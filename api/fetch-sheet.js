@@ -25,10 +25,22 @@ export default async function handler(req, res) {
   try {
     let targetUrl = decodeURIComponent(url).trim();
     
-    // Convert edit/view Google Sheet URLs to direct export URLs
-    const gMatch = targetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-    if (gMatch && gMatch[1] && !targetUrl.includes('/pub?')) {
-      targetUrl = `https://docs.google.com/spreadsheets/d/${gMatch[1]}/export?format=${format}`;
+    // Convert Google Sheet URLs (edit, view, or web-published) to direct export URLs
+    if (targetUrl.includes('/spreadsheets/d/e/')) {
+      if (targetUrl.includes('/pubhtml')) {
+        targetUrl = targetUrl.replace('/pubhtml', `/pub?output=${format}`);
+      } else if (targetUrl.includes('/pub')) {
+        if (!targetUrl.includes('output=')) {
+          targetUrl += targetUrl.includes('?') ? `&output=${format}` : `?output=${format}`;
+        }
+      } else {
+        targetUrl = targetUrl.replace(/\/+$/, '') + `/pub?output=${format}`;
+      }
+    } else {
+      const gMatch = targetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      if (gMatch && gMatch[1] && gMatch[1] !== 'e' && !targetUrl.includes('/pub?')) {
+        targetUrl = `https://docs.google.com/spreadsheets/d/${gMatch[1]}/export?format=${format}`;
+      }
     }
 
     const response = await fetch(targetUrl, {

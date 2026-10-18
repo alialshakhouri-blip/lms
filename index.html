@@ -8284,12 +8284,22 @@
     // ===================================================================
     // LIVE ATTENDANCE (GOOGLE SHEETS LINK ONLY)
     // ===================================================================
-    const DEFAULT_LIVE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/edit?gid=405188505#gid=405188505';
+    const OLD_DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/edit?gid=405188505#gid=405188505';
+    const DEFAULT_LIVE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTNTmulOawbWzqcws5J66Bn-MljRwMC9Mluag64wUCU1PjXMb3L9jyX1fO079e6ppp5epjL-PNzyAlS/pubhtml';
+
+    function getLiveSheetUrl() {
+        let url = (localStorage.getItem('sys_sheet_url_v9') || '').trim();
+        if (!url || url === OLD_DEFAULT_SHEET_URL) {
+            url = DEFAULT_LIVE_SHEET_URL;
+            localStorage.setItem('sys_sheet_url_v9', url);
+        }
+        return url;
+    }
 
     function openLiveSheetConfigModal() {
         const modal = document.getElementById('liveSheetConfigModal');
         const input = document.getElementById('modalLiveSheetUrlInput');
-        if (input) input.value = localStorage.getItem('sys_sheet_url_v9') || DEFAULT_LIVE_SHEET_URL;
+        if (input) input.value = getLiveSheetUrl();
         if (modal) modal.classList.remove('hidden');
     }
 
@@ -8327,7 +8337,7 @@
             return showToast('⛔ عذراً: غير مصرح للمدرب بتحديث كشف الحضور المباشر', 'error');
         }
 
-        const savedUrl = (localStorage.getItem('sys_sheet_url_v9') || DEFAULT_LIVE_SHEET_URL).trim();
+        const savedUrl = getLiveSheetUrl();
 
         if (!isSilent) showLoading('جاري مزامنة التحضير المباشر من Google Sheets...', savedUrl);
         const { workbook, error, exportUrl, arrayBuffer } = await fetchGoogleSheetWorkbook(savedUrl);
@@ -8496,7 +8506,7 @@
 
     function loadSettingsInputs() {
         const sUrl = document.getElementById('sheetUrlInput');
-        if (sUrl) sUrl.value = localStorage.getItem('sys_sheet_url_v9') || DEFAULT_LIVE_SHEET_URL;
+        if (sUrl) sUrl.value = getLiveSheetUrl();
 
         const instUrl = document.getElementById('institutionsUrlInput');
         if (instUrl) instUrl.value = localStorage.getItem('sys_institutions_url_v9') || '';
@@ -10687,9 +10697,21 @@
             return { workbook: null, error: new Error('رابط غير محدد'), exportUrl: '', arrayBuffer: null };
         }
         let exportUrl = url.trim();
-        const gMatch = exportUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-        if (gMatch && gMatch[1] && !exportUrl.includes('/pub?')) {
-            exportUrl = `https://docs.google.com/spreadsheets/d/${gMatch[1]}/export?format=xlsx`;
+        if (exportUrl.includes('/spreadsheets/d/e/')) {
+            if (exportUrl.includes('/pubhtml')) {
+                exportUrl = exportUrl.replace('/pubhtml', '/pub?output=xlsx');
+            } else if (exportUrl.includes('/pub')) {
+                if (!exportUrl.includes('output=')) {
+                    exportUrl += exportUrl.includes('?') ? '&output=xlsx' : '?output=xlsx';
+                }
+            } else {
+                exportUrl = exportUrl.replace(/\/+$/, '') + '/pub?output=xlsx';
+            }
+        } else {
+            const gMatch = exportUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            if (gMatch && gMatch[1] && gMatch[1] !== 'e' && !exportUrl.includes('/pub?')) {
+                exportUrl = `https://docs.google.com/spreadsheets/d/${gMatch[1]}/export?format=xlsx`;
+            }
         }
 
         const fetchAttempts = [
