@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+ai_server/.env
+
+# Python caches & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+ai_server/venv/
+
+# Vercel deployment folder
+.vercel/
+
+# OS metadata
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# IDE / Editor folders
+.vscode/
+.idea/
+*.swp
+*.swo
