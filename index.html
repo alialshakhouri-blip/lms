@@ -8452,6 +8452,7 @@
             }
 
             lastSyncTimestamp = `Google Sheets (مباشر: ${new Date().toLocaleTimeString('ar-SA')})`;
+            localStorage.setItem('sys_last_sync_time', String(Date.now()));
             saveData();
             renderApp();
             renderMasterSchedule();
@@ -10781,28 +10782,29 @@
         const fetchAttempts = [
             // 1. خادم Vercel المباشر الخالي من CORS (يعمل فوراً عند الرفع على فيرسل)
             async () => {
-                const vercelApiUrl = `/api/fetch-sheet?url=${encodeURIComponent(exportUrl)}`;
-                const r = await fetch(vercelApiUrl);
+                const vercelApiUrl = `/api/fetch-sheet?url=${encodeURIComponent(exportUrl)}&_t=${Date.now()}`;
+                const r = await fetch(vercelApiUrl, { cache: 'no-store' });
                 if (!r.ok) throw new Error(`Vercel API error ${r.status}`);
                 return await r.arrayBuffer();
             },
             // 2. الجلب المباشر (يعمل في حال كان الرابط منشوراً للويب /pub?output=xlsx)
             async () => {
-                const r = await fetch(exportUrl);
+                const directUrl = exportUrl + (exportUrl.includes('?') ? `&_t=${Date.now()}` : `?_t=${Date.now()}`);
+                const r = await fetch(directUrl, { cache: 'no-store' });
                 if (!r.ok) throw new Error(`Direct fetch error ${r.status}`);
                 return await r.arrayBuffer();
             },
             // 3. البروكسي العالمي الاحتياطي AllOrigins
             async () => {
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(exportUrl)}`;
-                const r = await fetch(proxyUrl);
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(exportUrl)}&_t=${Date.now()}`;
+                const r = await fetch(proxyUrl, { cache: 'no-store' });
                 if (!r.ok) throw new Error(`Proxy 1 error ${r.status}`);
                 return await r.arrayBuffer();
             },
             // 4. البروكسي العالمي الاحتياطي CORSProxy
             async () => {
                 const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(exportUrl)}`;
-                const r = await fetch(proxyUrl);
+                const r = await fetch(proxyUrl, { cache: 'no-store' });
                 if (!r.ok) throw new Error(`Proxy 2 error ${r.status}`);
                 return await r.arrayBuffer();
             }
@@ -25243,11 +25245,17 @@
                 initSupabaseCloudIntegration().catch(sbErr => console.warn('Supabase auto-init error:', sbErr));
             }
 
-            // 2.5 مزامنة تلقائية هادئة من Google Sheets في حال كان كشف المتدربين فارغاً
-            if (typeof syncLiveAttendanceFromGoogleSheets === 'function' && (!trainees || trainees.length === 0)) {
-                setTimeout(() => {
-                    syncLiveAttendanceFromGoogleSheets(true).catch(e => console.warn('Silent auto-sync skipped:', e));
-                }, 400);
+            // 2.5 مزامنة تلقائية هادئة من Google Sheets في حال كان كشف المتدربين فارغاً أو مر 3 دقائق على آخر جلب
+            if (typeof syncLiveAttendanceFromGoogleSheets === 'function') {
+                const lastSync = localStorage.getItem('sys_last_sync_time');
+                const now = Date.now();
+                if (!trainees || trainees.length === 0 || !lastSync || (now - Number(lastSync)) > 3 * 60 * 1000) {
+                    setTimeout(() => {
+                        syncLiveAttendanceFromGoogleSheets(true)
+                            .then(() => localStorage.setItem('sys_last_sync_time', String(Date.now())))
+                            .catch(e => console.warn('Silent auto-sync skipped:', e));
+                    }, 400);
+                }
             }
 
             // 3. تهيئة الواجهات الأساسية
