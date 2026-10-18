@@ -1,13 +1,14 @@
 {
   "name": "bgti-attendance-app",
   "version": "1.0.0",
-  "description": "LMS and Attendance System with AI Generation via Vercel Serverless & Google Gemini API",
+  "description": "LMS and Attendance System with AI Generation via Vercel Serverless & Google Gemini API and Supabase Storage",
   "type": "module",
   "main": "api/generate.js",
   "scripts": {
     "start": "node api/generate.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
     "jszip": "^3.10.1",
     "pdf-parse": "^1.1.1"
   }

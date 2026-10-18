@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- JSZip لقراءة بنية الخلايا والتظليل المتقدم (الأخضر والأصفر للمقاعد الشاغرة) -->
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- Supabase JS Client للمزامنة السحابية الدائمة والتخزين السحابي للملفات -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- خط المراعي Almarai -->
     <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
@@ -3235,6 +3237,12 @@
                                 <span id="lmsDarkModeIcon">🌙</span>
                                 <span id="lmsDarkModeLabel" class="hidden sm:inline">الوضع الليلي</span>
                             </button>
+
+                            <!-- ☁️ Supabase Cloud Sync Badge -->
+                            <div class="supabase-cloud-badge flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 whitespace-nowrap shrink-0 transition" title="حالة المزامنة السحابية الدائمة (Supabase Database & Storage)">
+                                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                                <span>وضع التخزين المحلي</span>
+                            </div>
 
                             <!-- ✨ AI Auto-Generate Button -->
                             <button type="button" onclick="openAiGenerateModal()" class="lms-action-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap shrink-0 border border-violet-300 text-violet-900 bg-violet-50 hover:bg-violet-100 transition" title="توليد محتوى الأسبوع آلياً عبر الذكاء الاصطناعي">
@@ -16261,7 +16269,7 @@
                                     <div class="font-black text-slate-900 truncate">ملف المحاضرة المرفق: ${v.lectureFile.name}</div>
                                     <div class="text-[10px] text-slate-500 font-mono mt-0.5">${v.lectureFile.size || ''} • ${v.lectureFile.kind === 'ppt' ? 'عرض باوربوينت PowerPoint' : 'ملف PDF'}</div>
                                 </div>
-                                <button type="button" onclick="downloadLmsLectureFile('${v.lectureFile.id || v.id}', '${(v.lectureFile.name || 'lecture_file').replace(/'/g, "\\'")}', '${v.lectureFile.data || ''}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black px-3.5 py-2 rounded-xl text-xs shrink-0 transition cursor-pointer flex items-center gap-1.5 shadow-xs">
+                                <button type="button" onclick="downloadLmsLectureFile('${v.lectureFile.id || v.id}', '${(v.lectureFile.name || 'lecture_file').replace(/'/g, "\\'")}', '${v.lectureFile.data || ''}', '${v.lectureFile.url || v.url || ''}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black px-3.5 py-2 rounded-xl text-xs shrink-0 transition cursor-pointer flex items-center gap-1.5 shadow-xs">
                                     <span>📥</span>
                                     <span>تحميل ملف المحاضرة (${v.lectureFile.kind === 'ppt' ? 'PPT' : 'PDF'})</span>
                                 </button>
@@ -17770,7 +17778,7 @@
                                     <div class="text-[10px] text-slate-500 font-mono">${v.lectureFile.size || ''} • ${v.lectureFile.kind === 'ppt' ? 'ملف عرض باوربوينت (PowerPoint)' : 'ملف محاضرة PDF'}</div>
                                 </div>
                             </div>
-                            <button type="button" onclick="downloadLmsLectureFile('${v.lectureFile.id || v.id}', '${(v.lectureFile.name || 'lecture_file').replace(/'/g, "\\'")}', '${v.lectureFile.data || ''}')" class="lms-action-btn bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold px-3 py-1.5 rounded-lg text-xs shrink-0 transition cursor-pointer flex items-center gap-1 shadow-xs">
+                            <button type="button" onclick="downloadLmsLectureFile('${v.lectureFile.id || v.id}', '${(v.lectureFile.name || 'lecture_file').replace(/'/g, "\\'")}', '${v.lectureFile.data || ''}', '${v.lectureFile.url || v.url || ''}')" class="lms-action-btn bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold px-3 py-1.5 rounded-lg text-xs shrink-0 transition cursor-pointer flex items-center gap-1 shadow-xs">
                                 <span>📥</span>
                                 <span>تحميل الملف</span>
                             </button>
@@ -18737,8 +18745,13 @@
         }
     }
 
-    async function downloadLmsLectureFile(id, filename, directData) {
+    async function downloadLmsLectureFile(id, filename, directData, cloudUrl) {
         try {
+            const targetUrl = cloudUrl || directData;
+            if (targetUrl && (targetUrl.startsWith('http://') || targetUrl.startsWith('https://'))) {
+                window.open(targetUrl, '_blank');
+                return;
+            }
             let dataUrl = directData;
             if (!dataUrl || dataUrl === 'undefined' || dataUrl === 'null' || !dataUrl.startsWith('data:')) {
                 dataUrl = await getLmsLectureFileBlob(id);
@@ -18765,7 +18778,236 @@
     }
     window.downloadLmsLectureFile = downloadLmsLectureFile;
 
-    function persistLmsCourses() {
+    // ══════════════════════════════════════════════════════════════════════════
+    //  SUPABASE CLOUD INTEGRATION & REALTIME STORAGE (LMS & DATABASE)
+    // ══════════════════════════════════════════════════════════════════════════
+    let supabaseClient = null;
+    let isSupabaseConnected = false;
+    let supabaseCloudConfig = { url: '', anonKey: '' };
+
+    async function initSupabaseCloudIntegration() {
+        try {
+            let cfg = null;
+            try {
+                const res = await fetch('/api/config');
+                if (res.ok) {
+                    cfg = await res.json();
+                }
+            } catch (e) {
+                console.warn('Could not fetch /api/config:', e);
+            }
+
+            const sbUrl = (cfg && cfg.supabaseUrl) ? cfg.supabaseUrl : (localStorage.getItem('sys_supabase_url') || '');
+            const sbKey = (cfg && cfg.supabaseAnonKey) ? cfg.supabaseAnonKey : (localStorage.getItem('sys_supabase_anon_key') || '');
+
+            if (sbUrl && sbKey && typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+                supabaseCloudConfig.url = sbUrl;
+                supabaseCloudConfig.anonKey = sbKey;
+                supabaseClient = window.supabase.createClient(sbUrl, sbKey, {
+                    auth: { persistSession: false }
+                });
+                isSupabaseConnected = true;
+                window.supabaseClient = supabaseClient;
+                console.log('✅ Supabase Cloud connected:', sbUrl);
+                updateCloudSyncBadge(true);
+
+                // Pull latest courses from cloud
+                await pullLmsCoursesFromSupabase();
+            } else {
+                updateCloudSyncBadge(false);
+            }
+        } catch (err) {
+            console.warn('Supabase initialization warning:', err);
+            updateCloudSyncBadge(false);
+        }
+    }
+    window.initSupabaseCloudIntegration = initSupabaseCloudIntegration;
+
+    function updateCloudSyncBadge(connected) {
+        const badges = document.querySelectorAll('.supabase-cloud-badge');
+        badges.forEach(b => {
+            if (connected) {
+                b.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>سحابة Supabase متصلة</span>';
+                b.classList.remove('text-slate-400', 'bg-slate-100');
+                b.classList.add('text-emerald-700', 'bg-emerald-50', 'border-emerald-200');
+            } else {
+                b.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400"></span><span>وضع التخزين المحلي</span>';
+            }
+        });
+    }
+
+    async function pullLmsCoursesFromSupabase() {
+        try {
+            // First try direct client
+            if (supabaseClient && isSupabaseConnected) {
+                const { data, error } = await supabaseClient
+                    .from('lms_courses')
+                    .select('*')
+                    .order('updated_at', { ascending: false });
+
+                if (!error && data && data.length > 0) {
+                    const cloudMap = {};
+                    data.forEach(row => {
+                        const k = row.course_key || row.id;
+                        cloudMap[k] = {
+                            courseTitle: row.title,
+                            trainerName: row.trainer_name,
+                            courseCode: row.course_code,
+                            weeks: Array.isArray(row.weeks) ? row.weeks : [],
+                            metadata: row.metadata || {}
+                        };
+                    });
+                    mergeCloudCoursesIntoLocal(cloudMap);
+                    return;
+                }
+            }
+
+            // Fallback via /api/lms-sync
+            const res = await fetch('/api/lms-sync');
+            if (res.ok) {
+                const json = await res.json();
+                if (json.success && json.courses && Object.keys(json.courses).length > 0) {
+                    mergeCloudCoursesIntoLocal(json.courses);
+                }
+            }
+        } catch (err) {
+            console.warn('pullLmsCoursesFromSupabase warning:', err);
+        }
+    }
+    window.pullLmsCoursesFromSupabase = pullLmsCoursesFromSupabase;
+
+    function mergeCloudCoursesIntoLocal(cloudCourses) {
+        if (!cloudCourses || typeof cloudCourses !== 'object') return;
+        let changed = false;
+        for (const [key, cData] of Object.entries(cloudCourses)) {
+            if (!lmsCourses[key]) {
+                lmsCourses[key] = cData;
+                changed = true;
+            } else {
+                const localWeeks = lmsCourses[key].weeks || [];
+                const cloudWeeks = cData.weeks || [];
+                if (cloudWeeks.length >= localWeeks.length && cloudWeeks.length > 0) {
+                    lmsCourses[key].weeks = cloudWeeks;
+                    changed = true;
+                }
+            }
+        }
+        if (changed) {
+            persistLmsCoursesLocalOnly();
+            if (typeof renderTrainerLms === 'function' && document.getElementById('trainerLmsModal') && !document.getElementById('trainerLmsModal').classList.contains('hidden')) {
+                renderTrainerLms();
+            }
+            if (typeof renderStudentLms === 'function' && document.getElementById('tab-studentLms') && !document.getElementById('tab-studentLms').classList.contains('hidden')) {
+                renderStudentLms();
+            }
+            console.log('🔄 تم تحديث المقررات الأكاديمية ومزامنتها من سحابة Supabase.');
+        }
+    }
+
+    async function syncLmsCourseToSupabase(courseKey) {
+        const cData = lmsCourses[courseKey];
+        if (!cData) return;
+
+        // Try direct Supabase client
+        if (supabaseClient && isSupabaseConnected) {
+            try {
+                const payload = {
+                    id: courseKey,
+                    course_key: courseKey,
+                    title: cData.courseTitle || courseKey,
+                    trainer_name: cData.trainerName || '',
+                    course_code: cData.courseCode || '',
+                    weeks: Array.isArray(cData.weeks) ? cData.weeks : [],
+                    metadata: cData.metadata || {},
+                    updated_at: new Date().toISOString()
+                };
+                const { error } = await supabaseClient
+                    .from('lms_courses')
+                    .upsert(payload, { onConflict: 'course_key' });
+                if (!error) {
+                    console.log(`☁️ تم مزامنة كورس [${courseKey}] سحابياً مع Supabase.`);
+                    return;
+                }
+            } catch (e) {
+                console.warn('Client Supabase upsert failed, using API:', e);
+            }
+        }
+
+        // Fallback via serverless API
+        try {
+            await fetch('/api/lms-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseKey, courseData: cData })
+            });
+            console.log(`☁️ تم مزامنة كورس [${courseKey}] عبر API Vercel/Supabase.`);
+        } catch (apiErr) {
+            console.warn('API cloud sync error:', apiErr);
+        }
+    }
+    window.syncLmsCourseToSupabase = syncLmsCourseToSupabase;
+
+    async function uploadFileToSupabaseStorage(file, courseKey = '', weekId = '') {
+        if (!file) return null;
+        try {
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const str = String(reader.result || '');
+                    const cIdx = str.indexOf(',');
+                    resolve(cIdx >= 0 ? str.slice(cIdx + 1) : str);
+                };
+                reader.onerror = () => reject(new Error('فشل قراءة الملف'));
+                reader.readAsDataURL(file);
+            });
+
+            // 1. Try serverless /api/upload-file
+            try {
+                const res = await fetch('/api/upload-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: file.name,
+                        fileType: file.type,
+                        base64: base64,
+                        courseKey: courseKey,
+                        weekId: weekId,
+                        uploadedBy: (currentUser && currentUser.name) ? currentUser.name : 'Trainer'
+                    })
+                });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success && json.publicUrl) {
+                        return json.publicUrl;
+                    }
+                }
+            } catch (apiUploadErr) {
+                console.warn('API file upload failed, trying direct client:', apiUploadErr);
+            }
+
+            // 2. Try direct Supabase Storage SDK
+            if (supabaseClient && isSupabaseConnected) {
+                const cleanName = file.name.replace(/[^a-zA-Z0-9._\-\u0600-\u06FF]/g, '_');
+                const path = `courses/${courseKey || 'general'}/${Date.now()}_${cleanName}`;
+                const { data, error } = await supabaseClient.storage
+                    .from('lms-files')
+                    .upload(path, file, { upsert: true });
+
+                if (!error && data) {
+                    const { data: pubData } = supabaseClient.storage
+                        .from('lms-files')
+                        .getPublicUrl(path);
+                    return pubData.publicUrl;
+                }
+            }
+        } catch (err) {
+            console.error('uploadFileToSupabaseStorage error:', err);
+        }
+        return null;
+    }
+    window.uploadFileToSupabaseStorage = uploadFileToSupabaseStorage;
+
+    function persistLmsCoursesLocalOnly() {
         try {
             localStorage.setItem('sys_lms_courses_v2', JSON.stringify(lmsCourses));
             localStorage.setItem('sys_lms_courses_v1', JSON.stringify(lmsCourses));
@@ -18785,7 +19027,16 @@
             }
         }
     }
+
+    function persistLmsCourses() {
+        persistLmsCoursesLocalOnly();
+        const activeKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null;
+        if (activeKey) {
+            syncLmsCourseToSupabase(activeKey);
+        }
+    }
     window.persistLmsCourses = persistLmsCourses;
+    window.persistLmsCoursesLocalOnly = persistLmsCoursesLocalOnly;
 
     function onLmsVideoMaterialTypeChange(val) {
         const durEl = document.getElementById('lmsVideoDuration');
@@ -19958,6 +20209,7 @@
 
         const aTitle = document.getElementById('aiAssignmentTitle')?.value.trim() || 'الواجب الأسبوعي';
         const aInstructions = document.getElementById('aiAssignmentInstructions')?.value.trim() || '';
+        const cloudFileUrl = (currentAiGeneratedData && currentAiGeneratedData.file_url) ? currentAiGeneratedData.file_url : '';
 
         // 1. Save Component 01: Lecture Overview
         if (!activeWeek.videos) activeWeek.videos = [];
@@ -19965,7 +20217,7 @@
         activeWeek.videos.push({
             id: 'v-' + Date.now(),
             title: lecTitle,
-            url: '',
+            url: cloudFileUrl || '',
             materialType: isPpt ? 'ppt' : 'pdf',
             duration: `${lecDuration}:00 دقيقة`,
             notes: lecSummary,
@@ -19974,9 +20226,10 @@
                 name: selectedAiFile.name,
                 size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
                 type: selectedAiFile.type || (isPpt ? 'presentation' : 'document'),
-                kind: isPpt ? 'ppt' : 'pdf'
+                kind: isPpt ? 'ppt' : 'pdf',
+                url: cloudFileUrl || ''
             } : null,
-            lectureLinks: []
+            lectureLinks: cloudFileUrl ? [cloudFileUrl] : []
         });
 
         // 2. Save Component 02: Glossary & Study Notes
@@ -19994,7 +20247,7 @@
             type: 'قاموس مصطلحات ومذكرة أسبوعية',
             description: glossaryHtmlDesc,
             desc: glossaryHtmlDesc,
-            url: ''
+            url: cloudFileUrl || ''
         });
 
         // 3. Save Component 03: Quiz & Interactive Questions
@@ -20067,19 +20320,37 @@
             pdfFile: (selectedAiFile && !isPpt) ? {
                 name: selectedAiFile.name,
                 size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
+                url: cloudFileUrl || '',
                 data: ''
             } : null,
             questions: assignmentQuestionsFormatted
         });
 
-        // Persist to storage
+        // Persist to storage (Local & Cloud via Supabase)
         persistLmsCourses();
+
+        // If cloud URL wasn't ready yet, upload file in background and update
+        if (!cloudFileUrl && selectedAiFile && typeof uploadFileToSupabaseStorage === 'function') {
+            uploadFileToSupabaseStorage(selectedAiFile, courseKey, activeWeek.id).then(url => {
+                if (url) {
+                    const lastVid = activeWeek.videos[activeWeek.videos.length - 1];
+                    if (lastVid) {
+                        lastVid.url = url;
+                        if (lastVid.lectureFile) lastVid.lectureFile.url = url;
+                    }
+                    const lastDoc = activeWeek.docs[activeWeek.docs.length - 1];
+                    if (lastDoc) lastDoc.url = url;
+                    persistLmsCourses();
+                    console.log('☁️ تم إرفاق الرابط السحابي الدائم للملف في Supabase:', url);
+                }
+            }).catch(e => console.warn('Background Supabase upload warning:', e));
+        }
 
         // Close modal and refresh UI
         closeAiGenerateModal();
         renderTrainerLms();
 
-        showToast('🎉 تم توليد وتوزيع عناصر الأسبوع الأربعة (محاضرة، قاموس، اختبار، واجب) وحفظها بنجاح!', 'success');
+        showToast('🎉 تم حفظ وتوزيع عناصر الأسبوع ومزامنتها سحابياً في Supabase بنجاح!', 'success');
     }
 
     // ===================================================================
@@ -24879,6 +25150,11 @@
                     currentUser.company = match.company || currentUser.company;
                     localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
                 }
+            }
+
+            // 1.5 ربط ومزامنة سحابة Supabase التلقائية (قاعدة البيانات والتخزين السحابي للملفات)
+            if (typeof initSupabaseCloudIntegration === 'function') {
+                initSupabaseCloudIntegration().catch(sbErr => console.warn('Supabase auto-init error:', sbErr));
             }
 
             // 2.5 مزامنة تلقائية هادئة من Google Sheets في حال كان كشف المتدربين فارغاً

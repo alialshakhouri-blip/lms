@@ -428,6 +428,39 @@ export default async function handler(req, res) {
     const fileBuffer = Buffer.from(base64, 'base64');
     const fileSizeKB = Math.round(fileBuffer.length / 1024);
 
+    // ─── Automatic Supabase Cloud Storage Upload (Bucket: 'lms-files') ──────
+    let cloudFileUrl = '';
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '');
+    const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
+
+    if (supabaseUrl && supabaseKey) {
+      try {
+        const cleanFn = safeFilename.replace(/[^a-zA-Z0-9._\-\u0600-\u06FF]/g, '_');
+        const folder = courseName ? encodeURIComponent(courseName.replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '_')) : 'ai_generated';
+        const storagePath = `courses/${folder}/${Date.now()}_${cleanFn}`;
+        const mime = isPdf ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+
+        const uploadRes = await fetch(`${supabaseUrl}/storage/v1/object/lms-files/${storagePath}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${supabaseKey}`,
+            'apikey': supabaseKey,
+            'Content-Type': mime,
+            'x-upsert': 'true'
+          },
+          body: fileBuffer
+        });
+
+        if (uploadRes.ok) {
+          cloudFileUrl = `${supabaseUrl}/storage/v1/object/public/lms-files/${storagePath}`;
+        } else {
+          console.warn('Supabase storage auto-upload response:', uploadRes.status);
+        }
+      } catch (uploadErr) {
+        console.warn('Auto cloud file upload warning:', uploadErr);
+      }
+    }
+
     let extractedText = '';
     if (isPptx) {
       extractedText = extractTextFromPptxBuffer(fileBuffer);
@@ -535,6 +568,7 @@ export default async function handler(req, res) {
       mode: modeUsed,
       filename: safeFilename,
       fileSizeKB,
+      file_url: cloudFileUrl || '',
       text_length: textLength,
       processing_time_seconds: parseFloat(durationSec),
       data: generatedData
