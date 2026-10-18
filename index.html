@@ -686,12 +686,29 @@
 
                 <!-- User Profile Pill -->
                 <div class="bg-slate-50 border border-slate-200 pl-3 pr-2 py-1.5 rounded-2xl flex items-center gap-2">
-                    <div onclick="openMyProfileModal()" title="تعديل ملفك الشخصي والصورة الشخصية" class="w-8 h-8 rounded-full gold-gradient-bg flex items-center justify-center text-slate-950 font-black text-xs shadow-xs cursor-pointer hover:ring-2 hover:ring-amber-400 transition overflow-hidden" id="userAvatar">
-                        👑
+                    <div onclick="openMyProfileModal()" title="تعديل ملفك الشخصي والصورة الشخصية" class="w-8 h-8 rounded-full gold-gradient-bg flex items-center justify-center text-slate-950 font-black text-xs shadow-xs cursor-pointer hover:ring-2 hover:ring-amber-400 transition overflow-hidden p-0.5" id="userAvatar">
+                        <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 36C6 27 12 25 18 25C24 25 30 27 30 36Z" fill="#1e293b"/>
+                            <path d="M13 36L17 26.5L19 26.5L23 36L21 36L18 28.5L15 36Z" fill="#f59e0b"/>
+                            <polygon points="17,27.5 19,27.5 18.5,36 17.5,36" fill="#ffffff"/>
+                            <rect x="16" y="21" width="4" height="5" fill="#f6c8a4"/>
+                            <ellipse cx="18" cy="18" rx="5.5" ry="6.5" fill="#fcd8b8"/>
+                            <circle cx="16" cy="16.5" r="0.75" fill="#1e293b"/>
+                            <circle cx="20" cy="16.5" r="0.75" fill="#1e293b"/>
+                            <path d="M15.5 15.2Q16.5 14.7 17.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
+                            <path d="M18.5 15.2Q19.5 14.7 20.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
+                            <path d="M16 20Q18 21.5 20 20Q19 22.5 18 22.5Q17 22.5 16 20Z" fill="#1e293b"/>
+                            <path d="M10 14C8 20 9 27 11 32C12 30 13 26 14 23C13 19 12 16 12.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
+                            <path d="M26 14C28 20 27 27 25 32C24 30 23 26 22 23C23 19 24 16 23.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
+                            <path d="M12.5 13.5C12.5 8 15 6 18 6C21 6 23.5 8 23.5 13.5C23.5 16 22 19 21.5 20C21 18 21 15 21 14C21 11.5 20 10.5 18 10.5C16 10.5 15 11.5 15 14C15 15 15 18 14.5 20C14 19 12.5 16 12.5 13.5Z" fill="#ffffff"/>
+                            <path d="M16 6.8Q18 5.8 20 6.8" stroke="#e2e8f0" stroke-width="0.8" fill="none"/>
+                            <ellipse cx="18" cy="9.5" rx="6.5" ry="2" stroke="#0f172a" stroke-width="1.6" fill="none"/>
+                            <ellipse cx="18" cy="10.5" rx="6.2" ry="1.8" stroke="#334155" stroke-width="1.1" fill="none"/>
+                        </svg>
                     </div>
                     <div onclick="openMyProfileModal()" title="تعديل ملفك الشخصي والصورة الشخصية" class="hidden md:block text-right cursor-pointer hover:opacity-80 transition">
                         <div class="text-xs font-black text-slate-900 leading-tight" id="currentUserName">المدير العام</div>
-                        <div class="text-[10px] font-bold text-amber-700" id="currentUserRoleTitle">سوبر أدمن</div>
+                        <div class="text-[10px] font-bold text-amber-700" id="currentUserRoleTitle">المدير العام (سوبر أدمن)</div>
                     </div>
                     <button onclick="logout()" title="تسجيل الخروج" class="mr-1 text-slate-500 hover:text-red-600 text-xs px-2 py-1 rounded-xl hover:bg-red-50 border border-slate-200 hover:border-red-200 transition font-bold flex items-center gap-1 cursor-pointer">
                         <span>🚪</span>
@@ -720,12 +737,29 @@
 
                 <!-- Current Role Box -->
                 <div onclick="openMyProfileModal()" title="اضغط لتعديل ملفك الشخصي والصورة الشخصية" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 p-3 rounded-2xl flex items-center gap-3 cursor-pointer transition">
-                    <div class="w-10 h-10 rounded-xl gold-gradient-bg flex items-center justify-center text-lg text-slate-950 font-black shadow-xs overflow-hidden" id="sidebarAvatar">
-                        👑
+                    <div class="w-10 h-10 rounded-xl gold-gradient-bg flex items-center justify-center text-lg text-slate-950 font-black shadow-xs overflow-hidden p-0.5" id="sidebarAvatar">
+                        <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 36C6 27 12 25 18 25C24 25 30 27 30 36Z" fill="#1e293b"/>
+                            <path d="M13 36L17 26.5L19 26.5L23 36L21 36L18 28.5L15 36Z" fill="#f59e0b"/>
+                            <polygon points="17,27.5 19,27.5 18.5,36 17.5,36" fill="#ffffff"/>
+                            <rect x="16" y="21" width="4" height="5" fill="#f6c8a4"/>
+                            <ellipse cx="18" cy="18" rx="5.5" ry="6.5" fill="#fcd8b8"/>
+                            <circle cx="16" cy="16.5" r="0.75" fill="#1e293b"/>
+                            <circle cx="20" cy="16.5" r="0.75" fill="#1e293b"/>
+                            <path d="M15.5 15.2Q16.5 14.7 17.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
+                            <path d="M18.5 15.2Q19.5 14.7 20.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
+                            <path d="M16 20Q18 21.5 20 20Q19 22.5 18 22.5Q17 22.5 16 20Z" fill="#1e293b"/>
+                            <path d="M10 14C8 20 9 27 11 32C12 30 13 26 14 23C13 19 12 16 12.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
+                            <path d="M26 14C28 20 27 27 25 32C24 30 23 26 22 23C23 19 24 16 23.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
+                            <path d="M12.5 13.5C12.5 8 15 6 18 6C21 6 23.5 8 23.5 13.5C23.5 16 22 19 21.5 20C21 18 21 15 21 14C21 11.5 20 10.5 18 10.5C16 10.5 15 11.5 15 14C15 15 15 18 14.5 20C14 19 12.5 16 12.5 13.5Z" fill="#ffffff"/>
+                            <path d="M16 6.8Q18 5.8 20 6.8" stroke="#e2e8f0" stroke-width="0.8" fill="none"/>
+                            <ellipse cx="18" cy="9.5" rx="6.5" ry="2" stroke="#0f172a" stroke-width="1.6" fill="none"/>
+                            <ellipse cx="18" cy="10.5" rx="6.2" ry="1.8" stroke="#334155" stroke-width="1.1" fill="none"/>
+                        </svg>
                     </div>
                     <div>
                         <div class="text-xs font-extrabold text-slate-900" id="sidebarUserName">المدير العام</div>
-                        <div class="text-[11px] font-bold text-amber-700" id="sidebarUserRole">سوبر أدمن • فرع عنك</div>
+                        <div class="text-[11px] font-bold text-amber-700" id="sidebarUserRole">المدير العام • فرع عنك</div>
                     </div>
                 </div>
 
@@ -4895,9 +4929,29 @@
 
     let scheduleData = JSON.parse(localStorage.getItem('sys_schedule_v9')) || INITIAL_MASTER_SCHEDULE;
 
+    // أيقونة شخص يرتدي غترة وعقال وبشت رسمي مخصصة للمدير العام
+    const GHUTRA_AVATAR_SVG = `<svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 36C6 27 12 25 18 25C24 25 30 27 30 36Z" fill="#1e293b"/>
+        <path d="M13 36L17 26.5L19 26.5L23 36L21 36L18 28.5L15 36Z" fill="#f59e0b"/>
+        <polygon points="17,27.5 19,27.5 18.5,36 17.5,36" fill="#ffffff"/>
+        <rect x="16" y="21" width="4" height="5" fill="#f6c8a4"/>
+        <ellipse cx="18" cy="18" rx="5.5" ry="6.5" fill="#fcd8b8"/>
+        <circle cx="16" cy="16.5" r="0.75" fill="#1e293b"/>
+        <circle cx="20" cy="16.5" r="0.75" fill="#1e293b"/>
+        <path d="M15.5 15.2Q16.5 14.7 17.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
+        <path d="M18.5 15.2Q19.5 14.7 20.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
+        <path d="M16 20Q18 21.5 20 20Q19 22.5 18 22.5Q17 22.5 16 20Z" fill="#1e293b"/>
+        <path d="M10 14C8 20 9 27 11 32C12 30 13 26 14 23C13 19 12 16 12.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
+        <path d="M26 14C28 20 27 27 25 32C24 30 23 26 22 23C23 19 24 16 23.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
+        <path d="M12.5 13.5C12.5 8 15 6 18 6C21 6 23.5 8 23.5 13.5C23.5 16 22 19 21.5 20C21 18 21 15 21 14C21 11.5 20 10.5 18 10.5C16 10.5 15 11.5 15 14C15 15 15 18 14.5 20C14 19 12.5 16 12.5 13.5Z" fill="#ffffff"/>
+        <path d="M16 6.8Q18 5.8 20 6.8" stroke="#e2e8f0" stroke-width="0.8" fill="none"/>
+        <ellipse cx="18" cy="9.5" rx="6.5" ry="2" stroke="#0f172a" stroke-width="1.6" fill="none"/>
+        <ellipse cx="18" cy="10.5" rx="6.2" ry="1.8" stroke="#334155" stroke-width="1.1" fill="none"/>
+    </svg>`;
+
     // Users List with Trainer Profile Links (including Essam Saeed instead of Ibrahim AlMousa)
     const INITIAL_USERS = [
-        { id: 'usr-1', username: 'superadmin', password: '123', name: 'المدير العام (سوبر أدمن)', role: 'superadmin', createdAt: '2026/10/01' },
+        { id: 'usr-1', username: 'superadmin', password: '123', name: 'المدير العام', role: 'superadmin', createdAt: '2026/10/01' },
         { id: 'usr-2', username: 'admin', password: '123', name: 'مشرف الحضور واللوجستيات', role: 'admin', createdAt: '2026/10/02' },
         { id: 'usr-3', username: 'sharaf', password: '123', name: 'أ. شرف الدين (انجليزية)', role: 'trainer', trainerProfile: 'شرف الدين', createdAt: '2026/10/03' },
         { id: 'usr-4', username: 'essam', password: '123', name: 'أ. عصام سعيد (الكهرباء)', role: 'trainer', trainerProfile: 'عصام سعيد', createdAt: '2026/10/03' },
@@ -5184,15 +5238,20 @@
         dashboardView.classList.remove('hidden');
 
         const roleTitles = {
-            superadmin: 'سوبر أدمن 👑',
+            superadmin: 'المدير العام',
             admin: 'مشرف نظام (أدمن) 🛡️',
             trainer: 'مدرب معتمد 👨‍🏫'
         };
         const roleIcons = {
-            superadmin: '👑',
+            superadmin: GHUTRA_AVATAR_SVG,
             admin: '🛡️',
             trainer: '👨‍🏫'
         };
+
+        if (currentUser.username === 'superadmin' && (!currentUser.name || currentUser.name.includes('سوبر أدمن'))) {
+            currentUser.name = 'المدير العام';
+            localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
+        }
 
         document.getElementById('currentUserName').innerText = currentUser.name;
         document.getElementById('currentUserRoleTitle').innerText = roleTitles[currentUser.role] || currentUser.role;
@@ -5203,8 +5262,9 @@
             if (avatarEl) avatarEl.innerHTML = `<img src="${currentUser.avatar}" class="w-full h-full object-cover">`;
             if (sidebarAvatarEl) sidebarAvatarEl.innerHTML = `<img src="${currentUser.avatar}" class="w-full h-full object-cover">`;
         } else {
-            if (avatarEl) avatarEl.innerText = roleIcons[currentUser.role] || '👤';
-            if (sidebarAvatarEl) sidebarAvatarEl.innerText = roleIcons[currentUser.role] || '👤';
+            const iconHtml = roleIcons[currentUser.role] || '👤';
+            if (avatarEl) avatarEl.innerHTML = iconHtml;
+            if (sidebarAvatarEl) sidebarAvatarEl.innerHTML = iconHtml;
         }
 
         document.getElementById('sidebarUserName').innerText = currentUser.name;
@@ -5575,8 +5635,12 @@
         if (src) {
             previewEl.innerHTML = `<img src="${src}" class="w-full h-full object-cover">`;
         } else {
-            const initial = (currentUser?.name || 'م')[0];
-            previewEl.innerHTML = `<span class="text-2xl font-black">${initial}</span>`;
+            if (currentUser?.role === 'superadmin') {
+                previewEl.innerHTML = `<div class="w-full h-full p-2">${GHUTRA_AVATAR_SVG}</div>`;
+            } else {
+                const initial = (currentUser?.name || 'م')[0];
+                previewEl.innerHTML = `<span class="text-2xl font-black">${initial}</span>`;
+            }
         }
     }
 
@@ -9022,7 +9086,7 @@
         if (usersTable) {
             usersTable.innerHTML = users.map(u => {
                 const roleLabels = {
-                    superadmin: '<span class="bg-amber-100 text-amber-900 px-2.5 py-1 rounded-full border border-amber-300 font-bold">👑 سوبر أدمن</span>',
+                    superadmin: `<span class="bg-amber-100 text-amber-900 px-2.5 py-1 rounded-full border border-amber-300 font-bold inline-flex items-center gap-1.5"><span class="w-4 h-4 inline-block">${GHUTRA_AVATAR_SVG}</span> المدير العام (سوبر أدمن)</span>`,
                     admin: '<span class="bg-blue-100 text-blue-900 px-2.5 py-1 rounded-full border border-blue-300 font-bold">🛡️ مشرف (أدمن)</span>',
                     trainer: '<span class="bg-emerald-100 text-emerald-900 px-2.5 py-1 rounded-full border border-emerald-300 font-bold">👨‍🏫 مدرب</span>'
                 };
@@ -9030,8 +9094,8 @@
                 return `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-3 font-bold flex items-center gap-2">
-                            <span class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs border border-slate-200">
-                                ${u.role === 'superadmin' ? '👑' : (u.role === 'admin' ? '🛡️' : '👨‍🏫')}
+                            <span class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs border border-slate-200 overflow-hidden p-0.5">
+                                ${u.role === 'superadmin' ? GHUTRA_AVATAR_SVG : (u.role === 'admin' ? '🛡️' : '👨‍🏫')}
                             </span>
                             <span class="font-extrabold text-slate-900">${u.name}</span>
                         </td>
