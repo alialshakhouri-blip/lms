@@ -664,6 +664,7 @@
                 </button>
                 
                 <div id="topHeaderUploadButtons" class="flex items-center gap-2">
+                    <span id="autoSyncScheduleBadge" class="hidden xl:inline-flex"></span>
                     <button onclick="syncLiveAttendanceFromGoogleSheets()" class="gold-gradient-bg text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm hover:brightness-105 cursor-pointer" title="التحضير المباشر الصباحي عبر رابط Google Sheets">
                         <span class="text-sm">🔄</span>
                         <span>التحضير المباشر (Google Sheets)</span>
@@ -2362,6 +2363,20 @@
                             💡 تأكد من مشاركة الشيت ليكون متاحاً برابط عرض عام (Anyone with link can view).
                         </p>
                     </div>
+
+                    <!-- Hourly Schedule Window (8:30 AM to 4:30 PM) -->
+                    <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-2xl text-xs space-y-1.5">
+                        <div class="flex items-center gap-2 font-black text-amber-950">
+                            <span>⏰</span>
+                            <span>جدول المزامنة التلقائية المعتمد:</span>
+                        </div>
+                        <p class="text-slate-600 text-[11px] leading-relaxed">
+                            • تتم المزامنة وسحب التحضير اللحظي <b>كل ساعة</b> تلقائياً.<br>
+                            • تبدأ المزامنة الساعة <b>8:30 صباحاً</b>، وتتوقف عند الساعة <b>4:30 مساءً</b>.<br>
+                            • تستأنف المزامنة في صباح اليوم التالي عند الساعة <b>8:30 صباحاً</b>.
+                        </p>
+                        <div id="modalSyncScheduleStatus" class="pt-1 text-[11px] font-bold text-amber-900 flex items-center gap-1.5"></div>
+                    </div>
                     <div class="flex gap-2 pt-2">
                         <button onclick="executeModalLiveSheetSync()" class="flex-1 gold-gradient-bg text-slate-950 font-black py-2.5 rounded-xl text-xs transition shadow-sm hover:brightness-105 cursor-pointer">
                             🔄 حفظ ومزامنة التحضير الآن
@@ -3803,8 +3818,9 @@
             </div>
 
             <!-- ==================== AI AUTO-GENERATE MODAL ==================== -->
+            <!-- ==================== AI AUTO-GENERATE MODAL (STEP WIZARD) ==================== -->
             <div id="modal-aiGenerate" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] flex items-center justify-center p-3 md:p-5 overflow-y-auto">
-                <div class="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-slate-200 flex flex-col max-h-[95vh]">
+                <div class="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-slate-200 flex flex-col max-h-[95vh] overflow-hidden">
 
                     <!-- Header -->
                     <div class="flex items-center justify-between p-5 border-b border-slate-100 shrink-0">
@@ -3812,10 +3828,43 @@
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 text-white flex items-center justify-center text-lg shadow-sm shrink-0">✨</div>
                             <div>
                                 <h3 class="font-black text-slate-900 text-base">توليد محتوى الوحدة بالذكاء الاصطناعي</h3>
-                                <p class="text-[11px] text-slate-500 font-bold" id="aiModalSubtitle">سحابي عبر Vercel و Gemini AI — ارفع PPTX أو PDF لتوليد المكونات الأربعة آلياً</p>
+                                <p class="text-[11px] text-slate-500 font-bold" id="aiModalSubtitle">ارفع الملف لإنشاء المحتوى خطوة بخطوة: الفيديوهات ➔ المذكرات ➔ الواجبات ➔ الاختبارات</p>
                             </div>
                         </div>
                         <button type="button" onclick="closeAiGenerateModal()" class="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 rounded-xl transition text-sm cursor-pointer shrink-0">✕</button>
+                    </div>
+
+                    <!-- Step Timeline / Stepper (Shown when generation is ready) -->
+                    <div id="aiWizardStepper" class="hidden border-b border-slate-100 bg-slate-50/80 px-4 py-3 shrink-0">
+                        <div class="flex items-center justify-between max-w-xl mx-auto relative">
+                            <!-- Background line -->
+                            <div class="absolute top-4 left-6 right-6 h-0.5 bg-slate-200 z-0"></div>
+                            <div id="aiStepProgressBar" class="absolute top-4 right-6 h-0.5 bg-gradient-to-l from-violet-600 to-purple-600 z-0 transition-all duration-300" style="width: 0%;"></div>
+
+                            <!-- Step 1 Button -->
+                            <button type="button" onclick="goToAiStep(1)" id="aiStepBtn-1" class="relative z-10 flex flex-col items-center gap-1 group cursor-pointer">
+                                <span id="aiStepCircle-1" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-xs bg-violet-600 text-white ring-4 ring-violet-100">1</span>
+                                <span id="aiStepLabel-1" class="text-[10px] font-black text-violet-900">الفيديوهات 🎬</span>
+                            </button>
+
+                            <!-- Step 2 Button -->
+                            <button type="button" onclick="goToAiStep(2)" id="aiStepBtn-2" class="relative z-10 flex flex-col items-center gap-1 group cursor-pointer">
+                                <span id="aiStepCircle-2" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-xs bg-white text-slate-400 border border-slate-300">2</span>
+                                <span id="aiStepLabel-2" class="text-[10px] font-bold text-slate-500">المذكرات والمواضيع 📝</span>
+                            </button>
+
+                            <!-- Step 3 Button -->
+                            <button type="button" onclick="goToAiStep(3)" id="aiStepBtn-3" class="relative z-10 flex flex-col items-center gap-1 group cursor-pointer">
+                                <span id="aiStepCircle-3" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-xs bg-white text-slate-400 border border-slate-300">3</span>
+                                <span id="aiStepLabel-3" class="text-[10px] font-bold text-slate-500">الواجبات 📋</span>
+                            </button>
+
+                            <!-- Step 4 Button -->
+                            <button type="button" onclick="goToAiStep(4)" id="aiStepBtn-4" class="relative z-10 flex flex-col items-center gap-1 group cursor-pointer">
+                                <span id="aiStepCircle-4" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-xs bg-white text-slate-400 border border-slate-300">4</span>
+                                <span id="aiStepLabel-4" class="text-[10px] font-bold text-slate-500">الاختبارات 🎯</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Scrollable body -->
@@ -3837,7 +3886,7 @@
                             </div>
                         </details>
 
-                        <!-- File Upload Zone -->
+                        <!-- File Upload Zone (Shown before wizard) -->
                         <div id="aiUploadZone" class="border-2 border-dashed border-violet-300 rounded-2xl p-6 text-center bg-violet-50/40 hover:bg-violet-50 transition cursor-pointer relative" onclick="document.getElementById('aiFileInput').click()">
                             <input type="file" id="aiFileInput" accept=".pptx,.pdf" class="hidden" onchange="onAiFileSelected(this)">
                             <div id="aiUploadPrompt">
@@ -3865,8 +3914,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-black text-slate-900 text-sm" id="aiLoadingMsg">جاري استخراج النص من الملف...</p>
-                                <p class="text-xs text-slate-500 font-bold mt-1">يستغرق هذا عادةً 10 إلى 30 ثانية</p>
+                                <p class="font-black text-slate-900 text-sm" id="aiLoadingMsg">جاري استخراج النص من الملف وتحليله سحابياً...</p>
+                                <p class="text-xs text-slate-500 font-bold mt-1">يستغرق هذا عادةً 10 إلى 30 ثانية لتوليد الخطوات</p>
                             </div>
                             <div class="flex gap-1.5 mt-1" id="aiLoadingDots">
                                 <span class="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style="animation-delay:0s"></span>
@@ -3886,86 +3935,215 @@
                             </div>
                         </div>
 
-                        <!-- AI Generated Preview (shown after success) -->
-                        <div id="aiPreviewArea" class="hidden space-y-4">
+                        <!-- ==================== WIZARD STEPS CONTAINER ==================== -->
+                        <div id="aiWizardContainer" class="hidden space-y-4">
 
                             <!-- Success Banner -->
-                            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center gap-3">
-                                <span class="text-xl shrink-0">🎉</span>
-                                <div>
-                                    <p class="font-black text-emerald-900 text-sm">تم توليد المحتوى بنجاح!</p>
-                                    <p class="text-[11px] text-emerald-700 font-bold" id="aiSuccessStats">تم تحليل X حرف من الملف في X ثانية</p>
+                            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-xl shrink-0">🎉</span>
+                                    <div>
+                                        <p class="font-black text-emerald-900 text-xs">تم تحليل الملف وتوليد المقترحات بنجاح!</p>
+                                        <p class="text-[10px] text-emerald-700 font-bold" id="aiSuccessStats">تم تحليل الملف خلال ثوانٍ</p>
+                                    </div>
                                 </div>
+                                <span class="text-[10px] font-bold text-violet-800 bg-violet-100 px-2.5 py-1 rounded-xl">مراحل التوليد (4 خطوات)</span>
                             </div>
 
-                            <!-- 01: Lecture Preview -->
-                            <div class="border border-slate-200 rounded-2xl overflow-hidden">
-                                <div class="bg-slate-50 border-b border-slate-200 px-4 py-2.5 flex items-center gap-2.5">
-                                    <div class="w-7 h-7 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center text-[11px] font-mono font-black shrink-0">01</div>
-                                    <h5 class="font-black text-sm text-slate-900">المحاضرة والشرح المرئي</h5>
-                                    <span class="mr-auto text-[10px] text-slate-400 font-bold">معاينة — يمكنك التعديل قبل الحفظ</span>
-                                </div>
-                                <div class="p-4 space-y-2">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <input type="text" id="aiLectureTitle" class="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right" placeholder="عنوان المحاضرة">
-                                        <div class="flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 shrink-0">
-                                            <span>⏱</span>
-                                            <input type="number" id="aiLectureDuration" min="5" max="120" class="w-10 bg-transparent outline-none text-center font-mono font-black text-slate-900">
-                                            <span>دقيقة</span>
+                            <!-- ═════════════════════════════════════════════════
+                                 STEP 1: SUGGESTED VIDEOS (3 فيديوهات يختار منها)
+                                 ═════════════════════════════════════════════════ -->
+                            <div id="aiStepView-1" class="space-y-4">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-bold text-sm">01</span>
+                                        <div>
+                                            <h4 class="font-black text-slate-900 text-sm">الفيديوهات التعليمية المقترحة</h4>
+                                            <p class="text-[11px] text-slate-500 font-bold">يقترح الذكاء الاصطناعي 3 فيديوهات ذات صلة بمحتوى ملفك، اختر ما يناسبك منها أو ضع رابطك المفضل:</p>
                                         </div>
                                     </div>
-                                    <textarea id="aiLectureSummary" rows="3" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right resize-none" placeholder="ملخص المحاضرة..."></textarea>
+                                    <span class="text-[11px] font-bold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-lg">الخطوة 1 من 4</span>
+                                </div>
+
+                                <!-- 3 Suggested Videos Cards Container -->
+                                <div id="aiSuggestedVideosContainer" class="space-y-3">
+                                    <!-- Dynamic Cards injected here -->
+                                </div>
+
+                                <!-- Custom Video Link Option -->
+                                <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                                    <label class="block text-xs font-bold text-slate-700">
+                                        <span>🔗</span>
+                                        <span>أو رابط فيديو مخصص من يوتيوب / سحابي (اختياري):</span>
+                                    </label>
+                                    <input type="url" id="aiCustomVideoUrl" placeholder="https://www.youtube.com/watch?v=... أو رابط مباشر" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold font-mono outline-none focus:border-violet-400 text-left dir-ltr">
                                 </div>
                             </div>
 
-                            <!-- 02: Glossary Preview -->
-                            <div class="border border-slate-200 rounded-2xl overflow-hidden">
-                                <div class="bg-emerald-50 border-b border-emerald-200 px-4 py-2.5 flex items-center gap-2.5">
-                                    <div class="w-7 h-7 rounded-lg bg-emerald-200 text-emerald-800 flex items-center justify-center text-[11px] font-mono font-black shrink-0">02</div>
-                                    <h5 class="font-black text-sm text-slate-900">قاموس المصطلحات (Glossary)</h5>
-                                    <span class="mr-auto text-[10px] text-emerald-600 font-bold" id="aiGlossaryCount">0 مصطلح</span>
+                            <!-- ═════════════════════════════════════════════════
+                                 STEP 2: STUDY NOTES, SUMMARIES & TOPICS
+                                 ═════════════════════════════════════════════════ -->
+                            <div id="aiStepView-2" class="hidden space-y-4">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm">02</span>
+                                        <div>
+                                            <h4 class="font-black text-slate-900 text-sm">المذكرات والملخصات الدراسية والمواضيع</h4>
+                                            <p class="text-[11px] text-slate-500 font-bold">المحاور الأكاديمية المستخلصة والملخص الشامل وقاموس المصطلحات الفنية:</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">الخطوة 2 من 4</span>
                                 </div>
-                                <div class="p-4 space-y-2">
-                                    <input type="text" id="aiGlossaryTitle" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right mb-2" placeholder="عنوان المذكرة">
-                                    <div id="aiGlossaryTermsList" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
-                                </div>
-                            </div>
 
-                            <!-- 03: Quiz Preview -->
-                            <div class="border border-slate-200 rounded-2xl overflow-hidden">
-                                <div class="bg-blue-50 border-b border-blue-200 px-4 py-2.5 flex items-center gap-2.5">
-                                    <div class="w-7 h-7 rounded-lg bg-blue-200 text-blue-800 flex items-center justify-center text-[11px] font-mono font-black shrink-0">03</div>
-                                    <h5 class="font-black text-sm text-slate-900">الاختبار التفاعلي</h5>
-                                    <span class="mr-auto text-[10px] text-blue-600 font-bold" id="aiQuizQCount">0 سؤال</span>
-                                </div>
-                                <div class="p-4 space-y-3">
+                                <!-- Lecture Overview & Duration -->
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <input type="text" id="aiQuizTitle" class="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right" placeholder="عنوان الاختبار">
-                                        <div class="flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-700 shrink-0">
+                                        <div class="flex-1 min-w-[200px]">
+                                            <label class="block text-[11px] font-bold text-slate-600 mb-1">عنوان المحاضرة والدرس:</label>
+                                            <input type="text" id="aiLectureTitle" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right" placeholder="عنوان المحاضرة">
+                                        </div>
+                                        <div class="w-28 shrink-0">
+                                            <label class="block text-[11px] font-bold text-slate-600 mb-1">المدة المقدرة:</label>
+                                            <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-700">
+                                                <span>⏱</span>
+                                                <input type="number" id="aiLectureDuration" min="5" max="120" value="15" class="w-10 bg-transparent outline-none text-center font-mono font-black text-slate-900">
+                                                <span>د</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">ملخص المحاضرة والمذكرة الدراسية:</label>
+                                        <textarea id="aiLectureSummary" rows="3" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right resize-none" placeholder="ملخص المحاضرة والنقاط الأساسية..."></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Core Extracted Topics -->
+                                <div class="p-4 bg-violet-50/50 border border-violet-200 rounded-2xl space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-xs font-black text-violet-900">
+                                            <span>📌</span>
+                                            <span>المحاور والمواضيع الدراسية الأساسية:</span>
+                                        </label>
+                                        <span class="text-[10px] text-violet-600 font-bold">مستخلصة من صلب الملف</span>
+                                    </div>
+                                    <div id="aiTopicsList" class="space-y-1.5">
+                                        <!-- Topics tags/inputs -->
+                                    </div>
+                                </div>
+
+                                <!-- Glossary Terms -->
+                                <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                                    <div class="bg-emerald-50 border-b border-emerald-200 px-4 py-2.5 flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm">📖</span>
+                                            <h5 class="font-black text-xs text-slate-900">قاموس المصطلحات الفنية (Glossary)</h5>
+                                        </div>
+                                        <span class="text-[10px] text-emerald-700 font-bold" id="aiGlossaryCount">0 مصطلح</span>
+                                    </div>
+                                    <div class="p-3 space-y-2">
+                                        <input type="text" id="aiGlossaryTitle" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right" placeholder="عنوان قاموس المصطلحات">
+                                        <div id="aiGlossaryTermsList" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ═════════════════════════════════════════════════
+                                 STEP 3: ASSIGNMENT (MCQ OR TEXT WRITING)
+                                 ═════════════════════════════════════════════════ -->
+                            <div id="aiStepView-3" class="hidden space-y-4">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-sm">03</span>
+                                        <div>
+                                            <h4 class="font-black text-slate-900 text-sm">الواجبات والتكاليف الأسبوعية</h4>
+                                            <p class="text-[11px] text-slate-500 font-bold">حدد نمط الواجب للمتدربين: اختيار من متعدد أو كتابة نصية مقالية:</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg">الخطوة 3 من 4</span>
+                                </div>
+
+                                <!-- Segmented Mode Selector: MCQ vs Text -->
+                                <div class="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-2 border border-slate-200">
+                                    <button type="button" id="aiAssignModeBtnMcq" onclick="setAiAssignmentMode('mcq')" class="flex-1 py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs bg-white text-slate-900">
+                                        <span>🔘</span>
+                                        <span>أسئلة اختيار من متعدد (MCQ)</span>
+                                    </button>
+                                    <button type="button" id="aiAssignModeBtnText" onclick="setAiAssignmentMode('text')" class="flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer text-slate-600 hover:text-slate-900">
+                                        <span>✍️</span>
+                                        <span>كتابة نص / إجابة مقالية (Text Essay)</span>
+                                    </button>
+                                </div>
+
+                                <!-- Assignment Title & Instructions -->
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" id="aiAssignmentTitle" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right" placeholder="عنوان الواجب">
+                                        <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs font-bold text-amber-900 shrink-0">
+                                            <span>🎯</span>
+                                            <span class="font-mono font-black">10</span>
+                                            <span>درجات</span>
+                                        </div>
+                                    </div>
+                                    <textarea id="aiAssignmentInstructions" rows="2" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right resize-none" placeholder="تعليمات الواجب والتكليف..."></textarea>
+                                </div>
+
+                                <!-- MCQ Questions Mode Container -->
+                                <div id="aiAssignModeContainerMcq" class="space-y-2.5">
+                                    <div class="flex items-center justify-between text-xs font-bold text-slate-600 px-1">
+                                        <span>الأسئلة التطبيقية (اختيار من متعدد):</span>
+                                        <span class="text-[10px] text-emerald-600 font-bold">تصحيح آلي للمتدرب</span>
+                                    </div>
+                                    <div id="aiAssignmentQList" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+                                </div>
+
+                                <!-- Text Writing Mode Container -->
+                                <div id="aiAssignModeContainerText" class="hidden space-y-3">
+                                    <div class="flex items-center justify-between text-xs font-bold text-slate-600 px-1">
+                                        <span>التكليف المقالي والكتابي:</span>
+                                        <span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md font-bold">تسليم نصي وكتابة مباشرة للمتدرب</span>
+                                    </div>
+                                    <div id="aiAssignmentTextPromptsList" class="space-y-3 max-h-64 overflow-y-auto pr-1"></div>
+                                </div>
+                            </div>
+
+                            <!-- ═════════════════════════════════════════════════
+                                 STEP 4: QUIZZES & EXAMS
+                                 ═════════════════════════════════════════════════ -->
+                            <div id="aiStepView-4" class="hidden space-y-4">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-sm">04</span>
+                                        <div>
+                                            <h4 class="font-black text-slate-900 text-sm">الاختبار الأسبوعي التفاعلي</h4>
+                                            <p class="text-[11px] text-slate-500 font-bold">مراجعة أسئلة الاختبار ودرجات التقييم قبل الحفظ النهائي:</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg">الخطوة 4 من 4</span>
+                                </div>
+
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <input type="text" id="aiQuizTitle" class="flex-1 min-w-[200px] bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right" placeholder="عنوان الاختبار">
+                                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-700 shrink-0">
                                             <span>⏱</span>
-                                            <input type="number" id="aiQuizDuration" min="5" max="60" class="w-8 bg-transparent outline-none text-center font-mono font-black text-slate-900">
+                                            <input type="number" id="aiQuizDuration" min="5" max="60" value="15" class="w-8 bg-transparent outline-none text-center font-mono font-black text-slate-900">
                                             <span>د</span>
                                         </div>
                                         <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-xl px-2.5 py-2 text-xs font-bold text-amber-800 shrink-0">
                                             <span>🎯</span>
-                                            <input type="number" id="aiQuizGrade" min="1" max="100" class="w-8 bg-transparent outline-none text-center font-mono font-black text-amber-900">
+                                            <input type="number" id="aiQuizGrade" min="1" max="100" value="10" class="w-8 bg-transparent outline-none text-center font-mono font-black text-amber-900">
                                             <span>درجة</span>
                                         </div>
                                     </div>
                                     <div id="aiQuizQuestionsList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
                                 </div>
-                            </div>
 
-                            <!-- 04: Assignment Preview -->
-                            <div class="border border-slate-200 rounded-2xl overflow-hidden">
-                                <div class="bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center gap-2.5">
-                                    <div class="w-7 h-7 rounded-lg bg-amber-200 text-amber-800 flex items-center justify-center text-[11px] font-mono font-black shrink-0">04</div>
-                                    <h5 class="font-black text-sm text-slate-900">الواجب والتكليف الأسبوعي</h5>
-                                </div>
-                                <div class="p-4 space-y-2">
-                                    <input type="text" id="aiAssignmentTitle" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right" placeholder="عنوان الواجب">
-                                    <textarea id="aiAssignmentInstructions" rows="3" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right resize-none" placeholder="تعليمات الواجب..."></textarea>
-                                    <div id="aiAssignmentQList" class="space-y-2 max-h-48 overflow-y-auto pr-1 mt-2"></div>
+                                <!-- Ready Notice -->
+                                <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-2.5 text-xs text-emerald-900">
+                                    <span class="text-xl">✅</span>
+                                    <div class="font-bold leading-relaxed">
+                                        اكتملت مراجعة الخطوات الأربعة! اضغط على <b>«اعتماد وإنشاء المحتوى بالكامل»</b> أدناه لإدراج الفيديوهات، المذكرات، الواجب، والاختبار في خطة الأسبوع للمتدربين.
+                                    </div>
                                 </div>
                             </div>
 
@@ -3973,18 +4151,43 @@
                     </div>
 
                     <!-- Footer Actions -->
-                    <div class="p-5 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3 shrink-0">
-                        <button type="button" id="aiGenerateBtn" onclick="runAiGenerate()" class="w-full sm:w-auto bg-gradient-to-l from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800 text-white font-black text-sm px-6 py-3 rounded-2xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-violet-500/30 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span>✨</span>
-                            <span>ابدأ التوليد بالذكاء الاصطناعي</span>
-                        </button>
-                        <button type="button" id="aiSaveAllBtn" onclick="saveAiGeneratedContent()" class="hidden w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm px-6 py-3 rounded-2xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/25 transition active:scale-95">
-                            <span>💾</span>
-                            <span>حفظ ونشر المحتوى الكامل للأسبوع</span>
-                        </button>
-                        <button type="button" onclick="closeAiGenerateModal()" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm px-5 py-3 rounded-2xl cursor-pointer transition">
-                            إلغاء
-                        </button>
+                    <div class="p-4 md:p-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 bg-slate-50/50">
+                        
+                        <!-- Initial Generate Button (before generation) -->
+                        <div id="aiInitialActions" class="w-full flex flex-col sm:flex-row items-center gap-3">
+                            <button type="button" id="aiGenerateBtn" onclick="runAiGenerate()" class="w-full sm:w-auto bg-gradient-to-l from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800 text-white font-black text-sm px-6 py-3 rounded-2xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-violet-500/30 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span>✨</span>
+                                <span>ابدأ التوليد والتحليل بالخطوات</span>
+                            </button>
+                            <button type="button" onclick="closeAiGenerateModal()" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm px-5 py-3 rounded-2xl cursor-pointer transition">
+                                إلغاء
+                            </button>
+                        </div>
+
+                        <!-- Wizard Navigation Actions (when wizard is active) -->
+                        <div id="aiWizardActions" class="hidden w-full flex items-center justify-between gap-2 flex-wrap">
+                            <button type="button" id="aiWizardPrevBtn" onclick="prevAiStep()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer transition flex items-center gap-1.5">
+                                <span>➡️</span>
+                                <span>السابق</span>
+                            </button>
+
+                            <div class="flex items-center gap-2 mr-auto">
+                                <button type="button" id="aiWizardNextBtn" onclick="nextAiStep()" class="bg-gradient-to-l from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800 text-white font-black text-xs px-5 py-2.5 rounded-xl cursor-pointer shadow-md shadow-violet-500/25 transition active:scale-95 flex items-center gap-1.5">
+                                    <span>التالي</span>
+                                    <span>⬅️</span>
+                                </button>
+                                
+                                <button type="button" id="aiWizardFinishBtn" onclick="saveAiGeneratedContent()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs px-6 py-2.5 rounded-xl cursor-pointer shadow-md shadow-emerald-500/30 transition active:scale-95 flex items-center gap-1.5">
+                                    <span>🚀</span>
+                                    <span>اعتماد وإنشاء المحتوى بالكامل</span>
+                                </button>
+
+                                <button type="button" onclick="closeAiGenerateModal()" class="text-slate-400 hover:text-slate-600 text-xs font-bold px-3 py-2 cursor-pointer">
+                                    إغلاق
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -8364,6 +8567,9 @@
         const modal = document.getElementById('liveSheetConfigModal');
         const input = document.getElementById('modalLiveSheetUrlInput');
         if (input) input.value = getLiveSheetUrl();
+        if (typeof updateAttendanceScheduleStatusUI === 'function') {
+            updateAttendanceScheduleStatusUI();
+        }
         if (modal) modal.classList.remove('hidden');
     }
 
@@ -8476,6 +8682,103 @@
     // بديل اسم الدالة القديم لضمان التوافق التام
     function syncGoogleSheet() {
         syncLiveAttendanceFromGoogleSheets();
+    }
+
+    // ===================================================================
+    // SCHEDULED HOURLY LIVE ATTENDANCE SYNC (08:30 AM to 04:30 PM)
+    // ===================================================================
+    function getAttendanceSyncStatus() {
+        const now = new Date();
+        const currentMins = now.getHours() * 60 + now.getMinutes();
+        const startMins = 8 * 60 + 30;   // 08:30 AM (510 min)
+        const endMins = 16 * 60 + 30;    // 04:30 PM (990 min)
+        const isWithinWindow = currentMins >= startMins && currentMins < endMins;
+
+        const lastSync = Number(localStorage.getItem('sys_last_hourly_sync') || localStorage.getItem('sys_last_sync_time') || 0);
+        const ONE_HOUR_MS = 60 * 60 * 1000;
+        const timeSinceLastSync = Date.now() - lastSync;
+        const isDue = !lastSync || timeSinceLastSync >= ONE_HOUR_MS;
+
+        return {
+            isWithinWindow,
+            isDue,
+            lastSync,
+            timeSinceLastSync,
+            currentMins,
+            startMins,
+            endMins
+        };
+    }
+
+    function updateAttendanceScheduleStatusUI() {
+        const status = getAttendanceSyncStatus();
+        const badge = document.getElementById('autoSyncScheduleBadge');
+        const modalStatus = document.getElementById('modalSyncScheduleStatus');
+
+        let statusText = '';
+        let badgeHtml = '';
+
+        if (status.isWithinWindow) {
+            const nextSyncMin = Math.max(0, Math.ceil((60 * 60 * 1000 - status.timeSinceLastSync) / (60 * 1000)));
+            const lastTimeStr = status.lastSync ? new Date(status.lastSync).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : 'لم يتم بعد';
+            statusText = `🟢 المزامنة نشطة (كل ساعة): آخر تحديث ${lastTimeStr} — التحديث القادم بعد قرابة ${nextSyncMin} دقيقة (تتوقف 4:30 م).`;
+            badgeHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs" title="المزامنة التلقائية نشطة كل ساعة حتى 4:30 م">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>مزامنة كل ساعة (8:30 ص - 4:30 م)</span>
+                </span>
+            `;
+        } else {
+            statusText = `⏸️ المزامنة التلقائية متوقفة حالياً (خارج أوقات العمل). تستأنف تلقائياً غداً الساعة 8:30 صباحاً.`;
+            badgeHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs" title="المزامنة التلقائية متوقفة وتستأنف غداً 8:30 ص">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                    <span>مزامنة مجدولة (تستأنف 8:30 ص)</span>
+                </span>
+            `;
+        }
+
+        if (badge) badge.innerHTML = badgeHtml;
+        if (modalStatus) modalStatus.innerText = statusText;
+    }
+
+    async function checkAndRunScheduledAttendanceSync(isInitial = false) {
+        if (typeof syncLiveAttendanceFromGoogleSheets !== 'function') return;
+        if (currentUser?.role === 'trainer') return;
+
+        const status = getAttendanceSyncStatus();
+        updateAttendanceScheduleStatusUI();
+
+        if (!status.isWithinWindow) {
+            return;
+        }
+
+        const needsSync = status.isDue || (isInitial && (!trainees || trainees.length === 0));
+        if (needsSync) {
+            console.log('⏰ تنفيذ المزامنة التلقائية المجدولة لكشف الحضور (كل ساعة بين 8:30 ص و 4:30 م)...');
+            try {
+                await syncLiveAttendanceFromGoogleSheets(true);
+                const nowTime = Date.now();
+                localStorage.setItem('sys_last_hourly_sync', String(nowTime));
+                localStorage.setItem('sys_last_sync_time', String(nowTime));
+                updateAttendanceScheduleStatusUI();
+            } catch (err) {
+                console.warn('Scheduled attendance sync warning:', err);
+            }
+        }
+    }
+
+    let attendanceSyncScheduleInterval = null;
+    function initScheduledAttendanceSync() {
+        if (attendanceSyncScheduleInterval) clearInterval(attendanceSyncScheduleInterval);
+        
+        // Initial check and run if due
+        checkAndRunScheduledAttendanceSync(true);
+
+        // Check every minute to guarantee punctual execution
+        attendanceSyncScheduleInterval = setInterval(() => {
+            checkAndRunScheduledAttendanceSync(false);
+        }, 60 * 1000);
     }
 
     // تحديث فوري لكشف حضور المتدرب من لوحة تحكم الطالب
@@ -19910,10 +20213,12 @@
     }
 
     // ===================================================================
-    // AI AUTO-GENERATION ENGINE (توليد محتوى الأسبوع آلياً بالذكاء الاصطناعي)
+    // AI AUTO-GENERATION ENGINE (توليد محتوى الأسبوع آلياً بالذكاء الاصطناعي - نظام الخطوات)
     // ===================================================================
     let selectedAiFile = null;
     let currentAiGeneratedData = null;
+    let currentAiStep = 1;
+    let currentAiAssignmentMode = 'mcq';
 
     function openAiGenerateModal() {
         // Resolve trainer course context if called from trainer dashboard or sidebar
@@ -19942,29 +20247,39 @@
 
         selectedAiFile = null;
         currentAiGeneratedData = null;
+        currentAiStep = 1;
+        currentAiAssignmentMode = 'mcq';
 
         const fileInput = document.getElementById('aiFileInput');
         if (fileInput) fileInput.value = '';
 
+        const uploadZone = document.getElementById('aiUploadZone');
         const uploadPrompt = document.getElementById('aiUploadPrompt');
         const filePreview = document.getElementById('aiFilePreview');
+        if (uploadZone) uploadZone.classList.remove('hidden');
         if (uploadPrompt) uploadPrompt.classList.remove('hidden');
         if (filePreview) filePreview.classList.add('hidden');
 
         const loadingState = document.getElementById('aiLoadingState');
         const errorState = document.getElementById('aiErrorState');
-        const previewArea = document.getElementById('aiPreviewArea');
-        const saveBtn = document.getElementById('aiSaveAllBtn');
+        const stepper = document.getElementById('aiWizardStepper');
+        const wizardContainer = document.getElementById('aiWizardContainer');
+        const initialActions = document.getElementById('aiInitialActions');
+        const wizardActions = document.getElementById('aiWizardActions');
         const genBtn = document.getElementById('aiGenerateBtn');
 
         if (loadingState) loadingState.classList.add('hidden');
         if (errorState) errorState.classList.add('hidden');
-        if (previewArea) previewArea.classList.add('hidden');
-        if (saveBtn) saveBtn.classList.add('hidden');
+        if (stepper) stepper.classList.add('hidden');
+        if (wizardContainer) wizardContainer.classList.add('hidden');
+        if (initialActions) initialActions.classList.remove('hidden');
+        if (wizardActions) wizardActions.classList.add('hidden');
         if (genBtn) {
-            genBtn.classList.remove('hidden');
             genBtn.disabled = false;
         }
+
+        const customVidInput = document.getElementById('aiCustomVideoUrl');
+        if (customVidInput) customVidInput.value = '';
 
         // Restore saved server URL if any (ignoring legacy localhost:5005)
         const savedUrl = localStorage.getItem('sys_ai_server_url');
@@ -20050,6 +20365,122 @@
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────
+    // STEPPER NAVIGATION LOGIC (التايم لاين والتنقل بين الخطوات)
+    // ─────────────────────────────────────────────────────────────────
+    function goToAiStep(stepNum) {
+        currentAiStep = Math.max(1, Math.min(4, stepNum));
+
+        // Show/hide corresponding step views
+        for (let i = 1; i <= 4; i++) {
+            const view = document.getElementById(`aiStepView-${i}`);
+            if (view) {
+                if (i === currentAiStep) {
+                    view.classList.remove('hidden');
+                } else {
+                    view.classList.add('hidden');
+                }
+            }
+
+            // Stepper circles & labels
+            const circle = document.getElementById(`aiStepCircle-${i}`);
+            const label = document.getElementById(`aiStepLabel-${i}`);
+            if (circle) {
+                circle.className = 'w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-xs';
+                if (i === currentAiStep) {
+                    circle.classList.add('bg-violet-600', 'text-white', 'ring-4', 'ring-violet-100');
+                    circle.innerText = String(i);
+                } else if (i < currentAiStep) {
+                    circle.classList.add('bg-emerald-500', 'text-white');
+                    circle.innerText = '✓';
+                } else {
+                    circle.classList.add('bg-white', 'text-slate-400', 'border', 'border-slate-300');
+                    circle.innerText = String(i);
+                }
+            }
+            if (label) {
+                if (i === currentAiStep) {
+                    label.className = 'text-[10px] font-black text-violet-900';
+                } else if (i < currentAiStep) {
+                    label.className = 'text-[10px] font-bold text-emerald-700';
+                } else {
+                    label.className = 'text-[10px] font-bold text-slate-400';
+                }
+            }
+        }
+
+        // Stepper Progress Bar (0% at step 1, 100% at step 4)
+        const pBar = document.getElementById('aiStepProgressBar');
+        if (pBar) {
+            const pct = ((currentAiStep - 1) / 3) * 100;
+            pBar.style.width = `${pct}%`;
+        }
+
+        // Update Wizard Footer Buttons
+        const prevBtn = document.getElementById('aiWizardPrevBtn');
+        const nextBtn = document.getElementById('aiWizardNextBtn');
+        const finishBtn = document.getElementById('aiWizardFinishBtn');
+
+        if (prevBtn) {
+            if (currentAiStep > 1) {
+                prevBtn.classList.remove('invisible');
+            } else {
+                prevBtn.classList.add('invisible');
+            }
+        }
+        if (nextBtn) {
+            if (currentAiStep < 4) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.add('hidden');
+            }
+        }
+        if (finishBtn) {
+            if (currentAiStep === 4) {
+                finishBtn.classList.remove('hidden');
+            } else {
+                finishBtn.classList.add('hidden');
+            }
+        }
+    }
+
+    function nextAiStep() {
+        goToAiStep(currentAiStep + 1);
+    }
+
+    function prevAiStep() {
+        goToAiStep(currentAiStep - 1);
+    }
+
+    function setAiAssignmentMode(mode) {
+        currentAiAssignmentMode = mode === 'text' ? 'text' : 'mcq';
+
+        const btnMcq = document.getElementById('aiAssignModeBtnMcq');
+        const btnText = document.getElementById('aiAssignModeBtnText');
+        const containerMcq = document.getElementById('aiAssignModeContainerMcq');
+        const containerText = document.getElementById('aiAssignModeContainerText');
+
+        if (currentAiAssignmentMode === 'mcq') {
+            if (btnMcq) {
+                btnMcq.className = 'flex-1 py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs bg-white text-slate-900';
+            }
+            if (btnText) {
+                btnText.className = 'flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer text-slate-600 hover:text-slate-900';
+            }
+            if (containerMcq) containerMcq.classList.remove('hidden');
+            if (containerText) containerText.classList.add('hidden');
+        } else {
+            if (btnMcq) {
+                btnMcq.className = 'flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer text-slate-600 hover:text-slate-900';
+            }
+            if (btnText) {
+                btnText.className = 'flex-1 py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs bg-white text-slate-900';
+            }
+            if (containerMcq) containerMcq.classList.add('hidden');
+            if (containerText) containerText.classList.remove('hidden');
+        }
+    }
+
     async function runAiGenerate() {
         if (!selectedAiFile) {
             showToast('يرجى اختيار ملف باوربوينت (.pptx) أو PDF (.pdf) أولاً', 'warning');
@@ -20059,7 +20490,6 @@
         const serverUrlInput = document.getElementById('aiServerUrl');
         let endpointUrl = (serverUrlInput ? serverUrlInput.value.trim() : '') || '/api/generate';
 
-        // Auto-fix endpoints
         if (!endpointUrl.startsWith('http://') && !endpointUrl.startsWith('https://') && !endpointUrl.startsWith('/')) {
             endpointUrl = '/' + endpointUrl;
         }
@@ -20069,21 +20499,23 @@
         const loadingMsg = document.getElementById('aiLoadingMsg');
         const errorState = document.getElementById('aiErrorState');
         const errorMsg = document.getElementById('aiErrorMsg');
-        const previewArea = document.getElementById('aiPreviewArea');
-        const saveBtn = document.getElementById('aiSaveAllBtn');
+        const stepper = document.getElementById('aiWizardStepper');
+        const wizardContainer = document.getElementById('aiWizardContainer');
+        const initialActions = document.getElementById('aiInitialActions');
+        const wizardActions = document.getElementById('aiWizardActions');
+        const uploadZone = document.getElementById('aiUploadZone');
 
         if (genBtn) genBtn.disabled = true;
         if (errorState) errorState.classList.add('hidden');
-        if (previewArea) previewArea.classList.add('hidden');
-        if (saveBtn) saveBtn.classList.add('hidden');
+        if (stepper) stepper.classList.add('hidden');
+        if (wizardContainer) wizardContainer.classList.add('hidden');
         if (loadingState) {
             loadingState.classList.remove('hidden');
             loadingState.classList.add('flex');
         }
-        if (loadingMsg) loadingMsg.innerText = `جاري معالجة الملف وتحليله سحابياً عبر Gemini AI من "${selectedAiFile.name}"...`;
+        if (loadingMsg) loadingMsg.innerText = `جاري معالجة الملف واستخراج المحتوى بالذكاء الاصطناعي من "${selectedAiFile.name}"...`;
 
         try {
-            // Read file as Base64 to send cleanly via JSON to Vercel Serverless Function
             const base64Data = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => {
@@ -20130,20 +20562,27 @@
 
             currentAiGeneratedData = result.data;
 
-            // Populate Preview fields
+            // Populate all 4 Steps with generated data
             populateAiPreview(result);
 
             if (loadingState) {
                 loadingState.classList.add('hidden');
                 loadingState.classList.remove('flex');
             }
-            if (previewArea) previewArea.classList.remove('hidden');
-            if (saveBtn) saveBtn.classList.remove('hidden');
-            if (genBtn) genBtn.classList.add('hidden');
+
+            // Switch to Wizard View
+            if (uploadZone) uploadZone.classList.add('hidden');
+            if (stepper) stepper.classList.remove('hidden');
+            if (wizardContainer) wizardContainer.classList.remove('hidden');
+            if (initialActions) initialActions.classList.add('hidden');
+            if (wizardActions) wizardActions.classList.remove('hidden');
+
+            // Open Step 1 (Videos)
+            goToAiStep(1);
 
             const modeLabel = result.mode === 'gemini' 
-                ? 'تم تحليل الملف عبر Google Gemini 2.0 Flash وتوليد المحتوى بنجاح! ✨' 
-                : 'تم تحليل الملف وتوليد المحتوى الأكاديمي بنجاح! ✓';
+                ? 'تم تحليل الملف عبر Google Gemini 2.0 Flash وتجهيز الخطوات الأربعة بنجاح! ✨' 
+                : 'تم تحليل الملف وتجهيز الخطوات الأربعة بنجاح! ✓';
             showToast(modeLabel, 'success');
 
         } catch (err) {
@@ -20183,7 +20622,51 @@
             successStats.innerHTML = `تم تحليل <b>${chars}</b> حرف من الملف "${result.filename || ''}" خلال <b>${timeSec}s</b> عبر <b>${modeText}</b>`;
         }
 
-        // 01: Lecture Overview
+        // ─────────────────────────────────────────────────────────────────
+        // STEP 1: SUGGESTED VIDEOS (3 فيديوهات مقترحة يختار منها)
+        // ─────────────────────────────────────────────────────────────────
+        const videosContainer = document.getElementById('aiSuggestedVideosContainer');
+        const rawVideos = Array.isArray(data.suggested_videos) && data.suggested_videos.length > 0 
+            ? data.suggested_videos 
+            : [
+                { id: 1, title: `شرح تطبيقي لـ ${data.lecture?.title || 'المحاضرة'}`, description: 'شرح تطبيقي وتدريب عملي على المهارات الأساسية والمصطلحات', duration: '12:00 دقيقة', search_query: `${data.lecture?.title || 'technical training'} tutorial`, youtube_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(data.lecture?.title || 'tutorial')}` },
+                { id: 2, title: `إجراءات ومعايير السلامة المهنية المعتمدة`, description: 'استعراض لإجراءات التشغيل القياسية (SOP) واشتراطات السلامة والجودة', duration: '10:00 دقيقة', search_query: 'industrial safety procedures tutorial', youtube_url: 'https://www.youtube.com/results?search_query=industrial+safety' },
+                { id: 3, title: `المصطلحات الفنية والمحادثة التقنية في بيئة العمل`, description: 'فيديو إثرائي للمصطلحات التخصصية والنطق السليم في بيئة العمل', duration: '15:00 دقيقة', search_query: 'technical english terminology', youtube_url: 'https://www.youtube.com/results?search_query=technical+english' }
+            ];
+
+        if (videosContainer) {
+            videosContainer.innerHTML = rawVideos.slice(0, 3).map((v, idx) => {
+                const isChecked = idx === 0 ? 'checked' : '';
+                const ytQuery = v.search_query || v.title;
+                const ytSearchUrl = v.youtube_url || `https://www.youtube.com/results?search_query=${encodeURIComponent(ytQuery)}`;
+                return `
+                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs transition hover:border-violet-300">
+                        <div class="flex items-start gap-3 flex-1 min-w-0">
+                            <label class="flex items-center gap-2 cursor-pointer pt-0.5">
+                                <input type="radio" name="aiSelectedVideoRadio" value="${idx}" ${isChecked} class="w-4 h-4 text-violet-600 focus:ring-violet-500 cursor-pointer">
+                                <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-bold text-xs shrink-0">🎥</span>
+                            </label>
+                            <div class="space-y-1 flex-1 min-w-0">
+                                <input type="text" id="aiVideoTitle-${idx}" value="${escapeHtml(v.title || `فيديو تدريبي ${idx + 1}`)}" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-black text-slate-900 outline-none focus:border-violet-400">
+                                <p class="text-[11px] text-slate-500 font-bold">${escapeHtml(v.description || '')}</p>
+                                <input type="hidden" id="aiVideoUrl-${idx}" value="${escapeHtml(ytSearchUrl)}">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                            <span class="bg-violet-50 border border-violet-200 text-violet-800 px-2.5 py-1 rounded-lg text-[10px] font-bold">⏱ ${escapeHtml(v.duration || '12 دقيقة')}</span>
+                            <a href="${escapeHtml(ytSearchUrl)}" target="_blank" rel="noopener noreferrer" class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition">
+                                <span>▶️</span>
+                                <span>معاينة يوتيوب ↗</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // STEP 2: LECTURE OVERVIEW, TOPICS & GLOSSARY
+        // ─────────────────────────────────────────────────────────────────
         const lecture = data.lecture || {};
         const lecTitle = document.getElementById('aiLectureTitle');
         const lecDuration = document.getElementById('aiLectureDuration');
@@ -20192,7 +20675,25 @@
         if (lecDuration) lecDuration.value = lecture.duration_minutes || 15;
         if (lecSummary) lecSummary.value = lecture.summary || '';
 
-        // 02: Glossary & Notes
+        // Core Topics list
+        const topicsContainer = document.getElementById('aiTopicsList');
+        const rawTopics = Array.isArray(lecture.topics) && lecture.topics.length > 0 
+            ? lecture.topics 
+            : [
+                `المحور الأول: المفاهيم والأسس الرئيسية لـ ${lecture.title || 'الوحدة'}`,
+                `المحور الثاني: الإجراءات والمعايير التشغيلية المعتمدة`,
+                `المحور الثالث: السلامة المهنية والتطبيق في بيئة العمل`
+            ];
+        if (topicsContainer) {
+            topicsContainer.innerHTML = rawTopics.map((top, tIdx) => `
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-md bg-violet-200 text-violet-900 font-mono font-bold flex items-center justify-center text-[10px] shrink-0">${tIdx + 1}</span>
+                    <input type="text" class="aiTopicInput flex-1 bg-white border border-violet-200 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-800 outline-none focus:border-violet-400" value="${escapeHtml(top)}">
+                </div>
+            `).join('');
+        }
+
+        // Glossary & Notes
         const glossary = data.glossary_notes || {};
         const glossTitle = document.getElementById('aiGlossaryTitle');
         const glossCount = document.getElementById('aiGlossaryCount');
@@ -20207,28 +20708,102 @@
                 <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
                     <div class="flex items-center gap-2">
                         <span class="w-5 h-5 rounded-md bg-emerald-100 text-emerald-800 font-mono font-black flex items-center justify-center text-[10px] shrink-0">${i + 1}</span>
-                        <strong class="font-bold text-slate-900 font-mono">${t.en || ''}</strong>
+                        <strong class="font-bold text-slate-900 font-mono">${escapeHtml(t.en || '')}</strong>
                         <span class="text-slate-400">←</span>
-                        <span class="font-bold text-emerald-800">${t.ar || ''}</span>
+                        <span class="font-bold text-emerald-800">${escapeHtml(t.ar || '')}</span>
                     </div>
-                    <span class="text-[11px] text-slate-500 font-bold">${t.definition || ''}</span>
+                    <span class="text-[11px] text-slate-500 font-bold">${escapeHtml(t.definition || '')}</span>
                 </div>
             `).join('');
         }
 
-        // 03: Quiz
+        // ─────────────────────────────────────────────────────────────────
+        // STEP 3: ASSIGNMENT (MCQ OR TEXT)
+        // ─────────────────────────────────────────────────────────────────
+        const assignment = data.assignment || {};
+        const aTitle = document.getElementById('aiAssignmentTitle');
+        const aInstructions = document.getElementById('aiAssignmentInstructions');
+        const aList = document.getElementById('aiAssignmentQList');
+        const aTextList = document.getElementById('aiAssignmentTextPromptsList');
+
+        if (aTitle) aTitle.value = assignment.title || 'الواجب والتكليف الأسبوعي';
+        if (aInstructions) aInstructions.value = assignment.instructions || 'قم بمراجعة المصطلحات الفنية وإتمام التكليف بالشكل المطلوب.';
+
+        // MCQ Questions
+        const aMcqQuestions = Array.isArray(assignment.mcq_questions) && assignment.mcq_questions.length > 0
+            ? assignment.mcq_questions
+            : (Array.isArray(assignment.questions) ? assignment.questions : []);
+
+        if (aList) {
+            if (aMcqQuestions.length > 0) {
+                aList.innerHTML = aMcqQuestions.map((q, i) => {
+                    const opts = Array.isArray(q.options) ? q.options : [];
+                    return `
+                        <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-black text-slate-800">س ${i + 1}: ${escapeHtml(q.question || '')}</span>
+                                <span class="text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-md">
+                                    الإجابة: ${escapeHtml(q.correct_answer || opts[0] || 'الخيار 1')}
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+                                ${opts.map(opt => `
+                                    <div class="px-2.5 py-1 rounded-lg border text-[11px] font-bold ${opt === q.correct_answer ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900 font-black' : 'bg-slate-50 border-slate-200 text-slate-700'}">
+                                        ${opt === q.correct_answer ? '✓ ' : '• '}${escapeHtml(opt)}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                aList.innerHTML = '<p class="text-xs text-slate-400 p-2">لا توجد أسئلة اختيار من متعدد متوفرة.</p>';
+            }
+        }
+
+        // Text Essay Prompts
+        const aTextQuestions = Array.isArray(assignment.text_questions) && assignment.text_questions.length > 0
+            ? assignment.text_questions
+            : [
+                {
+                    prompt: `اكتب فقرة باللغة الإنجليزية التقنية تشرح فيها أهمية تطبيق معايير السلامة المهنية ومصطلحات درس "${lecture.title || 'الوحدة'}".`,
+                    guidelines: 'استخدم ما لا يقل عن 3 مصطلحات فنية واكتب ما بين 40 إلى 60 كلمة بدقة ووضوح.',
+                    model_answer: 'Sample model answer: Adhering to technical standard operating procedures ensures safe operations...'
+                }
+            ];
+
+        if (aTextList) {
+            aTextList.innerHTML = aTextQuestions.map((tq, ti) => `
+                <div class="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="font-black text-slate-800">مهمة كتابية ${ti + 1}:</span>
+                        <span class="text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md">كتابة مقالية</span>
+                    </div>
+                    <textarea id="aiTextPrompt-${ti}" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-800 outline-none focus:border-amber-400 resize-none">${escapeHtml(tq.prompt || '')}</textarea>
+                    <div class="flex items-center gap-2 text-[11px] text-slate-500 font-bold bg-slate-50 p-2 rounded-lg">
+                        <span>💡 الإرشادات:</span>
+                        <input type="text" id="aiTextGuide-${ti}" value="${escapeHtml(tq.guidelines || '')}" class="flex-1 bg-transparent border-0 outline-none font-bold text-slate-700">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Set default to MCQ
+        setAiAssignmentMode('mcq');
+
+        // ─────────────────────────────────────────────────────────────────
+        // STEP 4: QUIZZES & EXAMS
+        // ─────────────────────────────────────────────────────────────────
         const quiz = data.quiz || {};
         const qTitle = document.getElementById('aiQuizTitle');
         const qDur = document.getElementById('aiQuizDuration');
         const qGrade = document.getElementById('aiQuizGrade');
-        const qCount = document.getElementById('aiQuizQCount');
         const qList = document.getElementById('aiQuizQuestionsList');
 
         if (qTitle) qTitle.value = quiz.title || 'اختبار الأسبوع التفاعلي';
         if (qDur) qDur.value = quiz.duration_minutes || 15;
         if (qGrade) qGrade.value = quiz.total_grade || 10;
         const questions = Array.isArray(quiz.questions) ? quiz.questions : [];
-        if (qCount) qCount.innerText = `${questions.length} أسئلة`;
 
         if (qList) {
             qList.innerHTML = questions.map((q, i) => {
@@ -20236,48 +20811,21 @@
                 return `
                     <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2 text-xs">
                         <div class="flex items-center justify-between">
-                            <span class="font-black text-slate-800">س ${i + 1}: ${q.question || ''}</span>
+                            <span class="font-black text-slate-800">س ${i + 1}: ${escapeHtml(q.question || '')}</span>
                             <span class="text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md">
-                                الإجابة: ${q.correct_answer || (opts[0] || 'أ')}
+                                الإجابة: ${escapeHtml(q.correct_answer || opts[0] || 'أ')}
                             </span>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
                             ${opts.map(opt => `
-                                <div class="px-2.5 py-1.5 rounded-lg border text-[11px] font-bold ${opt === q.correct_answer ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900 font-black' : 'bg-slate-50 border-slate-200 text-slate-700'}">
-                                    ${opt === q.correct_answer ? '✓ ' : '• '}${opt}
+                                <div class="px-2.5 py-1 rounded-lg border text-[11px] font-bold ${opt === q.correct_answer ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900 font-black' : 'bg-slate-50 border-slate-200 text-slate-700'}">
+                                    ${opt === q.correct_answer ? '✓ ' : '• '}${escapeHtml(opt)}
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 `;
             }).join('');
-        }
-
-        // 04: Assignment
-        const assignment = data.assignment || {};
-        const aTitle = document.getElementById('aiAssignmentTitle');
-        const aInstructions = document.getElementById('aiAssignmentInstructions');
-        const aList = document.getElementById('aiAssignmentQList');
-
-        if (aTitle) aTitle.value = assignment.title || 'الواجب والتكليف الأسبوعي';
-        if (aInstructions) aInstructions.value = assignment.instructions || '';
-
-        const aQuestions = Array.isArray(assignment.questions) ? assignment.questions : [];
-        if (aList) {
-            if (aQuestions.length > 0) {
-                aList.innerHTML = aQuestions.map((q, i) => `
-                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
-                        <span class="font-bold text-slate-800">تطبيق ${i + 1}: ${q.question || ''}</span>
-                        ${Array.isArray(q.options) && q.options.length > 0 ? `
-                            <div class="flex flex-wrap gap-1 text-[11px] text-slate-600">
-                                ${q.options.map(o => `<span class="bg-white px-2 py-0.5 rounded border border-slate-200">${o}</span>`).join('')}
-                            </div>
-                        ` : ''}
-                    </div>
-                `).join('');
-            } else {
-                aList.innerHTML = '';
-            }
         }
     }
 
@@ -20295,27 +20843,34 @@
             return;
         }
 
-        // Read values from preview inputs (honoring any edits the trainer made)
-        const lecTitle = document.getElementById('aiLectureTitle')?.value.trim() || 'محاضرة الوحدة';
+        const cloudFileUrl = (currentAiGeneratedData && currentAiGeneratedData.file_url) ? currentAiGeneratedData.file_url : '';
+        const isPpt = selectedAiFile && selectedAiFile.name.toLowerCase().endsWith('.pptx');
+
+        // ═════════════════════════════════════════════════════════════════
+        // 1. SAVE COMPONENT 01: SELECTED VIDEOS & LECTURE
+        // ═════════════════════════════════════════════════════════════════
+        if (!activeWeek.videos) activeWeek.videos = [];
+
+        // Check which video radio is selected
+        const selectedRadio = document.querySelector('input[name="aiSelectedVideoRadio"]:checked');
+        const selectedIdx = selectedRadio ? parseInt(selectedRadio.value, 10) : 0;
+        const videoTitleEl = document.getElementById(`aiVideoTitle-${selectedIdx}`);
+        const videoUrlEl = document.getElementById(`aiVideoUrl-${selectedIdx}`);
+        const customVideoUrlEl = document.getElementById('aiCustomVideoUrl');
+
+        const finalVideoTitle = (videoTitleEl ? videoTitleEl.value.trim() : '') || 'فيديو تعليمي تفاعلي';
+        const finalVideoUrl = (customVideoUrlEl && customVideoUrlEl.value.trim()) 
+            ? customVideoUrlEl.value.trim() 
+            : ((videoUrlEl ? videoUrlEl.value.trim() : '') || cloudFileUrl || '');
+
+        const lecTitle = document.getElementById('aiLectureTitle')?.value.trim() || finalVideoTitle;
         const lecDuration = document.getElementById('aiLectureDuration')?.value.trim() || '15';
         const lecSummary = document.getElementById('aiLectureSummary')?.value.trim() || '';
 
-        const glossTitle = document.getElementById('aiGlossaryTitle')?.value.trim() || 'قاموس مصطلحات الأسبوع';
-        const qTitle = document.getElementById('aiQuizTitle')?.value.trim() || 'اختبار الأسبوع';
-        const qDur = parseInt(document.getElementById('aiQuizDuration')?.value, 10) || 15;
-        const qGrade = parseInt(document.getElementById('aiQuizGrade')?.value, 10) || 10;
-
-        const aTitle = document.getElementById('aiAssignmentTitle')?.value.trim() || 'الواجب الأسبوعي';
-        const aInstructions = document.getElementById('aiAssignmentInstructions')?.value.trim() || '';
-        const cloudFileUrl = (currentAiGeneratedData && currentAiGeneratedData.file_url) ? currentAiGeneratedData.file_url : '';
-
-        // 1. Save Component 01: Lecture Overview
-        if (!activeWeek.videos) activeWeek.videos = [];
-        const isPpt = selectedAiFile && selectedAiFile.name.toLowerCase().endsWith('.pptx');
         activeWeek.videos.push({
             id: 'v-' + Date.now(),
             title: lecTitle,
-            url: cloudFileUrl || '',
+            url: finalVideoUrl,
             materialType: isPpt ? 'ppt' : 'pdf',
             duration: `${lecDuration}:00 دقيقة`,
             notes: lecSummary,
@@ -20327,35 +20882,133 @@
                 kind: isPpt ? 'ppt' : 'pdf',
                 url: cloudFileUrl || ''
             } : null,
-            lectureLinks: cloudFileUrl ? [cloudFileUrl] : []
+            lectureLinks: finalVideoUrl ? [finalVideoUrl] : []
         });
 
-        // 2. Save Component 02: Glossary & Study Notes
+        // ═════════════════════════════════════════════════════════════════
+        // 2. SAVE COMPONENT 02: STUDY NOTES, TOPICS & GLOSSARY
+        // ═════════════════════════════════════════════════════════════════
         if (!activeWeek.docs) activeWeek.docs = [];
+        const glossTitle = document.getElementById('aiGlossaryTitle')?.value.trim() || 'قاموس ومذكرات مصطلحات الأسبوع';
         const terms = Array.isArray(currentAiGeneratedData.glossary_notes?.terms) ? currentAiGeneratedData.glossary_notes.terms : [];
-        let glossaryHtmlDesc = (currentAiGeneratedData.glossary_notes?.description || '') + '\n\n';
+        
+        // Collect topics
+        const topicInputs = document.querySelectorAll('.aiTopicInput');
+        const collectedTopics = [];
+        topicInputs.forEach(ti => {
+            if (ti.value.trim()) collectedTopics.push(ti.value.trim());
+        });
+
+        let docDescription = (currentAiGeneratedData.glossary_notes?.description || '') + '\n\n';
+        if (collectedTopics.length > 0) {
+            docDescription += '📌 المحاور والمواضيع الدراسية الأساسية:\n' + collectedTopics.map(tp => `• ${tp}`).join('\n') + '\n\n';
+        }
         if (terms.length > 0) {
-            glossaryHtmlDesc += 'المصطلحات الفنية المعتمدة:\n' + terms.map(t => `• ${t.en} (${t.ar}): ${t.definition || ''}`).join('\n');
+            docDescription += '📖 المصطلحات الفنية المعتمدة:\n' + terms.map(t => `• ${t.en} (${t.ar}): ${t.definition || ''}`).join('\n');
         }
 
         activeWeek.docs.push({
             id: 'd-' + Date.now(),
             title: glossTitle,
             docKind: 'text',
-            type: 'قاموس مصطلحات ومذكرة أسبوعية',
-            description: glossaryHtmlDesc,
-            desc: glossaryHtmlDesc,
+            type: 'مذكرة دراسية وقاموس مصطلحات',
+            description: docDescription,
+            desc: docDescription,
+            topics: collectedTopics,
             url: cloudFileUrl || ''
         });
 
-        // 3. Save Component 03: Quiz & Interactive Questions
+        // ═════════════════════════════════════════════════════════════════
+        // 3. SAVE COMPONENT 03: ASSIGNMENT (MCQ OR TEXT WRITING)
+        // ═════════════════════════════════════════════════════════════════
+        if (!activeWeek.assignments) activeWeek.assignments = [];
+        const aTitle = document.getElementById('aiAssignmentTitle')?.value.trim() || 'الواجب الأسبوعي';
+        const aInstructions = document.getElementById('aiAssignmentInstructions')?.value.trim() || '';
+        const targetGrp = (activeTrainerLmsGroupFilter && activeTrainerLmsGroupFilter !== 'ALL') ? activeTrainerLmsGroupFilter : 'ALL';
+
+        const defDueDate = new Date();
+        defDueDate.setDate(defDueDate.getDate() + 7);
+
+        if (currentAiAssignmentMode === 'text') {
+            // Text Writing / Essay Assignment
+            const prompt1 = document.getElementById('aiTextPrompt-0')?.value.trim() || 'اكتب تقريراً موجزاً باللغة الإنجليزية التقنية يوضح المفاهيم الأساسية للدرس.';
+            const guide1 = document.getElementById('aiTextGuide-0')?.value.trim() || 'استخدم المصطلحات المعتمدة وراعِ السلامة المهنية.';
+
+            activeWeek.assignments.push({
+                id: 'a-' + Date.now(),
+                title: aTitle,
+                dueDate: defDueDate.toISOString().split('T')[0],
+                points: 10,
+                targetGroup: targetGrp,
+                assignmentCategory: 'essay',
+                submissionType: 'text',
+                gradingMode: 'manual_trainer',
+                instructions: aInstructions,
+                promptText: prompt1,
+                guidelines: guide1,
+                pdfFile: (selectedAiFile && !isPpt) ? {
+                    name: selectedAiFile.name,
+                    size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
+                    url: cloudFileUrl || '',
+                    data: ''
+                } : null,
+                questions: []
+            });
+        } else {
+            // MCQ Questions Assignment
+            const rawAssignmentQuestions = Array.isArray(currentAiGeneratedData.assignment?.mcq_questions) && currentAiGeneratedData.assignment.mcq_questions.length > 0
+                ? currentAiGeneratedData.assignment.mcq_questions
+                : (Array.isArray(currentAiGeneratedData.assignment?.questions) ? currentAiGeneratedData.assignment.questions : []);
+
+            const assignmentQuestionsFormatted = rawAssignmentQuestions.map((q, idx) => {
+                const rawOpts = Array.isArray(q.options) && q.options.length > 0 ? [...q.options] : ['خيار 1', 'خيار 2', 'خيار 3', 'خيار 4'];
+                while (rawOpts.length < 4) rawOpts.push(`خيار ${rawOpts.length + 1}`);
+                let correctIdx = 0;
+                if (q.correct_answer) {
+                    const foundIdx = rawOpts.findIndex(opt => opt.trim() === q.correct_answer.trim());
+                    if (foundIdx >= 0) correctIdx = foundIdx;
+                }
+                return {
+                    id: 'aq-' + Date.now() + '-' + idx,
+                    text: q.question || `تطبيق رقم ${idx + 1}`,
+                    options: rawOpts.slice(0, 4),
+                    correctIndex: correctIdx
+                };
+            });
+
+            activeWeek.assignments.push({
+                id: 'a-' + Date.now(),
+                title: aTitle,
+                dueDate: defDueDate.toISOString().split('T')[0],
+                points: 10,
+                targetGroup: targetGrp,
+                assignmentCategory: 'individual',
+                submissionType: 'mcq',
+                gradingMode: 'system_auto',
+                instructions: aInstructions,
+                pdfFile: (selectedAiFile && !isPpt) ? {
+                    name: selectedAiFile.name,
+                    size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
+                    url: cloudFileUrl || '',
+                    data: ''
+                } : null,
+                questions: assignmentQuestionsFormatted
+            });
+        }
+
+        // ═════════════════════════════════════════════════════════════════
+        // 4. SAVE COMPONENT 04: QUIZ (الاختبار الأسبوعي)
+        // ═════════════════════════════════════════════════════════════════
         if (!activeWeek.quizzes) activeWeek.quizzes = [];
-        const rawQuestions = Array.isArray(currentAiGeneratedData.quiz?.questions) ? currentAiGeneratedData.quiz.questions : [];
-        const quizQuestionsFormatted = rawQuestions.map((q, idx) => {
+        const qTitle = document.getElementById('aiQuizTitle')?.value.trim() || 'اختبار الأسبوع';
+        const qDur = parseInt(document.getElementById('aiQuizDuration')?.value, 10) || 15;
+        const qGrade = parseInt(document.getElementById('aiQuizGrade')?.value, 10) || 10;
+
+        const rawQuizQuestions = Array.isArray(currentAiGeneratedData.quiz?.questions) ? currentAiGeneratedData.quiz.questions : [];
+        const quizQuestionsFormatted = rawQuizQuestions.map((q, idx) => {
             const rawOpts = Array.isArray(q.options) ? [...q.options] : [];
             while (rawOpts.length < 4) rawOpts.push(`الخيار ${rawOpts.length + 1}`);
 
-            // Find correct index
             let correctIdx = 0;
             if (q.correct_answer) {
                 const foundIdx = rawOpts.findIndex(opt => opt.trim() === q.correct_answer.trim() || opt.includes(q.correct_answer));
@@ -20370,7 +21023,6 @@
             };
         });
 
-        const targetGrp = (activeTrainerLmsGroupFilter && activeTrainerLmsGroupFilter !== 'ALL') ? activeTrainerLmsGroupFilter : 'ALL';
         activeWeek.quizzes.push({
             id: 'q-' + Date.now(),
             title: qTitle,
@@ -20382,46 +21034,6 @@
             quizCategory: 'weekend',
             gradingMode: 'system_auto',
             questions: quizQuestionsFormatted
-        });
-
-        // 4. Save Component 04: Assignment
-        if (!activeWeek.assignments) activeWeek.assignments = [];
-        const rawAssignmentQuestions = Array.isArray(currentAiGeneratedData.assignment?.questions) ? currentAiGeneratedData.assignment.questions : [];
-        const assignmentQuestionsFormatted = rawAssignmentQuestions.map((q, idx) => {
-            const rawOpts = Array.isArray(q.options) && q.options.length > 0 ? [...q.options] : ['خيار 1', 'خيار 2', 'خيار 3', 'خيار 4'];
-            while (rawOpts.length < 4) rawOpts.push(`خيار ${rawOpts.length + 1}`);
-            let correctIdx = 0;
-            if (q.correct_answer) {
-                const foundIdx = rawOpts.findIndex(opt => opt.trim() === q.correct_answer.trim());
-                if (foundIdx >= 0) correctIdx = foundIdx;
-            }
-            return {
-                id: 'aq-' + Date.now() + '-' + idx,
-                text: q.question || `تطبيق رقم ${idx + 1}`,
-                options: rawOpts.slice(0, 4),
-                correctIndex: correctIdx
-            };
-        });
-
-        const defDueDate = new Date();
-        defDueDate.setDate(defDueDate.getDate() + 7);
-
-        activeWeek.assignments.push({
-            id: 'a-' + Date.now(),
-            title: aTitle,
-            dueDate: defDueDate.toISOString().split('T')[0],
-            points: 10,
-            targetGroup: targetGrp,
-            assignmentCategory: 'individual',
-            gradingMode: 'manual_trainer',
-            instructions: aInstructions,
-            pdfFile: (selectedAiFile && !isPpt) ? {
-                name: selectedAiFile.name,
-                size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
-                url: cloudFileUrl || '',
-                data: ''
-            } : null,
-            questions: assignmentQuestionsFormatted
         });
 
         // Persist to storage (Local & Cloud via Supabase)
@@ -20448,7 +21060,7 @@
         closeAiGenerateModal();
         renderTrainerLms();
 
-        showToast('🎉 تم حفظ وتوزيع عناصر الأسبوع ومزامنتها سحابياً في Supabase بنجاح!', 'success');
+        showToast('🎉 تم اعتماد وإنشاء كافة محتويات الوحدة بنجاح في المنصة وفق الخطوات المختارة!', 'success');
     }
 
     // ===================================================================
@@ -25255,17 +25867,9 @@
                 initSupabaseCloudIntegration().catch(sbErr => console.warn('Supabase auto-init error:', sbErr));
             }
 
-            // 2.5 مزامنة تلقائية هادئة من Google Sheets في حال كان كشف المتدربين فارغاً أو مر 3 دقائق على آخر جلب
-            if (typeof syncLiveAttendanceFromGoogleSheets === 'function') {
-                const lastSync = localStorage.getItem('sys_last_sync_time');
-                const now = Date.now();
-                if (!trainees || trainees.length === 0 || !lastSync || (now - Number(lastSync)) > 3 * 60 * 1000) {
-                    setTimeout(() => {
-                        syncLiveAttendanceFromGoogleSheets(true)
-                            .then(() => localStorage.setItem('sys_last_sync_time', String(Date.now())))
-                            .catch(e => console.warn('Silent auto-sync skipped:', e));
-                    }, 400);
-                }
+            // 2.5 مزامنة مجدولة هادئة لكشف الحضور المباشر (كل ساعة بين 8:30 ص و 4:30 م وتستأنف غداً 8:30 ص)
+            if (typeof initScheduledAttendanceSync === 'function') {
+                initScheduledAttendanceSync();
             }
 
             // 3. تهيئة الواجهات الأساسية

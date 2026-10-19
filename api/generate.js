@@ -24,26 +24,86 @@ const LMS_PROMPT_TEMPLATE = `أنت مساعد تعليمي خبير متخصص 
 {CONTENT_BLOCK}
 
 ## تعليمات الإنتاج الصارمة:
-1. استنتج العنوان والمواضيع بدقة من المحتوى التدريبي المرفق.
-2. أنشئ قاموس مصطلحات يحتوي من 5 إلى 8 مصطلحات إنجليزية-عربية تخصصية مستخرجة من المحتوى مع تعريف علمي مختصر.
-3. أنشئ اختباراً أسبوعياً تفاعلياً يتكون من 5 أسئلة اختيار من متعدد (MCQ)، 10 درجات، مدة 15 دقيقة، متنوعة الإجابات الصحيحة وتختبر الفهم والتطبيق.
-4. أنشئ واجباً تطبيقياً عملياً شاملاً (10 درجات) يطلب من المتدرب استخدام المصطلحات والمفاهيم في سياق عملي مهني مع أسئلة تطبيقية.
-5. الإجابات الصحيحة في الاختبار والواجب يجب أن تكون منوعة ومطابقة لأحد الخيارات الأربعة بالضبط.
+1. استنتج 3 فيديوهات تعليمية مرئية مقترحة ذات صلة مباشرة بمحتوى الدرس لاختيار المتدرب أو المدرب منها (مع عنوان ووصف ومدة ورابط بحث يوتيوب مقترح).
+2. استنتج الملخص الأكاديمي الشامل والمحاور/المواضيع الأساسية للوحدة التدريبية (3 إلى 5 محاور أساسية).
+3. أنشئ قاموس مصطلحات يحتوي من 5 إلى 8 مصطلحات إنجليزية-عربية تخصصية مستخرجة من المحتوى مع تعريف علمي مختصر وسياق عملي.
+4. أنشئ واجباً تطبيقياً متكاملاً يتضمن نمطين:
+   - أسئلة اختيار من متعدد (MCQ) تطبيقية (من 3 إلى 5 أسئلة).
+   - أسئلة مقالية / كتابة نصية (Text Essay) تطلب من المتدرب صياغة نص أو فقرة عملية باستخدام المفاهيم والمصطلحات.
+5. أنشئ اختباراً أسبوعياً تفاعلياً يتكون من 5 أسئلة اختيار من متعدد (MCQ)، 10 درجات، مدة 15 دقيقة، متنوعة الإجابات وتختبر الفهم والتطبيق.
 6. أعد فقط JSON نظيف صالح للـ Parse ومطابق تماماً للبنية التالية بدون أي نص أو مقدمات أو كتل تعليق خارج الـ JSON.
 
 ## JSON Schema المطلوبة (أعد هذه البنية بالضبط):
 {
+  "suggested_videos": [
+    {
+      "id": 1,
+      "title": "عنوان مقترح للفيديو التدريبي الأول (باللغة الإنجليزية أو العربية)",
+      "description": "شرح موجز لمحتوى الفيديو والمهارة العملية التي يشرحها",
+      "duration": "10-15 دقيقة",
+      "search_query": "Industrial safety procedures practical guide",
+      "youtube_url": "https://www.youtube.com/results?search_query=industrial+safety"
+    },
+    {
+      "id": 2,
+      "title": "عنوان مقترح للفيديو التدريبي الثاني",
+      "description": "شرح تفصيلي للمفاهيم الأساسية والتطبيق المهني في بيئة العمل",
+      "duration": "8-12 دقيقة",
+      "search_query": "Technical english terminology tutorial",
+      "youtube_url": "https://www.youtube.com/results?search_query=technical+terms"
+    },
+    {
+      "id": 3,
+      "title": "عنوان مقترح للفيديو التدريبي الثالث",
+      "description": "فيديو إثرائي مكمل للموضوع مع أمثلة واقعية",
+      "duration": "12-18 دقيقة",
+      "search_query": "Standard operating procedures workplace",
+      "youtube_url": "https://www.youtube.com/results?search_query=operating+procedures"
+    }
+  ],
   "lecture": {
     "title": "عنوان المحاضرة المشتق من الملف",
     "duration_minutes": 15,
-    "summary": "ملخص شامل ومكثف لمحتوى المحاضرة والنقاط الأساسية (لا يقل عن 80 كلمة بالعربية الفصحى)"
+    "summary": "ملخص شامل ومكثف لمحتوى المحاضرة والنقاط الأساسية (لا يقل عن 80 كلمة بالعربية الفصحى)",
+    "topics": [
+      "المحور الأول: مقدمة وأسس المفهوم التدريبي",
+      "المحور الثاني: الإجراءات والمعايير المهنية المعتمدة",
+      "المحور الثالث: التطبيق العملي والسلامة في بيئة العمل"
+    ]
   },
   "glossary_notes": {
-    "title": "قاموس مصطلحات الأسبوع",
+    "title": "قاموس ومذكرات مصطلحات الأسبوع",
     "description": "قاموس مصطلحات فنية ومهنية إنجليزية مترجمة للعربية وموضحة وفق المنهج التدريبي",
     "terms": [
       {"en": "Term 1", "ar": "المصطلح بالعربية", "definition": "شرح مختصر للمصطلح وسياق استخدامه في بيئة العمل"},
       {"en": "Term 2", "ar": "المصطلح بالعربية", "definition": "شرح مختصر للمصطلح وسياق استخدامه في بيئة العمل"}
+    ]
+  },
+  "assignment": {
+    "title": "الواجب والتكليف الأسبوعي",
+    "total_grade": 10,
+    "instructions": "تعليمات واضحة للمتدرب لكيفية حل التكليف وربط المصطلحات بالممارسة المهنية",
+    "assignment_type": "mcq_or_text",
+    "mcq_questions": [
+      {
+        "question": "سؤال تطبيقي من متعدد يطلب تطبيق المصطلحات في مواقف عمل واقعية",
+        "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
+        "correct_answer": "الخيار أ"
+      }
+    ],
+    "text_questions": [
+      {
+        "prompt": "اكتب فقرة باللغة الإنجليزية التقنية لا تقل عن 50 كلمة توضح فيها كيفية تطبيق إجراءات السلامة المذكورة في المحاضرة.",
+        "guidelines": "استخدم على الأقل 3 من المصطلحات الفنية المكتسبة في سياق مهني صحيح.",
+        "model_answer": "نموذج إجابة استرشادي يوضح للمدرب المعايير المقبولة للتقييم."
+      }
+    ],
+    "questions": [
+      {
+        "question": "سؤال تطبيقي من متعدد يطلب تطبيق المصطلحات في مواقف عمل واقعية",
+        "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
+        "correct_answer": "الخيار أ"
+      }
     ]
   },
   "quiz": {
@@ -54,18 +114,6 @@ const LMS_PROMPT_TEMPLATE = `أنت مساعد تعليمي خبير متخصص 
       {
         "type": "mcq",
         "question": "نص السؤال بالإنجليزية أو العربية يختبر مفهوماً تم شرحه",
-        "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
-        "correct_answer": "الخيار أ"
-      }
-    ]
-  },
-  "assignment": {
-    "title": "الواجب والتكليف الأسبوعي",
-    "total_grade": 10,
-    "instructions": "تعليمات واضحة للمتدرب لكيفية حل التكليف وربط المصطلحات بالممارسة المهنية",
-    "questions": [
-      {
-        "question": "سؤال تطبيقي أو اختيار من متعدد يطلب تطبيق المصطلحات في مواقف عمل واقعية",
         "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
         "correct_answer": "الخيار أ"
       }
@@ -265,14 +313,49 @@ function buildDemoContentFromText(extractedText, filename) {
 
   const summaryText = lines.slice(0, 6).join(' ') || 'تتناول هذه الوحدة المفاهيم والمهارات الفنية الأساسية المعتمدة في المنهج التدريبي، مع التركيز على المصطلحات المهنية والتطبيق العملي.';
 
+  const topicSuggestions = [
+    `المحور الأول: مقدمة وأسس ${title}`,
+    `المحور الثاني: الإجراءات والمعايير التشغيلية المعتمدة`,
+    `المحور الثالث: السلامة المهنية والتطبيق في بيئة العمل`
+  ];
+
+  const suggestedVideos = [
+    {
+      id: 1,
+      title: `شرح تطبيقي لـ ${title} وأهم المصطلحات المهنية`,
+      description: `فيديو تدريبي تفاعلي يركز على شرح ${extractedTerms[0].en} و ${extractedTerms[1]?.en || 'المفاهيم'} وتطبيقها المباشر في الورش والمختبرات.`,
+      duration: '12:30 دقيقة',
+      search_query: `${title} technical training tutorial`,
+      youtube_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' practical training')}`
+    },
+    {
+      id: 2,
+      title: `معايير السلامة المهنية وتطبيق إجراءات التشغيل في ${title}`,
+      description: `استعراض واقعي لإجراءات العمل القياسية (SOP) واشتراطات الجودة وإدارة المخاطر في بيئة العمل الصناعية.`,
+      duration: '09:45 دقيقة',
+      search_query: `${title} industrial safety procedure`,
+      youtube_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' safety procedure')}`
+    },
+    {
+      id: 3,
+      title: `دليل المصطلحات الإنجليزية التخصصية والمحادثة الفنية`,
+      description: `جلسة إثرائية مساعدة على النطق الصحيح والتواصل المهني باللغة الإنجليزية التقنية مع الزملاء والمشرفين.`,
+      duration: '15:00 دقيقة',
+      search_query: `${title} technical english glossary`,
+      youtube_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' technical english')}`
+    }
+  ];
+
   return {
+    suggested_videos: suggestedVideos,
     lecture: {
       title: `محاضرة: ${title}`,
       duration_minutes: 15,
-      summary: `تتناول هذه المحاضرة المفاهيم الأساسية المستخلصة من الملف التدريبي، مع التركيز على المصطلحات المهنية والتطبيق العملي في المنشآت الصناعية والمختبرات. المحاور الأساسية: ${summaryText.slice(0, 320)}...`
+      summary: `تتناول هذه المحاضرة المفاهيم الأساسية المستخلصة من الملف التدريبي، مع التركيز على المصطلحات المهنية والتطبيق العملي في المنشآت الصناعية والمختبرات. المحاور الأساسية: ${summaryText.slice(0, 320)}...`,
+      topics: topicSuggestions
     },
     glossary_notes: {
-      title: `قاموس مصطلحات: ${title}`,
+      title: `قاموس مصطلحات ومذكرات: ${title}`,
       description: `أكثر من ${extractedTerms.length} مصطلحات فنية إنجليزية مترجمة للعربية وموضحة وفق المنهج التدريبي المعتمد.`,
       terms: extractedTerms
     },
@@ -341,7 +424,42 @@ function buildDemoContentFromText(extractedText, filename) {
     assignment: {
       title: `الواجب الأسبوعي: ${title}`,
       total_grade: 10,
-      instructions: `قم بمراجعة المصطلحات الفنية المكتسبة في درس "${title}". اكتب 5 جمل تطبيقية باللغة الإنجليزية تستخدم فيها المصطلحات بشكل صحيح في سياق صناعي، ثم أجب عن الأسئلة التطبيقية أدناه.`,
+      instructions: `قم بمراجعة المصطلحات الفنية المكتسبة في درس "${title}". اختر النمط المفضل (اختيار من متعدد أو كتابة نصية تطبيقية) لتنفيذ التكليف.`,
+      assignment_type: 'mcq',
+      mcq_questions: [
+        {
+          question: `سؤال تطبيقي: اختر الاستخدام الصحيح للمصطلح '${extractedTerms[0].en}' في بيئة الورشة والمختبر:`,
+          options: [
+            `All technicians must strictly apply ${extractedTerms[0].en} during operational procedures.`,
+            `The term ${extractedTerms[0].en} only refers to coffee breaks.`,
+            `Do not mention ${extractedTerms[0].en} in safety reports.`,
+            `It has no relevance to industrial standards.`
+          ],
+          correct_answer: `All technicians must strictly apply ${extractedTerms[0].en} during operational procedures.`
+        },
+        {
+          question: `كيف تساهم ممارسة "${extractedTerms[Math.min(1, extractedTerms.length - 1)].ar}" في تقليل الحوادث ورفع الإنتاجية؟`,
+          options: [
+            'بضمان الامتثال للمعايير الفنية والوقائية وتقليل الأخطاء البشرية',
+            'بزيادة أوقات التوقف غير المبررة في خطوط الإنتاج',
+            'بإلغاء دور المشرفين الفنيين',
+            'بالاعتماد على التخمين في صيانة الآلات'
+          ],
+          correct_answer: 'بضمان الامتثال للمعايير الفنية والوقائية وتقليل الأخطاء البشرية'
+        }
+      ],
+      text_questions: [
+        {
+          prompt: `اكتب تقريراً موجزاً باللغة الإنجليزية (من 40 إلى 60 كلمة) تشرح فيه أهمية استخدام مصطلح "${extractedTerms[0].en}" في بيئة العمل الصناعية مع إعطاء مثال عملي واقعي.`,
+          guidelines: `يجب تضمين مصطلحين فنيين على الأقل (${extractedTerms[0].en} و ${extractedTerms[1]?.en || 'Technical Safety'}) ومراعاة قواعد الكتابة المهنية.`,
+          model_answer: `Sample Model Answer: In modern industrial facilities, applying ${extractedTerms[0].en} is crucial to maintaining operational safety and high performance...`
+        },
+        {
+          prompt: `وضح باللغة العربية الإجراءات المتبعة لتطبيق "${extractedTerms[Math.min(1, extractedTerms.length - 1)].ar}" وما هي المخاطر المترتبة على إهمالها؟`,
+          guidelines: 'اذكر 3 خطوات عملية متسلسلة مدعومة بأمثلة من واقع التدريب الميداني.',
+          model_answer: 'الإجابة النموذجية تتضمن: 1. الفحص الدوري قبل التشغيل 2. ارتداء مهمات الوقاية 3. توثيق الملاحظات في سجل الوردية.'
+        }
+      ],
       questions: [
         {
           question: `سؤال تطبيقي: اختر الاستخدام الصحيح للمصطلح '${extractedTerms[0].en}' في بيئة الورشة والمختبر:`,
