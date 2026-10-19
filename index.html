@@ -16,8 +16,14 @@
     <!-- خط المراعي Almarai -->
     <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        body, button, input, select, textarea, span, h1, h2, h3, h4, p, div, table, th, td {
-            font-family: 'Almarai', sans-serif !important;
+        body, button, input, select, textarea, span, h1, h2, h3, h4, p, div, table, th, td, label, code, pre {
+            font-family: 'Almarai', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        }
+
+        /* Enforce unified font and polish for AI Generation Modal */
+        #modal-aiGenerate,
+        #modal-aiGenerate * {
+            font-family: 'Almarai', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
         }
 
         /* Gold gradient styling */
@@ -537,17 +543,15 @@
             </div>
         </div>
 
-        <!-- Staff Guidance Badge -->
-        <div class="text-[11px] bg-slate-800/80 border border-slate-700 text-slate-300 p-3 rounded-2xl text-right leading-relaxed font-bold">
-            💡 <b>بيانات الدخول:</b> أدخل اسم المستخدم وكلمة المرور الخاصة بحسابك التدريبي أو الإداري (حساب الأدمن الافتراضي: admin / 123456).
-        </div>
+
+
 
         <!-- Staff Login Form -->
         <form onsubmit="handleStaffLogin(event)" class="space-y-3.5 pt-1">
             <div class="space-y-1 text-right">
                 <label class="block text-xs font-bold opacity-90 text-white">اسم المستخدم (Username):</label>
                 <div class="relative">
-                    <input type="text" id="staffLoginUsername" required placeholder="أدخل اسم المستخدم (مثال: admin)" class="w-full bg-slate-900/40 border border-slate-700/60 focus:border-amber-400 focus:bg-slate-900/70 rounded-xl p-3 text-xs text-white font-bold outline-none transition font-mono pr-9">
+                    <input type="text" id="staffLoginUsername" required placeholder="أدخل اسم المستخدم" class="w-full bg-slate-900/40 border border-slate-700/60 focus:border-amber-400 focus:bg-slate-900/70 rounded-xl p-3 text-xs text-white font-bold outline-none transition font-mono pr-9">
                     <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm opacity-60">👤</span>
                 </div>
             </div>
@@ -591,31 +595,37 @@
 
 </div>
 
-<!-- Mandatory Password Change Modal for Students (First Time Login - Top Level z-[9999]) -->
+<!-- Mandatory Password Change Modal for Students & Trainers (Top Level z-[9999]) -->
 <div id="mandatoryPasswordModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-    <div class="glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-4 border border-amber-400/50 animate-pop-in text-white text-right">
+    <div class="glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-4 border border-amber-400/50 animate-pop-in text-white text-right relative">
+        <button type="button" onclick="closeMandatoryPasswordModal()" id="mndCloseBtn" class="hidden absolute top-4 left-4 text-slate-400 hover:text-white text-sm bg-white/10 hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer transition">✕</button>
         <div class="text-center space-y-2">
             <div class="w-14 h-14 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl shadow-lg">
                 🔒
             </div>
-            <h3 class="text-lg font-black text-amber-400">تغيير كلمة المرور الإجباري</h3>
+            <h3 class="text-lg font-black text-amber-400" id="mndModalTitle">تغيير كلمة المرور وتأمين الحساب</h3>
             <div class="bg-amber-500/15 border border-amber-400/40 p-3 rounded-2xl text-xs text-amber-200 leading-relaxed font-bold">
-                مرحباً بك يا <span id="mndTraineeName" class="text-white underline font-black">المتدرب</span>! نظراً لأن هذا أول تسجيل دخول لك بكلمة المرور الافتراضية، <b>يجب تعيين كلمة مرور جديدة وخاصة بك</b> لحماية حسابك وسجلك الأكاديمي.
+                مرحباً بك يا <span id="mndTraineeName" class="text-white underline font-black">المتدرب / المدرب</span>! يُرجى <b>تعيين كلمة مرور جديدة وخاصة بك</b> (بدلاً من كلمة المرور الافتراضية) لحماية حسابك وسجلك الأكاديمي والتدريبي.
             </div>
         </div>
 
         <form onsubmit="handleMandatoryPasswordChange(event)" class="space-y-3.5 pt-1">
             <div>
                 <label class="block text-xs font-bold mb-1 opacity-90">كلمة المرور الجديدة (New Password):</label>
-                <input type="password" id="mndNewPassword" required minlength="4" placeholder="أدخل كلمة مرور سرية جديدة (4 خانات فأكثر)..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
+                <input type="password" id="mndNewPassword" required minlength="3" placeholder="أدخل كلمة مرور سرية جديدة..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
             </div>
             <div>
                 <label class="block text-xs font-bold mb-1 opacity-90">تأكيد كلمة المرور الجديدة (Confirm Password):</label>
-                <input type="password" id="mndConfirmPassword" required minlength="4" placeholder="أعد إدخال نفس كلمة المرور للتأكيد..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
+                <input type="password" id="mndConfirmPassword" required minlength="3" placeholder="أعد إدخال نفس كلمة المرور للتأكيد..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
             </div>
-            <button type="submit" class="w-full gold-gradient-bg text-slate-950 font-black py-3 rounded-xl text-xs transition shadow-lg hover:brightness-105 active:scale-98 flex items-center justify-center gap-2 cursor-pointer mt-2">
-                <span>حفظ كلمة المرور والدخول إلى لوحتي الأكاديمية 🚀</span>
-            </button>
+            <div class="flex gap-2 pt-1">
+                <button type="submit" class="flex-1 gold-gradient-bg text-slate-950 font-black py-3 rounded-xl text-xs transition shadow-lg hover:brightness-105 active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
+                    <span>حفظ كلمة المرور وتأمين الحساب 🚀</span>
+                </button>
+                <button type="button" onclick="closeMandatoryPasswordModal()" id="mndCancelBtn" class="hidden px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition cursor-pointer">
+                    إلغاء
+                </button>
+            </div>
         </form>
     </div>
 </div>
@@ -834,12 +844,40 @@
 
                     <!-- Student Only: Dedicated Student Attendance -->
                     <button onclick="switchTab('studentDashboard')" id="btn-studentDashboard" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive">
-                        <span class="text-base">📋</span>
-                        <span class="text-xs font-bold">سجل الحضور والمتابعة</span>
+                        <span class="text-base">🏠</span>
+                        <span class="text-xs font-bold">لوحة تحكم المتدرب</span>
+                    </button>
+
+                    <!-- Student Courses: مقرراتك التدريبية (صفحة مستقلة لاختيار المقرر ثم فتح LMS) -->
+                    <button onclick="switchTab('studentCourses')" id="btn-studentCourses" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-purple-200/70 bg-purple-50/50 text-purple-950 font-bold">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">📚</span>
+                            <span class="text-xs font-bold">مقرراتك التدريبية</span>
+                        </div>
+                        <span class="text-[9px] bg-purple-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-2xs">المقررات المعتمدة</span>
+                    </button>
+
+                    <!-- Student Schedule: الجدول الدراسي (أوقات الدوام والقاعات والمدربين) -->
+                    <button onclick="switchTab('studySchedule')" id="btn-studySchedule" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-blue-200/70 bg-blue-50/50 text-blue-950 font-bold">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">🗓️</span>
+                            <span class="text-xs font-bold">الجدول الدراسي</span>
+                        </div>
+                        <span class="text-[9px] bg-blue-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-2xs">أوقات الدوام</span>
+                    </button>
+
+                    <!-- Dedicated Attendance Sheet: كشف الحضور العام والغياب (مباشر + أرشيف + تقويم) -->
+                    <button onclick="switchTab('attendanceSheet')" id="btn-attendanceSheet" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-amber-300/80 bg-amber-50/60 text-slate-900 font-bold">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">📋</span>
+                            <span class="text-xs font-bold">كشف الحضور العام</span>
+                        </div>
+                        <span class="text-[9px] bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-full shadow-2xs">مباشر وأرشيف</span>
                     </button>
 
                     <!-- Student Only: Dedicated Student LMS Courses -->
                     <button onclick="switchTab('studentLms')" id="btn-studentLms" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive border border-emerald-200/60 bg-emerald-50/40 text-emerald-950 font-bold">
+                        <span class="text-base">💻</span>
                         <span class="text-xs">المحتوى الأكاديمي والكورسات (LMS)</span>
                     </button>
 
@@ -1073,11 +1111,16 @@
                     </div>
 
                     <!-- Trainer Attendance Google Sheet Link & Switcher -->
-                    <div class="flex items-center gap-2.5 w-full md:w-auto flex-wrap">
-                        <!-- ✨ AI Auto-Generate Button (Prominent for Trainer) -->
-                        <button type="button" onclick="openAiGenerateModal()" class="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-700 hover:from-violet-700 hover:to-indigo-800 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-md shadow-violet-500/30 hover:shadow-violet-500/45 transition border border-violet-400 cursor-pointer active:scale-95" title="توليد محتوى الأسبوع الأكاديمي آلياً بالذكاء الاصطناعي من ملفات PPTX و PDF">
-                            <span class="text-sm">✨</span>
-                            <span>توليد المحتوى بالذكاء الاصطناعي (AI)</span>
+                        <!-- 👁️ Student Preview Demo Button -->
+                        <button type="button" onclick="openStudentDemoPreview()" class="bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-md shadow-sky-500/20 transition active:scale-95 cursor-pointer border border-sky-400" title="معاينة حية لشكل صفحة ومحتوى الكورس كما يراها الطالب تماماً">
+                            <span class="text-sm">👁️</span>
+                            <span>معاينة كمتدرب (ديمو)</span>
+                        </button>
+
+                        <!-- 🔑 Change Password Button -->
+                        <button type="button" onclick="openTrainerChangePasswordModal()" class="bg-slate-900 hover:bg-black text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition border border-amber-400/40 cursor-pointer shadow-xs" title="تغيير كلمة المرور وتأمين حساب المدرب">
+                            <span class="text-xs">🔑</span>
+                            <span>تغيير كلمة المرور</span>
                         </button>
 
                         <button type="button" onclick="openTrainerLmsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm transition border border-emerald-500 cursor-pointer" title="إدارة المحتوى الأكاديمي للكورس (Canvas LMS): اختبارات، مقاطع فيديو، ملفات، وواجبات">
@@ -1231,10 +1274,6 @@
                                 <span>محتوى الكورس (LMS)</span>
                             </button>
 
-                            <button type="button" onclick="openAiGenerateModal()" class="bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800 text-white font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition border border-violet-400 cursor-pointer" title="توليد محتوى الكورس الأسبوعي بالذكاء الاصطناعي">
-                                <span>✨</span>
-                                <span>توليد آلي (AI)</span>
-                            </button>
 
                             <a href="https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/edit?gid=405188505#gid=405188505" 
                                target="_blank" 
@@ -3136,9 +3175,15 @@
                                 <p class="text-[11px] font-bold text-slate-400">يلزم كل متدرب حضور فترتين يومياً (فترة 1 وفترة 2) ما عدا المستثنى كالشركات المعفاة (AIC)</p>
                             </div>
                         </div>
-                        <span id="sdDualCourseExemptBadge" class="text-xs font-black px-3 py-1 rounded-full bg-slate-900 text-amber-300 border border-slate-800">
-                            فترتان معتمدتان
-                        </span>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button type="button" onclick="switchTab('studySchedule')" class="text-xs font-black px-3 py-1 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                                <span>🗓️</span>
+                                <span>الجدول الدراسي الكامل</span>
+                            </button>
+                            <span id="sdDualCourseExemptBadge" class="text-xs font-black px-3 py-1 rounded-full bg-slate-900 text-amber-300 border border-slate-800">
+                                فترتان معتمدتان
+                            </span>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5" id="sdDualCourseCardsContainer">
                         <!-- Populated dynamically -->
@@ -3253,9 +3298,201 @@
                 </div>
             </div>
 
+            <!-- ==================== TAB: STUDY SCHEDULE (الجدول الدراسي وأوقات الدوام) ==================== -->
+            <div id="tab-studySchedule" class="hidden space-y-6">
+                <!-- Top Header Card -->
+                <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-3xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-r-4 border-r-blue-600">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-800 text-white flex items-center justify-center text-3xl shadow-sm shrink-0">
+                            🗓️
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-black text-slate-900 text-lg md:text-xl">الجدول الدراسي الأسبوعي (المقررات وأوقات الدوام)</h3>
+                                <span class="bg-blue-100 text-blue-900 text-xs font-black px-2.5 py-0.5 rounded-full border border-blue-200">فرع عنك</span>
+                                <span id="studySchedGroupBadge" class="bg-slate-900 text-amber-300 text-xs font-black px-2.5 py-0.5 rounded-full border border-slate-800">--</span>
+                            </div>
+                            <p class="text-xs text-slate-500 font-bold mt-1">توزيع المواد التدريبية المعتمدة، القاعات والمعامل، وأسماء المدربين المشرفين مع أوقات الدوام الرسمي</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-wrap w-full md:w-auto">
+                        <button type="button" onclick="printOrExportSchedule()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-black px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs">
+                            <span>🖨️</span>
+                            <span>طباعة الجدول</span>
+                        </button>
+                        <button type="button" onclick="switchTab(currentUser?.role === 'student' ? 'studentDashboard' : 'attendance')" class="bg-slate-900 hover:bg-black text-amber-300 font-black px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                            <span>⬅️</span>
+                            <span>العودة للرئيسية</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trainee Info Banner (If logged in as student) -->
+                <div id="studySchedStudentInfoCard" class="bg-gradient-to-r from-slate-900 to-[#0F2942] text-white p-4 md:p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">👨‍🎓</span>
+                        <div>
+                            <span class="text-[11px] text-amber-300 font-bold block">بيانات المتدرب الأكاديمية:</span>
+                            <span class="font-black text-sm text-white" id="studySchedStudentName">اسم المتدرب</span>
+                            <span class="text-xs text-slate-300 mr-2" id="studySchedStudentMeta">(الهوية: -- | المجموعة: --)</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-amber-200 bg-white/10 px-3 py-1.5 rounded-xl border border-white/15">
+                        <span>⏰ نظام الدوام:</span>
+                        <span id="studySchedSystemNotice">فترتان تدريبيتان يومياً (صباحية ومسائية)</span>
+                    </div>
+                </div>
+
+                <!-- 1. Registered Courses & Working Hours Cards (المواد ومكانها واسم المدرب وأوقات الدوام) -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-black text-slate-900 text-sm md:text-base flex items-center gap-2">
+                            <span>📚</span>
+                            <span>المقررات المعتمدة وأوقات الدوام ومكان الانعقاد:</span>
+                        </h4>
+                        <span class="text-xs font-bold text-slate-500">من الأحد إلى الخميس</span>
+                    </div>
+
+                    <div id="studySchedCoursesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Populated dynamically via renderStudyScheduleView() -->
+                    </div>
+                </div>
+
+                <!-- 2. Weekly Timetable Grid (Sunday - Thursday) -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">📅</span>
+                            <h4 class="font-black text-slate-900 text-sm md:text-base">الجدول الزمني لحصص الأسبوع (نظام 10 حصص)</h4>
+                        </div>
+                        <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                            ✓ معتمد في نظام المتابعة والحضور
+                        </span>
+                    </div>
+
+                    <!-- Timetable Table -->
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[700px] text-center text-xs border-collapse rounded-2xl overflow-hidden">
+                            <thead>
+                                <tr class="bg-slate-900 text-amber-300 font-extrabold text-[11px]">
+                                    <th class="p-3 border-l border-slate-800 w-28">اليوم التدريبي</th>
+                                    <th class="p-3 border-l border-slate-800">
+                                        الفترة الأولى (الصباحية)<br>
+                                        <span class="text-[10px] text-white/80 font-bold">⏰ 08:00 ص - 12:00 م (4 ساعات)</span>
+                                    </th>
+                                    <th class="p-3 border-l border-slate-800 bg-slate-800 text-slate-300 w-32">
+                                        استراحة وصلاة<br>
+                                        <span class="text-[10px] text-amber-400 font-bold">12:00 م - 12:30 م</span>
+                                    </th>
+                                    <th class="p-3">
+                                        الفترة الثانية (المسائية)<br>
+                                        <span class="text-[10px] text-white/80 font-bold">⏰ 12:30 م - 04:00 م (3.5 ساعات)</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="studySchedTimetableBody" class="divide-y divide-slate-100 font-bold text-slate-800 bg-white">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. Policy & Guidance Card -->
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 text-xs text-amber-950">
+                    <span class="text-xl shrink-0">⚠️</span>
+                    <div class="space-y-1">
+                        <span class="font-black text-amber-900 block">تعليمات الحضور والدوام التدريبي:</span>
+                        <p class="text-amber-900 leading-relaxed font-bold">
+                            • يلزم المتدرب الحضور في كلا الفترتين (الأولى والثانية) يومياً لاحتساب الحضور كاملاً (نظام 10 حصص أسبوعياً).<br>
+                            • الحضور في فترة واحدة فقط دون الأخرى يُسجل في النظام كـ «مخالف (فترة واحدة)»، وخصم نصف يوم.<br>
+                            • متدربو الشركات المستثناة (مثل AIC) ملزمون بفترة تدريبية واحدة فقط معتمدة.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB: STUDENT COURSES (مقرراتك التدريبية المستقلة) ==================== -->
+            <div id="tab-studentCourses" class="hidden space-y-6">
+                
+                <!-- 👁️ Trainer Demo Preview Notice Banner for Courses -->
+                <div id="trainerDemoNoticeBannerCourses" class="hidden bg-gradient-to-r from-blue-700 via-indigo-800 to-[#0F2942] text-white p-4 rounded-2xl flex items-center justify-between shadow-lg border border-blue-400/40 gap-3 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">👁️</span>
+                        <div>
+                            <div class="font-black text-sm text-amber-300">وضع المعاينة التجريبية كمتدرب (Student Demo Preview)</div>
+                            <div class="text-xs text-blue-100 mt-0.5">أنت الآن تستعرض صفحة المقررات تماماً كما يشاهدها المتدرب. اختر أي مقرر لتجربة الأسابيع والمحتوى.</div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="exitTrainerStudentDemo()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-md active:scale-95 cursor-pointer whitespace-nowrap">
+                        ⬅ إنهاء المعاينة والعودة للوحة المدرب
+                    </button>
+                </div>
+
+                <!-- Top Header Card -->
+                <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-[#0F2942] text-white p-6 md:p-8 rounded-3xl shadow-lg border border-purple-400/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl shadow-inner border border-white/20">
+                                📚
+                            </div>
+                            <div>
+                                <h3 class="text-xl md:text-2xl font-black text-amber-300">مقرراتك التدريبية المعتمدة</h3>
+                                <p class="text-xs text-purple-200 mt-1">اختر المقرر الدراسي للوصول المباشر إلى المنصة الأكاديمية الأسبوعية (LMS)، المحاضرات، المذكرات، والاختبارات</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 bg-white/10 px-4 py-2.5 rounded-2xl border border-white/15 backdrop-blur-sm text-xs font-bold">
+                        <span>👤 المتدرب:</span>
+                        <span id="scTraineeName" class="text-amber-300 font-black">--</span>
+                        <span class="text-white/40">•</span>
+                        <span id="scTraineeGroup" class="text-purple-200 font-mono">--</span>
+                    </div>
+                </div>
+
+                <!-- Info Notice -->
+                <div class="bg-purple-50/80 border border-purple-200 p-4 rounded-2xl flex items-center justify-between gap-3 flex-wrap">
+                    <div class="flex items-center gap-3 text-xs text-purple-950 font-bold">
+                        <span class="text-xl">💡</span>
+                        <span>محتوى كل مقرر مقسم إلى 6 أسابيع تدريبية، يشمل المحاضرات المرئية، مذكرات المراجعة، الواجبات، والاختبارات الأسبوعية.</span>
+                    </div>
+                    <button type="button" onclick="switchTab('studySchedule')" class="text-xs bg-purple-700 hover:bg-purple-800 text-white font-black px-4 py-2 rounded-xl transition shadow-xs cursor-pointer flex items-center gap-1.5">
+                        <span>🗓️</span>
+                        <span>عرض الجدول الدراسي وأوقات الدوام</span>
+                    </button>
+                </div>
+
+                <!-- Registered Courses Cards Grid -->
+                <div id="studentCoursesCardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Populated dynamically via renderStudentCoursesPage() -->
+                </div>
+            </div>
+
             <!-- ==================== TAB: STUDENT LMS (منصة المتدرب للمحتوى الأكاديمي) ==================== -->
             <div id="tab-studentLms" class="hidden lms-workspace-surface rounded-3xl p-4 md:p-7 border border-slate-200 space-y-6">
                 
+                <!-- 👁️ Trainer Demo Preview Notice Banner (Shown only during demo) -->
+                <div id="trainerDemoNoticeBanner" class="hidden bg-gradient-to-r from-blue-700 via-indigo-800 to-[#0F2942] text-white p-4 rounded-2xl flex items-center justify-between shadow-lg border border-blue-400/40 gap-3 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">👁️</span>
+                        <div>
+                            <div class="font-black text-sm text-amber-300">وضع المعاينة التجريبية كمتدرب (Student Demo Preview)</div>
+                            <div class="text-xs text-blue-100 mt-0.5">أنت الآن تستعرض صفحة المقرر تماماً كما يشاهدها المتدرب. يمكنك تجربة المحاضرات والمذكرات والاختبارات.</div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="exitTrainerStudentDemo()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-md active:scale-95 cursor-pointer whitespace-nowrap">
+                        ⬅ إنهاء المعاينة والعودة للوحة المدرب
+                    </button>
+                </div>
+
+                <!-- Navigation Breadcrumb to Course Selector -->
+                <div class="flex items-center justify-between gap-3 flex-wrap pb-1">
+                    <button type="button" onclick="switchTab('studentCourses')" class="bg-white hover:bg-slate-50 text-slate-800 font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 border border-slate-200 transition shadow-xs cursor-pointer">
+                        <span>⬅</span>
+                        <span>العودة إلى قائمة مقرراتك التدريبية</span>
+                    </button>
+                </div>
+
                 <!-- Course Header Banner -->
                 <div class="bg-white border border-slate-200 border-r-4 border-r-[#0F2942] p-5 md:p-6 rounded-2xl shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="space-y-1">
@@ -3868,6 +4105,119 @@
                 </div>
             </div>
 
+            <!-- ==================== TAB: DEDICATED ATTENDANCE SHEET (كشف الحضور العام والغياب) ==================== -->
+            <div id="tab-attendanceSheet" class="hidden space-y-6">
+                <!-- Top Header Card -->
+                <div class="bg-gradient-to-r from-slate-900 via-[#0F2942] to-slate-950 text-white p-6 md:p-8 rounded-3xl shadow-lg border border-amber-400/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl gold-gradient-bg flex items-center justify-center text-2xl text-slate-950 font-black shadow-md">
+                                📋
+                            </div>
+                            <div>
+                                <h3 class="text-xl md:text-2xl font-black text-amber-400">كشف الحضور العام والغياب</h3>
+                                <p class="text-xs text-slate-300 mt-1">سجل تفصيلي معتمد مبني على رابط التحضير اليومي المباشر + الأرشيف التراكمي المرفوع</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <!-- Calendar / Week Switcher Button -->
+                        <button type="button" onclick="openAttendanceArchiveCalendarModal()" class="gold-gradient-bg text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-md hover:brightness-105 active:scale-95 transition cursor-pointer" title="تصفح تقويم الأسابيع والرجوع للأرشيف المرفوع من صفحة المزامنة">
+                            <span class="text-sm">📅</span>
+                            <span>زر التقويم والأرشيف</span>
+                            <span id="attSheetWeekBadge" class="bg-slate-950 text-amber-300 text-[10px] px-2 py-0.5 rounded-md font-mono">الأسبوع الحالي (مباشر)</span>
+                        </button>
+                        
+                        <!-- Refresh Live Attendance Button -->
+                        <button type="button" onclick="refreshAttendanceSheetData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-sm" title="جلب أحدث رصد حضور من رابط Google Sheets">
+                            <span>🔄</span>
+                            <span>تحديث من الرابط</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Stats Strip -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-right">
+                        <span class="text-[11px] font-bold text-slate-500 block">مصدر البيانات المعروضة:</span>
+                        <span id="attSourceBadge" class="text-xs font-black text-blue-700 mt-1 block">Google Sheets (مباشر)</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-right">
+                        <span class="text-[11px] font-bold text-slate-500 block">إجمالي المتدربين:</span>
+                        <span id="attTotalTraineesCount" class="text-lg font-black text-slate-900 mt-0.5 block font-mono">0</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-right">
+                        <span class="text-[11px] font-bold text-slate-500 block">نسبة الحضور المعتمدة:</span>
+                        <span id="attAverageRateBadge" class="text-lg font-black text-emerald-600 mt-0.5 block font-mono">0%</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-right">
+                        <span class="text-[11px] font-bold text-slate-500 block">حالات الغياب / المخالفة:</span>
+                        <span id="attViolatorsCountBadge" class="text-lg font-black text-red-600 mt-0.5 block font-mono">0</span>
+                    </div>
+                </div>
+
+                <!-- Filter Toolbar for Staff / Trainer / Admin -->
+                <div id="attFilterToolbar" class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 flex-wrap flex-1">
+                        <!-- Group Filter -->
+                        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                            <span>المجموعة:</span>
+                            <select id="attGroupFilterSelect" onchange="filterAttendanceSheetView()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#0F2942]">
+                                <option value="ALL">جميع المجموعات (الكل)</option>
+                                <option value="سامسونج 101 & 102">سامسونج 101 & 102 (مدمجة)</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                            <span>الحالة:</span>
+                            <select id="attStatusFilterSelect" onchange="filterAttendanceSheetView()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#0F2942]">
+                                <option value="ALL">جميع الحالات</option>
+                                <option value="present">حاضر كامل</option>
+                                <option value="violator">مخالف (فترة واحدة)</option>
+                                <option value="absent">غائب</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative w-full md:w-64">
+                        <input type="text" id="attSearchInput" oninput="filterAttendanceSheetView()" placeholder="بحث بالاسم أو الهوية الوطنية..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#0F2942]">
+                    </div>
+                </div>
+
+                <!-- Main Sheet Container -->
+                <div id="attendanceSheetContentContainer" class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+                    <!-- Dynamic Table or Student View populated via renderAttendanceSheetPage() -->
+                </div>
+            </div>
+
+            <!-- Attendance Archive Calendar Modal (زر التقويم للرجوع لأسابيع الأرشيف المرفوع) -->
+            <div id="attendanceArchiveCalendarModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-slate-200 text-right animate-pop-in">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-2xl">📅</span>
+                            <div>
+                                <h4 class="font-black text-slate-900 text-base">تقويم أسابيع الحضور والأرشيف</h4>
+                                <p class="text-[11px] text-slate-500">اختر بين التحضير اليومي المباشر أو الأسابيع المؤرشفة من صفحة المزامنة</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="closeAttendanceArchiveCalendarModal()" class="text-slate-400 hover:text-slate-700 text-sm bg-slate-100 hover:bg-slate-200 rounded-full w-7 h-7 flex items-center justify-center cursor-pointer transition">✕</button>
+                    </div>
+
+                    <div class="space-y-2.5 max-h-80 overflow-y-auto pr-1" id="attCalendarWeeksList">
+                        <!-- Populated dynamically with live week & archive weeks -->
+                    </div>
+
+                    <div class="pt-2 border-t flex justify-end">
+                        <button type="button" onclick="closeAttendanceArchiveCalendarModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition cursor-pointer">
+                            إغلاق
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- ==================== TAB: STUDENT GRADES (صفحة الدرجات وكشف التقييم المستقلة للمتدرب) ==================== -->
             <div id="tab-studentGrades" class="hidden space-y-6">
                 <div class="bg-white border border-slate-200 border-r-4 border-r-[#0F2942] rounded-3xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -3960,23 +4310,23 @@
             <!-- ==================== AI AUTO-GENERATE MODAL ==================== -->
             <!-- ==================== AI AUTO-GENERATE MODAL (STEP WIZARD) ==================== -->
             <div id="modal-aiGenerate" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] flex items-center justify-center p-3 md:p-5 overflow-y-auto">
-                <div class="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-slate-200 flex flex-col max-h-[95vh] overflow-hidden">
+                <div class="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-200 flex flex-col max-h-[94vh] overflow-hidden">
 
                     <!-- Header -->
-                    <div class="flex items-center justify-between p-5 border-b border-slate-100 shrink-0">
+                    <div class="flex items-center justify-between p-5 border-b border-slate-100 shrink-0 bg-slate-50/50">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 text-white flex items-center justify-center text-lg shadow-sm shrink-0">✨</div>
+                            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 text-white flex items-center justify-center text-xl shadow-sm shrink-0">✨</div>
                             <div>
-                                <h3 class="font-black text-slate-900 text-base">توليد محتوى الوحدة بالذكاء الاصطناعي</h3>
-                                <p class="text-[11px] text-slate-500 font-bold" id="aiModalSubtitle">ارفع الملف لإنشاء المحتوى خطوة بخطوة: الفيديوهات ➔ المذكرات ➔ الواجبات ➔ الاختبارات</p>
+                                <h3 class="font-black text-slate-900 text-base md:text-lg">توليد وتخصيص محتوى الوحدة بالذكاء الاصطناعي</h3>
+                                <p class="text-[11px] text-slate-500 font-bold" id="aiModalSubtitle">ارفع الملف لإنشاء المحتوى خطوة بخطوة: الفيديوهات ➔ المذكرات والمصطلحات ➔ الواجبات ➔ الاختبارات</p>
                             </div>
                         </div>
-                        <button type="button" onclick="closeAiGenerateModal()" class="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 rounded-xl transition text-sm cursor-pointer shrink-0">✕</button>
+                        <button type="button" onclick="closeAiGenerateModal()" class="text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 p-2.5 rounded-xl transition text-sm cursor-pointer shrink-0 shadow-2xs">✕</button>
                     </div>
 
                     <!-- Step Timeline / Stepper (Shown when generation is ready) -->
-                    <div id="aiWizardStepper" class="hidden border-b border-slate-100 bg-slate-50/80 px-4 py-3 shrink-0">
-                        <div class="flex items-center justify-between max-w-xl mx-auto relative">
+                    <div id="aiWizardStepper" class="hidden border-b border-slate-100 bg-slate-50/90 px-4 py-3 shrink-0">
+                        <div class="flex items-center justify-between max-w-2xl mx-auto relative">
                             <!-- Background line -->
                             <div class="absolute top-4 left-6 right-6 h-0.5 bg-slate-200 z-0"></div>
                             <div id="aiStepProgressBar" class="absolute top-4 right-6 h-0.5 bg-gradient-to-l from-violet-600 to-purple-600 z-0 transition-all duration-300" style="width: 0%;"></div>
@@ -3990,19 +4340,19 @@
                             <!-- Step 2 Button -->
                             <button type="button" onclick="goToAiStep(2)" id="aiStepBtn-2" class="relative z-10 flex flex-col items-center gap-1 group cursor-pointer">
                                 <span id="aiStepCircle-2" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-xs bg-white text-slate-400 border border-slate-300">2</span>
-                                <span id="aiStepLabel-2" class="text-[10px] font-bold text-slate-500">المذكرات والمواضيع 📝</span>
+                                <span id="aiStepLabel-2" class="text-[10px] font-bold text-slate-500">المذكرات والمصطلحات 📝</span>
                             </button>
 
                             <!-- Step 3 Button -->
                             <button type="button" onclick="goToAiStep(3)" id="aiStepBtn-3" class="relative z-10 flex flex-col items-center gap-1 group cursor-pointer">
                                 <span id="aiStepCircle-3" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-xs bg-white text-slate-400 border border-slate-300">3</span>
-                                <span id="aiStepLabel-3" class="text-[10px] font-bold text-slate-500">الواجبات 📋</span>
+                                <span id="aiStepLabel-3" class="text-[10px] font-bold text-slate-500">الواجبات والتكاليف 📋</span>
                             </button>
 
                             <!-- Step 4 Button -->
                             <button type="button" onclick="goToAiStep(4)" id="aiStepBtn-4" class="relative z-10 flex flex-col items-center gap-1 group cursor-pointer">
                                 <span id="aiStepCircle-4" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-xs bg-white text-slate-400 border border-slate-300">4</span>
-                                <span id="aiStepLabel-4" class="text-[10px] font-bold text-slate-500">الاختبارات 🎯</span>
+                                <span id="aiStepLabel-4" class="text-[10px] font-bold text-slate-500">الاختبار الأسبوعي 🎯</span>
                             </button>
                         </div>
                     </div>
@@ -4018,10 +4368,10 @@
                                 <span class="mr-auto text-emerald-700 font-bold bg-emerald-100/70 border border-emerald-300 px-2 py-0.5 rounded-full text-[10px]">جاهز سحابياً (/api/generate)</span>
                             </summary>
                             <div class="mt-3 space-y-2">
-                                <label class="block font-bold text-slate-600">مسار الـ API (الافتراضي: <code class="font-mono text-violet-700">/api/generate</code>):</label>
-                                <input type="text" id="aiServerUrl" value="/api/generate" placeholder="/api/generate أو https://your-app.vercel.app/api/generate" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 dir-ltr text-left">
+                                <label class="block font-bold text-slate-600">مسار الـ API (الافتراضي: <code class="text-violet-700 font-bold bg-violet-50 px-1.5 py-0.5 rounded border border-violet-200">/api/generate</code>):</label>
+                                <input type="text" id="aiServerUrl" value="/api/generate" placeholder="/api/generate أو https://your-app.vercel.app/api/generate" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 dir-ltr text-left">
                                 <p class="text-slate-500 font-bold text-[11px] leading-relaxed">
-                                    يعمل مباشرة داخل Vercel بنظام Serverless API ويقرأ المفتاح تلقائياً من <span class="font-mono bg-slate-200/80 px-1.5 py-0.5 rounded text-violet-800">process.env.GEMINI_API_KEY</span> بدون الحاجة لتشغيل أي سيرفر محلي منفصل.
+                                    يعمل مباشرة داخل Vercel بنظام Serverless API ويقرأ المفتاح تلقائياً من <span class="bg-slate-200/80 px-1.5 py-0.5 rounded text-violet-800 font-bold">process.env.GEMINI_API_KEY</span> بدون الحاجة لتشغيل أي سيرفر محلي منفصل.
                                 </p>
                             </div>
                         </details>
@@ -4116,7 +4466,7 @@
                                         <span>🔗</span>
                                         <span>أو رابط فيديو مخصص من يوتيوب / سحابي (اختياري):</span>
                                     </label>
-                                    <input type="url" id="aiCustomVideoUrl" placeholder="https://www.youtube.com/watch?v=... أو رابط مباشر" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold font-mono outline-none focus:border-violet-400 text-left dir-ltr">
+                                    <input type="url" id="aiCustomVideoUrl" placeholder="https://www.youtube.com/watch?v=... أو رابط مباشر" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-left dir-ltr">
                                 </div>
                             </div>
 
@@ -4146,7 +4496,7 @@
                                             <label class="block text-[11px] font-bold text-slate-600 mb-1">المدة المقدرة:</label>
                                             <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-700">
                                                 <span>⏱</span>
-                                                <input type="number" id="aiLectureDuration" min="5" max="120" value="15" class="w-10 bg-transparent outline-none text-center font-mono font-black text-slate-900">
+                                                <input type="number" id="aiLectureDuration" min="5" max="120" value="15" class="w-10 bg-transparent outline-none text-center font-black text-slate-900">
                                                 <span>د</span>
                                             </div>
                                         </div>
@@ -4182,7 +4532,7 @@
                                     </div>
                                     <div class="p-3 space-y-2">
                                         <input type="text" id="aiGlossaryTitle" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right" placeholder="عنوان قاموس المصطلحات">
-                                        <div id="aiGlossaryTermsList" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
+                                        <div id="aiGlossaryTermsList" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
                                     </div>
                                 </div>
                             </div>
@@ -4220,29 +4570,44 @@
                                         <input type="text" id="aiAssignmentTitle" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right" placeholder="عنوان الواجب">
                                         <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs font-bold text-amber-900 shrink-0">
                                             <span>🎯</span>
-                                            <span class="font-mono font-black">10</span>
+                                            <span class="font-black">10</span>
                                             <span>درجات</span>
                                         </div>
                                     </div>
                                     <textarea id="aiAssignmentInstructions" rows="2" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right resize-none" placeholder="تعليمات الواجب والتكليف..."></textarea>
+                                    
+                                    <!-- 📅 Assignment Due Date Picker -->
+                                    <div class="flex items-center justify-between bg-teal-50/70 border border-teal-200 p-2.5 rounded-xl gap-2 flex-wrap">
+                                        <div class="flex items-center gap-1.5 text-xs font-bold text-teal-950">
+                                            <span>📅</span>
+                                            <span>تاريخ وموعد تسليم الواجب (تقويم):</span>
+                                        </div>
+                                        <input type="date" id="aiAssignmentDueDate" class="bg-white border border-teal-300 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 outline-none font-mono">
+                                    </div>
                                 </div>
 
                                 <!-- MCQ Questions Mode Container -->
-                                <div id="aiAssignModeContainerMcq" class="space-y-2.5">
+                                <div id="aiAssignModeContainerMcq" class="space-y-3">
                                     <div class="flex items-center justify-between text-xs font-bold text-slate-600 px-1">
-                                        <span>الأسئلة التطبيقية (اختيار من متعدد):</span>
-                                        <span class="text-[10px] text-emerald-600 font-bold">تصحيح آلي للمتدرب</span>
+                                        <span class="font-black text-slate-900 flex items-center gap-1.5">
+                                            <span>🔘</span>
+                                            <span>أسئلة الواجب التطبيقية (اختيار من متعدد):</span>
+                                        </span>
+                                        <span class="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold">✓ تصحيح آلي فوري</span>
                                     </div>
-                                    <div id="aiAssignmentQList" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+                                    <div id="aiAssignmentQList" class="space-y-3.5 max-h-80 overflow-y-auto pr-1.5"></div>
                                 </div>
 
                                 <!-- Text Writing Mode Container -->
                                 <div id="aiAssignModeContainerText" class="hidden space-y-3">
                                     <div class="flex items-center justify-between text-xs font-bold text-slate-600 px-1">
-                                        <span>التكليف المقالي والكتابي:</span>
-                                        <span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md font-bold">تسليم نصي وكتابة مباشرة للمتدرب</span>
+                                        <span class="font-black text-slate-900 flex items-center gap-1.5">
+                                            <span>✍️</span>
+                                            <span>التكليف المقالي والكتابي:</span>
+                                        </span>
+                                        <span class="text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full font-bold">تسليم نصي وكتابة مباشرة</span>
                                     </div>
-                                    <div id="aiAssignmentTextPromptsList" class="space-y-3 max-h-64 overflow-y-auto pr-1"></div>
+                                    <div id="aiAssignmentTextPromptsList" class="space-y-3.5 max-h-80 overflow-y-auto pr-1.5"></div>
                                 </div>
                             </div>
 
@@ -4266,16 +4631,26 @@
                                         <input type="text" id="aiQuizTitle" class="flex-1 min-w-[200px] bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right" placeholder="عنوان الاختبار">
                                         <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-700 shrink-0">
                                             <span>⏱</span>
-                                            <input type="number" id="aiQuizDuration" min="5" max="60" value="15" class="w-8 bg-transparent outline-none text-center font-mono font-black text-slate-900">
+                                            <input type="number" id="aiQuizDuration" min="5" max="60" value="15" class="w-8 bg-transparent outline-none text-center font-black text-slate-900">
                                             <span>د</span>
                                         </div>
                                         <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-xl px-2.5 py-2 text-xs font-bold text-amber-800 shrink-0">
                                             <span>🎯</span>
-                                            <input type="number" id="aiQuizGrade" min="1" max="100" value="10" class="w-8 bg-transparent outline-none text-center font-mono font-black text-amber-900">
+                                            <input type="number" id="aiQuizGrade" min="1" max="100" value="10" class="w-8 bg-transparent outline-none text-center font-black text-amber-900">
                                             <span>درجة</span>
                                         </div>
                                     </div>
-                                    <div id="aiQuizQuestionsList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+
+                                    <!-- 📅 Quiz Due Date Picker -->
+                                    <div class="flex items-center justify-between bg-indigo-50/70 border border-indigo-200 p-2.5 rounded-xl gap-2 flex-wrap">
+                                        <div class="flex items-center gap-1.5 text-xs font-bold text-indigo-950">
+                                            <span>📅</span>
+                                            <span>تاريخ وموعد الاختبار (تقويم):</span>
+                                        </div>
+                                        <input type="date" id="aiQuizDueDate" class="bg-white border border-indigo-300 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 outline-none font-mono">
+                                    </div>
+
+                                    <div id="aiQuizQuestionsList" class="space-y-3.5 max-h-80 overflow-y-auto pr-1.5"></div>
                                 </div>
 
                                 <!-- Ready Notice -->
@@ -4338,7 +4713,7 @@
                     <div class="flex items-center justify-between border-b pb-3">
                         <div>
 
-                            <h4 class="font-black text-slate-900 text-sm">إضافة محاضرة وشرح (فيديو / PowerPoint / PDF / روابط)</h4>
+                            <h4 class="font-black text-slate-900 text-sm" id="lmsVideoModalTitle">إضافة محاضرة وشرح (فيديو / PowerPoint / PDF / روابط)</h4>
                             <p class="text-[11px] text-slate-500 mt-0.5">يمكنك إدراج رابط فيديو، أو رفع ملف باوربوينت أو PDF، أو وضع روابط للمحاضرة</p>
                         </div>
                         <button type="button" onclick="closeLmsSubModal('lmsVideoModal')" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer">✕</button>
@@ -4405,7 +4780,7 @@
                         </div>
 
                         <div class="flex gap-2 pt-2 border-t">
-                            <button type="submit" class="flex-1 bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">حفظ وإضافة المحاضرة</button>
+                            <button type="submit" id="lmsVideoSubmitBtn" class="flex-1 bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">حفظ وإضافة المحاضرة</button>
                             <button type="button" onclick="closeLmsSubModal('lmsVideoModal')" class="px-4 py-2.5 border rounded-xl text-xs font-bold text-slate-600 cursor-pointer">إلغاء</button>
                         </div>
                     </form>
@@ -4440,7 +4815,7 @@
                         </div>
 
                         <div class="flex gap-2 pt-3 border-t">
-                            <button type="submit" class="flex-1 bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black py-2.5 rounded-xl text-xs transition shadow-sm cursor-pointer">
+                            <button type="submit" id="lmsDocSubmitBtn" class="flex-1 bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black py-2.5 rounded-xl text-xs transition shadow-sm cursor-pointer">
                                 حفظ ونشر المذكرة
                             </button>
                             <button type="button" onclick="closeLmsSubModal('lmsDocModal')" class="px-4 py-2.5 border rounded-xl text-xs font-bold text-slate-600 cursor-pointer">
@@ -4489,10 +4864,17 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-                                    <span>تاريخ الاختبار:</span>
-                                    <span class="text-[10px] text-indigo-700 font-bold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">الاستحقاق والجدول</span>
+                                    <span class="flex items-center gap-1.5">
+                                        <span>📅</span>
+                                        <span>تاريخ ووقت الاختبار (تقويم):</span>
+                                    </span>
+                                    <span class="text-[10px] text-indigo-700 font-bold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">تقويم الاستحقاق</span>
                                 </label>
-                                <input type="text" id="lmsQuizDate" placeholder="مثال: الخميس 11:59 م أو 2026-10-15" value="الخميس 11:59 م" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-[#0F2942]">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="date" id="lmsQuizDueDateInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-[#0F2942] font-mono">
+                                    <input type="time" id="lmsQuizDueTimeInput" value="23:59" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-[#0F2942] font-mono">
+                                </div>
+                                <input type="hidden" id="lmsQuizDate" value="الخميس 11:59 م">
                             </div>
                         </div>
 
@@ -5205,7 +5587,7 @@
             capacity: 14,
             maxTolerance: 14,
             rows: [
-                ["HYUNDAI 101", "Samsung 104", "Eleco 101 + Eleco 102", "Samsung 102 -101", "Samsung 103", "(LA) Samsung + (LA) Sinopec 100 + (LA) Amana", "Shinbo 103 + SINOPEC 102", "Samsung 108"]
+                ["HYUNDAI 101", "Samsung 104", "Eleco 101 + Eleco 102", "سامسونج 101 & 102", "Samsung 103", "(LA) Samsung + (LA) Sinopec 100 + (LA) Amana", "Shinbo 103 + SINOPEC 102", "Samsung 108"]
             ]
         },
         {
@@ -5235,7 +5617,7 @@
             capacity: 14,
             maxTolerance: 14,
             rows: [
-                ["Sinopec 108", "Sinopec 104", "Samsung 102 -101", "Sinopec 110", "Sinopec 111", "Sinopec 112", "Sinopec 106", "Sinopec 109"]
+                ["Sinopec 108", "Sinopec 104", "سامسونج 101 & 102", "Sinopec 110", "Sinopec 111", "Sinopec 112", "Sinopec 106", "Sinopec 109"]
             ]
         },
         {
@@ -5440,12 +5822,15 @@
         const btnTimesheet = document.getElementById('btn-timesheet');
         const btnArchive = document.getElementById('btn-archive');
         const btnStudentDashboard = document.getElementById('btn-studentDashboard');
+        const btnStudentCourses = document.getElementById('btn-studentCourses');
         const btnStudentLms = document.getElementById('btn-studentLms');
         const btnStudentGrades = document.getElementById('btn-studentGrades');
         const btnSubmissionsCalendar = document.getElementById('btn-submissionsCalendar');
         const btnStudentSubmissionsCalendar = document.getElementById('btn-studentSubmissionsCalendar');
         const btnVirtualClass = document.getElementById('btn-virtualClass');
         const btnStudentVirtualClass = document.getElementById('btn-studentVirtualClass');
+        const btnStudySchedule = document.getElementById('btn-studySchedule');
+        const btnAttendanceSheet = document.getElementById('btn-attendanceSheet');
 
         const topHeaderUploadButtons = document.getElementById('topHeaderUploadButtons');
         const topSyncBtn = document.getElementById('topSyncBtn');
@@ -5461,6 +5846,9 @@
 
             // إظهار أزرار المتدرب المخصصة في القائمة الجانبية
             if (btnStudentDashboard) btnStudentDashboard.classList.remove('hidden');
+            if (btnStudentCourses) btnStudentCourses.classList.remove('hidden');
+            if (btnStudySchedule) btnStudySchedule.classList.remove('hidden');
+            if (btnAttendanceSheet) btnAttendanceSheet.classList.remove('hidden');
             if (btnStudentLms) btnStudentLms.classList.remove('hidden');
             if (btnStudentGrades) btnStudentGrades.classList.remove('hidden');
             if (btnStudentSubmissionsCalendar) btnStudentSubmissionsCalendar.classList.remove('hidden');
@@ -5483,13 +5871,18 @@
         } else {
             // المشرفين والمدربين: إخفاء أزرار المتدرب
             if (btnStudentDashboard) btnStudentDashboard.classList.add('hidden');
+            if (btnStudentCourses) btnStudentCourses.classList.add('hidden');
             if (btnStudentLms) btnStudentLms.classList.add('hidden');
             if (btnStudentGrades) btnStudentGrades.classList.add('hidden');
             if (btnStudentSubmissionsCalendar) btnStudentSubmissionsCalendar.classList.add('hidden');
             if (btnStudentVirtualClass) btnStudentVirtualClass.classList.add('hidden');
+            if (btnStudySchedule) btnStudySchedule.classList.remove('hidden');
+            if (btnAttendanceSheet) btnAttendanceSheet.classList.remove('hidden');
             
             const studentTab = document.getElementById('tab-studentDashboard');
             if (studentTab) studentTab.classList.add('hidden');
+            const studentCoursesTab = document.getElementById('tab-studentCourses');
+            if (studentCoursesTab) studentCoursesTab.classList.add('hidden');
             const studentLmsTab = document.getElementById('tab-studentLms');
             if (studentLmsTab) studentLmsTab.classList.add('hidden');
             const studentGradesTab = document.getElementById('tab-studentGrades');
@@ -5699,13 +6092,13 @@
 
         // الصلاحيات الخاصة بالمتدربين والمدربين
         if (currentUser.role === 'student') {
-            const allowedStudentTabs = ['studentDashboard', 'studentLms', 'studentGrades', 'submissionsCalendar', 'studentVirtualClass'];
+            const allowedStudentTabs = ['studentDashboard', 'studentCourses', 'studentLms', 'studentGrades', 'submissionsCalendar', 'studentVirtualClass', 'studySchedule', 'attendanceSheet'];
             if (!allowedStudentTabs.includes(tab)) {
                 showToast('⛔ عذراً: غير مصرح للمتدرب بالوصول لشاشات الإدارة أو المدربين', 'error');
                 return;
             }
         } else if (currentUser.role === 'trainer') {
-            const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass'];
+            const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'studySchedule', 'attendanceSheet'];
             if (!allowedTrainerTabs.includes(tab)) {
                 showToast('⛔ عذراً: هذه الشاشة غير مصرح بها للمدرب', 'error');
                 return;
@@ -5730,7 +6123,7 @@
         currentActiveTabId = tab;
         updateGlobalBackBtnUI();
 
-        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentLms', 'studentGrades', 'submissionsCalendar', 'virtualClass', 'studentVirtualClass'];
+        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentLms', 'studentGrades', 'submissionsCalendar', 'virtualClass', 'studentVirtualClass', 'studySchedule', 'attendanceSheet'];
         tabs.forEach(t => {
             const el = document.getElementById(`tab-${t}`);
             const btn = document.getElementById(`btn-${t}`);
@@ -5775,6 +6168,12 @@
                 if (typeof renderGradesSystemTab === 'function') renderGradesSystemTab();
             } else if (tab === 'studentDashboard') {
                 renderStudentDashboard();
+            } else if (tab === 'studentCourses') {
+                if (typeof renderStudentCoursesPage === 'function') renderStudentCoursesPage();
+            } else if (tab === 'studySchedule') {
+                if (typeof renderStudyScheduleView === 'function') renderStudyScheduleView();
+            } else if (tab === 'attendanceSheet') {
+                if (typeof renderAttendanceSheetPage === 'function') renderAttendanceSheetPage();
             } else if (tab === 'studentLms') {
                 renderStudentLms();
             } else if (tab === 'studentGrades') {
@@ -6127,6 +6526,7 @@
         const staffMatch = users.find(user => user.username.toLowerCase() === u.toLowerCase() && (user.password === p || (user.username === 'admin' && p === '123456')));
         if (staffMatch) {
             currentUser = staffMatch;
+            let trainerNeedsPasswordChange = false;
             if (staffMatch.role === 'trainer') {
                 const trObj = getTrainerObj(staffMatch);
                 const trainerName = trObj ? trObj.name : (staffMatch.trainerProfile || staffMatch.name);
@@ -6134,10 +6534,21 @@
                 if (!staffMatch.trainerProfile && trObj) staffMatch.trainerProfile = trObj.name;
                 const matchedKey = findCourseKeyForTrainer(trainerName);
                 if (matchedKey) activeTrainerLmsCourse = matchedKey;
+
+                // التحقق من تسجيل دخول المدرب بكلمة المرور الافتراضية
+                if (p === '123' || staffMatch.password === '123' || staffMatch.mustChangePassword) {
+                    trainerNeedsPasswordChange = true;
+                    staffMatch.mustChangePassword = true;
+                }
             }
             saveData();
             applyUserRolePermissions();
-            showToast(`تم تسجيل الدخول بنجاح كـ (${staffMatch.name})`, 'success');
+            if (trainerNeedsPasswordChange) {
+                openTrainerChangePasswordModal(true);
+                showToast(`مرحباً بك يا ${staffMatch.name}! يُرجى تعيين كلمة مرور جديدة وخاصة بك لتأمين حسابك كمدرب.`, 'info');
+            } else {
+                showToast(`تم تسجيل الدخول بنجاح كـ (${staffMatch.name})`, 'success');
+            }
             return;
         }
 
@@ -6232,19 +6643,64 @@
     function openMandatoryPasswordModal() {
         const modal = document.getElementById('mandatoryPasswordModal');
         const nameEl = document.getElementById('mndTraineeName');
-        if (nameEl && currentUser) nameEl.innerText = currentUser.name;
+        const titleEl = document.getElementById('mndModalTitle');
+        const closeBtn = document.getElementById('mndCloseBtn');
+        const cancelBtn = document.getElementById('mndCancelBtn');
+
+        if (nameEl && currentUser) nameEl.innerText = currentUser.name || 'المتدرب';
+        if (titleEl) titleEl.innerText = 'تغيير كلمة المرور وتأمين الحساب';
+        if (closeBtn) closeBtn.classList.add('hidden');
+        if (cancelBtn) cancelBtn.classList.add('hidden');
+
+        document.getElementById('mndNewPassword').value = '';
+        document.getElementById('mndConfirmPassword').value = '';
         if (modal) modal.classList.remove('hidden');
+    }
+
+    function openTrainerChangePasswordModal(isMandatory = false) {
+        if (!currentUser || currentUser.role !== 'trainer') return;
+        const modal = document.getElementById('mandatoryPasswordModal');
+        const nameEl = document.getElementById('mndTraineeName');
+        const titleEl = document.getElementById('mndModalTitle');
+        const closeBtn = document.getElementById('mndCloseBtn');
+        const cancelBtn = document.getElementById('mndCancelBtn');
+
+        if (nameEl) nameEl.innerText = currentUser.name || 'المدرب';
+        if (titleEl) {
+            titleEl.innerText = isMandatory ? 'تحديث كلمة المرور الإلزامية للمدرب' : 'تغيير وتحديث كلمة مرور المدرب';
+        }
+
+        if (isMandatory) {
+            if (closeBtn) closeBtn.classList.add('hidden');
+            if (cancelBtn) cancelBtn.classList.add('hidden');
+        } else {
+            if (closeBtn) closeBtn.classList.remove('hidden');
+            if (cancelBtn) cancelBtn.classList.remove('hidden');
+        }
+
+        document.getElementById('mndNewPassword').value = '';
+        document.getElementById('mndConfirmPassword').value = '';
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeMandatoryPasswordModal() {
+        if (currentUser && currentUser.mustChangePassword) {
+            showToast('⚠️ يُرجى تعيين كلمة مرور خاصة بك للمتابعة واستخدام النظام', 'warning');
+            return;
+        }
+        const modal = document.getElementById('mandatoryPasswordModal');
+        if (modal) modal.classList.add('hidden');
     }
 
     function handleMandatoryPasswordChange(e) {
         e.preventDefault();
-        if (!currentUser || currentUser.role !== 'student') return;
+        if (!currentUser) return;
 
         const p1 = document.getElementById('mndNewPassword').value.trim();
         const p2 = document.getElementById('mndConfirmPassword').value.trim();
 
-        if (p1.length < 4) {
-            showToast('⚠️ يجب ألا تقل كلمة المرور عن 4 خانات', 'error');
+        if (p1.length < 3) {
+            showToast('⚠️ يجب ألا تقل كلمة المرور عن 3 خانات', 'error');
             return;
         }
 
@@ -6253,22 +6709,46 @@
             return;
         }
 
-        const cleanId = cleanNationalId(currentUser.id);
-        studentCreds[cleanId] = {
-            password: p1,
-            changedAt: new Date().toISOString(),
-            mustChangePassword: false
-        };
-        localStorage.setItem('sys_student_creds_v1', JSON.stringify(studentCreds));
+        if (currentUser.role === 'trainer') {
+            const userInDb = users.find(u => u.id === currentUser.id || u.username.toLowerCase() === currentUser.username.toLowerCase());
+            if (userInDb) {
+                userInDb.password = p1;
+                userInDb.mustChangePassword = false;
+                userInDb.passwordChanged = true;
+                userInDb.passwordChangedAt = new Date().toISOString();
+            }
+            currentUser.password = p1;
+            currentUser.mustChangePassword = false;
+            currentUser.passwordChanged = true;
 
-        currentUser.mustChangePassword = false;
-        localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
+            localStorage.setItem('sys_users_v9', JSON.stringify(users));
+            localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
 
-        const modal = document.getElementById('mandatoryPasswordModal');
-        if (modal) modal.classList.add('hidden');
+            const modal = document.getElementById('mandatoryPasswordModal');
+            if (modal) modal.classList.add('hidden');
 
-        showToast(`🎉 تم حفظ وتأمين كلمة المرور بنجاح! تم تفعيل حسابك بالكامل.`, 'success');
-        renderStudentDashboard();
+            showToast('🎉 تم حفظ وتحديث كلمة مرور حساب المدرب بنجاح!', 'success');
+            return;
+        }
+
+        if (currentUser.role === 'student') {
+            const cleanId = cleanNationalId(currentUser.id);
+            studentCreds[cleanId] = {
+                password: p1,
+                changedAt: new Date().toISOString(),
+                mustChangePassword: false
+            };
+            localStorage.setItem('sys_student_creds_v1', JSON.stringify(studentCreds));
+
+            currentUser.mustChangePassword = false;
+            localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
+
+            const modal = document.getElementById('mandatoryPasswordModal');
+            if (modal) modal.classList.add('hidden');
+
+            showToast(`🎉 تم حفظ وتأمين كلمة المرور بنجاح! تم تفعيل حسابك بالكامل.`, 'success');
+            renderStudentDashboard();
+        }
     }
 
     function logout() {
@@ -6495,11 +6975,17 @@
         let str = String(cellValue).trim();
         if (!str || str === '******') return [];
 
-        if (str.includes('-') && /samsung/i.test(str) && /\d+/.test(str)) {
-            return ['Samsung 101', 'Samsung 102'];
+        if ((str.includes('-') || str.includes('&') || str.includes('+')) && (/samsung/i.test(str) || /سامسونج/.test(str)) && (str.includes('101') || str.includes('102'))) {
+            return ['سامسونج 101 & 102'];
         }
 
-        const parts = str.split('+').map(p => p.trim()).filter(Boolean);
+        const parts = str.split('+').map(p => {
+            const trimmed = p.trim();
+            if ((/samsung/i.test(trimmed) || /سامسونج/.test(trimmed)) && (trimmed.includes('101') || trimmed.includes('102'))) {
+                return 'سامسونج 101 & 102';
+            }
+            return trimmed;
+        }).filter(Boolean);
         return parts;
     }
 
@@ -6507,13 +6993,16 @@
     function canonicalGroupName(str) {
         if (!str) return '';
         let s = String(str).toLowerCase().trim();
-        s = s.replace(/[\(\)\-_]/g, '').trim().replace(/\s+/g, '');
+        s = s.replace(/[\(\)\-_&]/g, '').trim().replace(/\s+/g, '');
         s = s.replace(/ساينبوك|سينوبك|سابك/g, 'sinopec')
              .replace(/سامسونج/g, 'samsung')
              .replace(/هونداي|هيونداي/g, 'hyundai')
              .replace(/شينبو/g, 'shinbo')
              .replace(/امانة|أمانة/g, 'amana')
              .replace(/إليكو|اليكو/g, 'eleco');
+        if (s.includes('samsung') && (s.includes('101') || s.includes('102'))) {
+            return 'samsung101102';
+        }
         return s;
     }
 
@@ -9183,7 +9672,15 @@
             relevantGroups = relevantGroups.filter(t => t.company === selectedCompany);
         }
 
-        const groups = ['ALL', ...new Set(relevantGroups.map(t => t.group))];
+        const rawGroups = relevantGroups.map(t => {
+            const grp = t.group || '';
+            if ((/samsung/i.test(grp) || /سامسونج/.test(grp)) && (grp.includes('101') || grp.includes('102'))) {
+                return 'سامسونج 101 & 102';
+            }
+            return grp;
+        }).filter(g => g && !isLAGroup(g));
+
+        const groups = ['ALL', ...new Set(rawGroups)];
         groupSelect.innerHTML = groups.map(g => `
             <option value="${g}" ${g === currentGroup ? 'selected' : ''}>
                 ${g === 'ALL' ? 'جميع المجموعات والشعب' : g}
@@ -9230,7 +9727,7 @@
 
         const filteredTrainees = trainees.filter(t => {
             const matchesComp = selectedCompany === 'ALL' || t.company === selectedCompany;
-            const matchesGroup = selectedGroup === 'ALL' || t.group === selectedGroup;
+            const matchesGroup = selectedGroup === 'ALL' || t.group === selectedGroup || isGroupMatch(selectedGroup, t.group);
             
             const dayChecks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIndex] : [false, false, false, false];
             const st = calculateStatus(dayChecks);
@@ -9797,7 +10294,13 @@
         if (currentUser?.role === 'trainer') {
             availableGroups = getGroupsForTrainer(currentUser);
         } else {
-            const traineeGroups = trainees.map(t => t.group).filter(g => g && !isLAGroup(g));
+            const traineeGroups = trainees.map(t => {
+                const g = t.group || '';
+                if ((/samsung/i.test(g) || /سامسونج/.test(g)) && (g.includes('101') || g.includes('102'))) {
+                    return 'سامسونج 101 & 102';
+                }
+                return g;
+            }).filter(g => g && !isLAGroup(g));
             const scheduleGroups = [];
             if (scheduleData) {
                 scheduleData.forEach(tr => {
@@ -16213,7 +16716,158 @@
             isAicExempt: false
         }];
     }
+    const _baseGetAllCoursesForTrainee = getAllCoursesForTrainee;
+    getAllCoursesForTrainee = function(trainee) {
+        const list = _baseGetAllCoursesForTrainee(trainee) || [];
+        return list.map((c, idx) => {
+            const pNum = c.period || (idx + 1);
+            const isP2 = (pNum === 2);
+            return {
+                ...c,
+                period: pNum,
+                timing: c.timing || (isP2 ? '12:30 م - 04:00 م' : '08:00 ص - 12:00 م'),
+                timingPeriod: c.timingPeriod || (isP2 ? 'مسائية' : 'صباحية'),
+                durationHours: c.durationHours || (isP2 ? '3.5 ساعات' : '4 ساعات'),
+                days: c.days || 'الأحد إلى الخميس',
+                room: c.room || (isP2 ? 'معمل حاسب2' : 'القاعة 7')
+            };
+        });
+    };
     window.getAllCoursesForTrainee = getAllCoursesForTrainee;
+
+    // ===================================================================
+    // STUDY SCHEDULE VIEW CONTROLLER (عرض وتحديث الجدول الدراسي)
+    // ===================================================================
+    function renderStudyScheduleView() {
+        if (!currentUser) return;
+        const courses = getAllCoursesForTrainee(currentUser);
+        const isAic = /AIC/i.test(currentUser.company || currentUser.group || '');
+
+        // 1. Group badge & student details
+        const grpBadge = document.getElementById('studySchedGroupBadge');
+        if (grpBadge) grpBadge.innerText = currentUser.group || 'شعبة تدريبية عامة';
+
+        const sName = document.getElementById('studySchedStudentName');
+        const sMeta = document.getElementById('studySchedStudentMeta');
+        const sNotice = document.getElementById('studySchedSystemNotice');
+        if (sName) sName.innerText = currentUser.name || 'متدرب المعهد';
+        if (sMeta) sMeta.innerText = `(الهوية: ${currentUser.id || '--'} | الشعبة: ${currentUser.group || '--'} | الشركة: ${currentUser.company || '--'})`;
+        if (sNotice) sNotice.innerText = isAic ? 'مستثنى AIC (فترة تدريبية واحدة)' : 'فترتان تدريبيتان يومياً (08:00 ص - 04:00 م)';
+
+        // 2. Render Courses Cards with Location, Trainer, Hours
+        const container = document.getElementById('studySchedCoursesContainer');
+        if (container) {
+            container.innerHTML = courses.map((c, idx) => {
+                const isP1 = (idx === 0 || c.period === 1);
+                const periodTime = c.timing || (isP1 ? '08:00 ص - 12:00 م' : '12:30 م - 04:00 م');
+                const periodDuration = c.durationHours || (isP1 ? '4 ساعات تدريبية' : '3.5 ساعات تدريبية');
+                const badgeBg = isP1 ? 'bg-blue-100 text-blue-900 border-blue-200' : 'bg-purple-100 text-purple-900 border-purple-200';
+                const cardBorder = isP1 ? 'border-blue-200/90 bg-gradient-to-br from-blue-50/50 to-white' : 'border-purple-200/90 bg-gradient-to-br from-purple-50/50 to-white';
+
+                return `
+                    <div class="p-5 rounded-3xl border ${cardBorder} shadow-xs space-y-4 text-right">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <span class="text-xs font-black px-3 py-1 rounded-full border ${badgeBg}">
+                                ${c.periodLabel || (isP1 ? 'الفترة الأولى (الصباحية)' : 'الفترة الثانية (المسائية)')}
+                            </span>
+                            <span class="text-xs font-black text-slate-800 bg-white border border-slate-200 px-3 py-1 rounded-xl shadow-2xs">
+                                📍 مكان الانعقاد: ${c.room || 'القاعة التدريبية'}
+                            </span>
+                        </div>
+
+                        <div class="space-y-1">
+                            <span class="text-[11px] font-bold text-slate-400 block">${c.specialty || 'التخصص التدريبي المعتمد'}</span>
+                            <h4 class="font-black text-slate-900 text-base md:text-lg leading-snug">${c.courseTitle}</h4>
+                            <p class="text-xs text-slate-600 font-bold mt-1">👨‍🏫 المدرب المشرف: <b class="text-slate-900 text-sm">${c.trainerName}</b></p>
+                        </div>
+
+                        <!-- أوقات الدوام والقاعة -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                            <div class="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-2.5">
+                                <span class="text-xl">⏰</span>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 font-bold block">وقت الدوام:</span>
+                                    <span class="font-black text-slate-900 text-xs">${periodTime}</span>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-2.5">
+                                <span class="text-xl">📍</span>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 font-bold block">القاعة / المعمل:</span>
+                                    <span class="font-black text-indigo-950 text-xs">${c.room || 'القاعة 7'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-100 flex-wrap gap-2">
+                            <div class="flex items-center gap-1.5 text-xs text-slate-500 font-bold">
+                                <span>📅 الأيام:</span>
+                                <span class="font-extrabold text-slate-800">الأحد - الخميس (أسبوعياً)</span>
+                            </div>
+                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}'); switchTab('studentLms');" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold text-xs py-2 px-3.5 rounded-xl transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                                <span>📚</span>
+                                <span>الانتقال لمحتوى المقرر في LMS 👈</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 3. Render Timetable Body (الأحد إلى الخميس)
+        const tbody = document.getElementById('studySchedTimetableBody');
+        if (tbody) {
+            const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+            const c1 = courses[0] || {};
+            const c2 = courses[1] || courses[0] || {};
+
+            tbody.innerHTML = days.map((day, dIdx) => `
+                <tr class="hover:bg-slate-50/80 transition text-xs">
+                    <td class="p-3.5 border-l border-slate-200 font-black text-slate-900 bg-slate-50/60">
+                        <span class="inline-block px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-800 shadow-2xs">${day}</span>
+                    </td>
+                    <td class="p-3.5 border-l border-slate-200 text-right">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <div>
+                                <span class="font-black text-slate-900 block text-xs md:text-sm">${c1.courseShort || c1.courseTitle || 'الفترة الصباحية'}</span>
+                                <span class="text-[11px] text-slate-500 font-bold mt-0.5 block">المدرب: ${c1.trainerName || '--'}</span>
+                            </div>
+                            <span class="text-[11px] font-black px-2 py-0.5 rounded-md bg-blue-50 text-blue-900 border border-blue-200">
+                                📍 ${c1.room || 'القاعة 7'}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="p-3.5 border-l border-slate-200 bg-amber-50/30 text-amber-900 text-center font-bold">
+                        <span class="text-[11px] block">صلاة واستراحة</span>
+                        <span class="text-[10px] text-amber-700 font-medium">30 دقيقة</span>
+                    </td>
+                    <td class="p-3.5 text-right">
+                        ${isAic ? `
+                            <div class="text-center py-2 text-slate-400 font-bold text-xs bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                مستثنى من الفترة الثانية (AIC)
+                            </div>
+                        ` : `
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <div>
+                                    <span class="font-black text-slate-900 block text-xs md:text-sm">${c2.courseShort || c2.courseTitle || 'الفترة المسائية'}</span>
+                                    <span class="text-[11px] text-slate-500 font-bold mt-0.5 block">المدرب: ${c2.trainerName || '--'}</span>
+                                </div>
+                                <span class="text-[11px] font-black px-2 py-0.5 rounded-md bg-purple-50 text-purple-900 border border-purple-200">
+                                    📍 ${c2.room || 'معمل حاسب 2'}
+                                </span>
+                            </div>
+                        `}
+                    </td>
+                </tr>
+            `).join('');
+        }
+    }
+    window.renderStudyScheduleView = renderStudyScheduleView;
+
+    function printOrExportSchedule() {
+        window.print();
+    }
+    window.printOrExportSchedule = printOrExportSchedule;
 
     function getTrainerAndCourseForTrainee(trainee) {
         const all = getAllCoursesForTrainee(trainee);
@@ -16748,20 +17402,40 @@
         if (dualCardsContainer) {
             dualCardsContainer.innerHTML = allStudentCourses.map((c, idx) => {
                 const isSelected = (binding.lmsKey === c.lmsKey || activeStudentLmsCourse === c.lmsKey);
+                const isP1 = (idx === 0 || c.period === 1);
+                const periodTime = c.timing || (isP1 ? '08:00 ص - 12:00 م' : '12:30 م - 04:00 م');
+                const periodDuration = c.durationHours || (isP1 ? '4 ساعات تدريبية' : '3.5 ساعات تدريبية');
+                const periodBadge = isP1 ? 'bg-blue-100 text-blue-900 border-blue-200' : 'bg-purple-100 text-purple-900 border-purple-200';
+                const timeTheme = isP1 ? 'bg-blue-50/80 text-blue-950 border-blue-200' : 'bg-purple-50/80 text-purple-950 border-purple-200';
+
                 return `
                     <div class="p-4 rounded-2xl border ${isSelected ? 'border-amber-400 bg-amber-50/70 ring-2 ring-amber-300/60 shadow-sm' : 'border-slate-200 bg-slate-50 hover:bg-white'} transition space-y-3 text-right">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full ${idx === 0 ? 'bg-blue-100 text-blue-900 border border-blue-200' : 'bg-purple-100 text-purple-900 border border-purple-200'}">
+                        <div class="flex items-center justify-between flex-wrap gap-1.5">
+                            <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full border ${periodBadge}">
                                 ${c.periodLabel || `الفترة ${idx + 1}`}
                             </span>
-                            <span class="text-xs font-bold text-slate-500">
+                            <span class="text-xs font-black text-slate-800 bg-white border border-slate-200 px-2.5 py-0.5 rounded-lg shadow-2xs">
                                 📍 ${c.room || 'القاعة التدريبية'}
                             </span>
                         </div>
+
                         <div>
                             <h4 class="font-black text-slate-900 text-sm md:text-base leading-snug">${c.courseTitle}</h4>
                             <p class="text-xs text-slate-600 font-bold mt-1">المدرب المشرف: <b class="text-slate-900">${c.trainerName}</b></p>
                         </div>
+
+                        <!-- شريط أوقات الدوام الرسمي المعتمد -->
+                        <div class="p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center justify-between flex-wrap gap-2 text-xs">
+                            <div class="flex items-center gap-1.5 font-extrabold text-slate-800">
+                                <span class="text-base">⏰</span>
+                                <span class="text-[11px] text-slate-500 font-bold">أوقات الدوام:</span>
+                                <span class="text-xs font-black text-slate-900">${periodTime}</span>
+                            </div>
+                            <span class="text-[10px] font-black px-2 py-0.5 rounded-md border ${timeTheme}">
+                                ${c.timingPeriod || (isP1 ? 'صباحية' : 'مسائية')} • ${periodDuration}
+                            </span>
+                        </div>
+
                         <div class="flex items-center gap-2 pt-1">
                             <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}'); switchTab('studentLms');" class="flex-1 ${isSelected ? 'gold-gradient-bg text-slate-950 font-black' : 'bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold'} text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
                                 <span>📚</span>
@@ -18819,6 +19493,10 @@
                                     <span>تكبير الشاشة</span>
                                 </button>
                             ` : ''}
+                            <button type="button" onclick="openEditVideoModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل المحاضرة">
+                                <span>✏️</span>
+                                <span>تعديل</span>
+                            </button>
                             <button type="button" onclick="deleteLmsVideo(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold transition cursor-pointer" title="حذف المحاضرة">
                                 حذف
                             </button>
@@ -18880,6 +19558,10 @@
                         <button type="button" onclick="openReadDocModal('${d.id}')" class="lms-action-btn text-xs bg-white hover:bg-[#0F2942] text-[#0F2942] hover:text-white border border-slate-200 font-bold px-3 py-1.5 rounded-lg cursor-pointer">
                             معاينة النص
                         </button>
+                        <button type="button" onclick="openEditDocModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل المذكرة">
+                            <span>✏️</span>
+                            <span>تعديل</span>
+                        </button>
                         <button type="button" onclick="deleteLmsDoc(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold transition cursor-pointer" title="حذف المذكرة">
                             حذف
                         </button>
@@ -18939,8 +19621,9 @@
                             النتائج وتنزيل الدرجات (${totalQuizResults})
                         </button>
                         <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="openEditQuizModal(${idx})" class="lms-action-btn text-xs text-slate-700 hover:text-[#0F2942] bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold cursor-pointer">
-                                الاطلاع وتعديل الاختبار
+                            <button type="button" onclick="openEditQuizModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل الاختبار">
+                                <span>✏️</span>
+                                <span>تعديل</span>
                             </button>
                             <button type="button" onclick="deleteLmsQuiz(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold cursor-pointer">
                                 حذف
@@ -19021,8 +19704,9 @@
                                 الاطلاع على التسليمات ورصد الدرجات يدوياً (${subCount})
                             </button>
                             <div class="flex items-center gap-1.5">
-                                <button type="button" onclick="openEditAssignmentModal(${idx})" class="lms-action-btn text-xs text-slate-700 hover:text-[#0F2942] bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold cursor-pointer">
-                                    تعديل وتحديد الفئة
+                                <button type="button" onclick="openEditAssignmentModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل الواجب">
+                                    <span>✏️</span>
+                                    <span>تعديل</span>
                                 </button>
                                 <button type="button" onclick="deleteLmsAssignment(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold cursor-pointer">
                                     حذف
@@ -20180,18 +20864,63 @@
         }
     }
 
+    let editingVideoIndex = -1;
+
     function openAddVideoModal() {
+        editingVideoIndex = -1;
+        const titleEl = document.getElementById('lmsVideoModalTitle');
+        if (titleEl) titleEl.innerText = 'إضافة محاضرة وشرح (فيديو / PowerPoint / PDF / روابط)';
+        const btnEl = document.getElementById('lmsVideoSubmitBtn');
+        if (btnEl) btnEl.innerText = 'حفظ وإضافة المحاضرة';
+
         document.getElementById('lmsVideoTitle').value = '';
         document.getElementById('lmsVideoUrl').value = '';
         document.getElementById('lmsVideoDuration').value = '10:00';
         document.getElementById('lmsVideoNotes').value = '';
         const matSel = document.getElementById('lmsVideoMaterialType');
-        if (matSel) matSel.value = 'video';
+        if (matSel) {
+            matSel.value = 'video';
+            if (typeof onLmsLectureTypeChange === 'function') onLmsLectureTypeChange();
+        }
         const extraLinksEl = document.getElementById('lmsVideoExtraLinks');
         if (extraLinksEl) extraLinksEl.value = '';
         currentTrainerLectureFile = null;
         const fInput = document.getElementById('lmsLectureFileInput');
         if (fInput) fInput.value = '';
+        updateTrainerLectureFileUI();
+
+        const modal = document.getElementById('lmsVideoModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function openEditVideoModal(idx) {
+        editingVideoIndex = idx;
+        const courseKey = getActiveTrainerCourseKey();
+        const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
+        const activeWeek = getActiveTrainerLmsWeekObj(courseData);
+        if (!activeWeek || !activeWeek.videos || !activeWeek.videos[idx]) return;
+        const v = activeWeek.videos[idx];
+
+        const titleEl = document.getElementById('lmsVideoModalTitle');
+        if (titleEl) titleEl.innerText = 'تعديل المحاضرة والمحتوى التعليمي';
+        const btnEl = document.getElementById('lmsVideoSubmitBtn');
+        if (btnEl) btnEl.innerText = 'تحديث وحفظ التعديلات';
+
+        document.getElementById('lmsVideoTitle').value = v.title || '';
+        document.getElementById('lmsVideoUrl').value = v.url || '';
+        document.getElementById('lmsVideoDuration').value = v.duration || '10:00';
+        document.getElementById('lmsVideoNotes').value = v.notes || '';
+        const matSel = document.getElementById('lmsVideoMaterialType');
+        if (matSel) {
+            matSel.value = v.materialType || 'video';
+            if (typeof onLmsLectureTypeChange === 'function') onLmsLectureTypeChange();
+        }
+        const extraLinksEl = document.getElementById('lmsVideoExtraLinks');
+        if (extraLinksEl) {
+            extraLinksEl.value = (v.lectureLinks || []).map(l => l.label ? `${l.label} | ${l.url}` : l.url).join('\n');
+        }
+
+        currentTrainerLectureFile = v.lectureFile || null;
         updateTrainerLectureFileUI();
 
         const modal = document.getElementById('lmsVideoModal');
@@ -20231,28 +20960,52 @@
             return;
         }
 
-        const lectureId = 'v-' + Date.now();
-        let lectureFilePayload = null;
+        if (!activeWeek.videos) activeWeek.videos = [];
 
+        let lectureFilePayload = null;
         if (currentTrainerLectureFile) {
-            const fileId = 'lf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-            storeLmsLectureFileBlob(fileId, currentTrainerLectureFile.data, {
-                name: currentTrainerLectureFile.name,
-                size: currentTrainerLectureFile.size,
-                type: currentTrainerLectureFile.type,
-                kind: currentTrainerLectureFile.kind
-            });
-            lectureFilePayload = {
-                id: fileId,
-                name: currentTrainerLectureFile.name,
-                size: currentTrainerLectureFile.size,
-                type: currentTrainerLectureFile.type,
-                kind: currentTrainerLectureFile.kind,
-                data: (currentTrainerLectureFile.data && currentTrainerLectureFile.data.length < 150000) ? currentTrainerLectureFile.data : ''
-            };
+            if (currentTrainerLectureFile.data && currentTrainerLectureFile.data.startsWith('data:')) {
+                const fileId = currentTrainerLectureFile.id || ('lf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6));
+                storeLmsLectureFileBlob(fileId, currentTrainerLectureFile.data, {
+                    name: currentTrainerLectureFile.name,
+                    size: currentTrainerLectureFile.size,
+                    type: currentTrainerLectureFile.type,
+                    kind: currentTrainerLectureFile.kind
+                });
+                lectureFilePayload = {
+                    id: fileId,
+                    name: currentTrainerLectureFile.name,
+                    size: currentTrainerLectureFile.size,
+                    type: currentTrainerLectureFile.type,
+                    kind: currentTrainerLectureFile.kind,
+                    data: (currentTrainerLectureFile.data && currentTrainerLectureFile.data.length < 150000) ? currentTrainerLectureFile.data : ''
+                };
+            } else {
+                lectureFilePayload = currentTrainerLectureFile;
+            }
         }
 
-        if (!activeWeek.videos) activeWeek.videos = [];
+        if (editingVideoIndex >= 0 && activeWeek.videos[editingVideoIndex]) {
+            const oldVid = activeWeek.videos[editingVideoIndex];
+            activeWeek.videos[editingVideoIndex] = {
+                id: oldVid.id,
+                title: title,
+                url: url,
+                materialType: materialType,
+                duration: duration || (materialType === 'ppt' ? 'عرض باوربوينت' : (materialType === 'pdf' ? 'ملف PDF' : '10:00')),
+                lectureFile: lectureFilePayload || oldVid.lectureFile || null,
+                lectureLinks: lectureLinks,
+                notes: notes
+            };
+            editingVideoIndex = -1;
+            persistLmsCourses();
+            closeLmsSubModal('lmsVideoModal');
+            renderTrainerLms();
+            showToast('تم تحديث وحفظ بيانات المحاضرة بنجاح ✓', 'success');
+            return;
+        }
+
+        const lectureId = 'v-' + Date.now();
         activeWeek.videos.push({
             id: lectureId,
             title: title,
@@ -20279,17 +21032,51 @@
             activeWeek.videos.splice(idx, 1);
             persistLmsCourses();
             renderTrainerLms();
+            showToast('تم حذف المحاضرة', 'info');
         }
     }
 
     // ===================================================================
     // REVIEW NOTES ENGINE (TEXT NOTES ONLY - مذكرات وملخصات نصية مباشرة)
     // ===================================================================
+    let editingDocIndex = -1;
+
     function openAddDocModal() {
+        editingDocIndex = -1;
+        const titleEl = document.getElementById('lmsDocModalTitle');
+        if (titleEl) titleEl.innerText = 'إدارة المذكرات والملخصات الدراسية';
+        const btnEl = document.getElementById('lmsDocSubmitBtn');
+        if (btnEl) btnEl.innerText = 'حفظ ونشر المذكرة';
+
         document.getElementById('lmsDocTitle').value = '';
         document.getElementById('lmsDocDesc').value = '';
         const urlEl = document.getElementById('lmsDocUrl');
         if (urlEl) urlEl.value = '';
+        const modal = document.getElementById('lmsDocModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function openEditDocModal(idx) {
+        editingDocIndex = idx;
+        const courseKey = getActiveTrainerCourseKey();
+        const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
+        const activeWeek = getActiveTrainerLmsWeekObj(courseData);
+        if (!activeWeek) return;
+
+        const list = (activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []);
+        if (!list || !list[idx]) return;
+        const d = list[idx];
+
+        const titleEl = document.getElementById('lmsDocModalTitle');
+        if (titleEl) titleEl.innerText = 'تعديل المذكرة والملخص الدراسي';
+        const btnEl = document.getElementById('lmsDocSubmitBtn');
+        if (btnEl) btnEl.innerText = 'تحديث وحفظ التعديلات';
+
+        document.getElementById('lmsDocTitle').value = d.title || '';
+        document.getElementById('lmsDocDesc').value = d.description || d.desc || '';
+        const urlEl = document.getElementById('lmsDocUrl');
+        if (urlEl) urlEl.value = d.url || '';
+
         const modal = document.getElementById('lmsDocModal');
         if (modal) modal.classList.remove('hidden');
     }
@@ -20310,7 +21097,31 @@
             return;
         }
 
-        if (!activeWeek.docs) activeWeek.docs = [];
+        if (!activeWeek.docs) {
+            activeWeek.docs = activeWeek.documents ? [...activeWeek.documents] : [];
+        }
+
+        if (editingDocIndex >= 0 && activeWeek.docs[editingDocIndex]) {
+            const oldId = activeWeek.docs[editingDocIndex].id || ('d-' + Date.now());
+            activeWeek.docs[editingDocIndex] = {
+                id: oldId,
+                title: title,
+                docKind: 'text',
+                type: 'مذكرة مراجعة نصية',
+                description: desc,
+                desc: desc,
+                url: url
+            };
+            if (activeWeek.documents && activeWeek.documents[editingDocIndex]) {
+                activeWeek.documents[editingDocIndex] = activeWeek.docs[editingDocIndex];
+            }
+            editingDocIndex = -1;
+            persistLmsCourses();
+            closeLmsSubModal('lmsDocModal');
+            renderTrainerLms();
+            showToast('تم تحديث وحفظ مذكرة المراجعة بنجاح ✓', 'success');
+            return;
+        }
 
         const newDoc = {
             id: 'd-' + Date.now(),
@@ -20323,10 +21134,11 @@
         };
 
         activeWeek.docs.push(newDoc);
-        localStorage.setItem('sys_lms_courses_v1', JSON.stringify(lmsCourses));
+        if (activeWeek.documents) activeWeek.documents.push(newDoc);
+        persistLmsCourses();
         closeLmsSubModal('lmsDocModal');
         renderTrainerLms();
-        showToast('تمت إضافة ونشر مذكرة المراجعة بنجاح', 'success');
+        showToast('تمت إضافة ونشر مذكرة المراجعة بنجاح ✓', 'success');
     }
 
     function deleteLmsDoc(idx) {
@@ -20334,10 +21146,15 @@
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
-        if (!activeWeek || !activeWeek.docs) return;
+        if (!activeWeek) return;
 
-        activeWeek.docs.splice(idx, 1);
-        localStorage.setItem('sys_lms_courses_v1', JSON.stringify(lmsCourses));
+        if (activeWeek.docs && activeWeek.docs[idx]) {
+            activeWeek.docs.splice(idx, 1);
+        }
+        if (activeWeek.documents && activeWeek.documents[idx]) {
+            activeWeek.documents.splice(idx, 1);
+        }
+        persistLmsCourses();
         renderTrainerLms();
         showToast('تم حذف مذكرة المراجعة', 'info');
     }
@@ -20444,6 +21261,13 @@
         const defaultTarget = (activeTrainerLmsGroupFilter && activeTrainerLmsGroupFilter !== 'ALL') ? activeTrainerLmsGroupFilter : 'ALL';
         populateLmsTargetGroupOptions('lmsQuizTargetGroup', defaultTarget);
 
+        const defD = new Date();
+        defD.setDate(defD.getDate() + 7);
+        const dateInputEl = document.getElementById('lmsQuizDueDateInput');
+        if (dateInputEl) dateInputEl.value = defD.toISOString().split('T')[0];
+        const timeInputEl = document.getElementById('lmsQuizDueTimeInput');
+        if (timeInputEl) timeInputEl.value = '23:59';
+
         const qdInput = document.getElementById('lmsQuizDate');
         if (qdInput) qdInput.value = 'الخميس 11:59 م';
 
@@ -20471,6 +21295,32 @@
         document.getElementById('lmsQuizTitle').value = q.title || '';
         const qdEditInput = document.getElementById('lmsQuizDate');
         if (qdEditInput) qdEditInput.value = q.quizDate || q.dueDate || 'الخميس 11:59 م';
+
+        const dateInputEl = document.getElementById('lmsQuizDueDateInput');
+        const timeInputEl = document.getElementById('lmsQuizDueTimeInput');
+        if (dateInputEl) {
+            if (q.dueDateInput) {
+                dateInputEl.value = q.dueDateInput;
+            } else if (q.dueDateIso && q.dueDateIso.includes('T')) {
+                dateInputEl.value = q.dueDateIso.split('T')[0];
+            } else if (q.dueDate && /^\d{4}-\d{2}-\d{2}/.test(q.dueDate)) {
+                dateInputEl.value = q.dueDate.slice(0, 10);
+            } else {
+                const defD = new Date();
+                defD.setDate(defD.getDate() + 7);
+                dateInputEl.value = defD.toISOString().split('T')[0];
+            }
+        }
+        if (timeInputEl) {
+            if (q.dueTimeInput) {
+                timeInputEl.value = q.dueTimeInput;
+            } else if (q.dueDateIso && q.dueDateIso.includes('T')) {
+                timeInputEl.value = q.dueDateIso.split('T')[1].slice(0, 5);
+            } else {
+                timeInputEl.value = '23:59';
+            }
+        }
+
         document.getElementById('lmsQuizDuration').value = q.timeMinutes || 10;
         document.getElementById('lmsQuizTotalPoints').value = q.totalPoints || 10;
         document.getElementById('lmsQuizMaxAttempts').value = q.maxAttempts || 2;
@@ -20539,7 +21389,15 @@
         if (!activeWeek) return;
 
         const title = document.getElementById('lmsQuizTitle').value.trim();
-        const quizDate = document.getElementById('lmsQuizDate')?.value.trim() || 'الخميس 11:59 م';
+        const dateInputVal = document.getElementById('lmsQuizDueDateInput')?.value;
+        const timeInputVal = document.getElementById('lmsQuizDueTimeInput')?.value || '23:59';
+        let quizDate = document.getElementById('lmsQuizDate')?.value.trim() || 'الخميس 11:59 م';
+        let dueDateIso = null;
+        if (dateInputVal) {
+            dueDateIso = `${dateInputVal}T${timeInputVal}:00`;
+            quizDate = `${dateInputVal} (${timeInputVal})`;
+        }
+
         const duration = parseInt(document.getElementById('lmsQuizDuration').value) || 10;
         const totalPoints = parseInt(document.getElementById('lmsQuizTotalPoints').value) || 10;
         const maxAttempts = parseInt(document.getElementById('lmsQuizMaxAttempts').value) || 2;
@@ -20568,6 +21426,10 @@
         const quizData = {
             title: title,
             quizDate: quizDate,
+            dueDate: dateInputVal || quizDate,
+            dueDateIso: dueDateIso,
+            dueDateInput: dateInputVal,
+            dueTimeInput: timeInputVal,
             timeMinutes: duration,
             totalPoints: totalPoints,
             maxAttempts: maxAttempts,
@@ -21357,8 +22219,8 @@
         if (topicsContainer) {
             topicsContainer.innerHTML = rawTopics.map((top, tIdx) => `
                 <div class="flex items-center gap-2">
-                    <span class="w-5 h-5 rounded-md bg-violet-200 text-violet-900 font-mono font-bold flex items-center justify-center text-[10px] shrink-0">${tIdx + 1}</span>
-                    <input type="text" class="aiTopicInput flex-1 bg-white border border-violet-200 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-800 outline-none focus:border-violet-400" value="${escapeHtml(top)}">
+                    <span class="w-6 h-6 rounded-lg bg-violet-100 text-violet-900 font-black flex items-center justify-center text-xs shrink-0">${tIdx + 1}</span>
+                    <input type="text" class="aiTopicInput flex-1 bg-white border border-violet-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 outline-none focus:border-violet-400" value="${escapeHtml(top)}">
                 </div>
             `).join('');
         }
@@ -21375,14 +22237,14 @@
 
         if (glossList) {
             glossList.innerHTML = terms.map((t, i) => `
-                <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-md bg-emerald-100 text-emerald-800 font-mono font-black flex items-center justify-center text-[10px] shrink-0">${i + 1}</span>
-                        <strong class="font-bold text-slate-900 font-mono">${escapeHtml(t.en || '')}</strong>
-                        <span class="text-slate-400">←</span>
-                        <span class="font-bold text-emerald-800">${escapeHtml(t.ar || '')}</span>
+                <div class="p-3 bg-white border border-slate-200 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs shadow-2xs hover:border-emerald-300 transition">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-900 font-black flex items-center justify-center text-xs shrink-0">${i + 1}</span>
+                        <span class="font-black text-slate-900 text-xs">${escapeHtml(t.en || '')}</span>
+                        <span class="text-slate-400 font-bold">←</span>
+                        <span class="font-black text-emerald-800 text-xs">${escapeHtml(t.ar || '')}</span>
                     </div>
-                    <span class="text-[11px] text-slate-500 font-bold">${escapeHtml(t.definition || '')}</span>
+                    <span class="text-[11px] text-slate-600 font-bold bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200/80">${escapeHtml(t.definition || '')}</span>
                 </div>
             `).join('');
         }
@@ -21409,19 +22271,41 @@
                 aList.innerHTML = aMcqQuestions.map((q, i) => {
                     const opts = Array.isArray(q.options) ? q.options : [];
                     return `
-                        <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2 text-xs">
-                            <div class="flex items-center justify-between">
-                                <span class="font-black text-slate-800">س ${i + 1}: ${escapeHtml(q.question || '')}</span>
-                                <span class="text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-md">
-                                    الإجابة: ${escapeHtml(q.correct_answer || opts[0] || 'الخيار 1')}
+                        <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3 transition hover:border-violet-300">
+                            <div class="flex items-start justify-between gap-3 flex-wrap border-b border-slate-100 pb-2.5">
+                                <div class="flex items-center gap-2.5 flex-1 min-w-[200px]">
+                                    <span class="px-2.5 py-1 rounded-lg bg-violet-100 text-violet-900 font-black text-xs shrink-0 shadow-2xs">
+                                        سؤال ${i + 1}
+                                    </span>
+                                    <span class="font-black text-slate-900 text-xs md:text-sm leading-relaxed">
+                                        ${escapeHtml(q.question || '')}
+                                    </span>
+                                </div>
+                                <span class="text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
+                                    <span>✓</span>
+                                    <span>الإجابة النموذجية: ${escapeHtml(q.correct_answer || opts[0] || 'الخيار 1')}</span>
                                 </span>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
-                                ${opts.map(opt => `
-                                    <div class="px-2.5 py-1 rounded-lg border text-[11px] font-bold ${opt === q.correct_answer ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900 font-black' : 'bg-slate-50 border-slate-200 text-slate-700'}">
-                                        ${opt === q.correct_answer ? '✓ ' : '• '}${escapeHtml(opt)}
-                                    </div>
-                                `).join('')}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+                                ${opts.map((opt, optIdx) => {
+                                    const isCorrect = (opt === q.correct_answer);
+                                    const letter = ['أ', 'ب', 'ج', 'د'][optIdx] || (optIdx + 1);
+                                    return `
+                                        <div class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 transition ${
+                                            isCorrect
+                                                ? 'bg-emerald-50 border-emerald-300 text-emerald-950 ring-1 ring-emerald-300/60 font-black'
+                                                : 'bg-slate-50/80 border-slate-200 text-slate-700 hover:bg-white'
+                                        }">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-5 h-5 rounded-md ${isCorrect ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-200 text-slate-700'} font-black text-[10px] flex items-center justify-center shrink-0">
+                                                    ${letter}
+                                                </span>
+                                                <span>${escapeHtml(opt)}</span>
+                                            </div>
+                                            ${isCorrect ? '<span class="text-emerald-700 font-black text-xs">✓ صحيحة</span>' : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
                     `;
@@ -21444,15 +22328,20 @@
 
         if (aTextList) {
             aTextList.innerHTML = aTextQuestions.map((tq, ti) => `
-                <div class="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2 text-xs">
-                    <div class="flex items-center justify-between">
-                        <span class="font-black text-slate-800">مهمة كتابية ${ti + 1}:</span>
-                        <span class="text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md">كتابة مقالية</span>
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3 transition hover:border-amber-300">
+                    <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 font-black text-xs shrink-0">
+                                مهمة كتابية ${ti + 1}
+                            </span>
+                            <span class="text-xs font-black text-slate-800">التكليف الإنشائي والمقالي</span>
+                        </div>
+                        <span class="text-[10px] font-black bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full">كتابة مقالية</span>
                     </div>
-                    <textarea id="aiTextPrompt-${ti}" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-800 outline-none focus:border-amber-400 resize-none">${escapeHtml(tq.prompt || '')}</textarea>
-                    <div class="flex items-center gap-2 text-[11px] text-slate-500 font-bold bg-slate-50 p-2 rounded-lg">
-                        <span>💡 الإرشادات:</span>
-                        <input type="text" id="aiTextGuide-${ti}" value="${escapeHtml(tq.guidelines || '')}" class="flex-1 bg-transparent border-0 outline-none font-bold text-slate-700">
+                    <textarea id="aiTextPrompt-${ti}" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-900 outline-none focus:border-amber-400 resize-none">${escapeHtml(tq.prompt || '')}</textarea>
+                    <div class="flex items-center gap-2 text-xs text-slate-600 font-bold bg-amber-50/50 border border-amber-200/60 p-2.5 rounded-xl">
+                        <span class="shrink-0">💡 الإرشادات والمعايير:</span>
+                        <input type="text" id="aiTextGuide-${ti}" value="${escapeHtml(tq.guidelines || '')}" class="flex-1 bg-transparent border-0 outline-none font-bold text-slate-800">
                     </div>
                 </div>
             `).join('');
@@ -21479,19 +22368,41 @@
             qList.innerHTML = questions.map((q, i) => {
                 const opts = Array.isArray(q.options) ? q.options : [];
                 return `
-                    <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2 text-xs">
-                        <div class="flex items-center justify-between">
-                            <span class="font-black text-slate-800">س ${i + 1}: ${escapeHtml(q.question || '')}</span>
-                            <span class="text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md">
-                                الإجابة: ${escapeHtml(q.correct_answer || opts[0] || 'أ')}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3 transition hover:border-blue-300">
+                        <div class="flex items-start justify-between gap-3 flex-wrap border-b border-slate-100 pb-2.5">
+                            <div class="flex items-center gap-2.5 flex-1 min-w-[200px]">
+                                <span class="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-900 font-black text-xs shrink-0 shadow-2xs">
+                                    سؤال ${i + 1}
+                                </span>
+                                <span class="font-black text-slate-900 text-xs md:text-sm leading-relaxed">
+                                    ${escapeHtml(q.question || '')}
+                                </span>
+                            </div>
+                            <span class="text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
+                                <span>✓</span>
+                                <span>الإجابة الصحيحة: ${escapeHtml(q.correct_answer || opts[0] || 'أ')}</span>
                             </span>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
-                            ${opts.map(opt => `
-                                <div class="px-2.5 py-1 rounded-lg border text-[11px] font-bold ${opt === q.correct_answer ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900 font-black' : 'bg-slate-50 border-slate-200 text-slate-700'}">
-                                    ${opt === q.correct_answer ? '✓ ' : '• '}${escapeHtml(opt)}
-                                </div>
-                            `).join('')}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+                            ${opts.map((opt, optIdx) => {
+                                const isCorrect = (opt === q.correct_answer);
+                                const letter = ['أ', 'ب', 'ج', 'د'][optIdx] || (optIdx + 1);
+                                return `
+                                    <div class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 transition ${
+                                        isCorrect
+                                            ? 'bg-emerald-50 border-emerald-300 text-emerald-950 ring-1 ring-emerald-300/60 font-black'
+                                            : 'bg-slate-50/80 border-slate-200 text-slate-700 hover:bg-white'
+                                    }">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-5 h-5 rounded-md ${isCorrect ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-200 text-slate-700'} font-black text-[10px] flex items-center justify-center shrink-0">
+                                                ${letter}
+                                            </span>
+                                            <span>${escapeHtml(opt)}</span>
+                                        </div>
+                                        ${isCorrect ? '<span class="text-emerald-700 font-black text-xs">✓ صحيحة</span>' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
                 `;
@@ -21598,6 +22509,7 @@
 
         const defDueDate = new Date();
         defDueDate.setDate(defDueDate.getDate() + 7);
+        const resolvedAssignmentDueDate = document.getElementById('aiAssignmentDueDate')?.value || defDueDate.toISOString().split('T')[0];
 
         if (currentAiAssignmentMode === 'text') {
             // Text Writing / Essay Assignment
@@ -21607,7 +22519,8 @@
             activeWeek.assignments.push({
                 id: 'a-' + Date.now(),
                 title: aTitle,
-                dueDate: defDueDate.toISOString().split('T')[0],
+                dueDate: resolvedAssignmentDueDate,
+                dueDateIso: resolvedAssignmentDueDate,
                 points: 10,
                 targetGroup: targetGrp,
                 assignmentCategory: 'essay',
@@ -21649,7 +22562,8 @@
             activeWeek.assignments.push({
                 id: 'a-' + Date.now(),
                 title: aTitle,
-                dueDate: defDueDate.toISOString().split('T')[0],
+                dueDate: resolvedAssignmentDueDate,
+                dueDateIso: resolvedAssignmentDueDate,
                 points: 10,
                 targetGroup: targetGrp,
                 assignmentCategory: 'individual',
@@ -21673,6 +22587,7 @@
         const qTitle = document.getElementById('aiQuizTitle')?.value.trim() || 'اختبار الأسبوع';
         const qDur = parseInt(document.getElementById('aiQuizDuration')?.value, 10) || 15;
         const qGrade = parseInt(document.getElementById('aiQuizGrade')?.value, 10) || 10;
+        const resolvedQuizDueDate = document.getElementById('aiQuizDueDate')?.value || 'الخميس 11:59 م';
 
         const rawQuizQuestions = Array.isArray(currentAiGeneratedData.quiz?.questions) ? currentAiGeneratedData.quiz.questions : [];
         const quizQuestionsFormatted = rawQuizQuestions.map((q, idx) => {
@@ -21696,7 +22611,9 @@
         activeWeek.quizzes.push({
             id: 'q-' + Date.now(),
             title: qTitle,
-            quizDate: 'الخميس 11:59 م',
+            quizDate: resolvedQuizDueDate,
+            dueDate: resolvedQuizDueDate,
+            dueDateIso: resolvedQuizDueDate,
             timeMinutes: qDur,
             totalPoints: qGrade,
             maxAttempts: 2,
@@ -26655,7 +27572,513 @@
     window.renderVcScheduleMatrix = renderVcScheduleMatrix;
     window.evaluateTraineeSessionAccess = evaluateTraineeSessionAccess;
     window.formatDateToArabic = formatDateToArabic;
-    window.getTodayDateString = getTodayDateString;
+    window.getTodayDateString = getTodayDateString;    // ===================================================================
+    // STUDENT COURSES PAGE (مقرراتك التدريبية المستقلة)
+    // ===================================================================
+    function renderStudentCoursesPage() {
+        if (!currentUser) return;
+        const nameEl = document.getElementById('scTraineeName');
+        const groupEl = document.getElementById('scTraineeGroup');
+        const container = document.getElementById('studentCoursesCardsContainer');
+        if (!container) return;
+
+        if (nameEl) nameEl.innerText = currentUser.name || 'المتدرب';
+        if (groupEl) groupEl.innerText = currentUser.group || 'شعبة معتمدة';
+
+        const courses = (typeof getAllCoursesForTrainee === 'function') ? getAllCoursesForTrainee(currentUser) : [];
+        if (!courses || courses.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-full p-8 text-center bg-white rounded-3xl border border-slate-200 space-y-3">
+                    <span class="text-4xl block">📚</span>
+                    <h4 class="font-black text-slate-800 text-sm">لا توجد مقررات تدريبية مسجلة لشعبتك حالياً</h4>
+                    <p class="text-xs text-slate-500">يرجى مراجعة إدارة شؤون المتدربين لتحديث شعبتك وجدولك الدراسي</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = courses.map((c, idx) => {
+            const courseData = (typeof lmsCourses !== 'undefined' && lmsCourses[c.lmsKey]) ? lmsCourses[c.lmsKey] : {};
+            const weeks = courseData.weeks || [];
+            let totalVideos = 0;
+            let totalDocs = 0;
+            let totalAssignments = 0;
+            let totalQuizzes = 0;
+
+            weeks.forEach(w => {
+                totalVideos += (w.videos ? w.videos.length : 0);
+                totalDocs += (w.docs ? w.docs.length : 0);
+                totalAssignments += (w.assignments ? w.assignments.length : 0);
+                totalQuizzes += (w.quizzes ? w.quizzes.length : 0);
+            });
+
+            return `
+                <div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-5 hover:border-purple-300 group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-purple-100 text-purple-900 border border-purple-200">
+                                <span>${idx === 0 ? '📘' : '💻'}</span>
+                                <span>${c.periodLabel || `الفترة ${idx + 1}`}</span>
+                            </span>
+                            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                                🏫 ${c.room || 'القاعة التدريبية'}
+                            </span>
+                        </div>
+
+                        <div>
+                            <h4 class="text-base font-black text-slate-900 group-hover:text-purple-900 transition">${c.courseTitle || courseData.courseTitle || c.courseShort}</h4>
+                            <p class="text-xs text-slate-500 font-bold mt-1 flex items-center gap-1.5">
+                                <span>👨‍🏫 المدرب المعتمد:</span>
+                                <span class="text-slate-800">${c.trainerName || courseData.trainer || 'المدرب المختص'}</span>
+                            </p>
+                        </div>
+
+                        <!-- 6-Weeks Academic Roadmap Breakdown -->
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-2">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-600">
+                                <span>الخطة الزمنية للمنهج:</span>
+                                <span class="text-purple-700 font-black">6 أسابيع تدريبية معتمدة</span>
+                            </div>
+                            <div class="grid grid-cols-6 gap-1 text-center">
+                                ${[1, 2, 3, 4, 5, 6].map(wkNum => `
+                                    <div class="py-1 px-0.5 rounded-lg text-[10px] font-black border ${wkNum === 1 ? 'bg-purple-600 text-white border-purple-600 shadow-2xs' : 'bg-white text-slate-700 border-slate-200'}">
+                                        أسبوع ${wkNum}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Module Stats Grid -->
+                        <div class="grid grid-cols-4 gap-2 pt-1 text-center">
+                            <div class="p-2 bg-blue-50/70 rounded-xl border border-blue-100">
+                                <span class="block text-xs font-black text-blue-900">${totalVideos}</span>
+                                <span class="text-[10px] text-blue-700 font-bold">محاضرة</span>
+                            </div>
+                            <div class="p-2 bg-emerald-50/70 rounded-xl border border-emerald-100">
+                                <span class="block text-xs font-black text-emerald-900">${totalDocs}</span>
+                                <span class="text-[10px] text-emerald-700 font-bold">مذكرة</span>
+                            </div>
+                            <div class="p-2 bg-amber-50/70 rounded-xl border border-amber-100">
+                                <span class="block text-xs font-black text-amber-900">${totalAssignments}</span>
+                                <span class="text-[10px] text-amber-700 font-bold">واجب</span>
+                            </div>
+                            <div class="p-2 bg-purple-50/70 rounded-xl border border-purple-100">
+                                <span class="block text-xs font-black text-purple-900">${totalQuizzes}</span>
+                                <span class="text-[10px] text-purple-700 font-bold">اختبار</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Direct Launch Button -->
+                    <button type="button" onclick="openStudentLmsForCourse('${c.lmsKey}')" class="w-full bg-[#0F2942] hover:bg-purple-950 text-white font-black py-3 rounded-2xl text-xs transition duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer group-hover:scale-[1.01]">
+                        <span>دخول المقرر واستعراض المحتوى والأسابيع</span>
+                        <span>←</span>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function openStudentLmsForCourse(courseKey) {
+        if (typeof switchStudentActiveCourse === 'function') {
+            switchStudentActiveCourse(courseKey);
+        } else {
+            activeStudentLmsCourse = courseKey;
+        }
+        switchTab('studentLms');
+    }
+
+    // ===================================================================
+    // TRAINER STUDENT DEMO VIEW (وضع المعاينة كمتدرب للمدربين)
+    // ===================================================================
+    function openStudentDemoPreview() {
+        if (!currentUser) return;
+        if (!window._trainerDemoBackupUser) {
+            window._trainerDemoBackupUser = JSON.parse(JSON.stringify(currentUser));
+        }
+
+        const trainerGroup = activeSelectedGroupInTrainerDashboard || 'سامسونج 101 & 102';
+
+        currentUser = {
+            id: 'DEMO-STUDENT',
+            cleanId: 'DEMO-STUDENT',
+            name: `معاينة كمتدرب (${window._trainerDemoBackupUser.name})`,
+            role: 'student',
+            group: trainerGroup,
+            company: 'Samsung / التدريب الميداني',
+            rate: 100,
+            archiveRate: 100,
+            combinedRate: 100,
+            weeklyAttendance: [true, true, true, true, true],
+            isDemoPreview: true
+        };
+
+        const banner = document.getElementById('trainerDemoNoticeBanner');
+        if (banner) banner.classList.remove('hidden');
+        const bannerCourses = document.getElementById('trainerDemoNoticeBannerCourses');
+        if (bannerCourses) bannerCourses.classList.remove('hidden');
+
+        applyUserRolePermissions();
+        switchTab('studentCourses');
+        showToast('👁️ تم الانتقال لوضع المعاينة كمتدرب! يمكنك استعراض المقررات والمحتوى تماماً كما يشاهده المتدرب.', 'info');
+    }
+
+    function exitTrainerStudentDemo() {
+        if (window._trainerDemoBackupUser) {
+            currentUser = JSON.parse(JSON.stringify(window._trainerDemoBackupUser));
+            window._trainerDemoBackupUser = null;
+        }
+
+        const banner = document.getElementById('trainerDemoNoticeBanner');
+        if (banner) banner.classList.add('hidden');
+        const bannerCourses = document.getElementById('trainerDemoNoticeBannerCourses');
+        if (bannerCourses) bannerCourses.classList.add('hidden');
+
+        applyUserRolePermissions();
+        switchTab('trainerDashboard');
+        showToast('تمت العودة بنجاح إلى لوحة تحكم المدرب 👨‍🏫', 'success');
+    }
+
+    // ===================================================================
+    // ATTENDANCE SHEET PAGE (كشف الحضور العام والغياب المباشر والأرشيف)
+    // ===================================================================
+    let activeAttendanceArchiveWeekKey = 'LIVE';
+    let cachedAttendanceSheetData = [];
+
+    function renderAttendanceSheetPage() {
+        const cont = document.getElementById('attendanceSheetContentContainer');
+        if (!cont) return;
+
+        const sourceBadge = document.getElementById('attSourceBadge');
+        const weekBadge = document.getElementById('attSheetWeekBadge');
+        const totalCountBadge = document.getElementById('attTotalTraineesCount');
+        const avgRateBadge = document.getElementById('attAverageRateBadge');
+        const violCountBadge = document.getElementById('attViolatorsCountBadge');
+        const groupFilterSel = document.getElementById('attGroupFilterSelect');
+
+        // Build dataset based on activeAttendanceArchiveWeekKey
+        let sheetTrainees = [];
+        if (activeAttendanceArchiveWeekKey === 'LIVE') {
+            const rawPool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : SAMPLE_TRAINEES;
+            sheetTrainees = rawPool.filter(t => !isLAGroup(t.group));
+            if (sourceBadge) sourceBadge.innerText = 'Google Sheets (مباشر)';
+            if (weekBadge) weekBadge.innerText = 'الأسبوع الحالي (مباشر)';
+        } else {
+            const loadedFromArchive = [];
+            for (let cId in archiveData) {
+                const item = archiveData[cId];
+                if (item && item.weeksHistory && item.weeksHistory[activeAttendanceArchiveWeekKey]) {
+                    const wEntry = item.weeksHistory[activeAttendanceArchiveWeekKey];
+                    loadedFromArchive.push({
+                        id: item.id || cId,
+                        name: item.name || 'متدرب',
+                        group: item.group || 'سامسونج 101 & 102',
+                        company: item.company || 'معتمد',
+                        rate: wEntry.rate !== undefined ? wEntry.rate : 100,
+                        weeklyAttendance: [true, true, true, true, true],
+                        weeklyAttendedSessions: wEntry.attended || 10
+                    });
+                }
+            }
+            sheetTrainees = loadedFromArchive.length > 0 ? loadedFromArchive : trainees;
+            if (sourceBadge) sourceBadge.innerText = `أرشيف: ${activeAttendanceArchiveWeekKey}`;
+            if (weekBadge) weekBadge.innerText = `الأسبوع المؤرشف (${activeAttendanceArchiveWeekKey})`;
+        }
+
+        // Scope by User Role
+        if (currentUser && currentUser.role === 'student') {
+            const myCleanId = cleanNationalId(currentUser.id);
+            sheetTrainees = sheetTrainees.filter(t => cleanNationalId(t.id) === myCleanId || t.id === currentUser.id);
+            const tb = document.getElementById('attFilterToolbar');
+            if (tb) tb.classList.add('hidden');
+        } else if (currentUser && currentUser.role === 'trainer') {
+            const trainerObj = getTrainerObj(currentUser);
+            const trainerName = trainerObj ? trainerObj.name : (currentUser.trainerProfile || currentUser.name);
+            const linkedGroups = (typeof getTrainerLinkedGroups === 'function') 
+                ? getTrainerLinkedGroups(trainerName) 
+                : ((typeof getGroupsForTrainer === 'function') ? getGroupsForTrainer(trainerName) : []);
+
+            if (linkedGroups && linkedGroups.length > 0) {
+                sheetTrainees = sheetTrainees.filter(t => {
+                    return linkedGroups.some(g => isGroupMatch(g, t.group));
+                });
+            }
+
+            if (groupFilterSel) {
+                const uniqueGroups = Array.from(new Set(sheetTrainees.map(t => {
+                    if ((/samsung/i.test(t.group) || /سامسونج/.test(t.group)) && (t.group.includes('101') || t.group.includes('102'))) {
+                        return 'سامسونج 101 & 102';
+                    }
+                    return t.group;
+                }))).filter(Boolean);
+
+                groupFilterSel.innerHTML = `
+                    <option value="ALL">جميع مجموعاتي المعتمدة (${sheetTrainees.length} متدرب)</option>
+                    ${uniqueGroups.map(g => `<option value="${g}">${g}</option>`).join('')}
+                `;
+            }
+        } else {
+            if (groupFilterSel && groupFilterSel.options.length <= 2) {
+                const allGroups = Array.from(new Set(sheetTrainees.map(t => {
+                    if ((/samsung/i.test(t.group) || /سامسونج/.test(t.group)) && (t.group.includes('101') || t.group.includes('102'))) {
+                        return 'سامسونج 101 & 102';
+                    }
+                    return t.group;
+                }))).filter(Boolean);
+
+                groupFilterSel.innerHTML = `
+                    <option value="ALL">جميع المجموعات (الكل)</option>
+                    <option value="سامسونج 101 & 102">سامسونج 101 & 102 (مدمجة)</option>
+                    ${allGroups.filter(g => g !== 'سامسونج 101 & 102').map(g => `<option value="${g}">${g}</option>`).join('')}
+                `;
+            }
+        }
+
+        cachedAttendanceSheetData = sheetTrainees;
+
+        const total = sheetTrainees.length;
+        let sumRate = 0;
+        let violCount = 0;
+        sheetTrainees.forEach(t => {
+            const r = t.rate !== undefined ? t.rate : 100;
+            sumRate += r;
+            if (r < 80) violCount++;
+        });
+        const avg = total > 0 ? Math.round(sumRate / total) : 0;
+
+        if (totalCountBadge) totalCountBadge.innerText = total;
+        if (avgRateBadge) avgRateBadge.innerText = `${avg}%`;
+        if (violCountBadge) violCountBadge.innerText = violCount;
+
+        filterAttendanceSheetView();
+    }
+
+    function filterAttendanceSheetView() {
+        const cont = document.getElementById('attendanceSheetContentContainer');
+        if (!cont) return;
+
+        const groupVal = document.getElementById('attGroupFilterSelect')?.value || 'ALL';
+        const statusVal = document.getElementById('attStatusFilterSelect')?.value || 'ALL';
+        const searchVal = (document.getElementById('attSearchInput')?.value || '').trim().toLowerCase();
+
+        let filtered = cachedAttendanceSheetData.filter(t => {
+            if (groupVal !== 'ALL') {
+                if (groupVal === 'سامسونج 101 & 102') {
+                    const isSamsungCombined = (/samsung/i.test(t.group) || /سامسونج/.test(t.group)) && (t.group.includes('101') || t.group.includes('102'));
+                    if (!isSamsungCombined && t.group !== 'سامسونج 101 & 102') return false;
+                } else if (!isGroupMatch(groupVal, t.group)) {
+                    return false;
+                }
+            }
+
+            const r = t.rate !== undefined ? t.rate : 100;
+            if (statusVal === 'present' && r < 90) return false;
+            if (statusVal === 'violator' && (r < 50 || r >= 90)) return false;
+            if (statusVal === 'absent' && r >= 50) return false;
+
+            if (searchVal) {
+                const name = (t.name || '').toLowerCase();
+                const id = (t.id || '').toLowerCase();
+                const grp = (t.group || '').toLowerCase();
+                if (!name.includes(searchVal) && !id.includes(searchVal) && !grp.includes(searchVal)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            cont.innerHTML = `
+                <div class="p-12 text-center text-slate-500 font-bold text-xs space-y-2">
+                    <span class="text-3xl block">🔍</span>
+                    <span>لا توجد سجلات حضور تطابق الفلاتر المحددة</span>
+                </div>
+            `;
+            return;
+        }
+
+        const daysNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+
+        cont.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-100/80 text-slate-700 font-black border-b border-slate-200">
+                            <th class="p-3 text-center w-12">#</th>
+                            <th class="p-3">اسم المتدرب</th>
+                            <th class="p-3">الهوية الوطنية</th>
+                            <th class="p-3">المجموعة</th>
+                            ${daysNames.map(d => `<th class="p-2 text-center min-w-[70px]">${d}</th>`).join('')}
+                            <th class="p-3 text-center">نسبة الحضور</th>
+                            <th class="p-3 text-center">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-medium">
+                        ${filtered.map((t, idx) => {
+                            const r = t.rate !== undefined ? t.rate : 100;
+                            let statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">ملتزم ممتاز</span>';
+                            if (r < 50) {
+                                statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300">غياب حرج</span>';
+                            } else if (r < 80) {
+                                statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300">إنذار / مخالف</span>';
+                            }
+
+                            let displayGroup = t.group || 'غير محدد';
+                            if ((/samsung/i.test(displayGroup) || /سامسونج/.test(displayGroup)) && (displayGroup.includes('101') || displayGroup.includes('102'))) {
+                                displayGroup = 'سامسونج 101 & 102';
+                            }
+
+                            return `
+                                <tr class="hover:bg-slate-50/80 transition">
+                                    <td class="p-3 text-center text-slate-400 font-bold font-mono">${idx + 1}</td>
+                                    <td class="p-3 font-bold text-slate-900">${t.name}</td>
+                                    <td class="p-3 text-slate-600 font-mono font-bold">${t.id}</td>
+                                    <td class="p-3">
+                                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black border ${displayGroup.includes('سامسونج') ? 'bg-blue-50 text-blue-900 border-blue-200' : 'bg-slate-100 text-slate-700 border-slate-200'}">
+                                            ${displayGroup}
+                                        </span>
+                                    </td>
+                                    ${[0, 1, 2, 3, 4].map(dIdx => {
+                                        const dayChecks = (t.weeklyAttendance && t.weeklyAttendance[dIdx]) ? t.weeklyAttendance[dIdx] : [true, true];
+                                        const count = Array.isArray(dayChecks) ? dayChecks.filter(Boolean).length : (dayChecks ? 2 : 0);
+                                        let icon = '<span class="text-emerald-600 font-black text-xs" title="حاضر كامل (فترتان)">✓✓</span>';
+                                        if (count === 1) icon = '<span class="text-amber-600 font-black text-xs" title="فترة واحدة">✓✕</span>';
+                                        else if (count === 0) icon = '<span class="text-rose-600 font-black text-xs" title="غائب">✕✕</span>';
+                                        return `<td class="p-2 text-center bg-slate-50/40">${icon}</td>`;
+                                    }).join('')}
+                                    <td class="p-3 text-center font-mono font-black ${r >= 80 ? 'text-emerald-600' : (r >= 50 ? 'text-amber-600' : 'text-rose-600')}">
+                                        ${r}%
+                                    </td>
+                                    <td class="p-3 text-center">${statusBadge}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function openAttendanceArchiveCalendarModal() {
+        const modal = document.getElementById('attendanceArchiveCalendarModal');
+        const listCont = document.getElementById('attCalendarWeeksList');
+        if (!modal || !listCont) return;
+
+        const weekSet = new Set();
+        for (let cId in archiveData) {
+            if (archiveData[cId]?.weeksHistory) {
+                Object.keys(archiveData[cId].weeksHistory).forEach(k => weekSet.add(k));
+            }
+        }
+        if (Array.isArray(reports)) {
+            reports.forEach(r => {
+                if (r.weekTitle || r.date) weekSet.add(r.weekTitle || r.date);
+            });
+        }
+
+        const weeksArray = Array.from(weekSet).filter(Boolean);
+
+        listCont.innerHTML = `
+            <!-- Live Week Option -->
+            <button type="button" onclick="selectAttendanceArchiveWeek('LIVE')" class="w-full text-right p-3.5 rounded-2xl border transition flex items-center justify-between cursor-pointer ${
+                activeAttendanceArchiveWeekKey === 'LIVE'
+                    ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300'
+                    : 'bg-white hover:bg-slate-50 border-slate-200'
+            }">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-xl">🟢</span>
+                    <div>
+                        <div class="font-black text-xs text-slate-900">الأسبوع الحالي (رابط التحضير المباشر Google Sheets)</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">سجل الحضور اللحظي المتزامن آلياً مع شيت التحضير اليومي</div>
+                    </div>
+                </div>
+                ${activeAttendanceArchiveWeekKey === 'LIVE' ? '<span class="text-[10px] font-black bg-amber-400 text-slate-950 px-2 py-0.5 rounded-md">المعروض حالياً ✓</span>' : ''}
+            </button>
+
+            <!-- Archived Weeks from sync page -->
+            ${weeksArray.length > 0 ? `
+                <div class="pt-2">
+                    <span class="text-[11px] font-black text-slate-600 block mb-1">الأسابيع المؤرشفة والمرفوعة من صفحة المزامنة:</span>
+                    <div class="space-y-1.5">
+                        ${weeksArray.map(wk => {
+                            const isAct = activeAttendanceArchiveWeekKey === wk;
+                            return `
+                                <button type="button" onclick="selectAttendanceArchiveWeek('${wk}')" class="w-full text-right p-3 rounded-2xl border transition flex items-center justify-between cursor-pointer ${
+                                    isAct
+                                        ? 'bg-indigo-50 border-indigo-400 ring-2 ring-indigo-300'
+                                        : 'bg-white hover:bg-slate-50 border-slate-200'
+                                }">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-base">📁</span>
+                                        <div>
+                                            <div class="font-bold text-xs text-slate-800">${wk}</div>
+                                            <div class="text-[10px] text-slate-400">سجل أسبوعي محفوظ بالأرشيف التراكمي</div>
+                                        </div>
+                                    </div>
+                                    ${isAct ? '<span class="text-[10px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded-md">المعروض حالياً ✓</span>' : ''}
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            ` : `
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center text-xs text-slate-500 font-bold">
+                    لا توجد أسابيع مؤرشفة إضافية بعد. يمكنك رفع ملفات الأرشيف الأسبوعية من تبويب المزامنة (Sync).
+                </div>
+            `}
+        `;
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeAttendanceArchiveCalendarModal() {
+        const modal = document.getElementById('attendanceArchiveCalendarModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function selectAttendanceArchiveWeek(weekKey) {
+        activeAttendanceArchiveWeekKey = weekKey;
+        closeAttendanceArchiveCalendarModal();
+        renderAttendanceSheetPage();
+        if (weekKey === 'LIVE') {
+            showToast('تم التبديل لعرض كشف الحضور المباشر (Google Sheets)', 'success');
+        } else {
+            showToast(`تم التبديل لعرض سجل الأسبوع المؤرشف (${weekKey})`, 'info');
+        }
+    }
+
+    async function refreshAttendanceSheetData() {
+        if (typeof syncLiveAttendanceFromGoogleSheets === 'function') {
+            showLoading('جاري مزامنة أحدث بيانات الحضور من رابط Google Sheets...', 'Google Sheets');
+            try {
+                await syncLiveAttendanceFromGoogleSheets();
+                activeAttendanceArchiveWeekKey = 'LIVE';
+                renderAttendanceSheetPage();
+                showToast('✅ تم تحديث كشف الحضور بنجاح من Google Sheets', 'success');
+            } catch (err) {
+                showToast('تعذر التحديث: ' + err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        } else {
+            renderAttendanceSheetPage();
+        }
+    }
+
+    // تصدير الدوال الجديدة للنطاق العام window
+    window.renderStudentCoursesPage = renderStudentCoursesPage;
+    window.openStudentLmsForCourse = openStudentLmsForCourse;
+    window.openStudentDemoPreview = openStudentDemoPreview;
+    window.exitTrainerStudentDemo = exitTrainerStudentDemo;
+    window.openTrainerChangePasswordModal = openTrainerChangePasswordModal;
+    window.closeMandatoryPasswordModal = closeMandatoryPasswordModal;
+    window.renderAttendanceSheetPage = renderAttendanceSheetPage;
+    window.filterAttendanceSheetView = filterAttendanceSheetView;
+    window.openAttendanceArchiveCalendarModal = openAttendanceArchiveCalendarModal;
+    window.closeAttendanceArchiveCalendarModal = closeAttendanceArchiveCalendarModal;
+    window.selectAttendanceArchiveWeek = selectAttendanceArchiveWeek;
+    window.refreshAttendanceSheetData = refreshAttendanceSheetData;
 
 
     // ===================================================================
