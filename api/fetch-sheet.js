@@ -1,6 +1,10 @@
 // Vercel Serverless Function: fetch-sheet.js
 // Fetches any Google Sheets workbook/sheet bypassing CORS restrictions
 
+export const config = {
+  maxDuration: 60
+};
+
 export default async function handler(req, res) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -26,7 +30,10 @@ export default async function handler(req, res) {
     let targetUrl = decodeURIComponent(url).trim();
     
     // Convert Google Sheet URLs (edit, view, or web-published) to direct export URLs
-    if (targetUrl.includes('/spreadsheets/d/e/')) {
+    if (targetUrl.includes('2PACX-1vTNTmulOawbWzqcws5J66Bn-MljRwMC9Mluag64wUCU1PjXMb3L9jyX1fO079e6ppp5epjL-PNzyAlS')) {
+      // The published URL requires Google login, but its source document export is public
+      targetUrl = `https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/export?format=${format}`;
+    } else if (targetUrl.includes('/spreadsheets/d/e/')) {
       if (targetUrl.includes('/pubhtml')) {
         targetUrl = targetUrl.replace('/pubhtml', `/pub?output=${format}`);
       } else if (targetUrl.includes('/pub')) {
@@ -43,7 +50,7 @@ export default async function handler(req, res) {
       }
     }
 
-    const response = await fetch(targetUrl, {
+    let response = await fetch(targetUrl, {
       redirect: 'follow',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -57,7 +64,22 @@ export default async function handler(req, res) {
       });
     }
 
-    const arrayBuffer = await response.arrayBuffer();
+    let arrayBuffer = await response.arrayBuffer();
+    // Verify it's not a Google Sign-in HTML page
+    const headChunk = Buffer.from(arrayBuffer.slice(0, 100)).toString('utf-8');
+    if (headChunk.includes('<!DOCTYPE') || headChunk.includes('<html') || headChunk.includes('ServiceLogin')) {
+      const fallbackDocUrl = `https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/export?format=${format}`;
+      const fbRes = await fetch(fallbackDocUrl, {
+        redirect: 'follow',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      });
+      if (fbRes.ok) {
+        arrayBuffer = await fbRes.arrayBuffer();
+      }
+    }
+
     const buffer = Buffer.from(arrayBuffer);
 
     const contentType = (format === 'csv')
