@@ -1289,6 +1289,10 @@
                                 <span>رابط التحضير اليومي للشعبة</span>
                                 <span class="text-[10px] bg-slate-950 text-amber-300 px-1 py-0.2 rounded font-mono">↗</span>
                             </a>
+                            <button type="button" id="btnTrainerManualSync" onclick="syncTrainerManualAttendance()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition border border-amber-400 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed" title="مزامنة وتحديث كشف التحضير للشعبة فوراً من Google Sheets (مسموح مرة كل 10 دقائق)">
+                                <span class="text-sm" id="iconTrainerManualSync">🔄</span>
+                                <span id="labelTrainerManualSync">مزامنة التحضير (كل 10د)</span>
+                            </button>
                             <button id="btnCopyGroupPhones" onclick="copyGroupPhones()" class="bg-slate-900 hover:bg-black text-amber-300 font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1 shadow-xs" title="نسخ جميع أرقام جوال طلاب هذه المجموعة">
                                 <span>📲</span>
                                 <span>نسخ الجوالات</span>
@@ -7498,6 +7502,7 @@
         }).join('') || `<div class="col-span-4 p-8 text-center text-xs text-slate-400 font-bold">لا توجد شعب مسجلة لهذا المدرب</div>`;
 
         renderTraineesOfSelectedGroup();
+        updateTrainerSyncButtonCooldownUI();
     }
 
     function selectGroupInTrainerDashboard(groupName) {
@@ -9445,6 +9450,158 @@
     // بديل اسم الدالة القديم لضمان التوافق التام
     function syncGoogleSheet() {
         syncLiveAttendanceFromGoogleSheets();
+    }
+
+    // ===================================================================
+    // نظام مزامنة التحضير اليدوي للمدرب (مسموح مرة كل 10 دقائق)
+    // ===================================================================
+    const TRAINER_SYNC_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes (600,000 ms)
+
+    function getTrainerSyncRemainingMs() {
+        const trainerKey = currentUser?.id || currentUser?.username || activeTrainerForDashboard || 'trainer';
+        const cooldownKey = `sys_trainer_last_attendance_sync_${trainerKey}`;
+        const lastSync = parseInt(localStorage.getItem(cooldownKey) || '0', 10);
+        const elapsed = Date.now() - lastSync;
+        return Math.max(0, TRAINER_SYNC_COOLDOWN_MS - elapsed);
+    }
+
+    function updateTrainerSyncButtonCooldownUI() {
+        const btn = document.getElementById('btnTrainerManualSync');
+        const icon = document.getElementById('iconTrainerManualSync');
+        const label = document.getElementById('labelTrainerManualSync');
+        if (!btn || !label) return;
+
+        const remMs = getTrainerSyncRemainingMs();
+        if (remMs > 0) {
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btn.classList.remove('hover:from-amber-600', 'hover:to-amber-700', 'cursor-pointer');
+            const totalSecs = Math.ceil(remMs / 1000);
+            const m = Math.floor(totalSecs / 60);
+            const s = totalSecs % 60;
+            const timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
+            label.textContent = `مزامنة التحضير (${timeStr})`;
+            if (icon) icon.textContent = '⏳';
+            btn.title = `المزامنة اليدوية متاحة بعد انتهاء المهلة: متبقي (${timeStr}) دقيقة (تحديث كل 10 دقائق)`;
+        } else {
+            btn.disabled = false;
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            btn.classList.add('hover:from-amber-600', 'hover:to-amber-700', 'cursor-pointer');
+            label.textContent = 'مزامنة التحضير (كل 10د)';
+            if (icon) icon.textContent = '🔄';
+            btn.title = 'مزامنة وتحديث كشف التحضير للشعبة فوراً من Google Sheets (مسموح مرة كل 10 دقائق)';
+        }
+    }
+
+    async function syncTrainerManualAttendance() {
+        const remMs = getTrainerSyncRemainingMs();
+        if (remMs > 0) {
+            const totalSecs = Math.ceil(remMs / 1000);
+            const m = Math.floor(totalSecs / 60);
+            const s = totalSecs % 60;
+            const timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
+            showToast(`⏳ يرجى الانتظار (${timeStr}) دقيقة قبل إجراء المزامنة اليدوية القادمة (مسموح مرة كل 10 دقائق)`, 'warning');
+            updateTrainerSyncButtonCooldownUI();
+            return;
+        }
+
+        const btn = document.getElementById('btnTrainerManualSync');
+        const icon = document.getElementById('iconTrainerManualSync');
+        const label = document.getElementById('labelTrainerManualSync');
+        if (btn) btn.disabled = true;
+        if (icon) icon.classList.add('animate-spin');
+        if (label) label.textContent = 'جاري المزامنة...';
+
+        showLoading('جاري مزامنة كشف التحضير وتحديث بيانات الشعبة...', 'Google Sheets');
+
+        try {
+            const savedUrl = getLiveSheetUrl();
+            const { workbook, error, exportUrl, arrayBuffer } = await fetchGoogleSheetWorkbook(savedUrl);
+            hideLoading();
+            if (icon) icon.classList.remove('animate-spin');
+
+            if (error || !workbook) {
+                updateTrainerSyncButtonCooldownUI();
+                showLiveSyncFallbackModal(exportUrl);
+                return;
+            }
+
+            const result = parseAttendanceWorkbook(workbook);
+            if (!result || !result.allTrainees || result.allTrainees.length === 0) {
+                updateTrainerSyncButtonCooldownUI();
+                return showToast('لم يتم العثور على بيانات حضور مطابقة في رابط Google Sheets', 'error');
+            }
+
+            if (arrayBuffer) {
+                const detectedLAVacancies = await parseLAVacanciesFromWorkbook(workbook, arrayBuffer);
+                if (Object.keys(detectedLAVacancies).length > 0) {
+                    laVacancies = detectedLAVacancies;
+                    localStorage.setItem('sys_la_vacancies_v9', JSON.stringify(laVacancies));
+                }
+            }
+
+            trainees = result.allTrainees;
+            if (result.detectedDates && result.detectedDates.length === 5) {
+                weekDates = result.detectedDates;
+                localStorage.setItem('sys_week_dates', JSON.stringify(weekDates));
+            }
+
+            linkArchiveWithTrainees();
+
+            // تحديث كائن المتدرب الحالي فوراً إذا كان متدرباً مفتوحاً
+            if (currentUser && currentUser.role === 'student') {
+                const cleanId = cleanNationalId(currentUser.id);
+                const updated = trainees.find(t => cleanNationalId(t.id) === cleanId || t.id === currentUser.id);
+                if (updated) {
+                    currentUser.weeklyAttendance = updated.weeklyAttendance;
+                    currentUser.rate = updated.rate;
+                    currentUser.archiveRate = updated.archiveRate;
+                    currentUser.combinedRate = updated.combinedRate;
+                    currentUser.weeklyAttendedSessions = updated.weeklyAttendedSessions;
+                    currentUser.name = updated.name || currentUser.name;
+                    currentUser.group = updated.group || currentUser.group;
+                    currentUser.company = updated.company || currentUser.company;
+                    localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
+                }
+            }
+
+            // حفظ وقت المزامنة الأخير للمدرب لتفعيل عداد الـ 10 دقائق
+            const trainerKey = currentUser?.id || currentUser?.username || activeTrainerForDashboard || 'trainer';
+            const cooldownKey = `sys_trainer_last_attendance_sync_${trainerKey}`;
+            localStorage.setItem(cooldownKey, String(Date.now()));
+            lastSyncTimestamp = `مزامنة المدرب: ${new Date().toLocaleTimeString('ar-SA')}`;
+            localStorage.setItem('sys_last_sync_time', String(Date.now()));
+            saveData();
+
+            // تحديث العرض
+            renderApp();
+            renderMasterSchedule();
+            if (typeof renderTrainerDashboard === 'function') {
+                renderTrainerDashboard();
+            }
+            if (typeof renderTraineesOfSelectedGroup === 'function') {
+                renderTraineesOfSelectedGroup();
+            }
+
+            updateTrainerSyncButtonCooldownUI();
+            showToast(`✅ تم تحديث كشف التحضير واحتساب نسب الحضور بنجاح! تم استيراد ${trainees.length} متدرب. (المزامنة القادمة بعد 10 دقائق)`, 'success');
+        } catch (err) {
+            console.error('Error in syncTrainerManualAttendance:', err);
+            hideLoading();
+            if (icon) icon.classList.remove('animate-spin');
+            updateTrainerSyncButtonCooldownUI();
+            showToast('حدث خطأ أثناء مزامنة بيانات الحضور: ' + err.message, 'error');
+        }
+    }
+
+    // تشغيل مؤقت لتحديث عداد المزامنة للمدرب كل ثانية
+    if (!window._trainerSyncCooldownInterval) {
+        window._trainerSyncCooldownInterval = setInterval(() => {
+            const btn = document.getElementById('btnTrainerManualSync');
+            if (btn && !document.getElementById('tab-trainerDashboard')?.classList.contains('hidden')) {
+                updateTrainerSyncButtonCooldownUI();
+            }
+        }, 1000);
     }
 
     // ===================================================================

@@ -1,6 +1,6 @@
 {
   "name": "bgti-attendance-app",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "LMS and Attendance System with AI Text-to-Quiz, Interactive Matching Game, and Auto-Generation via Google Gemini & Vercel Serverless",
   "type": "module",
   "main": "api/generate.js",
