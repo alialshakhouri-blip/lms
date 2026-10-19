@@ -589,33 +589,34 @@
     <div id="loginStudentHelpNotice" class="hidden"></div>
     <div id="loginHintText" class="hidden"></div>
 
-    <!-- Mandatory Password Change Modal for Students (First Time Login) -->
-    <div id="mandatoryPasswordModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-4 border border-amber-400/50 animate-pop-in text-white text-right">
-            <div class="text-center space-y-2">
-                <div class="w-14 h-14 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl shadow-lg">
-                    🔒
-                </div>
-                <h3 class="text-lg font-black text-amber-400">تغيير كلمة المرور الإجباري</h3>
-                <div class="bg-amber-500/15 border border-amber-400/40 p-3 rounded-2xl text-xs text-amber-200 leading-relaxed font-bold">
-                    مرحباً بك يا <span id="mndTraineeName" class="text-white underline font-black">المتدرب</span>! نظراً لأن هذا أول تسجيل دخول لك بكلمة المرور الافتراضية، <b>يجب تعيين كلمة مرور جديدة وخاصة بك</b> لحماية حسابك وسجلك الأكاديمي.
-                </div>
-            </div>
+</div>
 
-            <form onsubmit="handleMandatoryPasswordChange(event)" class="space-y-3.5 pt-1">
-                <div>
-                    <label class="block text-xs font-bold mb-1 opacity-90">كلمة المرور الجديدة (New Password):</label>
-                    <input type="password" id="mndNewPassword" required minlength="4" placeholder="أدخل كلمة مرور سرية جديدة (4 خانات فأكثر)..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold mb-1 opacity-90">تأكيد كلمة المرور الجديدة (Confirm Password):</label>
-                    <input type="password" id="mndConfirmPassword" required minlength="4" placeholder="أعد إدخال نفس كلمة المرور للتأكيد..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
-                </div>
-                <button type="submit" class="w-full gold-gradient-bg text-slate-950 font-black py-3 rounded-xl text-xs transition shadow-lg hover:brightness-105 active:scale-98 flex items-center justify-center gap-2 cursor-pointer mt-2">
-                    <span>حفظ كلمة المرور والدخول إلى لوحتي الأكاديمية 🚀</span>
-                </button>
-            </form>
+<!-- Mandatory Password Change Modal for Students (First Time Login - Top Level z-[9999]) -->
+<div id="mandatoryPasswordModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
+    <div class="glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-4 border border-amber-400/50 animate-pop-in text-white text-right">
+        <div class="text-center space-y-2">
+            <div class="w-14 h-14 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl shadow-lg">
+                🔒
+            </div>
+            <h3 class="text-lg font-black text-amber-400">تغيير كلمة المرور الإجباري</h3>
+            <div class="bg-amber-500/15 border border-amber-400/40 p-3 rounded-2xl text-xs text-amber-200 leading-relaxed font-bold">
+                مرحباً بك يا <span id="mndTraineeName" class="text-white underline font-black">المتدرب</span>! نظراً لأن هذا أول تسجيل دخول لك بكلمة المرور الافتراضية، <b>يجب تعيين كلمة مرور جديدة وخاصة بك</b> لحماية حسابك وسجلك الأكاديمي.
+            </div>
         </div>
+
+        <form onsubmit="handleMandatoryPasswordChange(event)" class="space-y-3.5 pt-1">
+            <div>
+                <label class="block text-xs font-bold mb-1 opacity-90">كلمة المرور الجديدة (New Password):</label>
+                <input type="password" id="mndNewPassword" required minlength="4" placeholder="أدخل كلمة مرور سرية جديدة (4 خانات فأكثر)..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
+            </div>
+            <div>
+                <label class="block text-xs font-bold mb-1 opacity-90">تأكيد كلمة المرور الجديدة (Confirm Password):</label>
+                <input type="password" id="mndConfirmPassword" required minlength="4" placeholder="أعد إدخال نفس كلمة المرور للتأكيد..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
+            </div>
+            <button type="submit" class="w-full gold-gradient-bg text-slate-950 font-black py-3 rounded-xl text-xs transition shadow-lg hover:brightness-105 active:scale-98 flex items-center justify-center gap-2 cursor-pointer mt-2">
+                <span>حفظ كلمة المرور والدخول إلى لوحتي الأكاديمية 🚀</span>
+            </button>
+        </form>
     </div>
 </div>
 
@@ -1019,9 +1020,13 @@
 
                     <!-- Days Selection Bar -->
                     <div class="flex items-center justify-between border-t border-slate-100 pt-3 flex-wrap gap-2">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <span class="text-xs font-extrabold text-slate-800">📅 اليوم المحدد للمتابعة:</span>
                             <span class="text-[11px] text-amber-700 font-bold" id="currentDayDateLabel"></span>
+                            <button type="button" onclick="openWeeklyAttendanceCalendarModal()" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-2xs cursor-pointer" title="استعراض التقويم الأسبوعي الشامل للأيام الخمسة">
+                                <span>🗓️</span>
+                                <span>التقويم الأسبوعي للمتابعة</span>
+                            </button>
                         </div>
                         <div class="flex gap-1.5 overflow-x-auto" id="dayButtons"></div>
                     </div>
@@ -2343,6 +2348,122 @@
                 </div>
             </div>
 
+            <!-- ==================== WEEKLY ATTENDANCE CALENDAR MODAL (التقويم الأسبوعي الشامل للمتابعة) ==================== -->
+            <div id="weeklyAttendanceCalendarModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 md:p-6 overflow-y-auto">
+                <div class="bg-white rounded-3xl max-w-4xl w-full p-5 md:p-7 shadow-2xl space-y-5 border border-slate-200 text-right animate-pop-in my-auto max-h-[92vh] overflow-y-auto">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl gold-gradient-bg flex items-center justify-center text-2xl shadow-xs text-slate-950 font-black shrink-0">
+                                📅
+                            </div>
+                            <div>
+                                <h3 class="font-black text-slate-900 text-base md:text-lg">التقويم الأسبوعي الشامل للمتابعة والتحضير</h3>
+                                <p class="text-xs text-slate-500 font-bold">متابعة إحصائيات الحضور ونسب الالتزام للأيام الخمسة (الأحد - الخميس) والتبديل المباشر</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="closeWeeklyAttendanceCalendarModal()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-lg font-bold transition cursor-pointer">✕</button>
+                    </div>
+
+                    <!-- Weekly Overall Stats Banner -->
+                    <div id="wacOverallStatsBanner" class="bg-gradient-to-r from-slate-900 via-[#0F2942] to-slate-900 text-white rounded-2xl p-4 shadow-sm border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">📊</span>
+                            <div>
+                                <div class="text-xs text-amber-300 font-extrabold" id="wacWeekRangeLabel">الأسبوع التدريبي الحالي</div>
+                                <div class="text-sm font-black text-white" id="wacTotalTraineesCount">إجمالي المتدربين: 0 متدرب</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap text-xs font-mono">
+                            <span class="bg-white/10 px-3 py-1.5 rounded-xl border border-white/10">نسبة الحضور الأسبوعية العامة: <b id="wacAverageRate" class="text-amber-300 font-black">0%</b></span>
+                        </div>
+                    </div>
+
+                    <!-- 5-Day Calendar Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" id="wacDaysGrid">
+                        <!-- Populated dynamically: Sunday to Thursday cards -->
+                    </div>
+
+                    <!-- Footer note & action -->
+                    <div class="flex items-center justify-between border-t border-slate-100 pt-3 flex-wrap gap-2 text-xs">
+                        <span class="text-slate-500 font-bold">💡 انقر على زر (التحضير 👈) في أي يوم للانتقال الفوري لقائمة الحضور في ذلك اليوم.</span>
+                        <button type="button" onclick="closeWeeklyAttendanceCalendarModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold transition cursor-pointer">
+                            إغلاق
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TRAINEE WEEKLY CALENDAR MODAL (تقويم الحضور الأسبوعي للمتدرب) ==================== -->
+            <div id="traineeWeeklyCalendarModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 md:p-6 overflow-y-auto">
+                <div class="bg-white rounded-3xl max-w-3xl w-full p-5 md:p-7 shadow-2xl space-y-5 border border-slate-200 text-right animate-pop-in my-auto max-h-[92vh] overflow-y-auto">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl gold-gradient-bg flex items-center justify-center text-2xl shadow-xs text-slate-950 font-black shrink-0">
+                                👨‍🎓
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h3 class="font-black text-slate-900 text-base md:text-lg" id="twcTraineeName">اسم المتدرب</h3>
+                                    <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-slate-900 text-amber-300 border border-slate-800" id="twcGroupName">المجموعة</span>
+                                    <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300" id="twcCompanyName">الشركة</span>
+                                </div>
+                                <p class="text-xs text-slate-500 font-bold mt-0.5">
+                                    الهوية: <span id="twcTraineeId" class="font-mono text-slate-900 font-black">--</span> • 
+                                    القاعة: <span id="twcRoom" class="font-bold text-slate-700">--</span>
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="closeTraineeWeeklyCalendarModal()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-lg font-bold transition cursor-pointer">✕</button>
+                    </div>
+
+                    <!-- 2-Periods Rule Explanation & Trainee Rate Banner -->
+                    <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50/70 space-y-2">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">⚖️</span>
+                                <span class="font-black text-xs text-amber-950" id="twcRuleBadge">النظام التدريبي: ملزم بحضور فترتين (فترة 1 وفترة 2)</span>
+                            </div>
+                            <span id="twcOverallRateBadge" class="text-xs font-black px-3 py-1 rounded-full bg-emerald-600 text-white font-mono shadow-xs">100% نسبة الحضور</span>
+                        </div>
+                        <p class="text-[11px] text-amber-900 font-bold leading-relaxed" id="twcRuleExplanation">
+                            حسب لائحة المعهد: يلزم كل متدرب حضور فترتين يومياً (الفترة الأولى والثانية)، وحضور فترة واحدة فقط يُسجل كمخالفة، بينما تستثنى الشركات المستثناة رسمياً (مثل AIC).
+                        </p>
+                        <!-- Enrolled Subjects Strip -->
+                        <div id="twcSubjectsStrip" class="pt-1 flex items-center gap-2 flex-wrap text-xs"></div>
+                    </div>
+
+                    <!-- 5-Day Weekly Attendance Calendar Grid -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-black text-slate-900 text-xs flex items-center gap-1.5">
+                                <span>🗓️</span>
+                                <span>سجل الحضور الأسبوعي للأيام الخمسة (الأحد - الخميس):</span>
+                            </h4>
+                            <span class="text-[11px] font-bold text-slate-500" id="twcSummarySessionsCount">0 / 10 حصص</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-5 gap-2.5" id="twcDaysCalendarGrid">
+                            <!-- Populated dynamically: 5 days -->
+                        </div>
+                    </div>
+
+                    <!-- Modal Actions -->
+                    <div class="flex items-center justify-between border-t border-slate-100 pt-3 flex-wrap gap-2">
+                        <div id="twcWhatsAppContainer"></div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="twcOpenProfileBtn" onclick="closeTraineeWeeklyCalendarModal(); openTraineeProfileModal(currentTwcTraineeId);" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
+                                <span>👤</span>
+                                <span>فتح الملف الشامل للمتدرب</span>
+                            </button>
+                            <button type="button" onclick="closeTraineeWeeklyCalendarModal()" class="px-4 py-2 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-bold text-slate-700 transition cursor-pointer">
+                                إغلاق
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ==================== LIVE GOOGLE SHEET CONFIG MODAL ==================== -->
             <div id="liveSheetConfigModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
                 <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-200 text-right">
@@ -3004,6 +3125,25 @@
 
                 <!-- ==================== STUDENT RESUME LEARNING HERO CARD (متابعة التعلم والمهمة التالية) ==================== -->
                 <div id="sdResumeLearningCard" class="hidden"></div>
+
+                <!-- ==================== DUAL COURSE OVERVIEW (المادتان التدريبيتان المقررتان - نظام الفترتين) ==================== -->
+                <div id="sdDualCourseSection" class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-2xl">📚</span>
+                            <div>
+                                <h4 class="font-black text-slate-900 text-sm md:text-base">المقررات التدريبية المعتمدة (نظام الفترتين)</h4>
+                                <p class="text-[11px] font-bold text-slate-400">يلزم كل متدرب حضور فترتين يومياً (فترة 1 وفترة 2) ما عدا المستثنى كالشركات المعفاة (AIC)</p>
+                            </div>
+                        </div>
+                        <span id="sdDualCourseExemptBadge" class="text-xs font-black px-3 py-1 rounded-full bg-slate-900 text-amber-300 border border-slate-800">
+                            فترتان معتمدتان
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5" id="sdDualCourseCardsContainer">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
 
                 <!-- Stats Grid (نسبة الحضور + حضور الأسبوع نظام 10 حصص + الإنجاز الأكاديمي) -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -5006,6 +5146,17 @@
 
 <!-- ==================== SCRIPT LOGIC ==================== -->
 <script>
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+    window.escapeHtml = escapeHtml;
+
     const DEFAULT_DAYS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
     const SCHEDULE_HOURS = ['8:00 - 9:00', '9:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00', '12:00 - 1:00', '1:00 - 2:00', '2:00 - 3:00', '3:00 - 4:00'];
     
@@ -6121,6 +6272,8 @@
     }
 
     function logout() {
+        const modal = document.getElementById('mandatoryPasswordModal');
+        if (modal) modal.classList.add('hidden');
         currentUser = null;
         localStorage.removeItem('sys_current_user_v9');
         saveData();
@@ -6355,6 +6508,12 @@
         if (!str) return '';
         let s = String(str).toLowerCase().trim();
         s = s.replace(/[\(\)\-_]/g, '').trim().replace(/\s+/g, '');
+        s = s.replace(/ساينبوك|سينوبك|سابك/g, 'sinopec')
+             .replace(/سامسونج/g, 'samsung')
+             .replace(/هونداي|هيونداي/g, 'hyundai')
+             .replace(/شينبو/g, 'shinbo')
+             .replace(/امانة|أمانة/g, 'amana')
+             .replace(/إليكو|اليكو/g, 'eleco');
         return s;
     }
 
@@ -7492,8 +7651,41 @@
     }
 
 
-    function calculateStatus(checks) {
+    function calculateStatus(checks, traineeOrCompany) {
+        const comp = typeof traineeOrCompany === 'string'
+            ? traineeOrCompany
+            : (traineeOrCompany?.company || traineeOrCompany?.group || '');
+        const isAicExempt = /AIC/i.test(comp);
+
         const count = (checks || []).filter(Boolean).length;
+        const p1 = Boolean(checks && checks[0]);
+        const p2 = Boolean(checks && checks[1]);
+
+        if (isAicExempt) {
+            if (count >= 1) {
+                return { 
+                    label: 'حاضر (مستثنى AIC)', 
+                    type: 'present', 
+                    bg: 'bg-emerald-100 text-emerald-800 border-emerald-300', 
+                    count: count, 
+                    period1: true, 
+                    period2: count >= 2,
+                    isAicExempt: true,
+                    periodsLabel: count >= 2 ? 'حاضر فترتين (مستثنى AIC)' : 'حاضر فترة واحدة (مستثنى AIC كافية)'
+                };
+            }
+            return { 
+                label: 'غائب', 
+                type: 'absent', 
+                bg: 'bg-red-100 text-red-900 border-red-300', 
+                count: 0, 
+                period1: false, 
+                period2: false,
+                isAicExempt: true,
+                periodsLabel: 'غائب (0 حصة)'
+            };
+        }
+
         if (count >= 2) {
             return { 
                 label: 'حاضر كامل', 
@@ -7502,18 +7694,20 @@
                 count: 2, 
                 period1: true, 
                 period2: true,
+                isAicExempt: false,
                 periodsLabel: 'فترة 1 وفترة 2 (حصتان)'
             };
         }
         if (count === 1) {
             return { 
-                label: 'مخالف', 
+                label: 'مخالف (فترة واحدة)', 
                 type: 'violator', 
                 bg: 'bg-amber-100 text-amber-900 border-amber-300', 
                 count: 1, 
-                period1: true, 
-                period2: false,
-                periodsLabel: 'فترة 1 فقط (حصة واحدة)'
+                period1: p1 || !p2, 
+                period2: p2,
+                isAicExempt: false,
+                periodsLabel: p1 ? 'فترة 1 فقط (غائب فترة 2)' : 'فترة 2 فقط (غائب فترة 1)'
             };
         }
         return { 
@@ -7523,7 +7717,8 @@
             count: 0, 
             period1: false, 
             period2: false,
-                periodsLabel: 'غائب (0 حصة)'
+            isAicExempt: false,
+            periodsLabel: 'غائب (0 حصة)'
         };
     }
 
@@ -9127,7 +9322,7 @@
         } else {
             listEl.innerHTML = filteredTrainees.map((t) => {
                 const dayChecks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIndex] : [false, false, false, false];
-                const status = calculateStatus(dayChecks);
+                const status = calculateStatus(dayChecks, t);
                 const dayName = weekDates[activeDayIndex] || DEFAULT_DAYS[activeDayIndex];
 
                 const whatsappMsg = encodeURIComponent(
@@ -9142,7 +9337,7 @@
                         
                         <div class="col-span-12 md:col-span-5 space-y-1.5">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="font-extrabold text-sm text-slate-900">${t.name}</span>
+                                <span class="font-extrabold text-sm text-slate-900 hover:text-amber-600 transition cursor-pointer underline decoration-dotted decoration-amber-400" onclick="openTraineeWeeklyCalendarModal('${t.id}')" title="عرض سجل الحضور الأسبوعي كتقويم">${t.name}</span>
                                 <span class="text-[10px] bg-slate-900 text-amber-300 font-bold px-2 py-0.5 rounded border border-slate-800">
                                     ${t.group}
                                 </span>
@@ -9192,7 +9387,7 @@
                                 </span>
                             </div>
                             <span class="text-[10px] text-slate-400 font-bold">
-                                حصص اليوم: فترة 1 • فترة 2
+                                ${status.isAicExempt ? 'حصص اليوم: فترة واحدة كافية (مستثنى AIC)' : 'حصص اليوم: ملزم بفترتين (فترة 1 • فترة 2)'}
                             </span>
                         </div>
 
@@ -9201,9 +9396,14 @@
                                 ${status.label}
                             </span>
 
-                            <button type="button" onclick="openTraineeProfileModal('${t.id}')" title="معاينة وتعديل ملف المتدرب وبياناته الشخصية" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-2.5 py-1 rounded-xl transition flex items-center gap-1 shadow-2xs">
+                            <button type="button" onclick="openTraineeWeeklyCalendarModal('${t.id}')" title="عرض سجل الحضور كتقويم أسبوعي" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 font-extrabold px-2 py-1 rounded-xl transition flex items-center gap-1 border border-amber-300 shadow-2xs cursor-pointer">
+                                <span>🗓️</span>
+                                <span>تقويم</span>
+                            </button>
+
+                            <button type="button" onclick="openTraineeProfileModal('${t.id}')" title="معاينة وتعديل ملف المتدرب وبياناته الشخصية" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-2.5 py-1 rounded-xl transition flex items-center gap-1 shadow-2xs cursor-pointer">
                                 <span>👤</span>
-                                <span>ملف المتدرب</span>
+                                <span>الملف</span>
                             </button>
 
                             ${(currentUser?.role === 'superadmin' && t.phone) ? `
@@ -15730,7 +15930,15 @@
     if (INITIAL_LMS_COURSES["اللحام"]) INITIAL_LMS_COURSES["رضا مطيلق"] = INITIAL_LMS_COURSES["اللحام"];
     if (INITIAL_LMS_COURSES["الكهرباء"]) INITIAL_LMS_COURSES["عصام سعيد"] = INITIAL_LMS_COURSES["الكهرباء"];
     if (INITIAL_LMS_COURSES["انجليزية"]) INITIAL_LMS_COURSES["شرف الدين"] = INITIAL_LMS_COURSES["انجليزية"];
-    if (INITIAL_LMS_COURSES["سيد احمد"]) INITIAL_LMS_COURSES["الميكانيكية"] = INITIAL_LMS_COURSES["سيد احمد"];
+    if (INITIAL_LMS_COURSES["سيد احمد"]) {
+        INITIAL_LMS_COURSES["الميكانيكية"] = INITIAL_LMS_COURSES["سيد احمد"];
+        INITIAL_LMS_COURSES["الميكانيكا"] = INITIAL_LMS_COURSES["سيد احمد"];
+        INITIAL_LMS_COURSES["ميكانيكا"] = INITIAL_LMS_COURSES["سيد احمد"];
+        INITIAL_LMS_COURSES["سيد أحمد"] = INITIAL_LMS_COURSES["سيد احمد"];
+    }
+    if (INITIAL_LMS_COURSES["قاسم الماجد"]) {
+        INITIAL_LMS_COURSES["الحاسب الالي (قاسم الماجد)"] = INITIAL_LMS_COURSES["قاسم الماجد"];
+    }
     if (INITIAL_LMS_COURSES["فاضل الماجد"]) INITIAL_LMS_COURSES["السلامة والصحة"] = INITIAL_LMS_COURSES["فاضل الماجد"];
     if (INITIAL_LMS_COURSES["أحمد الاصيل"]) INITIAL_LMS_COURSES["الادارة المكتبية والسكرتارية"] = INITIAL_LMS_COURSES["أحمد الاصيل"];
     if (INITIAL_LMS_COURSES["ناجي محمد"]) INITIAL_LMS_COURSES["إنشاءات"] = INITIAL_LMS_COURSES["ناجي محمد"];
@@ -15741,6 +15949,14 @@
         if (!lmsCourses[k] && INITIAL_LMS_COURSES[k]) {
             lmsCourses[k] = INITIAL_LMS_COURSES[k];
         }
+    }
+    if (INITIAL_LMS_COURSES["قاسم الماجد"]) lmsCourses["قاسم الماجد"] = INITIAL_LMS_COURSES["قاسم الماجد"];
+    if (INITIAL_LMS_COURSES["سيد احمد"]) {
+        lmsCourses["سيد احمد"] = INITIAL_LMS_COURSES["سيد احمد"];
+        lmsCourses["سيد أحمد"] = INITIAL_LMS_COURSES["سيد احمد"];
+        lmsCourses["الميكانيكية"] = INITIAL_LMS_COURSES["سيد احمد"];
+        lmsCourses["الميكانيكا"] = INITIAL_LMS_COURSES["سيد احمد"];
+        lmsCourses["ميكانيكا"] = INITIAL_LMS_COURSES["سيد احمد"];
     }
     // تحديث وتثبيت منهج السلامة والصحة المهنية لأستاذ فاضل الماجد بالمنهج المعتمد المكتمل
     if (INITIAL_LMS_COURSES["فاضل الماجد"]) {
@@ -15823,24 +16039,67 @@
         return null;
     }
 
-    function getTrainerAndCourseForTrainee(trainee) {
+    // استخراج جميع المقررات المربوطة بالمتدرب حسب نظام الفترتين (فترة 1 وفترة 2 ما عدا المستثنى مثل AIC)
+    function getAllCoursesForTrainee(trainee) {
         const schedule = (typeof scheduleData !== 'undefined' && Array.isArray(scheduleData) && scheduleData.length) ? scheduleData : INITIAL_MASTER_SCHEDULE;
 
         if (!trainee || !trainee.group) {
             const defTr = schedule[0] || { name: 'رضا مطيلق', course: 'اللحام', room: 'القاعة 9' };
             const defKey = findCourseKeyForTrainer(defTr.name) || 'رضا مطيلق';
-            return {
+            return [{
+                period: 1,
+                periodLabel: 'الفترة الأولى',
                 trainerName: 'أ. ' + defTr.name,
+                rawTrainerName: defTr.name,
                 courseTitle: lmsCourses[defKey]?.courseTitle || 'كورس تدريبي ممتد (6 أسابيع)',
-                room: defTr.room || 'القاعة التدريبية',
+                courseShort: defTr.course || 'تخصص عام',
                 specialty: defTr.course || 'تخصص عام',
-                lmsKey: defKey
-            };
+                room: defTr.room || 'القاعة التدريبية',
+                lmsKey: defKey,
+                isAicExempt: false
+            }];
         }
 
         const g = trainee.group.trim();
-        let matched = [];
+        const canG = (typeof canonicalGroupName === 'function') ? canonicalGroupName(g) : g.toLowerCase();
+        const isAic = /AIC/i.test(trainee.company || trainee.group || '');
 
+        // ربط خاص ومباشر لمجموعات سابك / ساينبوك 105:
+        // الفترة الأولى: مكانيكا (أ. سيد أحمد / القاعة 7)
+        // الفترة الثانية: الحاسب الآلي (أ. قاسم الماجد / معمل حاسب2)
+        if (canG.includes('105') && (canG.includes('sinopec') || canG.includes('sabic'))) {
+            const c1Key = findCourseKeyForTrainer('سيد احمد') || 'سيد احمد';
+            const c2Key = findCourseKeyForTrainer('قاسم الماجد') || 'قاسم الماجد';
+            return [
+                {
+                    period: 1,
+                    periodLabel: 'الفترة الأولى (الميكانيكا)',
+                    trainerName: 'أ. سيد أحمد',
+                    rawTrainerName: 'سيد أحمد',
+                    courseTitle: lmsCourses[c1Key]?.courseTitle || 'دورة الميكانيكا العامة وعلوم وتطبيقات الهيدروليك (6 أسابيع)',
+                    courseShort: 'الميكانيكا العامة',
+                    specialty: 'الميكانيكية',
+                    room: 'القاعة 7',
+                    lmsKey: c1Key,
+                    isAicExempt: false
+                },
+                {
+                    period: 2,
+                    periodLabel: 'الفترة الثانية (الحاسب الآلي)',
+                    trainerName: 'أ. قاسم الماجد',
+                    rawTrainerName: 'قاسم الماجد',
+                    courseTitle: lmsCourses[c2Key]?.courseTitle || 'دورة مهارات وتطبيقات الحاسب والبرمجيات المكتبية (6 أسابيع)',
+                    courseShort: 'الحاسب الآلي',
+                    specialty: 'الحاسب الالي',
+                    room: 'معمل حاسب2',
+                    lmsKey: c2Key,
+                    isAicExempt: false
+                }
+            ];
+        }
+
+        // البحث في الجدول الدراسي العام عن جميع المدربين المطابقين لشعبة المتدرب
+        let matched = [];
         schedule.forEach(tr => {
             let found = false;
             (tr.rows || []).forEach(row => {
@@ -15848,9 +16107,11 @@
                     if (!cell) return;
                     const parts = cell.replace('+', ',').replace('/', ',').split(',');
                     for (let p of parts) {
-                        const pt = p.trim().toLowerCase();
-                        if (pt && (pt.includes(g.toLowerCase()) || g.toLowerCase().includes(pt))) {
-                            matched.push(tr);
+                        const pt = p.trim();
+                        if (pt && (typeof isGroupMatch === 'function' ? isGroupMatch(pt, g) : (pt.toLowerCase().includes(g.toLowerCase()) || g.toLowerCase().includes(pt.toLowerCase())))) {
+                            if (!matched.some(m => m.name === tr.name)) {
+                                matched.push(tr);
+                            }
                             found = true;
                             break;
                         }
@@ -15859,50 +16120,383 @@
             });
         });
 
-        if (matched.length > 0) {
-            // تفضيل المدرب التخصصي غير الإنجليزي أولاً إن وجد (مثل اللحام، الكهرباء، الميكانيكا، السلامة، الحاسب، الإدارة، الإنشاءات)
-            const primary = matched.find(m => m.course !== 'انجليزية') || matched[0];
-            const courseKey = findCourseKeyForTrainer(primary.name) || primary.name;
+        // إذا كانت الشركة مستثناة (مثل AIC) تقتصر على فترة واحدة
+        if (isAic) {
+            const tr = matched[0] || schedule[0];
+            const courseKey = findCourseKeyForTrainer(tr.name) || tr.name;
             const cData = lmsCourses[courseKey] || {};
-
-            return {
-                trainerName: 'أ. ' + primary.name,
-                courseTitle: cData.courseTitle || `كورس ${primary.course} (6 أسابيع)`,
-                room: primary.room || 'القاعة التدريبية',
-                specialty: primary.course,
+            return [{
+                period: 1,
+                periodLabel: 'مقرر معتمد (مستثنى AIC - فترة واحدة)',
+                trainerName: 'أ. ' + tr.name,
+                rawTrainerName: tr.name,
+                courseTitle: cData.courseTitle || `كورس ${tr.course} (6 أسابيع)`,
+                courseShort: tr.course || 'تخصص عام',
+                specialty: tr.course,
+                room: tr.room || 'القاعة التدريبية',
                 lmsKey: courseKey,
-                allMatchedTrainers: matched
-            };
+                isAicExempt: true
+            }];
         }
 
-        // مطابقة ذكية بالبحث في مجموعات كل مدرب
-        for (let tr of schedule) {
-            const trGroups = getGroupsForTrainer(tr.name);
-            if (trGroups.some(grp => isGroupMatch(grp, g))) {
+        // إذا وجد مدربان أو أكثر في الجدول للشعبة
+        if (matched.length >= 2) {
+            return matched.slice(0, 2).map((tr, idx) => {
                 const courseKey = findCourseKeyForTrainer(tr.name) || tr.name;
                 const cData = lmsCourses[courseKey] || {};
                 return {
+                    period: idx + 1,
+                    periodLabel: `الفترة ${idx + 1} (${tr.course || 'تخصص'})`,
                     trainerName: 'أ. ' + tr.name,
+                    rawTrainerName: tr.name,
                     courseTitle: cData.courseTitle || `كورس ${tr.course} (6 أسابيع)`,
-                    room: tr.room || 'القاعة التدريبية',
+                    courseShort: tr.course || 'تخصص عام',
                     specialty: tr.course,
+                    room: tr.room || 'القاعة التدريبية',
                     lmsKey: courseKey,
-                    allMatchedTrainers: [tr]
+                    isAicExempt: false
                 };
+            });
+        }
+
+        if (matched.length === 1) {
+            const tr1 = matched[0];
+            const c1Key = findCourseKeyForTrainer(tr1.name) || tr1.name;
+            const c1Data = lmsCourses[c1Key] || {};
+
+            // البحث عن فترة ثانية مساندة للشعبة (حاسب آلي أو إنجليزي أو أقرب مدرب)
+            const tr2 = schedule.find(s => s.name !== tr1.name && (s.course.includes('حاسب') || s.course.includes('انجليزي'))) || schedule.find(s => s.name === 'قاسم الماجد') || schedule[1] || tr1;
+            const c2Key = findCourseKeyForTrainer(tr2.name) || tr2.name;
+            const c2Data = lmsCourses[c2Key] || {};
+
+            return [
+                {
+                    period: 1,
+                    periodLabel: `الفترة الأولى (${tr1.course || 'تخصص'})`,
+                    trainerName: 'أ. ' + tr1.name,
+                    rawTrainerName: tr1.name,
+                    courseTitle: c1Data.courseTitle || `كورس ${tr1.course} (6 أسابيع)`,
+                    courseShort: tr1.course || 'تخصص رئيسي',
+                    specialty: tr1.course,
+                    room: tr1.room || 'القاعة التدريبية',
+                    lmsKey: c1Key,
+                    isAicExempt: false
+                },
+                {
+                    period: 2,
+                    periodLabel: `الفترة الثانية (${tr2.course || 'مساند'})`,
+                    trainerName: 'أ. ' + tr2.name,
+                    rawTrainerName: tr2.name,
+                    courseTitle: c2Data.courseTitle || `كورس ${tr2.course} (6 أسابيع)`,
+                    courseShort: tr2.course || 'مساند',
+                    specialty: tr2.course,
+                    room: tr2.room || 'المعمل التدريبي',
+                    lmsKey: c2Key,
+                    isAicExempt: false
+                }
+            ];
+        }
+
+        // مدرب افتراضي
+        const fallbackTr = schedule[0] || { name: 'رضا مطيلق', course: 'اللحام', room: 'القاعة 9' };
+        const fbKey = findCourseKeyForTrainer(fallbackTr.name) || 'رضا مطيلق';
+        return [{
+            period: 1,
+            periodLabel: 'الفترة الأولى',
+            trainerName: 'أ. ' + fallbackTr.name,
+            rawTrainerName: fallbackTr.name,
+            courseTitle: lmsCourses[fbKey]?.courseTitle || 'كورس تدريبي ممتد (6 أسابيع)',
+            courseShort: fallbackTr.course || 'تخصص عام',
+            specialty: fallbackTr.course || 'تخصص عام',
+            room: fallbackTr.room || 'القاعة التدريبية',
+            lmsKey: fbKey,
+            isAicExempt: false
+        }];
+    }
+    window.getAllCoursesForTrainee = getAllCoursesForTrainee;
+
+    function getTrainerAndCourseForTrainee(trainee) {
+        const all = getAllCoursesForTrainee(trainee);
+        if (activeStudentLmsCourse) {
+            const found = all.find(c => c.lmsKey === activeStudentLmsCourse || c.rawTrainerName === activeStudentLmsCourse);
+            if (found) return found;
+        }
+        return all[0];
+    }
+    window.getTrainerAndCourseForTrainee = getTrainerAndCourseForTrainee;
+
+    function switchStudentActiveCourse(lmsKey) {
+        activeStudentLmsCourse = lmsKey;
+        if (typeof renderStudentDashboard === 'function') renderStudentDashboard();
+        if (typeof renderStudentLms === 'function') renderStudentLms();
+        if (typeof renderStudentSubmissionsCalendar === 'function') renderStudentSubmissionsCalendar();
+        if (typeof renderSubmissionsCalendarPage === 'function' && !document.getElementById('tab-submissionsCalendar')?.classList.contains('hidden')) {
+            renderSubmissionsCalendarPage();
+        }
+        showToast(`تم التبديل إلى مقرر: ${lmsCourses[lmsKey]?.courseTitle || lmsKey}`, 'info');
+    }
+    window.switchStudentActiveCourse = switchStudentActiveCourse;
+
+    // ===================================================================
+    // WEEKLY ATTENDANCE CALENDAR MODAL CONTROLLERS (التقويم الأسبوعي الشامل)
+    // ===================================================================
+    function openWeeklyAttendanceCalendarModal() {
+        const modal = document.getElementById('weeklyAttendanceCalendarModal');
+        if (!modal) return;
+
+        const days = (weekDates && Array.isArray(weekDates) && weekDates.length === 5) ? weekDates : DEFAULT_DAYS;
+        const totalTrainees = (trainees || []).length;
+        
+        let totalPresentSum = 0;
+        const daysStats = days.map((dayLabel, dIdx) => {
+            let present = 0;
+            let violator = 0;
+            let absent = 0;
+
+            (trainees || []).forEach(t => {
+                const checks = t.weeklyAttendance ? t.weeklyAttendance[dIdx] : [false, false, false, false];
+                const st = calculateStatus(checks, t);
+                if (st.type === 'present') present++;
+                else if (st.type === 'violator') violator++;
+                else absent++;
+            });
+
+            const rate = totalTrainees > 0 ? Math.round(((present + (violator * 0.5)) / totalTrainees) * 100) : 100;
+            totalPresentSum += rate;
+
+            return { dayLabel, dIdx, present, violator, absent, rate };
+        });
+
+        const averageRate = days.length > 0 ? Math.round(totalPresentSum / days.length) : 0;
+
+        const totalEl = document.getElementById('wacTotalTraineesCount');
+        if (totalEl) totalEl.innerText = `إجمالي المتدربين المسجلين: ${totalTrainees} متدرب`;
+
+        const avgEl = document.getElementById('wacAverageRate');
+        if (avgEl) avgEl.innerText = `${averageRate}%`;
+
+        const rangeEl = document.getElementById('wacWeekRangeLabel');
+        if (rangeEl) rangeEl.innerText = `الأسبوع التدريبي: ${days[0]} إلى ${days[days.length - 1]}`;
+
+        const gridEl = document.getElementById('wacDaysGrid');
+        if (gridEl) {
+            gridEl.innerHTML = daysStats.map(ds => {
+                const isToday = (ds.dIdx === activeDayIndex);
+                return `
+                    <div class="p-3.5 rounded-2xl border ${isToday ? 'border-amber-400 bg-amber-50/70 ring-2 ring-amber-300' : 'border-slate-200 bg-slate-50 hover:bg-white'} transition space-y-3 text-right">
+                        <div class="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                            <div>
+                                <span class="font-black text-sm text-slate-900 block">${ds.dayLabel}</span>
+                                <span class="text-[10px] text-slate-400 font-bold">اليوم ${ds.dIdx + 1}</span>
+                            </div>
+                            <span class="text-xs font-black px-2.5 py-1 rounded-full font-mono ${ds.rate >= 90 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : (ds.rate >= 75 ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-red-100 text-red-800 border border-red-300')}">
+                                ${ds.rate}%
+                            </span>
+                        </div>
+
+                        <div class="space-y-1.5 text-xs font-bold">
+                            <div class="flex items-center justify-between text-emerald-700">
+                                <span>✓ حاضر كامل:</span>
+                                <span class="font-mono font-black">${ds.present}</span>
+                            </div>
+                            <div class="flex items-center justify-between text-amber-700">
+                                <span>⚠️ مخالف (فترة):</span>
+                                <span class="font-mono font-black">${ds.violator}</span>
+                            </div>
+                            <div class="flex items-center justify-between text-rose-700">
+                                <span>✕ غائب:</span>
+                                <span class="font-mono font-black">${ds.absent}</span>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="selectWeeklyCalendarDay(${ds.dIdx})" class="w-full py-2 px-3 rounded-xl text-xs font-black transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${isToday ? 'gold-gradient-bg text-slate-950 font-black' : 'bg-slate-900 hover:bg-black text-amber-300'}">
+                            <span>${isToday ? 'اليوم المفتوح حالياً' : 'الانتقال للتحضير 👈'}</span>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        modal.classList.remove('hidden');
+    }
+    window.openWeeklyAttendanceCalendarModal = openWeeklyAttendanceCalendarModal;
+
+    function closeWeeklyAttendanceCalendarModal() {
+        const modal = document.getElementById('weeklyAttendanceCalendarModal');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeWeeklyAttendanceCalendarModal = closeWeeklyAttendanceCalendarModal;
+
+    function selectWeeklyCalendarDay(idx) {
+        activeDayIndex = idx;
+        if (typeof renderApp === 'function') renderApp();
+        closeWeeklyAttendanceCalendarModal();
+        const dayName = weekDates[idx] || DEFAULT_DAYS[idx];
+        showToast(`تم الانتقال لتحضير يوم: ${dayName}`, 'info');
+    }
+    window.selectWeeklyCalendarDay = selectWeeklyCalendarDay;
+
+    // ===================================================================
+    // TRAINEE WEEKLY CALENDAR MODAL (سجل الحضور الأسبوعي كتقويم للمتدرب)
+    // ===================================================================
+    let currentTwcTraineeId = null;
+
+    function openTraineeWeeklyCalendarModal(traineeId) {
+        let trainee = (typeof traineeId === 'object' && traineeId !== null)
+            ? traineeId
+            : (trainees || []).find(t => t.id === traineeId || (typeof cleanNationalId === 'function' && cleanNationalId(t.id) === cleanNationalId(traineeId))) || phoneDirectory[traineeId];
+        if (!trainee) return showToast('لم يتم العثور على بيانات المتدرب', 'error');
+
+        const tid = (typeof traineeId === 'object' && traineeId !== null) ? (traineeId.id || '1001') : traineeId;
+        currentTwcTraineeId = tid;
+        const modal = document.getElementById('traineeWeeklyCalendarModal');
+        if (!modal) return;
+
+        const tObj = {
+            id: tid,
+            name: trainee.name || 'متدرب',
+            phone: trainee.phone || phoneDirectory[tid]?.phone || '',
+            company: trainee.company || phoneDirectory[tid]?.company || 'المؤسسة',
+            group: trainee.group || phoneDirectory[tid]?.group || 'عام',
+            room: trainee.room || phoneDirectory[tid]?.room || 'غير محدد',
+            weeklyAttendance: trainee.weeklyAttendance || [
+                [false, false, false, false],
+                [false, false, false, false],
+                [false, false, false, false],
+                [false, false, false, false],
+                [false, false, false, false]
+            ]
+        };
+
+        // Header values
+        document.getElementById('twcTraineeName').innerText = tObj.name;
+        document.getElementById('twcGroupName').innerText = `الشعبة: ${tObj.group}`;
+        document.getElementById('twcCompanyName').innerText = `الشركة: ${tObj.company}`;
+        document.getElementById('twcTraineeId').innerText = tObj.id;
+        document.getElementById('twcRoom').innerText = tObj.room;
+
+        // Courses for this trainee
+        const traineeCourses = getAllCoursesForTrainee(tObj);
+        const isAic = /AIC/i.test(tObj.company || tObj.group || '');
+
+        const ruleBadge = document.getElementById('twcRuleBadge');
+        const ruleExp = document.getElementById('twcRuleExplanation');
+        if (isAic) {
+            if (ruleBadge) ruleBadge.innerText = 'النظام التدريبي: مستثنى من الفترتين (شركة AIC - فترة واحدة كافية)';
+            if (ruleExp) ruleExp.innerText = 'حسب استثناءات الإدارة المعتمدة: متدربو شركة AIC مستثنون من شرط الفترتين، ويكفي حضور فترة تدريبية واحدة لاحتساب اليوم كاملاً.';
+        } else {
+            if (ruleBadge) ruleBadge.innerText = 'النظام التدريبي: ملزم بحضور فترتين (فترة 1 وفترة 2)';
+            if (ruleExp) ruleExp.innerText = 'حسب لائحة المعهد: يلزم كل متدرب حضور فترتين تدريبيتين يومياً. إذا حضر فترة واحدة فقط يُسجل كمخالف ويفقد نصف الحضور اليومي.';
+        }
+
+        // Enrolled subjects strip
+        const stripEl = document.getElementById('twcSubjectsStrip');
+        if (stripEl) {
+            stripEl.innerHTML = traineeCourses.map((c, idx) => `
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black ${idx === 0 ? 'bg-blue-100 text-blue-900 border border-blue-200' : 'bg-purple-100 text-purple-900 border border-purple-200'}">
+                    <span>${idx === 0 ? '📘' : '💻'}</span>
+                    <span>${c.periodLabel || `الفترة ${idx + 1}`}: <b>${c.courseShort}</b> (${c.trainerName} - ${c.room})</span>
+                </span>
+            `).join('');
+        }
+
+        // Weekly calculations (10 sessions system)
+        const days = (weekDates && Array.isArray(weekDates) && weekDates.length === 5) ? weekDates : DEFAULT_DAYS;
+        let attendedSessions = 0;
+        let fullyPresentDays = 0;
+        let violatorDays = 0;
+        let absentDays = 0;
+
+        const daysCardsHtml = days.map((dayLabel, dIdx) => {
+            const checks = tObj.weeklyAttendance[dIdx] || [false, false, false, false];
+            const st = calculateStatus(checks, tObj);
+
+            if (st.type === 'present') {
+                fullyPresentDays++;
+                attendedSessions += 2;
+            } else if (st.type === 'violator') {
+                violatorDays++;
+                attendedSessions += 1;
+            } else {
+                absentDays++;
+            }
+
+            const isToday = (dIdx === activeDayIndex);
+
+            // Subject labels for Period 1 and Period 2
+            const p1Name = traineeCourses[0]?.courseShort || 'فترة 1';
+            const p2Name = traineeCourses[1]?.courseShort || traineeCourses[0]?.courseShort || 'فترة 2';
+
+            return `
+                <div class="p-3 rounded-2xl border ${isToday ? 'border-amber-400 bg-amber-50/70 ring-1 ring-amber-300' : 'border-slate-200 bg-slate-50'} text-center space-y-2">
+                    <div class="border-b border-slate-200/70 pb-1.5">
+                        <span class="font-extrabold text-xs text-slate-800 block">${dayLabel}</span>
+                        <span class="text-[9px] text-slate-400 font-bold">يوم ${dIdx + 1}</span>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="p-1 rounded-lg border text-[10px] font-black flex items-center justify-between px-2 ${st.period1 ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-rose-50 text-rose-800 border-rose-200'}" title="الفترة الأولى: ${p1Name}">
+                            <span class="truncate max-w-[80px]">${p1Name}</span>
+                            <span>${st.period1 ? '✓ حاضر' : '✕ غائب'}</span>
+                        </div>
+
+                        ${!isAic ? `
+                        <div class="p-1 rounded-lg border text-[10px] font-black flex items-center justify-between px-2 ${st.period2 ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-rose-50 text-rose-800 border-rose-200'}" title="الفترة الثانية: ${p2Name}">
+                            <span class="truncate max-w-[80px]">${p2Name}</span>
+                            <span>${st.period2 ? '✓ حاضر' : '✕ غائب'}</span>
+                        </div>
+                        ` : `
+                        <div class="p-1 rounded-lg border border-slate-200 bg-white text-[9px] font-bold text-slate-500">
+                            معفى من فترة 2
+                        </div>
+                        `}
+                    </div>
+
+                    <span class="text-[9.5px] font-black px-1.5 py-0.5 rounded-full border ${st.bg} block truncate">
+                        ${st.label}
+                    </span>
+                </div>
+            `;
+        }).join('');
+
+        const gridEl = document.getElementById('twcDaysCalendarGrid');
+        if (gridEl) gridEl.innerHTML = daysCardsHtml;
+
+        const rate = Math.round((attendedSessions / 10) * 100);
+        const rateBadge = document.getElementById('twcOverallRateBadge');
+        if (rateBadge) {
+            rateBadge.innerText = `${rate}% نسبة الحضور الأسبوعية`;
+            rateBadge.className = `text-xs font-black px-3 py-1 rounded-full font-mono shadow-xs ${rate >= 90 ? 'bg-emerald-600 text-white' : (rate >= 75 ? 'bg-blue-600 text-white' : (rate >= 50 ? 'bg-amber-500 text-slate-950' : 'bg-red-600 text-white'))}`;
+        }
+
+        const sessCount = document.getElementById('twcSummarySessionsCount');
+        if (sessCount) sessCount.innerText = `المجموع: ${attendedSessions} من 10 حصص (${fullyPresentDays} أيام حاضر • ${violatorDays} مخالف • ${absentDays} غائب)`;
+
+        // WhatsApp button
+        const wpCont = document.getElementById('twcWhatsAppContainer');
+        if (wpCont) {
+            if (tObj.phone) {
+                const msg = encodeURIComponent(`السلام عليكم المتدرب: ${tObj.name}\nمعهد الذهب الأسود للتدريب - فرع عنك.\nنفيدكم بأن معدل حضورك الأسبوعي هو: ${rate}% (${attendedSessions} من 10 حصص).`);
+                wpCont.innerHTML = `
+                    <a href="https://wa.me/966${tObj.phone.replace(/^0/, '')}?text=${msg}" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                        <span>واتساب 💬</span>
+                        <span class="font-mono dir-ltr">${tObj.phone}</span>
+                    </a>
+                `;
+            } else {
+                wpCont.innerHTML = `<span class="text-xs text-slate-400 font-bold">لا يوجد رقم جوال مسجل</span>`;
             }
         }
 
-        // المدرب الافتراضي
-        const fallbackTr = schedule[0] || { name: 'رضا مطيلق', course: 'اللحام', room: 'القاعة 9' };
-        const fbKey = findCourseKeyForTrainer(fallbackTr.name) || 'رضا مطيلق';
-        return {
-            trainerName: 'أ. ' + fallbackTr.name,
-            courseTitle: lmsCourses[fbKey]?.courseTitle || 'كورس تدريبي ممتد (6 أسابيع)',
-            room: fallbackTr.room || 'القاعة التدريبية',
-            specialty: fallbackTr.course || 'تخصص عام',
-            lmsKey: fbKey
-        };
+        modal.classList.remove('hidden');
     }
+    window.openTraineeWeeklyCalendarModal = openTraineeWeeklyCalendarModal;
+
+    function closeTraineeWeeklyCalendarModal() {
+        const modal = document.getElementById('traineeWeeklyCalendarModal');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeTraineeWeeklyCalendarModal = closeTraineeWeeklyCalendarModal;
 
     // ===================================================================
     // STUDENT ACADEMIC PROGRESS & CERTIFICATE ENGINE (محرك متابعة التقدم وإصدار الشهادات)
@@ -16134,9 +16728,50 @@
         document.getElementById('sdStudentCompany').innerText = currentUser.company;
         document.getElementById('sdStudentRoom').innerText = currentUser.room;
 
+        const allStudentCourses = getAllCoursesForTrainee(currentUser);
+        const isAic = /AIC/i.test(currentUser.company || currentUser.group || '');
+
         const binding = getTrainerAndCourseForTrainee(currentUser);
         document.getElementById('sdStudentTrainer').innerText = binding.trainerName;
         document.getElementById('sdStudentCourse').innerText = binding.courseTitle;
+
+        // تحديث بطاقات المقررات التدريبية المعتمدة (نظام الفترتين)
+        const dualCardsContainer = document.getElementById('sdDualCourseCardsContainer');
+        const exemptBadge = document.getElementById('sdDualCourseExemptBadge');
+        if (exemptBadge) {
+            exemptBadge.innerText = isAic ? 'مستثنى AIC (فترة واحدة)' : 'فترتان تدريبيتان (إلزامي)';
+            exemptBadge.className = isAic
+                ? 'text-xs font-black px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300'
+                : 'text-xs font-black px-3 py-1 rounded-full bg-slate-900 text-amber-300 border border-slate-800';
+        }
+
+        if (dualCardsContainer) {
+            dualCardsContainer.innerHTML = allStudentCourses.map((c, idx) => {
+                const isSelected = (binding.lmsKey === c.lmsKey || activeStudentLmsCourse === c.lmsKey);
+                return `
+                    <div class="p-4 rounded-2xl border ${isSelected ? 'border-amber-400 bg-amber-50/70 ring-2 ring-amber-300/60 shadow-sm' : 'border-slate-200 bg-slate-50 hover:bg-white'} transition space-y-3 text-right">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full ${idx === 0 ? 'bg-blue-100 text-blue-900 border border-blue-200' : 'bg-purple-100 text-purple-900 border border-purple-200'}">
+                                ${c.periodLabel || `الفترة ${idx + 1}`}
+                            </span>
+                            <span class="text-xs font-bold text-slate-500">
+                                📍 ${c.room || 'القاعة التدريبية'}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="font-black text-slate-900 text-sm md:text-base leading-snug">${c.courseTitle}</h4>
+                            <p class="text-xs text-slate-600 font-bold mt-1">المدرب المشرف: <b class="text-slate-900">${c.trainerName}</b></p>
+                        </div>
+                        <div class="flex items-center gap-2 pt-1">
+                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}'); switchTab('studentLms');" class="flex-1 ${isSelected ? 'gold-gradient-bg text-slate-950 font-black' : 'bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold'} text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
+                                <span>📚</span>
+                                <span>${isSelected ? 'المقرر النشط حالياً (عرض الواجبات)' : 'الانتقال لواجبات المقرر 👈'}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
         // 2. جلب بيانات المتدرب الحقيقية المسجلة في النظام
         const cleanId = cleanNationalId(currentUser.id);
@@ -16550,9 +17185,33 @@
         const courseDescEl = document.getElementById('sdLmsCourseDesc');
         if (courseDescEl) courseDescEl.innerText = courseData.description || 'المنهج والمهام التدريبية المعتمدة لهذا المقرر';
 
-        // إفراغ شريط التبديل لضمان عدم ظهور أي دورات أو مقررات تخص مدربين آخرين للمتدرب
+        // شريط التبديل السلس بين مقرري المتدرب (نظام الفترتين)
         const switcherContainer = document.getElementById('sdCourseSwitcherContainer');
-        if (switcherContainer) switcherContainer.innerHTML = '';
+        const allStudentCourses = getAllCoursesForTrainee(currentUser);
+        if (switcherContainer) {
+            if (allStudentCourses.length > 1) {
+                switcherContainer.className = 'flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap w-full';
+                switcherContainer.innerHTML = `
+                    <span class="text-xs font-black text-slate-700 pl-1">مقرراتك التدريبية:</span>
+                    ${allStudentCourses.map((c, cIdx) => {
+                        const isAct = (courseKey === c.lmsKey);
+                        return `
+                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}')" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-2xs border ${
+                                isAct
+                                    ? 'bg-[#0F2942] text-amber-300 border-[#0F2942] ring-2 ring-amber-300/40'
+                                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                            }">
+                                <span>${cIdx === 0 ? '📘' : '💻'}</span>
+                                <span>${c.periodLabel || `الفترة ${cIdx + 1}`}: ${c.courseShort} (${c.trainerName})</span>
+                            </button>
+                        `;
+                    }).join('')}
+                `;
+            } else {
+                switcherContainer.className = 'hidden';
+                switcherContainer.innerHTML = '';
+            }
+        }
 
         // أزرار الأسابيع الستة مع مؤشرات الإنجاز الذكية لكل أسبوع
         const weekTabsContainer = document.getElementById('sdLmsWeekTabsContainer');
@@ -20612,6 +21271,17 @@
         }
     }
 
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+    window.escapeHtml = escapeHtml;
+
     function populateAiPreview(result) {
         const data = result.data || {};
         const successStats = document.getElementById('aiSuccessStats');
@@ -23493,11 +24163,10 @@
     function renderStudentSubmissionsCalendar(filterWeek = 'ALL') {
         if (!currentUser || currentUser.role !== 'student') return;
 
-        const binding = getTrainerAndCourseForTrainee(currentUser);
-        const courseKey = binding.lmsKey || 'رضا مطيلق';
-        const courseData = lmsCourses[courseKey] || lmsCourses[binding.trainerName.replace(/^أ\.\s*/, '')] || Object.values(lmsCourses)[0];
-        if (!courseData) return;
-        ensureLmsCourseWeeklyPillars(courseData);
+        const studentCourses = getAllCoursesForTrainee(currentUser);
+        const primaryCourse = studentCourses[0];
+        const primaryData = lmsCourses[primaryCourse?.lmsKey] || Object.values(lmsCourses)[0];
+        if (!primaryData) return;
 
         const filterBar = document.getElementById('sdCalendarWeekFilterBar');
         if (filterBar) {
@@ -23533,13 +24202,15 @@
                     <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center text-lg font-black shrink-0">📅</div>
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-black text-sm text-white">تقويم المهام والتسليمات (التقويم الميلادي)</span>
+                            <span class="font-black text-sm text-white">التقويم الأكاديمي المشترك لجميع المقررات (نظام الفترتين)</span>
                             <span class="bg-amber-400/20 text-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-400/40">انطلاق التدريب: الأحد 18 أكتوبر 2026</span>
                         </div>
-                        <p class="text-xs text-slate-300 font-bold mt-0.5">مواعيد استحقاق الواجبات والاختبارات أسبوعياً — اضغط على المهمة للحل والتسليم الفوري</p>
+                        <p class="text-xs text-slate-300 font-bold mt-0.5">
+                            المقررات المشمولة: ${studentCourses.map(c => `<span class="text-amber-200 underline font-black">${c.courseShort} (${c.trainerName})</span>`).join(' • ')} — تقويم موحد يجمع تسليمات المادتين
+                        </p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 text-[11px] font-bold text-slate-300 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10 shrink-0">
+                <div class="flex items-center gap-2 text-[11px] font-bold text-slate-300 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10 shrink-0 flex-wrap">
                     <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> 📝 الواجب (10 درجات)</span>
                     <span class="text-slate-500">•</span>
                     <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> 🏁 الاختبار (10 درجات)</span>
@@ -23548,136 +24219,120 @@
         `;
 
         html += weeksToShow.map(wNum => {
-            const weekObj = (courseData?.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === wNum) || {};
-            const weekTitle = weekObj.title || weekObj.topic || `الأسبوع التدريبي ${wNum}`;
-            const assList = (weekObj.assignments || []).filter(a => a.assignmentCategory !== 'group');
-            const weeklyAss = assList[0] || null;
-            const weekQuizzes = weekObj.quizzes || [];
-            const wkdQuiz = weekQuizzes.find(q => q.quizCategory !== 'optional') || weekQuizzes[0] || null;
-
-            const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, courseData, wNum);
-            const assSub = subDetails.weekly?.sub || subDetails.individual?.sub;
-            const wkdRec = subDetails.weekendExam?.rec || subDetails.optionalQuiz?.rec;
-
-            const assScore = assSub ? (assSub.score !== undefined ? assSub.score : 10) : null;
-            const isAssDone = !!assSub;
-
-            const wkdScore = wkdRec ? (wkdRec.bestScore !== undefined ? wkdRec.bestScore : (wkdRec.score || 0)) : null;
-            const isWkdDone = !!wkdRec;
-
             const range = getAcademicWeekDateRange(wNum);
-            const effectiveAssDateStr = weeklyAss?.dueDate || range.thursStr;
-            const effectiveQuizDateStr = wkdQuiz?.dueDate || range.endStr;
 
             const daysCellsHtml = range.days.map((day, dIdx) => {
-                const isAssDay = (day.dateStr === effectiveAssDateStr) || (!weeklyAss?.dueDate && day.isDefaultAssDay);
-                const isQuizDay = (day.dateStr === effectiveQuizDateStr) || (!wkdQuiz?.dueDate && day.isDefaultQuizDay);
+                let dayTasks = [];
+
+                studentCourses.forEach((cCourse, cIdx) => {
+                    const cData = lmsCourses[cCourse.lmsKey] || lmsCourses[cCourse.rawTrainerName] || {};
+                    if (typeof ensureLmsCourseWeeklyPillars === 'function') ensureLmsCourseWeeklyPillars(cData);
+
+                    const wkObj = (cData.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === wNum) || {};
+                    const assList = (wkObj.assignments || []).filter(a => a.assignmentCategory !== 'group');
+                    const weeklyAss = assList[0] || null;
+                    const weekQuizzes = wkObj.quizzes || [];
+                    const wkdQuiz = weekQuizzes.find(q => q.quizCategory !== 'optional') || weekQuizzes[0] || null;
+
+                    const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, cData, wNum);
+                    const assSub = subDetails.weekly?.sub || subDetails.individual?.sub;
+                    const wkdRec = subDetails.weekendExam?.rec || subDetails.optionalQuiz?.rec;
+
+                    const assScore = assSub ? (assSub.score !== undefined ? assSub.score : 10) : null;
+                    const isAssDone = !!assSub;
+
+                    const wkdScore = wkdRec ? (wkdRec.bestScore !== undefined ? wkdRec.bestScore : (wkdRec.score || 0)) : null;
+                    const isWkdDone = !!wkdRec;
+
+                    const effectiveAssDateStr = weeklyAss?.dueDate || range.thursStr;
+                    const effectiveQuizDateStr = wkdQuiz?.dueDate || range.endStr;
+
+                    if (weeklyAss && ((day.dateStr === effectiveAssDateStr) || (!weeklyAss.dueDate && day.isDefaultAssDay))) {
+                        dayTasks.push({
+                            type: 'assignment',
+                            course: cCourse,
+                            courseIdx: cIdx,
+                            item: weeklyAss,
+                            isDone: isAssDone,
+                            score: assScore,
+                            title: weeklyAss.title || 'الواجب الأسبوعي'
+                        });
+                    }
+
+                    if (wkdQuiz && ((day.dateStr === effectiveQuizDateStr) || (!wkdQuiz.dueDate && day.isDefaultQuizDay))) {
+                        dayTasks.push({
+                            type: 'quiz',
+                            course: cCourse,
+                            courseIdx: cIdx,
+                            item: wkdQuiz,
+                            isDone: isWkdDone,
+                            score: wkdScore,
+                            title: wkdQuiz.title || 'الاختبار الأسبوعي'
+                        });
+                    }
+                });
+
                 const isWeekend = day.isWeekend;
+                const hasTasks = dayTasks.length > 0;
+                const allDone = hasTasks && dayTasks.every(t => t.isDone);
 
                 let cellBg = 'bg-white';
                 let cellBorder = 'border-slate-200';
-                if (isAssDay) {
-                    cellBg = isAssDone ? 'bg-emerald-50/60 border-emerald-300 ring-1 ring-emerald-200' : 'bg-amber-50/70 border-amber-300 ring-1 ring-amber-200';
-                } else if (isQuizDay) {
-                    cellBg = isWkdDone ? 'bg-emerald-50/60 border-emerald-300 ring-1 ring-emerald-200' : 'bg-amber-50/70 border-amber-300 ring-1 ring-amber-200';
+                if (hasTasks) {
+                    cellBg = allDone ? 'bg-emerald-50/50 border-emerald-300 ring-1 ring-emerald-200' : 'bg-amber-50/60 border-amber-300 ring-1 ring-amber-200';
                 } else if (isWeekend) {
                     cellBg = 'bg-slate-50/60';
                 }
 
                 return `
-                    <div class="${cellBg} border ${cellBorder} rounded-xl p-2.5 flex flex-col justify-between min-h-[145px] transition hover:shadow-xs text-right">
+                    <div class="${cellBg} border ${cellBorder} rounded-xl p-2.5 flex flex-col justify-between min-h-[160px] transition hover:shadow-xs text-right">
                         <div>
                             <div class="flex items-center justify-between border-b border-slate-100 pb-1.5 mb-1.5">
                                 <span class="text-[11px] font-black text-slate-800">${day.dayName}</span>
                                 <span class="text-[10px] font-mono font-bold text-slate-500 bg-white/90 px-1.5 py-0.5 rounded border border-slate-200">${day.label}</span>
                             </div>
 
-                            ${isAssDay ? `
-                                <div class="space-y-1.5">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-[10px] font-black text-amber-900 bg-amber-200/80 px-1.5 py-0.5 rounded">📝 تسليم الواجب</span>
-                                        <span class="text-[9px] font-mono font-bold text-slate-500">10 درجات</span>
-                                    </div>
-                                    <p class="text-[10px] font-black text-slate-800 line-clamp-2" title="${weeklyAss?.title || 'الواجب الأسبوعي'}">${weeklyAss?.title || 'الواجب الأسبوعي'}</p>
-                                    <div class="pt-0.5">
-                                        ${isAssDone ? `
-                                            <span class="inline-block text-[9px] font-black text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-full border border-emerald-300">
-                                                ✅ تم التسليم (${assScore}/10)
-                                            </span>
-                                        ` : `
-                                            <span class="inline-block text-[9px] font-black text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
-                                                ⏳ بانتظار التسليم
-                                            </span>
-                                        `}
-                                    </div>
+                            ${hasTasks ? `
+                                <div class="space-y-2">
+                                    ${dayTasks.map(t => `
+                                        <div class="p-2 rounded-xl border ${t.courseIdx === 0 ? 'border-blue-200 bg-blue-50/60' : 'border-purple-200 bg-purple-50/60'} space-y-1">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${t.courseIdx === 0 ? 'bg-blue-100 text-blue-900' : 'bg-purple-100 text-purple-900'}">
+                                                    ${t.course.courseShort}
+                                                </span>
+                                                <span class="text-[9px] font-bold text-slate-600">${t.type === 'assignment' ? '📝 واجب' : '🏁 اختبار'}</span>
+                                            </div>
+                                            <p class="text-[10px] font-black text-slate-800 line-clamp-1" title="${t.title}">${t.title}</p>
+                                            <div class="flex items-center justify-between pt-0.5">
+                                                <span class="text-[8.5px] font-black ${t.isDone ? 'text-emerald-800 bg-emerald-100' : 'text-amber-900 bg-amber-100'} px-1.5 py-0.5 rounded-full">
+                                                    ${t.isDone ? `✅ تم (${t.score}/10)` : '⏳ مطلوب'}
+                                                </span>
+                                                ${t.type === 'assignment' ? `
+                                                    <button type="button" onclick="switchStudentActiveCourse('${t.course.lmsKey}'); openSubmitAssignmentModal('${t.item.id}')" class="text-[9px] font-black px-2 py-0.5 rounded bg-slate-900 text-amber-300 hover:bg-black transition cursor-pointer">
+                                                        ${t.isDone ? 'معاينة 👁️' : 'حل وتسليم ✍️'}
+                                                    </button>
+                                                ` : `
+                                                    <button type="button" onclick="switchStudentActiveCourse('${t.course.lmsKey}'); openTakeQuizModal('${t.item.id}')" class="text-[9px] font-black px-2 py-0.5 rounded bg-[#0F2942] text-white hover:bg-[#1E3A8A] transition cursor-pointer">
+                                                        ${t.isDone ? 'إعادة ⚡' : 'بدء الاختبار 🏁'}
+                                                    </button>
+                                                `}
+                                            </div>
+                                        </div>
+                                    `).join('')}
                                 </div>
-                            ` : ''}
-
-                            ${isQuizDay ? `
-                                <div class="space-y-1.5">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-[10px] font-black text-emerald-900 bg-emerald-200/80 px-1.5 py-0.5 rounded">🏁 موعد الاختبار</span>
-                                        <span class="text-[9px] font-mono font-bold text-slate-500">10 درجات</span>
-                                    </div>
-                                    <p class="text-[10px] font-black text-slate-800 line-clamp-2" title="${wkdQuiz?.title || 'الاختبار الأسبوعي'}">${wkdQuiz?.title || 'الاختبار الأسبوعي'}</p>
-                                    <div class="pt-0.5">
-                                        ${isWkdDone ? `
-                                            <span class="inline-block text-[9px] font-black text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-full border border-emerald-300">
-                                                ✅ تم الإنجاز (${wkdScore}/10)
-                                            </span>
-                                        ` : `
-                                            <span class="inline-block text-[9px] font-black text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
-                                                ⏳ متاح للحل
-                                            </span>
-                                        `}
-                                    </div>
-                                </div>
-                            ` : ''}
-
-                            ${(!isAssDay && !isQuizDay) ? `
-                                <div class="py-2 text-center text-slate-400">
+                            ` : `
+                                <div class="py-3 text-center text-slate-400">
                                     ${dIdx === 0 ? '<div class="text-[10px] font-bold text-sky-700 bg-sky-50 py-1 px-1.5 rounded-lg border border-sky-100">🎯 انطلاق المحاضرات</div>' : ''}
                                     ${(dIdx >= 1 && dIdx <= 3) ? '<div class="text-[10px] font-bold text-slate-500 bg-slate-50 py-1 px-1 rounded-lg">💻 تدريب وتطبيق عملي</div>' : ''}
                                     ${dIdx === 5 ? '<div class="text-[10px] font-bold text-slate-400 bg-slate-100/60 py-1 px-1 rounded-lg">☕ عطلة نهاية الأسبوع</div>' : ''}
                                 </div>
-                            ` : ''}
+                            `}
                         </div>
 
-                        <div class="pt-1.5 border-t border-slate-100 mt-auto">
-                            ${isAssDay ? `
-                                ${isAssDone ? `
-                                    ${weeklyAss ? `
-                                        <button type="button" onclick="openSubmitAssignmentModal('${weeklyAss.id}')" class="w-full bg-slate-100 hover:bg-slate-200 text-[#0F2942] border border-slate-300 text-[9px] font-bold py-1 px-1.5 rounded-lg transition cursor-pointer">
-                                            👁️ معاينة التسليم
-                                        </button>
-                                    ` : ''}
-                                ` : `
-                                    ${weeklyAss ? `
-                                        <button type="button" onclick="openSubmitAssignmentModal('${weeklyAss.id}')" class="w-full bg-[#0F2942] hover:bg-[#1E3A8A] text-white text-[9px] font-black py-1 px-1.5 rounded-lg transition cursor-pointer shadow-2xs">
-                                            ✍️ حل وتسليم
-                                        </button>
-                                    ` : ''}
-                                `}
-                            ` : (isQuizDay ? `
-                                ${isWkdDone ? `
-                                    ${wkdQuiz ? `
-                                        <button type="button" onclick="openTakeQuizModal('${wkdQuiz.id}')" class="w-full bg-slate-100 hover:bg-slate-200 text-[#0F2942] border border-slate-300 text-[9px] font-bold py-1 px-1.5 rounded-lg transition cursor-pointer">
-                                            ⚡ مراجعة أو إعادة
-                                        </button>
-                                    ` : ''}
-                                ` : `
-                                    ${wkdQuiz ? `
-                                        <button type="button" onclick="openTakeQuizModal('${wkdQuiz.id}')" class="w-full bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 text-[9px] font-black py-1 px-1.5 rounded-lg transition cursor-pointer shadow-2xs">
-                                            🏁 بدء الاختبار
-                                        </button>
-                                    ` : ''}
-                                `}
-                            ` : `
-                                <button type="button" onclick="setStudentLmsWeek(${wNum}); switchTab('studentLms');" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold py-1 px-1 rounded-lg text-[9px] transition cursor-pointer flex items-center justify-center gap-0.5">
-                                    <span>دروس الأسبوع</span>
-                                    <span>⬅️</span>
-                                </button>
-                            `)}
+                        <div class="pt-1.5 border-t border-slate-100 mt-auto text-center">
+                            <span class="text-[9px] text-slate-400 font-bold">
+                                ${day.dateStr}
+                            </span>
                         </div>
                     </div>
                 `;
@@ -23689,21 +24344,23 @@
                         <div class="flex items-center gap-2">
                             <span class="w-6 h-6 rounded-md bg-[#0F2942] text-amber-300 font-mono font-black text-xs flex items-center justify-center">${wNum}</span>
                             <div>
-                                <span class="font-black text-xs md:text-sm text-slate-900">${weekTitle}</span>
+                                <span class="font-black text-xs md:text-sm text-slate-900">الأسبوع التدريبي ${wNum}</span>
                                 <span class="text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 inline-block mr-1">
                                     📅 ${range.fullRangeLabel} 2026
                                 </span>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <button type="button" onclick="setStudentLmsWeek(${wNum}); switchTab('studentLms');" class="bg-white hover:bg-slate-100 text-[#0F2942] border border-slate-300 text-[10px] font-black px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 shadow-2xs">
-                                <span>📚 الانتقال للمقرر (LMS)</span>
-                                <span>⬅️</span>
-                            </button>
+                            ${studentCourses.map(c => `
+                                <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}'); setStudentLmsWeek(${wNum}); switchTab('studentLms');" class="bg-slate-100 hover:bg-[#0F2942] hover:text-white text-[#0F2942] text-[11px] font-black px-2.5 py-1 rounded-xl transition cursor-pointer flex items-center gap-1 border border-slate-200">
+                                    <span>📚 محتوى ${c.courseShort}</span>
+                                    <span>⬅️</span>
+                                </button>
+                            `).join('')}
                         </div>
                     </div>
 
-                    <!-- شبكة التقويم الأسبوعية للمتدرب (7 أيام: من الأحد إلى السبت) -->
+                    <!-- شبكة التقويم الأسبوعية (7 أيام: من الأحد إلى السبت) -->
                     <div class="overflow-x-auto pb-1">
                         <div class="min-w-[760px] space-y-1.5">
                             <div class="grid grid-cols-7 gap-2 text-center text-[10px] font-black text-slate-500 bg-slate-100/80 py-1.5 rounded-xl">
@@ -23711,9 +24368,9 @@
                                 <span>الاثنين</span>
                                 <span>الثلاثاء</span>
                                 <span>الأربعاء</span>
-                                <span class="text-amber-800">الخميس (الواجب)</span>
+                                <span class="text-amber-800">الخميس (تسليمات)</span>
                                 <span>الجمعة</span>
-                                <span class="text-emerald-800">السبت (الاختبار)</span>
+                                <span class="text-emerald-800">السبت (اختبارات)</span>
                             </div>
                             <div class="grid grid-cols-7 gap-2">
                                 ${daysCellsHtml}
@@ -23749,6 +24406,13 @@
     let activeCalendarPageViewMode = 'month'; // 'month' | 'week' | 'agenda'
     let activeCalendarPageWeekFilter = 'ALL';  // 'ALL' | '1'..'6'
     let activeCalendarPageSelectedWeek = 1;
+    let activeCalendarPageCourseFilter = 'ALL';
+
+    function setCalendarPageCourseFilter(filter) {
+        activeCalendarPageCourseFilter = filter;
+        renderSubmissionsCalendarPage();
+    }
+    window.setCalendarPageCourseFilter = setCalendarPageCourseFilter;
 
     function setCalendarPageViewMode(mode) {
         activeCalendarPageViewMode = mode;
@@ -23798,6 +24462,8 @@
         let courseData = null;
         let pool = [];
         let trainerName = '';
+        let studentCourses = [];
+        let coursesToScan = [];
 
         if (isStudent) {
             const student = trainees.find(t => cleanNationalId(t.id) === cleanNationalId(currentUser.traineeId || currentUser.username)) || {
@@ -23805,15 +24471,26 @@
                 name: currentUser.name,
                 group: currentUser.group || 'غير محدد'
             };
+            studentCourses = (typeof getAllCoursesForTrainee === 'function') ? getAllCoursesForTrainee(student) : [];
             const binding = (typeof getTrainerAndCourseForTrainee === 'function') ? getTrainerAndCourseForTrainee(student) : null;
             trainerName = binding?.trainerName || 'المدرب المشرف';
             const courseKey = activeStudentLmsCourse || binding?.lmsKey || 'رضا مطيلق';
             courseData = lmsCourses[courseKey] || lmsCourses[trainerName.replace(/^أ\.\s*/, '')] || lmsCourses['رضا مطيلق'] || Object.values(lmsCourses)[0];
             pool = [student];
 
-            if (titleEl) titleEl.innerText = `تقويم التسليمات والمهام - ${courseData?.courseTitle || 'المقرر التدريبي'}`;
+            coursesToScan = (studentCourses.length > 0)
+                ? (activeCalendarPageCourseFilter === 'ALL' ? studentCourses : studentCourses.filter(c => c.lmsKey === activeCalendarPageCourseFilter))
+                : [{ lmsKey: courseKey, courseShort: courseData?.courseTitle || 'المقرر', courseTitle: courseData?.courseTitle || 'المقرر', course: courseData }];
+
+            const multiLabel = (studentCourses.length > 1)
+                ? (activeCalendarPageCourseFilter === 'ALL'
+                    ? `المقررات المشتركة (${studentCourses.map(c => c.courseShort).join(' + ')})`
+                    : (studentCourses.find(c => c.lmsKey === activeCalendarPageCourseFilter)?.courseTitle || courseData?.courseTitle))
+                : (courseData?.courseTitle || 'المقرر التدريبي');
+
+            if (titleEl) titleEl.innerText = `تقويم التسليمات والمهام الموحد - ${multiLabel}`;
             if (roleBadge) roleBadge.innerText = `بوابة المتدرب: ${student.name} (${student.group})`;
-            if (subEl) subEl.innerText = `المشرف: ${trainerName} • التسليمات من الأحد إلى الخميس فقط • عطلة الجمعة والسبت`;
+            if (subEl) subEl.innerText = `${(studentCourses.length > 1 && activeCalendarPageCourseFilter === 'ALL') ? 'تقويم موحد ومشترك لجميع المقررات المسجلة' : 'المشرف: ' + trainerName} • التسليمات من الأحد إلى الخميس فقط • عطلة الجمعة والسبت`;
         } else {
             const gradesTarget = (typeof getGradesSystemTargetTrainees === 'function') ? getGradesSystemTargetTrainees() : { pool: [], courseData: null, trainerName: '' };
             pool = gradesTarget.pool || [];
@@ -23849,13 +24526,31 @@
                                 </span>
                             </div>
                             <p class="text-xs text-slate-500 font-bold mt-0.5">
-                                ${courseData?.courseTitle || 'المقرر التدريبي'} • أيام الدراسة والتسليم من الأحد إلى الخميس (الجمعة والسبت عطلة أسبوعية)
+                                ${(isStudent && studentCourses.length > 1 && activeCalendarPageCourseFilter === 'ALL') ? 'تقويم تسليمات موحد وشامل لجميع المقررات المسجلة' : (courseData?.courseTitle || 'المقرر التدريبي')} • أيام الدراسة والتسليم من الأحد إلى الخميس (الجمعة والسبت عطلة أسبوعية)
                             </p>
                         </div>
                     </div>
 
                     <!-- Right: Controls & View Switcher -->
                     <div class="flex items-center gap-2.5 flex-wrap">
+                        <!-- Multi-Course Filter for Dual-Course Trainees -->
+                        ${(isStudent && studentCourses.length > 1) ? `
+                            <div class="bg-amber-50 p-1 rounded-2xl flex items-center gap-1 border border-amber-200 shadow-inner">
+                                <span class="text-[11px] font-black text-amber-900 px-2 flex items-center gap-1">
+                                    <span>📚</span>
+                                    <span>المقرر:</span>
+                                </span>
+                                <button type="button" onclick="setCalendarPageCourseFilter('ALL')" class="px-2.5 py-1 rounded-xl text-xs font-black transition cursor-pointer ${activeCalendarPageCourseFilter === 'ALL' ? 'bg-[#0F2942] text-amber-300 shadow-sm' : 'text-slate-700 hover:text-slate-900'}">
+                                    الكل (مشترك)
+                                </button>
+                                ${studentCourses.map(c => `
+                                    <button type="button" onclick="setCalendarPageCourseFilter('${c.lmsKey}')" class="px-2.5 py-1 rounded-xl text-xs font-black transition cursor-pointer ${activeCalendarPageCourseFilter === c.lmsKey ? 'bg-[#0F2942] text-amber-300 shadow-sm' : 'text-slate-700 hover:text-slate-900'}">
+                                        ${c.courseShort}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
                         <!-- View Switcher Segmented Control -->
                         <div class="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 border border-slate-200 shadow-inner">
                             <button type="button" onclick="setCalendarPageViewMode('month')" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${currentMode === 'month' ? 'bg-[#0F2942] text-amber-300 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
@@ -23973,6 +24668,54 @@
                     let cellBg = isWeekend ? 'bg-slate-50/70' : 'bg-white';
                     if (isToday) cellBg = 'bg-amber-50/40';
 
+                    let studentDayTasks = [];
+                    if (isStudent) {
+                        coursesToScan.forEach((cCourse, cIdx) => {
+                            const cData = cCourse.course || lmsCourses[cCourse.lmsKey];
+                            if (!cData) return;
+                            ensureLmsCourseWeeklyPillars(cData);
+                            const cWeek = (cData.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === wNum) || {};
+                            const cAssList = (cWeek.assignments || []).filter(a => a.assignmentCategory !== 'group');
+                            const cWeeklyAss = cAssList[0] || null;
+                            const cWeekQuizzes = cWeek.quizzes || [];
+                            const cWkdQuiz = cWeekQuizzes.find(q => q.quizCategory !== 'optional') || cWeekQuizzes[0] || null;
+
+                            const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, cData, wNum);
+                            const aSub = subDetails.weekly?.sub || subDetails.individual?.sub;
+                            const qSub = subDetails.weekendExam?.rec || subDetails.optionalQuiz?.rec;
+                            const cIsAssDone = !!aSub;
+                            const cAssScore = aSub ? (aSub.score !== undefined ? aSub.score : 10) : null;
+                            const cIsWkdDone = !!qSub;
+                            const cWkdScore = qSub ? (qSub.bestScore !== undefined ? qSub.bestScore : (qSub.score || 0)) : null;
+
+                            const cIsAssDay = (cWeeklyAss?.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(cWeeklyAss.dueDate)) ? (day.dateStr === cWeeklyAss.dueDate) : (dIdx === 3);
+                            const cIsQuizDay = (cWkdQuiz?.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(cWkdQuiz.dueDate)) ? (day.dateStr === cWkdQuiz.dueDate) : (dIdx === 4);
+
+                            if (cWeeklyAss && cIsAssDay) {
+                                studentDayTasks.push({
+                                    type: 'assignment',
+                                    course: cCourse,
+                                    courseIdx: cIdx,
+                                    item: cWeeklyAss,
+                                    isDone: cIsAssDone,
+                                    score: cAssScore,
+                                    title: cWeeklyAss.title || 'الواجب الأسبوعي'
+                                });
+                            }
+                            if (cWkdQuiz && cIsQuizDay) {
+                                studentDayTasks.push({
+                                    type: 'quiz',
+                                    course: cCourse,
+                                    courseIdx: cIdx,
+                                    item: cWkdQuiz,
+                                    isDone: cIsWkdDone,
+                                    score: cWkdScore,
+                                    title: cWkdQuiz.title || 'الاختبار الأسبوعي'
+                                });
+                            }
+                        });
+                    }
+
                     return `
                         <div class="${cellBg} p-2 md:p-3 min-h-[135px] flex flex-col justify-between border-b border-l border-slate-200 transition hover:bg-slate-50/90 relative group">
                             <!-- Cell Day Header -->
@@ -24002,18 +24745,23 @@
                                     </div>
                                 ` : ''}
 
-                                ${isAssDay ? `
-                                    ${isStudent ? `
-                                        <div onclick="${weeklyAss ? `openSubmitAssignmentModal('${weeklyAss.id}')` : ''}" class="rounded-lg p-1.5 border transition cursor-pointer text-right shadow-2xs ${isAssDone ? 'bg-emerald-50 border-emerald-300 text-emerald-950 hover:bg-emerald-100' : 'bg-amber-50 border-amber-300 text-amber-950 hover:bg-amber-100'}">
+                                ${isStudent ? `
+                                    ${studentDayTasks.map(task => `
+                                        <div onclick="switchStudentActiveCourse('${task.course.lmsKey}'); ${task.type === 'assignment' ? `openSubmitAssignmentModal('${task.item.id}')` : `openTakeQuizModal('${task.item.id}')`}" class="rounded-lg p-1.5 border transition cursor-pointer text-right shadow-2xs ${task.isDone ? 'bg-emerald-50 border-emerald-300 text-emerald-950 hover:bg-emerald-100' : (task.courseIdx === 0 ? 'bg-amber-50 border-amber-300 text-amber-950 hover:bg-amber-100' : 'bg-sky-50 border-sky-300 text-sky-950 hover:bg-sky-100')}">
                                             <div class="flex items-center justify-between text-[10px] font-black">
-                                                <span class="flex items-center gap-1"><span>📝</span> <span>الواجب الأسبوعي</span></span>
-                                                <span class="font-mono text-[9px] px-1 py-0.2 rounded ${isAssDone ? 'bg-emerald-200' : 'bg-amber-200'}">${isAssDone ? `${assScore}/10` : '10د'}</span>
+                                                <span class="flex items-center gap-1">
+                                                    <span class="text-[9px] px-1 py-0.2 rounded font-bold ${task.courseIdx === 0 ? 'bg-amber-200 text-amber-950' : 'bg-sky-200 text-sky-950'}">${task.course.courseShort}</span>
+                                                    <span>${task.type === 'assignment' ? '📝 واجب' : '🏁 اختبار'}</span>
+                                                </span>
+                                                <span class="font-mono text-[9px] px-1 py-0.2 rounded ${task.isDone ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-200 text-slate-800'}">${task.isDone ? `${task.score}/10` : '10د'}</span>
                                             </div>
-                                            <div class="text-[10px] font-bold mt-0.5 truncate ${isAssDone ? 'text-emerald-700' : 'text-amber-800'}">
-                                                ${isAssDone ? '✅ تم التسليم بنجاح' : '⏳ اضغط للحل والتسليم'}
+                                            <div class="text-[10px] font-bold mt-0.5 truncate ${task.isDone ? 'text-emerald-700' : 'text-slate-800'}">
+                                                ${task.isDone ? '✅ تم التسليم بنجاح' : '⏳ اضغط للحل والتسليم'}
                                             </div>
                                         </div>
-                                    ` : `
+                                    `).join('')}
+                                ` : `
+                                    ${isAssDay ? `
                                         <div onclick="switchTab('gradesSystem'); openGradesSystemWeekDetail(${wNum});" class="bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 rounded-lg p-1.5 transition cursor-pointer text-right shadow-2xs">
                                             <div class="flex items-center justify-between text-[10px] font-black">
                                                 <span class="flex items-center gap-1"><span>📝</span> <span>استحقاق الواجب</span></span>
@@ -24027,21 +24775,9 @@
                                                 <span class="font-mono">${assPct}%</span>
                                             </div>
                                         </div>
-                                    `}
-                                ` : ''}
+                                    ` : ''}
 
-                                ${isQuizDay ? `
-                                    ${isStudent ? `
-                                        <div onclick="${wkdQuiz ? `openTakeQuizModal('${wkdQuiz.id}')` : ''}" class="rounded-lg p-1.5 border transition cursor-pointer text-right shadow-2xs ${isWkdDone ? 'bg-emerald-50 border-emerald-300 text-emerald-950 hover:bg-emerald-100' : 'bg-indigo-50 border-indigo-300 text-indigo-950 hover:bg-indigo-100'}">
-                                            <div class="flex items-center justify-between text-[10px] font-black">
-                                                <span class="flex items-center gap-1"><span>🏁</span> <span>الاختبار الأسبوعي</span></span>
-                                                <span class="font-mono text-[9px] px-1 py-0.2 rounded ${isWkdDone ? 'bg-emerald-200' : 'bg-indigo-200'}">${isWkdDone ? `${wkdScore}/10` : '10د'}</span>
-                                            </div>
-                                            <div class="text-[10px] font-bold mt-0.5 truncate ${isWkdDone ? 'text-emerald-700' : 'text-indigo-800'}">
-                                                ${isWkdDone ? '✅ تم اجتياز الاختبار' : '⚡ متاح للحل الفوري'}
-                                            </div>
-                                        </div>
-                                    ` : `
+                                    ${isQuizDay ? `
                                         <div onclick="switchTab('gradesSystem'); openGradesSystemWeekDetail(${wNum});" class="bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-950 rounded-lg p-1.5 transition cursor-pointer text-right shadow-2xs">
                                             <div class="flex items-center justify-between text-[10px] font-black">
                                                 <span class="flex items-center gap-1"><span>🏁</span> <span>موعد الاختبار</span></span>
@@ -24055,8 +24791,8 @@
                                                 <span class="font-mono">${wkdPct}%</span>
                                             </div>
                                         </div>
-                                    `}
-                                ` : ''}
+                                    ` : ''}
+                                `}
 
                                 ${isWeekend ? `
                                     <div class="py-2 text-center text-slate-400 my-auto">
@@ -24169,6 +24905,54 @@
                 const isQuizDay = (dIdx === 4); // Thursday
                 const isWeekend = day.isWeekend;
 
+                let studentDayTasks = [];
+                if (isStudent) {
+                    coursesToScan.forEach((cCourse, cIdx) => {
+                        const cData = cCourse.course || lmsCourses[cCourse.lmsKey];
+                        if (!cData) return;
+                        ensureLmsCourseWeeklyPillars(cData);
+                        const cWeek = (cData.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === wNum) || {};
+                        const cAssList = (cWeek.assignments || []).filter(a => a.assignmentCategory !== 'group');
+                        const cWeeklyAss = cAssList[0] || null;
+                        const cWeekQuizzes = cWeek.quizzes || [];
+                        const cWkdQuiz = cWeekQuizzes.find(q => q.quizCategory !== 'optional') || cWeekQuizzes[0] || null;
+
+                        const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, cData, wNum);
+                        const aSub = subDetails.weekly?.sub || subDetails.individual?.sub;
+                        const qSub = subDetails.weekendExam?.rec || subDetails.optionalQuiz?.rec;
+                        const cIsAssDone = !!aSub;
+                        const cAssScore = aSub ? (aSub.score !== undefined ? aSub.score : 10) : null;
+                        const cIsWkdDone = !!qSub;
+                        const cWkdScore = qSub ? (qSub.bestScore !== undefined ? qSub.bestScore : (qSub.score || 0)) : null;
+
+                        const cIsAssDay = (cWeeklyAss?.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(cWeeklyAss.dueDate)) ? (day.dateStr === cWeeklyAss.dueDate) : (dIdx === 3);
+                        const cIsQuizDay = (cWkdQuiz?.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(cWkdQuiz.dueDate)) ? (day.dateStr === cWkdQuiz.dueDate) : (dIdx === 4);
+
+                        if (cWeeklyAss && cIsAssDay) {
+                            studentDayTasks.push({
+                                type: 'assignment',
+                                course: cCourse,
+                                courseIdx: cIdx,
+                                item: cWeeklyAss,
+                                isDone: cIsAssDone,
+                                score: cAssScore,
+                                title: cWeeklyAss.title || 'واجب التطبيق الأسبوعي'
+                            });
+                        }
+                        if (cWkdQuiz && cIsQuizDay) {
+                            studentDayTasks.push({
+                                type: 'quiz',
+                                course: cCourse,
+                                courseIdx: cIdx,
+                                item: cWkdQuiz,
+                                isDone: cIsWkdDone,
+                                score: cWkdScore,
+                                title: cWkdQuiz.title || 'اختبار نهاية الأسبوع'
+                            });
+                        }
+                    });
+                }
+
                 return `
                     <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between shadow-2xs space-y-3 ${isWeekend ? 'bg-slate-50/70 opacity-80' : ''}">
                         <div>
@@ -24180,24 +24964,48 @@
                                 <span class="text-lg">${dIdx === 0 ? '🎯' : (dIdx === 3 ? '📝' : (dIdx === 4 ? '🏁' : (isWeekend ? '☕' : '💻')))}</span>
                             </div>
 
-                            ${isAssDay ? `
-                                <div class="bg-amber-50 border border-amber-300 rounded-xl p-3 space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs font-black text-amber-950">📝 الواجب الأسبوعي</span>
-                                        <span class="text-[10px] font-mono font-bold bg-amber-200 text-amber-900 px-2 py-0.5 rounded-lg">10 درجات</span>
+                            ${isStudent ? `
+                                ${studentDayTasks.length > 0 ? `
+                                    <div class="space-y-2.5">
+                                        ${studentDayTasks.map(task => `
+                                            <div class="rounded-xl p-3 space-y-2 border ${task.isDone ? 'bg-emerald-50 border-emerald-300' : (task.courseIdx === 0 ? 'bg-amber-50 border-amber-300' : 'bg-sky-50 border-sky-300')}">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-xs font-black flex items-center gap-1">
+                                                        <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${task.courseIdx === 0 ? 'bg-amber-200 text-amber-950' : 'bg-sky-200 text-sky-950'}">${task.course.courseShort}</span>
+                                                        <span>${task.type === 'assignment' ? '📝 واجب' : '🏁 اختبار'}</span>
+                                                    </span>
+                                                    <span class="text-[10px] font-mono font-bold bg-white/90 text-slate-800 px-2 py-0.5 rounded-lg border border-slate-200">10 درجات</span>
+                                                </div>
+                                                <p class="text-xs font-bold text-slate-800">${task.title}</p>
+                                                <div class="pt-1">
+                                                    ${task.isDone ? `
+                                                        <div class="text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg">✅ تم الإنجاز (${task.score}/10)</div>
+                                                    ` : `
+                                                        <button type="button" onclick="switchStudentActiveCourse('${task.course.lmsKey}'); ${task.type === 'assignment' ? `openSubmitAssignmentModal('${task.item.id}')` : `openTakeQuizModal('${task.item.id}')`}" class="w-full ${task.type === 'assignment' ? 'bg-amber-500 hover:bg-amber-600 text-slate-950' : 'bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300'} font-black text-xs py-2 rounded-xl transition cursor-pointer shadow-2xs">
+                                                            ${task.type === 'assignment' ? '✍️ حل وتسليم الواجب' : '🏁 بدء الاختبار'}
+                                                        </button>
+                                                    `}
+                                                </div>
+                                            </div>
+                                        `).join('')}
                                     </div>
-                                    <p class="text-xs font-bold text-slate-800">${weeklyAss?.title || 'واجب التطبيق الأسبوعي'}</p>
-                                    ${isStudent ? `
-                                        <div class="pt-1">
-                                            ${isAssDone ? `
-                                                <div class="text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg">✅ تم التسليم (${assScore}/10)</div>
-                                            ` : `
-                                                <button type="button" onclick="openSubmitAssignmentModal('${weeklyAss?.id}')" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs py-2 rounded-xl transition cursor-pointer shadow-2xs">
-                                                    ✍️ حل وتسليم الواجب
-                                                </button>
-                                            `}
+                                ` : `
+                                    ${(!isWeekend) ? `
+                                        <div class="py-4 text-center text-slate-400 space-y-1">
+                                            <span class="text-xs font-bold text-slate-600 bg-slate-50 p-2 rounded-xl block border border-slate-100">
+                                                ${dIdx === 0 ? '🎯 انطلاق المحاضرات والوحدة' : (dIdx === 1 ? '💻 ورشة تدريب ومناقشة تفاعلية' : '📖 تطبيق عملي ودراسة ذاتية')}
+                                            </span>
                                         </div>
-                                    ` : `
+                                    ` : ''}
+                                `}
+                            ` : `
+                                ${isAssDay ? `
+                                    <div class="bg-amber-50 border border-amber-300 rounded-xl p-3 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs font-black text-amber-950">📝 الواجب الأسبوعي</span>
+                                            <span class="text-[10px] font-mono font-bold bg-amber-200 text-amber-900 px-2 py-0.5 rounded-lg">10 درجات</span>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-800">${weeklyAss?.title || 'واجب التطبيق الأسبوعي'}</p>
                                         <div class="space-y-1 pt-1">
                                             <div class="flex justify-between text-xs font-bold text-amber-900">
                                                 <span>التسليمات:</span>
@@ -24207,28 +25015,16 @@
                                                 <div class="bg-amber-600 h-1.5 rounded-full" style="width: ${assPct}%"></div>
                                             </div>
                                         </div>
-                                    `}
-                                </div>
-                            ` : ''}
-
-                            ${isQuizDay ? `
-                                <div class="bg-indigo-50 border border-indigo-300 rounded-xl p-3 space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs font-black text-indigo-950">🏁 الاختبار الأسبوعي</span>
-                                        <span class="text-[10px] font-mono font-bold bg-indigo-200 text-indigo-900 px-2 py-0.5 rounded-lg">10 درجات</span>
                                     </div>
-                                    <p class="text-xs font-bold text-slate-800">${wkdQuiz?.title || 'اختبار نهاية الأسبوع'}</p>
-                                    ${isStudent ? `
-                                        <div class="pt-1">
-                                            ${isWkdDone ? `
-                                                <div class="text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg">✅ مُجتاز (${wkdScore}/10)</div>
-                                            ` : `
-                                                <button type="button" onclick="openTakeQuizModal('${wkdQuiz?.id}')" class="w-full bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black text-xs py-2 rounded-xl transition cursor-pointer shadow-2xs">
-                                                    🏁 بدء الاختبار
-                                                </button>
-                                            `}
+                                ` : ''}
+
+                                ${isQuizDay ? `
+                                    <div class="bg-indigo-50 border border-indigo-300 rounded-xl p-3 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs font-black text-indigo-950">🏁 الاختبار الأسبوعي</span>
+                                            <span class="text-[10px] font-mono font-bold bg-indigo-200 text-indigo-900 px-2 py-0.5 rounded-lg">10 درجات</span>
                                         </div>
-                                    ` : `
+                                        <p class="text-xs font-bold text-slate-800">${wkdQuiz?.title || 'اختبار نهاية الأسبوع'}</p>
                                         <div class="space-y-1 pt-1">
                                             <div class="flex justify-between text-xs font-bold text-indigo-900">
                                                 <span>الحل:</span>
@@ -24238,17 +25034,17 @@
                                                 <div class="bg-indigo-600 h-1.5 rounded-full" style="width: ${wkdPct}%"></div>
                                             </div>
                                         </div>
-                                    `}
-                                </div>
-                            ` : ''}
+                                    </div>
+                                ` : ''}
 
-                            ${(!isAssDay && !isQuizDay && !isWeekend) ? `
-                                <div class="py-4 text-center text-slate-400 space-y-1">
-                                    <span class="text-xs font-bold text-slate-600 bg-slate-50 p-2 rounded-xl block border border-slate-100">
-                                        ${dIdx === 0 ? '🎯 انطلاق المحاضرات والوحدة' : (dIdx === 1 ? '💻 ورشة تدريب ومناقشة تفاعلية' : '📖 تطبيق عملي ودراسة ذاتية')}
-                                    </span>
-                                </div>
-                            ` : ''}
+                                ${(!isAssDay && !isQuizDay && !isWeekend) ? `
+                                    <div class="py-4 text-center text-slate-400 space-y-1">
+                                        <span class="text-xs font-bold text-slate-600 bg-slate-50 p-2 rounded-xl block border border-slate-100">
+                                            ${dIdx === 0 ? '🎯 انطلاق المحاضرات والوحدة' : (dIdx === 1 ? '💻 ورشة تدريب ومناقشة تفاعلية' : '📖 تطبيق عملي ودراسة ذاتية')}
+                                        </span>
+                                    </div>
+                                ` : ''}
+                            `}
 
                             ${isWeekend ? `
                                 <div class="py-6 text-center text-slate-400">
@@ -24293,71 +25089,123 @@
         else if (currentMode === 'agenda') {
             const agendaRows = [];
             for (let w = 1; w <= 6; w++) {
-                const weekObj = (courseData?.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === w) || {};
-                const weekTitle = weekObj.title || weekObj.topic || `الأسبوع ${w}`;
-                const assList = (weekObj.assignments || []).filter(a => a.assignmentCategory !== 'group');
-                const weeklyAss = assList[0] || null;
-                const weekQuizzes = weekObj.quizzes || [];
-                const wkdQuiz = weekQuizzes.find(q => q.quizCategory !== 'optional') || weekQuizzes[0] || null;
                 const range = getAcademicWeekDateRange(w);
 
-                let assSubCount = 0, wkdSubCount = 0;
-                if (!isStudent) {
+                if (isStudent) {
+                    coursesToScan.forEach((cCourse, cIdx) => {
+                        const cData = cCourse.course || lmsCourses[cCourse.lmsKey];
+                        if (!cData) return;
+                        ensureLmsCourseWeeklyPillars(cData);
+                        const weekObj = (cData.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === w) || {};
+                        const weekTitle = weekObj.title || weekObj.topic || `الأسبوع ${w}`;
+                        const assList = (weekObj.assignments || []).filter(a => a.assignmentCategory !== 'group');
+                        const weeklyAss = assList[0] || null;
+                        const weekQuizzes = weekObj.quizzes || [];
+                        const wkdQuiz = weekQuizzes.find(q => q.quizCategory !== 'optional') || weekQuizzes[0] || null;
+
+                        const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, cData, w);
+                        const aSub = subDetails.weekly?.sub || subDetails.individual?.sub;
+                        const qSub = subDetails.weekendExam?.rec || subDetails.optionalQuiz?.rec;
+                        const isAssDone = !!aSub;
+                        const assScore = aSub ? (aSub.score !== undefined ? aSub.score : 10) : null;
+                        const isWkdDone = !!qSub;
+                        const wkdScore = qSub ? (qSub.bestScore !== undefined ? qSub.bestScore : (qSub.score || 0)) : null;
+
+                        if (weeklyAss) {
+                            agendaRows.push({
+                                weekNum: w,
+                                weekTitle: weekTitle,
+                                courseShort: cCourse.courseShort,
+                                courseKey: cCourse.lmsKey,
+                                type: 'واجب',
+                                icon: '📝',
+                                title: weeklyAss?.title || `واجب الأسبوع ${w}`,
+                                dueDateLabel: range.days[3].label,
+                                dueDayName: range.days[3].dayName,
+                                points: '10 درجات',
+                                isStudent: true,
+                                isDone: isAssDone,
+                                score: assScore,
+                                action: `switchStudentActiveCourse('${cCourse.lmsKey}'); openSubmitAssignmentModal('${weeklyAss.id}');`
+                            });
+                        }
+
+                        if (wkdQuiz) {
+                            agendaRows.push({
+                                weekNum: w,
+                                weekTitle: weekTitle,
+                                courseShort: cCourse.courseShort,
+                                courseKey: cCourse.lmsKey,
+                                type: 'اختبار',
+                                icon: '🏁',
+                                title: wkdQuiz?.title || `اختبار الأسبوع ${w}`,
+                                dueDateLabel: range.days[4].label,
+                                dueDayName: range.days[4].dayName,
+                                points: '10 درجات',
+                                isStudent: true,
+                                isDone: isWkdDone,
+                                score: wkdScore,
+                                action: `switchStudentActiveCourse('${cCourse.lmsKey}'); openTakeQuizModal('${wkdQuiz.id}');`
+                            });
+                        }
+                    });
+                } else {
+                    const weekObj = (courseData?.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === w) || {};
+                    const weekTitle = weekObj.title || weekObj.topic || `الأسبوع ${w}`;
+                    const assList = (weekObj.assignments || []).filter(a => a.assignmentCategory !== 'group');
+                    const weeklyAss = assList[0] || null;
+                    const weekQuizzes = weekObj.quizzes || [];
+                    const wkdQuiz = weekQuizzes.find(q => q.quizCategory !== 'optional') || weekQuizzes[0] || null;
+
+                    let assSubCount = 0, wkdSubCount = 0;
                     pool.forEach(t => {
                         const subDetails = getTraineeWeekSubmissionsDetail(t.id, courseData, w);
                         if (subDetails.weekly?.sub || subDetails.individual?.sub) assSubCount++;
                         if (subDetails.weekendExam?.rec || subDetails.optionalQuiz?.rec) wkdSubCount++;
                     });
+                    const assPct = Math.round((assSubCount / totalPoolCount) * 100);
+                    const wkdPct = Math.round((wkdSubCount / totalPoolCount) * 100);
+
+                    // Assignment Item
+                    agendaRows.push({
+                        weekNum: w,
+                        weekTitle: weekTitle,
+                        courseShort: '',
+                        courseKey: '',
+                        type: 'واجب',
+                        icon: '📝',
+                        title: weeklyAss?.title || `واجب الأسبوع ${w}`,
+                        dueDateLabel: range.days[3].label,
+                        dueDayName: range.days[3].dayName,
+                        points: '10 درجات',
+                        isStudent: false,
+                        isDone: false,
+                        score: null,
+                        trainerCount: `${assSubCount}/${totalPoolCount}`,
+                        trainerPct: assPct,
+                        action: `switchTab('gradesSystem'); openGradesSystemWeekDetail(${w});`
+                    });
+
+                    // Quiz Item
+                    agendaRows.push({
+                        weekNum: w,
+                        weekTitle: weekTitle,
+                        courseShort: '',
+                        courseKey: '',
+                        type: 'اختبار',
+                        icon: '🏁',
+                        title: wkdQuiz?.title || `اختبار الأسبوع ${w}`,
+                        dueDateLabel: range.days[4].label,
+                        dueDayName: range.days[4].dayName,
+                        points: '10 درجات',
+                        isStudent: false,
+                        isDone: false,
+                        score: null,
+                        trainerCount: `${wkdSubCount}/${totalPoolCount}`,
+                        trainerPct: wkdPct,
+                        action: `switchTab('gradesSystem'); openGradesSystemWeekDetail(${w});`
+                    });
                 }
-                const assPct = Math.round((assSubCount / totalPoolCount) * 100);
-                const wkdPct = Math.round((wkdSubCount / totalPoolCount) * 100);
-
-                let isAssDone = false, assScore = null, isWkdDone = false, wkdScore = null;
-                if (isStudent) {
-                    const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, courseData, w);
-                    const aSub = subDetails.weekly?.sub || subDetails.individual?.sub;
-                    const qSub = subDetails.weekendExam?.rec || subDetails.optionalQuiz?.rec;
-                    isAssDone = !!aSub;
-                    assScore = aSub ? (aSub.score !== undefined ? aSub.score : 10) : null;
-                    isWkdDone = !!qSub;
-                    wkdScore = qSub ? (qSub.bestScore !== undefined ? qSub.bestScore : (qSub.score || 0)) : null;
-                }
-
-                // Assignment Item
-                agendaRows.push({
-                    weekNum: w,
-                    weekTitle: weekTitle,
-                    type: 'واجب',
-                    icon: '📝',
-                    title: weeklyAss?.title || `واجب الأسبوع ${w}`,
-                    dueDateLabel: range.days[3].label,
-                    dueDayName: range.days[3].dayName,
-                    points: '10 درجات',
-                    isStudent: isStudent,
-                    isDone: isAssDone,
-                    score: assScore,
-                    trainerCount: `${assSubCount}/${totalPoolCount}`,
-                    trainerPct: assPct,
-                    action: isStudent ? (weeklyAss ? `openSubmitAssignmentModal('${weeklyAss.id}')` : '') : `switchTab('gradesSystem'); openGradesSystemWeekDetail(${w});`
-                });
-
-                // Quiz Item
-                agendaRows.push({
-                    weekNum: w,
-                    weekTitle: weekTitle,
-                    type: 'اختبار',
-                    icon: '🏁',
-                    title: wkdQuiz?.title || `اختبار الأسبوع ${w}`,
-                    dueDateLabel: range.days[4].label,
-                    dueDayName: range.days[4].dayName,
-                    points: '10 درجات',
-                    isStudent: isStudent,
-                    isDone: isWkdDone,
-                    score: wkdScore,
-                    trainerCount: `${wkdSubCount}/${totalPoolCount}`,
-                    trainerPct: wkdPct,
-                    action: isStudent ? (wkdQuiz ? `openTakeQuizModal('${wkdQuiz.id}')` : '') : `switchTab('gradesSystem'); openGradesSystemWeekDetail(${w});`
-                });
             }
 
             mainViewContent = `
@@ -24365,7 +25213,7 @@
                     <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="text-xl">📋</span>
-                            <h4 class="font-black text-slate-900 text-sm md:text-base">جدول استحقاق المهام والاختبارات المعتمدة (12 استحقاقاً)</h4>
+                            <h4 class="font-black text-slate-900 text-sm md:text-base">جدول استحقاق المهام والاختبارات المعتمدة</h4>
                         </div>
                         <span class="text-xs font-bold text-slate-500">الأربعاء (واجبات) • الخميس (اختبارات)</span>
                     </div>
@@ -24392,7 +25240,10 @@
                                             <div class="flex items-center gap-2">
                                                 <span class="text-base">${row.icon}</span>
                                                 <div>
-                                                    <span class="font-black text-slate-900 block">${row.title}</span>
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        ${row.courseShort ? `<span class="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black px-1.5 py-0.2 rounded font-sans">${row.courseShort}</span>` : ''}
+                                                        <span class="font-black text-slate-900">${row.title}</span>
+                                                    </div>
                                                     <span class="text-[10px] text-slate-400 font-bold">${row.weekTitle}</span>
                                                 </div>
                                             </div>
