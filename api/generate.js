@@ -30,7 +30,10 @@ const LMS_PROMPT_TEMPLATE = `أنت مساعد تعليمي خبير متخصص 
 4. أنشئ واجباً تطبيقياً متكاملاً يتضمن نمطين:
    - أسئلة اختيار من متعدد (MCQ) تطبيقية (من 3 إلى 5 أسئلة).
    - أسئلة مقالية / كتابة نصية (Text Essay) تطلب من المتدرب صياغة نص أو فقرة عملية باستخدام المفاهيم والمصطلحات.
-5. أنشئ اختباراً أسبوعياً تفاعلياً يتكون من 5 أسئلة اختيار من متعدد (MCQ)، 10 درجات، مدة 15 دقيقة، متنوعة الإجابات وتختبر الفهم والتطبيق.
+5. أنشئ اختباراً أسبوعياً تفاعلياً متنوعاً وممتعاً (10 درجات، مدة 15 دقيقة) يتضمن بالضرورة الأنماط الثلاثة التالية:
+   - أسئلة اختيار من متعدد (MCQ) (سؤالان على الأقل) مع 4 خيارات وتحديد الإجابة النموذجية وشرح توضيحي.
+   - أسئلة صح وخطأ (True / False) (سؤالان على الأقل) بخيارات ["صح ✓", "خطأ ✗"] وتحديد الصواب وتفسير مختصر.
+   - سؤال لعبة التوصيل والمطابقة (Matching Game) (سؤال واحد ممتع ومبتكر) يحتوي على 4 أزواج متطابقة متوازية ("pairs": [{"left": "المصطلح أو المفهوم أ", "right": "التعريف أو التطبيق المناظر ب"}, ...]).
 6. أعد فقط JSON نظيف صالح للـ Parse ومطابق تماماً للبنية التالية بدون أي نص أو مقدمات أو كتل تعليق خارج الـ JSON.
 
 ## JSON Schema المطلوبة (أعد هذه البنية بالضبط):
@@ -107,15 +110,48 @@ const LMS_PROMPT_TEMPLATE = `أنت مساعد تعليمي خبير متخصص 
     ]
   },
   "quiz": {
-    "title": "اختبار الأسبوع الأكاديمي",
+    "title": "اختبار الأسبوع التفاعلي المتنوع",
     "duration_minutes": 15,
     "total_grade": 10,
     "questions": [
       {
         "type": "mcq",
-        "question": "نص السؤال بالإنجليزية أو العربية يختبر مفهوماً تم شرحه",
+        "question": "نص السؤال الأول من متعدد بالإنجليزية أو العربية يختبر فهماً دقيقاً",
         "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
-        "correct_answer": "الخيار أ"
+        "correct_answer": "الخيار أ",
+        "explanation": "شرح وتوضيح لسبب صحة الخيار"
+      },
+      {
+        "type": "mcq",
+        "question": "نص السؤال الثاني من متعدد يربط بين المصطلح والممارسة المهنية",
+        "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
+        "correct_answer": "الخيار أ",
+        "explanation": "شرح توضيحي"
+      },
+      {
+        "type": "true_false",
+        "question": "عبارة محددة من المحتوى يطلب من المتدرب الحكم بصحتها أو خطئها",
+        "options": ["صح ✓", "خطأ ✗"],
+        "correct_answer": "صح ✓",
+        "explanation": "تفسير صحة العبارة وفقاً للمعايير المهنية"
+      },
+      {
+        "type": "true_false",
+        "question": "عبارة ثانية تقيس الدقة في تطبيق إجراءات العمل والتشغيل",
+        "options": ["صح ✓", "خطأ ✗"],
+        "correct_answer": "خطأ ✗",
+        "explanation": "تفسير سبب خطأ العبارة وتصحيحها"
+      },
+      {
+        "type": "matching",
+        "question": "🎮 لعبة التوصيل والمطابقة: صِل كل مصطلح/مفهوم في القائمة (أ) بما يناسبه في القائمة (ب)",
+        "pairs": [
+          {"left": "المصطلح أو المفهوم 1", "right": "التعريف أو التطبيق المقابل 1"},
+          {"left": "المصطلح أو المفهوم 2", "right": "التعريف أو التطبيق المقابل 2"},
+          {"left": "المصطلح أو المفهوم 3", "right": "التعريف أو التطبيق المقابل 3"},
+          {"left": "المصطلح أو المفهوم 4", "right": "التعريف أو التطبيق المقابل 4"}
+        ],
+        "explanation": "أحسنت! جميع المصطلحات تم توصيلها بتعريفاتها ومجالاتها الفنية الصحيحة"
       }
     ]
   }
@@ -366,58 +402,52 @@ function buildDemoContentFromText(extractedText, filename) {
       questions: [
         {
           type: 'mcq',
-          question: `What is the primary definition of '${extractedTerms[0].en}' according to the technical lecture?`,
+          question: `ما هو التعريف الدقيق للمصطلح المهني '${extractedTerms[0].en}' وفق سياق المحاضرة؟`,
           options: [
             extractedTerms[0].definition.slice(0, 65),
-            'An unrelated manual hand tool used in carpentry',
-            'A temporary administrative financial report',
-            'None of the above'
+            'أداة صيانة يدوية عامة غير متصلة بالموضوع',
+            'مستند إداري مالي دوري للشركات',
+            'إجراء غير معتمد في الورش الفنية'
           ],
-          correct_answer: extractedTerms[0].definition.slice(0, 65)
+          correct_answer: extractedTerms[0].definition.slice(0, 65),
+          explanation: `يشير مصطلح ${extractedTerms[0].en} إلى ${extractedTerms[0].definition}`
         },
         {
           type: 'mcq',
-          question: `ما هو المقابل الدقيق للمصطلح المهني '${extractedTerms[Math.min(1, extractedTerms.length - 1)].en}'؟`,
+          question: `Which technical term best corresponds to: '${extractedTerms[Math.min(1, extractedTerms.length - 1)].definition.slice(0, 70)}'?`,
           options: [
-            extractedTerms[Math.min(1, extractedTerms.length - 1)].ar,
-            'أداة تشغيل عامة',
-            'مستند محاسبي دوري',
-            'إجراء صيانة طارئة غير مخطط له'
-          ],
-          correct_answer: extractedTerms[Math.min(1, extractedTerms.length - 1)].ar
-        },
-        {
-          type: 'mcq',
-          question: `Which term best describes: '${extractedTerms[Math.min(2, extractedTerms.length - 1)].definition.slice(0, 70)}'?`,
-          options: [
-            extractedTerms[Math.min(2, extractedTerms.length - 1)].en,
-            'General Hardware Tool',
+            extractedTerms[Math.min(1, extractedTerms.length - 1)].en,
+            'General Utility Hardware',
             'Draft Blueprint Specification',
-            'Hazard Warning Sign'
+            'Hazard Evacuation Alert'
           ],
-          correct_answer: extractedTerms[Math.min(2, extractedTerms.length - 1)].en
+          correct_answer: extractedTerms[Math.min(1, extractedTerms.length - 1)].en,
+          explanation: `The correct technical term is ${extractedTerms[Math.min(1, extractedTerms.length - 1)].en}.`
         },
         {
-          type: 'mcq',
-          question: 'ما الغرض الرئيسي من دراسة واستخدام المصطلحات الفنية باللغة الإنجليزية في بيئة العمل الصناعية؟',
-          options: [
-            'التواصل الدقيق وفهم كتيبات التشغيل ومعايير السلامة العالمية',
-            'إلغاء استخدام اللغة العربية في المحادثات اليومية بين الزملاء',
-            'حفظ الكلمات دون تطبيقها في الورش والمختبرات العملية',
-            'إجراء اختبارات نظرية فقط دون أهمية في الميدان'
-          ],
-          correct_answer: 'التواصل الدقيق وفهم كتيبات التشغيل ومعايير السلامة العالمية'
+          type: 'true_false',
+          question: `عبارة: الالتزام بالمصطلحات الفنية المعتمدة وإجراءات السلامة في '${title}' يُعد إلزامياً لحماية الكوادر الفنية وضمان جودة التشغيل الميداني.`,
+          options: ['صح ✓', 'خطأ ✗'],
+          correct_answer: 'صح ✓',
+          explanation: 'صواب؛ لأن الالتزام بالمعايير الفنية واشتراطات السلامة يقلل من الحوادث ويوحد التواصل المهني الدقيق.'
         },
         {
-          type: 'mcq',
-          question: `True or False: Technical terminology in '${title}' requires adherence to international industrial safety standards.`,
-          options: [
-            'True (صواب - إلزامي في المعايير الصناعية الدولية)',
-            'False (خطأ - غير مطلوب في بيئة العمل)',
-            'Optional only in administrative offices',
-            'Only applies to top management'
+          type: 'true_false',
+          question: `عبارة: المصطلحات الفنية المذكورة في الدرس هي مجرد مفاهيم نظرية ولا علاقة لها بالتطبيق الميداني أو كتيبات التشغيل القياسية.`,
+          options: ['صح ✓', 'خطأ ✗'],
+          correct_answer: 'خطأ ✗',
+          explanation: 'خطأ؛ لأن المصطلحات التقنية هي أدوات تواصل ميدانية أساسية وتطبق في صلب العمليات الفنية اليومية.'
+        },
+        {
+          type: 'matching',
+          question: '🎮 لعبة التوصيل والمطابقة: صِل كل مصطلح مهني في القائمة (أ) بتعريفه وتطبيقه الصحيح في القائمة (ب):',
+          pairs: [
+            { left: extractedTerms[0]?.en || 'Technical Safety', right: extractedTerms[0]?.ar || 'السلامة الفنية والمهنية' },
+            { left: extractedTerms[Math.min(1, extractedTerms.length - 1)]?.en || 'Standard Procedures', right: extractedTerms[Math.min(1, extractedTerms.length - 1)]?.ar || 'إجراءات التشغيل القياسية' },
+            { left: extractedTerms[Math.min(2, extractedTerms.length - 1)]?.en || 'Quality Control', right: extractedTerms[Math.min(2, extractedTerms.length - 1)]?.ar || 'ضبط وتأكيد الجودة' },
+            { left: extractedTerms[Math.min(3, extractedTerms.length - 1)]?.en || 'Risk Management', right: extractedTerms[Math.min(3, extractedTerms.length - 1)]?.ar || 'إدارة وتقييم المخاطر' }
           ],
-          correct_answer: 'True (صواب - إلزامي في المعايير الصناعية الدولية)'
+          explanation: 'ممتاز! تم توصيل كافة المصطلحات بتعريفاتها ومجالاتها الفنية الصحيحة بنجاح.'
         }
       ]
     },
@@ -522,36 +552,43 @@ export default async function handler(req, res) {
   const startTime = Date.now();
 
   try {
-    const { filename, fileType, base64, courseName, weekTitle, weekTopic } = req.body || {};
+    const { filename, fileType, base64, textInput, courseName, weekTitle, weekTopic } = req.body || {};
 
-    if (!base64) {
+    const hasDirectText = typeof textInput === 'string' && textInput.trim().length >= 10;
+    const hasFile = Boolean(base64);
+
+    if (!hasDirectText && !hasFile) {
       return res.status(400).json({
         success: false,
-        error: 'لم يتم استلام محتوى الملف (Base64). يرجى التأكد من اختيار ملف PPTX أو PDF.'
+        error: 'لم يتم استلام أي محتوى. يرجى إدخال نص دراسي مباشر أو رفع ملف PPTX / PDF.'
       });
     }
 
-    const safeFilename = filename || 'uploaded_document';
+    const safeFilename = filename || (hasDirectText && !hasFile ? 'نص_دراسي_مباشر.txt' : 'uploaded_document');
     const isPdf = safeFilename.toLowerCase().endsWith('.pdf') || (fileType && fileType.includes('pdf'));
     const isPptx = safeFilename.toLowerCase().endsWith('.pptx') || (fileType && (fileType.includes('presentation') || fileType.includes('powerpoint')));
 
-    if (!isPdf && !isPptx) {
+    if (hasFile && !isPdf && !isPptx) {
       return res.status(400).json({
         success: false,
         error: 'صيغة الملف غير مدعومة. يرجى رفع ملف PowerPoint (.pptx) أو PDF (.pdf).'
       });
     }
 
-    // Convert Base64 string to Buffer
-    const fileBuffer = Buffer.from(base64, 'base64');
-    const fileSizeKB = Math.round(fileBuffer.length / 1024);
+    // Convert Base64 string to Buffer if file provided
+    let fileBuffer = null;
+    let fileSizeKB = 0;
+    if (hasFile) {
+      fileBuffer = Buffer.from(base64, 'base64');
+      fileSizeKB = Math.round(fileBuffer.length / 1024);
+    }
 
     // ─── Automatic Supabase Cloud Storage Upload (Bucket: 'lms-files') ──────
     let cloudFileUrl = '';
     const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '');
     const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
 
-    if (supabaseUrl && supabaseKey) {
+    if (fileBuffer && supabaseUrl && supabaseKey) {
       try {
         const cleanFn = safeFilename.replace(/[^a-zA-Z0-9._\-\u0600-\u06FF]/g, '_');
         const folder = courseName ? encodeURIComponent(courseName.replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '_')) : 'ai_generated';
@@ -580,10 +617,17 @@ export default async function handler(req, res) {
     }
 
     let extractedText = '';
-    if (isPptx) {
+    if (hasDirectText && !hasFile) {
+      extractedText = textInput.trim();
+    } else if (hasFile && isPptx && fileBuffer) {
       extractedText = extractTextFromPptxBuffer(fileBuffer);
-    } else {
+    } else if (hasFile && fileBuffer) {
       extractedText = extractTextFromPdfBuffer(fileBuffer);
+    }
+
+    // If both file and direct text provided, merge them
+    if (hasDirectText && hasFile && extractedText) {
+      extractedText = `${extractedText}\n\n[إضافات وملاحظات نصية من المدرب]:\n${textInput.trim()}`;
     }
 
     const textLength = extractedText ? extractedText.length : 0;
@@ -607,8 +651,18 @@ export default async function handler(req, res) {
 
         const parts = [];
 
-        // For PDF: Gemini natively ingests PDF as inlineData with 100% multimodal accuracy!
-        if (isPdf) {
+        // If direct text only (no file attached)
+        if (hasDirectText && !hasFile) {
+          const trimmedText = extractedText.length > 25000
+            ? extractedText.slice(0, 25000) + '\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]'
+            : extractedText;
+
+          const contentSection = `${contextBlock}\n## النص التدريبي والمحتوى المدخل مباشرة من المدرب (${safeFilename}):\n---\n${trimmedText}\n---`;
+          parts.push({
+            text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', contentSection)
+          });
+        } else if (isPdf && hasFile) {
+          // For PDF: Gemini natively ingests PDF as inlineData with 100% multimodal accuracy!
           parts.push({
             inlineData: {
               mimeType: 'application/pdf',
@@ -619,9 +673,9 @@ export default async function handler(req, res) {
             text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', `${contextBlock}\n## المحتوى المُستخرج: (راجع وثيقة الـ PDF المرفقة أعلاه بالكامل)`)
           });
         } else {
-          // For PPTX: provide extracted slide texts
-          const trimmedText = extractedText.length > 15000
-            ? extractedText.slice(0, 15000) + '\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]'
+          // For PPTX or merged: provide extracted slide texts
+          const trimmedText = extractedText.length > 20000
+            ? extractedText.slice(0, 20000) + '\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]'
             : extractedText;
 
           const contentSection = `${contextBlock}\n## المحتوى المُستخرج من شرائح العرض (${safeFilename}):\n---\n${trimmedText}\n---`;

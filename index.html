@@ -4324,7 +4324,7 @@
                             <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 text-white flex items-center justify-center text-xl shadow-sm shrink-0">✨</div>
                             <div>
                                 <h3 class="font-black text-slate-900 text-base md:text-lg">توليد وتخصيص محتوى الوحدة بالذكاء الاصطناعي</h3>
-                                <p class="text-[11px] text-slate-500 font-bold" id="aiModalSubtitle">ارفع الملف لإنشاء المحتوى خطوة بخطوة: الفيديوهات ➔ المذكرات والمصطلحات ➔ الواجبات ➔ الاختبارات</p>
+                                <p class="text-[11px] text-slate-500 font-bold" id="aiModalSubtitle">ارفع الملف أو ألصق النص لإنشاء المحتوى واختبار تفاعلي متنوع خطوة بخطوة: الفيديوهات ➔ المذكرات ➔ الواجبات ➔ الاختبارات (اختيارات، صح وخطأ، ولعبة التوصيل)</p>
                             </div>
                         </div>
                         <button type="button" onclick="closeAiGenerateModal()" class="text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 p-2.5 rounded-xl transition text-sm cursor-pointer shrink-0 shadow-2xs">✕</button>
@@ -4382,7 +4382,19 @@
                             </div>
                         </details>
 
-                        <!-- File Upload Zone (Shown before wizard) -->
+                        <!-- Input Source Mode Selector (الملف التدريبي vs النص المباشر) -->
+                        <div class="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-2 border border-slate-200">
+                            <button type="button" id="aiSourceTabFile" onclick="setAiSourceMode('file')" class="flex-1 py-2.5 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs bg-white text-violet-950 ring-1 ring-violet-200">
+                                <span class="text-base">📁</span>
+                                <span>رفع ملف تدريبي (PPTX / PDF)</span>
+                            </button>
+                            <button type="button" id="aiSourceTabText" onclick="setAiSourceMode('text')" class="flex-1 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer text-slate-600 hover:text-slate-900">
+                                <span class="text-base">📝</span>
+                                <span>تحويل نص دراسي مباشر إلى اختبار (Text to Quiz)</span>
+                            </button>
+                        </div>
+
+                        <!-- Mode 1: File Upload Zone (Shown when file mode active) -->
                         <div id="aiUploadZone" class="border-2 border-dashed border-violet-300 rounded-2xl p-6 text-center bg-violet-50/40 hover:bg-violet-50 transition cursor-pointer relative" onclick="document.getElementById('aiFileInput').click()">
                             <input type="file" id="aiFileInput" accept=".pptx,.pdf" class="hidden" onchange="onAiFileSelected(this)">
                             <div id="aiUploadPrompt">
@@ -4398,6 +4410,47 @@
                                     <p class="text-[11px] text-slate-500 font-bold" id="aiFileSize">0 KB</p>
                                 </div>
                                 <button type="button" onclick="clearAiFile(event)" class="text-[11px] text-red-500 hover:text-red-700 font-bold mt-1 cursor-pointer">✕ إزالة الملف</button>
+                            </div>
+                        </div>
+
+                        <!-- Mode 2: Direct Text Input Zone (Shown when text mode active) -->
+                        <div id="aiTextZone" class="hidden space-y-3 bg-gradient-to-br from-violet-50/50 to-indigo-50/30 border border-violet-200 rounded-2xl p-4 md:p-5">
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-bold text-xs shrink-0">✍️</span>
+                                    <div>
+                                        <label for="aiDirectTextInput" class="font-black text-slate-900 text-xs">إدخال نص المحاضرة أو الملخص للتحويل المباشر:</label>
+                                        <p class="text-[10px] text-slate-500 font-bold">الصق النص التدريبي أو المذكرات وسيقوم الذكاء الاصطناعي بتوليد اختبار تفاعلي متنوع ووحدة متكاملة</p>
+                                    </div>
+                                </div>
+                                <span id="aiDirectTextCount" class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">0 حرف</span>
+                            </div>
+
+                            <textarea id="aiDirectTextInput" rows="6" oninput="updateAiTextCount()" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 resize-y leading-relaxed text-right placeholder-slate-400" placeholder="الصق هنا نص المحاضرة أو ملخص الدرس أو فقرات الشرح أو المصطلحات الفنية (مثال: محاضرة عن السلامة المهنية، أدوات الورشة، أو المصطلحات الفنية باللغة الإنجليزية)...&#10;&#10;وسيقوم المساعد الذكي تلقائياً بتحويلها إلى اختبار أسبوعي متنوع (اختيارات، صح وخطأ، ولعبة التوصيل والمطابقة) بالإضافة إلى خطة الوحدة الأسبوعية كاملة."></textarea>
+
+                            <!-- Quick Sample Presets -->
+                            <div class="space-y-1.5 pt-1">
+                                <span class="text-[10px] font-black text-slate-500">⚡ نصوص جاهزة للتجربة الفورية:</span>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <button type="button" onclick="loadAiSampleText('safety')" class="text-[10px] font-bold bg-white hover:bg-violet-50 text-slate-700 hover:text-violet-900 border border-slate-200 hover:border-violet-300 px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-2xs flex items-center gap-1">
+                                        <span>🛡️</span>
+                                        <span>درس السلامة الصناعية (PPE)</span>
+                                    </button>
+                                    <button type="button" onclick="loadAiSampleText('electrical')" class="text-[10px] font-bold bg-white hover:bg-violet-50 text-slate-700 hover:text-violet-900 border border-slate-200 hover:border-violet-300 px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-2xs flex items-center gap-1">
+                                        <span>⚡</span>
+                                        <span>درس المصطلحات الكهربائية</span>
+                                    </button>
+                                    <button type="button" onclick="loadAiSampleText('maintenance')" class="text-[10px] font-bold bg-white hover:bg-violet-50 text-slate-700 hover:text-violet-900 border border-slate-200 hover:border-violet-300 px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-2xs flex items-center gap-1">
+                                        <span>🔧</span>
+                                        <span>درس صيانة المعدات (SOP)</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Highlights Feature Box -->
+                            <div class="bg-violet-100/60 border border-violet-200 rounded-xl p-2.5 text-[11px] text-violet-950 font-bold flex items-center gap-2">
+                                <span class="text-sm shrink-0">🎯</span>
+                                <span>سيتم تلقائياً إنشاء اختبار تفاعلي يشمل: <b>اختيارات (MCQ)</b> + <b>صح وخطأ</b> + <b>🎮 لعبة التوصيل والمطابقة</b> مباشرة من النص!</span>
                             </div>
                         </div>
 
@@ -4678,7 +4731,7 @@
                         <div id="aiInitialActions" class="w-full flex flex-col sm:flex-row items-center gap-3">
                             <button type="button" id="aiGenerateBtn" onclick="runAiGenerate()" class="w-full sm:w-auto bg-gradient-to-l from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800 text-white font-black text-sm px-6 py-3 rounded-2xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-violet-500/30 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <span>✨</span>
-                                <span>ابدأ التوليد والتحليل بالخطوات</span>
+                                <span id="aiGenerateBtnLabel">ابدأ التوليد والتحليل بالخطوات</span>
                             </button>
                             <button type="button" onclick="closeAiGenerateModal()" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm px-5 py-3 rounded-2xl cursor-pointer transition">
                                 إلغاء
@@ -18364,13 +18417,165 @@
         isAntiCheatListenerAttached = false;
     }
 
+    window.activeMatchingSelection = window.activeMatchingSelection || {};
+    window.matchingPairsMap = window.matchingPairsMap || {};
+
+    const MATCHING_COLORS = [
+        { bg: 'bg-blue-50', text: 'text-blue-950', border: 'border-blue-400', badgeBg: 'bg-blue-600', badgeText: 'text-white' },
+        { bg: 'bg-emerald-50', text: 'text-emerald-950', border: 'border-emerald-400', badgeBg: 'bg-emerald-600', badgeText: 'text-white' },
+        { bg: 'bg-amber-50', text: 'text-amber-950', border: 'border-amber-400', badgeBg: 'bg-amber-600', badgeText: 'text-white' },
+        { bg: 'bg-purple-50', text: 'text-purple-950', border: 'border-purple-400', badgeBg: 'bg-purple-600', badgeText: 'text-white' },
+        { bg: 'bg-rose-50', text: 'text-rose-950', border: 'border-rose-400', badgeBg: 'bg-rose-600', badgeText: 'text-white' }
+    ];
+
+    function handleMatchingItemClick(qId, col, val, btnEl) {
+        window.matchingPairsMap[qId] = window.matchingPairsMap[qId] || {};
+
+        if (col === 'left') {
+            if (window.matchingPairsMap[qId][val]) {
+                delete window.matchingPairsMap[qId][val];
+            }
+            window.activeMatchingSelection[qId] = val;
+
+            const leftBtns = document.querySelectorAll(`[data-match-q="${qId}"][data-match-col="left"]`);
+            leftBtns.forEach(b => {
+                if (b.getAttribute('data-match-val') === val) {
+                    b.classList.add('ring-4', 'ring-violet-300', 'border-violet-600');
+                } else {
+                    b.classList.remove('ring-4', 'ring-violet-300');
+                }
+            });
+        } else if (col === 'right') {
+            const activeLeft = window.activeMatchingSelection[qId];
+            if (!activeLeft) {
+                showToast('اختر مصطلحاً من العمود (أ) أولاً ثم انقر على تعريفه في العمود (ب)', 'info');
+                return;
+            }
+
+            for (let l in window.matchingPairsMap[qId]) {
+                if (window.matchingPairsMap[qId][l] === val) {
+                    delete window.matchingPairsMap[qId][l];
+                }
+            }
+
+            window.matchingPairsMap[qId][activeLeft] = val;
+            window.activeMatchingSelection[qId] = null;
+
+            const leftBtns = document.querySelectorAll(`[data-match-q="${qId}"][data-match-col="left"]`);
+            leftBtns.forEach(b => b.classList.remove('ring-4', 'ring-violet-300'));
+        }
+
+        renderMatchingBoardState(qId);
+    }
+    window.handleMatchingItemClick = handleMatchingItemClick;
+
+    function renderMatchingBoardState(qId) {
+        const pairs = window.matchingPairsMap[qId] || {};
+        const hiddenInput = document.getElementById(`match_input_${qId}`);
+        if (hiddenInput) {
+            hiddenInput.value = JSON.stringify(pairs);
+        }
+
+        const leftBtns = document.querySelectorAll(`[data-match-q="${qId}"][data-match-col="left"]`);
+        const rightBtns = document.querySelectorAll(`[data-match-q="${qId}"][data-match-col="right"]`);
+
+        leftBtns.forEach(b => {
+            b.className = 'matching-btn-left w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-violet-400 font-black text-xs text-slate-800 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs';
+            const badge = b.querySelector('.matching-badge');
+            if (badge) {
+                badge.classList.add('hidden');
+                badge.innerText = '';
+            }
+        });
+
+        rightBtns.forEach(b => {
+            b.className = 'matching-btn-right w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-indigo-400 font-bold text-xs text-slate-700 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs';
+            const badge = b.querySelector('.matching-badge');
+            if (badge) {
+                badge.classList.add('hidden');
+                badge.innerText = '';
+            }
+        });
+
+        let pairIndex = 0;
+        for (let lVal in pairs) {
+            const rVal = pairs[lVal];
+            const color = MATCHING_COLORS[pairIndex % MATCHING_COLORS.length];
+            const pairNum = pairIndex + 1;
+
+            leftBtns.forEach(b => {
+                if (b.getAttribute('data-match-val') === lVal) {
+                    b.className = `matching-btn-left w-full text-right p-3 rounded-xl border-2 ${color.border} ${color.bg} font-black text-xs ${color.text} transition cursor-pointer flex items-center justify-between gap-2 shadow-xs`;
+                    const badge = b.querySelector('.matching-badge');
+                    if (badge) {
+                        badge.className = `matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black ${color.badgeBg} ${color.badgeText}`;
+                        badge.innerText = `زوج ${pairNum} ✓`;
+                        badge.classList.remove('hidden');
+                    }
+                }
+            });
+
+            rightBtns.forEach(b => {
+                if (b.getAttribute('data-match-val') === rVal) {
+                    b.className = `matching-btn-right w-full text-right p-3 rounded-xl border-2 ${color.border} ${color.bg} font-black text-xs ${color.text} transition cursor-pointer flex items-center justify-between gap-2 shadow-xs`;
+                    const badge = b.querySelector('.matching-badge');
+                    if (badge) {
+                        badge.className = `matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black ${color.badgeBg} ${color.badgeText}`;
+                        badge.innerText = `زوج ${pairNum} ✓`;
+                        badge.classList.remove('hidden');
+                    }
+                }
+            });
+
+            pairIndex++;
+        }
+
+        const statusEl = document.getElementById(`match_status_${qId}`);
+        if (statusEl) {
+            const total = leftBtns.length || 4;
+            const connected = Object.keys(pairs).length;
+            if (connected === total && total > 0) {
+                statusEl.className = 'text-[11px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200';
+                statusEl.innerText = `✓ اكتمل توصيل كافة الأزواج بنجاح (${total} من ${total})!`;
+            } else {
+                statusEl.className = 'text-[11px] font-bold text-slate-600';
+                statusEl.innerText = `تم توصيل ${connected} من ${total} أزواج`;
+            }
+        }
+
+        updateQuizAnswerProgress();
+    }
+    window.renderMatchingBoardState = renderMatchingBoardState;
+
+    function resetMatchingGame(qId) {
+        window.matchingPairsMap[qId] = {};
+        window.activeMatchingSelection[qId] = null;
+        renderMatchingBoardState(qId);
+        showToast('تم مسح التوصيل، يمكنك البدء مجدداً', 'info');
+    }
+    window.resetMatchingGame = resetMatchingGame;
+
     function updateQuizAnswerProgress() {
         if (!currentTakingQuiz) return;
         const questions = currentTakingQuiz.questions || [];
         let answeredCount = 0;
         questions.forEach(q => {
-            const chosen = document.querySelector(`input[name="q_${q.id}"]:checked`);
-            if (chosen) answeredCount++;
+            const qType = q.type || 'mcq';
+            if (qType === 'matching') {
+                const hiddenInput = document.getElementById(`match_input_${q.id}`);
+                if (hiddenInput && hiddenInput.value) {
+                    try {
+                        const pairs = JSON.parse(hiddenInput.value);
+                        const requiredCount = Array.isArray(q.pairs) ? q.pairs.length : 1;
+                        if (Object.keys(pairs).length >= requiredCount) {
+                            answeredCount++;
+                        }
+                    } catch(e) {}
+                }
+            } else {
+                const chosen = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                if (chosen) answeredCount++;
+            }
         });
         const progressEl = document.getElementById('tqAnsweredProgressText');
         if (progressEl) {
@@ -18460,28 +18665,164 @@
         const warnBanner = document.getElementById('tqAntiCheatWarningBanner');
         if (warnBanner) warnBanner.classList.add('hidden');
 
+        // تفريغ وتجهيز حالة لعبة التوصيل
+        (foundQuiz.questions || []).forEach(q => {
+            if (q.type === 'matching') {
+                window.matchingPairsMap[q.id] = {};
+                window.activeMatchingSelection[q.id] = null;
+            }
+        });
+
         // بناء الأسئلة
         const container = document.getElementById('tqQuestionsContainer');
         if (container) {
-            container.innerHTML = (foundQuiz.questions || []).map((q, idx) => `
-                <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 space-y-3">
-                    <div class="flex items-start gap-2">
-                        <span class="w-6 h-6 rounded-full bg-[#0F2942] text-white text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
-                            ${idx + 1}
-                        </span>
-                        <h5 class="font-black text-xs md:text-sm text-slate-900 leading-snug">${q.text}</h5>
-                    </div>
+            container.innerHTML = (foundQuiz.questions || []).map((q, idx) => {
+                const qType = q.type || 'mcq';
 
-                    <div class="space-y-2 pr-7">
-                        ${(q.options || []).map((opt, oIdx) => `
-                            <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 cursor-pointer transition text-xs font-bold text-slate-800">
-                                <input type="radio" name="q_${q.id}" value="${oIdx}" onchange="updateQuizAnswerProgress()" class="accent-[#0F2942] w-4 h-4">
-                                <span>${opt}</span>
-                            </label>
-                        `).join('')}
+                if (qType === 'matching') {
+                    const pairs = Array.isArray(q.pairs) ? q.pairs : [];
+                    const leftItems = pairs.map(p => p.left);
+                    const rightItems = [...pairs.map(p => p.right)].sort(() => Math.random() - 0.5);
+
+                    return `
+                        <div class="border-2 border-indigo-200 rounded-2xl p-4 bg-gradient-to-br from-indigo-50/60 to-purple-50/40 space-y-3.5" id="match_block_${q.id}">
+                            <div class="flex items-start justify-between gap-2 border-b border-indigo-100 pb-2.5">
+                                <div class="flex items-start gap-2.5">
+                                    <span class="w-6 h-6 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-black flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                                        ${idx + 1}
+                                    </span>
+                                    <div>
+                                        <h5 class="font-black text-xs md:text-sm text-slate-900 leading-snug">${escapeHtml(q.text || q.question || 'لعبة التوصيل والمطابقة')}</h5>
+                                        <p class="text-[11px] text-indigo-700 font-bold mt-0.5">🎮 طريقة اللعب: انقر على المفهوم في (العمود أ) ثم انقر على تعريفه في (العمود ب) لإتمام المطابقة.</p>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-black bg-indigo-100 text-indigo-900 border border-indigo-200 px-2.5 py-1 rounded-full shrink-0">
+                                    🎮 لعبة توصيل ومطابقة
+                                </span>
+                            </div>
+
+                            <!-- Dual-Column Interactive Matching Board -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1" id="match_board_${q.id}">
+                                <!-- Column A (Left items) -->
+                                <div class="space-y-2">
+                                    <div class="text-[11px] font-black text-slate-700 flex items-center gap-1.5 px-1">
+                                        <span class="w-2 h-2 rounded-full bg-violet-600"></span>
+                                        <span>العمود (أ) - المصطلحات والمفاهيم:</span>
+                                    </div>
+                                    <div class="space-y-2">
+                                        ${leftItems.map((leftText) => `
+                                            <button type="button" 
+                                                onclick="handleMatchingItemClick('${q.id}', 'left', '${escapeHtml(leftText)}', this)" 
+                                                data-match-q="${q.id}" 
+                                                data-match-col="left" 
+                                                data-match-val="${escapeHtml(leftText)}" 
+                                                class="matching-btn-left w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-violet-400 font-black text-xs text-slate-800 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs">
+                                                <span class="leading-relaxed">${escapeHtml(leftText)}</span>
+                                                <span class="matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black hidden"></span>
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <!-- Column B (Right items) -->
+                                <div class="space-y-2">
+                                    <div class="text-[11px] font-black text-slate-700 flex items-center gap-1.5 px-1">
+                                        <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                                        <span>العمود (ب) - التعريفات والتطبيقات:</span>
+                                    </div>
+                                    <div class="space-y-2">
+                                        ${rightItems.map((rightText) => `
+                                            <button type="button" 
+                                                onclick="handleMatchingItemClick('${q.id}', 'right', '${escapeHtml(rightText)}', this)" 
+                                                data-match-q="${q.id}" 
+                                                data-match-col="right" 
+                                                data-match-val="${escapeHtml(rightText)}" 
+                                                class="matching-btn-right w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-indigo-400 font-bold text-xs text-slate-700 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs">
+                                                <span class="leading-relaxed">${escapeHtml(rightText)}</span>
+                                                <span class="matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black hidden"></span>
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Matching Game Status & Reset Button -->
+                            <div class="flex items-center justify-between pt-2 border-t border-indigo-100 flex-wrap gap-2 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs">🔗</span>
+                                    <span class="text-[11px] font-bold text-slate-600" id="match_status_${q.id}">تم توصيل 0 من ${pairs.length} أزواج</span>
+                                </div>
+                                <button type="button" onclick="resetMatchingGame('${q.id}')" class="text-[11px] font-bold text-slate-600 hover:text-red-700 bg-white border border-slate-200 hover:border-red-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
+                                    🔄 مسح وإعادة التوصيل
+                                </button>
+                            </div>
+
+                            <input type="hidden" id="match_input_${q.id}" name="q_${q.id}" value="">
+                        </div>
+                    `;
+                }
+
+                if (qType === 'true_false') {
+                    return `
+                        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 space-y-3">
+                            <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
+                                <div class="flex items-start gap-2">
+                                    <span class="w-6 h-6 rounded-full bg-[#0F2942] text-white text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
+                                        ${idx + 1}
+                                    </span>
+                                    <h5 class="font-black text-xs md:text-sm text-slate-900 leading-snug">${escapeHtml(q.text || q.question || '')}</h5>
+                                </div>
+                                <span class="text-[10px] font-black bg-purple-50 text-purple-900 border border-purple-200 px-2 py-0.5 rounded-full shrink-0">
+                                    ⚖️ صح أو خطأ
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                                <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/30 cursor-pointer transition text-xs font-black text-slate-800">
+                                    <input type="radio" name="q_${q.id}" value="0" onchange="updateQuizAnswerProgress()" class="accent-emerald-600 w-4 h-4">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="text-emerald-700">✅</span>
+                                        <span>صح (صواب)</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-rose-300 hover:bg-rose-50/30 cursor-pointer transition text-xs font-black text-slate-800">
+                                    <input type="radio" name="q_${q.id}" value="1" onchange="updateQuizAnswerProgress()" class="accent-rose-600 w-4 h-4">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="text-rose-700">❌</span>
+                                        <span>خطأ (غير صحيح)</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Default MCQ
+                return `
+                    <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 space-y-3">
+                        <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
+                            <div class="flex items-start gap-2">
+                                <span class="w-6 h-6 rounded-full bg-[#0F2942] text-white text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
+                                    ${idx + 1}
+                                </span>
+                                <h5 class="font-black text-xs md:text-sm text-slate-900 leading-snug">${escapeHtml(q.text || q.question || '')}</h5>
+                            </div>
+                            <span class="text-[10px] font-black bg-blue-50 text-blue-900 border border-blue-200 px-2 py-0.5 rounded-full shrink-0">
+                                🔘 اختيار من متعدد
+                            </span>
+                        </div>
+
+                        <div class="space-y-2 pr-7">
+                            ${(q.options || []).map((opt, oIdx) => `
+                                <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 cursor-pointer transition text-xs font-bold text-slate-800">
+                                    <input type="radio" name="q_${q.id}" value="${oIdx}" onchange="updateQuizAnswerProgress()" class="accent-[#0F2942] w-4 h-4">
+                                    <span>${escapeHtml(opt)}</span>
+                                </label>
+                            `).join('')}
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         const submitBtn = document.getElementById('tqSubmitBtn');
@@ -18597,12 +18938,36 @@
 
         const answersMap = {};
         questions.forEach(q => {
-            const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
-            if (selected) {
-                const chosen = parseInt(selected.value);
-                answersMap[q.id] = chosen;
-                if (chosen === q.correctIndex) {
-                    score += (q.points || ptsPerQ);
+            const qType = q.type || 'mcq';
+            const qPoints = q.points || ptsPerQ;
+
+            if (qType === 'matching') {
+                const hiddenInput = document.getElementById(`match_input_${q.id}`);
+                let studentPairs = {};
+                if (hiddenInput && hiddenInput.value) {
+                    try {
+                        studentPairs = JSON.parse(hiddenInput.value);
+                    } catch(e) {}
+                }
+                answersMap[q.id] = studentPairs;
+                const totalPairsCount = (Array.isArray(q.pairs) && q.pairs.length > 0) ? q.pairs.length : 1;
+                let correctPairsCount = 0;
+                (q.pairs || []).forEach(p => {
+                    const studentRight = studentPairs[p.left];
+                    if (studentRight && String(studentRight).trim() === String(p.right).trim()) {
+                        correctPairsCount++;
+                    }
+                });
+                const matchScore = (correctPairsCount / totalPairsCount) * qPoints;
+                score += matchScore;
+            } else {
+                const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                if (selected) {
+                    const chosen = parseInt(selected.value, 10);
+                    answersMap[q.id] = chosen;
+                    if (chosen === q.correctIndex) {
+                        score += qPoints;
+                    }
                 }
             }
         });
@@ -21925,9 +22290,13 @@
         const uploadZone = document.getElementById('aiUploadZone');
         const uploadPrompt = document.getElementById('aiUploadPrompt');
         const filePreview = document.getElementById('aiFilePreview');
-        if (uploadZone) uploadZone.classList.remove('hidden');
+        const sourceTabWrapper = document.getElementById('aiSourceTabFile')?.parentElement;
+        if (sourceTabWrapper) sourceTabWrapper.classList.remove('hidden');
         if (uploadPrompt) uploadPrompt.classList.remove('hidden');
         if (filePreview) filePreview.classList.add('hidden');
+
+        // Reset to current mode
+        setAiSourceMode(currentAiSourceMode || 'file');
 
         const loadingState = document.getElementById('aiLoadingState');
         const errorState = document.getElementById('aiErrorState');
@@ -22033,6 +22402,87 @@
             filePreview.classList.remove('flex');
         }
     }
+
+    let currentAiSourceMode = 'file';
+
+    function setAiSourceMode(mode) {
+        currentAiSourceMode = mode === 'text' ? 'text' : 'file';
+        const tabFile = document.getElementById('aiSourceTabFile');
+        const tabText = document.getElementById('aiSourceTabText');
+        const uploadZone = document.getElementById('aiUploadZone');
+        const textZone = document.getElementById('aiTextZone');
+        const btnLabel = document.getElementById('aiGenerateBtnLabel');
+
+        if (currentAiSourceMode === 'text') {
+            if (tabFile) tabFile.className = 'flex-1 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer text-slate-600 hover:text-slate-900';
+            if (tabText) tabText.className = 'flex-1 py-2.5 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs bg-white text-violet-950 ring-1 ring-violet-200';
+            if (uploadZone) uploadZone.classList.add('hidden');
+            if (textZone) textZone.classList.remove('hidden');
+            if (btnLabel) btnLabel.innerText = 'توليد الاختبار والوحدة من النص المباشر ✨';
+        } else {
+            if (tabFile) tabFile.className = 'flex-1 py-2.5 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs bg-white text-violet-950 ring-1 ring-violet-200';
+            if (tabText) tabText.className = 'flex-1 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer text-slate-600 hover:text-slate-900';
+            if (uploadZone) uploadZone.classList.remove('hidden');
+            if (textZone) textZone.classList.add('hidden');
+            if (btnLabel) btnLabel.innerText = 'ابدأ التوليد والتحليل بالخطوات ✨';
+        }
+    }
+    window.setAiSourceMode = setAiSourceMode;
+
+    function updateAiTextCount() {
+        const input = document.getElementById('aiDirectTextInput');
+        const countEl = document.getElementById('aiDirectTextCount');
+        if (!input || !countEl) return;
+        const len = input.value.trim().length;
+        countEl.innerText = `${len} حرف`;
+        if (len >= 20) {
+            countEl.className = 'text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200';
+        } else {
+            countEl.className = 'text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full';
+        }
+    }
+    window.updateAiTextCount = updateAiTextCount;
+
+    function loadAiSampleText(presetKey) {
+        const input = document.getElementById('aiDirectTextInput');
+        if (!input) return;
+
+        const samples = {
+            safety: `الوحدة التدريبية: إجراءات السلامة الصناعية ومهمات الوقاية الشخصية (Industrial Safety & PPE).
+تعد السلامة المهنية الركيزة الأساسية في المنشآت البترولية والصناعية والمختبرات التقنية.
+المصطلحات الفنية المعتمدة:
+1. Personal Protective Equipment (PPE): مهمات الوقاية الشخصية وتشمل الخوذة ونظارات الأمان وحذاء السلامة المقاوم للصدمات والقفازات العازلة.
+2. Hazard Identification: عملية الرصد المبكر وتحديد المخاطر الفيزيائية والكيميائية والكهربائية في موقع العمل قبل وقوع الحوادث.
+3. Risk Assessment: تقييم شدة المخاطر المحتملة ووضع خطط وإجراءات التحكم المسبقة لضمان سلامة الكادر والمعدات.
+4. Emergency Stop (E-Stop): زر الإيقاف الفوري في حالات الطوارئ لفصل الطاقة المحركة عن الآلات والمعدات فوراً لمنع تفاقم الخطر.
+5. Standard Operating Procedure (SOP): إجراءات التشغيل القياسية المكتوبة والتي تلزم الفنيين باتباع خطوات محددة لضمان الجودة والسلامة.
+قواعد العمل الإلزامية:
+- الالتزام التام بارتداء مهمات الوقاية الشخصية المناسبة في كافة مناطق العمليات.
+- يمنع تشغيل أي آلة دوارة أو قاطعة دون التأكد من تثبيت حواجز الحماية الوقائية وسلامة مفاتيح التحكم.
+- توثيق أي ملاحظة أو خلل في سجل الوردية اليومي وإخطار المشرف فوراً.`,
+            electrical: `الوحدة التدريبية: الدوائر الكهربائية والقياسات والمصطلحات الفنية (Electrical Circuits & Measurements).
+تعتبر مبادئ الكهرباء الصناعية أساسية لجميع الفنيين في بيئة التشغيل والصيانة.
+المصطلحات الفنية الأساسية:
+1. Voltage (الجهد الكهربائي): فرق الجهد بين نقطتين في الدائرة ويقاس بوحدة الفولت (Volt) باستخدام جهاز الفولتميتر.
+2. Current (التيار الكهربائي): تدفق الشحنات الكهربائية عبر الموصل ويقاس بوحدة الأمبير (Ampere).
+3. Resistance (المقاومة الكهربائية): ممانعة الموصل لمرور التيار الكهربائي وتقاس بوحدة الأوم (Ohm) وتخضع لقانون أوم.
+4. Circuit Breaker (قاطع الدائرة): جهاز حماية كهروميكانيكي يفصل التيار تلقائياً عند حدوث حمل زائد (Overload) أو قصر دائرة (Short Circuit).
+5. Lockout / Tagout (LOTO): إجراء وقائي إلزامي يقضي بإقفال مفاتيح الطاقة وتثبيت لافتات تحذيرية أثناء صيانة المعدات لضمان عدم إعادة تشغيلها بالخطأ.`,
+            maintenance: `الوحدة التدريبية: صيانة وتفتيش المعدات الصناعية وضمان الجودة (Industrial Maintenance & Inspection).
+تهدف الصيانة الدورية إلى ضمان استمرارية الإنتاج ورفع الكفاءة التشغيلية وتفادي التوقفات غير المخططة.
+المفاهيم والمصطلحات الفنية:
+1. Preventive Maintenance (الصيانة الوقائية): إجراء أعمال الفحص الدوري والتزييت واستبدال القطع الاستهلاكية وفق جدول زمني محدد قبل حدوث الأعطال.
+2. Corrective Maintenance (الصيانة التصحيحية / الطارئة): أعمال الإصلاح الفوري واستبدال المكونات التالفة بعد حدوث عطل غير متوقع.
+3. Quality Assurance (ضمان الجودة): السياسات والعمليات المنهجية التي تضمن مطابقة العمليات والمنتجات للمواصفات القياسية العالمية.
+4. Calibration (المعايرة الفنية): مقارنة دقة قراءات أجهزة القياس بمعيار مرجعي معتمد لضمان خلو القراءات من أي انحراف.
+5. Inspection Checklist (قائمة الفحص الفني): وثيقة توثق خطوات الفحص الدوري وملاحظات الحالة الفنية للآلة.`
+        };
+
+        input.value = samples[presetKey] || samples.safety;
+        updateAiTextCount();
+        showToast('تم تحميل نص دراسي نموذجي جاهز للتحويل السريع إلى اختبار ✓', 'info');
+    }
+    window.loadAiSampleText = loadAiSampleText;
 
     // ─────────────────────────────────────────────────────────────────
     // STEPPER NAVIGATION LOGIC (التايم لاين والتنقل بين الخطوات)
@@ -22151,8 +22601,16 @@
     }
 
     async function runAiGenerate() {
-        if (!selectedAiFile) {
-            showToast('يرجى اختيار ملف باوربوينت (.pptx) أو PDF (.pdf) أولاً', 'warning');
+        const directTextInput = document.getElementById('aiDirectTextInput');
+        const directText = directTextInput ? directTextInput.value.trim() : '';
+
+        if (currentAiSourceMode === 'file' && !selectedAiFile) {
+            showToast('يرجى اختيار ملف PowerPoint (.pptx) أو PDF (.pdf) أولاً، أو الانتقال إلى تبويب النص المباشر', 'warning');
+            return;
+        }
+
+        if (currentAiSourceMode === 'text' && directText.length < 20) {
+            showToast('يرجى كتابة أو لصق نص دراسي لا يقل عن 20 حرفاً لتوليد الاختبار والوحدة بالذكاء الاصطناعي', 'warning');
             return;
         }
 
@@ -22173,6 +22631,8 @@
         const initialActions = document.getElementById('aiInitialActions');
         const wizardActions = document.getElementById('aiWizardActions');
         const uploadZone = document.getElementById('aiUploadZone');
+        const textZone = document.getElementById('aiTextZone');
+        const sourceTabWrapper = document.getElementById('aiSourceTabFile')?.parentElement;
 
         if (genBtn) genBtn.disabled = true;
         if (errorState) errorState.classList.add('hidden');
@@ -22182,32 +22642,46 @@
             loadingState.classList.remove('hidden');
             loadingState.classList.add('flex');
         }
-        if (loadingMsg) loadingMsg.innerText = `جاري معالجة الملف واستخراج المحتوى بالذكاء الاصطناعي من "${selectedAiFile.name}"...`;
+
+        if (currentAiSourceMode === 'text') {
+            if (loadingMsg) loadingMsg.innerText = `جاري تحليل النص وصياغة اختبار تفاعلي متنوع (اختيارات، صح وخطأ، ولعبة التوصيل) عبر الذكاء الاصطناعي...`;
+        } else {
+            if (loadingMsg) loadingMsg.innerText = `جاري معالجة الملف واستخراج المحتوى بالذكاء الاصطناعي من "${selectedAiFile.name}"...`;
+        }
 
         try {
-            const base64Data = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const resStr = String(reader.result || '');
-                    const commaIdx = resStr.indexOf(',');
-                    resolve(commaIdx >= 0 ? resStr.slice(commaIdx + 1) : resStr);
-                };
-                reader.onerror = () => reject(new Error('تعذر قراءة محتوى الملف من المتصفح'));
-                reader.readAsDataURL(selectedAiFile);
-            });
+            let base64Data = '';
+            if (currentAiSourceMode === 'file' && selectedAiFile) {
+                base64Data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const resStr = String(reader.result || '');
+                        const commaIdx = resStr.indexOf(',');
+                        resolve(commaIdx >= 0 ? resStr.slice(commaIdx + 1) : resStr);
+                    };
+                    reader.onerror = () => reject(new Error('تعذر قراءة محتوى الملف من المتصفح'));
+                    reader.readAsDataURL(selectedAiFile);
+                });
+            }
 
             const activeCourseKey = getActiveTrainerCourseKey();
             const activeCourseObj = (typeof lmsCourses !== 'undefined' && lmsCourses[activeCourseKey]) ? lmsCourses[activeCourseKey] : {};
             const activeWeekObj = (typeof getActiveTrainerLmsWeekObj === 'function') ? (getActiveTrainerLmsWeekObj(activeCourseObj) || {}) : {};
 
             const payload = {
-                filename: selectedAiFile.name,
-                fileType: selectedAiFile.type || (selectedAiFile.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.presentationml.presentation'),
-                base64: base64Data,
                 courseName: activeCourseObj.title || 'اللغة الإنجليزية الفنية والمصطلحات المهنية',
                 weekTitle: activeWeekObj.title || (document.getElementById('tlActiveWeekTitle') ? document.getElementById('tlActiveWeekTitle').innerText : 'الوحدة التدريبية'),
                 weekTopic: activeWeekObj.topic || (document.getElementById('tlActiveWeekTopic') ? document.getElementById('tlActiveWeekTopic').innerText : '')
             };
+
+            if (currentAiSourceMode === 'file' && selectedAiFile) {
+                payload.filename = selectedAiFile.name;
+                payload.fileType = selectedAiFile.type || (selectedAiFile.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.presentationml.presentation');
+                payload.base64 = base64Data;
+            } else {
+                payload.filename = 'نص_دراسي_مباشر.txt';
+                payload.textInput = directText;
+            }
 
             const response = await fetch(endpointUrl, {
                 method: 'POST',
@@ -22241,6 +22715,8 @@
 
             // Switch to Wizard View
             if (uploadZone) uploadZone.classList.add('hidden');
+            if (textZone) textZone.classList.add('hidden');
+            if (sourceTabWrapper) sourceTabWrapper.classList.add('hidden');
             if (stepper) stepper.classList.remove('hidden');
             if (wizardContainer) wizardContainer.classList.remove('hidden');
             if (initialActions) initialActions.classList.add('hidden');
@@ -22250,8 +22726,8 @@
             goToAiStep(1);
 
             const modeLabel = result.mode === 'gemini' 
-                ? 'تم تحليل الملف عبر Google Gemini 2.0 Flash وتجهيز الخطوات الأربعة بنجاح! ✨' 
-                : 'تم تحليل الملف وتجهيز الخطوات الأربعة بنجاح! ✓';
+                ? 'تم تحليل المحتوى عبر Google Gemini 2.0 Flash وبناء الاختبار التفاعلي والوحدة بنجاح! ✨' 
+                : 'تم تجهيز الاختبار التفاعلي المتنوع والوحدة التدريبية بنجاح! ✓';
             showToast(modeLabel, 'success');
 
         } catch (err) {
@@ -22274,7 +22750,7 @@
                         يرجى التأكد من نشر المشروع على Vercel أو التحقق من صحة رابط الـ API.
                     `;
                 } else {
-                    errorMsg.innerText = err.message || 'حدث خطأ غير متوقع أثناء معالجة الملف.';
+                    errorMsg.innerText = err.message || 'حدث خطأ غير متوقع أثناء معالجة المحتوى.';
                 }
             }
             if (genBtn) genBtn.disabled = false;
@@ -22514,6 +22990,89 @@
 
         if (qList) {
             qList.innerHTML = questions.map((q, i) => {
+                const qType = q.type || 'mcq';
+
+                if (qType === 'matching') {
+                    const pairs = Array.isArray(q.pairs) ? q.pairs : [];
+                    return `
+                        <div class="p-4 bg-white border border-indigo-200 rounded-2xl shadow-xs space-y-3 transition hover:border-indigo-400">
+                            <div class="flex items-start justify-between gap-3 flex-wrap border-b border-indigo-100 pb-2.5">
+                                <div class="flex items-center gap-2.5 flex-1 min-w-[200px]">
+                                    <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-900 font-black text-xs shrink-0 shadow-2xs">
+                                        سؤال ${i + 1}
+                                    </span>
+                                    <span class="font-black text-slate-900 text-xs md:text-sm leading-relaxed">
+                                        ${escapeHtml(q.question || 'لعبة التوصيل والمطابقة')}
+                                    </span>
+                                </div>
+                                <span class="text-[10px] font-black bg-indigo-50 text-indigo-900 border border-indigo-200 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
+                                    <span>🎮</span>
+                                    <span>لعبة توصيل ومطابقة (${pairs.length} أزواج)</span>
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+                                ${pairs.map((p, pIdx) => `
+                                    <div class="p-2.5 rounded-xl border border-indigo-200/80 bg-indigo-50/40 text-xs font-bold flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                                            <span class="w-5 h-5 rounded-md bg-indigo-600 text-white font-black text-[10px] flex items-center justify-center shrink-0">
+                                                ${pIdx + 1}
+                                            </span>
+                                            <span class="font-black text-indigo-950 truncate">${escapeHtml(p.left)}</span>
+                                        </div>
+                                        <span class="text-indigo-400 font-bold shrink-0">➔</span>
+                                        <span class="font-bold text-slate-700 flex-1 min-w-0 text-left truncate">${escapeHtml(p.right)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ${q.explanation ? `<p class="text-[11px] text-emerald-800 font-bold bg-emerald-50 border border-emerald-200/60 p-2 rounded-xl">💡 ${escapeHtml(q.explanation)}</p>` : ''}
+                        </div>
+                    `;
+                }
+
+                if (qType === 'true_false') {
+                    const isTrue = !(q.correct_answer && (q.correct_answer.includes('خطأ') || q.correct_answer === 'False' || q.correct_answer === false));
+                    return `
+                        <div class="p-4 bg-white border border-purple-200 rounded-2xl shadow-xs space-y-3 transition hover:border-purple-400">
+                            <div class="flex items-start justify-between gap-3 flex-wrap border-b border-purple-100 pb-2.5">
+                                <div class="flex items-center gap-2.5 flex-1 min-w-[200px]">
+                                    <span class="px-2.5 py-1 rounded-lg bg-purple-100 text-purple-900 font-black text-xs shrink-0 shadow-2xs">
+                                        سؤال ${i + 1}
+                                    </span>
+                                    <span class="font-black text-slate-900 text-xs md:text-sm leading-relaxed">
+                                        ${escapeHtml(q.question || '')}
+                                    </span>
+                                </div>
+                                <span class="text-[10px] font-black bg-purple-50 text-purple-900 border border-purple-200 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
+                                    <span>⚖️</span>
+                                    <span>صح أو خطأ (الصواب: ${isTrue ? 'صح ✓' : 'خطأ ✗'})</span>
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+                                <div class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 ${
+                                    isTrue ? 'bg-emerald-50 border-emerald-300 text-emerald-950 ring-1 ring-emerald-300/60 font-black' : 'bg-slate-50 border-slate-200 text-slate-700'
+                                }">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="text-emerald-700">✅</span>
+                                        <span>صح (صواب)</span>
+                                    </span>
+                                    ${isTrue ? '<span class="text-emerald-700 font-black text-xs">✓ صحيحة</span>' : ''}
+                                </div>
+                                <div class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 ${
+                                    !isTrue ? 'bg-emerald-50 border-emerald-300 text-emerald-950 ring-1 ring-emerald-300/60 font-black' : 'bg-slate-50 border-slate-200 text-slate-700'
+                                }">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="text-rose-700">❌</span>
+                                        <span>خطأ (غير صحيح)</span>
+                                    </span>
+                                    ${!isTrue ? '<span class="text-emerald-700 font-black text-xs">✓ صحيحة</span>' : ''}
+                                </div>
+                            </div>
+                            ${q.explanation ? `<p class="text-[11px] text-purple-900 font-bold bg-purple-50 border border-purple-200/60 p-2 rounded-xl">💡 ${escapeHtml(q.explanation)}</p>` : ''}
+                        </div>
+                    `;
+                }
+
+                // Default MCQ
                 const opts = Array.isArray(q.options) ? q.options : [];
                 return `
                     <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3 transition hover:border-blue-300">
@@ -22552,6 +23111,7 @@
                                 `;
                             }).join('')}
                         </div>
+                        ${q.explanation ? `<p class="text-[11px] text-blue-900 font-bold bg-blue-50 border border-blue-200/60 p-2 rounded-xl">💡 ${escapeHtml(q.explanation)}</p>` : ''}
                     </div>
                 `;
             }).join('');
@@ -22739,6 +23299,36 @@
 
         const rawQuizQuestions = Array.isArray(currentAiGeneratedData.quiz?.questions) ? currentAiGeneratedData.quiz.questions : [];
         const quizQuestionsFormatted = rawQuizQuestions.map((q, idx) => {
+            const qType = q.type || 'mcq';
+
+            if (qType === 'matching') {
+                return {
+                    id: 'qq-' + Date.now() + '-' + idx,
+                    type: 'matching',
+                    text: q.question || `🎮 لعبة التوصيل والمطابقة ${idx + 1}`,
+                    pairs: Array.isArray(q.pairs) ? q.pairs : [],
+                    explanation: q.explanation || ''
+                };
+            }
+
+            if (qType === 'true_false') {
+                const rawOpts = ['صح ✓', 'خطأ ✗'];
+                let correctIdx = 0;
+                if (q.correct_answer && (q.correct_answer.includes('خطأ') || q.correct_answer === 'False' || q.correct_answer === false)) {
+                    correctIdx = 1;
+                }
+                return {
+                    id: 'qq-' + Date.now() + '-' + idx,
+                    type: 'true_false',
+                    text: q.question || `سؤال صح أو خطأ ${idx + 1}`,
+                    options: rawOpts,
+                    correct_answer: rawOpts[correctIdx],
+                    correctIndex: correctIdx,
+                    explanation: q.explanation || ''
+                };
+            }
+
+            // Default MCQ
             const rawOpts = Array.isArray(q.options) ? [...q.options] : [];
             while (rawOpts.length < 4) rawOpts.push(`الخيار ${rawOpts.length + 1}`);
 
@@ -22750,9 +23340,12 @@
 
             return {
                 id: 'qq-' + Date.now() + '-' + idx,
+                type: 'mcq',
                 text: q.question || `سؤال رقم ${idx + 1}`,
                 options: rawOpts.slice(0, 4),
-                correctIndex: correctIdx
+                correct_answer: rawOpts[correctIdx],
+                correctIndex: correctIdx,
+                explanation: q.explanation || ''
             };
         });
 
