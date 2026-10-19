@@ -485,11 +485,6 @@
             </div>
         </div>
 
-        <!-- Student Dynamic Guidance Badge -->
-        <div class="text-[11px] bg-amber-500/15 border border-amber-400/40 text-amber-200 p-3 rounded-2xl text-right leading-relaxed font-bold">
-            💡 <b>إرشادات تسجيل دخول المتدرب:</b> اسم المستخدم هو <b>رقم الهوية الوطنية</b>، وكلمة المرور الافتراضية هي <b>آخر 4 أرقام من الهوية</b> (يتم طلب تعيين كلمة سر جديدة خاصة فور الدخول لأول مرة).
-        </div>
-
         <!-- Student Login Form -->
         <form onsubmit="handleStudentLogin(event)" class="space-y-3.5 pt-1">
             <div class="space-y-1 text-right">
@@ -503,8 +498,11 @@
             <div class="space-y-1 text-right">
                 <label class="block text-xs font-bold opacity-90 text-white">كلمة المرور (Password):</label>
                 <div class="relative">
-                    <input type="password" id="studentLoginPassword" required placeholder="آخر 4 أرقام من الهوية عند أول دخول" class="w-full bg-slate-900/40 border border-slate-700/60 focus:border-amber-400 focus:bg-slate-900/70 rounded-xl p-3 text-xs text-white font-bold outline-none transition pr-9">
+                    <input type="password" id="studentLoginPassword" required placeholder="••••••••" class="w-full bg-slate-900/40 border border-slate-700/60 focus:border-amber-400 focus:bg-slate-900/70 rounded-xl p-3 text-xs text-white font-bold outline-none transition pr-9 pl-10">
                     <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm opacity-60">🔑</span>
+                    <button type="button" onclick="togglePasswordVisibility('studentLoginPassword', this)" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 p-1 cursor-pointer transition focus:outline-none" title="إظهار / إخفاء كلمة المرور">
+                        👁️
+                    </button>
                 </div>
             </div>
 
@@ -559,8 +557,11 @@
             <div class="space-y-1 text-right">
                 <label class="block text-xs font-bold opacity-90 text-white">كلمة المرور (Password):</label>
                 <div class="relative">
-                    <input type="password" id="staffLoginPassword" required placeholder="••••••••" class="w-full bg-slate-900/40 border border-slate-700/60 focus:border-amber-400 focus:bg-slate-900/70 rounded-xl p-3 text-xs text-white font-bold outline-none transition pr-9">
+                    <input type="password" id="staffLoginPassword" required placeholder="••••••••" class="w-full bg-slate-900/40 border border-slate-700/60 focus:border-amber-400 focus:bg-slate-900/70 rounded-xl p-3 text-xs text-white font-bold outline-none transition pr-9 pl-10">
                     <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm opacity-60">🔑</span>
+                    <button type="button" onclick="togglePasswordVisibility('staffLoginPassword', this)" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 p-1 cursor-pointer transition focus:outline-none" title="إظهار / إخفاء كلمة المرور">
+                        👁️
+                    </button>
                 </div>
             </div>
 
@@ -612,11 +613,21 @@
         <form onsubmit="handleMandatoryPasswordChange(event)" class="space-y-3.5 pt-1">
             <div>
                 <label class="block text-xs font-bold mb-1 opacity-90">كلمة المرور الجديدة (New Password):</label>
-                <input type="password" id="mndNewPassword" required minlength="3" placeholder="أدخل كلمة مرور سرية جديدة..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
+                <div class="relative">
+                    <input type="password" id="mndNewPassword" required minlength="3" placeholder="أدخل كلمة مرور سرية جديدة..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono pl-10">
+                    <button type="button" onclick="togglePasswordVisibility('mndNewPassword', this)" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 p-1 cursor-pointer transition focus:outline-none" title="إظهار / إخفاء كلمة المرور">
+                        👁️
+                    </button>
+                </div>
             </div>
             <div>
                 <label class="block text-xs font-bold mb-1 opacity-90">تأكيد كلمة المرور الجديدة (Confirm Password):</label>
-                <input type="password" id="mndConfirmPassword" required minlength="3" placeholder="أعد إدخال نفس كلمة المرور للتأكيد..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
+                <div class="relative">
+                    <input type="password" id="mndConfirmPassword" required minlength="3" placeholder="أعد إدخال نفس كلمة المرور للتأكيد..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono pl-10">
+                    <button type="button" onclick="togglePasswordVisibility('mndConfirmPassword', this)" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 p-1 cursor-pointer transition focus:outline-none" title="إظهار / إخفاء كلمة المرور">
+                        👁️
+                    </button>
+                </div>
             </div>
             <div class="flex gap-2 pt-1">
                 <button type="submit" class="flex-1 gold-gradient-bg text-slate-950 font-black py-3 rounded-xl text-xs transition shadow-lg hover:brightness-105 active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
@@ -1110,12 +1121,7 @@
                         </div>
                     </div>
 
-                    <!-- Trainer Attendance Google Sheet Link & Switcher -->
-                        <!-- 👁️ Student Preview Demo Button -->
-                        <button type="button" onclick="openStudentDemoPreview()" class="bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-md shadow-sky-500/20 transition active:scale-95 cursor-pointer border border-sky-400" title="معاينة حية لشكل صفحة ومحتوى الكورس كما يراها الطالب تماماً">
-                            <span class="text-sm">👁️</span>
-                            <span>معاينة كمتدرب (ديمو)</span>
-                        </button>
+
 
                         <!-- 🔑 Change Password Button -->
                         <button type="button" onclick="openTrainerChangePasswordModal()" class="bg-slate-900 hover:bg-black text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition border border-amber-400/40 cursor-pointer shadow-xs" title="تغيير كلمة المرور وتأمين حساب المدرب">
@@ -1747,7 +1753,12 @@
 
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور:</label>
-                                <input type="password" id="newPassword" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-bold outline-none focus:border-amber-500">
+                                <div class="relative">
+                                    <input type="password" id="newPassword" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-bold outline-none focus:border-amber-500 pl-10">
+                                    <button type="button" onclick="togglePasswordVisibility('newPassword', this)" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-600 p-1 cursor-pointer transition focus:outline-none" title="إظهار / إخفاء كلمة المرور">
+                                        👁️
+                                    </button>
+                                </div>
                             </div>
 
                             <div>
@@ -3415,19 +3426,7 @@
             <!-- ==================== TAB: STUDENT COURSES (مقرراتك التدريبية المستقلة) ==================== -->
             <div id="tab-studentCourses" class="hidden space-y-6">
                 
-                <!-- 👁️ Trainer Demo Preview Notice Banner for Courses -->
-                <div id="trainerDemoNoticeBannerCourses" class="hidden bg-gradient-to-r from-blue-700 via-indigo-800 to-[#0F2942] text-white p-4 rounded-2xl flex items-center justify-between shadow-lg border border-blue-400/40 gap-3 flex-wrap">
-                    <div class="flex items-center gap-3">
-                        <span class="text-2xl">👁️</span>
-                        <div>
-                            <div class="font-black text-sm text-amber-300">وضع المعاينة التجريبية كمتدرب (Student Demo Preview)</div>
-                            <div class="text-xs text-blue-100 mt-0.5">أنت الآن تستعرض صفحة المقررات تماماً كما يشاهدها المتدرب. اختر أي مقرر لتجربة الأسابيع والمحتوى.</div>
-                        </div>
-                    </div>
-                    <button type="button" onclick="exitTrainerStudentDemo()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-md active:scale-95 cursor-pointer whitespace-nowrap">
-                        ⬅ إنهاء المعاينة والعودة للوحة المدرب
-                    </button>
-                </div>
+
 
                 <!-- Top Header Card -->
                 <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-[#0F2942] text-white p-6 md:p-8 rounded-3xl shadow-lg border border-purple-400/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -3471,19 +3470,6 @@
             <!-- ==================== TAB: STUDENT LMS (منصة المتدرب للمحتوى الأكاديمي) ==================== -->
             <div id="tab-studentLms" class="hidden lms-workspace-surface rounded-3xl p-4 md:p-7 border border-slate-200 space-y-6">
                 
-                <!-- 👁️ Trainer Demo Preview Notice Banner (Shown only during demo) -->
-                <div id="trainerDemoNoticeBanner" class="hidden bg-gradient-to-r from-blue-700 via-indigo-800 to-[#0F2942] text-white p-4 rounded-2xl flex items-center justify-between shadow-lg border border-blue-400/40 gap-3 flex-wrap">
-                    <div class="flex items-center gap-3">
-                        <span class="text-2xl">👁️</span>
-                        <div>
-                            <div class="font-black text-sm text-amber-300">وضع المعاينة التجريبية كمتدرب (Student Demo Preview)</div>
-                            <div class="text-xs text-blue-100 mt-0.5">أنت الآن تستعرض صفحة المقرر تماماً كما يشاهدها المتدرب. يمكنك تجربة المحاضرات والمذكرات والاختبارات.</div>
-                        </div>
-                    </div>
-                    <button type="button" onclick="exitTrainerStudentDemo()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-md active:scale-95 cursor-pointer whitespace-nowrap">
-                        ⬅ إنهاء المعاينة والعودة للوحة المدرب
-                    </button>
-                </div>
 
                 <!-- Navigation Breadcrumb to Course Selector -->
                 <div class="flex items-center justify-between gap-3 flex-wrap pb-1">
@@ -3611,6 +3597,21 @@
             <!-- ==================== TAB: TRAINER LMS (لوحة المدرب المستقلة لإدارة المقررات - Canvas & Blackboard Redesign) ==================== -->
             <div id="tab-trainerLms" class="hidden lms-workspace-surface rounded-3xl p-4 md:p-7 border border-slate-200/90 space-y-7 shadow-2xs">
                 
+                <!-- 👁️ Trainer LMS Student Demo & Screen-Sharing Mode Notice Banner -->
+                <div id="trainerLmsDemoNoticeBar" class="hidden bg-gradient-to-r from-blue-700 via-indigo-800 to-[#0F2942] text-white p-4 rounded-2xl flex items-center justify-between shadow-lg border border-blue-400/40 gap-3 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">📺</span>
+                        <div>
+                            <div class="font-black text-sm text-amber-300">وضع المعاينة كمتدرب ومشاركة الشاشة (Student Demo & Screen Share)</div>
+                            <div class="text-xs text-blue-100 mt-0.5">يتم الآن عرض صفحة المقرر بشكل نظيف كما يشاهدها المتدرب، ومناسب للمشاركة في القاعة أو البث المرئي دون أزرار التعديل والحذف.</div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="toggleTrainerLmsStudentDemo(false)" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-md active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1.5">
+                        <span>↩</span>
+                        <span>العودة لوضع تحرير المدرب</span>
+                    </button>
+                </div>
+
                 <!-- 1. Enterprise Academic Course Header (Strictly Locked to Trainer's Own Course) -->
                 <div class="bg-white border border-slate-200/90 border-r-4 border-r-[#0F2942] p-4 md:p-5 rounded-2xl shadow-xs space-y-3">
                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
@@ -3658,6 +3659,12 @@
                                 <span>التقويم الأكاديمي</span>
                             </button>
 
+                            <!-- 👁️ Student Preview Demo / Screen Share Button -->
+                            <button type="button" id="btnTrainerLmsStudentDemo" onclick="toggleTrainerLmsStudentDemo()" class="bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs transition active:scale-95 cursor-pointer border border-sky-400 shrink-0 whitespace-nowrap" title="معاينة كمتدرب ومشاركة الشاشة">
+                                <span class="text-xs">👁️</span>
+                                <span id="btnTrainerLmsStudentDemoLabel">معاينة كمتدرب (ديمو)</span>
+                            </button>
+
                             <!-- Dark Mode Toggle Button -->
                             <button type="button" id="lmsDarkModeToggleBtn" onclick="toggleAppDarkMode()" class="dark-mode-toggle-btn lms-action-btn bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs whitespace-nowrap shrink-0" title="تبديل الوضع الليلي / النهاري">
                                 <span id="lmsDarkModeIcon">🌙</span>
@@ -3671,7 +3678,7 @@
                             </div>
 
                             <!-- ✨ AI Auto-Generate Button -->
-                            <button type="button" onclick="openAiGenerateModal()" class="lms-action-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap shrink-0 border border-violet-300 text-violet-900 bg-violet-50 hover:bg-violet-100 transition" title="توليد محتوى الأسبوع آلياً عبر الذكاء الاصطناعي">
+                            <button type="button" id="tlTopAiBtn" onclick="openAiGenerateModal()" class="lms-action-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap shrink-0 border border-violet-300 text-violet-900 bg-violet-50 hover:bg-violet-100 transition" title="توليد محتوى الأسبوع آلياً عبر الذكاء الاصطناعي">
                                 <span>✨</span>
                                 <span>توليد بالذكاء الاصطناعي</span>
                             </button>
@@ -3758,7 +3765,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <button type="button" onclick="openAiGenerateModal()" class="lms-action-btn bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-700 hover:from-violet-700 hover:to-indigo-800 text-white font-black text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-md shadow-violet-500/20 hover:shadow-violet-500/35 transition active:scale-95 border-0">
+                            <button type="button" id="tlWeekAiBtn" onclick="openAiGenerateModal()" class="lms-action-btn bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-700 hover:from-violet-700 hover:to-indigo-800 text-white font-black text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-md shadow-violet-500/20 hover:shadow-violet-500/35 transition active:scale-95 border-0">
                                 <span>✨</span>
                                 <span>توليد محتوى الأسبوع آلياً (PPTX / PDF)</span>
                             </button>
@@ -3787,7 +3794,7 @@
                                             <p class="text-[11px] text-slate-500 font-bold">المنهج العام لجميع مجموعات المقرر</p>
                                         </div>
                                     </div>
-                                    <button type="button" onclick="openAddVideoModal()" class="lms-action-btn bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/35 transition active:scale-95 border-0">
+                                    <button type="button" id="tlAddVideoBtn" onclick="openAddVideoModal()" class="lms-action-btn bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/35 transition active:scale-95 border-0">
                                         <span class="text-sm">🎥</span>
                                         <span>+ إضافة محاضرة</span>
                                     </button>
@@ -3812,7 +3819,7 @@
                                             <p class="text-[11px] text-slate-500 font-bold">مذكرات نصية عامة لجميع مجموعات المقرر</p>
                                         </div>
                                     </div>
-                                    <button type="button" onclick="openAddDocModal()" class="lms-action-btn bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/35 transition active:scale-95 border-0">
+                                    <button type="button" id="tlAddDocBtn" onclick="openAddDocModal()" class="lms-action-btn bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/35 transition active:scale-95 border-0">
                                         <span class="text-sm">📝</span>
                                         <span>+ إضافة مذكرة</span>
                                     </button>
@@ -3836,7 +3843,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button type="button" onclick="openAddQuizModal()" class="lms-action-btn lms-navy-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                                    <button type="button" id="tlAddQuizBtn" onclick="openAddQuizModal()" class="lms-action-btn lms-navy-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs">
                                         <span>+ إنشاء اختبار</span>
                                     </button>
                                 </div>
@@ -3860,7 +3867,7 @@
                                             <p class="text-[11px] text-slate-500 font-bold" id="tlAssignmentsSubHeaderLabel">تحديد الواجب لمجموعة معينة ومتابعة تسليماتها</p>
                                         </div>
                                     </div>
-                                    <button type="button" onclick="openAddAssignmentModal()" class="lms-action-btn lms-navy-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                                    <button type="button" id="tlAddAssignmentBtn" onclick="openAddAssignmentModal()" class="lms-action-btn lms-navy-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs">
                                         <span>+ إنشاء واجب</span>
                                     </button>
                                 </div>
@@ -5372,7 +5379,12 @@
 
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور الجديدة (اتركها فارغة للإبقاء على الحالية):</label>
-                            <input type="password" id="myProfilePasswordInput" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-bold outline-none focus:border-amber-500">
+                            <div class="relative">
+                                <input type="password" id="myProfilePasswordInput" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-bold outline-none focus:border-amber-500 pl-10">
+                                <button type="button" onclick="togglePasswordVisibility('myProfilePasswordInput', this)" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-600 p-1 cursor-pointer transition focus:outline-none" title="إظهار / إخفاء كلمة المرور">
+                                    👁️
+                                </button>
+                            </div>
                         </div>
 
                         <div class="flex items-center gap-2 pt-2">
@@ -5710,6 +5722,10 @@
         }
     });
     let currentUser = JSON.parse(localStorage.getItem('sys_current_user_v9')) || null;
+    if (currentUser && (currentUser.isDemoPreview || currentUser.id === 'DEMO-STUDENT' || currentUser.cleanId === 'DEMO-STUDENT' || currentUser.username === 'DEMO-STUDENT')) {
+        currentUser = null;
+        try { localStorage.removeItem('sys_current_user_v9'); } catch (e) {}
+    }
 
     let trainees = JSON.parse(localStorage.getItem('sys_trainees_v9')) || [];
     let reports = JSON.parse(localStorage.getItem('sys_reports_v9')) || [];
@@ -6544,7 +6560,7 @@
             saveData();
             applyUserRolePermissions();
             if (trainerNeedsPasswordChange) {
-                openTrainerChangePasswordModal(true);
+                openTrainerChangePasswordModal(false);
                 showToast(`مرحباً بك يا ${staffMatch.name}! يُرجى تعيين كلمة مرور جديدة وخاصة بك لتأمين حسابك كمدرب.`, 'info');
             } else {
                 showToast(`تم تسجيل الدخول بنجاح كـ (${staffMatch.name})`, 'success');
@@ -6649,8 +6665,8 @@
 
         if (nameEl && currentUser) nameEl.innerText = currentUser.name || 'المتدرب';
         if (titleEl) titleEl.innerText = 'تغيير كلمة المرور وتأمين الحساب';
-        if (closeBtn) closeBtn.classList.add('hidden');
-        if (cancelBtn) cancelBtn.classList.add('hidden');
+        if (closeBtn) closeBtn.classList.remove('hidden');
+        if (cancelBtn) cancelBtn.classList.remove('hidden');
 
         document.getElementById('mndNewPassword').value = '';
         document.getElementById('mndConfirmPassword').value = '';
@@ -6670,13 +6686,9 @@
             titleEl.innerText = isMandatory ? 'تحديث كلمة المرور الإلزامية للمدرب' : 'تغيير وتحديث كلمة مرور المدرب';
         }
 
-        if (isMandatory) {
-            if (closeBtn) closeBtn.classList.add('hidden');
-            if (cancelBtn) cancelBtn.classList.add('hidden');
-        } else {
-            if (closeBtn) closeBtn.classList.remove('hidden');
-            if (cancelBtn) cancelBtn.classList.remove('hidden');
-        }
+        // Always keep cancel and close buttons accessible
+        if (closeBtn) closeBtn.classList.remove('hidden');
+        if (cancelBtn) cancelBtn.classList.remove('hidden');
 
         document.getElementById('mndNewPassword').value = '';
         document.getElementById('mndConfirmPassword').value = '';
@@ -6684,12 +6696,26 @@
     }
 
     function closeMandatoryPasswordModal() {
-        if (currentUser && currentUser.mustChangePassword) {
-            showToast('⚠️ يُرجى تعيين كلمة مرور خاصة بك للمتابعة واستخدام النظام', 'warning');
-            return;
-        }
         const modal = document.getElementById('mandatoryPasswordModal');
         if (modal) modal.classList.add('hidden');
+    }
+
+    function togglePasswordVisibility(inputId, btnEl) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (btnEl) {
+                btnEl.innerText = '🙈';
+                btnEl.title = 'إخفاء كلمة المرور';
+            }
+        } else {
+            input.type = 'password';
+            if (btnEl) {
+                btnEl.innerText = '👁️';
+                btnEl.title = 'إظهار كلمة المرور';
+            }
+        }
     }
 
     function handleMandatoryPasswordChange(e) {
@@ -7321,7 +7347,8 @@
         const acadDetailsEl = document.getElementById('tdTrainerAcademicDetails');
         if (acadDetailsEl) acadDetailsEl.innerText = academicSummary;
 
-        if (!activeSelectedGroupInTrainerDashboard && allDistinctGroups.length > 0) {
+        const isCurrentActiveInGroups = allDistinctGroups.some(g => isGroupMatch(g, activeSelectedGroupInTrainerDashboard) || g === activeSelectedGroupInTrainerDashboard);
+        if ((!activeSelectedGroupInTrainerDashboard || !isCurrentActiveInGroups) && allDistinctGroups.length > 0) {
             activeSelectedGroupInTrainerDashboard = allDistinctGroups[0];
         }
 
@@ -19333,6 +19360,70 @@
         renderTrainerLms();
     }
 
+    let isTrainerLmsStudentDemoActive = false;
+
+    function toggleTrainerLmsStudentDemo(forceState) {
+        if (typeof forceState === 'boolean') {
+            isTrainerLmsStudentDemoActive = forceState;
+        } else {
+            isTrainerLmsStudentDemoActive = !isTrainerLmsStudentDemoActive;
+        }
+
+        const banner = document.getElementById('trainerLmsDemoNoticeBar');
+        if (banner) {
+            if (isTrainerLmsStudentDemoActive) banner.classList.remove('hidden');
+            else banner.classList.add('hidden');
+        }
+
+        const demoBtn = document.getElementById('btnTrainerLmsStudentDemo');
+        const demoLbl = document.getElementById('btnTrainerLmsStudentDemoLabel');
+        if (demoBtn && demoLbl) {
+            if (isTrainerLmsStudentDemoActive) {
+                demoBtn.className = "bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs transition active:scale-95 cursor-pointer border border-amber-500 shrink-0 whitespace-nowrap";
+                demoLbl.innerText = "↩ وضع تحرير المدرب";
+            } else {
+                demoBtn.className = "bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs transition active:scale-95 cursor-pointer border border-sky-400 shrink-0 whitespace-nowrap";
+                demoLbl.innerText = "معاينة كمتدرب (ديمو)";
+            }
+        }
+
+        const createWrapper = document.getElementById('tlCreateDropdownWrapper');
+        if (createWrapper) {
+            if (isTrainerLmsStudentDemoActive) createWrapper.classList.add('hidden');
+            else createWrapper.classList.remove('hidden');
+        }
+        const topAiBtn = document.getElementById('tlTopAiBtn');
+        if (topAiBtn) {
+            if (isTrainerLmsStudentDemoActive) topAiBtn.classList.add('hidden');
+            else topAiBtn.classList.remove('hidden');
+        }
+        const weekAiBtn = document.getElementById('tlWeekAiBtn');
+        if (weekAiBtn) {
+            if (isTrainerLmsStudentDemoActive) weekAiBtn.classList.add('hidden');
+            else weekAiBtn.classList.remove('hidden');
+        }
+
+        const addBtnIds = ['tlAddVideoBtn', 'tlAddDocBtn', 'tlAddQuizBtn', 'tlAddAssignmentBtn'];
+        addBtnIds.forEach(bId => {
+            const b = document.getElementById(bId);
+            if (b) {
+                if (isTrainerLmsStudentDemoActive) b.classList.add('hidden');
+                else b.classList.remove('hidden');
+            }
+        });
+
+        renderTrainerLms();
+
+        const lmsTab = document.getElementById('tab-trainerLms');
+        if (lmsTab) lmsTab.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        if (isTrainerLmsStudentDemoActive) {
+            showToast('📺 تم تفعيل وضع المعاينة ومشاركة الشاشة! تظهر المحتويات كما يراها المتدرب دون أزرار تعديل.', 'info');
+        } else {
+            showToast('تمت العودة لوضع تحرير وإدارة المحتوى بنجاح 👨‍🏫', 'success');
+        }
+    }
+
     function renderTrainerLms() {
         // ضمان قفل المقرر على المدرب الحالي فقط وعدم إظهار أي مقررات أخرى
         const courseKey = getActiveTrainerCourseKey();
@@ -19340,6 +19431,46 @@
 
         if (typeof ensureLmsCourseWeeklyPillars === 'function') {
             ensureLmsCourseWeeklyPillars(courseData);
+        }
+
+        // مزامنة حالة عناصر التحكم أثناء وضع المعاينة كمتدرب ومشاركة الشاشة
+        const banner = document.getElementById('trainerLmsDemoNoticeBar');
+        if (banner) {
+            if (isTrainerLmsStudentDemoActive) banner.classList.remove('hidden');
+            else banner.classList.add('hidden');
+        }
+        const createWrapper = document.getElementById('tlCreateDropdownWrapper');
+        if (createWrapper) {
+            if (isTrainerLmsStudentDemoActive) createWrapper.classList.add('hidden');
+            else createWrapper.classList.remove('hidden');
+        }
+        const topAiBtn = document.getElementById('tlTopAiBtn');
+        if (topAiBtn) {
+            if (isTrainerLmsStudentDemoActive) topAiBtn.classList.add('hidden');
+            else topAiBtn.classList.remove('hidden');
+        }
+        const weekAiBtn = document.getElementById('tlWeekAiBtn');
+        if (weekAiBtn) {
+            if (isTrainerLmsStudentDemoActive) weekAiBtn.classList.add('hidden');
+            else weekAiBtn.classList.remove('hidden');
+        }
+        ['tlAddVideoBtn', 'tlAddDocBtn', 'tlAddQuizBtn', 'tlAddAssignmentBtn'].forEach(bId => {
+            const b = document.getElementById(bId);
+            if (b) {
+                if (isTrainerLmsStudentDemoActive) b.classList.add('hidden');
+                else b.classList.remove('hidden');
+            }
+        });
+        const demoBtn = document.getElementById('btnTrainerLmsStudentDemo');
+        const demoLbl = document.getElementById('btnTrainerLmsStudentDemoLabel');
+        if (demoBtn && demoLbl) {
+            if (isTrainerLmsStudentDemoActive) {
+                demoBtn.className = "bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs transition active:scale-95 cursor-pointer border border-amber-500 shrink-0 whitespace-nowrap";
+                demoLbl.innerText = "↩ وضع تحرير المدرب";
+            } else {
+                demoBtn.className = "bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs transition active:scale-95 cursor-pointer border border-sky-400 shrink-0 whitespace-nowrap";
+                demoLbl.innerText = "معاينة كمتدرب (ديمو)";
+            }
         }
 
         const trainerDisplay = document.getElementById('tlCurrentTrainerDisplay');
@@ -19493,13 +19624,15 @@
                                     <span>تكبير الشاشة</span>
                                 </button>
                             ` : ''}
-                            <button type="button" onclick="openEditVideoModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل المحاضرة">
-                                <span>✏️</span>
-                                <span>تعديل</span>
-                            </button>
-                            <button type="button" onclick="deleteLmsVideo(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold transition cursor-pointer" title="حذف المحاضرة">
-                                حذف
-                            </button>
+                            ${!isTrainerLmsStudentDemoActive ? `
+                                <button type="button" onclick="openEditVideoModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل المحاضرة">
+                                    <span>✏️</span>
+                                    <span>تعديل</span>
+                                </button>
+                                <button type="button" onclick="deleteLmsVideo(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold transition cursor-pointer" title="حذف المحاضرة">
+                                    حذف
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                     ${hasVideoPlayer ? `
@@ -19540,7 +19673,7 @@
             `}).join('') : `
                 <div class="border border-dashed border-slate-200 rounded-xl p-5 text-center space-y-1 bg-[#F8F9FA]/60">
                     <div class="text-xs font-bold text-slate-500">لا توجد محاضرات مضافة في هذا الأسبوع</div>
-                    <div class="text-[10px] text-slate-400">اضغط على "+ إضافة محاضرة" لإدراج فيديو أو ملف باوربوينت أو PDF أو روابط</div>
+                    ${!isTrainerLmsStudentDemoActive ? `<div class="text-[10px] text-slate-400">اضغط على "+ إضافة محاضرة" لإدراج فيديو أو ملف باوربوينت أو PDF أو روابط</div>` : ''}
                 </div>
             `;
         }
@@ -19558,19 +19691,21 @@
                         <button type="button" onclick="openReadDocModal('${d.id}')" class="lms-action-btn text-xs bg-white hover:bg-[#0F2942] text-[#0F2942] hover:text-white border border-slate-200 font-bold px-3 py-1.5 rounded-lg cursor-pointer">
                             معاينة النص
                         </button>
-                        <button type="button" onclick="openEditDocModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل المذكرة">
-                            <span>✏️</span>
-                            <span>تعديل</span>
-                        </button>
-                        <button type="button" onclick="deleteLmsDoc(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold transition cursor-pointer" title="حذف المذكرة">
-                            حذف
-                        </button>
+                        ${!isTrainerLmsStudentDemoActive ? `
+                            <button type="button" onclick="openEditDocModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل المذكرة">
+                                <span>✏️</span>
+                                <span>تعديل</span>
+                            </button>
+                            <button type="button" onclick="deleteLmsDoc(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold transition cursor-pointer" title="حذف المذكرة">
+                                حذف
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             `).join('') : `
                 <div class="border border-dashed border-slate-200 rounded-xl p-5 text-center space-y-1 bg-[#F8F9FA]/60">
                     <div class="text-xs font-bold text-slate-500">لا توجد مذكرات دراسية مضافة لهذا الأسبوع</div>
-                    <div class="text-[10px] text-slate-400">اضغط على "+ إضافة مذكرة" لكتابة ملخص نصي مباشر للمتدربين</div>
+                    ${!isTrainerLmsStudentDemoActive ? `<div class="text-[10px] text-slate-400">اضغط على "+ إضافة مذكرة" لكتابة ملخص نصي مباشر للمتدربين</div>` : ''}
                 </div>
             `;
         }
@@ -19617,24 +19752,31 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-between pt-2.5 border-t border-slate-200/80 flex-wrap gap-2">
-                        <button type="button" onclick="openTrainerQuizSubmissions('${q.id}', '${defaultFilterGroup.replace(/'/g, "\\'")}')" class="lms-action-btn text-xs bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer">
-                            النتائج وتنزيل الدرجات (${totalQuizResults})
-                        </button>
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="openEditQuizModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل الاختبار">
-                                <span>✏️</span>
-                                <span>تعديل</span>
+                        ${isTrainerLmsStudentDemoActive ? `
+                            <button type="button" onclick="openTakeQuizModal('${q.id}')" class="lms-action-btn text-xs bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold px-4 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5">
+                                <span>🏁</span>
+                                <span>بدء الاختبار (معاينة المتدرب)</span>
                             </button>
-                            <button type="button" onclick="deleteLmsQuiz(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold cursor-pointer">
-                                حذف
+                        ` : `
+                            <button type="button" onclick="openTrainerQuizSubmissions('${q.id}', '${defaultFilterGroup.replace(/'/g, "\\'")}')" class="lms-action-btn text-xs bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer">
+                                النتائج وتنزيل الدرجات (${totalQuizResults})
                             </button>
-                        </div>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="openEditQuizModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل الاختبار">
+                                    <span>✏️</span>
+                                    <span>تعديل</span>
+                                </button>
+                                <button type="button" onclick="deleteLmsQuiz(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold cursor-pointer">
+                                    حذف
+                                </button>
+                            </div>
+                        `}
                     </div>
                 </div>
             `}).join('') : `
                 <div class="border border-dashed border-slate-200 rounded-xl p-5 text-center space-y-1 bg-[#F8F9FA]/60">
                     <div class="text-xs font-bold text-slate-500">لا توجد اختبارات مضافة في هذا الأسبوع</div>
-                    <div class="text-[10px] text-slate-400">اضغط على "+ إنشاء اختبار" لإضافة اختبار للأسبوع</div>
+                    ${!isTrainerLmsStudentDemoActive ? `<div class="text-[10px] text-slate-400">اضغط على "+ إنشاء اختبار" لإضافة اختبار للأسبوع</div>` : ''}
                 </div>
             `;
         }
@@ -19700,25 +19842,32 @@
                         ` : ''}
 
                         <div class="flex items-center justify-between pt-2.5 border-t border-slate-200/80 flex-wrap gap-2">
-                            <button type="button" onclick="openTrainerAssignmentSubmissions('${a.id}', '${defaultFilterGroup.replace(/'/g, "\\'")}')" class="lms-action-btn text-xs bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer">
-                                الاطلاع على التسليمات ورصد الدرجات يدوياً (${subCount})
-                            </button>
-                            <div class="flex items-center gap-1.5">
-                                <button type="button" onclick="openEditAssignmentModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل الواجب">
-                                    <span>✏️</span>
-                                    <span>تعديل</span>
+                            ${isTrainerLmsStudentDemoActive ? `
+                                <button type="button" onclick="openSubmitAssignmentModal('${a.id}')" class="lms-action-btn text-xs bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold px-4 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5">
+                                    <span>📝</span>
+                                    <span>تسليم الواجب (معاينة المتدرب)</span>
                                 </button>
-                                <button type="button" onclick="deleteLmsAssignment(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold cursor-pointer">
-                                    حذف
+                            ` : `
+                                <button type="button" onclick="openTrainerAssignmentSubmissions('${a.id}', '${defaultFilterGroup.replace(/'/g, "\\'")}')" class="lms-action-btn text-xs bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer">
+                                    الاطلاع على التسليمات ورصد الدرجات يدوياً (${subCount})
                                 </button>
-                            </div>
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" onclick="openEditAssignmentModal(${idx})" class="lms-action-btn text-xs text-sky-700 hover:text-sky-900 bg-white hover:bg-sky-50 border border-slate-200 px-2.5 py-1.5 rounded-lg font-bold cursor-pointer flex items-center gap-1 shadow-2xs" title="تعديل الواجب">
+                                        <span>✏️</span>
+                                        <span>تعديل</span>
+                                    </button>
+                                    <button type="button" onclick="deleteLmsAssignment(${idx})" class="text-xs text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-lg font-bold cursor-pointer">
+                                        حذف
+                                    </button>
+                                </div>
+                            `}
                         </div>
                     </div>
                 `;
             }).join('') : `
                 <div class="border border-dashed border-slate-200 rounded-xl p-5 text-center space-y-1 bg-[#F8F9FA]/60">
                     <div class="text-xs font-bold text-slate-500">لا توجد واجبات مضافة في هذا الأسبوع</div>
-                    <div class="text-[10px] text-slate-400">اضغط على "+ إنشاء واجب" لإضافة الواجب الأسبوعي</div>
+                    ${!isTrainerLmsStudentDemoActive ? `<div class="text-[10px] text-slate-400">اضغط على "+ إنشاء واجب" لإضافة الواجب الأسبوعي</div>` : ''}
                 </div>
             `;
         }
@@ -27691,52 +27840,19 @@
     // ===================================================================
     // TRAINER STUDENT DEMO VIEW (وضع المعاينة كمتدرب للمدربين)
     // ===================================================================
+    // TRAINER STUDENT DEMO VIEW (وضع المعاينة كمتدرب ومشاركة الشاشة في LMS)
+    // ===================================================================
     function openStudentDemoPreview() {
-        if (!currentUser) return;
-        if (!window._trainerDemoBackupUser) {
-            window._trainerDemoBackupUser = JSON.parse(JSON.stringify(currentUser));
+        switchTab('trainerLms');
+        if (typeof toggleTrainerLmsStudentDemo === 'function') {
+            toggleTrainerLmsStudentDemo(true);
         }
-
-        const trainerGroup = activeSelectedGroupInTrainerDashboard || 'سامسونج 101 & 102';
-
-        currentUser = {
-            id: 'DEMO-STUDENT',
-            cleanId: 'DEMO-STUDENT',
-            name: `معاينة كمتدرب (${window._trainerDemoBackupUser.name})`,
-            role: 'student',
-            group: trainerGroup,
-            company: 'Samsung / التدريب الميداني',
-            rate: 100,
-            archiveRate: 100,
-            combinedRate: 100,
-            weeklyAttendance: [true, true, true, true, true],
-            isDemoPreview: true
-        };
-
-        const banner = document.getElementById('trainerDemoNoticeBanner');
-        if (banner) banner.classList.remove('hidden');
-        const bannerCourses = document.getElementById('trainerDemoNoticeBannerCourses');
-        if (bannerCourses) bannerCourses.classList.remove('hidden');
-
-        applyUserRolePermissions();
-        switchTab('studentCourses');
-        showToast('👁️ تم الانتقال لوضع المعاينة كمتدرب! يمكنك استعراض المقررات والمحتوى تماماً كما يشاهده المتدرب.', 'info');
     }
 
     function exitTrainerStudentDemo() {
-        if (window._trainerDemoBackupUser) {
-            currentUser = JSON.parse(JSON.stringify(window._trainerDemoBackupUser));
-            window._trainerDemoBackupUser = null;
+        if (typeof toggleTrainerLmsStudentDemo === 'function') {
+            toggleTrainerLmsStudentDemo(false);
         }
-
-        const banner = document.getElementById('trainerDemoNoticeBanner');
-        if (banner) banner.classList.add('hidden');
-        const bannerCourses = document.getElementById('trainerDemoNoticeBannerCourses');
-        if (bannerCourses) bannerCourses.classList.add('hidden');
-
-        applyUserRolePermissions();
-        switchTab('trainerDashboard');
-        showToast('تمت العودة بنجاح إلى لوحة تحكم المدرب 👨‍🏫', 'success');
     }
 
     // ===================================================================
@@ -28071,6 +28187,7 @@
     window.openStudentLmsForCourse = openStudentLmsForCourse;
     window.openStudentDemoPreview = openStudentDemoPreview;
     window.exitTrainerStudentDemo = exitTrainerStudentDemo;
+    window.toggleTrainerLmsStudentDemo = toggleTrainerLmsStudentDemo;
     window.openTrainerChangePasswordModal = openTrainerChangePasswordModal;
     window.closeMandatoryPasswordModal = closeMandatoryPasswordModal;
     window.renderAttendanceSheetPage = renderAttendanceSheetPage;
@@ -28079,6 +28196,7 @@
     window.closeAttendanceArchiveCalendarModal = closeAttendanceArchiveCalendarModal;
     window.selectAttendanceArchiveWeek = selectAttendanceArchiveWeek;
     window.refreshAttendanceSheetData = refreshAttendanceSheetData;
+    window.togglePasswordVisibility = togglePasswordVisibility;
 
 
     // ===================================================================
