@@ -11,6 +11,13 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- JSZip لقراءة بنية الخلايا والتظليل المتقدم (الأخضر والأصفر للمقاعد الشاغرة) -->
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- PDF.js لقراءة واستخراج نصوص ملفات PDF محلياً وسحابياً بدقة 100% للذكاء الاصطناعي -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
     <!-- Supabase JS Client للمزامنة السحابية الدائمة والتخزين السحابي للملفات -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- خط المراعي Almarai -->
@@ -4328,7 +4335,7 @@
                             <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 text-white flex items-center justify-center text-xl shadow-sm shrink-0">✨</div>
                             <div>
                                 <h3 class="font-black text-slate-900 text-base md:text-lg">توليد وتخصيص محتوى الوحدة بالذكاء الاصطناعي</h3>
-                                <p class="text-[11px] text-slate-500 font-bold" id="aiModalSubtitle">ارفع الملف أو ألصق النص لإنشاء المحتوى واختبار تفاعلي متنوع خطوة بخطوة: الفيديوهات ➔ المذكرات ➔ الواجبات ➔ الاختبارات (اختيارات، صح وخطأ، ولعبة التوصيل)</p>
+                                <p class="text-[11px] text-slate-500 font-bold" id="aiModalSubtitle">ارفع الملف أو ألصق النص لإنشاء المحتوى واختبار تفاعلي متنوع خطوة بخطوة: الفيديوهات ➔ المذكرات ➔ الواجبات ➔ الاختبارات (اختيارات، صح وخطأ، وتوصيل ومطابقة المفاهيم)</p>
                             </div>
                         </div>
                         <button type="button" onclick="closeAiGenerateModal()" class="text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 p-2.5 rounded-xl transition text-sm cursor-pointer shrink-0 shadow-2xs">✕</button>
@@ -4430,7 +4437,7 @@
                                 <span id="aiDirectTextCount" class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">0 حرف</span>
                             </div>
 
-                            <textarea id="aiDirectTextInput" rows="6" oninput="updateAiTextCount()" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 resize-y leading-relaxed text-right placeholder-slate-400" placeholder="الصق هنا نص المحاضرة أو ملخص الدرس أو فقرات الشرح أو المصطلحات الفنية (مثال: محاضرة عن السلامة المهنية، أدوات الورشة، أو المصطلحات الفنية باللغة الإنجليزية)...&#10;&#10;وسيقوم المساعد الذكي تلقائياً بتحويلها إلى اختبار أسبوعي متنوع (اختيارات، صح وخطأ، ولعبة التوصيل والمطابقة) بالإضافة إلى خطة الوحدة الأسبوعية كاملة."></textarea>
+                            <textarea id="aiDirectTextInput" rows="6" oninput="updateAiTextCount()" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 resize-y leading-relaxed text-right placeholder-slate-400" placeholder="الصق هنا نص المحاضرة أو ملخص الدرس أو فقرات الشرح أو المصطلحات الفنية (مثال: محاضرة عن السلامة المهنية، أدوات الورشة، أو المصطلحات الفنية باللغة الإنجليزية)...&#10;&#10;وسيقوم المساعد الذكي تلقائياً بتحويلها إلى اختبار أسبوعي متنوع (اختيارات، صح وخطأ، وتوصيل ومطابقة المفاهيم) بالإضافة إلى خطة الوحدة الأسبوعية كاملة."></textarea>
 
                             <!-- Quick Sample Presets -->
                             <div class="space-y-1.5 pt-1">
@@ -4454,7 +4461,7 @@
                             <!-- Highlights Feature Box -->
                             <div class="bg-violet-100/60 border border-violet-200 rounded-xl p-2.5 text-[11px] text-violet-950 font-bold flex items-center gap-2">
                                 <span class="text-sm shrink-0">🎯</span>
-                                <span>سيتم تلقائياً إنشاء اختبار تفاعلي يشمل: <b>اختيارات (MCQ)</b> + <b>صح وخطأ</b> + <b>🎮 لعبة التوصيل والمطابقة</b> مباشرة من النص!</span>
+                                <span>سيتم تلقائياً إنشاء اختبار تفاعلي يشمل: <b>اختيارات (MCQ)</b> + <b>صح وخطأ</b> + <b>🔗 توصيل ومطابقة المفاهيم</b> مباشرة من النص!</span>
                             </div>
                         </div>
 
@@ -18578,12 +18585,71 @@
     window.matchingPairsMap = window.matchingPairsMap || {};
 
     const MATCHING_COLORS = [
-        { bg: 'bg-blue-50', text: 'text-blue-950', border: 'border-blue-400', badgeBg: 'bg-blue-600', badgeText: 'text-white' },
-        { bg: 'bg-emerald-50', text: 'text-emerald-950', border: 'border-emerald-400', badgeBg: 'bg-emerald-600', badgeText: 'text-white' },
-        { bg: 'bg-amber-50', text: 'text-amber-950', border: 'border-amber-400', badgeBg: 'bg-amber-600', badgeText: 'text-white' },
-        { bg: 'bg-purple-50', text: 'text-purple-950', border: 'border-purple-400', badgeBg: 'bg-purple-600', badgeText: 'text-white' },
-        { bg: 'bg-rose-50', text: 'text-rose-950', border: 'border-rose-400', badgeBg: 'bg-rose-600', badgeText: 'text-white' }
+        { bg: 'bg-red-50', text: 'text-red-950', border: 'border-red-500', badgeBg: 'bg-red-600', badgeText: 'text-white', hex: '#EF4444' },
+        { bg: 'bg-blue-50', text: 'text-blue-950', border: 'border-blue-500', badgeBg: 'bg-blue-600', badgeText: 'text-white', hex: '#3B82F6' },
+        { bg: 'bg-emerald-50', text: 'text-emerald-950', border: 'border-emerald-500', badgeBg: 'bg-emerald-600', badgeText: 'text-white', hex: '#10B981' },
+        { bg: 'bg-amber-50', text: 'text-amber-950', border: 'border-amber-500', badgeBg: 'bg-amber-600', badgeText: 'text-white', hex: '#F59E0B' },
+        { bg: 'bg-purple-50', text: 'text-purple-950', border: 'border-purple-500', badgeBg: 'bg-purple-600', badgeText: 'text-white', hex: '#8B5CF6' }
     ];
+
+    let currentDraggingMatch = null;
+
+    function handleMatchingDragStart(e, qId, val, btnEl) {
+        currentDraggingMatch = { qId, val, el: btnEl };
+        if (e.dataTransfer) {
+            e.dataTransfer.setData('text/plain', val);
+            e.dataTransfer.effectAllowed = 'link';
+        }
+        btnEl.classList.add('opacity-60', 'scale-95', 'ring-4', 'ring-violet-300');
+        window.activeMatchingSelection[qId] = val;
+    }
+    window.handleMatchingDragStart = handleMatchingDragStart;
+
+    function handleMatchingDragEnd(e, btnEl) {
+        btnEl.classList.remove('opacity-60', 'scale-95', 'ring-4', 'ring-violet-300');
+        currentDraggingMatch = null;
+    }
+    window.handleMatchingDragEnd = handleMatchingDragEnd;
+
+    function handleMatchingDragOver(e, btnEl) {
+        e.preventDefault();
+        if (e.dataTransfer) {
+            e.dataTransfer.dropEffect = 'link';
+        }
+        btnEl.classList.add('ring-4', 'ring-indigo-400', 'bg-indigo-50/70');
+    }
+    window.handleMatchingDragOver = handleMatchingDragOver;
+
+    function handleMatchingDragLeave(e, btnEl) {
+        btnEl.classList.remove('ring-4', 'ring-indigo-400', 'bg-indigo-50/70');
+    }
+    window.handleMatchingDragLeave = handleMatchingDragLeave;
+
+    function handleMatchingDrop(e, qId, rightVal, btnEl) {
+        e.preventDefault();
+        btnEl.classList.remove('ring-4', 'ring-indigo-400', 'bg-indigo-50/70');
+        const leftVal = (currentDraggingMatch && currentDraggingMatch.qId === qId)
+            ? currentDraggingMatch.val
+            : (e.dataTransfer ? e.dataTransfer.getData('text/plain') : window.activeMatchingSelection[qId]);
+
+        if (!leftVal) return;
+
+        window.matchingPairsMap[qId] = window.matchingPairsMap[qId] || {};
+
+        // Remove any previous match using this rightVal or leftVal
+        for (let l in window.matchingPairsMap[qId]) {
+            if (window.matchingPairsMap[qId][l] === rightVal || l === leftVal) {
+                delete window.matchingPairsMap[qId][l];
+            }
+        }
+
+        window.matchingPairsMap[qId][leftVal] = rightVal;
+        window.activeMatchingSelection[qId] = null;
+        currentDraggingMatch = null;
+
+        renderMatchingBoardState(qId);
+    }
+    window.handleMatchingDrop = handleMatchingDrop;
 
     function handleMatchingItemClick(qId, col, val, btnEl) {
         window.matchingPairsMap[qId] = window.matchingPairsMap[qId] || {};
@@ -18605,7 +18671,7 @@
         } else if (col === 'right') {
             const activeLeft = window.activeMatchingSelection[qId];
             if (!activeLeft) {
-                showToast('اختر مصطلحاً من العمود (أ) أولاً ثم انقر على تعريفه في العمود (ب)', 'info');
+                showToast('اختر أو اسحب مصطلحاً من العمود (أ) أولاً ثم صله بتعريفه في العمود (ب)', 'info');
                 return;
             }
 
@@ -18626,6 +18692,117 @@
     }
     window.handleMatchingItemClick = handleMatchingItemClick;
 
+    function drawMatchingLines(qId) {
+        const board = document.getElementById(`match_board_${qId}`);
+        const svg = document.getElementById(`match_svg_${qId}`);
+        if (!board || !svg) return;
+
+        svg.innerHTML = '';
+        const pairs = window.matchingPairsMap[qId] || {};
+        const boardRect = board.getBoundingClientRect();
+        if (boardRect.width === 0 || boardRect.height === 0) return;
+
+        let pIdx = 0;
+        for (let lVal in pairs) {
+            const rVal = pairs[lVal];
+            const color = MATCHING_COLORS[pIdx % MATCHING_COLORS.length];
+            const strokeColor = color.hex || '#EF4444';
+
+            const leftBtns = board.querySelectorAll('.matching-btn-left');
+            const rightBtns = board.querySelectorAll('.matching-btn-right');
+            let leftBtn = null;
+            let rightBtn = null;
+
+            leftBtns.forEach(b => {
+                if (b.getAttribute('data-match-val') === lVal) leftBtn = b;
+            });
+            rightBtns.forEach(b => {
+                if (b.getAttribute('data-match-val') === rVal) rightBtn = b;
+            });
+
+            if (leftBtn && rightBtn) {
+                const lDot = leftBtn.querySelector('.match-anchor-left') || leftBtn;
+                const rDot = rightBtn.querySelector('.match-anchor-right') || rightBtn;
+
+                const lRect = lDot.getBoundingClientRect();
+                const rRect = rDot.getBoundingClientRect();
+
+                const x1 = lRect.left + lRect.width / 2 - boardRect.left;
+                const y1 = lRect.top + lRect.height / 2 - boardRect.top;
+                const x2 = rRect.left + rRect.width / 2 - boardRect.left;
+                const y2 = rRect.top + rRect.height / 2 - boardRect.top;
+
+                if (lDot !== leftBtn) {
+                    lDot.style.backgroundColor = strokeColor;
+                    lDot.style.borderColor = strokeColor;
+                }
+                if (rDot !== rightBtn) {
+                    rDot.style.backgroundColor = strokeColor;
+                    rDot.style.borderColor = strokeColor;
+                }
+
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+                // Glow background line
+                const glow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                glow.setAttribute('x1', x1);
+                glow.setAttribute('y1', y1);
+                glow.setAttribute('x2', x2);
+                glow.setAttribute('y2', y2);
+                glow.setAttribute('stroke', strokeColor);
+                glow.setAttribute('stroke-width', '7');
+                glow.setAttribute('stroke-opacity', '0.22');
+                glow.setAttribute('stroke-linecap', 'round');
+                g.appendChild(glow);
+
+                // Main connecting line (matches user image)
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                line.setAttribute('stroke', strokeColor);
+                line.setAttribute('stroke-width', '3.5');
+                line.setAttribute('stroke-linecap', 'round');
+                g.appendChild(line);
+
+                // Endpoint circles
+                const c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                c1.setAttribute('cx', x1);
+                c1.setAttribute('cy', y1);
+                c1.setAttribute('r', '5.5');
+                c1.setAttribute('fill', strokeColor);
+                c1.setAttribute('stroke', '#ffffff');
+                c1.setAttribute('stroke-width', '2');
+                g.appendChild(c1);
+
+                const c2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                c2.setAttribute('cx', x2);
+                c2.setAttribute('cy', y2);
+                c2.setAttribute('r', '5.5');
+                c2.setAttribute('fill', strokeColor);
+                c2.setAttribute('stroke', '#ffffff');
+                c2.setAttribute('stroke-width', '2');
+                g.appendChild(c2);
+
+                svg.appendChild(g);
+            }
+            pIdx++;
+        }
+    }
+    window.drawMatchingLines = drawMatchingLines;
+
+    if (!window._matchingResizeListener) {
+        window._matchingResizeListener = () => {
+            if (window.matchingPairsMap) {
+                Object.keys(window.matchingPairsMap).forEach(qId => {
+                    drawMatchingLines(qId);
+                });
+            }
+        };
+        window.addEventListener('resize', window._matchingResizeListener);
+    }
+
     function renderMatchingBoardState(qId) {
         const pairs = window.matchingPairsMap[qId] || {};
         const hiddenInput = document.getElementById(`match_input_${qId}`);
@@ -18637,20 +18814,30 @@
         const rightBtns = document.querySelectorAll(`[data-match-q="${qId}"][data-match-col="right"]`);
 
         leftBtns.forEach(b => {
-            b.className = 'matching-btn-left w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-violet-400 font-black text-xs text-slate-800 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs';
+            b.className = 'matching-btn-left w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-violet-400 font-black text-xs text-slate-800 transition cursor-grab active:cursor-grabbing flex items-center justify-between gap-2 shadow-2xs select-none';
             const badge = b.querySelector('.matching-badge');
             if (badge) {
                 badge.classList.add('hidden');
                 badge.innerText = '';
             }
+            const dot = b.querySelector('.match-anchor-left');
+            if (dot) {
+                dot.style.backgroundColor = '#ffffff';
+                dot.style.borderColor = '#cbd5e1';
+            }
         });
 
         rightBtns.forEach(b => {
-            b.className = 'matching-btn-right w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-indigo-400 font-bold text-xs text-slate-700 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs';
+            b.className = 'matching-btn-right w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-indigo-400 font-bold text-xs text-slate-700 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs select-none';
             const badge = b.querySelector('.matching-badge');
             if (badge) {
                 badge.classList.add('hidden');
                 badge.innerText = '';
+            }
+            const dot = b.querySelector('.match-anchor-right');
+            if (dot) {
+                dot.style.backgroundColor = '#ffffff';
+                dot.style.borderColor = '#cbd5e1';
             }
         });
 
@@ -18662,7 +18849,7 @@
 
             leftBtns.forEach(b => {
                 if (b.getAttribute('data-match-val') === lVal) {
-                    b.className = `matching-btn-left w-full text-right p-3 rounded-xl border-2 ${color.border} ${color.bg} font-black text-xs ${color.text} transition cursor-pointer flex items-center justify-between gap-2 shadow-xs`;
+                    b.className = `matching-btn-left w-full text-right p-3 rounded-xl border-2 ${color.border} ${color.bg} font-black text-xs ${color.text} transition cursor-grab active:cursor-grabbing flex items-center justify-between gap-2 shadow-xs select-none`;
                     const badge = b.querySelector('.matching-badge');
                     if (badge) {
                         badge.className = `matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black ${color.badgeBg} ${color.badgeText}`;
@@ -18674,7 +18861,7 @@
 
             rightBtns.forEach(b => {
                 if (b.getAttribute('data-match-val') === rVal) {
-                    b.className = `matching-btn-right w-full text-right p-3 rounded-xl border-2 ${color.border} ${color.bg} font-black text-xs ${color.text} transition cursor-pointer flex items-center justify-between gap-2 shadow-xs`;
+                    b.className = `matching-btn-right w-full text-right p-3 rounded-xl border-2 ${color.border} ${color.bg} font-black text-xs ${color.text} transition cursor-pointer flex items-center justify-between gap-2 shadow-xs select-none`;
                     const badge = b.querySelector('.matching-badge');
                     if (badge) {
                         badge.className = `matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black ${color.badgeBg} ${color.badgeText}`;
@@ -18700,17 +18887,21 @@
             }
         }
 
+        requestAnimationFrame(() => drawMatchingLines(qId));
         updateQuizAnswerProgress();
     }
     window.renderMatchingBoardState = renderMatchingBoardState;
 
-    function resetMatchingGame(qId) {
+    function resetMatchingQuestion(qId) {
         window.matchingPairsMap[qId] = {};
         window.activeMatchingSelection[qId] = null;
+        const svg = document.getElementById(`match_svg_${qId}`);
+        if (svg) svg.innerHTML = '';
         renderMatchingBoardState(qId);
         showToast('تم مسح التوصيل، يمكنك البدء مجدداً', 'info');
     }
-    window.resetMatchingGame = resetMatchingGame;
+    window.resetMatchingQuestion = resetMatchingQuestion;
+    window.resetMatchingGame = resetMatchingQuestion; // for backward compatibility
 
     function updateQuizAnswerProgress() {
         if (!currentTakingQuiz) return;
@@ -18822,7 +19013,7 @@
         const warnBanner = document.getElementById('tqAntiCheatWarningBanner');
         if (warnBanner) warnBanner.classList.add('hidden');
 
-        // تفريغ وتجهيز حالة لعبة التوصيل
+        // تفريغ وتجهيز حالة سؤال التوصيل والمطابقة
         (foundQuiz.questions || []).forEach(q => {
             if (q.type === 'matching') {
                 window.matchingPairsMap[q.id] = {};
@@ -18849,55 +19040,79 @@
                                         ${idx + 1}
                                     </span>
                                     <div>
-                                        <h5 class="font-black text-xs md:text-sm text-slate-900 leading-snug">${escapeHtml(q.text || q.question || 'لعبة التوصيل والمطابقة')}</h5>
-                                        <p class="text-[11px] text-indigo-700 font-bold mt-0.5">🎮 طريقة اللعب: انقر على المفهوم في (العمود أ) ثم انقر على تعريفه في (العمود ب) لإتمام المطابقة.</p>
+                                        <h5 class="font-black text-xs md:text-sm text-slate-900 leading-snug">${escapeHtml(q.text || q.question || 'توصيل ومطابقة المفاهيم')}</h5>
+                                        <p class="text-[11px] text-indigo-700 font-bold mt-0.5">📌 طريقة الإجابة: اسحب المفهوم من (العمود أ) إلى تعريفه في (العمود ب) أو انقر عليهما للتوصيل والمطابقة.</p>
                                     </div>
                                 </div>
                                 <span class="text-[10px] font-black bg-indigo-100 text-indigo-900 border border-indigo-200 px-2.5 py-1 rounded-full shrink-0">
-                                    🎮 لعبة توصيل ومطابقة
+                                    🔗 سؤال توصيل ومطابقة
                                 </span>
                             </div>
 
-                            <!-- Dual-Column Interactive Matching Board -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1" id="match_board_${q.id}">
+                            <!-- Dual-Column Interactive Matching Board with SVG Connecting Lines -->
+                            <div class="grid grid-cols-2 gap-3 sm:gap-6 pt-1 relative" id="match_board_${q.id}">
+                                <!-- SVG Connection Lines Canvas Overlay -->
+                                <svg id="match_svg_${q.id}" class="absolute inset-0 w-full h-full pointer-events-none z-10" style="overflow: visible; min-height: 100%;"></svg>
+
                                 <!-- Column A (Left items) -->
-                                <div class="space-y-2">
+                                <div class="space-y-2 relative z-20">
                                     <div class="text-[11px] font-black text-slate-700 flex items-center gap-1.5 px-1">
                                         <span class="w-2 h-2 rounded-full bg-violet-600"></span>
                                         <span>العمود (أ) - المصطلحات والمفاهيم:</span>
                                     </div>
-                                    <div class="space-y-2">
-                                        ${leftItems.map((leftText) => `
-                                            <button type="button" 
-                                                onclick="handleMatchingItemClick('${q.id}', 'left', '${escapeHtml(leftText)}', this)" 
-                                                data-match-q="${q.id}" 
-                                                data-match-col="left" 
-                                                data-match-val="${escapeHtml(leftText)}" 
-                                                class="matching-btn-left w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-violet-400 font-black text-xs text-slate-800 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs">
-                                                <span class="leading-relaxed">${escapeHtml(leftText)}</span>
-                                                <span class="matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black hidden"></span>
-                                            </button>
+                                    <div class="space-y-2.5">
+                                        ${leftItems.map((leftText, lIdx) => `
+                                            <div class="relative group">
+                                                <button type="button" 
+                                                    id="match_btn_left_${q.id}_${lIdx}"
+                                                    draggable="true"
+                                                    ondragstart="handleMatchingDragStart(event, '${q.id}', '${escapeHtml(leftText)}', this)" 
+                                                    ondragend="handleMatchingDragEnd(event, this)"
+                                                    onclick="handleMatchingItemClick('${q.id}', 'left', '${escapeHtml(leftText)}', this)" 
+                                                    data-match-q="${q.id}" 
+                                                    data-match-col="left" 
+                                                    data-match-val="${escapeHtml(leftText)}" 
+                                                    class="matching-btn-left w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-violet-400 font-black text-xs text-slate-800 transition cursor-grab active:cursor-grabbing flex items-center justify-between gap-2 shadow-2xs select-none">
+                                                    <div class="flex items-center gap-1.5 leading-relaxed">
+                                                        <span class="text-slate-400 text-xs shrink-0 cursor-grab" title="اسحب للتوصيل">⠿</span>
+                                                        <span>${escapeHtml(leftText)}</span>
+                                                    </div>
+                                                    <div class="flex items-center gap-1.5 shrink-0">
+                                                        <span class="matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black hidden"></span>
+                                                        <span class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white inline-block match-anchor-dot match-anchor-left transition"></span>
+                                                    </div>
+                                                </button>
+                                            </div>
                                         `).join('')}
                                     </div>
                                 </div>
 
                                 <!-- Column B (Right items) -->
-                                <div class="space-y-2">
+                                <div class="space-y-2 relative z-20">
                                     <div class="text-[11px] font-black text-slate-700 flex items-center gap-1.5 px-1">
                                         <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
                                         <span>العمود (ب) - التعريفات والتطبيقات:</span>
                                     </div>
-                                    <div class="space-y-2">
-                                        ${rightItems.map((rightText) => `
-                                            <button type="button" 
-                                                onclick="handleMatchingItemClick('${q.id}', 'right', '${escapeHtml(rightText)}', this)" 
-                                                data-match-q="${q.id}" 
-                                                data-match-col="right" 
-                                                data-match-val="${escapeHtml(rightText)}" 
-                                                class="matching-btn-right w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-indigo-400 font-bold text-xs text-slate-700 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs">
-                                                <span class="leading-relaxed">${escapeHtml(rightText)}</span>
-                                                <span class="matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black hidden"></span>
-                                            </button>
+                                    <div class="space-y-2.5">
+                                        ${rightItems.map((rightText, rIdx) => `
+                                            <div class="relative group">
+                                                <button type="button" 
+                                                    id="match_btn_right_${q.id}_${rIdx}"
+                                                    ondragover="handleMatchingDragOver(event, this)" 
+                                                    ondragleave="handleMatchingDragLeave(event, this)" 
+                                                    ondrop="handleMatchingDrop(event, '${q.id}', '${escapeHtml(rightText)}', this)" 
+                                                    onclick="handleMatchingItemClick('${q.id}', 'right', '${escapeHtml(rightText)}', this)" 
+                                                    data-match-q="${q.id}" 
+                                                    data-match-col="right" 
+                                                    data-match-val="${escapeHtml(rightText)}" 
+                                                    class="matching-btn-right w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-indigo-400 font-bold text-xs text-slate-700 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs select-none">
+                                                    <div class="flex items-center gap-1.5 shrink-0">
+                                                        <span class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white inline-block match-anchor-dot match-anchor-right transition"></span>
+                                                        <span class="matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black hidden"></span>
+                                                    </div>
+                                                    <span class="leading-relaxed flex-1">${escapeHtml(rightText)}</span>
+                                                </button>
+                                            </div>
                                         `).join('')}
                                     </div>
                                 </div>
@@ -18909,7 +19124,7 @@
                                     <span class="text-xs">🔗</span>
                                     <span class="text-[11px] font-bold text-slate-600" id="match_status_${q.id}">تم توصيل 0 من ${pairs.length} أزواج</span>
                                 </div>
-                                <button type="button" onclick="resetMatchingGame('${q.id}')" class="text-[11px] font-bold text-slate-600 hover:text-red-700 bg-white border border-slate-200 hover:border-red-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
+                                <button type="button" onclick="resetMatchingQuestion('${q.id}')" class="text-[11px] font-bold text-slate-600 hover:text-red-700 bg-white border border-slate-200 hover:border-red-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
                                     🔄 مسح وإعادة التوصيل
                                 </button>
                             </div>
@@ -22496,6 +22711,30 @@
         if (modal) modal.classList.add('hidden');
     }
 
+    let selectedAiFileExtractedText = '';
+
+    async function extractPdfTextClientSide(file) {
+        if (typeof pdfjsLib === 'undefined') return '';
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdf = await loadingTask.promise;
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(s => s.str).join(' ').trim();
+                if (pageText) {
+                    fullText += `[صفحة ${i}]:\n${pageText}\n\n`;
+                }
+            }
+            return fullText.trim();
+        } catch (err) {
+            console.warn('PDF.js text extraction error:', err);
+            return '';
+        }
+    }
+
     function onAiFileSelected(input) {
         const file = input.files && input.files[0];
         if (!file) return;
@@ -22516,6 +22755,19 @@
         }
 
         selectedAiFile = file;
+        selectedAiFileExtractedText = '';
+
+        if (ext === '.pdf') {
+            extractPdfTextClientSide(file).then(text => {
+                if (text && text.length > 20) {
+                    selectedAiFileExtractedText = text;
+                    const fSizeEl = document.getElementById('aiFileSize');
+                    if (fSizeEl) {
+                        fSizeEl.innerText += ` • تم استخراج المحتوى (${text.length} حرف) ✓`;
+                    }
+                }
+            });
+        }
 
         const uploadPrompt = document.getElementById('aiUploadPrompt');
         const filePreview = document.getElementById('aiFilePreview');
@@ -22801,7 +23053,7 @@
         }
 
         if (currentAiSourceMode === 'text') {
-            if (loadingMsg) loadingMsg.innerText = `جاري تحليل النص وصياغة اختبار تفاعلي متنوع (اختيارات، صح وخطأ، ولعبة التوصيل) عبر الذكاء الاصطناعي...`;
+            if (loadingMsg) loadingMsg.innerText = `جاري تحليل النص وصياغة اختبار تفاعلي متنوع (اختيارات، صح وخطأ، وتوصيل ومطابقة) عبر الذكاء الاصطناعي...`;
         } else {
             if (loadingMsg) loadingMsg.innerText = `جاري معالجة الملف واستخراج المحتوى بالذكاء الاصطناعي من "${selectedAiFile.name}"...`;
         }
@@ -22832,9 +23084,26 @@
             };
 
             if (currentAiSourceMode === 'file' && selectedAiFile) {
+                if (selectedAiFile.name.toLowerCase().endsWith('.pdf') && !selectedAiFileExtractedText) {
+                    if (loadingMsg) loadingMsg.innerText = `جاري قراءة واستخراج صفحات ملف الـ PDF...`;
+                    selectedAiFileExtractedText = await extractPdfTextClientSide(selectedAiFile);
+                }
+
                 payload.filename = selectedAiFile.name;
                 payload.fileType = selectedAiFile.type || (selectedAiFile.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.presentationml.presentation');
-                payload.base64 = base64Data;
+
+                if (selectedAiFileExtractedText) {
+                    payload.textInput = selectedAiFileExtractedText;
+                    payload.extractedPdfText = selectedAiFileExtractedText;
+                }
+
+                // If file size is under 3.2MB, pass base64 for Gemini multimodal analysis
+                // If larger, omit base64 to prevent Vercel 4.5MB payload limit (HTTP 413)
+                if (selectedAiFile.size < 3.2 * 1024 * 1024) {
+                    payload.base64 = base64Data;
+                } else if (!selectedAiFileExtractedText) {
+                    payload.base64 = base64Data;
+                }
             } else {
                 payload.filename = 'نص_دراسي_مباشر.txt';
                 payload.textInput = directText;
@@ -23159,12 +23428,12 @@
                                         سؤال ${i + 1}
                                     </span>
                                     <span class="font-black text-slate-900 text-xs md:text-sm leading-relaxed">
-                                        ${escapeHtml(q.question || 'لعبة التوصيل والمطابقة')}
+                                        ${escapeHtml(q.question || 'توصيل ومطابقة المفاهيم')}
                                     </span>
                                 </div>
                                 <span class="text-[10px] font-black bg-indigo-50 text-indigo-900 border border-indigo-200 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
-                                    <span>🎮</span>
-                                    <span>لعبة توصيل ومطابقة (${pairs.length} أزواج)</span>
+                                    <span>🔗</span>
+                                    <span>سؤال توصيل ومطابقة (${pairs.length} أزواج)</span>
                                 </span>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
@@ -23462,7 +23731,7 @@
                 return {
                     id: 'qq-' + Date.now() + '-' + idx,
                     type: 'matching',
-                    text: q.question || `🎮 لعبة التوصيل والمطابقة ${idx + 1}`,
+                    text: q.question || `🔗 سؤال التوصيل والمطابقة ${idx + 1}`,
                     pairs: Array.isArray(q.pairs) ? q.pairs : [],
                     explanation: q.explanation || ''
                 };

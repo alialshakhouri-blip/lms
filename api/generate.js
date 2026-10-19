@@ -33,7 +33,7 @@ const LMS_PROMPT_TEMPLATE = `أنت مساعد تعليمي خبير متخصص 
 5. أنشئ اختباراً أسبوعياً تفاعلياً متنوعاً وممتعاً (10 درجات، مدة 15 دقيقة) يتضمن بالضرورة الأنماط الثلاثة التالية:
    - أسئلة اختيار من متعدد (MCQ) (سؤالان على الأقل) مع 4 خيارات وتحديد الإجابة النموذجية وشرح توضيحي.
    - أسئلة صح وخطأ (True / False) (سؤالان على الأقل) بخيارات ["صح ✓", "خطأ ✗"] وتحديد الصواب وتفسير مختصر.
-   - سؤال لعبة التوصيل والمطابقة (Matching Game) (سؤال واحد ممتع ومبتكر) يحتوي على 4 أزواج متطابقة متوازية ("pairs": [{"left": "المصطلح أو المفهوم أ", "right": "التعريف أو التطبيق المناظر ب"}, ...]).
+   - سؤال التوصيل والمطابقة (Matching Questions) (سؤال واحد تطبيقي دقيق) يحتوي على 4 أزواج متطابقة متوازية ("pairs": [{"left": "المصطلح أو المفهوم أ", "right": "التعريف أو التطبيق المناظر ب"}, ...]).
 6. أعد فقط JSON نظيف صالح للـ Parse ومطابق تماماً للبنية التالية بدون أي نص أو مقدمات أو كتل تعليق خارج الـ JSON.
 
 ## JSON Schema المطلوبة (أعد هذه البنية بالضبط):
@@ -144,7 +144,7 @@ const LMS_PROMPT_TEMPLATE = `أنت مساعد تعليمي خبير متخصص 
       },
       {
         "type": "matching",
-        "question": "🎮 لعبة التوصيل والمطابقة: صِل كل مصطلح/مفهوم في القائمة (أ) بما يناسبه في القائمة (ب)",
+        "question": "🔗 سؤال التوصيل والمطابقة: صِل كل مصطلح/مفهوم في القائمة (أ) بما يناسبه في القائمة (ب)",
         "pairs": [
           {"left": "المصطلح أو المفهوم 1", "right": "التعريف أو التطبيق المقابل 1"},
           {"left": "المصطلح أو المفهوم 2", "right": "التعريف أو التطبيق المقابل 2"},
@@ -269,7 +269,22 @@ function extractPrintableStrings(buffer, minLen = 5) {
 // ══════════════════════════════════════════════════════════════════════════════
 //  PURE NODE.js PDF TEXT EXTRACTOR (Used for offline fallback)
 // ══════════════════════════════════════════════════════════════════════════════
-function extractTextFromPdfBuffer(buffer) {
+async function extractTextFromPdfBuffer(buffer) {
+  // 1. Try pdf-parse dynamic import if installed in environment
+  try {
+    const pdfParseMod = await import('pdf-parse');
+    const pdfParse = pdfParseMod.default || pdfParseMod;
+    if (typeof pdfParse === 'function') {
+      const data = await pdfParse(buffer);
+      if (data && data.text && data.text.trim().length > 10) {
+        return data.text.trim();
+      }
+    }
+  } catch (pdfErr) {
+    // continue to pure node fallback
+  }
+
+  // 2. Pure Node.js stream decompress & regex
   try {
     const raw = buffer.toString('latin1');
     const streamRegex = /stream[\r\n]+([\s\S]*?)[\r\n]+endstream/g;
@@ -279,18 +294,27 @@ function extractTextFromPdfBuffer(buffer) {
     while ((match = streamRegex.exec(raw)) !== null) {
       try {
         const streamData = Buffer.from(match[1], 'latin1');
-        const inflated = zlib.inflateSync(streamData).toString('utf8');
-        
-        // Extract text between parentheses: (Hello) Tj or [(Hello) 20 (World)] TJ
-        const textRegex = /\(([^)]+)\)\s*(?:Tj|'|")/g;
-        let tMatch;
-        const blockTexts = [];
-        while ((tMatch = textRegex.exec(inflated)) !== null) {
-          const clean = tMatch[1].replace(/\\([()\\])/g, '$1').trim();
-          if (clean.length > 2) blockTexts.push(clean);
+        let inflated = null;
+        try {
+          inflated = zlib.inflateSync(streamData).toString('utf8');
+        } catch (z1) {
+          try {
+            inflated = zlib.inflateRawSync(streamData).toString('utf8');
+          } catch (z2) {}
         }
-        if (blockTexts.length > 0) {
-          extractedBlocks.push(blockTexts.join(' '));
+
+        if (inflated) {
+          // Extract text between parentheses: (Hello) Tj or [(Hello) 20 (World)] TJ
+          const textRegex = /\(([^)]+)\)\s*(?:Tj|'|")/g;
+          let tMatch;
+          const blockTexts = [];
+          while ((tMatch = textRegex.exec(inflated)) !== null) {
+            const clean = tMatch[1].replace(/\\([()\\])/g, '$1').trim();
+            if (clean.length > 2) blockTexts.push(clean);
+          }
+          if (blockTexts.length > 0) {
+            extractedBlocks.push(blockTexts.join(' '));
+          }
         }
       } catch (e) {
         // stream was not standard flate deflate, ignore
@@ -304,7 +328,7 @@ function extractTextFromPdfBuffer(buffer) {
     console.warn('PDF stream extraction warning:', err);
   }
 
-  // Fallback to printable text extraction
+  // 3. Fallback to printable text extraction
   return extractPrintableStrings(buffer);
 }
 
@@ -440,7 +464,7 @@ function buildDemoContentFromText(extractedText, filename) {
         },
         {
           type: 'matching',
-          question: '🎮 لعبة التوصيل والمطابقة: صِل كل مصطلح مهني في القائمة (أ) بتعريفه وتطبيقه الصحيح في القائمة (ب):',
+          question: '🔗 سؤال التوصيل والمطابقة: صِل كل مصطلح مهني في القائمة (أ) بتعريفه وتطبيقه الصحيح في القائمة (ب):',
           pairs: [
             { left: extractedTerms[0]?.en || 'Technical Safety', right: extractedTerms[0]?.ar || 'السلامة الفنية والمهنية' },
             { left: extractedTerms[Math.min(1, extractedTerms.length - 1)]?.en || 'Standard Procedures', right: extractedTerms[Math.min(1, extractedTerms.length - 1)]?.ar || 'إجراءات التشغيل القياسية' },
@@ -552,12 +576,13 @@ export default async function handler(req, res) {
   const startTime = Date.now();
 
   try {
-    const { filename, fileType, base64, textInput, courseName, weekTitle, weekTopic } = req.body || {};
+    const { filename, fileType, base64, textInput, extractedPdfText, courseName, weekTitle, weekTopic } = req.body || {};
 
     const hasDirectText = typeof textInput === 'string' && textInput.trim().length >= 10;
+    const hasExtractedPdfText = typeof extractedPdfText === 'string' && extractedPdfText.trim().length >= 10;
     const hasFile = Boolean(base64);
 
-    if (!hasDirectText && !hasFile) {
+    if (!hasDirectText && !hasFile && !hasExtractedPdfText) {
       return res.status(400).json({
         success: false,
         error: 'لم يتم استلام أي محتوى. يرجى إدخال نص دراسي مباشر أو رفع ملف PPTX / PDF.'
@@ -617,16 +642,18 @@ export default async function handler(req, res) {
     }
 
     let extractedText = '';
-    if (hasDirectText && !hasFile) {
+    if (hasExtractedPdfText) {
+      extractedText = extractedPdfText.trim();
+    } else if (hasDirectText && !hasFile) {
       extractedText = textInput.trim();
     } else if (hasFile && isPptx && fileBuffer) {
       extractedText = extractTextFromPptxBuffer(fileBuffer);
     } else if (hasFile && fileBuffer) {
-      extractedText = extractTextFromPdfBuffer(fileBuffer);
+      extractedText = await extractTextFromPdfBuffer(fileBuffer);
     }
 
-    // If both file and direct text provided, merge them
-    if (hasDirectText && hasFile && extractedText) {
+    // If both file and direct text provided and not already from extractedPdfText, merge them
+    if (hasDirectText && hasFile && extractedText && !hasExtractedPdfText) {
       extractedText = `${extractedText}\n\n[إضافات وملاحظات نصية من المدرب]:\n${textInput.trim()}`;
     }
 
@@ -661,16 +688,29 @@ export default async function handler(req, res) {
           parts.push({
             text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', contentSection)
           });
-        } else if (isPdf && hasFile) {
-          // For PDF: Gemini natively ingests PDF as inlineData with 100% multimodal accuracy!
+        } else if (isPdf && (hasFile || hasExtractedPdfText)) {
+          // If base64 is available and under reasonable limit (under 4MB), pass inlineData
+          if (base64 && base64.length < 4500000) {
+            parts.push({
+              inlineData: {
+                mimeType: 'application/pdf',
+                data: base64
+              }
+            });
+          }
+
+          let contentSection = `${contextBlock}\n## المحتوى المُستخرج من وثيقة الـ PDF (${safeFilename}):\n`;
+          if (extractedText && extractedText.length > 20) {
+            const trimmedText = extractedText.length > 25000
+              ? extractedText.slice(0, 25000) + '\n\n[... تم الاكتفاء بهذا الجزء من المستند ...]'
+              : extractedText;
+            contentSection += `---\n${trimmedText}\n---`;
+          } else {
+            contentSection += `(راجع وثيقة الـ PDF المرفقة أعلاه بالكامل)`;
+          }
+
           parts.push({
-            inlineData: {
-              mimeType: 'application/pdf',
-              data: base64
-            }
-          });
-          parts.push({
-            text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', `${contextBlock}\n## المحتوى المُستخرج: (راجع وثيقة الـ PDF المرفقة أعلاه بالكامل)`)
+            text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', contentSection)
           });
         } else {
           // For PPTX or merged: provide extracted slide texts
