@@ -20,6 +20,8 @@
     </script>
     <!-- Supabase JS Client للمزامنة السحابية الدائمة والتخزين السحابي للملفات -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Canvas Confetti لمؤثرات الاحتفال والمفرقعات عند التسليم المبكر -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <!-- خط المراعي Almarai -->
     <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
@@ -409,7 +411,7 @@
 <body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col antialiased">
 
 <!-- ==================== TOAST NOTIFICATION ==================== -->
-<div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none">
+<div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[99999] transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none" style="z-index: 99999;">
     <div id="toastContent" class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold border border-amber-500/40 gold-glow">
         <span id="toastIcon" class="text-lg">ℹ️</span>
         <span id="toastMessage">رسالة إشعار</span>
@@ -3925,6 +3927,11 @@
                                 <span class="text-xs font-bold text-slate-500 whitespace-nowrap">المدرب:</span>
                                 <select id="gsTrainerSelector" onchange="onGradesSystemTrainerChange(this.value)" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 outline-none focus:border-[#0F2942]"></select>
                             </div>
+                            <button type="button" onclick="openAntiCheatIncidentsModal()" class="bg-red-600 hover:bg-red-700 text-white font-black px-3 py-2 rounded-xl text-xs transition shadow-xs cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0" title="سجل بلاغات النزاهة الأكاديمية (إعادة فتح الاختبار أو إعطاء درجة 0)">
+                                <span>🚨</span>
+                                <span>سجل البلاغات</span>
+                                <span id="gsTopToolbarIncidentBadge" class="hidden bg-white text-red-900 px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black">0</span>
+                            </button>
                             <button type="button" onclick="openTrainerSubmissionsCalendarModal()" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 border border-slate-700 font-black px-3 py-2 rounded-xl text-xs transition shadow-xs cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0">
                                 <span>📅</span>
                                 <span>تقويم التسليمات</span>
@@ -3947,6 +3954,25 @@
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <!-- Security Incidents Alert Banner (سجل بلاغات النزاهة الأكاديمية) -->
+                <div id="gsAntiCheatIncidentsBanner" class="hidden bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-3xl p-4 shadow-md flex items-center justify-between flex-wrap gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="w-10 h-10 rounded-2xl bg-white/20 text-white flex items-center justify-center text-xl font-black shrink-0 animate-pulse">🚨</span>
+                        <div>
+                            <div class="text-sm font-black flex items-center gap-2">
+                                <span>سجل بلاغات النزاهة الأكاديمية:</span>
+                                <span class="bg-white text-red-950 px-2 py-0.5 rounded-full text-xs font-black font-mono" id="gsAntiCheatIncidentsBadge">0 بلاغات</span>
+                            </div>
+                            <div class="text-xs text-red-100 font-bold mt-0.5">
+                                يوجد اختبارات مقفلة آلياً لمخالفة مغادرة شاشة الاختبار (3 تحذيرات) بانتظار اتخاذ الإجراء (إعادة الفتح أو إعطاء 0).
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="openAntiCheatIncidentsModal()" class="bg-white hover:bg-slate-100 text-red-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-xs cursor-pointer">
+                        📋 فتح سجل البلاغات واتخاذ الإجراء
+                    </button>
                 </div>
 
                 <!-- 4 Executive KPI Cards -->
@@ -4437,7 +4463,13 @@
                                 <span id="aiDirectTextCount" class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">0 حرف</span>
                             </div>
 
-                            <textarea id="aiDirectTextInput" rows="6" oninput="updateAiTextCount()" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 resize-y leading-relaxed text-right placeholder-slate-400" placeholder="الصق هنا نص المحاضرة أو ملخص الدرس أو فقرات الشرح أو المصطلحات الفنية (مثال: محاضرة عن السلامة المهنية، أدوات الورشة، أو المصطلحات الفنية باللغة الإنجليزية)...&#10;&#10;وسيقوم المساعد الذكي تلقائياً بتحويلها إلى اختبار أسبوعي متنوع (اختيارات، صح وخطأ، وتوصيل ومطابقة المفاهيم) بالإضافة إلى خطة الوحدة الأسبوعية كاملة."></textarea>
+                            <textarea id="aiDirectTextInput" rows="6" oninput="updateAiTextCount()" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 resize-y leading-relaxed text-right placeholder-slate-400 transition" placeholder="الصق هنا نص المحاضرة أو ملخص الدرس أو فقرات الشرح أو المصطلحات الفنية (مثال: محاضرة عن السلامة المهنية، أدوات الورشة، أو المصطلحات الفنية باللغة الإنجليزية)...&#10;&#10;وسيقوم المساعد الذكي تلقائياً بتحويلها إلى اختبار أسبوعي متنوع (اختيارات، صح وخطأ، وتوصيل ومطابقة المفاهيم) بالإضافة إلى خطة الوحدة الأسبوعية كاملة."></textarea>
+
+                            <!-- Inline Validation Notice for < 20 Characters -->
+                            <div id="aiDirectTextWarning" class="hidden text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 p-2.5 rounded-xl flex items-center gap-2 transition animate-pulse">
+                                <span class="text-base shrink-0">⚠️</span>
+                                <span>تنبيه: يلزم إدخال أو لصق نص دراسي لا يقل عن 20 حرفاً (الحالي: <b id="aiDirectTextCurrentLen">0</b> حرف) ليتمكن الذكاء الاصطناعي من تحليل المحتوى وتوليد الأسئلة بدقة.</span>
+                            </div>
 
                             <!-- Quick Sample Presets -->
                             <div class="space-y-1.5 pt-1">
@@ -4780,13 +4812,18 @@
             <!-- SUB-MODAL: Add Multi-Format Lecture (Video / PowerPoint / PDF / Links) -->
             <div id="lmsVideoModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-60 flex items-center justify-center p-4 overflow-y-auto">
                 <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-right max-h-[92vh] flex flex-col">
-                    <div class="flex items-center justify-between border-b pb-3">
+                    <div class="flex items-center justify-between border-b pb-3 gap-2 flex-wrap">
                         <div>
-
                             <h4 class="font-black text-slate-900 text-sm" id="lmsVideoModalTitle">إضافة محاضرة وشرح (فيديو / PowerPoint / PDF / روابط)</h4>
                             <p class="text-[11px] text-slate-500 mt-0.5">يمكنك إدراج رابط فيديو، أو رفع ملف باوربوينت أو PDF، أو وضع روابط للمحاضرة</p>
                         </div>
-                        <button type="button" onclick="closeLmsSubModal('lmsVideoModal')" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer">✕</button>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="openComponentAiModal('video')" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-black px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-2xs transition cursor-pointer" title="توليد عنوان وروابط ومحتوى المحاضرة بالذكاء الاصطناعي">
+                                <span>✨</span>
+                                <span>توليد بالذكاء الاصطناعي</span>
+                            </button>
+                            <button type="button" onclick="closeLmsSubModal('lmsVideoModal')" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer p-1">✕</button>
+                        </div>
                     </div>
                     <form onsubmit="saveLmsVideo(event)" class="space-y-3 flex-1 overflow-y-auto pr-1">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -4860,12 +4897,18 @@
             <!-- SUB-MODAL: Add / Edit Review Document & Summary Notes -->
             <div id="lmsDocModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-60 flex items-center justify-center p-3 md:p-5 overflow-y-auto">
                 <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-right max-h-[92vh] flex flex-col">
-                    <div class="flex items-center justify-between border-b pb-3">
+                    <div class="flex items-center justify-between border-b pb-3 gap-2 flex-wrap">
                         <div>
                             <h4 class="font-black text-slate-900 text-sm md:text-base" id="lmsDocModalTitle">إدارة المذكرات والملخصات الدراسية</h4>
                             <p class="text-[11px] text-slate-500">كتابة وإضافة مذكرات المراجعة والملخصات النصية للطلاب مباشرة</p>
                         </div>
-                        <button type="button" onclick="closeLmsSubModal('lmsDocModal')" class="text-slate-400 hover:text-slate-700 text-xs p-1 cursor-pointer">✕</button>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="openComponentAiModal('doc')" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-black px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-2xs transition cursor-pointer" title="توليد ملخص دراسي ومصطلحات بالذكاء الاصطناعي">
+                                <span>✨</span>
+                                <span>توليد بالذكاء الاصطناعي</span>
+                            </button>
+                            <button type="button" onclick="closeLmsSubModal('lmsDocModal')" class="text-slate-400 hover:text-slate-700 text-xs p-1 cursor-pointer">✕</button>
+                        </div>
                     </div>
 
                     <form onsubmit="saveLmsDoc(event)" class="space-y-4 flex-1 overflow-y-auto pr-1">
@@ -4920,9 +4963,15 @@
             <!-- SUB-MODAL: Add Quiz Builder -->
             <div id="lmsQuizModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-60 flex items-center justify-center p-3 md:p-5 overflow-y-auto">
                 <div class="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-right max-h-[90vh] flex flex-col">
-                    <div class="flex items-center justify-between border-b pb-3">
+                    <div class="flex items-center justify-between border-b pb-3 gap-2 flex-wrap">
                         <h4 class="font-black text-slate-900 text-sm" id="lmsQuizModalTitle">الاطلاع وتعديل الاختبار</h4>
-                        <button type="button" onclick="closeLmsSubModal('lmsQuizModal')" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer">✕</button>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="openComponentAiModal('quiz')" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-black px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-2xs transition cursor-pointer" title="توليد أسئلة الاختبار التفاعلي بالذكاء الاصطناعي">
+                                <span>✨</span>
+                                <span>توليد أسئلة بالذكاء الاصطناعي</span>
+                            </button>
+                            <button type="button" onclick="closeLmsSubModal('lmsQuizModal')" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer p-1">✕</button>
+                        </div>
                     </div>
                     <form onsubmit="saveLmsQuiz(event)" class="space-y-4 flex-1 overflow-y-auto pr-1">
                         <input type="hidden" id="lmsQuizCategory" value="weekend">
@@ -4998,9 +5047,15 @@
             <!-- SUB-MODAL: Add / Edit Assignment -->
             <div id="lmsAssignmentModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-60 flex items-center justify-center p-4 overflow-y-auto">
                 <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-right max-h-[92vh] flex flex-col">
-                    <div class="flex items-center justify-between border-b pb-3">
+                    <div class="flex items-center justify-between border-b pb-3 gap-2 flex-wrap">
                         <h4 class="font-black text-slate-900 text-sm" id="lmsAssignmentModalTitle">إنشاء واجب وتكليف أسبوعي</h4>
-                        <button type="button" onclick="closeLmsSubModal('lmsAssignmentModal')" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer">✕</button>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="openComponentAiModal('assignment')" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-black px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-2xs transition cursor-pointer" title="توليد الواجب وتكليفاته وأسئلته بالذكاء الاصطناعي">
+                                <span>✨</span>
+                                <span>توليد بالذكاء الاصطناعي</span>
+                            </button>
+                            <button type="button" onclick="closeLmsSubModal('lmsAssignmentModal')" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer p-1">✕</button>
+                        </div>
                     </div>
                     <form onsubmit="saveLmsAssignment(event)" class="space-y-3 flex-1 overflow-y-auto pr-1">
                         <div>
@@ -5038,19 +5093,25 @@
                             <p class="text-[10px] text-slate-500 mt-1">يمكنك هنا تخصيص الواجب لمجموعة محددة فقط أو لجميع المجموعات.</p>
                         </div>
 
-                        <!-- 1. Assignment Multiple Choice Questions Builder (اختيار من متعدد أولاً) -->
+                        <!-- 1. Assignment Questions Builder (اختيار من متعدد + صح وخطأ) -->
                         <div class="space-y-3 pt-2.5 border-t border-slate-200 bg-slate-50/60 p-3 rounded-2xl">
                             <div class="flex items-center justify-between flex-wrap gap-2">
                                 <div>
                                     <span class="text-xs font-black text-slate-900 flex items-center gap-1.5">
                                         <span>🎯</span>
-                                        <span>أسئلة الواجب (اختيار من متعدد):</span>
+                                        <span>أسئلة الواجب (اختيارات وصح وخطأ):</span>
                                     </span>
-                                    <p class="text-[10px] text-slate-500 font-bold mt-0.5">أضف أسئلة اختيار من متعدد ليتم تصحيحها ورصد درجتها آلياً للمتدرب</p>
+                                    <p class="text-[10px] text-slate-500 font-bold mt-0.5">أضف أسئلة اختيار من متعدد أو صح وخطأ ليتم تصحيحها ورصد درجتها آلياً للمتدرب</p>
                                 </div>
-                                <button type="button" onclick="addQuestionToAssignmentBuilder()" class="text-xs bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-3 py-1.5 rounded-xl transition cursor-pointer shadow-2xs">
-                                    + إضافة سؤال اختيار من متعدد
-                                </button>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <button type="button" onclick="addQuestionToAssignmentBuilder('mcq')" class="text-xs bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-2xs">
+                                        + سؤال اختيار
+                                    </button>
+                                    <button type="button" onclick="addQuestionToAssignmentBuilder('true_false')" class="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-black px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-2xs flex items-center gap-1">
+                                        <span>✓/✗</span>
+                                        <span>+ سؤال صح وخطأ</span>
+                                    </button>
+                                </div>
                             </div>
                             <div id="lmsAssignmentQuestionsList" class="space-y-3">
                                 <!-- Dynamic question rows -->
@@ -5091,6 +5152,78 @@
                             <button type="button" onclick="closeLmsSubModal('lmsAssignmentModal')" class="px-4 py-2.5 border rounded-xl text-xs font-bold text-slate-600 cursor-pointer">إلغاء</button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- MODAL: Individual Component AI Generator (توليد مخصص لكل عنصر على حدة) -->
+            <div id="modal-componentAiGenerate" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-70 flex items-center justify-center p-3 md:p-5 overflow-y-auto">
+                <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-right max-h-[92vh] flex flex-col">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-xs">✨</span>
+                            <div>
+                                <h4 class="font-black text-slate-900 text-sm md:text-base" id="caiModalTitle">توليد المحتوى بالذكاء الاصطناعي</h4>
+                                <p class="text-[11px] text-slate-500 font-bold" id="caiModalSubtitle">توليد وصياغة فورية مخصصة لهذا العنصر بدقة عالية</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="closeComponentAiModal()" class="text-slate-400 hover:text-slate-700 text-xs p-1 cursor-pointer">✕</button>
+                    </div>
+
+                    <div class="space-y-3 flex-1 overflow-y-auto pr-1">
+                        <!-- Target Component Info Badge -->
+                        <div class="bg-violet-50 border border-violet-200 rounded-2xl p-3 flex items-center justify-between text-xs">
+                            <span class="font-bold text-violet-950" id="caiTargetBadge">العنصر المستهدف: --</span>
+                            <span class="font-mono text-[10px] bg-violet-200/80 text-violet-950 font-black px-2 py-0.5 rounded-lg">Gemini 2.5 Flash</span>
+                        </div>
+
+                        <!-- Prompt / Topic Input -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">موضوع أو نص الدرس المطلوب التوليد له:</label>
+                            <textarea id="caiPromptInput" rows="3" placeholder="أدخل موضوع الدرس أو الصق جزءاً من النص التدريبي هنا..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:border-[#0F2942] leading-relaxed shadow-2xs"></textarea>
+                            <p class="text-[10px] text-slate-500 mt-1">💡 يمكنك ترك هذا الحقل كما هو للتوليد التلقائي بناءً على موضوع الأسبوع الحالي للمقرر.</p>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="caiLoadingState" class="hidden flex-col items-center justify-center p-6 space-y-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                            <div class="w-10 h-10 border-4 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
+                            <div class="text-xs font-black text-slate-800" id="caiLoadingMsg">جاري التوليد بالذكاء الاصطناعي وتجهيز المحتوى...</div>
+                            <div class="text-[10px] text-slate-500">سيتم تعبئة الحقول في نافذة التعديل مباشرة فور الانتهاء</div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 pt-3 border-t">
+                        <button type="button" id="caiSubmitBtn" onclick="runComponentAiGenerate()" class="flex-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-black py-2.5 rounded-xl text-xs transition shadow-sm cursor-pointer flex items-center justify-center gap-2">
+                            <span>✨</span>
+                            <span>بدء التوليد والتعبئة الفورية</span>
+                        </button>
+                        <button type="button" onclick="closeComponentAiModal()" class="px-4 py-2.5 border rounded-xl text-xs font-bold text-slate-600 cursor-pointer">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL: Academic Integrity Incidents Log (سجل بلاغات النزاهة الأكاديمية) -->
+            <div id="modal-antiCheatIncidents" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-70 flex items-center justify-center p-3 md:p-5 overflow-y-auto">
+                <div class="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-right max-h-[92vh] flex flex-col">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-9 h-9 rounded-2xl bg-red-600 text-white flex items-center justify-center font-black text-base shadow-xs animate-pulse">🚨</span>
+                            <div>
+                                <h4 class="font-black text-slate-900 text-base">سجل بلاغات النزاهة الأكاديمية</h4>
+                                <p class="text-xs text-slate-500 font-bold">كشف الاختبارات المقفلة آلياً بسبب تكرار مغادرة شاشة الاختبار (3 تحذيرات)</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="closeAntiCheatIncidentsModal()" class="text-slate-400 hover:text-slate-700 text-xs p-1 cursor-pointer">✕</button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto pr-1 space-y-3" id="antiCheatIncidentsContainer">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <div class="pt-3 border-t flex justify-end">
+                        <button type="button" onclick="closeAntiCheatIncidentsModal()" class="bg-[#0F2942] text-white font-black px-5 py-2.5 rounded-xl text-xs cursor-pointer">
+                            إغلاق
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -5210,6 +5343,9 @@
 
                     <!-- STAGE 3: شاشة تأكيد التسليم الناجح (حجب النتيجة عن المتدرب) -->
                     <div id="tqStageCompleted" class="hidden text-center space-y-5 py-6 px-4">
+                        <!-- Early Submission Party Bonus Banner -->
+                        <div id="tqEarlyBonusCelebrationBanner" class="hidden"></div>
+
                         <div class="w-20 h-20 mx-auto rounded-3xl bg-emerald-500/10 border-2 border-emerald-500 text-emerald-600 text-4xl flex items-center justify-center shadow-lg animate-pop-in">
                             ✓
                         </div>
@@ -5234,6 +5370,40 @@
                         <div class="pt-3 flex justify-center gap-3">
                             <button type="button" onclick="closeTakeQuizModal()" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black px-6 py-3 rounded-xl text-xs transition shadow-md cursor-pointer">
                                 العودة إلى المقررات (LMS)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STAGE 4: شاشة إقفال الاختبار بموجب النزاهة الأكاديمية (3 تحذيرات مغادرة صفحة) -->
+                    <div id="tqStageLockedByAntiCheat" class="hidden text-center space-y-5 py-6 px-4">
+                        <div class="w-20 h-20 mx-auto rounded-3xl bg-red-600/10 border-2 border-red-600 text-red-600 text-4xl flex items-center justify-center shadow-lg animate-pulse">
+                            ⛔
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-black text-red-900">تم إقفال الاختبار تلقائياً لمخالفة ضوابط النزاهة الأكاديمية!</h3>
+                            <div class="inline-block bg-red-100 text-red-950 text-xs font-black px-4 py-1.5 rounded-full border border-red-300">
+                                تم رصد مغادرة شاشة الاختبار أو التبديل بين النوافذ (3 مرات متتالية)
+                            </div>
+                        </div>
+
+                        <!-- Incident Notice Card -->
+                        <div class="bg-red-50 border-2 border-red-300 rounded-2xl p-4 max-w-md mx-auto text-right space-y-2.5 text-red-950">
+                            <div class="flex items-center gap-2 font-black text-xs text-red-900">
+                                <span>🚨</span>
+                                <span>إحالة رسمية إلى سجل بلاغات النزاهة الأكاديمية:</span>
+                            </div>
+                            <p class="text-xs leading-relaxed font-bold text-slate-700">
+                                تم إيقاف جلسة الاختبار وتوثيق حالتك في <b>سجل بلاغات النزاهة الأكاديمية</b> لدى المشرف والمدرب. هذا الاختبار مقفل حالياً ولن تتمكن من المتابعة إلا بعد اتخاذ المدرب الإجراء المناسب:
+                            </p>
+                            <div class="space-y-1 text-xs font-bold text-slate-800 pr-3">
+                                <div>• <b>إعادة فتح الاختبار</b>: منحك فرصة جديدة لأداء الاختبار.</div>
+                                <div>• <b>اعتماد درجة (0)</b>: تثبيت درجة صفر للمحاولة بسبب الإخلال بالنزاهة.</div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 flex justify-center gap-3">
+                            <button type="button" onclick="closeTakeQuizModal()" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black px-6 py-3 rounded-xl text-xs transition shadow-md cursor-pointer">
+                                إغلاق والعودة
                             </button>
                         </div>
                     </div>
@@ -5828,9 +5998,12 @@
         const msgEl = document.getElementById('toastMessage');
         const iconEl = document.getElementById('toastIcon');
 
-        msgEl.innerText = message;
-        iconEl.innerText = type === 'error' ? '❌' : (type === 'success' ? '✅' : 'ℹ️');
+        if (!toast || !msgEl || !iconEl) return;
 
+        msgEl.innerText = message;
+        iconEl.innerText = type === 'error' ? '❌' : (type === 'success' ? '✅' : (type === 'warning' ? '⚠️' : 'ℹ️'));
+
+        toast.style.zIndex = '99999';
         toast.classList.remove('opacity-0', '-translate-y-24', 'pointer-events-none');
         setTimeout(() => {
             toast.classList.add('opacity-0', '-translate-y-24', 'pointer-events-none');
@@ -8869,7 +9042,7 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetCount = parseArchiveWorkbook(workbook);
+                    const sheetCount = parseArchiveWorkbook(workbook, file.name);
                     totalImportedSheets += sheetCount;
                 } catch(err) {
                     console.error('Archive file read error:', err);
@@ -8883,8 +9056,11 @@
                         loadSettingsInputs();
                         renderApp();
                         renderTrainerDashboard();
+                        if (typeof renderAttendanceSheetPage === 'function') {
+                            renderAttendanceSheetPage();
+                        }
                         const totalArchTrainees = Object.keys(archiveData).length;
-                        showToast(`✅ تم تحديث وربط الأرشيف مع شاشة الحضور بنجاح! تم ربط ${totalArchTrainees} متدرب برقم الهوية من ${files.length} ملف (${totalImportedSheets} شيت).`, 'success');
+                        showToast(`✅ تم تحديث وربط الأرشيف مع شاشة الحضور والتقويم بنجاح! تم ربط ${totalArchTrainees} متدرب برقم الهوية من ${files.length} ملف (${totalImportedSheets} شيت).`, 'success');
                     }
                 }
             };
@@ -9010,7 +9186,58 @@
         localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
     }
 
-    function parseArchiveWorkbook(workbook) {
+    function normalizeArchiveWeekTitle(str) {
+        if (!str) return '';
+        let s = String(str).trim();
+        s = s.replace(/\.[^/.]+$/, '').trim();
+        const m = s.match(/(?:الأسبوع|اسبوع|الاسبوع|أسبوع|Week)\s*([0-9\u0660-\u0669]+|[اأإلبتثجحخدذرزسشصضطظعغفقكلمنهوي]+)/i);
+        if (m) {
+            const rawVal = m[1].trim();
+            const arabicMap = {
+                'الأول': '1', 'الاول': '1', 'اول': '1', 'أول': '1',
+                'الثاني': '2', 'ثاني': '2',
+                'الثالث': '3', 'ثالث': '3',
+                'الرابع': '4', 'رابع': '4',
+                'الخامس': '5', 'خامس': '5',
+                'السادس': '6', 'سادس': '6',
+                'السابع': '7', 'سابع': '7',
+                'الثامن': '8', 'ثامن': '8',
+                'التاسع': '9', 'تاسع': '9',
+                'العاشر': '10', 'عاشر': '10'
+            };
+            const num = arabicMap[rawVal] || rawVal;
+            return `الأسبوع ${num}`;
+        }
+        return s;
+    }
+
+    function extractArchiveWeekKey(fileName, sheetName, rows) {
+        if (rows && rows.length > 0) {
+            for (let r = 0; r < Math.min(6, rows.length); r++) {
+                const rowStr = (Array.isArray(rows[r]) ? rows[r].join(' ') : String(rows[r])).trim();
+                const normalized = normalizeArchiveWeekTitle(rowStr);
+                if (normalized.startsWith('الأسبوع ')) return normalized;
+            }
+        }
+        if (sheetName) {
+            const normalizedSheet = normalizeArchiveWeekTitle(sheetName);
+            if (normalizedSheet.startsWith('الأسبوع ')) return normalizedSheet;
+        }
+        if (fileName) {
+            const normalizedFile = normalizeArchiveWeekTitle(fileName);
+            if (normalizedFile.startsWith('الأسبوع ')) return normalizedFile;
+            const cleanBase = fileName.replace(/\.[^/.]+$/, '').trim();
+            if (cleanBase.length >= 3 && !/^(sheet|book|workbook|كشف|حضور|جدول)$/i.test(cleanBase)) {
+                return cleanBase;
+            }
+        }
+        if (sheetName && !/^Sheet\d+$/i.test(sheetName)) {
+            return sheetName;
+        }
+        return `الأسبوع المؤرشف (${new Date().toLocaleDateString('ar-SA')})`;
+    }
+
+    function parseArchiveWorkbook(workbook, fileName = '') {
         let parsedSheets = 0;
 
         workbook.SheetNames.forEach(sheetName => {
@@ -9020,6 +9247,7 @@
             const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
             if (!rows || rows.length < 5) return;
 
+            const weekKey = extractArchiveWeekKey(fileName, sheetName, rows);
             const group = sheetName.trim();
             const company = detectCompany(group);
 
@@ -9078,6 +9306,7 @@
                 // رصد فترات الحضور المحضورة والإجمالية في هذا الشيت (نظام 10 حصص أسبوعياً)
                 let sheetTotalPeriods = 0;
                 let sheetAttendedPeriods = 0;
+                const daysChecks = [];
 
                 for (let day = 0; day < 5; day++) {
                     let dayCheckedCount = 0;
@@ -9090,8 +9319,12 @@
                     sheetTotalPeriods += 2;
                     if (dayCheckedCount >= 2) {
                         sheetAttendedPeriods += 2; // حاضر كامل (أي فترتين أو أكثر من الأربعة في اليوم)
+                        daysChecks.push([true, true]);
                     } else if (dayCheckedCount === 1) {
                         sheetAttendedPeriods += 1; // مخالف (فترة واحدة)
+                        daysChecks.push([true, false]);
+                    } else {
+                        daysChecks.push([false, false]);
                     }
                 }
 
@@ -9120,6 +9353,24 @@
                         weeksHistory: {}
                     };
                 }
+
+                if (!archiveData[id].weeksHistory) {
+                    archiveData[id].weeksHistory = {};
+                }
+
+                const sheetWeekRate = sheetTotalPeriods > 0 ? Math.round((sheetAttendedPeriods / sheetTotalPeriods) * 100) : 0;
+                archiveData[id].weeksHistory[weekKey] = {
+                    weekKey: weekKey,
+                    fileName: fileName || '',
+                    sheetName: sheetName,
+                    group: group,
+                    company: finalCompany,
+                    attended: sheetAttendedPeriods,
+                    total: sheetTotalPeriods,
+                    rate: sheetWeekRate,
+                    daysChecks: daysChecks,
+                    uploadedAt: new Date().toISOString()
+                };
 
                 archiveData[id].baseTotalPeriods = (archiveData[id].baseTotalPeriods || 0) + sheetTotalPeriods;
                 archiveData[id].baseAttendedPeriods = (archiveData[id].baseAttendedPeriods || 0) + sheetAttendedPeriods;
@@ -16696,18 +16947,19 @@
             lmsCourses[k] = INITIAL_LMS_COURSES[k];
         }
     }
-    if (INITIAL_LMS_COURSES["قاسم الماجد"]) lmsCourses["قاسم الماجد"] = INITIAL_LMS_COURSES["قاسم الماجد"];
-    if (INITIAL_LMS_COURSES["سيد احمد"]) {
-        lmsCourses["سيد احمد"] = INITIAL_LMS_COURSES["سيد احمد"];
-        lmsCourses["سيد أحمد"] = INITIAL_LMS_COURSES["سيد احمد"];
-        lmsCourses["الميكانيكية"] = INITIAL_LMS_COURSES["سيد احمد"];
-        lmsCourses["الميكانيكا"] = INITIAL_LMS_COURSES["سيد احمد"];
-        lmsCourses["ميكانيكا"] = INITIAL_LMS_COURSES["سيد احمد"];
+    if (INITIAL_LMS_COURSES["قاسم الماجد"] && !lmsCourses["قاسم الماجد"]) {
+        lmsCourses["قاسم الماجد"] = INITIAL_LMS_COURSES["قاسم الماجد"];
     }
-    // تحديث وتثبيت منهج السلامة والصحة المهنية لأستاذ فاضل الماجد بالمنهج المعتمد المكتمل
+    if (INITIAL_LMS_COURSES["سيد احمد"]) {
+        if (!lmsCourses["سيد احمد"]) lmsCourses["سيد احمد"] = INITIAL_LMS_COURSES["سيد احمد"];
+        if (!lmsCourses["سيد أحمد"]) lmsCourses["سيد أحمد"] = lmsCourses["سيد احمد"];
+        if (!lmsCourses["الميكانيكية"]) lmsCourses["الميكانيكية"] = lmsCourses["سيد احمد"];
+        if (!lmsCourses["الميكانيكا"]) lmsCourses["الميكانيكا"] = lmsCourses["سيد احمد"];
+        if (!lmsCourses["ميكانيكا"]) lmsCourses["ميكانيكا"] = lmsCourses["سيد احمد"];
+    }
     if (INITIAL_LMS_COURSES["فاضل الماجد"]) {
-        lmsCourses["فاضل الماجد"] = INITIAL_LMS_COURSES["فاضل الماجد"];
-        lmsCourses["السلامة والصحة"] = INITIAL_LMS_COURSES["فاضل الماجد"];
+        if (!lmsCourses["فاضل الماجد"]) lmsCourses["فاضل الماجد"] = INITIAL_LMS_COURSES["فاضل الماجد"];
+        if (!lmsCourses["السلامة والصحة"]) lmsCourses["السلامة والصحة"] = lmsCourses["فاضل الماجد"];
     }
     // تهيئة مذكرات المراجعة كنصوص وتجريد أسماء الملفات من أية لاحقات (PDF / Excel)
     for (let k in lmsCourses) {
@@ -18548,6 +18800,48 @@
     }
     window.onTqPledgeCheckboxChange = onTqPledgeCheckboxChange;
 
+    function getStoredAntiCheatIncidents() {
+        try {
+            return JSON.parse(localStorage.getItem('sys_anti_cheat_incidents_v1') || '{}');
+        } catch(e) {
+            return {};
+        }
+    }
+
+    function saveAntiCheatIncidents(incidents) {
+        localStorage.setItem('sys_anti_cheat_incidents_v1', JSON.stringify(incidents));
+        updateAntiCheatIncidentsBadges();
+    }
+
+    function updateAntiCheatIncidentsBadges() {
+        const incidents = getStoredAntiCheatIncidents();
+        let pendingCount = 0;
+        for (let k in incidents) {
+            if (incidents[k] && incidents[k].status === 'locked_pending_trainer') {
+                pendingCount++;
+            }
+        }
+        const banner = document.getElementById('gsAntiCheatIncidentsBanner');
+        const badge = document.getElementById('gsAntiCheatIncidentsBadge');
+        const topBadge = document.getElementById('gsTopToolbarIncidentBadge');
+        if (banner) {
+            if (pendingCount > 0) {
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+        if (badge) badge.innerText = `${pendingCount} بلاغ مقفل`;
+        if (topBadge) {
+            if (pendingCount > 0) {
+                topBadge.classList.remove('hidden');
+                topBadge.innerText = String(pendingCount);
+            } else {
+                topBadge.classList.add('hidden');
+            }
+        }
+    }
+
     function handleQuizAntiCheatEvent() {
         if (!currentTakingQuiz || isQuizLocked) return;
         const examStage = document.getElementById('tqStageExam');
@@ -18557,10 +18851,318 @@
         const banner = document.getElementById('tqAntiCheatWarningBanner');
         const countBadge = document.getElementById('tqAntiCheatWarningCount');
         if (banner) banner.classList.remove('hidden');
-        if (countBadge) countBadge.innerText = `تحذير ${antiCheatWarningsCount}`;
+        if (countBadge) countBadge.innerText = `تحذير ${antiCheatWarningsCount} من 3`;
 
-        showToast(`⚠️ تنبيه نزاهة أكاديمية (${antiCheatWarningsCount}): تم رصد مغادرة شاشة الاختبار أو التبديل بين النوافذ! يرجى الاستمرار في صفحة الاختبار.`, 'warning');
+        if (antiCheatWarningsCount >= 3) {
+            lockQuizOnAntiCheatViolation();
+            return;
+        }
+
+        showToast(`⚠️ تنبيه نزاهة أكاديمية (${antiCheatWarningsCount} من 3): تم رصد مغادرة شاشة الاختبار أو التبديل بين النوافذ! سيتم إقفال الاختبار نهائياً عند التحذير الثالث وتحويلك للمدرب.`, 'warning');
     }
+
+    function lockQuizOnAntiCheatViolation() {
+        if (!currentTakingQuiz || !currentUser) return;
+        isQuizLocked = true;
+        if (quizTimerInterval) clearInterval(quizTimerInterval);
+        detachQuizAntiCheatListeners();
+
+        const tInfo = resolveTraineeInfoById(currentUser.id, currentUser.name, currentUser.group);
+        const subKey = `${currentUser.id}_${currentTakingQuiz.id}`;
+
+        // 1. Record incident in security log
+        const incidents = getStoredAntiCheatIncidents();
+        const incidentId = `inc_${currentUser.id}_${currentTakingQuiz.id}_${Date.now()}`;
+        incidents[subKey] = {
+            id: incidentId,
+            subKey: subKey,
+            studentId: currentUser.id,
+            studentName: tInfo.name,
+            studentGroup: tInfo.group,
+            quizId: currentTakingQuiz.id,
+            quizTitle: currentTakingQuiz.title,
+            violationsCount: antiCheatWarningsCount,
+            lockedAt: new Date().toISOString(),
+            status: 'locked_pending_trainer',
+            trainerActionTaken: null,
+            trainerActionAt: null,
+            resolvedBy: null,
+            reason: 'مغادرة شاشة الاختبار أو التبديل بين النوافذ 3 مرات متتالية (3 تحذيرات نزاهة أكاديمية)'
+        };
+        saveAntiCheatIncidents(incidents);
+
+        // 2. Mark submission in studentQuizSubmissions as locked
+        let subRecord = studentQuizSubmissions[subKey];
+        if (!subRecord || typeof subRecord !== 'object') {
+            subRecord = {
+                studentId: currentUser.id,
+                studentName: tInfo.name,
+                studentGroup: tInfo.group,
+                quizId: currentTakingQuiz.id,
+                attempts: [],
+                attemptsCount: 1,
+                bestScore: 0,
+                latestScore: 0,
+                totalPoints: currentTakingQuiz.totalPoints || 10,
+                locked: true
+            };
+        }
+        subRecord.isLockedByAntiCheat = true;
+        subRecord.antiCheatStatus = 'locked_pending_trainer';
+        subRecord.antiCheatWarnings = antiCheatWarningsCount;
+        subRecord.lockedAt = new Date().toISOString();
+        subRecord.locked = true;
+        studentQuizSubmissions[subKey] = subRecord;
+        localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+
+        // 3. Switch UI to Locked Stage
+        const stagePledge = document.getElementById('tqStagePledge');
+        const stageExam = document.getElementById('tqStageExam');
+        const stageCompleted = document.getElementById('tqStageCompleted');
+        const stageLocked = document.getElementById('tqStageLockedByAntiCheat');
+        if (stagePledge) stagePledge.classList.add('hidden');
+        if (stageExam) stageExam.classList.add('hidden');
+        if (stageCompleted) stageCompleted.classList.add('hidden');
+        if (stageLocked) stageLocked.classList.remove('hidden');
+
+        showToast('⛔ تم إقفال الاختبار تلقائياً لمخالفة النزاهة الأكاديمية (3 تحذيرات). تم تسجيل بلاغ في سجل المشرف.', 'error');
+        renderStudentLms();
+    }
+    window.lockQuizOnAntiCheatViolation = lockQuizOnAntiCheatViolation;
+
+    function openAntiCheatIncidentsModal() {
+        renderAntiCheatIncidentsModal();
+        const modal = document.getElementById('modal-antiCheatIncidents');
+        if (modal) modal.classList.remove('hidden');
+    }
+    window.openAntiCheatIncidentsModal = openAntiCheatIncidentsModal;
+
+    function closeAntiCheatIncidentsModal() {
+        const modal = document.getElementById('modal-antiCheatIncidents');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeAntiCheatIncidentsModal = closeAntiCheatIncidentsModal;
+
+    function renderAntiCheatIncidentsModal() {
+        const cont = document.getElementById('antiCheatIncidentsContainer');
+        if (!cont) return;
+
+        const incidents = getStoredAntiCheatIncidents();
+        const incidentList = Object.values(incidents).sort((a, b) => new Date(b.lockedAt) - new Date(a.lockedAt));
+
+        if (incidentList.length === 0) {
+            cont.innerHTML = `
+                <div class="text-center py-10 space-y-2 bg-slate-50 rounded-2xl border border-slate-200 p-6">
+                    <span class="text-3xl">🛡️</span>
+                    <h5 class="font-black text-sm text-slate-800">سجل بلاغات النزاهة نظيف ومثالي</h5>
+                    <p class="text-xs text-slate-500 font-bold">لا توجد أي حالات إقفال اختبار أو مخالفات نزاهة أكاديمية مسجلة حتى الآن.</p>
+                </div>
+            `;
+            return;
+        }
+
+        cont.innerHTML = incidentList.map((inc, idx) => {
+            const isPending = (inc.status === 'locked_pending_trainer');
+            const isReopened = (inc.status === 'reopened_by_trainer');
+            const isPenalized = (inc.status === 'penalized_zero');
+
+            let statusBadge = '';
+            if (isPending) {
+                statusBadge = '<span class="bg-red-100 text-red-900 border border-red-300 text-[10px] font-black px-2.5 py-0.5 rounded-full animate-pulse">🔒 مقفل بانتظار الإجراء</span>';
+            } else if (isReopened) {
+                statusBadge = '<span class="bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-black px-2.5 py-0.5 rounded-full">🔓 تم إعادة الفتح للمتدرب</span>';
+            } else if (isPenalized) {
+                statusBadge = '<span class="bg-slate-200 text-slate-800 border border-slate-300 text-[10px] font-black px-2.5 py-0.5 rounded-full">⛔ تم اعتماد درجة (0)</span>';
+            }
+
+            return `
+                <div class="border ${isPending ? 'border-red-300 bg-red-50/50' : 'border-slate-200 bg-white'} rounded-2xl p-4 shadow-2xs space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-full ${isPending ? 'bg-red-600' : 'bg-slate-700'} text-white font-black text-xs flex items-center justify-center shrink-0">
+                                ${idx + 1}
+                            </span>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="text-xs font-black text-slate-900">${inc.studentName}</span>
+                                    <span class="bg-[#0F2942] text-white text-[10px] font-black px-2 py-0.5 rounded-md">
+                                        مجموعة: ${inc.studentGroup || 'غير محددة'}
+                                    </span>
+                                    ${statusBadge}
+                                </div>
+                                <div class="text-[10px] text-slate-500 font-mono mt-0.5">
+                                    الهوية: ${inc.studentId} • وقت الإقفال: ${new Date(inc.lockedAt).toLocaleString('ar-SA')}
+                                </div>
+                            </div>
+                        </div>
+
+                        ${isPending ? `
+                            <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                                <button type="button" onclick="reopenQuizSubmission('${inc.studentId}', '${inc.quizId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-3 py-1.5 rounded-xl text-xs transition shadow-2xs cursor-pointer flex items-center gap-1">
+                                    <span>🔓</span>
+                                    <span>إعادة فتح الاختبار</span>
+                                </button>
+                                <button type="button" onclick="penalizeQuizSubmissionZero('${inc.studentId}', '${inc.quizId}')" class="bg-red-600 hover:bg-red-700 text-white font-black px-3 py-1.5 rounded-xl text-xs transition shadow-2xs cursor-pointer flex items-center gap-1">
+                                    <span>⛔</span>
+                                    <span>اعتماد درجة (0)</span>
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="text-[10px] text-slate-500 font-bold bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-200">
+                                تم اتخاذ الإجراء بواسطة: ${inc.resolvedBy || 'المدرب'} (${inc.trainerActionAt ? new Date(inc.trainerActionAt).toLocaleDateString('ar-SA') : ''})
+                            </div>
+                        `}
+                    </div>
+
+                    <div class="text-xs bg-white/80 p-2.5 rounded-xl border ${isPending ? 'border-red-200 text-red-900' : 'border-slate-100 text-slate-700'} leading-relaxed font-bold">
+                        <div><b>الاختبار:</b> ${inc.quizTitle || 'الاختبار الأسبوعي'}</div>
+                        <div class="mt-0.5 text-[11px] text-slate-600"><b>سبب المخالفة:</b> ${inc.reason || 'مغادرة شاشة الاختبار أو التبديل بين النوافذ 3 مرات متتالية'}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    window.renderAntiCheatIncidentsModal = renderAntiCheatIncidentsModal;
+
+    function reopenQuizSubmission(studentId, quizId) {
+        if (!confirm('هل أنت متأكد من إعادة فتح الاختبار لهذا المتدرب والسماح له بإعادة المحاولة؟ سيتم رفع القفل فوراً.')) return;
+        const subKey = `${studentId}_${quizId}`;
+        let subRecord = studentQuizSubmissions[subKey];
+        if (subRecord) {
+            subRecord.isLockedByAntiCheat = false;
+            subRecord.antiCheatStatus = 'reopened_by_trainer';
+            subRecord.locked = false;
+            subRecord.antiCheatWarnings = 0;
+            subRecord.reopenedAt = new Date().toISOString();
+            subRecord.reopenedBy = currentUser?.name || 'المدرب المشرف';
+            subRecord.extraAttemptsAllowed = (subRecord.extraAttemptsAllowed || 0) + 1;
+            studentQuizSubmissions[subKey] = subRecord;
+            localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+        }
+
+        const incidents = getStoredAntiCheatIncidents();
+        if (incidents[subKey]) {
+            incidents[subKey].status = 'reopened_by_trainer';
+            incidents[subKey].trainerActionTaken = 'reopened';
+            incidents[subKey].trainerActionAt = new Date().toISOString();
+            incidents[subKey].resolvedBy = currentUser?.name || 'المدرب المشرف';
+            saveAntiCheatIncidents(incidents);
+        }
+
+        showToast('✓ تم إعادة فتح الاختبار للمتدرب بنجاح، ويمكنه الآن استئناف أو إعادة الاختبار.', 'success');
+        if (typeof renderTrainerSubmissionsTab === 'function') renderTrainerSubmissionsTab();
+        if (typeof renderGradesSystemTab === 'function') renderGradesSystemTab();
+        renderAntiCheatIncidentsModal();
+    }
+    window.reopenQuizSubmission = reopenQuizSubmission;
+
+    function penalizeQuizSubmissionZero(studentId, quizId) {
+        if (!confirm('هل أنت متأكد من اعتماد الدرجة (0) للمتدرب بسبب الغش ومخالفة النزاهة الأكاديمية؟')) return;
+        const subKey = `${studentId}_${quizId}`;
+        const tInfo = resolveTraineeInfoById(studentId);
+        let subRecord = studentQuizSubmissions[subKey];
+
+        const located = (typeof findAssessmentWeekAndCourse === 'function') ? findAssessmentWeekAndCourse('quiz', quizId) : null;
+        const targetQuiz = located?.item || null;
+        const totalPoints = targetQuiz?.totalPoints || 10;
+
+        if (!subRecord || typeof subRecord !== 'object') {
+            subRecord = {
+                studentId: studentId,
+                studentName: tInfo.name,
+                studentGroup: tInfo.group,
+                quizId: quizId,
+                attempts: [],
+                attemptsCount: 1,
+                bestScore: 0,
+                latestScore: 0,
+                totalPoints: totalPoints,
+                locked: true
+            };
+        }
+
+        subRecord.bestScore = 0;
+        subRecord.latestScore = 0;
+        subRecord.score = 0;
+        subRecord.isLockedByAntiCheat = false;
+        subRecord.antiCheatStatus = 'penalized_zero';
+        subRecord.penalizedAt = new Date().toISOString();
+        subRecord.penalizedBy = currentUser?.name || 'المدرب المشرف';
+        subRecord.locked = true;
+
+        studentQuizSubmissions[subKey] = subRecord;
+        localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+
+        // Record 0 in trainee gradebook
+        if (typeof autoRecordAssessmentGradeForTrainee === 'function' && targetQuiz) {
+            autoRecordAssessmentGradeForTrainee(studentId, 'quiz', targetQuiz, 0);
+        } else if (located && located.weekNum && typeof getOrInitTraineeGradebook === 'function') {
+            const gb = getOrInitTraineeGradebook(studentId);
+            if (gb.weeks && gb.weeks[located.weekNum]) {
+                gb.weeks[located.weekNum].weekendExam = 0;
+                if (typeof saveTraineeGradebooksToStorage === 'function') saveTraineeGradebooksToStorage();
+            }
+        }
+
+        const incidents = getStoredAntiCheatIncidents();
+        if (incidents[subKey]) {
+            incidents[subKey].status = 'penalized_zero';
+            incidents[subKey].trainerActionTaken = 'zero_grade';
+            incidents[subKey].trainerActionAt = new Date().toISOString();
+            incidents[subKey].resolvedBy = currentUser?.name || 'المدرب المشرف';
+            saveAntiCheatIncidents(incidents);
+        }
+
+        showToast('تم اعتماد درجة (0) للمتدرب لمخالفة النزاهة وتحديث كشف الدرجات.', 'info');
+        if (typeof renderTrainerSubmissionsTab === 'function') renderTrainerSubmissionsTab();
+        if (typeof renderGradesSystemTab === 'function') renderGradesSystemTab();
+        renderAntiCheatIncidentsModal();
+    }
+    window.penalizeQuizSubmissionZero = penalizeQuizSubmissionZero;
+
+    // Helper: Check Early Submission
+    function checkIsAssessmentEarlySubmission(dueDate, dueTime) {
+        if (!dueDate) return { isEarly: false, reason: 'no_due_date' };
+        let deadlineStr = String(dueDate).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(deadlineStr)) {
+            const timeStr = (dueTime && /^\d{2}:\d{2}$/.test(dueTime)) ? dueTime : '23:59';
+            deadlineStr = `${deadlineStr}T${timeStr}:59`;
+        }
+        const deadlineD = new Date(deadlineStr);
+        if (isNaN(deadlineD.getTime())) return { isEarly: false, reason: 'invalid_date' };
+
+        const isEarly = Date.now() < deadlineD.getTime();
+        return {
+            isEarly: isEarly,
+            deadlineTimestamp: deadlineD.getTime(),
+            deadlineFormatted: deadlineD.toLocaleString('ar-SA')
+        };
+    }
+    window.checkIsAssessmentEarlySubmission = checkIsAssessmentEarlySubmission;
+
+    // Helper: Fireworks Celebration Particle Burst
+    function fireEarlySubmissionCelebration(title, bonusPoints) {
+        if (typeof confetti === 'function') {
+            try {
+                const count = 200;
+                const defaults = { origin: { y: 0.65 } };
+                function fire(particleRatio, opts) {
+                    confetti(Object.assign({}, defaults, opts, {
+                        particleCount: Math.floor(count * particleRatio)
+                    }));
+                }
+                fire(0.25, { spread: 35, startVelocity: 60, colors: ['#F59E0B', '#10B981', '#3B82F6'] });
+                fire(0.20, { spread: 70, colors: ['#EF4444', '#8B5CF6', '#F59E0B'] });
+                fire(0.35, { spread: 110, decay: 0.91, scalar: 0.8, colors: ['#10B981', '#F59E0B', '#0F2942'] });
+                fire(0.10, { spread: 130, startVelocity: 30, decay: 0.92, scalar: 1.2 });
+                fire(0.10, { spread: 140, startVelocity: 50, colors: ['#F59E0B', '#10B981'] });
+            } catch(e) {
+                console.warn('Confetti error:', e);
+            }
+        }
+        showToast(`🎉 رائع ومتميز! تم التسليم قبل الموعد المحدد وحصلت على بونص إضافي (+${bonusPoints || 1} درجات)! 🌟`, 'success');
+    }
+    window.fireEarlySubmissionCelebration = fireEarlySubmissionCelebration;
 
     function attachQuizAntiCheatListeners() {
         if (isAntiCheatListenerAttached) return;
@@ -18582,17 +19184,231 @@
     }
 
     window.activeMatchingSelection = window.activeMatchingSelection || {};
+    window.activeMatchingColor = window.activeMatchingColor || {};
     window.matchingPairsMap = window.matchingPairsMap || {};
+    window.matchingPairColors = window.matchingPairColors || {};
+    window._justCompletedMatchingDrag = false;
 
     const MATCHING_COLORS = [
-        { bg: 'bg-red-50', text: 'text-red-950', border: 'border-red-500', badgeBg: 'bg-red-600', badgeText: 'text-white', hex: '#EF4444' },
-        { bg: 'bg-blue-50', text: 'text-blue-950', border: 'border-blue-500', badgeBg: 'bg-blue-600', badgeText: 'text-white', hex: '#3B82F6' },
-        { bg: 'bg-emerald-50', text: 'text-emerald-950', border: 'border-emerald-500', badgeBg: 'bg-emerald-600', badgeText: 'text-white', hex: '#10B981' },
-        { bg: 'bg-amber-50', text: 'text-amber-950', border: 'border-amber-500', badgeBg: 'bg-amber-600', badgeText: 'text-white', hex: '#F59E0B' },
-        { bg: 'bg-purple-50', text: 'text-purple-950', border: 'border-purple-500', badgeBg: 'bg-purple-600', badgeText: 'text-white', hex: '#8B5CF6' }
+        { id: 'red', bg: 'bg-red-50', text: 'text-red-950', border: 'border-red-500', badgeBg: 'bg-red-600', badgeText: 'text-white', hex: '#EF4444', ring: 'ring-red-400' },
+        { id: 'blue', bg: 'bg-blue-50', text: 'text-blue-950', border: 'border-blue-500', badgeBg: 'bg-blue-600', badgeText: 'text-white', hex: '#3B82F6', ring: 'ring-blue-400' },
+        { id: 'emerald', bg: 'bg-emerald-50', text: 'text-emerald-950', border: 'border-emerald-500', badgeBg: 'bg-emerald-600', badgeText: 'text-white', hex: '#10B981', ring: 'ring-emerald-400' },
+        { id: 'amber', bg: 'bg-amber-50', text: 'text-amber-950', border: 'border-amber-500', badgeBg: 'bg-amber-600', badgeText: 'text-white', hex: '#F59E0B', ring: 'ring-amber-400' },
+        { id: 'purple', bg: 'bg-purple-50', text: 'text-purple-950', border: 'border-purple-500', badgeBg: 'bg-purple-600', badgeText: 'text-white', hex: '#8B5CF6', ring: 'ring-purple-400' },
+        { id: 'cyan', bg: 'bg-cyan-50', text: 'text-cyan-950', border: 'border-cyan-500', badgeBg: 'bg-cyan-600', badgeText: 'text-white', hex: '#06B6D4', ring: 'ring-cyan-400' },
+        { id: 'rose', bg: 'bg-rose-50', text: 'text-rose-950', border: 'border-rose-500', badgeBg: 'bg-rose-600', badgeText: 'text-white', hex: '#F43F5E', ring: 'ring-rose-400' },
+        { id: 'teal', bg: 'bg-teal-50', text: 'text-teal-950', border: 'border-teal-500', badgeBg: 'bg-teal-600', badgeText: 'text-white', hex: '#14B8A6', ring: 'ring-teal-400' }
     ];
 
+    function getNextMatchingColor(qId) {
+        window.matchingPairsMap = window.matchingPairsMap || {};
+        window.matchingPairColors = window.matchingPairColors || {};
+        window.matchingPairColors[qId] = window.matchingPairColors[qId] || {};
+        const pairs = window.matchingPairsMap[qId] || {};
+        const usedIds = new Set();
+        for (let l in pairs) {
+            const c = window.matchingPairColors[qId][l];
+            if (c && c.id) usedIds.add(c.id);
+        }
+        for (let i = 0; i < MATCHING_COLORS.length; i++) {
+            if (!usedIds.has(MATCHING_COLORS[i].id)) return MATCHING_COLORS[i];
+        }
+        return MATCHING_COLORS[Object.keys(pairs).length % MATCHING_COLORS.length];
+    }
+
     let currentDraggingMatch = null;
+    let currentRopeDrag = null;
+
+    function handleMatchingPointerDown(e, qId, leftVal, btnEl) {
+        if (e.button !== undefined && e.button !== 0) return;
+
+        const board = document.getElementById(`match_board_${qId}`);
+        const svg = document.getElementById(`match_svg_${qId}`);
+        if (!board || !svg) return;
+
+        const boardRect = board.getBoundingClientRect();
+        const dot = btnEl.querySelector('.match-anchor-left') || btnEl;
+        const dotRect = dot.getBoundingClientRect();
+
+        const startX = dotRect.left + dotRect.width / 2 - boardRect.left;
+        const startY = dotRect.top + dotRect.height / 2 - boardRect.top;
+
+        const chosenColor = (window.activeMatchingSelection && window.activeMatchingSelection[qId] === leftVal && window.activeMatchingColor && window.activeMatchingColor[qId])
+            ? window.activeMatchingColor[qId]
+            : (window.matchingPairColors?.[qId]?.[leftVal] || getNextMatchingColor(qId));
+
+        if (e.pointerId !== undefined && btnEl.setPointerCapture) {
+            try {
+                btnEl.setPointerCapture(e.pointerId);
+            } catch (err) {}
+        }
+
+        currentRopeDrag = {
+            qId,
+            leftVal,
+            btnEl,
+            color: chosenColor,
+            startX,
+            startY,
+            initX: e.clientX,
+            initY: e.clientY,
+            moved: false,
+            hoverTarget: null,
+            pointerId: e.pointerId
+        };
+
+        window.addEventListener('pointermove', onMatchingPointerMove, { passive: false });
+        window.addEventListener('pointerup', onMatchingPointerUp);
+        window.addEventListener('pointercancel', onMatchingPointerUp);
+    }
+    window.handleMatchingPointerDown = handleMatchingPointerDown;
+
+    function onMatchingPointerMove(e) {
+        if (!currentRopeDrag) return;
+
+        const dist = Math.hypot(e.clientX - currentRopeDrag.initX, e.clientY - currentRopeDrag.initY);
+        if (dist > 6) {
+            if (!currentRopeDrag.moved) {
+                currentRopeDrag.moved = true;
+
+                // When drag begins, disconnect any existing pair for this left item
+                const { qId, leftVal, btnEl, color } = currentRopeDrag;
+                window.matchingPairsMap = window.matchingPairsMap || {};
+                window.matchingPairsMap[qId] = window.matchingPairsMap[qId] || {};
+                if (window.matchingPairsMap[qId][leftVal]) {
+                    delete window.matchingPairsMap[qId][leftVal];
+                    if (window.matchingPairColors?.[qId]) delete window.matchingPairColors[qId][leftVal];
+                    drawMatchingLines(qId);
+                }
+
+                // Highlight starting button in Column A
+                btnEl.className = `matching-btn-left w-full text-right p-3 rounded-xl border-2 ${color.border} ${color.bg} font-black text-xs ${color.text} transition flex items-center justify-between gap-2 shadow-md ring-4 ${color.ring} scale-[1.02] select-none`;
+                const dot = btnEl.querySelector('.match-anchor-left');
+                if (dot) {
+                    dot.style.backgroundColor = color.hex;
+                    dot.style.borderColor = color.hex;
+                }
+            }
+            if (e.cancelable) e.preventDefault();
+        }
+
+        if (!currentRopeDrag.moved) return;
+
+        const { qId, startX, startY, color } = currentRopeDrag;
+        const board = document.getElementById(`match_board_${qId}`);
+        const svg = document.getElementById(`match_svg_${qId}`);
+        if (!board || !svg) return;
+        const boardRect = board.getBoundingClientRect();
+
+        const currX = e.clientX - boardRect.left;
+        const currY = e.clientY - boardRect.top;
+
+        let tempRopeGroup = svg.querySelector(`#temp_rope_group_${qId}`);
+        if (!tempRopeGroup) {
+            tempRopeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            tempRopeGroup.setAttribute('id', `temp_rope_group_${qId}`);
+            svg.appendChild(tempRopeGroup);
+        }
+
+        const midX = (startX + currX) / 2;
+        const midY = (startY + currY) / 2 + 10;
+        const pathData = `M ${startX} ${startY} Q ${midX} ${midY} ${currX} ${currY}`;
+
+        tempRopeGroup.innerHTML = `
+            <line x1="${startX}" y1="${startY}" x2="${currX}" y2="${currY}" stroke="${color.hex}" stroke-width="8" stroke-opacity="0.3" stroke-linecap="round"/>
+            <path d="${pathData}" stroke="${color.hex}" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+            <circle cx="${startX}" cy="${startY}" r="5.5" fill="${color.hex}" stroke="#fff" stroke-width="2"/>
+            <circle cx="${currX}" cy="${currY}" r="6.5" fill="${color.hex}" stroke="#fff" stroke-width="2"/>
+        `;
+
+        const rawEl = document.elementFromPoint(e.clientX, e.clientY);
+        const rightBtn = rawEl ? rawEl.closest(`[data-match-q="${qId}"][data-match-col="right"]`) : null;
+
+        if (rightBtn !== currentRopeDrag.hoverTarget) {
+            if (currentRopeDrag.hoverTarget) {
+                currentRopeDrag.hoverTarget.classList.remove(color.bg, color.border, 'ring-4', color.ring, 'scale-105');
+            }
+            currentRopeDrag.hoverTarget = rightBtn;
+            if (rightBtn) {
+                rightBtn.classList.add(color.bg, color.border, 'ring-4', color.ring, 'scale-105');
+                const rDot = rightBtn.querySelector('.match-anchor-right');
+                if (rDot) {
+                    rDot.style.backgroundColor = color.hex;
+                    rDot.style.borderColor = color.hex;
+                }
+            }
+        }
+    }
+
+    function onMatchingPointerUp(e) {
+        if (!currentRopeDrag) return;
+
+        window.removeEventListener('pointermove', onMatchingPointerMove);
+        window.removeEventListener('pointerup', onMatchingPointerUp);
+        window.removeEventListener('pointercancel', onMatchingPointerUp);
+
+        const { qId, leftVal, btnEl, color, moved, hoverTarget, pointerId } = currentRopeDrag;
+
+        if (pointerId !== undefined && btnEl.releasePointerCapture) {
+            try {
+                btnEl.releasePointerCapture(pointerId);
+            } catch (err) {}
+        }
+
+        const svg = document.getElementById(`match_svg_${qId}`);
+        const tempRopeGroup = svg ? svg.querySelector(`#temp_rope_group_${qId}`) : null;
+        if (tempRopeGroup) tempRopeGroup.remove();
+
+        if (hoverTarget) {
+            hoverTarget.classList.remove(color.bg, color.border, 'ring-4', color.ring, 'scale-105');
+        }
+
+        if (moved) {
+            window._justCompletedMatchingDrag = true;
+            setTimeout(() => { window._justCompletedMatchingDrag = false; }, 250);
+
+            let targetRightBtn = hoverTarget;
+            if (!targetRightBtn) {
+                const rawEl = document.elementFromPoint(e.clientX, e.clientY);
+                targetRightBtn = rawEl ? rawEl.closest(`[data-match-q="${qId}"][data-match-col="right"]`) : null;
+            }
+
+            if (targetRightBtn) {
+                const rightVal = targetRightBtn.getAttribute('data-match-val');
+                window.matchingPairsMap = window.matchingPairsMap || {};
+                window.matchingPairsMap[qId] = window.matchingPairsMap[qId] || {};
+                window.matchingPairColors = window.matchingPairColors || {};
+                window.matchingPairColors[qId] = window.matchingPairColors[qId] || {};
+
+                // Remove previous connections with same items
+                for (let l in window.matchingPairsMap[qId]) {
+                    if (window.matchingPairsMap[qId][l] === rightVal || l === leftVal) {
+                        delete window.matchingPairsMap[qId][l];
+                        delete window.matchingPairColors[qId][l];
+                    }
+                }
+
+                window.matchingPairsMap[qId][leftVal] = rightVal;
+                window.matchingPairColors[qId][leftVal] = color;
+                window.activeMatchingSelection[qId] = null;
+                window.activeMatchingColor[qId] = null;
+                currentRopeDrag = null;
+
+                renderMatchingBoardState(qId);
+                drawMatchingLines(qId);
+                if (typeof updateQuizAnswerProgress === 'function') updateQuizAnswerProgress();
+                return;
+            }
+
+            currentRopeDrag = null;
+            renderMatchingBoardState(qId);
+            drawMatchingLines(qId);
+            return;
+        }
+
+        // Not moved: let standard click handler execute naturally
+        currentRopeDrag = null;
+    }
 
     function handleMatchingDragStart(e, qId, val, btnEl) {
         currentDraggingMatch = { qId, val, el: btnEl };
@@ -18600,13 +19416,15 @@
             e.dataTransfer.setData('text/plain', val);
             e.dataTransfer.effectAllowed = 'link';
         }
-        btnEl.classList.add('opacity-60', 'scale-95', 'ring-4', 'ring-violet-300');
+        const chosenColor = getNextMatchingColor(qId);
         window.activeMatchingSelection[qId] = val;
+        window.activeMatchingColor[qId] = chosenColor;
+        btnEl.classList.add('opacity-60', 'scale-95', 'ring-4', chosenColor.ring);
     }
     window.handleMatchingDragStart = handleMatchingDragStart;
 
     function handleMatchingDragEnd(e, btnEl) {
-        btnEl.classList.remove('opacity-60', 'scale-95', 'ring-4', 'ring-violet-300');
+        btnEl.classList.remove('opacity-60', 'scale-95');
         currentDraggingMatch = null;
     }
     window.handleMatchingDragEnd = handleMatchingDragEnd;
@@ -18634,40 +19452,83 @@
 
         if (!leftVal) return;
 
+        window.matchingPairsMap = window.matchingPairsMap || {};
         window.matchingPairsMap[qId] = window.matchingPairsMap[qId] || {};
+        window.matchingPairColors = window.matchingPairColors || {};
+        window.matchingPairColors[qId] = window.matchingPairColors[qId] || {};
 
-        // Remove any previous match using this rightVal or leftVal
+        const pairColor = window.activeMatchingColor?.[qId] || getNextMatchingColor(qId);
+
         for (let l in window.matchingPairsMap[qId]) {
             if (window.matchingPairsMap[qId][l] === rightVal || l === leftVal) {
                 delete window.matchingPairsMap[qId][l];
+                delete window.matchingPairColors[qId][l];
             }
         }
 
         window.matchingPairsMap[qId][leftVal] = rightVal;
+        window.matchingPairColors[qId][leftVal] = pairColor;
         window.activeMatchingSelection[qId] = null;
+        window.activeMatchingColor[qId] = null;
         currentDraggingMatch = null;
 
         renderMatchingBoardState(qId);
+        drawMatchingLines(qId);
+        if (typeof updateQuizAnswerProgress === 'function') updateQuizAnswerProgress();
     }
     window.handleMatchingDrop = handleMatchingDrop;
 
     function handleMatchingItemClick(qId, col, val, btnEl) {
+        if (window._justCompletedMatchingDrag) return;
+
+        window.matchingPairsMap = window.matchingPairsMap || {};
         window.matchingPairsMap[qId] = window.matchingPairsMap[qId] || {};
+        window.matchingPairColors = window.matchingPairColors || {};
+        window.matchingPairColors[qId] = window.matchingPairColors[qId] || {};
 
         if (col === 'left') {
+            // If already actively selected, clicking again toggles/deselects it
+            if (window.activeMatchingSelection[qId] === val) {
+                window.activeMatchingSelection[qId] = null;
+                window.activeMatchingColor[qId] = null;
+                renderMatchingBoardState(qId);
+                return;
+            }
+
+            // If already paired, disconnect to allow re-pairing
             if (window.matchingPairsMap[qId][val]) {
                 delete window.matchingPairsMap[qId][val];
+                delete window.matchingPairColors[qId][val];
             }
+
+            const chosenColor = getNextMatchingColor(qId);
             window.activeMatchingSelection[qId] = val;
+            window.activeMatchingColor[qId] = chosenColor;
+
+            renderMatchingBoardState(qId);
 
             const leftBtns = document.querySelectorAll(`[data-match-q="${qId}"][data-match-col="left"]`);
             leftBtns.forEach(b => {
                 if (b.getAttribute('data-match-val') === val) {
-                    b.classList.add('ring-4', 'ring-violet-300', 'border-violet-600');
-                } else {
-                    b.classList.remove('ring-4', 'ring-violet-300');
+                    b.className = `matching-btn-left w-full text-right p-3 rounded-xl border-2 ${chosenColor.border} ${chosenColor.bg} font-black text-xs ${chosenColor.text} transition flex items-center justify-between gap-2 shadow-md ring-4 ${chosenColor.ring} scale-[1.02] select-none`;
+                    const badge = b.querySelector('.matching-badge');
+                    if (badge) {
+                        badge.className = `matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black ${chosenColor.badgeBg} ${chosenColor.badgeText}`;
+                        badge.innerText = 'محدد للتوصيل ➔';
+                        badge.classList.remove('hidden');
+                    }
+                    const dot = b.querySelector('.match-anchor-left');
+                    if (dot) {
+                        dot.style.backgroundColor = chosenColor.hex;
+                        dot.style.borderColor = chosenColor.hex;
+                    }
                 }
             });
+
+            const statusEl = document.getElementById(`match_status_${qId}`);
+            if (statusEl) {
+                statusEl.innerHTML = `<span class="inline-flex items-center gap-1.5 font-bold text-xs" dir="rtl" style="color: ${chosenColor.hex}"><span>🎯</span> تم تحديد: <bdi class="underline decoration-dotted font-black px-1">"${escapeHtml(val)}"</bdi> — انقر على التعريف المطابق في العمود (ب) لنفس اللون!</span>`;
+            }
         } else if (col === 'right') {
             const activeLeft = window.activeMatchingSelection[qId];
             if (!activeLeft) {
@@ -18675,20 +19536,24 @@
                 return;
             }
 
+            const pairColor = window.activeMatchingColor[qId] || getNextMatchingColor(qId);
+
             for (let l in window.matchingPairsMap[qId]) {
-                if (window.matchingPairsMap[qId][l] === val) {
+                if (window.matchingPairsMap[qId][l] === val || l === activeLeft) {
                     delete window.matchingPairsMap[qId][l];
+                    delete window.matchingPairColors[qId][l];
                 }
             }
 
             window.matchingPairsMap[qId][activeLeft] = val;
+            window.matchingPairColors[qId][activeLeft] = pairColor;
             window.activeMatchingSelection[qId] = null;
+            window.activeMatchingColor[qId] = null;
 
-            const leftBtns = document.querySelectorAll(`[data-match-q="${qId}"][data-match-col="left"]`);
-            leftBtns.forEach(b => b.classList.remove('ring-4', 'ring-violet-300'));
+            renderMatchingBoardState(qId);
+            drawMatchingLines(qId);
+            if (typeof updateQuizAnswerProgress === 'function') updateQuizAnswerProgress();
         }
-
-        renderMatchingBoardState(qId);
     }
     window.handleMatchingItemClick = handleMatchingItemClick;
 
@@ -18705,7 +19570,10 @@
         let pIdx = 0;
         for (let lVal in pairs) {
             const rVal = pairs[lVal];
-            const color = MATCHING_COLORS[pIdx % MATCHING_COLORS.length];
+            window.matchingPairColors = window.matchingPairColors || {};
+            window.matchingPairColors[qId] = window.matchingPairColors[qId] || {};
+            const color = window.matchingPairColors[qId][lVal] || MATCHING_COLORS[pIdx % MATCHING_COLORS.length];
+            window.matchingPairColors[qId][lVal] = color;
             const strokeColor = color.hex || '#EF4444';
 
             const leftBtns = board.querySelectorAll('.matching-btn-left');
@@ -18751,11 +19619,11 @@
                 glow.setAttribute('y2', y2);
                 glow.setAttribute('stroke', strokeColor);
                 glow.setAttribute('stroke-width', '7');
-                glow.setAttribute('stroke-opacity', '0.22');
+                glow.setAttribute('stroke-opacity', '0.25');
                 glow.setAttribute('stroke-linecap', 'round');
                 g.appendChild(glow);
 
-                // Main connecting line (matches user image)
+                // Main connecting line
                 const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 line.setAttribute('x1', x1);
                 line.setAttribute('y1', y1);
@@ -18844,17 +19712,25 @@
         let pairIndex = 0;
         for (let lVal in pairs) {
             const rVal = pairs[lVal];
-            const color = MATCHING_COLORS[pairIndex % MATCHING_COLORS.length];
+            window.matchingPairColors = window.matchingPairColors || {};
+            window.matchingPairColors[qId] = window.matchingPairColors[qId] || {};
+            const color = window.matchingPairColors[qId][lVal] || MATCHING_COLORS[pairIndex % MATCHING_COLORS.length];
+            window.matchingPairColors[qId][lVal] = color;
             const pairNum = pairIndex + 1;
 
             leftBtns.forEach(b => {
                 if (b.getAttribute('data-match-val') === lVal) {
-                    b.className = `matching-btn-left w-full text-right p-3 rounded-xl border-2 ${color.border} ${color.bg} font-black text-xs ${color.text} transition cursor-grab active:cursor-grabbing flex items-center justify-between gap-2 shadow-xs select-none`;
+                    b.className = `matching-btn-left w-full text-right p-3 rounded-xl border-2 ${color.border} ${color.bg} font-black text-xs ${color.text} transition flex items-center justify-between gap-2 shadow-xs select-none`;
                     const badge = b.querySelector('.matching-badge');
                     if (badge) {
                         badge.className = `matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black ${color.badgeBg} ${color.badgeText}`;
                         badge.innerText = `زوج ${pairNum} ✓`;
                         badge.classList.remove('hidden');
+                    }
+                    const dot = b.querySelector('.match-anchor-left');
+                    if (dot) {
+                        dot.style.backgroundColor = color.hex;
+                        dot.style.borderColor = color.hex;
                     }
                 }
             });
@@ -18867,6 +19743,11 @@
                         badge.className = `matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black ${color.badgeBg} ${color.badgeText}`;
                         badge.innerText = `زوج ${pairNum} ✓`;
                         badge.classList.remove('hidden');
+                    }
+                    const dot = b.querySelector('.match-anchor-right');
+                    if (dot) {
+                        dot.style.backgroundColor = color.hex;
+                        dot.style.borderColor = color.hex;
                     }
                 }
             });
@@ -18895,6 +19776,8 @@
     function resetMatchingQuestion(qId) {
         window.matchingPairsMap[qId] = {};
         window.activeMatchingSelection[qId] = null;
+        window.activeMatchingColor[qId] = null;
+        if (window.matchingPairColors) window.matchingPairColors[qId] = {};
         const svg = document.getElementById(`match_svg_${qId}`);
         if (svg) svg.innerHTML = '';
         renderMatchingBoardState(qId);
@@ -18981,8 +19864,27 @@
             attemptsUsed = subRecord.attemptsCount || (Array.isArray(subRecord.attempts) ? subRecord.attempts.length : 1);
         }
 
-        if (attemptsUsed >= maxAttempts) {
-            showToast(`لقد استنفدت كافة المحاولات المسموحة (${maxAttempts} محاولات) لهذا الاختبار. تم حفظ إجاباتك وهي قيد المراجعة والاعتماد.`, 'info');
+        // Check if locked by academic integrity (3 anti-cheat warnings)
+        if (subRecord && subRecord.isLockedByAntiCheat && subRecord.antiCheatStatus === 'locked_pending_trainer') {
+            currentTakingQuiz = foundQuiz;
+            isQuizLocked = true;
+            const stagePledge = document.getElementById('tqStagePledge');
+            const stageExam = document.getElementById('tqStageExam');
+            const stageCompleted = document.getElementById('tqStageCompleted');
+            const stageLocked = document.getElementById('tqStageLockedByAntiCheat');
+            if (stagePledge) stagePledge.classList.add('hidden');
+            if (stageExam) stageExam.classList.add('hidden');
+            if (stageCompleted) stageCompleted.classList.add('hidden');
+            if (stageLocked) stageLocked.classList.remove('hidden');
+            const modal = document.getElementById('takeQuizModal');
+            if (modal) modal.classList.remove('hidden');
+            showToast('⛔ هذا الاختبار مقفل حالياً بقرار النزاهة الأكاديمية (3 تحذيرات مغادرة صفحة). بانتظار إجراء المدرب (إعادة فتح أو اعتماد درجة 0).', 'error');
+            return;
+        }
+
+        const allowedAttempts = maxAttempts + (subRecord?.extraAttemptsAllowed || 0);
+        if (attemptsUsed >= allowedAttempts) {
+            showToast(`لقد استنفدت كافة المحاولات المسموحة (${allowedAttempts} محاولات) لهذا الاختبار. تم حفظ إجاباتك وهي قيد المراجعة والاعتماد.`, 'info');
             return;
         }
 
@@ -19041,7 +19943,7 @@
                                     </span>
                                     <div>
                                         <h5 class="font-black text-xs md:text-sm text-slate-900 leading-snug">${escapeHtml(q.text || q.question || 'توصيل ومطابقة المفاهيم')}</h5>
-                                        <p class="text-[11px] text-indigo-700 font-bold mt-0.5">📌 طريقة الإجابة: اسحب المفهوم من (العمود أ) إلى تعريفه في (العمود ب) أو انقر عليهما للتوصيل والمطابقة.</p>
+                                        <p class="text-[11px] text-indigo-700 font-bold mt-0.5">📌 طريقة الإجابة: اسحب بالماوس أو باللمس الخيط من (العمود أ) إلى تعريفه في (العمود ب)، أو انقر عليهما للتوصيل المباشر بنفس اللون.</p>
                                     </div>
                                 </div>
                                 <span class="text-[10px] font-black bg-indigo-100 text-indigo-900 border border-indigo-200 px-2.5 py-1 rounded-full shrink-0">
@@ -19065,6 +19967,7 @@
                                             <div class="relative group">
                                                 <button type="button" 
                                                     id="match_btn_left_${q.id}_${lIdx}"
+                                                    onpointerdown="handleMatchingPointerDown(event, '${q.id}', '${escapeHtml(leftText)}', this)"
                                                     draggable="true"
                                                     ondragstart="handleMatchingDragStart(event, '${q.id}', '${escapeHtml(leftText)}', this)" 
                                                     ondragend="handleMatchingDragEnd(event, this)"
@@ -19072,14 +19975,15 @@
                                                     data-match-q="${q.id}" 
                                                     data-match-col="left" 
                                                     data-match-val="${escapeHtml(leftText)}" 
+                                                    style="touch-action: none;"
                                                     class="matching-btn-left w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-violet-400 font-black text-xs text-slate-800 transition cursor-grab active:cursor-grabbing flex items-center justify-between gap-2 shadow-2xs select-none">
                                                     <div class="flex items-center gap-1.5 leading-relaxed">
-                                                        <span class="text-slate-400 text-xs shrink-0 cursor-grab" title="اسحب للتوصيل">⠿</span>
+                                                        <span class="text-slate-400 text-xs shrink-0 cursor-grab" title="اسحب للتوصيل بالماوس أو باللمس">⠿</span>
                                                         <span>${escapeHtml(leftText)}</span>
                                                     </div>
                                                     <div class="flex items-center gap-1.5 shrink-0">
                                                         <span class="matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black hidden"></span>
-                                                        <span class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white inline-block match-anchor-dot match-anchor-left transition"></span>
+                                                        <span class="w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-white inline-block match-anchor-dot match-anchor-left transition"></span>
                                                     </div>
                                                 </button>
                                             </div>
@@ -19107,7 +20011,7 @@
                                                     data-match-val="${escapeHtml(rightText)}" 
                                                     class="matching-btn-right w-full text-right p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-indigo-400 font-bold text-xs text-slate-700 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs select-none">
                                                     <div class="flex items-center gap-1.5 shrink-0">
-                                                        <span class="w-3 h-3 rounded-full border-2 border-slate-300 bg-white inline-block match-anchor-dot match-anchor-right transition"></span>
+                                                        <span class="w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-white inline-block match-anchor-dot match-anchor-right transition"></span>
                                                         <span class="matching-badge text-[10px] font-mono px-2 py-0.5 rounded-lg font-black hidden"></span>
                                                     </div>
                                                     <span class="leading-relaxed flex-1">${escapeHtml(rightText)}</span>
@@ -19344,7 +20248,15 @@
             }
         });
 
-        score = Math.round(score * 10) / 10;
+        const earlyCheck = checkIsAssessmentEarlySubmission(currentTakingQuiz.dueDateInput || currentTakingQuiz.dueDate, currentTakingQuiz.dueTimeInput);
+        let earlyBonusAwarded = 0;
+        if (earlyCheck.isEarly && !isTimeout) {
+            earlyBonusAwarded = 1;
+            score = Math.round((score + earlyBonusAwarded) * 10) / 10;
+        } else {
+            score = Math.round(score * 10) / 10;
+        }
+
         const subKey = `${currentUser.id}_${currentTakingQuiz.id}`;
         let subRecord = studentQuizSubmissions[subKey];
         const tInfo = resolveTraineeInfoById(currentUser.id, currentUser.name, currentUser.group);
@@ -19361,6 +20273,8 @@
                 latestScore: 0,
                 totalPoints: totalPoints,
                 locked: false,
+                isEarlySubmission: earlyCheck.isEarly && !isTimeout,
+                earlyBonusAwarded: earlyBonusAwarded,
                 answers: answersMap
             };
         }
@@ -19377,6 +20291,8 @@
                     totalPoints: subRecord.totalPoints || totalPoints,
                     percentage: Math.round((oldScore / (totalPoints || 1)) * 100),
                     isTimeout: false,
+                    isEarlySubmission: earlyCheck.isEarly && !isTimeout,
+                    earlyBonusAwarded: earlyBonusAwarded,
                     date: subRecord.submittedAt || new Date().toISOString(),
                     answers: answersMap
                 }],
@@ -19385,6 +20301,8 @@
                 latestScore: oldScore,
                 totalPoints: totalPoints,
                 locked: false,
+                isEarlySubmission: earlyCheck.isEarly && !isTimeout,
+                earlyBonusAwarded: earlyBonusAwarded,
                 answers: answersMap
             };
         }
@@ -19398,6 +20316,8 @@
             percentage: pct,
             isTimeout: isTimeout,
             antiCheatWarnings: antiCheatWarningsCount,
+            isEarlySubmission: earlyCheck.isEarly && !isTimeout,
+            earlyBonusAwarded: earlyBonusAwarded,
             date: new Date().toISOString(),
             answers: answersMap
         });
@@ -19413,9 +20333,12 @@
         subRecord.totalPoints = totalPoints;
         subRecord.submittedAt = new Date().toISOString();
         subRecord.answers = answersMap;
+        subRecord.isEarlySubmission = earlyCheck.isEarly && !isTimeout;
+        subRecord.earlyBonusAwarded = earlyBonusAwarded;
 
         const maxAttempts = currentTakingQuiz.maxAttempts || 2;
-        if (subRecord.attemptsCount >= maxAttempts) {
+        const allowedAttempts = maxAttempts + (subRecord.extraAttemptsAllowed || 0);
+        if (subRecord.attemptsCount >= allowedAttempts) {
             subRecord.locked = true;
         }
 
@@ -19431,9 +20354,34 @@
         const stagePledge = document.getElementById('tqStagePledge');
         const stageExam = document.getElementById('tqStageExam');
         const stageCompleted = document.getElementById('tqStageCompleted');
+        const stageLocked = document.getElementById('tqStageLockedByAntiCheat');
         if (stagePledge) stagePledge.classList.add('hidden');
         if (stageExam) stageExam.classList.add('hidden');
+        if (stageLocked) stageLocked.classList.add('hidden');
         if (stageCompleted) stageCompleted.classList.remove('hidden');
+
+        // الاحتفال بالتسليم المبكر إن تحقق الشرط قبل الوقت/التاريخ المحدد
+        const bonusBanner = document.getElementById('tqEarlyBonusCelebrationBanner');
+        if (earlyCheck.isEarly && !isTimeout) {
+            fireEarlySubmissionCelebration(currentTakingQuiz.title, earlyBonusAwarded);
+            if (bonusBanner) {
+                bonusBanner.classList.remove('hidden');
+                bonusBanner.innerHTML = `
+                    <div class="bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 text-slate-950 p-4 rounded-2xl shadow-lg border-2 border-amber-300 space-y-1 mb-4 text-center animate-bounce">
+                        <div class="text-base font-black flex items-center justify-center gap-2">
+                            <span>🎉</span>
+                            <span>احتفال التسليم المبكر المتميز!</span>
+                            <span>🌟</span>
+                        </div>
+                        <div class="text-xs font-bold leading-relaxed">
+                            أحسنت! أنجزت وسلّمت الاختبار قبل الموعد النهائي المحدد واستحققت <b>بونص التسليم المبكر (+${earlyBonusAwarded} درجات إضافية)</b>!
+                        </div>
+                    </div>
+                `;
+            }
+        } else if (bonusBanner) {
+            bonusBanner.classList.add('hidden');
+        }
 
         showToast('✅ تم تسليم الاختبار بنجاح وتوثيق المحاولة (النتيجة محجوبة بانتظار مراجعة واعتماد المدرب)', 'success');
         renderStudentLms();
@@ -19536,17 +20484,44 @@
                 const prevAnswers = (prev && prev.answers) || {};
                 qCont.innerHTML = foundAss.questions.map((q, idx) => {
                     const savedAns = (prevAnswers[idx] !== undefined) ? prevAnswers[idx] : null;
+                    const isTf = q.type === 'true_false';
+                    if (isTf) {
+                        return `
+                            <div class="bg-white border border-slate-200 rounded-xl p-3 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-5 h-5 rounded-full bg-emerald-700 text-white flex items-center justify-center text-[10px] font-black shrink-0">${idx + 1}</span>
+                                        <div class="text-xs font-black text-slate-800">${escapeHtml(q.text || '')}</div>
+                                    </div>
+                                    <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-black">صح أو خطأ</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 pt-1 pr-6">
+                                    <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 transition cursor-pointer font-black text-xs ${savedAns === 0 ? 'bg-emerald-50 border-emerald-600 text-emerald-800' : 'border-slate-200 hover:bg-slate-50 text-slate-700'}">
+                                        <input type="radio" name="sa_ans_${idx}" value="0" ${savedAns === 0 ? 'checked' : ''} class="accent-emerald-600">
+                                        <span>✅ صح (صحيح)</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 transition cursor-pointer font-black text-xs ${savedAns === 1 ? 'bg-rose-50 border-rose-600 text-rose-800' : 'border-slate-200 hover:bg-slate-50 text-slate-700'}">
+                                        <input type="radio" name="sa_ans_${idx}" value="1" ${savedAns === 1 ? 'checked' : ''} class="accent-rose-600">
+                                        <span>❌ خطأ (غير صحيح)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                    }
                     return `
                         <div class="bg-white border border-slate-200 rounded-xl p-3 space-y-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-5 h-5 rounded-full bg-[#0F2942] text-white flex items-center justify-center text-[10px] font-black shrink-0">${idx + 1}</span>
-                                <div class="text-xs font-black text-slate-800">${q.text}</div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-[#0F2942] text-white flex items-center justify-center text-[10px] font-black shrink-0">${idx + 1}</span>
+                                    <div class="text-xs font-black text-slate-800">${escapeHtml(q.text || '')}</div>
+                                </div>
+                                <span class="text-[10px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full font-bold">اختيار من متعدد</span>
                             </div>
                             <div class="space-y-1.5 pt-1 pr-6">
                                 ${(q.options || []).map((opt, oIdx) => `
                                     <label class="flex items-center gap-2 p-1.5 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer text-xs font-bold text-slate-700">
                                         <input type="radio" name="sa_ans_${idx}" value="${oIdx}" ${savedAns === oIdx ? 'checked' : ''} class="accent-[#0F2942]">
-                                        <span>${opt}</span>
+                                        <span>${escapeHtml(opt)}</span>
                                     </label>
                                 `).join('')}
                             </div>
@@ -19599,7 +20574,14 @@
         const existing = studentAssignmentSubmissions[subKey];
         const maxPts = ass.points || ass.totalPoints || 10;
 
-        // تصحيح أسئلة الاختيار من متعدد إن وجدت
+        // فحص بونص التسليم المبكر قبل موعد الاستحقاق
+        const earlyCheck = checkIsAssessmentEarlySubmission(ass.dueDate, '23:59');
+        let earlyBonusAwarded = 0;
+        if (earlyCheck.isEarly) {
+            earlyBonusAwarded = 1;
+        }
+
+        // تصحيح أسئلة الواجب (اختيارات + صح وخطأ) إن وجدت
         const studentAnswers = {};
         let mcqCorrect = 0;
         const hasMCQ = Array.isArray(ass.questions) && ass.questions.length > 0;
@@ -19629,6 +20611,11 @@
             autoScore = existing.score;
         }
 
+        // إضافة بونص التسليم المبكر
+        if (earlyCheck.isEarly) {
+            autoScore = Math.min(maxPts + earlyBonusAwarded, Math.round((autoScore + earlyBonusAwarded) * 10) / 10);
+        }
+
         studentAssignmentSubmissions[subKey] = {
             studentId: currentUser.id,
             studentName: tInfo.name,
@@ -19642,6 +20629,8 @@
             gradedByTrainer: !!(existing && existing.gradedByTrainer),
             autoGraded: true,
             maxPoints: maxPts,
+            isEarlySubmission: earlyCheck.isEarly,
+            earlyBonusAwarded: earlyBonusAwarded,
             notes: notes,
             link: link,
             file: currentAssignmentSelectedFile || (existing ? existing.file : null),
@@ -19655,10 +20644,20 @@
         }
 
         closeSubmitAssignmentModal();
-        if (hasMCQ) {
-            showToast(`✅ تم تسليم الواجب وتصحيح الأسئلة آلياً بنتيجة (${mcqCorrect}/${totalQCount}) والدرجة (${autoScore}/${maxPts})!`, 'success');
+
+        if (earlyCheck.isEarly) {
+            fireEarlySubmissionCelebration(ass.title, earlyBonusAwarded);
+            if (hasMCQ) {
+                showToast(`🎉 مبروك! حصلت على بونص التسليم المبكر (+${earlyBonusAwarded})! تم تسليم الواجب بنتيجة (${mcqCorrect}/${totalQCount}) والدرجة (${autoScore}/${maxPts})!`, 'success');
+            } else {
+                showToast(`🎉 مبروك! حصلت على بونص التسليم المبكر (+${earlyBonusAwarded})! تم تسليم الواجب ورصد درجتك (${autoScore}/${maxPts}) بنجاح!`, 'success');
+            }
         } else {
-            showToast(`✅ تم تسليم الواجب ورصد درجتك تلقائياً (${autoScore}/${maxPts}) بنجاح!`, 'success');
+            if (hasMCQ) {
+                showToast(`✅ تم تسليم الواجب وتصحيح الأسئلة آلياً بنتيجة (${mcqCorrect}/${totalQCount}) والدرجة (${autoScore}/${maxPts})!`, 'success');
+            } else {
+                showToast(`✅ تم تسليم الواجب ورصد درجتك تلقائياً (${autoScore}/${maxPts}) بنجاح!`, 'success');
+            }
         }
         renderStudentLms();
         if (typeof renderStudentSubmissionsCalendar === 'function') renderStudentSubmissionsCalendar();
@@ -21041,6 +22040,10 @@
                                         <span class="bg-[#0F2942] text-white text-[11px] font-black px-2.5 py-0.5 rounded-md shadow-2xs">
                                             المجموعة: ${sub.studentGroup || 'غير محددة'}
                                         </span>
+                                        ${sub.isEarlySubmission
+                                            ? `<span class="bg-amber-100 text-amber-950 border border-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full inline-flex items-center gap-1"><span>🌟</span><span>بونص تسليم مبكر (+${sub.earlyBonusAwarded || 1})</span></span>`
+                                            : ''
+                                        }
                                         ${isGradedManually
                                             ? `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black px-2 py-0.5 rounded-full">✅ تم رصد الدرجة يدوياً: ${sub.score} / ${maxPts}</span>`
                                             : `<span class="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full">⏳ بانتظار اطلاع المدرب ورصد الدرجة يدوياً</span>`
@@ -21272,6 +22275,14 @@
                                         <span class="bg-[#0F2942] text-white text-[11px] font-black px-2.5 py-0.5 rounded-md shadow-2xs">
                                             المجموعة: ${item.studentGroup || 'غير محددة'}
                                         </span>
+                                        ${rec.isLockedByAntiCheat
+                                            ? `<span class="bg-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full animate-pulse inline-flex items-center gap-1 shadow-2xs"><span>🚨</span><span>مقفل بالنزاهة (3 مغادرات)</span></span>`
+                                            : ''
+                                        }
+                                        ${rec.isEarlySubmission
+                                            ? `<span class="bg-amber-100 text-amber-950 border border-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full inline-flex items-center gap-1"><span>🌟</span><span>بونص تسليم مبكر (+${rec.earlyBonusAwarded || 1})</span></span>`
+                                            : ''
+                                        }
                                     </div>
                                     <div class="text-[10px] text-slate-500 font-mono mt-0.5">
                                         رقم الهوية: ${item.studentId} • المحاولات المستنفدة: ${attemptsCount}
@@ -21279,6 +22290,16 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
+                                ${rec.isLockedByAntiCheat ? `
+                                    <button type="button" onclick="reopenQuizSubmission('${item.studentId}', '${quizId}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-2.5 py-1.5 rounded-xl transition cursor-pointer flex items-center gap-1 shadow-2xs" title="رفع القفل عن المتدرب ومنحه محاولة إضافية">
+                                        <span>🔓</span>
+                                        <span>إعادة فتح</span>
+                                    </button>
+                                    <button type="button" onclick="penalizeQuizSubmissionZero('${item.studentId}', '${quizId}')" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-black px-2.5 py-1.5 rounded-xl transition cursor-pointer flex items-center gap-1 shadow-2xs" title="تطبيق عقوبة المخالفة وتثبيت درجة 0">
+                                        <span>🚫</span>
+                                        <span>اعتماد 0</span>
+                                    </button>
+                                ` : ''}
                                 <span class="text-xs font-black px-3 py-1 rounded-xl border ${
                                     passed ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-red-100 text-red-800 border-red-300'
                                 }">
@@ -21507,21 +22528,84 @@
 
     function mergeCloudCoursesIntoLocal(cloudCourses) {
         if (!cloudCourses || typeof cloudCourses !== 'object') return;
-        let changed = false;
+        let localChanged = false;
+        let needsCloudSync = false;
+
         for (const [key, cData] of Object.entries(cloudCourses)) {
             if (!lmsCourses[key]) {
                 lmsCourses[key] = cData;
-                changed = true;
+                localChanged = true;
             } else {
-                const localWeeks = lmsCourses[key].weeks || [];
-                const cloudWeeks = cData.weeks || [];
-                if (cloudWeeks.length >= localWeeks.length && cloudWeeks.length > 0) {
-                    lmsCourses[key].weeks = cloudWeeks;
-                    changed = true;
+                const localCourse = lmsCourses[key];
+                const cloudWeeks = Array.isArray(cData.weeks) ? cData.weeks : [];
+                const localWeeks = Array.isArray(localCourse.weeks) ? localCourse.weeks : [];
+
+                const maxWeeks = Math.max(localWeeks.length, cloudWeeks.length);
+                const mergedWeeks = [];
+
+                for (let i = 0; i < maxWeeks; i++) {
+                    const lW = localWeeks[i];
+                    const cW = cloudWeeks[i];
+
+                    if (!lW && cW) {
+                        mergedWeeks.push(JSON.parse(JSON.stringify(cW)));
+                        localChanged = true;
+                    } else if (lW && !cW) {
+                        mergedWeeks.push(lW);
+                        needsCloudSync = true;
+                    } else {
+                        // Deep merge per component: Quizzes, Assignments, Videos, Docs
+                        const targetW = { ...cW, ...lW };
+
+                        // 1. Quizzes
+                        const lQ = Array.isArray(lW.quizzes) ? lW.quizzes : [];
+                        const cQ = Array.isArray(cW.quizzes) ? cW.quizzes : [];
+                        const qMap = new Map();
+                        cQ.forEach(q => { if (q && (q.id || q.title)) qMap.set(String(q.id || q.title), q); });
+                        lQ.forEach(q => { if (q && (q.id || q.title)) qMap.set(String(q.id || q.title), q); });
+                        targetW.quizzes = Array.from(qMap.values());
+                        if (targetW.quizzes.length > cQ.length) needsCloudSync = true;
+                        if (targetW.quizzes.length !== lQ.length) localChanged = true;
+
+                        // 2. Assignments
+                        const lA = Array.isArray(lW.assignments) ? lW.assignments : [];
+                        const cA = Array.isArray(cW.assignments) ? cW.assignments : [];
+                        const aMap = new Map();
+                        cA.forEach(a => { if (a && (a.id || a.title)) aMap.set(String(a.id || a.title), a); });
+                        lA.forEach(a => { if (a && (a.id || a.title)) aMap.set(String(a.id || a.title), a); });
+                        targetW.assignments = Array.from(aMap.values());
+                        if (targetW.assignments.length > cA.length) needsCloudSync = true;
+                        if (targetW.assignments.length !== lA.length) localChanged = true;
+
+                        // 3. Videos
+                        const lV = Array.isArray(lW.videos) ? lW.videos : [];
+                        const cV = Array.isArray(cW.videos) ? cW.videos : [];
+                        const vMap = new Map();
+                        cV.forEach(v => { if (v && (v.id || v.title || v.url)) vMap.set(String(v.id || v.title || v.url), v); });
+                        lV.forEach(v => { if (v && (v.id || v.title || v.url)) vMap.set(String(v.id || v.title || v.url), v); });
+                        targetW.videos = Array.from(vMap.values());
+                        if (targetW.videos.length > cV.length) needsCloudSync = true;
+                        if (targetW.videos.length !== lV.length) localChanged = true;
+
+                        // 4. Docs
+                        const lD = Array.isArray(lW.docs) ? lW.docs : [];
+                        const cD = Array.isArray(cW.docs) ? cW.docs : [];
+                        const dMap = new Map();
+                        cD.forEach(d => { if (d && (d.id || d.title)) dMap.set(String(d.id || d.title), d); });
+                        lD.forEach(d => { if (d && (d.id || d.title)) dMap.set(String(d.id || d.title), d); });
+                        targetW.docs = Array.from(dMap.values());
+                        if (targetW.docs.length > cD.length) needsCloudSync = true;
+                        if (targetW.docs.length !== lD.length) localChanged = true;
+
+                        mergedWeeks.push(targetW);
+                    }
                 }
+
+                localCourse.weeks = mergedWeeks;
             }
         }
-        if (changed) {
+
+        if (localChanged) {
             persistLmsCoursesLocalOnly();
             if (typeof renderTrainerLms === 'function' && document.getElementById('trainerLmsModal') && !document.getElementById('trainerLmsModal').classList.contains('hidden')) {
                 renderTrainerLms();
@@ -21529,7 +22613,12 @@
             if (typeof renderStudentLms === 'function' && document.getElementById('tab-studentLms') && !document.getElementById('tab-studentLms').classList.contains('hidden')) {
                 renderStudentLms();
             }
-            console.log('🔄 تم تحديث المقررات الأكاديمية ومزامنتها من سحابة Supabase.');
+            console.log('🔄 تم دمج وتحديث المقررات الأكاديمية بنجاح دون فقدان المحتوى.');
+        }
+
+        if (needsCloudSync) {
+            console.log('☁️ مزامنة المحتوى المحلي الجديد إلى سحابة Supabase...');
+            syncAllLmsCoursesToSupabase();
         }
     }
 
@@ -21575,6 +22664,45 @@
         }
     }
     window.syncLmsCourseToSupabase = syncLmsCourseToSupabase;
+
+    async function syncAllLmsCoursesToSupabase() {
+        if (!lmsCourses || typeof lmsCourses !== 'object') return;
+        if (supabaseClient && isSupabaseConnected) {
+            try {
+                const rows = Object.entries(lmsCourses).map(([k, cData]) => ({
+                    id: k,
+                    course_key: k,
+                    title: cData.courseTitle || k,
+                    trainer_name: cData.trainerName || '',
+                    course_code: cData.courseCode || '',
+                    weeks: Array.isArray(cData.weeks) ? cData.weeks : [],
+                    metadata: cData.metadata || {},
+                    updated_at: new Date().toISOString()
+                }));
+                const { error } = await supabaseClient
+                    .from('lms_courses')
+                    .upsert(rows, { onConflict: 'course_key' });
+                if (!error) {
+                    console.log(`☁️ تم مزامنة كافة المقررات (${rows.length}) سحابياً مع Supabase.`);
+                    return;
+                }
+            } catch (e) {
+                console.warn('Client Supabase bulk upsert failed, using API:', e);
+            }
+        }
+
+        try {
+            await fetch('/api/lms-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ allCourses: lmsCourses })
+            });
+            console.log(`☁️ تم مزامنة كافة المقررات عبر API Vercel/Supabase.`);
+        } catch (apiErr) {
+            console.warn('Bulk API cloud sync error:', apiErr);
+        }
+    }
+    window.syncAllLmsCoursesToSupabase = syncAllLmsCoursesToSupabase;
 
     async function uploadFileToSupabaseStorage(file, courseKey = '', weekId = '') {
         if (!file) return null;
@@ -21662,6 +22790,9 @@
         const activeKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null;
         if (activeKey) {
             syncLmsCourseToSupabase(activeKey);
+        }
+        if (typeof syncAllLmsCoursesToSupabase === 'function') {
+            syncAllLmsCoursesToSupabase();
         }
     }
     window.persistLmsCourses = persistLmsCourses;
@@ -22334,7 +23465,7 @@
             showToast('تم حفظ ونشر الاختبار التفاعلي بنجاح', 'success');
         }
 
-        localStorage.setItem('sys_lms_courses_v1', JSON.stringify(lmsCourses));
+        persistLmsCourses();
         closeLmsSubModal('lmsQuizModal');
         renderTrainerLms();
     }
@@ -22346,7 +23477,7 @@
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (activeWeek && activeWeek.quizzes) {
             activeWeek.quizzes.splice(idx, 1);
-            localStorage.setItem('sys_lms_courses_v1', JSON.stringify(lmsCourses));
+            persistLmsCourses();
             renderTrainerLms();
             showToast('تم حذف الاختبار', 'info');
         }
@@ -22359,11 +23490,13 @@
     let editingAssignmentIndex = -1;
     let tempAssignmentQuestions = [];
 
-    function addQuestionToAssignmentBuilder() {
+    function addQuestionToAssignmentBuilder(type = 'mcq') {
+        const isTf = type === 'true_false';
         tempAssignmentQuestions.push({
             id: 'aq-' + Date.now() + '-' + tempAssignmentQuestions.length,
+            type: isTf ? 'true_false' : 'mcq',
             text: '',
-            options: ['', '', '', ''],
+            options: isTf ? ['صح', 'خطأ'] : ['', '', '', ''],
             correctIndex: 0
         });
         renderAssignmentQuestionsBuilder();
@@ -22380,29 +23513,60 @@
         if (!tempAssignmentQuestions || tempAssignmentQuestions.length === 0) {
             cont.innerHTML = `
                 <div class="border border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 text-[11px] text-slate-500 font-bold">
-                    لم تتم إضافة أسئلة اختيار من متعدد بعد. يمكنك إضافة أسئلة لتصحيح الواجب ورصد درجته آلياً للمتدرب، أو تركه كواجب للملفات والتعليمات فقط.
+                    لم تتم إضافة أسئلة للواجب بعد. يمكنك إضافة أسئلة اختيار من متعدد أو أسئلة صح وخطأ لتصحيح الواجب ورصد درجته آلياً للمتدرب، أو تركه كواجب للملفات والتعليمات فقط.
                 </div>
             `;
             return;
         }
 
-        cont.innerHTML = tempAssignmentQuestions.map((q, idx) => `
-            <div class="border border-slate-200 rounded-2xl p-3 bg-white space-y-2 shadow-xs">
-                <div class="flex items-center justify-between">
-                    <span class="font-black text-xs text-slate-800">السؤال رقم ${idx + 1}:</span>
-                    <button type="button" onclick="removeQuestionFromAssignmentBuilder(${idx})" class="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer">حذف السؤال ✕</button>
-                </div>
-                <input type="text" value="${q.text || ''}" oninput="tempAssignmentQuestions[${idx}].text = this.value" placeholder="اكتب نص السؤال هنا..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-bold outline-none focus:border-[#0F2942]">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                    ${[0, 1, 2, 3].map(oIdx => `
-                        <div class="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-                            <input type="radio" name="ass_builder_q_${idx}" value="${oIdx}" ${q.correctIndex === oIdx ? 'checked' : ''} onchange="tempAssignmentQuestions[${idx}].correctIndex = ${oIdx}" title="حدد كإجابة صحيحة" class="accent-[#0F2942]">
-                            <input type="text" value="${(q.options && q.options[oIdx]) || ''}" oninput="if (!tempAssignmentQuestions[${idx}].options) tempAssignmentQuestions[${idx}].options = ['', '', '', '']; tempAssignmentQuestions[${idx}].options[${oIdx}] = this.value" placeholder="الخيار ${oIdx + 1}" class="w-full text-xs font-bold outline-none bg-transparent">
+        cont.innerHTML = tempAssignmentQuestions.map((q, idx) => {
+            const isTf = q.type === 'true_false';
+            if (isTf) {
+                return `
+                    <div class="border border-emerald-200 bg-emerald-50/40 rounded-2xl p-3 space-y-2 shadow-xs">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="font-black text-xs text-emerald-950">السؤال رقم ${idx + 1}:</span>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-300 font-black px-2 py-0.5 rounded-full">سؤال صح وخطأ ✓/✗</span>
+                            </div>
+                            <button type="button" onclick="removeQuestionFromAssignmentBuilder(${idx})" class="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer">حذف السؤال ✕</button>
                         </div>
-                    `).join('')}
+                        <input type="text" value="${escapeHtml(q.text || '')}" oninput="tempAssignmentQuestions[${idx}].text = this.value" placeholder="اكتب نص عبارة الصح أو الخطأ هنا..." class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-bold outline-none focus:border-emerald-600">
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <label class="flex items-center gap-2 bg-white p-2 rounded-xl border-2 transition cursor-pointer ${q.correctIndex === 0 ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-black' : 'border-slate-200 text-slate-700 font-bold'}">
+                                <input type="radio" name="ass_builder_q_${idx}" value="0" ${q.correctIndex === 0 ? 'checked' : ''} onchange="tempAssignmentQuestions[${idx}].correctIndex = 0; renderAssignmentQuestionsBuilder();" class="accent-emerald-600">
+                                <span class="text-xs">✅ الإجابة الصحيحة: صح</span>
+                            </label>
+                            <label class="flex items-center gap-2 bg-white p-2 rounded-xl border-2 transition cursor-pointer ${q.correctIndex === 1 ? 'border-rose-600 bg-rose-50 text-rose-950 font-black' : 'border-slate-200 text-slate-700 font-bold'}">
+                                <input type="radio" name="ass_builder_q_${idx}" value="1" ${q.correctIndex === 1 ? 'checked' : ''} onchange="tempAssignmentQuestions[${idx}].correctIndex = 1; renderAssignmentQuestionsBuilder();" class="accent-rose-600">
+                                <span class="text-xs">❌ الإجابة الصحيحة: خطأ</span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="border border-slate-200 rounded-2xl p-3 bg-white space-y-2 shadow-xs">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="font-black text-xs text-slate-800">السؤال رقم ${idx + 1}:</span>
+                            <span class="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 font-black px-2 py-0.5 rounded-full">اختيار من متعدد</span>
+                        </div>
+                        <button type="button" onclick="removeQuestionFromAssignmentBuilder(${idx})" class="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer">حذف السؤال ✕</button>
+                    </div>
+                    <input type="text" value="${escapeHtml(q.text || '')}" oninput="tempAssignmentQuestions[${idx}].text = this.value" placeholder="اكتب نص السؤال هنا..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-bold outline-none focus:border-[#0F2942]">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        ${[0, 1, 2, 3].map(oIdx => `
+                            <div class="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+                                <input type="radio" name="ass_builder_q_${idx}" value="${oIdx}" ${q.correctIndex === oIdx ? 'checked' : ''} onchange="tempAssignmentQuestions[${idx}].correctIndex = ${oIdx}" title="حدد كإجابة صحيحة" class="accent-[#0F2942]">
+                                <input type="text" value="${escapeHtml((q.options && q.options[oIdx]) || '')}" oninput="if (!tempAssignmentQuestions[${idx}].options) tempAssignmentQuestions[${idx}].options = ['', '', '', '']; tempAssignmentQuestions[${idx}].options[${oIdx}] = this.value" placeholder="الخيار ${oIdx + 1}" class="w-full text-xs font-bold outline-none bg-transparent">
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function handleTrainerAssignmentPdf(input) {
@@ -22535,8 +23699,9 @@
 
         tempAssignmentQuestions = (a.questions || []).map(item => ({
             id: item.id || ('aq-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4)),
+            type: item.type || ((Array.isArray(item.options) && item.options.length === 2 && (item.options[0] === 'صح' || item.options[0] === 'صحيح')) ? 'true_false' : 'mcq'),
             text: item.text || '',
-            options: Array.isArray(item.options) ? [...item.options] : ['', '', '', ''],
+            options: item.type === 'true_false' ? ['صح', 'خطأ'] : (Array.isArray(item.options) ? [...item.options] : ['', '', '', '']),
             correctIndex: (item.correctIndex !== undefined) ? item.correctIndex : 0
         }));
         renderAssignmentQuestionsBuilder();
@@ -22563,10 +23728,21 @@
         if (!activeWeek.assignments) activeWeek.assignments = [];
 
         const validQuestions = (tempAssignmentQuestions || []).filter(q => q && q.text && q.text.trim()).map(q => {
+            const isTf = q.type === 'true_false';
+            if (isTf) {
+                return {
+                    id: q.id || ('aq-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4)),
+                    type: 'true_false',
+                    text: q.text.trim(),
+                    options: ['صح', 'خطأ'],
+                    correctIndex: (q.correctIndex === 1) ? 1 : 0
+                };
+            }
             const opts = Array.isArray(q.options) ? [...q.options] : [];
             while (opts.length < 4) opts.push(`خيار ${opts.length + 1}`);
             return {
                 id: q.id || ('aq-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4)),
+                type: 'mcq',
                 text: q.text.trim(),
                 options: opts.map(o => (o && o.trim()) ? o.trim() : 'خيار'),
                 correctIndex: (q.correctIndex !== undefined && q.correctIndex >= 0 && q.correctIndex < 4) ? q.correctIndex : 0
@@ -22595,7 +23771,7 @@
             showToast('تم حفظ ونشر الواجب بنجاح ✓', 'success');
         }
 
-        localStorage.setItem('sys_lms_courses_v1', JSON.stringify(lmsCourses));
+        persistLmsCourses();
         closeLmsSubModal('lmsAssignmentModal');
         renderTrainerLms();
     }
@@ -22607,7 +23783,7 @@
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (activeWeek && activeWeek.assignments) {
             activeWeek.assignments.splice(idx, 1);
-            localStorage.setItem('sys_lms_courses_v1', JSON.stringify(lmsCourses));
+            persistLmsCourses();
             renderTrainerLms();
             showToast('تم حذف الواجب', 'info');
         }
@@ -22841,13 +24017,24 @@
     function updateAiTextCount() {
         const input = document.getElementById('aiDirectTextInput');
         const countEl = document.getElementById('aiDirectTextCount');
+        const warnEl = document.getElementById('aiDirectTextWarning');
+        const curLenEl = document.getElementById('aiDirectTextCurrentLen');
         if (!input || !countEl) return;
         const len = input.value.trim().length;
         countEl.innerText = `${len} حرف`;
+        if (curLenEl) curLenEl.innerText = len;
+
         if (len >= 20) {
             countEl.className = 'text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200';
+            if (warnEl) warnEl.classList.add('hidden');
+            input.classList.remove('border-amber-400', 'ring-2', 'ring-amber-200');
         } else {
             countEl.className = 'text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full';
+            if (len > 0) {
+                if (warnEl) warnEl.classList.remove('hidden');
+            } else {
+                if (warnEl) warnEl.classList.add('hidden');
+            }
         }
     }
     window.updateAiTextCount = updateAiTextCount;
@@ -23019,7 +24206,15 @@
         }
 
         if (currentAiSourceMode === 'text' && directText.length < 20) {
-            showToast('يرجى كتابة أو لصق نص دراسي لا يقل عن 20 حرفاً لتوليد الاختبار والوحدة بالذكاء الاصطناعي', 'warning');
+            const warnEl = document.getElementById('aiDirectTextWarning');
+            const curLenEl = document.getElementById('aiDirectTextCurrentLen');
+            if (curLenEl) curLenEl.innerText = directText.length;
+            if (warnEl) warnEl.classList.remove('hidden');
+            if (directTextInput) {
+                directTextInput.classList.add('border-amber-400', 'ring-2', 'ring-amber-200');
+                directTextInput.focus();
+            }
+            showToast('⚠️ يرجى كتابة أو لصق نص دراسي لا يقل عن 20 حرفاً لتوليد الاختبار والوحدة بالذكاء الاصطناعي', 'warning');
             return;
         }
 
@@ -23544,7 +24739,7 @@
         }
     }
 
-    function saveAiGeneratedContent() {
+    async function saveAiGeneratedContent() {
         if (!currentAiGeneratedData) {
             showToast('لا توجد بيانات مولدة لحفظها', 'error');
             return;
@@ -23793,9 +24988,10 @@
         // Persist to storage (Local & Cloud via Supabase)
         persistLmsCourses();
 
-        // If cloud URL wasn't ready yet, upload file in background and update
+        // If cloud URL wasn't ready yet, upload file to Supabase storage and update
         if (!cloudFileUrl && selectedAiFile && typeof uploadFileToSupabaseStorage === 'function') {
-            uploadFileToSupabaseStorage(selectedAiFile, courseKey, activeWeek.id).then(url => {
+            try {
+                const url = await uploadFileToSupabaseStorage(selectedAiFile, courseKey, activeWeek.id);
                 if (url) {
                     const lastVid = activeWeek.videos[activeWeek.videos.length - 1];
                     if (lastVid) {
@@ -23807,14 +25003,475 @@
                     persistLmsCourses();
                     console.log('☁️ تم إرفاق الرابط السحابي الدائم للملف في Supabase:', url);
                 }
-            }).catch(e => console.warn('Background Supabase upload warning:', e));
+            } catch (upErr) {
+                console.warn('Background Supabase upload warning:', upErr);
+            }
         }
+
+        // Complete cloud synchronization with Supabase
+        if (typeof syncLmsCourseToSupabase === 'function') {
+            await syncLmsCourseToSupabase(courseKey);
+        }
+        if (typeof syncAllLmsCoursesToSupabase === 'function') {
+            await syncAllLmsCoursesToSupabase();
+        }
+
+        localStorage.removeItem('sys_ai_active_draft_v1');
 
         // Close modal and refresh UI
         closeAiGenerateModal();
         renderTrainerLms();
 
-        showToast('🎉 تم اعتماد وإنشاء كافة محتويات الوحدة بنجاح في المنصة وفق الخطوات المختارة!', 'success');
+        showToast('🎉 تم حفظ واعتماد ومزامنة كافة محتويات الوحدة سحابياً في Supabase بنجاح!', 'success');
+    }
+
+    // ===================================================================
+    // DEDICATED INDIVIDUAL COMPONENT AI GENERATION (توليد مخصص لكل عنصر على حدة داخل نوافذ الإضافة)
+    // ===================================================================
+    let currentComponentAiTarget = null; // 'video' | 'doc' | 'quiz' | 'assignment'
+
+    function openComponentAiModal(targetType) {
+        currentComponentAiTarget = targetType || 'quiz';
+
+        // Context info
+        const courseKey = getActiveTrainerCourseKey();
+        const courseData = (typeof lmsCourses !== 'undefined' && lmsCourses[courseKey]) ? lmsCourses[courseKey] : (lmsCourses['اللحام'] || {});
+        const activeWeek = (typeof getActiveTrainerLmsWeekObj === 'function')
+            ? getActiveTrainerLmsWeekObj(courseData)
+            : ((courseData.weeks && courseData.weeks[0]) || {});
+
+        const courseTitle = courseData.courseTitle || courseKey || 'المقرر التدريبي';
+        const weekNum = activeWeek ? (activeWeek.week || activeWeek.weekNum || 1) : 1;
+        const weekTitle = activeWeek ? (activeWeek.title || `الوحدة التدريبية للأسبوع ${weekNum}`) : `الوحدة التدريبية للأسبوع ${weekNum}`;
+        const weekTopic = activeWeek ? (activeWeek.topic || '') : '';
+
+        const titleEl = document.getElementById('caiModalTitle');
+        const subEl = document.getElementById('caiModalSubtitle');
+        const badgeEl = document.getElementById('caiTargetBadge');
+        const promptInput = document.getElementById('caiPromptInput');
+        const loadingState = document.getElementById('caiLoadingState');
+        const submitBtn = document.getElementById('caiSubmitBtn');
+
+        if (loadingState) {
+            loadingState.classList.add('hidden');
+            loadingState.classList.remove('flex');
+        }
+        if (submitBtn) submitBtn.disabled = false;
+
+        const targetConfigs = {
+            video: {
+                title: 'توليد المحاضرة المرئية والشرح بالذكاء الاصطناعي ✨',
+                sub: 'توليد عنوان مقترح ومحتوى ومدة وروابط يوتيوب إثرائية للمحاضرة',
+                badge: 'المكون المستهدف: المحاضرة والشرح المرئي',
+                defaultPrompt: `مقرر ${courseTitle} - الأسبوع ${weekNum}: ${weekTitle}. يرجى اقتراح فيديو تدريبي متكامل وشرح لأهم المفاهيم والتطبيقات المهنية.`
+            },
+            doc: {
+                title: 'توليد المذكرة والملخص الدراسي بالذكاء الاصطناعي ✨',
+                sub: 'صياغة ملخص أكاديمي وقاموس مصطلحات فنية وإثرائية ومحاور دراسية',
+                badge: 'المكون المستهدف: المذكرة والملخص الدراسي',
+                defaultPrompt: `مقرر ${courseTitle} - الأسبوع ${weekNum}: ${weekTitle}. إعداد مذكرة مراجعة وملخص شامل يتضمن المصطلحات الفنية وأسس السلامة والجودة.`
+            },
+            quiz: {
+                title: 'توليد أسئلة الاختبار الأسبوعي بالذكاء الاصطناعي ✨',
+                sub: 'صياغة أسئلة اختيار من متعدد وصح وخطأ للاختبار مع الإجابات النموذجية والتوضيحات',
+                badge: 'المكون المستهدف: أسئلة الاختبار التفاعلي الأسبوعي',
+                defaultPrompt: `مقرر ${courseTitle} - الأسبوع ${weekNum}: ${weekTitle}. أسئلة اختبار تفاعلي تشمل الاختيار من متعدد وأسئلة صح وخطأ حول ${weekTopic || weekTitle}.`
+            },
+            assignment: {
+                title: 'توليد التكليف والواجب الأسبوعي بالذكاء الاصطناعي ✨',
+                sub: 'صياغة عنوان الواجب والتعليمات وأسئلة تطبيقية (اختيارات + صح وخطأ)',
+                badge: 'المكون المستهدف: الواجب والتكليف الأسبوعي التطبيقي',
+                defaultPrompt: `مقرر ${courseTitle} - الأسبوع ${weekNum}: ${weekTitle}. صياغة تكليف أسبوعي تطبيقي مع أسئلة اختيار من متعدد وصح وخطأ وتطبيق عملي لما تم شرحه.`
+            }
+        };
+
+        const cfg = targetConfigs[targetType] || targetConfigs.quiz;
+        if (titleEl) titleEl.innerText = cfg.title;
+        if (subEl) subEl.innerText = cfg.sub;
+        if (badgeEl) badgeEl.innerText = cfg.badge;
+        if (promptInput) promptInput.value = cfg.defaultPrompt;
+
+        const modal = document.getElementById('modal-componentAiGenerate');
+        if (modal) modal.classList.remove('hidden');
+    }
+    window.openComponentAiModal = openComponentAiModal;
+
+    function closeComponentAiModal() {
+        const modal = document.getElementById('modal-componentAiGenerate');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeComponentAiModal = closeComponentAiModal;
+
+    async function runComponentAiGenerate() {
+        const target = currentComponentAiTarget || 'quiz';
+        const promptInput = document.getElementById('caiPromptInput');
+        const userPrompt = promptInput ? promptInput.value.trim() : '';
+
+        const courseKey = getActiveTrainerCourseKey();
+        const courseData = (typeof lmsCourses !== 'undefined' && lmsCourses[courseKey]) ? lmsCourses[courseKey] : (lmsCourses['اللحام'] || {});
+        const activeWeek = (typeof getActiveTrainerLmsWeekObj === 'function')
+            ? getActiveTrainerLmsWeekObj(courseData)
+            : ((courseData.weeks && courseData.weeks[0]) || {});
+
+        const courseTitle = courseData.courseTitle || courseKey || 'المقرر التدريبي';
+        const weekNum = activeWeek ? (activeWeek.week || activeWeek.weekNum || 1) : 1;
+        const weekTitle = activeWeek ? (activeWeek.title || `الأسبوع ${weekNum}`) : `الأسبوع ${weekNum}`;
+        const weekTopic = activeWeek ? (activeWeek.topic || '') : '';
+
+        const loadingState = document.getElementById('caiLoadingState');
+        const loadingMsg = document.getElementById('caiLoadingMsg');
+        const submitBtn = document.getElementById('caiSubmitBtn');
+
+        if (loadingState) {
+            loadingState.classList.remove('hidden');
+            loadingState.classList.add('flex');
+        }
+        if (submitBtn) submitBtn.disabled = true;
+
+        const targetLabels = {
+            video: 'المحاضرة والشرح المرئي',
+            doc: 'المذكرة والملخص الدراسي',
+            quiz: 'أسئلة الاختبار الأسبوعي',
+            assignment: 'الواجب والتكليف التطبيقي'
+        };
+        const targetLabel = targetLabels[target] || 'المحتوى';
+        if (loadingMsg) loadingMsg.innerText = `جاري صياغة وتوليد ${targetLabel} عبر الذكاء الاصطناعي...`;
+
+        const serverUrlInput = document.getElementById('aiServerUrl');
+        let endpointUrl = (serverUrlInput ? serverUrlInput.value.trim() : '') || '/api/generate';
+        if (!endpointUrl.startsWith('http://') && !endpointUrl.startsWith('https://') && !endpointUrl.startsWith('/')) {
+            endpointUrl = '/' + endpointUrl;
+        }
+
+        const payload = {
+            courseName: courseTitle,
+            weekTitle: `${weekTitle} (الأسبوع ${weekNum})`,
+            weekTopic: userPrompt || weekTopic || weekTitle,
+            textInput: userPrompt || `${courseTitle} - ${weekTitle}: ${weekTopic}`,
+            filename: `توليد_${target}.txt`,
+            targetComponent: target
+        };
+
+        let generatedData = null;
+
+        try {
+            const resp = await fetch(endpointUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (resp.ok) {
+                const json = await resp.json();
+                if (json && json.success && json.data) {
+                    generatedData = json.data;
+                }
+            }
+        } catch (fetchErr) {
+            console.warn('Network call to AI generate failed, using smart local generator:', fetchErr);
+        }
+
+        // Smart local rule-based fallback if offline or API unavailable
+        if (!generatedData) {
+            generatedData = generateSmartComponentFallback(target, courseTitle, weekTitle, userPrompt || weekTopic);
+        }
+
+        // Apply generated data directly to the respective target builder modal
+        applyAiDataToComponentModal(target, generatedData, weekTitle);
+
+        if (loadingState) {
+            loadingState.classList.add('hidden');
+            loadingState.classList.remove('flex');
+        }
+        if (submitBtn) submitBtn.disabled = false;
+        closeComponentAiModal();
+        showToast(`✨ تم توليد وتعبئة بيانات ${targetLabel} بنجاح!`, 'success');
+    }
+    window.runComponentAiGenerate = runComponentAiGenerate;
+
+    function applyAiDataToComponentModal(target, data, weekTitle) {
+        if (!data) return;
+
+        if (target === 'video') {
+            const rawV = (Array.isArray(data.suggested_videos) && data.suggested_videos[0]) ? data.suggested_videos[0] : {};
+            const titleVal = rawV.title || data.lecture?.title || `شرح تطبيقي: ${weekTitle}`;
+            const durVal = rawV.duration || `${data.lecture?.duration_minutes || 15} دقيقة`;
+            const urlVal = rawV.youtube_url || `https://www.youtube.com/results?search_query=${encodeURIComponent(titleVal)}`;
+            const notesVal = rawV.description || data.lecture?.summary || '';
+
+            const titleInp = document.getElementById('lmsVideoTitle');
+            const durInp = document.getElementById('lmsVideoDuration');
+            const urlInp = document.getElementById('lmsVideoUrl');
+            const notesInp = document.getElementById('lmsVideoNotes');
+            const typeInp = document.getElementById('lmsVideoMaterialType');
+
+            if (titleInp) titleInp.value = titleVal;
+            if (durInp) durInp.value = durVal;
+            if (urlInp) urlInp.value = urlVal;
+            if (notesInp) notesInp.value = notesVal;
+            if (typeInp) {
+                typeInp.value = 'video';
+                if (typeof onLmsLectureTypeChange === 'function') onLmsLectureTypeChange();
+            }
+            const modal = document.getElementById('lmsVideoModal');
+            if (modal) modal.classList.remove('hidden');
+        } else if (target === 'doc') {
+            const docTitle = data.glossary_notes?.title || data.lecture?.title || `مذكرة وملخص: ${weekTitle}`;
+            let docBody = (data.lecture?.summary || '') + '\n\n';
+            if (Array.isArray(data.lecture?.topics) && data.lecture.topics.length > 0) {
+                docBody += '📌 المحاور والمواضيع الأساسية:\n' + data.lecture.topics.map(t => `• ${t}`).join('\n') + '\n\n';
+            }
+            if (Array.isArray(data.glossary_notes?.terms) && data.glossary_notes.terms.length > 0) {
+                docBody += '📖 المصطلحات الفنية المعتمدة:\n' + data.glossary_notes.terms.map(t => `• ${t.en} (${t.ar}): ${t.definition || ''}`).join('\n');
+            }
+
+            const titleInp = document.getElementById('lmsDocTitle');
+            const descInp = document.getElementById('lmsDocDesc');
+            if (titleInp) titleInp.value = docTitle;
+            if (descInp) descInp.value = docBody.trim();
+
+            const modal = document.getElementById('lmsDocModal');
+            if (modal) modal.classList.remove('hidden');
+        } else if (target === 'quiz') {
+            const qz = data.quiz || {};
+            const qTitle = document.getElementById('lmsQuizTitle');
+            const qDur = document.getElementById('lmsQuizDuration');
+            const qPts = document.getElementById('lmsQuizTotalPoints');
+
+            if (qTitle && qz.title) qTitle.value = qz.title;
+            if (qDur && qz.duration_minutes) qDur.value = qz.duration_minutes;
+            if (qPts && qz.total_grade) qPts.value = qz.total_grade;
+
+            const rawQuestions = Array.isArray(qz.questions) && qz.questions.length > 0
+                ? qz.questions
+                : [
+                    {
+                        type: 'mcq',
+                        question: `ما هو المفهوم الأساسي المرتبط بـ ${weekTitle} في بيئة العمل الصناعية؟`,
+                        options: ['تطبيق إجراءات التشغيل والسلامة القياسية', 'تجاهل مؤشرات الفحص الدوري', 'الاعتماد على التقدير الشخصي غير الموثق', 'تعطيل أنظمة الإنذار المبكر'],
+                        correctIndex: 0
+                    },
+                    {
+                        type: 'mcq',
+                        question: `أي مما يلي يمثل الاستخدام الأمثل للمصطلحات الفنية المعتمدة؟`,
+                        options: ['توحيد لغة التواصل الفني ودقة توثيق التقارير', 'إلغاء سجلات الفحص الميداني', 'تقليل فترات الصيانة الوقائية', 'تجاوز اشتراطات الجودة المعتمدة'],
+                        correctIndex: 0
+                    },
+                    {
+                        type: 'true_false',
+                        question: `يعد الالتزام بمهمات الوقاية الشخصية (PPE) إلزامياً لكافة العاملين في بيئة العمل.`,
+                        options: ['صح', 'خطأ'],
+                        correctIndex: 0
+                    },
+                    {
+                        type: 'true_false',
+                        question: `يجوز تشغيل الآلات والمعدات الدوارة دون التأكد من تثبيت حواجز الحماية الوقائية.`,
+                        options: ['صح', 'خطأ'],
+                        correctIndex: 1
+                    }
+                ];
+
+            tempQuizQuestions = rawQuestions.map((q, idx) => {
+                const isTf = q.type === 'true_false';
+                let opts = Array.isArray(q.options) ? [...q.options] : [];
+                if (isTf) {
+                    opts = ['صح', 'خطأ', 'حسب طبيعة العمل', 'غير محدد'];
+                } else {
+                    while (opts.length < 4) opts.push(`خيار ${opts.length + 1}`);
+                }
+                let cIdx = (q.correctIndex !== undefined) ? q.correctIndex : 0;
+                if (q.correct_answer) {
+                    const fIdx = opts.findIndex(o => o.trim() === String(q.correct_answer).trim() || o.includes(String(q.correct_answer)));
+                    if (fIdx >= 0) cIdx = fIdx;
+                }
+                return {
+                    id: 'qq-' + Date.now() + '-' + idx,
+                    text: q.question || q.text || `سؤال ${idx + 1}`,
+                    options: opts.slice(0, 4),
+                    correctIndex: cIdx
+                };
+            });
+
+            if (typeof renderQuizBuilderQuestions === 'function') renderQuizBuilderQuestions();
+
+            const modal = document.getElementById('lmsQuizModal');
+            if (modal) modal.classList.remove('hidden');
+        } else if (target === 'assignment') {
+            const ass = data.assignment || {};
+            const aTitle = document.getElementById('lmsAssignmentTitle');
+            const aInst = document.getElementById('lmsAssignmentInstructions');
+            const aPts = document.getElementById('lmsAssignmentPoints');
+
+            if (aTitle) aTitle.value = ass.title || `الواجب الأسبوعي التطبيقي: ${weekTitle}`;
+            if (aInst) aInst.value = ass.instructions || `يرجى مراجعة محتوى المحاضرة وحل الأسئلة التطبيقية وإرفاق ملف الحل أو كتابة الملاحظات قبل الموعد النهائي المحدد.`;
+            if (aPts) aPts.value = ass.total_grade || 10;
+
+            const rawQuestions = (Array.isArray(ass.questions) && ass.questions.length > 0)
+                ? ass.questions
+                : ((Array.isArray(ass.mcq_questions) && ass.mcq_questions.length > 0)
+                    ? ass.mcq_questions
+                    : [
+                        {
+                            type: 'mcq',
+                            question: `حدد الإجراء القياسي الواجب اتخاذه عند بدء تطبيق مهام ${weekTitle}:`,
+                            options: ['التأكد من ارتداء مهمات الوقاية واستيفاء إجراءات السلامة', 'البدء المباشر دون فحص المعدات', 'تأجيل توثيق الإجراءات لنهاية الشهر', 'استخدام أدوات غير مطابقة للمواصفات'],
+                            correctIndex: 0
+                        },
+                        {
+                            type: 'mcq',
+                            question: `المصطلح الفني المعبر عن قائمة الفحص الفني المعتمدة هو:`,
+                            options: ['Inspection Checklist', 'Emergency Shutdown', 'Raw Material Log', 'Operator Shift Break'],
+                            correctIndex: 0
+                        },
+                        {
+                            type: 'true_false',
+                            question: `تساعد إجراءات التشغيل القياسية (SOP) على رفع جودة الإنتاج وتفادي حوادث العمل.`,
+                            options: ['صح', 'خطأ'],
+                            correctIndex: 0
+                        },
+                        {
+                            type: 'true_false',
+                            question: `يمكن تسليم التكليف بعد الموعد النهائي دون أي تأثير على بونص التسليم المبكر.`,
+                            options: ['صح', 'خطأ'],
+                            correctIndex: 1
+                        }
+                    ]);
+
+            tempAssignmentQuestions = rawQuestions.map((q, idx) => {
+                const isTf = q.type === 'true_false' || (Array.isArray(q.options) && q.options.length === 2 && (q.options[0] === 'صح' || q.options[0] === 'صحيح'));
+                if (isTf) {
+                    let cIdx = (q.correctIndex !== undefined) ? q.correctIndex : 0;
+                    if (q.correct_answer && (q.correct_answer.includes('خطأ') || q.correct_answer === 'False' || q.correct_answer === false)) {
+                        cIdx = 1;
+                    }
+                    return {
+                        id: 'aq-' + Date.now() + '-' + idx,
+                        type: 'true_false',
+                        text: q.question || q.text || `عبارة صح وخطأ رقم ${idx + 1}`,
+                        options: ['صح', 'خطأ'],
+                        correctIndex: cIdx
+                    };
+                }
+
+                const opts = Array.isArray(q.options) ? [...q.options] : ['خيار 1', 'خيار 2', 'خيار 3', 'خيار 4'];
+                while (opts.length < 4) opts.push(`خيار ${opts.length + 1}`);
+                let cIdx = (q.correctIndex !== undefined) ? q.correctIndex : 0;
+                if (q.correct_answer) {
+                    const fIdx = opts.findIndex(o => o.trim() === String(q.correct_answer).trim());
+                    if (fIdx >= 0) cIdx = fIdx;
+                }
+                return {
+                    id: 'aq-' + Date.now() + '-' + idx,
+                    type: 'mcq',
+                    text: q.question || q.text || `سؤال تطبيق رقم ${idx + 1}`,
+                    options: opts.slice(0, 4),
+                    correctIndex: cIdx
+                };
+            });
+
+            if (typeof renderAssignmentQuestionsBuilder === 'function') renderAssignmentQuestionsBuilder();
+
+            const modal = document.getElementById('lmsAssignmentModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+    }
+
+    function generateSmartComponentFallback(target, courseTitle, weekTitle, topic) {
+        const cleanTopic = topic || weekTitle || 'المهارات التقنية والمصطلحات المهنية';
+        return {
+            suggested_videos: [
+                {
+                    id: 1,
+                    title: `شرح تطبيقي شامل: ${cleanTopic}`,
+                    description: `استعراض عملي للمفاهيم الأساسية والمصطلحات التقنية المعتمدة في ${cleanTopic} مع التطبيق في بيئة التدريب.`,
+                    duration: '15:00 دقيقة',
+                    search_query: `${cleanTopic} practical guide tutorial`,
+                    youtube_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(cleanTopic + ' practical tutorial')}`
+                }
+            ],
+            lecture: {
+                title: `محاضرة وشرح: ${cleanTopic}`,
+                duration_minutes: 15,
+                summary: `تتناول هذه الوحدة التدريبية دراسة شاملة لمفاهيم ${cleanTopic}، مع التركيز على الممارسات المهنية المعتمدة، وضوابط السلامة الصناعية وإجراءات التشغيل القياسية (SOP)، وتمكين المتدربين من استيعاب المصطلحات التخصصية بدقة.`,
+                topics: [
+                    `المحور الأول: المفاهيم الأساسية والأطر النظرية لـ ${cleanTopic}`,
+                    `المحور الثاني: إجراءات السلامة المهنية ومهمات الوقاية الشخصية (PPE)`,
+                    `المحور الثالث: التطبيق العملي ومعايير الجودة والتفتيش الدوري`
+                ]
+            },
+            glossary_notes: {
+                title: `قاموس ومذكرة مراجعة: ${cleanTopic}`,
+                description: `ملخص دراسي مكثف للمصطلحات الفنية والمفاهيم التطبيقية لـ ${cleanTopic}.`,
+                terms: [
+                    { en: 'Standard Operating Procedure (SOP)', ar: 'إجراءات التشغيل القياسية', definition: 'التعليمات والخطوات المكتوبة والمعتمدة لتنفيذ العمليات بأعلى معايير الجودة والسلامة.' },
+                    { en: 'Personal Protective Equipment (PPE)', ar: 'مهمات الوقاية الشخصية', definition: 'المعدات الواقية الواجب ارتداؤها لحماية المتدرب والفني من مخاطر العمل.' },
+                    { en: 'Quality Assurance (QA)', ar: 'ضمان الجودة', definition: 'السياسات المنهجية التي تضمن توافق المخرجات مع المواصفات الفنية المعتمدة.' },
+                    { en: 'Preventive Maintenance', ar: 'الصيانة الوقائية', definition: 'أعمال الفحص والخدمة الدورية المجدولة لتفادي الأعطال والتوقفات غير المخططة.' },
+                    { en: 'Inspection Checklist', ar: 'قائمة الفحص الفني', definition: 'وثيقة رسمية تستخدم للتحقق من سلامة كافة الأجزاء قبل بدء التشغيل.' }
+                ]
+            },
+            assignment: {
+                title: `الواجب الأسبوعي التطبيقي: ${cleanTopic}`,
+                total_grade: 10,
+                instructions: `يرجى دراسة موضوع ${cleanTopic} وحل الأسئلة التطبيقية أدناه ورفع ملف الحل أو توثيق الملاحظات المهنية قبل موعد الاستحقاق (استفد من بونص التسليم المبكر +1).`,
+                questions: [
+                    {
+                        type: 'mcq',
+                        question: `ما هو الإجراء الفني الأولي الواجب اتباعه قبل بدء تشغيل معدات ${cleanTopic}؟`,
+                        options: ['فحص قائمة التحقق والتأكد من توافر مهمات الوقاية (PPE)', 'البدء بالتشغيل دون فحص مسبق', 'تجاهل إشارات التحذير من الحمل الزائد', 'تأخير تسجيل بيانات الوردية'],
+                        correctIndex: 0
+                    },
+                    {
+                        type: 'mcq',
+                        question: `المصطلح الفني الذي يرمز لإجراءات التشغيل القياسية المكتوبة هو:`,
+                        options: ['Standard Operating Procedure (SOP)', 'Safety Hazard Identification (SHI)', 'Personal Warning Sign (PWS)', 'Machine Breakdown Limit (MBL)'],
+                        correctIndex: 0
+                    },
+                    {
+                        type: 'true_false',
+                        question: `تعتبر إجراءات الفحص الدوري والصيانة الوقائية ركيزة أساسية لمنع توقف خطوط الإنتاج وحوادث العمل.`,
+                        options: ['صح', 'خطأ'],
+                        correctIndex: 0
+                    },
+                    {
+                        type: 'true_false',
+                        question: `يسمح النظام بتشغيل الماكينات دون ارتداء نظارات الأمان أو حذاء السلامة إذا كانت الوردية قصيرة.`,
+                        options: ['صح', 'خطأ'],
+                        correctIndex: 1
+                    }
+                ]
+            },
+            quiz: {
+                title: `اختبار الأسبوع التفاعلي: ${cleanTopic}`,
+                duration_minutes: 15,
+                total_grade: 10,
+                questions: [
+                    {
+                        type: 'mcq',
+                        question: `ما هي الوظيفة الأساسية لقائمة الفحص الفني (Inspection Checklist)؟`,
+                        options: ['توثيق سلامة مكونات المعدة والتأكد من جاهزيتها قبل التشغيل', 'إلغاء إجراءات الصيانة الدورية', 'استبدال مهمات الوقاية الشخصية', 'زيادة سرعة العمل على حساب معايير الأمان'],
+                        correctIndex: 0
+                    },
+                    {
+                        type: 'mcq',
+                        question: `أي من المصطلحات التالية يمثل مهمات الوقاية الشخصية في بيئة الورش والمعامل؟`,
+                        options: ['Personal Protective Equipment (PPE)', 'Preventive Process Estimation (PPE)', 'Pre-Production Evaluation (PPE)', 'Power Plant Engineering (PPE)'],
+                        correctIndex: 0
+                    },
+                    {
+                        type: 'true_false',
+                        question: `الالتزام بإجراءات السلامة المهنية يضمن سلامة الكادر البشري وسلامة المعدات ورفع كفاءة الإنتاج.`,
+                        options: ['صح', 'خطأ'],
+                        correctIndex: 0
+                    },
+                    {
+                        type: 'true_false',
+                        question: `يقتصر توثيق الأعطال وملاحظات التشغيل على المشرف العام فقط دون حاجة لمشاركة الفنيين.`,
+                        options: ['صح', 'خطأ'],
+                        correctIndex: 1
+                    }
+                ]
+            }
+        };
     }
 
     // ===================================================================
@@ -25170,16 +26827,46 @@
 
             bodyEl.innerHTML = `
                 <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 text-right">
+                    ${(quizSub && quizSub.isLockedByAntiCheat) ? `
+                        <div class="bg-red-50 border-2 border-red-300 rounded-2xl p-3 flex items-center justify-between flex-wrap gap-2 shadow-2xs">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl animate-pulse">🚨</span>
+                                <div>
+                                    <div class="text-xs font-black text-red-900">الاختبار مقفل بقرار أمني من نظام النزاهة الأكاديمية (3 تحذيرات مغادرة)</div>
+                                    <div class="text-[10px] text-red-700">تم رصد مغادرة شاشة الاختبار 3 مرات وقفل المحاولة لحماية العدالة والمصداقية</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="reopenQuizSubmission('${traineeId}', '${targetQuiz?.id}'); openGsSubmissionInspectorModal('${traineeId}', ${weekNum}, 'quiz', '${specificAssignmentId || ''}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black px-3 py-1.5 rounded-xl transition cursor-pointer flex items-center gap-1 shadow-2xs">
+                                    <span>🔓</span>
+                                    <span>رفع القفل وإعادة فتح الاختبار</span>
+                                </button>
+                                <button type="button" onclick="penalizeQuizSubmissionZero('${traineeId}', '${targetQuiz?.id}'); openGsSubmissionInspectorModal('${traineeId}', ${weekNum}, 'quiz', '${specificAssignmentId || ''}')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-3 py-1.5 rounded-xl transition cursor-pointer flex items-center gap-1 shadow-2xs">
+                                    <span>🚫</span>
+                                    <span>اعتماد درجة 0 نهائياً</span>
+                                </button>
+                            </div>
+                        </div>
+                    ` : ''}
+
                     <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-200/80 pb-2.5">
                         <div>
                             <span class="text-xs font-black text-[#0F2942]">🏁 ${targetQuiz?.title || 'الاختبار الأسبوعي'}</span>
                             <div class="text-[11px] text-slate-500 font-bold mt-0.5">المدة: ${targetQuiz?.timeMinutes || 10} د • الدرجة الكلية: ${maxPts} • المحاولات المتاحة: ${targetQuiz?.maxAttempts || 2}</div>
                         </div>
-                        <span class="text-[11px] font-black px-2.5 py-1 rounded-full border ${
-                            quizSub ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'
-                        }">
-                            ${quizSub ? `✅ مكتمل (${quizSub.bestScore !== undefined ? quizSub.bestScore : quizSub.score}/${maxPts})` : '⏳ لم يختبر بعد'}
-                        </span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            ${(quizSub && quizSub.isLockedByAntiCheat) ? `
+                                <span class="text-[11px] font-black px-2.5 py-1 rounded-full bg-red-600 text-white animate-pulse">🚨 مقفل بالنزاهة</span>
+                            ` : ''}
+                            ${(quizSub && quizSub.isEarlySubmission) ? `
+                                <span class="text-[11px] font-black px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300">🌟 بونص تسليم مبكر (+${quizSub.earlyBonusAwarded || 1})</span>
+                            ` : ''}
+                            <span class="text-[11px] font-black px-2.5 py-1 rounded-full border ${
+                                quizSub ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'
+                            }">
+                                ${quizSub ? `✅ مكتمل (${quizSub.bestScore !== undefined ? quizSub.bestScore : quizSub.score}/${maxPts})` : '⏳ لم يختبر بعد'}
+                            </span>
+                        </div>
                     </div>
 
                     ${quizSub ? `
@@ -25264,13 +26951,17 @@
                         ${assQuestions.map((q, idx) => {
                             const studentAns = (targetSub && targetSub.answers && targetSub.answers[idx] !== undefined) ? targetSub.answers[idx] : null;
                             const isCorrect = (studentAns !== null && studentAns === q.correctIndex);
+                            const isTf = q.type === 'true_false';
                             return `
                                 <div class="bg-white border border-slate-200 rounded-xl p-3 space-y-1.5">
                                     <div class="flex items-center justify-between gap-2">
-                                        <div class="text-xs font-black text-slate-800">${idx + 1}. ${q.text}</div>
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : (studentAns !== null ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-slate-100 text-slate-500')}">
-                                            ${isCorrect ? 'صحيحة ✓' : (studentAns !== null ? 'خاطئة ✗' : 'لم يُجب')}
-                                        </span>
+                                        <div class="text-xs font-black text-slate-800">${idx + 1}. ${escapeHtml(q.text || '')}</div>
+                                        <div class="flex items-center gap-1.5">
+                                            ${isTf ? '<span class="text-[9px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.2 rounded font-bold">صح/خطأ</span>' : ''}
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : (studentAns !== null ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-slate-100 text-slate-500')}">
+                                                ${isCorrect ? 'صحيحة ✓' : (studentAns !== null ? 'خاطئة ✗' : 'لم يُجب')}
+                                            </span>
+                                        </div>
                                     </div>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
                                         ${(q.options || []).map((opt, oIdx) => `
@@ -25278,7 +26969,7 @@
                                                 oIdx === q.correctIndex ? 'bg-emerald-50 border-emerald-300 font-bold text-emerald-950' :
                                                 (studentAns === oIdx ? 'bg-red-50 border-red-300 font-bold text-red-950' : 'bg-slate-50 border-slate-100 text-slate-600')
                                             }">
-                                                ${opt} ${oIdx === q.correctIndex ? '✅' : (studentAns === oIdx ? '❌' : '')}
+                                                ${escapeHtml(opt)} ${oIdx === q.correctIndex ? '✅' : (studentAns === oIdx ? '❌' : '')}
                                             </div>
                                         `).join('')}
                                     </div>
@@ -25294,11 +26985,16 @@
             <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5 text-right">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <span class="text-xs font-black text-[#0F2942]">📌 عنوان الواجب: ${targetAss?.title || 'الواجب الأسبوعي'}</span>
-                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
-                        targetSub ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'
-                    }">
-                        ${targetSub ? '✅ قام المتدرب برفع التسليم' : '⏳ لم يقم المتدرب برفع ملف بعد'}
-                    </span>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        ${(targetSub && targetSub.isEarlySubmission) ? `
+                            <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 border border-amber-300">🌟 بونص تسليم مبكر (+${targetSub.earlyBonusAwarded || 1})</span>
+                        ` : ''}
+                        <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                            targetSub ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'
+                        }">
+                            ${targetSub ? '✅ قام المتدرب برفع التسليم' : '⏳ لم يقم المتدرب برفع ملف بعد'}
+                        </span>
+                    </div>
                 </div>
                 ${targetSub ? `
                     <div class="text-[11px] text-slate-500 font-mono">تاريخ التسليم: ${targetSub.submittedAt ? new Date(targetSub.submittedAt).toLocaleString('ar-SA') : '--'}</div>
@@ -28906,17 +30602,19 @@
                     loadedFromArchive.push({
                         id: item.id || cId,
                         name: item.name || 'متدرب',
-                        group: item.group || 'سامسونج 101 & 102',
-                        company: item.company || 'معتمد',
+                        group: wEntry.group || item.group || 'سامسونج 101 & 102',
+                        company: wEntry.company || item.company || 'معتمد',
                         rate: wEntry.rate !== undefined ? wEntry.rate : 100,
-                        weeklyAttendance: [true, true, true, true, true],
-                        weeklyAttendedSessions: wEntry.attended || 10
+                        weeklyAttendance: (wEntry.daysChecks && Array.isArray(wEntry.daysChecks) && wEntry.daysChecks.length === 5)
+                            ? wEntry.daysChecks
+                            : [[true, true], [true, true], [true, true], [true, true], [true, true]],
+                        weeklyAttendedSessions: wEntry.attended !== undefined ? wEntry.attended : 10
                     });
                 }
             }
             sheetTrainees = loadedFromArchive.length > 0 ? loadedFromArchive : trainees;
-            if (sourceBadge) sourceBadge.innerText = `أرشيف: ${activeAttendanceArchiveWeekKey}`;
-            if (weekBadge) weekBadge.innerText = `الأسبوع المؤرشف (${activeAttendanceArchiveWeekKey})`;
+            if (sourceBadge) sourceBadge.innerText = `أرشيف معتمد: ${activeAttendanceArchiveWeekKey}`;
+            if (weekBadge) weekBadge.innerText = `${activeAttendanceArchiveWeekKey}`;
         }
 
         // Scope by User Role
@@ -29130,27 +30828,45 @@
                 ${activeAttendanceArchiveWeekKey === 'LIVE' ? '<span class="text-[10px] font-black bg-amber-400 text-slate-950 px-2 py-0.5 rounded-md">المعروض حالياً ✓</span>' : ''}
             </button>
 
-            <!-- Archived Weeks from sync page -->
+            <!-- Archived Weeks from sync page & cumulative uploads -->
             ${weeksArray.length > 0 ? `
                 <div class="pt-2">
-                    <span class="text-[11px] font-black text-slate-600 block mb-1">الأسابيع المؤرشفة والمرفوعة من صفحة المزامنة:</span>
-                    <div class="space-y-1.5">
+                    <span class="text-[11px] font-black text-slate-700 block mb-2">📁 الأسابيع المؤرشفة والمرفوعة من كشوف الحضور والرصيد المعتمد:</span>
+                    <div class="space-y-2">
                         ${weeksArray.map(wk => {
                             const isAct = activeAttendanceArchiveWeekKey === wk;
+                            let count = 0;
+                            let sumRate = 0;
+                            for (let cId in archiveData) {
+                                const wInfo = archiveData[cId]?.weeksHistory?.[wk];
+                                if (wInfo) {
+                                    count++;
+                                    sumRate += (wInfo.rate !== undefined ? wInfo.rate : 100);
+                                }
+                            }
+                            const avgRate = count > 0 ? Math.round(sumRate / count) : 100;
                             return `
-                                <button type="button" onclick="selectAttendanceArchiveWeek('${wk}')" class="w-full text-right p-3 rounded-2xl border transition flex items-center justify-between cursor-pointer ${
+                                <button type="button" onclick="selectAttendanceArchiveWeek('${wk}')" class="w-full text-right p-3.5 rounded-2xl border transition flex items-center justify-between cursor-pointer ${
                                     isAct
-                                        ? 'bg-indigo-50 border-indigo-400 ring-2 ring-indigo-300'
+                                        ? 'bg-indigo-50 border-indigo-400 ring-2 ring-indigo-300 shadow-sm'
                                         : 'bg-white hover:bg-slate-50 border-slate-200'
                                 }">
-                                    <div class="flex items-center gap-2.5">
-                                        <span class="text-base">📁</span>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl ${isAct ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'} flex items-center justify-center text-base shrink-0 font-bold">
+                                            📅
+                                        </div>
                                         <div>
-                                            <div class="font-bold text-xs text-slate-800">${wk}</div>
-                                            <div class="text-[10px] text-slate-400">سجل أسبوعي محفوظ بالأرشيف التراكمي</div>
+                                            <div class="font-black text-xs text-slate-900">${wk}</div>
+                                            <div class="text-[10px] font-bold text-slate-500 mt-0.5 flex items-center gap-2">
+                                                <span>👥 ${count > 0 ? count + ' متدرب' : 'سجل أسبوعي'}</span>
+                                                ${count > 0 ? `<span>•</span><span class="${avgRate >= 90 ? 'text-emerald-700' : 'text-amber-700'}">نسبة الحضور: ${avgRate}%</span>` : ''}
+                                            </div>
                                         </div>
                                     </div>
-                                    ${isAct ? '<span class="text-[10px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded-md">المعروض حالياً ✓</span>' : ''}
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">أرشيف معتمد</span>
+                                        ${isAct ? '<span class="text-[10px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded-md">المعروض حالياً ✓</span>' : ''}
+                                    </div>
                                 </button>
                             `;
                         }).join('')}
@@ -29158,7 +30874,7 @@
                 </div>
             ` : `
                 <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center text-xs text-slate-500 font-bold">
-                    لا توجد أسابيع مؤرشفة إضافية بعد. يمكنك رفع ملفات الأرشيف الأسبوعية من تبويب المزامنة (Sync).
+                    لا توجد أسابيع مؤرشفة إضافية بعد. يمكنك رفع ملفات الأرشيف الأسبوعية من تبويب المزامنة (Sync) أو كشوف الرصيد المعتمد.
                 </div>
             `}
         `;

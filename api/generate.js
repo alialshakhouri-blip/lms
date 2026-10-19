@@ -103,9 +103,16 @@ const LMS_PROMPT_TEMPLATE = `أنت مساعد تعليمي خبير متخصص 
     ],
     "questions": [
       {
+        "type": "mcq",
         "question": "سؤال تطبيقي من متعدد يطلب تطبيق المصطلحات في مواقف عمل واقعية",
         "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
         "correct_answer": "الخيار أ"
+      },
+      {
+        "type": "true_false",
+        "question": "عبارة صح وخطأ حول تطبيق المصطلحات وإجراءات العمل والمهام المهنية",
+        "options": ["صح", "خطأ"],
+        "correct_answer": "صح"
       }
     ]
   },
@@ -516,6 +523,7 @@ function buildDemoContentFromText(extractedText, filename) {
       ],
       questions: [
         {
+          type: 'mcq',
           question: `سؤال تطبيقي: اختر الاستخدام الصحيح للمصطلح '${extractedTerms[0].en}' في بيئة الورشة والمختبر:`,
           options: [
             `All technicians must strictly apply ${extractedTerms[0].en} during operational procedures.`,
@@ -526,6 +534,13 @@ function buildDemoContentFromText(extractedText, filename) {
           correct_answer: `All technicians must strictly apply ${extractedTerms[0].en} during operational procedures.`
         },
         {
+          type: 'true_false',
+          question: `صح أم خطأ: الالتزام الصارم بإجراءات السلامة وارتداء مهمات الوقاية (${extractedTerms[0].en}) إلزامي لجميع المتدربين في بيئة العمل الفنية:`,
+          options: ['صح', 'خطأ'],
+          correct_answer: 'صح'
+        },
+        {
+          type: 'mcq',
           question: `كيف تساهم ممارسة "${extractedTerms[Math.min(1, extractedTerms.length - 1)].ar}" في تقليل الحوادث ورفع الإنتاجية؟`,
           options: [
             'بضمان الامتثال للمعايير الفنية والوقائية وتقليل الأخطاء البشرية',
@@ -534,6 +549,12 @@ function buildDemoContentFromText(extractedText, filename) {
             'بالاعتماد على التخمين في صيانة الآلات'
           ],
           correct_answer: 'بضمان الامتثال للمعايير الفنية والوقائية وتقليل الأخطاء البشرية'
+        },
+        {
+          type: 'true_false',
+          question: `صح أم خطأ: يُسمح بتجاوز إجراءات التشغيل القياسية وتعديل إعدادات الماكينات دون إذن المشرف الفني المختص:`,
+          options: ['صح', 'خطأ'],
+          correct_answer: 'خطأ'
         }
       ]
     }
@@ -559,13 +580,22 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
+    const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
+    const cleanKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
+    const hasValidKey = Boolean(cleanKey && cleanKey !== 'YOUR_GEMINI_API_KEY_HERE' && cleanKey.length > 15);
+    const sbUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').trim();
+    const sbKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
+
     return res.status(200).json({
       status: 'ready',
       service: 'BGTI LMS AI Auto-Generation API (Vercel Serverless)',
       endpoints: {
         generate: 'POST /api/generate'
       },
-      hasGeminiApiKey: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE')
+      hasGeminiApiKey: hasValidKey,
+      keyPrefix: hasValidKey ? cleanKey.substring(0, 8) + '...' : null,
+      defaultModel: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+      hasSupabaseConfigured: Boolean(sbUrl && sbKey)
     });
   }
 
@@ -658,119 +688,153 @@ export default async function handler(req, res) {
     }
 
     const textLength = extractedText ? extractedText.length : 0;
-    const apiKey = process.env.GEMINI_API_KEY;
-    const hasValidKey = apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE' && apiKey.trim().length > 15;
+    const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
+    const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
+    const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE' && apiKey.length > 15);
 
     let generatedData = null;
     let modeUsed = 'demo_fallback';
+    let geminiApiErrors = [];
+
+    // Helper: Resilient JSON extractor
+    function safeExtractJson(text) {
+      if (!text) return null;
+      let s = String(text).trim();
+      // Match markdown code block ```json ... ```
+      const blockMatch = s.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+      if (blockMatch) s = blockMatch[1].trim();
+
+      const firstBrace = s.indexOf('{');
+      const lastBrace = s.lastIndexOf('}');
+      if (firstBrace >= 0 && lastBrace > firstBrace) {
+        try {
+          return JSON.parse(s.slice(firstBrace, lastBrace + 1));
+        } catch (e) {
+          // Continue to direct parse
+        }
+      }
+      try {
+        return JSON.parse(s);
+      } catch (e) {
+        return null;
+      }
+    }
 
     // ─── Call Gemini API if Key is Available ─────────────────────────────────
     if (hasValidKey) {
-      try {
-        const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey.trim()}`;
+      // Build context block
+      let contextBlock = `## بيانات الكورس والأسبوع:\n`;
+      if (courseName) contextBlock += `- اسم الكورس التدريبي: ${courseName}\n`;
+      if (weekTitle) contextBlock += `- الأسبوع: ${weekTitle}\n`;
+      if (weekTopic) contextBlock += `- موضوع الوحدة: ${weekTopic}\n`;
 
-        // Build context block
-        let contextBlock = `## بيانات الكورس والأسبوع:\n`;
-        if (courseName) contextBlock += `- اسم الكورس التدريبي: ${courseName}\n`;
-        if (weekTitle) contextBlock += `- الأسبوع: ${weekTitle}\n`;
-        if (weekTopic) contextBlock += `- موضوع الوحدة: ${weekTopic}\n`;
+      const parts = [];
 
-        const parts = [];
+      // If direct text only (no file attached)
+      if (hasDirectText && !hasFile) {
+        const trimmedText = extractedText.length > 25000
+          ? extractedText.slice(0, 25000) + '\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]'
+          : extractedText;
 
-        // If direct text only (no file attached)
-        if (hasDirectText && !hasFile) {
-          const trimmedText = extractedText.length > 25000
-            ? extractedText.slice(0, 25000) + '\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]'
-            : extractedText;
-
-          const contentSection = `${contextBlock}\n## النص التدريبي والمحتوى المدخل مباشرة من المدرب (${safeFilename}):\n---\n${trimmedText}\n---`;
-          parts.push({
-            text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', contentSection)
-          });
-        } else if (isPdf && (hasFile || hasExtractedPdfText)) {
-          // If base64 is available and under reasonable limit (under 4MB), pass inlineData
-          if (base64 && base64.length < 4500000) {
-            parts.push({
-              inlineData: {
-                mimeType: 'application/pdf',
-                data: base64
-              }
-            });
-          }
-
-          let contentSection = `${contextBlock}\n## المحتوى المُستخرج من وثيقة الـ PDF (${safeFilename}):\n`;
-          if (extractedText && extractedText.length > 20) {
-            const trimmedText = extractedText.length > 25000
-              ? extractedText.slice(0, 25000) + '\n\n[... تم الاكتفاء بهذا الجزء من المستند ...]'
-              : extractedText;
-            contentSection += `---\n${trimmedText}\n---`;
-          } else {
-            contentSection += `(راجع وثيقة الـ PDF المرفقة أعلاه بالكامل)`;
-          }
-
-          parts.push({
-            text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', contentSection)
-          });
-        } else {
-          // For PPTX or merged: provide extracted slide texts
-          const trimmedText = extractedText.length > 20000
-            ? extractedText.slice(0, 20000) + '\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]'
-            : extractedText;
-
-          const contentSection = `${contextBlock}\n## المحتوى المُستخرج من شرائح العرض (${safeFilename}):\n---\n${trimmedText}\n---`;
-          parts.push({
-            text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', contentSection)
-          });
-        }
-
-        const geminiRes = await fetch(geminiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: 'user',
-                parts
-              }
-            ],
-            generationConfig: {
-              temperature: 0.4,
-              responseMimeType: 'application/json'
-            }
-          })
+        const contentSection = `${contextBlock}\n## النص التدريبي والمحتوى المدخل مباشرة من المدرب (${safeFilename}):\n---\n${trimmedText}\n---`;
+        parts.push({
+          text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', contentSection)
         });
-
-        if (!geminiRes.ok) {
-          const errBody = await geminiRes.text();
-          console.error(`Gemini API error (Status ${geminiRes.status}):`, errBody);
-          // Fall back gracefully rather than throwing 500
-          modeUsed = 'demo_fallback_after_gemini_error';
-        } else {
-          const geminiJson = await geminiRes.json();
-          const candidate = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (candidate) {
-            // Strip any unexpected markdown code fences
-            const cleanJsonStr = candidate
-              .replace(/^```(?:json)?\s*/i, '')
-              .replace(/\s*```$/i, '')
-              .trim();
-
-            generatedData = JSON.parse(cleanJsonStr);
-            modeUsed = 'gemini';
-          }
+      } else if (isPdf && (hasFile || hasExtractedPdfText)) {
+        // If base64 is available and under reasonable limit (under 4MB), pass inlineData
+        if (base64 && base64.length < 4500000) {
+          parts.push({
+            inlineData: {
+              mimeType: 'application/pdf',
+              data: base64
+            }
+          });
         }
-      } catch (geminiError) {
-        console.error('Gemini execution error, falling back:', geminiError);
-        modeUsed = 'demo_fallback_after_gemini_exception';
+
+        let contentSection = `${contextBlock}\n## المحتوى المُستخرج من وثيقة الـ PDF (${safeFilename}):\n`;
+        if (extractedText && extractedText.length > 20) {
+          const trimmedText = extractedText.length > 25000
+            ? extractedText.slice(0, 25000) + '\n\n[... تم الاكتفاء بهذا الجزء من المستند ...]'
+            : extractedText;
+          contentSection += `---\n${trimmedText}\n---`;
+        } else {
+          contentSection += `(راجع وثيقة الـ PDF المرفقة أعلاه بالكامل)`;
+        }
+
+        parts.push({
+          text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', contentSection)
+        });
+      } else {
+        // For PPTX or merged: provide extracted slide texts
+        const trimmedText = extractedText.length > 20000
+          ? extractedText.slice(0, 20000) + '\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]'
+          : extractedText;
+
+        const contentSection = `${contextBlock}\n## المحتوى المُستخرج من شرائح العرض (${safeFilename}):\n---\n${trimmedText}\n---`;
+        parts.push({
+          text: LMS_PROMPT_TEMPLATE.replace('{CONTENT_BLOCK}', contentSection)
+        });
+      }
+
+      const preferredModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+      const modelsToTry = [preferredModel];
+      if (!modelsToTry.includes('gemini-1.5-flash')) modelsToTry.push('gemini-1.5-flash');
+      if (!modelsToTry.includes('gemini-2.5-flash')) modelsToTry.push('gemini-2.5-flash');
+
+      for (const curModel of modelsToTry) {
+        if (generatedData) break;
+        try {
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${curModel}:generateContent?key=${apiKey}`;
+
+          const geminiRes = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts
+                }
+              ],
+              generationConfig: {
+                temperature: 0.4,
+                responseMimeType: 'application/json'
+              }
+            })
+          });
+
+          if (!geminiRes.ok) {
+            const errBody = await geminiRes.text();
+            console.error(`Gemini API error on model ${curModel} (Status ${geminiRes.status}):`, errBody);
+            geminiApiErrors.push(`[${curModel} HTTP ${geminiRes.status}]: ${errBody.slice(0, 200)}`);
+            continue; // Fallback to next model in list
+          }
+
+          const geminiJson = await geminiRes.json();
+          const candidateText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
+          const parsed = safeExtractJson(candidateText);
+          if (parsed && typeof parsed === 'object') {
+            generatedData = parsed;
+            modeUsed = `gemini (${curModel})`;
+            break;
+          } else {
+            console.warn(`Gemini candidate text could not be parsed as JSON on model ${curModel}:`, candidateText?.slice(0, 200));
+          }
+        } catch (geminiError) {
+          console.error(`Gemini execution error on model ${curModel}:`, geminiError);
+          geminiApiErrors.push(`[${curModel} Exception]: ${geminiError.message}`);
+        }
       }
     }
 
     // ─── Smart Fallback if Gemini not used or failed ──────────────────────────
     if (!generatedData) {
       generatedData = buildDemoContentFromText(extractedText, safeFilename);
+      if (hasValidKey && geminiApiErrors.length > 0) {
+        modeUsed = 'demo_fallback_after_gemini_error';
+      }
     }
 
     const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -778,12 +842,14 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       mode: modeUsed,
+      hasGeminiApiKey: hasValidKey,
       filename: safeFilename,
       fileSizeKB,
       file_url: cloudFileUrl || '',
       text_length: textLength,
       processing_time_seconds: parseFloat(durationSec),
-      data: generatedData
+      data: generatedData,
+      geminiErrors: geminiApiErrors.length > 0 ? geminiApiErrors : undefined
     });
 
   } catch (err) {
