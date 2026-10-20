@@ -23286,7 +23286,7 @@
 
             let cfg = null;
             try {
-                const res = await fetch('/api/config');
+                const res = await fetch('/api/config?t=' + Date.now(), { cache: 'no-store' });
                 if (res.ok) {
                     cfg = await res.json();
                 }
@@ -23296,6 +23296,13 @@
 
             const isVercelConfigured = Boolean(cfg && cfg.supabaseUrl && cfg.supabaseAnonKey);
             window._supabaseFromVercelApi = isVercelConfigured;
+
+            if (isVercelConfigured) {
+                try {
+                    localStorage.setItem('sys_supabase_url', cfg.supabaseUrl.trim().replace(/\/+$/, ''));
+                    localStorage.setItem('sys_supabase_anon_key', cfg.supabaseAnonKey.trim());
+                } catch(e) {}
+            }
 
             const sbUrl = (cfg && cfg.supabaseUrl) ? cfg.supabaseUrl : (localStorage.getItem('sys_supabase_url') || '');
             const sbKey = (cfg && cfg.supabaseAnonKey) ? cfg.supabaseAnonKey : (localStorage.getItem('sys_supabase_anon_key') || '');
