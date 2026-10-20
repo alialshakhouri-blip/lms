@@ -257,6 +257,8 @@ export default async function handler(req, res) {
         phoneDirectory: syncStates['sys_phone_dir_v9'] || null,
         users: syncStates['sys_users_v9'] || null,
         laVacancies: syncStates['sys_la_vacancies_v9'] || null,
+        virtualClassrooms: syncStates['sys_virtual_classrooms_v1'] || null,
+        archiveData: syncStates['sys_archive_data_v1'] || null,
         totalSubmissions: submissionsList.length,
         serverTimestamp: new Date().toISOString()
       });
@@ -548,6 +550,20 @@ export default async function handler(req, res) {
           upsertRows.push({
             key: 'sys_la_vacancies_v9',
             data: body.laVacancies,
+            updated_at: new Date().toISOString()
+          });
+        }
+        if (body.virtualClassrooms && typeof body.virtualClassrooms === 'object') {
+          upsertRows.push({
+            key: 'sys_virtual_classrooms_v1',
+            data: body.virtualClassrooms,
+            updated_at: new Date().toISOString()
+          });
+        }
+        if (body.archiveData && typeof body.archiveData === 'object') {
+          upsertRows.push({
+            key: 'sys_archive_data_v1',
+            data: body.archiveData,
             updated_at: new Date().toISOString()
           });
         }
