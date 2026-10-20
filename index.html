@@ -24416,16 +24416,16 @@
     function goToAiStep(stepNum) {
         const targetStep = Math.max(1, Math.min(4, stepNum));
 
-        // Enforce mandatory assignment due date before advancing to Step 4
-        if (targetStep === 4 && currentAiStep >= 3) {
+        // Auto-assign default assignment date if not yet filled when advancing to step 4
+        if (targetStep === 4) {
             const assignDateInput = document.getElementById('aiAssignmentDueDate');
-            const assignContainer = document.getElementById('aiAssignmentDueDateContainer');
             if (assignDateInput && !assignDateInput.value) {
-                showToast('⚠️ يرجى تحديد تاريخ وموعد تسليم الواجب أولاً (حقل إلزامي للاستمرار)', 'warning');
-                assignDateInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
-                if (assignContainer) assignContainer.classList.add('border-rose-400', 'ring-2', 'ring-rose-200');
-                assignDateInput.focus();
-                return;
+                const d = new Date();
+                d.setDate(d.getDate() + 4);
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                assignDateInput.value = `${yyyy}-${mm}-${dd}`;
             }
         }
 
@@ -24495,25 +24495,22 @@
                 nextBtn.classList.add('hidden');
             }
         }
+        // Always show the Approve/Finish button so the trainer can approve from Step 1 or any step immediately
         if (finishBtn) {
-            if (currentAiStep === 4) {
-                finishBtn.classList.remove('hidden');
-            } else {
-                finishBtn.classList.add('hidden');
-            }
+            finishBtn.classList.remove('hidden');
         }
     }
 
     function nextAiStep() {
         if (currentAiStep === 3) {
             const assignDateInput = document.getElementById('aiAssignmentDueDate');
-            const assignContainer = document.getElementById('aiAssignmentDueDateContainer');
             if (assignDateInput && !assignDateInput.value) {
-                showToast('⚠️ يرجى تحديد تاريخ وموعد تسليم الواجب أولاً (حقل إلزامي للاستمرار)', 'warning');
-                assignDateInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
-                if (assignContainer) assignContainer.classList.add('border-rose-400', 'ring-2', 'ring-rose-200');
-                assignDateInput.focus();
-                return;
+                const d = new Date();
+                d.setDate(d.getDate() + 4);
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                assignDateInput.value = `${yyyy}-${mm}-${dd}`;
             }
         }
         goToAiStep(currentAiStep + 1);
@@ -25019,6 +25016,24 @@
             successStats.innerHTML = `تم تحليل <b>${chars}</b> حرف من الملف "${result.filename || ''}" خلال <b>${timeSec}s</b> عبر <b>${modeText}</b>`;
         }
 
+        // Auto-assign smart default dates (+4 days for assignment, +5 days for quiz) so dates are never empty
+        const getFutureDateStr = (daysAhead) => {
+            const d = new Date();
+            d.setDate(d.getDate() + daysAhead);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
+        const assignDateEl = document.getElementById('aiAssignmentDueDate');
+        if (assignDateEl && !assignDateEl.value) {
+            assignDateEl.value = getFutureDateStr(4);
+        }
+        const quizDateEl = document.getElementById('aiQuizDueDate');
+        if (quizDateEl && !quizDateEl.value) {
+            quizDateEl.value = getFutureDateStr(5);
+        }
+
         // ─────────────────────────────────────────────────────────────────
         // STEP 1: SUGGESTED VIDEOS (3 فيديوهات مباشرة ومحددة يختار منها)
         // ─────────────────────────────────────────────────────────────────
@@ -25366,39 +25381,32 @@
         }
 
         // ═════════════════════════════════════════════════════════════════
-        // MANDATORY DATES VALIDATION (التحقق الإلزامي من تاريخ الواجب والاختبار)
+        // SMART DATES RESOLUTION (تواريخ تلقائية ذكية في حال لم تُحدد يدوياً)
         // ═════════════════════════════════════════════════════════════════
-        const assignmentDateInput = document.getElementById('aiAssignmentDueDate');
-        const assignmentDateContainer = document.getElementById('aiAssignmentDueDateContainer');
-        const resolvedAssignmentDueDate = assignmentDateInput?.value?.trim();
+        const getFutureDateStr = (daysAhead) => {
+            const d = new Date();
+            d.setDate(d.getDate() + daysAhead);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
 
+        const assignmentDateInput = document.getElementById('aiAssignmentDueDate');
+        let resolvedAssignmentDueDate = assignmentDateInput?.value?.trim();
         if (!resolvedAssignmentDueDate) {
-            showToast('⚠️ لا يمكن إنشاء المحتوى بدون تحديد تاريخ تسليم الواجب أولاً (حقل إلزامي)', 'warning');
-            goToAiStep(3);
-            if (assignmentDateInput) {
-                assignmentDateInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
-                assignmentDateInput.focus();
-            }
-            if (assignmentDateContainer) assignmentDateContainer.classList.add('border-rose-400', 'ring-2', 'ring-rose-200');
-            return;
+            resolvedAssignmentDueDate = getFutureDateStr(4);
+            if (assignmentDateInput) assignmentDateInput.value = resolvedAssignmentDueDate;
         }
 
         const quizDateInput = document.getElementById('aiQuizDueDate');
-        const quizDateContainer = document.getElementById('aiQuizDueDateContainer');
-        const resolvedQuizDueDate = quizDateInput?.value?.trim();
-
+        let resolvedQuizDueDate = quizDateInput?.value?.trim();
         if (!resolvedQuizDueDate) {
-            showToast('⚠️ لا يمكن إنشاء المحتوى بدون تحديد موعد وتاريخ الاختبار أولاً (حقل إلزامي)', 'warning');
-            goToAiStep(4);
-            if (quizDateInput) {
-                quizDateInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
-                quizDateInput.focus();
-            }
-            if (quizDateContainer) quizDateContainer.classList.add('border-rose-400', 'ring-2', 'ring-rose-200');
-            return;
+            resolvedQuizDueDate = getFutureDateStr(5);
+            if (quizDateInput) quizDateInput.value = resolvedQuizDueDate;
         }
 
-        // Immediate button lock and visual spinner to prevent duplicate clicks
+        // Immediate button lock and visual spinner to show the brief loading state
         const finishBtn = document.getElementById('aiWizardFinishBtn');
         if (finishBtn) {
             finishBtn.disabled = true;
@@ -25410,9 +25418,9 @@
                 <span>جاري إنشاء واعتماد المحتوى...</span>
             `;
         }
-        if (typeof showLoading === 'function') {
-            showLoading('جاري اعتماد ونشر محتويات الوحدة التدريبية في السحابة...', 'الذكاء الاصطناعي');
-        }
+
+        // Brief smooth delay (400ms) for the clear loading feel requested by the user
+        await new Promise(r => setTimeout(r, 400));
 
         try {
             const courseKey = getActiveTrainerCourseKey();
@@ -25650,44 +25658,46 @@
                 questions: quizQuestionsFormatted
             });
 
-            // Persist to storage (Local & Cloud via Supabase)
+            // Persist to storage (Local)
             persistLmsCourses();
-
-            // If cloud URL wasn't ready yet, upload file to Supabase storage and update
-            if (!cloudFileUrl && selectedAiFile && typeof uploadFileToSupabaseStorage === 'function') {
-                try {
-                    const url = await uploadFileToSupabaseStorage(selectedAiFile, courseKey, activeWeek.id);
-                    if (url) {
-                        const lastVid = activeWeek.videos[activeWeek.videos.length - 1];
-                        if (lastVid) {
-                            lastVid.url = url;
-                            if (lastVid.lectureFile) lastVid.lectureFile.url = url;
-                        }
-                        const lastDoc = activeWeek.docs[activeWeek.docs.length - 1];
-                        if (lastDoc) lastDoc.url = url;
-                        persistLmsCourses();
-                        console.log('☁️ تم إرفاق الرابط السحابي الدائم للملف في Supabase:', url);
-                    }
-                } catch (upErr) {
-                    console.warn('Background Supabase upload warning:', upErr);
-                }
-            }
-
-            // Complete cloud synchronization with Supabase
-            if (typeof syncLmsCourseToSupabase === 'function') {
-                await syncLmsCourseToSupabase(courseKey);
-            }
-            if (typeof syncAllLmsCoursesToSupabase === 'function') {
-                await syncAllLmsCoursesToSupabase();
-            }
-
             localStorage.removeItem('sys_ai_active_draft_v1');
 
-            // Close modal and refresh UI
+            // ═════════════════════════════════════════════════════════════════
+            // CLOSE POPUP AUTOMATICALLY & UPDATE UI IMMEDIATELY
+            // ═════════════════════════════════════════════════════════════════
             closeAiGenerateModal();
             renderTrainerLms();
+            showToast('🎉 تم اعتماد وإنشاء محتويات الوحدة التدريبية بنجاح!', 'success');
 
-            showToast('🎉 تم حفظ واعتماد ومزامنة كافة محتويات الوحدة سحابياً في Supabase بنجاح!', 'success');
+            // ═════════════════════════════════════════════════════════════════
+            // ASYNCHRONOUS BACKGROUND SYNC (لا يعلق الواجهة ولا يؤخر إغلاق النافذة)
+            // ═════════════════════════════════════════════════════════════════
+            (async () => {
+                try {
+                    if (!cloudFileUrl && selectedAiFile && typeof uploadFileToSupabaseStorage === 'function') {
+                        const url = await uploadFileToSupabaseStorage(selectedAiFile, courseKey, activeWeek.id);
+                        if (url) {
+                            const lastVid = activeWeek.videos[activeWeek.videos.length - 1];
+                            if (lastVid) {
+                                lastVid.url = url;
+                                if (lastVid.lectureFile) lastVid.lectureFile.url = url;
+                            }
+                            const lastDoc = activeWeek.docs[activeWeek.docs.length - 1];
+                            if (lastDoc) lastDoc.url = url;
+                            persistLmsCourses();
+                            console.log('☁️ تم إرفاق الرابط السحابي الدائم للملف في Supabase:', url);
+                        }
+                    }
+                    if (typeof syncLmsCourseToSupabase === 'function') {
+                        await syncLmsCourseToSupabase(courseKey);
+                    }
+                    if (typeof syncAllLmsCoursesToSupabase === 'function') {
+                        await syncAllLmsCoursesToSupabase();
+                    }
+                } catch (bgSyncErr) {
+                    console.warn('Background Supabase upload/sync warning:', bgSyncErr);
+                }
+            })();
         } catch (saveErr) {
             console.error('Error saving AI content:', saveErr);
             showToast('حدث خطأ أثناء حفظ المحتوى: ' + (saveErr.message || ''), 'error');
