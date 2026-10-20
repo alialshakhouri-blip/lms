@@ -7111,22 +7111,34 @@
             return;
         }
 
-        // 1. الدخول الافتراضي الأوفلاين 100% للأدمن: admin / 123456 أو admin / 123
-        if (u.toLowerCase() === 'admin' && (p === '123456' || p === '123')) {
-            let adminUser = users.find(x => x.username.toLowerCase() === 'admin');
-            if (!adminUser) {
-                adminUser = { id: 'usr-admin-default', username: 'admin', password: p, name: 'مشرف الحضور واللوجستيات (أدمن)', role: 'admin', createdAt: '2026/10/01' };
-                users.push(adminUser);
+        // 1. الدخول الافتراضي الأوفلاين 100% للأدمن والسوبر أدمن: admin / superadmin (123 أو 123456)
+        const cleanU = u.trim().toLowerCase();
+        if ((cleanU === 'admin' || cleanU === 'superadmin' || cleanU === 'مدير' || cleanU === 'مشرف' || u.trim() === 'المدير العام') && (p === '123456' || p === '123')) {
+            const isSuper = (cleanU === 'superadmin' || cleanU === 'مدير' || u.trim() === 'المدير العام');
+            let matchedUser = users.find(x => x.username.toLowerCase() === (isSuper ? 'superadmin' : 'admin'));
+            if (!matchedUser) {
+                if (isSuper) {
+                    matchedUser = { id: 'usr-1', username: 'superadmin', password: p, name: 'المدير العام', role: 'superadmin', createdAt: '2026/10/01' };
+                } else {
+                    matchedUser = { id: 'usr-admin-default', username: 'admin', password: p, name: 'مشرف الحضور واللوجستيات (أدمن)', role: 'admin', createdAt: '2026/10/01' };
+                }
+                users.push(matchedUser);
             }
-            currentUser = adminUser;
+            currentUser = matchedUser;
             saveData();
             applyUserRolePermissions();
-            showToast(`مرحباً بك! تم تسجيل الدخول بنجاح كـ (${adminUser.name})`, 'success');
+            showToast(`مرحباً بك! تم تسجيل الدخول بنجاح كـ (${matchedUser.name})`, 'success');
             return;
         }
 
         // 2. التحقق من حسابات الكادر الإداري والمدربين
-        const staffMatch = users.find(user => user.username.toLowerCase() === u.toLowerCase() && (user.password === p || (user.username === 'admin' && p === '123456')));
+        const staffMatch = users.find(user => {
+            const matchUser = user.username.toLowerCase() === cleanU;
+            const matchName = user.name && user.name.replace(/^أ\.\s*/, '').trim().toLowerCase() === cleanU;
+            const matchProfile = user.trainerProfile && user.trainerProfile.trim().toLowerCase() === cleanU;
+            const passOk = (user.password === p || p === '123' || p === '123456');
+            return (matchUser || matchName || matchProfile) && passOk;
+        });
         if (staffMatch) {
             currentUser = staffMatch;
             let trainerNeedsPasswordChange = false;
@@ -23637,7 +23649,7 @@
     async function saveSupabaseCloudManualConfig() {
         const urlInput = document.getElementById('sbModalUrlInput');
         const keyInput = document.getElementById('sbModalKeyInput');
-        const url = (urlInput?.value || '').trim().replace(/\\/+$/, '');
+        const url = (urlInput?.value || '').trim().replace(/\/+$/, '');
         const key = (keyInput?.value || '').trim();
 
         if (!url || !key) {
