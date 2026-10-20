@@ -24700,6 +24700,79 @@
 
             if (supabaseClient && isSupabaseConnected) {
                 await supabaseClient.from('app_sync_state').upsert(coreUpserts, { onConflict: 'key' });
+
+                // مباشر: رفع المتدربين والحضور إلى جداول students و attendance
+                if (typeof syncAttendanceDirectToSupabase === 'function') {
+                    syncAttendanceDirectToSupabase(trainees);
+                }
+
+                // مباشر: رفع البلاغات إلى جدول delay_reports
+                if (Array.isArray(reports) && reports.length > 0) {
+                    try {
+                        const delayRows = reports.map(r => ({
+                            id: r.id,
+                            student_id: String(r.traineeId || ''),
+                            student_name: r.traineeName || '',
+                            group_name: r.traineeGroup || '—',
+                            delay_minutes: r.delayMinutes || 0,
+                            reason: r.note || r.type || '',
+                            excuse_type: r.type || 'ملاحظة عامة',
+                            status: r.status || 'pending',
+                            notes: r.actionNotes || r.actionDecision || '',
+                            report_date: r.date ? (new Date(r.date).toISOString().slice(0, 10)) : (new Date().toISOString().slice(0, 10))
+                        }));
+                        await supabaseClient.from('delay_reports').upsert(delayRows, { onConflict: 'id' });
+                    } catch(dErr) { console.warn('syncAllDataToCloud delay_reports upsert warning:', dErr); }
+                }
+
+                // مباشر: رفع تسليمات الاختبارات إلى جدول quiz_submissions
+                if (studentQuizSubmissions && Object.keys(studentQuizSubmissions).length > 0) {
+                    try {
+                        const qRows = Object.values(studentQuizSubmissions).map(q => ({
+                            id: `${q.studentId}_${q.quizId}`,
+                            student_id: String(q.studentId || ''),
+                            student_name: q.studentName || '',
+                            quiz_id: String(q.quizId || ''),
+                            course_key: q.courseKey || 'all',
+                            week_id: String(q.weekNum || 1),
+                            score: q.bestScore !== undefined ? q.bestScore : (q.score || null),
+                            best_score: q.bestScore !== undefined ? q.bestScore : (q.score || null),
+                            total_points: q.totalPoints || 10,
+                            answers: q.answers || {},
+                            attempts_count: q.attemptsCount || 1,
+                            is_locked: Boolean(q.locked || q.isLockedByAntiCheat),
+                            anti_cheat_status: q.antiCheatStatus || null,
+                            anti_cheat_warnings: q.antiCheatWarnings || 0,
+                            submitted_at: q.submittedAt || new Date().toISOString()
+                        }));
+                        await supabaseClient.from('quiz_submissions').upsert(qRows, { onConflict: 'id' });
+                    } catch(qErr) { console.warn('syncAllDataToCloud quiz_submissions upsert warning:', qErr); }
+                }
+
+                // مباشر: رفع تسليمات الواجبات إلى جدول assignment_submissions
+                if (studentAssignmentSubmissions && Object.keys(studentAssignmentSubmissions).length > 0) {
+                    try {
+                        const aRows = Object.values(studentAssignmentSubmissions).map(a => ({
+                            id: `${a.studentId}_${a.assignmentId}`,
+                            student_id: String(a.studentId || ''),
+                            student_name: a.studentName || '',
+                            assignment_id: String(a.assignmentId || ''),
+                            course_key: a.courseKey || 'all',
+                            week_id: String(a.weekNum || 1),
+                            submission_text: a.notes || a.submissionText || '',
+                            file_url: a.file || a.fileUrl || a.link || null,
+                            file_name: a.fileName || 'مرفق واجب',
+                            answers: a.answers || {},
+                            grade: a.score !== undefined ? a.score : null,
+                            max_points: a.maxPoints || 10,
+                            feedback: a.notes || '',
+                            graded_by: a.gradedBy || '',
+                            graded_by_trainer: Boolean(a.gradedByTrainer),
+                            submitted_at: a.submittedAt || new Date().toISOString()
+                        }));
+                        await supabaseClient.from('assignment_submissions').upsert(aRows, { onConflict: 'id' });
+                    } catch(aErr) { console.warn('syncAllDataToCloud assignment_submissions upsert warning:', aErr); }
+                }
             } else {
                 await fetch('/api/submissions-sync', {
                     method: 'POST',
