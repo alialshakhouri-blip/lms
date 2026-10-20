@@ -710,11 +710,11 @@
                 
                 <div id="topHeaderUploadButtons" class="flex items-center gap-2">
                     <span id="autoSyncScheduleBadge" class="hidden xl:inline-flex"></span>
-                    <button onclick="syncLiveAttendanceFromGoogleSheets()" class="gold-gradient-bg text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm hover:brightness-105 cursor-pointer" title="التحضير المباشر الصباحي عبر رابط Google Sheets">
+                    <button id="topSyncBtn" onclick="syncLiveAttendanceFromGoogleSheets()" class="gold-gradient-bg text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm hover:brightness-105 cursor-pointer" title="مزامنة التحضير المباشر من Google Sheets">
                         <span class="text-sm">🔄</span>
-                        <span>التحضير المباشر (Google Sheets)</span>
+                        <span id="topSyncBtnLabel">مزامنة التحضير</span>
                     </button>
-                    <button onclick="openLiveSheetConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold p-2 rounded-xl text-xs transition border border-slate-200 cursor-pointer" title="إعداد / تغيير رابط Google Sheets للتحضير المباشر">
+                    <button id="topLiveSheetSettingsBtn" onclick="openLiveSheetConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold p-2 rounded-xl text-xs transition border border-slate-200 cursor-pointer" title="إعداد / تغيير رابط Google Sheets للتحضير المباشر">
                         ⚙️
                     </button>
                 </div>
@@ -871,9 +871,14 @@
                     </button>
 
                     <!-- Admin Only: Timesheet / Salary Absence -->
-                    <button onclick="switchTab('timesheet')" id="btn-timesheet" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive border border-green-200/60 bg-green-50/40">
-                        <span class="text-base">💰</span>
-                        <span class="text-xs font-bold text-green-900">راتب • أيام الغياب</span>
+                    <button onclick="switchTab('timesheet')" id="btn-timesheet" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-green-200/60 bg-green-50/40" title="الرواتب والتايم شيت ( تحت التطوير )">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="text-base">💰</span>
+                            <span class="text-xs font-bold text-green-900 truncate">الرواتب والتايم شيت</span>
+                        </div>
+                        <span class="text-[9px] text-amber-800 bg-amber-100 border border-amber-300 font-black px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap shadow-2xs">
+                            ( تحت التطوير )
+                        </span>
                     </button>
 
                     <!-- Admin & Superadmin: Reports Center (مركز إصدار التقارير الإدارية والتحليلية) -->
@@ -1845,7 +1850,13 @@
                         <span class="text-3xl">💰</span>
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <h3 class="font-black text-slate-900 text-base">الراتب وأيام الغياب (التايم شيت)</h3>
+                                <h3 class="font-black text-slate-900 text-base flex items-center gap-2">
+                                    <span>الرواتب والتايم شيت</span>
+                                    <span class="text-amber-800 bg-amber-100 border border-amber-300 text-xs font-black px-2.5 py-0.5 rounded-full animate-pulse shadow-2xs inline-flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        ( تحت التطوير )
+                                    </span>
+                                </h3>
                                 <span class="bg-green-100 text-green-900 text-[10px] font-black px-2 py-0.5 rounded border border-green-300">نظام دورات الرواتب وحساب الشهور</span>
                             </div>
                             <p class="text-xs text-slate-500 mt-0.5">حساب غياب أشهر 9 و 10 و 11 ▸ دورة سامسونج (شهر ميلادي) ▸ دورة شينبو وسينوبك (أول 20 يوم أو من 21 لـ 20) ▸ الراتب 3700 ريال</p>
@@ -3204,10 +3215,6 @@
                     </div>
 
                     <div class="flex items-center gap-2.5 w-full md:w-auto flex-wrap">
-                        <button onclick="refreshStudentDashboardAttendance()" class="w-full md:w-auto bg-amber-400 hover:bg-amber-500 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer" title="تحديث وتزامن الحضور مباشرة من قوقل شيت">
-                            <span>🔄</span>
-                            <span>تحديث الحضور المباشر</span>
-                        </button>
                         <button onclick="logout()" class="w-full md:w-auto bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-700 border border-slate-200 font-bold px-4 py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
                             <span>🚪</span>
                             <span>تسجيل الخروج</span>
@@ -6307,6 +6314,7 @@
 
         const topHeaderUploadButtons = document.getElementById('topHeaderUploadButtons');
         const topSyncBtn = document.getElementById('topSyncBtn');
+        const topLiveSheetSettingsBtn = document.getElementById('topLiveSheetSettingsBtn');
         const tdAdminTrainerSelector = document.getElementById('tdAdminTrainerSelector');
         const masterScheduleUploadBtnContainer = document.getElementById('masterScheduleUploadBtnContainer');
         const reportsTrainerFilterContainer = document.getElementById('reportsTrainerFilterContainer');
@@ -6333,6 +6341,7 @@
 
             if (topHeaderUploadButtons) topHeaderUploadButtons.classList.add('hidden');
             if (topSyncBtn) topSyncBtn.classList.add('hidden');
+            if (topLiveSheetSettingsBtn) topLiveSheetSettingsBtn.classList.add('hidden');
             if (tdAdminTrainerSelector) tdAdminTrainerSelector.classList.add('hidden');
             if (masterScheduleUploadBtnContainer) masterScheduleUploadBtnContainer.classList.add('hidden');
             if (reportsTrainerFilterContainer) reportsTrainerFilterContainer.classList.add('hidden');
@@ -6390,9 +6399,10 @@
             if (btnTrainerReports) btnTrainerReports.classList.remove('hidden');
             if (btnVirtualClass) btnVirtualClass.classList.remove('hidden');
 
-            // إخفاء أزرار الرفع والإجراءات الإدارية
-            if (topHeaderUploadButtons) topHeaderUploadButtons.classList.add('hidden');
-            if (topSyncBtn) topSyncBtn.classList.add('hidden');
+            // إظهار زر مزامنة التحضير للمدرب وإخفاء زر إعدادات الرابط والإجراءات الإدارية
+            if (topHeaderUploadButtons) topHeaderUploadButtons.classList.remove('hidden');
+            if (topSyncBtn) topSyncBtn.classList.remove('hidden');
+            if (topLiveSheetSettingsBtn) topLiveSheetSettingsBtn.classList.add('hidden');
             if (tdAdminTrainerSelector) tdAdminTrainerSelector.classList.add('hidden');
             if (masterScheduleUploadBtnContainer) masterScheduleUploadBtnContainer.classList.add('hidden');
             if (reportsTrainerFilterContainer) reportsTrainerFilterContainer.classList.add('hidden');
@@ -6421,6 +6431,7 @@
 
             if (topHeaderUploadButtons) topHeaderUploadButtons.classList.remove('hidden');
             if (topSyncBtn) topSyncBtn.classList.remove('hidden');
+            if (topLiveSheetSettingsBtn) topLiveSheetSettingsBtn.classList.remove('hidden');
             if (tdAdminTrainerSelector) tdAdminTrainerSelector.classList.remove('hidden');
             if (masterScheduleUploadBtnContainer) masterScheduleUploadBtnContainer.classList.remove('hidden');
             if (reportsTrainerFilterContainer) reportsTrainerFilterContainer.classList.remove('hidden');
@@ -9854,8 +9865,8 @@
     }
 
     async function syncLiveAttendanceFromGoogleSheets(isSilent = false) {
-        if (currentUser?.role === 'trainer') {
-            return showToast('⛔ عذراً: غير مصرح للمدرب بتحديث كشف الحضور المباشر', 'error');
+        if (currentUser?.role === 'student') {
+            return showToast('⛔ عذراً: مزامنة التحضير غير مصرحة للمتدربين', 'error');
         }
 
         const savedUrl = getLiveSheetUrl();
@@ -10143,7 +10154,7 @@
 
     async function checkAndRunScheduledAttendanceSync(isInitial = false) {
         if (typeof syncLiveAttendanceFromGoogleSheets !== 'function') return;
-        if (currentUser?.role === 'trainer') return;
+        if (currentUser?.role === 'student') return;
 
         const status = getAttendanceSyncStatus();
         updateAttendanceScheduleStatusUI();
