@@ -384,9 +384,9 @@ const CURATED_EDUCATIONAL_VIDEOS = [
 
 function resolveDirectEducationalVideos(contextText = '', title = '') {
   const defaultVideos = [
-    { id: 1, title: `شرح تطبيقي لـ ${title || 'المفاهيم الأساسية'} وأهم المصطلحات المهنية`, url: 'https://www.youtube.com/watch?v=3sW4n-87HwA', duration: '15:00 دقيقة' },
-    { id: 2, title: `إجراءات السلامة والجودة وتطبيق المعايير المهنية المعتمدة`, url: 'https://www.youtube.com/watch?v=kYv9yYm3sQ0', duration: '18:00 دقيقة' },
-    { id: 3, title: `المصطلحات التخصصية وأفضل الممارسات في بيئة العمل`, url: 'https://www.youtube.com/watch?v=mQWpB8u-p6Y', duration: '14:00 دقيقة' }
+    { id: 1, title: `شرح تطبيقي لـ ${title || 'المفاهيم الأساسية'} وأهم المصطلحات المهنية`, url: 'https://www.youtube.com/watch?v=jBq2c8jE1uQ', duration: '15:00 دقيقة' },
+    { id: 2, title: `إجراءات السلامة والجودة وتطبيق المعايير المهنية المعتمدة`, url: 'https://www.youtube.com/watch?v=kYJv8Pj3p8k', duration: '18:00 دقيقة' },
+    { id: 3, title: `المصطلحات التخصصية وأفضل الممارسات في بيئة العمل`, url: 'https://www.youtube.com/watch?v=5Uq2x3Tq86w', duration: '14:00 دقيقة' }
   ];
 
   const hay = (contextText + ' ' + title).toLowerCase();
@@ -408,11 +408,13 @@ function ensureSpecificYouTubeVideos(data, contextTitle = '') {
   if (!Array.isArray(data.suggested_videos) || data.suggested_videos.length === 0) {
     data.suggested_videos = directVideos;
   } else {
-    data.suggested_videos = data.suggested_videos.map((v, i) => {
-      let url = (v.youtube_url || '').trim();
-      const isSearchUrl = url.includes('results?') || url.includes('search_query=');
-      const isValidWatch = url.includes('watch?v=') || url.includes('youtu.be/') || url.includes('embed/');
-      if (!isValidWatch || isSearchUrl) {
+    data.suggested_videos = data.suggested_videos.slice(0, 3).map((v, i) => {
+      let url = (v.youtube_url || v.url || '').trim();
+      const isSearchUrl = url.includes('results?') || url.includes('search_query=') || url.includes('/results');
+      const videoMatch = !isSearchUrl && url.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+      if (videoMatch && videoMatch[1] && !videoMatch[1].startsWith('0000') && !videoMatch[1].toLowerCase().includes('example')) {
+        url = `https://www.youtube.com/watch?v=${videoMatch[1]}`;
+      } else {
         url = directVideos[i % directVideos.length].youtube_url;
       }
       return {

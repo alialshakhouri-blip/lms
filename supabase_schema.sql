@@ -133,3 +133,26 @@ CREATE POLICY "Allow public update to lms-files" ON storage.objects
 
 CREATE POLICY "Allow public delete from lms-files" ON storage.objects
     FOR DELETE USING (bucket_id = 'lms-files');
+
+-- ══════════════════════════════════════════════════════════════════════════════
+-- 8. تمكين البث اللحظي المباشر (Supabase Realtime Publication)
+-- ══════════════════════════════════════════════════════════════════════════════
+DO $$
+BEGIN
+    BEGIN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.student_submissions;
+    EXCEPTION WHEN duplicate_object THEN
+        -- already added
+    END;
+    BEGIN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.app_sync_state;
+    EXCEPTION WHEN duplicate_object THEN
+        -- already added
+    END;
+    BEGIN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.lms_courses;
+    EXCEPTION WHEN duplicate_object THEN
+        -- already added
+    END;
+END $$;
+

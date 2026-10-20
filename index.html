@@ -710,6 +710,13 @@
                 
                 <div id="topHeaderUploadButtons" class="flex items-center gap-2">
                     <span id="autoSyncScheduleBadge" class="hidden xl:inline-flex"></span>
+                    
+                    <!-- ☁️ Global Supabase Cloud Sync Badge -->
+                    <div onclick="openSupabaseCloudModal()" class="supabase-cloud-badge flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 whitespace-nowrap shrink-0 transition cursor-pointer" title="حالة المزامنة السحابية (Supabase) - اضغط للإعداد والمزامنة">
+                        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                        <span>وضع التخزين المحلي</span>
+                    </div>
+
                     <button id="topSyncBtn" onclick="syncLiveAttendanceFromGoogleSheets()" class="gold-gradient-bg text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm hover:brightness-105 cursor-pointer" title="مزامنة التحضير المباشر من Google Sheets">
                         <span class="text-sm">🔄</span>
                         <span id="topSyncBtnLabel">مزامنة التحضير</span>
@@ -2618,6 +2625,83 @@
                 </div>
             </div>
 
+            <!-- ==================== SUPABASE CLOUD SYNC & CONFIG MODAL ==================== -->
+            <div id="supabaseCloudModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-5 border border-slate-200 text-right max-h-[92vh] overflow-y-auto">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-2xl p-2 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200">☁️</span>
+                            <div>
+                                <h3 class="font-black text-slate-900 text-base">إعدادات المزامنة السحابية المركزية (Supabase Cloud)</h3>
+                                <p class="text-[11px] text-slate-500">ربط كمبيوتر المدرب وأجهزة المتدربين بقاعدة بيانات سحابية موحدة</p>
+                            </div>
+                        </div>
+                        <button onclick="closeSupabaseCloudModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold p-1 cursor-pointer">✕</button>
+                    </div>
+
+                    <!-- Connection Status Card -->
+                    <div id="sbModalStatusCard" class="p-4 rounded-2xl border transition-all">
+                        <!-- Dynamically populated in openSupabaseCloudModal() -->
+                    </div>
+
+                    <!-- Why Cloud Sync is Essential Info Box -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 space-y-1.5 text-xs text-blue-950 font-bold">
+                        <div class="flex items-center gap-2 text-blue-800 font-black">
+                            <span>💡</span>
+                            <span>لماذا تحتاج المزامنة السحابية عند دخول متدرب من كمبيوتر آخر؟</span>
+                        </div>
+                        <p class="text-[11px] text-blue-900/90 leading-relaxed font-normal">
+                            بدون الربط السحابي، يعمل النظام في <strong>"وضع التخزين المحلي (Local Storage)"</strong> حيث تُحفظ تسليمات كل متدرب ودرجاته في متصفح جهازه فقط بمعزل عن بقية الأجهزة.
+                            عند تفعيل سحابة Supabase، تتصل جميع أجهزة المتدربين والمدربين بقاعدة بيانات سحابية موحدة، لتصل تسليمات الطلاب وتحديثات الكورسات فورياً إلى شاشة المدرب.
+                        </p>
+                    </div>
+
+                    <!-- 3-Step Setup Guide Accordion / Summary -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5">
+                        <div class="text-xs font-black text-slate-800 flex items-center justify-between">
+                            <span>🚀 خطوات التفعيل في 3 دقائق:</span>
+                            <button type="button" onclick="copySupabaseSqlScript()" class="gold-gradient-bg text-slate-950 font-black text-[11px] px-2.5 py-1 rounded-lg border border-amber-400 hover:brightness-105 cursor-pointer shadow-xs flex items-center gap-1">
+                                <span>📋</span>
+                                <span>نسخ كود إعداد الجداول (SQL)</span>
+                            </button>
+                        </div>
+                        <ol class="text-[11px] text-slate-600 space-y-1.5 list-decimal list-inside leading-relaxed font-bold">
+                            <li>أنشئ مشروعاً جديداً مجاناً على <a href="https://supabase.com" target="_blank" class="text-emerald-700 underline font-black">supabase.com ↗</a>.</li>
+                            <li>افتح <strong>SQL Editor</strong> في Supabase، الصق الكود الذي نسخته، واضغط <strong>Run</strong> لإنشاء الجداول وسلة تخزين الملفات.</li>
+                            <li>انسخ <strong>Project URL</strong> و <strong>Anon Key</strong> من إعدادات Supabase (Project Settings ➔ API) وضعها في الحقول أدناه أو في متغيرات بيئة Vercel.</li>
+                        </ol>
+                    </div>
+
+                    <!-- Credentials Form -->
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">رابط مشروع Supabase (Project URL):</label>
+                            <input type="url" id="sbModalUrlInput" placeholder="https://xxxxxxxxxxxx.supabase.co" class="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-50 font-mono text-slate-900 outline-none focus:border-emerald-500 font-bold transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">مفتاح الوصول العام (Anon Public Key):</label>
+                            <input type="password" id="sbModalKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-50 font-mono text-slate-900 outline-none focus:border-emerald-500 font-bold transition">
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+                        <button type="button" onclick="saveSupabaseCloudManualConfig()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition shadow-sm cursor-pointer flex items-center justify-center gap-1.5">
+                            <span>💾</span>
+                            <span>حفظ واختبار الاتصال</span>
+                        </button>
+                        <button type="button" onclick="syncAllDataToCloud(true)" class="gold-gradient-bg text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs transition shadow-sm hover:brightness-105 cursor-pointer flex items-center justify-center gap-1.5">
+                            <span>🔄</span>
+                            <span>مزامنة شاملة الآن</span>
+                        </button>
+                        <button type="button" onclick="closeSupabaseCloudModal()" class="px-4 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer">
+                            إغلاق
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- ==================== LIVE SHEET FALLBACK MODAL ==================== -->
             <div id="liveSheetFallbackModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
                 <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200 text-right">
@@ -3411,6 +3495,11 @@
                         <span>⬅</span>
                         <span>العودة إلى قائمة مقرراتك التدريبية</span>
                     </button>
+                    <!-- Supabase Cloud Badge -->
+                    <div class="supabase-cloud-badge flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 whitespace-nowrap shrink-0 transition" title="حالة الاتصال السحابي المركزي">
+                        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                        <span>وضع التخزين المحلي</span>
+                    </div>
                 </div>
 
                 <!-- Course Header Banner -->
@@ -3606,7 +3695,7 @@
                             </button>
 
                             <!-- ☁️ Supabase Cloud Sync Badge -->
-                            <div class="supabase-cloud-badge flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 whitespace-nowrap shrink-0 transition" title="حالة المزامنة السحابية الدائمة (Supabase Database & Storage)">
+                            <div onclick="openSupabaseCloudModal()" class="supabase-cloud-badge flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 whitespace-nowrap shrink-0 transition cursor-pointer" title="حالة المزامنة السحابية الدائمة (Supabase) - اضغط للإعداد والمزامنة">
                                 <span class="w-2 h-2 rounded-full bg-slate-400"></span>
                                 <span>وضع التخزين المحلي</span>
                             </div>
@@ -18995,7 +19084,50 @@
     function saveAntiCheatIncidents(incidents) {
         localStorage.setItem('sys_anti_cheat_incidents_v1', JSON.stringify(incidents));
         updateAntiCheatIncidentsBadges();
+        if (typeof syncAntiCheatIncidentsToCloud === 'function') {
+            syncAntiCheatIncidentsToCloud();
+        }
     }
+
+    let _syncAntiCheatDebounceTimer = null;
+    function syncAntiCheatIncidentsToCloud() {
+        clearTimeout(_syncAntiCheatDebounceTimer);
+        _syncAntiCheatDebounceTimer = setTimeout(async () => {
+            const incidents = getStoredAntiCheatIncidents();
+            if (!incidents || typeof incidents !== 'object') return;
+
+            // 1. Direct Supabase Client
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && typeof isSupabaseConnected !== 'undefined' && isSupabaseConnected) {
+                try {
+                    await supabaseClient.from('app_sync_state').upsert({
+                        key: 'sys_anti_cheat_incidents_v1',
+                        data: incidents,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'key' });
+                    return;
+                } catch (e) {
+                    console.warn('Direct anti-cheat incidents sync failed:', e);
+                }
+            }
+
+            // 2. Serverless API Fallback
+            try {
+                await fetch('/api/submissions-sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'sync_state',
+                        key: 'sys_anti_cheat_incidents_v1',
+                        data: incidents
+                    })
+                });
+            } catch (apiErr) {
+                console.warn('API anti-cheat sync warning:', apiErr);
+            }
+        }, 600);
+    }
+    window.syncAntiCheatIncidentsToCloud = syncAntiCheatIncidentsToCloud;
+
 
     function updateAntiCheatIncidentsBadges() {
         const incidents = getStoredAntiCheatIncidents();
@@ -19098,6 +19230,10 @@
         subRecord.locked = true;
         studentQuizSubmissions[subKey] = subRecord;
         localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+
+        if (typeof syncStudentSubmissionToCloud === 'function') {
+            syncStudentSubmissionToCloud('quiz', subKey, subRecord);
+        }
 
         // 3. Switch UI to Locked Stage
         const stagePledge = document.getElementById('tqStagePledge');
@@ -19222,6 +19358,9 @@
             subRecord.extraAttemptsAllowed = (subRecord.extraAttemptsAllowed || 0) + 1;
             studentQuizSubmissions[subKey] = subRecord;
             localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+            if (typeof syncStudentSubmissionToCloud === 'function') {
+                syncStudentSubmissionToCloud('quiz', subKey, subRecord);
+            }
         }
 
         const incidents = getStoredAntiCheatIncidents();
@@ -19276,6 +19415,9 @@
 
         studentQuizSubmissions[subKey] = subRecord;
         localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+        if (typeof syncStudentSubmissionToCloud === 'function') {
+            syncStudentSubmissionToCloud('quiz', subKey, subRecord);
+        }
 
         // Record 0 in trainee gradebook
         if (typeof autoRecordAssessmentGradeForTrainee === 'function' && targetQuiz) {
@@ -20534,6 +20676,11 @@
             autoRecordAssessmentGradeForTrainee(currentUser.id, 'quiz', currentTakingQuiz, subRecord.bestScore);
         }
 
+        // المزامنة السحابية الفورية للتسليم
+        if (typeof syncStudentSubmissionToCloud === 'function') {
+            syncStudentSubmissionToCloud('quiz', subKey, subRecord);
+        }
+
         // الانتقال للمرحلة 3: تأكيد التسليم مع حجب النتيجة الرقمية عن المتدرب عملاً بضوابط النزاهة الأكاديمية
         const stagePledge = document.getElementById('tqStagePledge');
         const stageExam = document.getElementById('tqStageExam');
@@ -20827,6 +20974,11 @@
             autoRecordAssessmentGradeForTrainee(currentUser.id, 'assignment', ass, autoScore);
         }
 
+        // المزامنة السحابية الفورية لتسليم الواجب
+        if (typeof syncStudentSubmissionToCloud === 'function') {
+            syncStudentSubmissionToCloud('assignment', subKey, studentAssignmentSubmissions[subKey]);
+        }
+
         closeSubmitAssignmentModal();
 
         if (earlyCheck.isEarly) {
@@ -20865,6 +21017,12 @@
         if (targetTrainer) {
             const matchedKey = findCourseKeyForTrainer(targetTrainer);
             if (matchedKey) activeTrainerLmsCourse = matchedKey;
+        }
+        if (typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
+            pullSubmissionsAndGradebooksFromSupabase(false);
+        }
+        if (typeof pullLmsCoursesFromSupabase === 'function') {
+            pullLmsCoursesFromSupabase();
         }
         switchTab('trainerLms');
     }
@@ -22619,6 +22777,8 @@
     let isSupabaseConnected = false;
     let supabaseCloudConfig = { url: '', anonKey: '' };
 
+    let _cloudPeriodicSyncTimer = null;
+
     async function initSupabaseCloudIntegration() {
         try {
             let cfg = null;
@@ -22645,8 +22805,19 @@
                 console.log('✅ Supabase Cloud connected:', sbUrl);
                 updateCloudSyncBadge(true);
 
-                // Pull latest courses from cloud
+                // 1. Pull latest courses from cloud
                 await pullLmsCoursesFromSupabase();
+
+                // 2. Pull latest student submissions & gradebooks from cloud
+                if (typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
+                    await pullSubmissionsAndGradebooksFromSupabase(false);
+                }
+
+                // 3. Start Periodic Sync (polling every 25 seconds)
+                startCloudPeriodicSync();
+
+                // 4. Realtime subscription (instant sync on submission)
+                initSupabaseRealtimeChannel();
             } else {
                 updateCloudSyncBadge(false);
             }
@@ -22657,15 +22828,64 @@
     }
     window.initSupabaseCloudIntegration = initSupabaseCloudIntegration;
 
+    function startCloudPeriodicSync() {
+        if (_cloudPeriodicSyncTimer) return;
+        _cloudPeriodicSyncTimer = setInterval(async () => {
+            if (isSupabaseConnected && !document.hidden && typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
+                await pullSubmissionsAndGradebooksFromSupabase(false);
+            }
+        }, 25000);
+    }
+
+    function initSupabaseRealtimeChannel() {
+        if (!supabaseClient || window._supabaseRealtimeActive) return;
+        try {
+            window._supabaseRealtimeActive = true;
+            supabaseClient
+                .channel('bgti_live_updates')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'student_submissions' }, (payload) => {
+                    console.log('⚡ تسليم جديد وصل لحظياً عبر السحابة:', payload);
+                    if (typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
+                        pullSubmissionsAndGradebooksFromSupabase(false);
+                    }
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'app_sync_state' }, (payload) => {
+                    console.log('⚡ تحديث لحظي للدرجات عبر السحابة:', payload);
+                    if (typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
+                        pullSubmissionsAndGradebooksFromSupabase(false);
+                    }
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'lms_courses' }, (payload) => {
+                    console.log('⚡ تحديث لحظي للمقررات عبر السحابة:', payload);
+                    if (typeof pullLmsCoursesFromSupabase === 'function') {
+                        pullLmsCoursesFromSupabase();
+                    }
+                })
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('⚡ تم تفعيل قناة Realtime للسحابة بنجاح.');
+                    }
+                });
+        } catch (rtErr) {
+            console.warn('Supabase Realtime setup skipped:', rtErr);
+        }
+    }
+
     function updateCloudSyncBadge(connected) {
         const badges = document.querySelectorAll('.supabase-cloud-badge');
         badges.forEach(b => {
+            b.classList.add('cursor-pointer');
+            b.onclick = () => openSupabaseCloudModal();
             if (connected) {
                 b.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>سحابة Supabase متصلة</span>';
-                b.classList.remove('text-slate-400', 'bg-slate-100');
-                b.classList.add('text-emerald-700', 'bg-emerald-50', 'border-emerald-200');
+                b.classList.remove('text-slate-400', 'bg-slate-100', 'border-slate-200', 'text-amber-800', 'bg-amber-50', 'border-amber-300');
+                b.classList.add('text-emerald-700', 'bg-emerald-50', 'border-emerald-200', 'hover:bg-emerald-100');
+                b.title = 'سحابة Supabase متصلة بنجاح - انقر لإدارة المزامنة';
             } else {
-                b.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400"></span><span>وضع التخزين المحلي</span>';
+                b.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>وضع التخزين المحلي (اضغط للربط)</span>';
+                b.classList.remove('text-emerald-700', 'bg-emerald-50', 'border-emerald-200', 'text-slate-400', 'bg-slate-100', 'border-slate-200');
+                b.classList.add('text-amber-800', 'bg-amber-50', 'border-amber-300', 'hover:bg-amber-100');
+                b.title = 'التطبيق في وضع التخزين المحلي - انقر لربط سحابة Supabase ومزامنة الأجهزة';
             }
         });
     }
@@ -22981,6 +23201,519 @@
     }
     window.persistLmsCourses = persistLmsCourses;
     window.persistLmsCoursesLocalOnly = persistLmsCoursesLocalOnly;
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  STUDENT SUBMISSIONS & GRADEBOOK CLOUD SYNCHRONIZATION ENGINE
+    // ══════════════════════════════════════════════════════════════════════════
+
+    async function pullSubmissionsAndGradebooksFromSupabase(showNotification = false) {
+        try {
+            let quizSubs = null;
+            let assSubs = null;
+            let gbs = null;
+            let cloudIncidents = null;
+
+            // 1. Try direct Supabase client if connected
+            if (supabaseClient && isSupabaseConnected) {
+                try {
+                    const [subResult, stateResult] = await Promise.all([
+                        supabaseClient
+                            .from('student_submissions')
+                            .select('*')
+                            .order('submitted_at', { ascending: false })
+                            .limit(2000),
+                        supabaseClient
+                            .from('app_sync_state')
+                            .select('*')
+                    ]);
+
+                    const stateMap = {};
+                    if (!stateResult.error && Array.isArray(stateResult.data)) {
+                        stateResult.data.forEach(r => { stateMap[r.key] = r.data; });
+                    }
+
+                    quizSubs = stateMap['sys_student_quiz_submissions_v1'] || {};
+                    assSubs = stateMap['sys_student_assignment_submissions_v1'] || {};
+                    gbs = stateMap['sys_trainee_gradebooks_v1'] || null;
+                    cloudIncidents = stateMap['sys_anti_cheat_incidents_v1'] || null;
+
+                    if (!subResult.error && Array.isArray(subResult.data)) {
+                        subResult.data.forEach(item => {
+                            const key = item.id;
+                            if (!key) return;
+                            if (item.component_type === 'quiz') {
+                                if (!quizSubs[key]) {
+                                    quizSubs[key] = {
+                                        studentId: item.student_id,
+                                        studentName: item.student_name,
+                                        quizId: item.component_id,
+                                        score: item.grade !== null ? Number(item.grade) : null,
+                                        bestScore: item.grade !== null ? Number(item.grade) : null,
+                                        totalPoints: item.max_grade !== null ? Number(item.max_grade) : 10,
+                                        answers: item.answers || {},
+                                        notes: item.feedback || '',
+                                        submittedAt: item.submitted_at
+                                    };
+                                }
+                            } else if (item.component_type === 'assignment') {
+                                if (!assSubs[key]) {
+                                    assSubs[key] = {
+                                        studentId: item.student_id,
+                                        studentName: item.student_name,
+                                        assignmentId: item.component_id,
+                                        score: item.grade !== null ? Number(item.grade) : null,
+                                        maxPoints: item.max_grade !== null ? Number(item.max_grade) : 10,
+                                        answers: item.answers || {},
+                                        notes: item.feedback || '',
+                                        submittedAt: item.submitted_at
+                                    };
+                                }
+                            }
+                        });
+                    }
+                } catch (sbErr) {
+                    console.warn('Direct Supabase pull warning:', sbErr);
+                }
+            }
+
+            // 2. Fallback via /api/submissions-sync serverless endpoint
+            if (!quizSubs && !assSubs) {
+                try {
+                    const res = await fetch('/api/submissions-sync');
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json.success) {
+                            quizSubs = json.quizSubmissions || {};
+                            assSubs = json.assignmentSubmissions || {};
+                            gbs = json.gradebooks || null;
+                            cloudIncidents = json.antiCheatIncidents || null;
+                        }
+                    }
+                } catch (apiErr) {
+                    console.warn('API submissions pull warning:', apiErr);
+                }
+            }
+
+            if (!quizSubs && !assSubs && !gbs && !cloudIncidents) return;
+
+            let hasChanges = false;
+
+            // Merge Quizzes
+            if (quizSubs && typeof quizSubs === 'object') {
+                for (const [k, qSub] of Object.entries(quizSubs)) {
+                    if (!studentQuizSubmissions[k]) {
+                        studentQuizSubmissions[k] = qSub;
+                        hasChanges = true;
+                    } else {
+                        const loc = studentQuizSubmissions[k];
+                        if ((qSub.attemptsCount || 0) > (loc.attemptsCount || 0) || 
+                            (qSub.bestScore || 0) > (loc.bestScore || 0) || 
+                            (qSub.locked && !loc.locked) ||
+                            (new Date(qSub.submittedAt || 0) > new Date(loc.submittedAt || 0))) {
+                            studentQuizSubmissions[k] = { ...loc, ...qSub };
+                            hasChanges = true;
+                        }
+                    }
+                }
+                if (hasChanges) {
+                    localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+                }
+            }
+
+            // Merge Assignments
+            if (assSubs && typeof assSubs === 'object') {
+                for (const [k, aSub] of Object.entries(assSubs)) {
+                    if (!studentAssignmentSubmissions[k]) {
+                        studentAssignmentSubmissions[k] = aSub;
+                        hasChanges = true;
+                    } else {
+                        const loc = studentAssignmentSubmissions[k];
+                        if (!loc.gradedByTrainer && aSub.gradedByTrainer) {
+                            studentAssignmentSubmissions[k] = { ...loc, ...aSub };
+                            hasChanges = true;
+                        } else if (new Date(aSub.submittedAt || 0) > new Date(loc.submittedAt || 0)) {
+                            studentAssignmentSubmissions[k] = { ...loc, ...aSub };
+                            hasChanges = true;
+                        }
+                    }
+                }
+                if (hasChanges) {
+                    localStorage.setItem('sys_student_assignment_submissions_v1', JSON.stringify(studentAssignmentSubmissions));
+                }
+            }
+
+            // Merge Gradebooks
+            if (gbs && typeof gbs === 'object') {
+                for (const [tId, cGb] of Object.entries(gbs)) {
+                    if (!traineeGradebooks[tId]) {
+                        traineeGradebooks[tId] = cGb;
+                        hasChanges = true;
+                    } else {
+                        const lGb = traineeGradebooks[tId];
+                        const cTime = new Date(cGb.updatedAt || 0).getTime();
+                        const lTime = new Date(lGb.updatedAt || 0).getTime();
+                        if (cTime > lTime) {
+                            traineeGradebooks[tId] = cGb;
+                            hasChanges = true;
+                        }
+                    }
+                }
+                if (hasChanges) {
+                    localStorage.setItem('sys_trainee_gradebooks_v1', JSON.stringify(traineeGradebooks));
+                }
+            }
+
+            // Merge Anti-Cheat Incidents
+            if (cloudIncidents && typeof cloudIncidents === 'object') {
+                const localIncidents = getStoredAntiCheatIncidents();
+                let incChanged = false;
+                for (const [k, inc] of Object.entries(cloudIncidents)) {
+                    if (!localIncidents[k]) {
+                        localIncidents[k] = inc;
+                        incChanged = true;
+                    } else {
+                        const locTime = new Date(localIncidents[k].lockedAt || 0).getTime();
+                        const cTime = new Date(inc.lockedAt || 0).getTime();
+                        const locActionTime = new Date(localIncidents[k].trainerActionAt || 0).getTime();
+                        const cActionTime = new Date(inc.trainerActionAt || 0).getTime();
+                        if (cActionTime > locActionTime || cTime > locTime) {
+                            localIncidents[k] = { ...localIncidents[k], ...inc };
+                            incChanged = true;
+                        }
+                    }
+                }
+                if (incChanged) {
+                    localStorage.setItem('sys_anti_cheat_incidents_v1', JSON.stringify(localIncidents));
+                    updateAntiCheatIncidentsBadges();
+                    hasChanges = true;
+                }
+            }
+
+            if (hasChanges) {
+                console.log('🔄 تم مزامنة ودمج تسليمات المتدربين والدرجات من السحابة بنجاح.');
+                if (typeof renderGradesSystemTab === 'function' && document.getElementById('tab-gradesSystem') && !document.getElementById('tab-gradesSystem').classList.contains('hidden')) {
+                    renderGradesSystemTab();
+                }
+                if (typeof renderStudentLms === 'function' && document.getElementById('tab-studentLms') && !document.getElementById('tab-studentLms').classList.contains('hidden')) {
+                    renderStudentLms();
+                }
+                if (typeof renderStudentGradesTab === 'function' && document.getElementById('tab-studentGrades') && !document.getElementById('tab-studentGrades').classList.contains('hidden')) {
+                    renderStudentGradesTab();
+                }
+                if (typeof renderTrainerSubmissionsTab === 'function' && document.getElementById('tab-trainerSubmissions') && !document.getElementById('tab-trainerSubmissions').classList.contains('hidden')) {
+                    renderTrainerSubmissionsTab();
+                }
+                if (showNotification && typeof showToast === 'function') {
+                    showToast('✅ تم مزامنة أحدث تسليمات ودرجات المتدربين من السحابة', 'success');
+                }
+            }
+        } catch (err) {
+            console.warn('pullSubmissionsAndGradebooksFromSupabase error:', err);
+        }
+    }
+    window.pullSubmissionsAndGradebooksFromSupabase = pullSubmissionsAndGradebooksFromSupabase;
+
+    async function syncStudentSubmissionToCloud(type, subKey, subRecord) {
+        if (!subKey || !subRecord) return;
+        const isQuiz = type === 'quiz';
+        const activeKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : '';
+        const activeW = (typeof activeLmsWeek !== 'undefined') ? activeLmsWeek : 1;
+
+        // 1. Direct Supabase Client
+        if (supabaseClient && isSupabaseConnected) {
+            try {
+                const row = {
+                    id: subKey,
+                    student_id: String(subRecord.studentId || subKey.split('_')[0] || ''),
+                    student_name: subRecord.studentName || '',
+                    course_key: activeKey || 'all',
+                    week_id: String(activeW),
+                    component_type: isQuiz ? 'quiz' : 'assignment',
+                    component_id: String(subRecord.quizId || subRecord.assignmentId || subKey.split('_').slice(1).join('_')),
+                    answers: subRecord.answers || {},
+                    grade: (typeof subRecord.score === 'number' && !isNaN(subRecord.score)) ? subRecord.score : (subRecord.bestScore || null),
+                    max_grade: subRecord.maxPoints || subRecord.totalPoints || 10,
+                    feedback: subRecord.notes || '',
+                    submitted_at: subRecord.submittedAt || new Date().toISOString()
+                };
+                const { error: insErr } = await supabaseClient
+                    .from('student_submissions')
+                    .upsert(row, { onConflict: 'id' });
+
+                if (!insErr) {
+                    console.log(`☁️ تم مزامنة تسليم [${subKey}] مباشرة إلى سحابة Supabase.`);
+                    const stateKey = isQuiz ? 'sys_student_quiz_submissions_v1' : 'sys_student_assignment_submissions_v1';
+                    const currentMap = isQuiz ? studentQuizSubmissions : studentAssignmentSubmissions;
+                    await supabaseClient
+                        .from('app_sync_state')
+                        .upsert({
+                            key: stateKey,
+                            data: currentMap,
+                            updated_at: new Date().toISOString()
+                        }, { onConflict: 'key' });
+                    return;
+                }
+            } catch (e) {
+                console.warn('Direct Supabase submission sync failed, using API:', e);
+            }
+        }
+
+        // 2. Serverless API Fallback
+        try {
+            await fetch('/api/submissions-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'submission',
+                    type: isQuiz ? 'quiz' : 'assignment',
+                    subKey: subKey,
+                    subRecord: subRecord,
+                    courseKey: activeKey,
+                    weekNum: activeW
+                })
+            });
+            console.log(`☁️ تم إرسال تسليم [${subKey}] عبر API Vercel/Supabase بنجاح.`);
+        } catch (apiErr) {
+            console.warn('API submission sync error:', apiErr);
+        }
+    }
+    window.syncStudentSubmissionToCloud = syncStudentSubmissionToCloud;
+
+    let _syncGradebooksDebounceTimer = null;
+    function syncGradebooksToCloud() {
+        clearTimeout(_syncGradebooksDebounceTimer);
+        _syncGradebooksDebounceTimer = setTimeout(async () => {
+            if (!traineeGradebooks || typeof traineeGradebooks !== 'object') return;
+
+            // 1. Direct Supabase
+            if (supabaseClient && isSupabaseConnected) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('app_sync_state')
+                        .upsert({
+                            key: 'sys_trainee_gradebooks_v1',
+                            data: traineeGradebooks,
+                            updated_at: new Date().toISOString()
+                        }, { onConflict: 'key' });
+                    if (!error) {
+                        console.log('☁️ تم مزامنة كشف الدرجات مباشرة إلى Supabase.');
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Direct gradebook sync failed, falling back to API:', e);
+                }
+            }
+
+            // 2. API Fallback
+            try {
+                await fetch('/api/submissions-sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'gradebooks',
+                        gradebooks: traineeGradebooks
+                    })
+                });
+                console.log('☁️ تم مزامنة كشف الدرجات عبر API Vercel/Supabase.');
+            } catch (apiErr) {
+                console.warn('API gradebook sync error:', apiErr);
+            }
+        }, 800);
+    }
+    window.syncGradebooksToCloud = syncGradebooksToCloud;
+
+    async function syncAllDataToCloud(showToastMsg = true) {
+        if (showToastMsg && typeof showToast === 'function') {
+            showToast('⏳ جاري المزامنة الشاملة مع سحابة Supabase...', 'info');
+        }
+
+        try {
+            // 1. Sync Courses
+            if (typeof syncAllLmsCoursesToSupabase === 'function') {
+                await syncAllLmsCoursesToSupabase();
+            }
+
+            // 2. Sync Submissions & Gradebooks & Anti-Cheat Incidents
+            const currentIncidents = (typeof getStoredAntiCheatIncidents === 'function') ? getStoredAntiCheatIncidents() : {};
+            if (supabaseClient && isSupabaseConnected) {
+                await supabaseClient.from('app_sync_state').upsert([
+                    { key: 'sys_student_quiz_submissions_v1', data: studentQuizSubmissions, updated_at: new Date().toISOString() },
+                    { key: 'sys_student_assignment_submissions_v1', data: studentAssignmentSubmissions, updated_at: new Date().toISOString() },
+                    { key: 'sys_trainee_gradebooks_v1', data: traineeGradebooks, updated_at: new Date().toISOString() },
+                    { key: 'sys_anti_cheat_incidents_v1', data: currentIncidents, updated_at: new Date().toISOString() }
+                ], { onConflict: 'key' });
+            } else {
+                await fetch('/api/submissions-sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'bulk_sync',
+                        quizSubmissions: studentQuizSubmissions,
+                        assignmentSubmissions: studentAssignmentSubmissions,
+                        gradebooks: traineeGradebooks,
+                        antiCheatIncidents: currentIncidents
+                    })
+                });
+            }
+
+            // 3. Pull latest from cloud
+            await pullLmsCoursesFromSupabase();
+            await pullSubmissionsAndGradebooksFromSupabase(false);
+
+            if (showToastMsg && typeof showToast === 'function') {
+                showToast('✅ اكتملت المزامنة السحابية الشاملة بنجاح!', 'success');
+            }
+        } catch (err) {
+            console.error('syncAllDataToCloud error:', err);
+            if (showToastMsg && typeof showToast === 'function') {
+                showToast(`⚠️ حدث خطأ أثناء المزامنة: ${err.message}`, 'error');
+            }
+        }
+    }
+    window.syncAllDataToCloud = syncAllDataToCloud;
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  SUPABASE CLOUD CONFIG MODAL CONTROLS
+    // ══════════════════════════════════════════════════════════════════════════
+
+    function openSupabaseCloudModal() {
+        const modal = document.getElementById('supabaseCloudModal');
+        if (!modal) return;
+        const urlInput = document.getElementById('sbModalUrlInput');
+        const keyInput = document.getElementById('sbModalKeyInput');
+        const statusCard = document.getElementById('sbModalStatusCard');
+
+        const currentUrl = supabaseCloudConfig.url || localStorage.getItem('sys_supabase_url') || '';
+        const currentKey = supabaseCloudConfig.anonKey || localStorage.getItem('sys_supabase_anon_key') || '';
+
+        if (urlInput) urlInput.value = currentUrl;
+        if (keyInput) keyInput.value = currentKey;
+
+        if (statusCard) {
+            if (isSupabaseConnected) {
+                statusCard.className = 'p-4 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-950 space-y-2';
+                statusCard.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="font-black text-sm text-emerald-800">سحابة Supabase متصلة ونشطة ✓</span>
+                        </div>
+                        <span class="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Multi-Device Live</span>
+                    </div>
+                    <div class="text-xs text-emerald-900/80 leading-relaxed">
+                        جميع أجهزة المتدربين والمدربين متصلة الآن بسحابة واحدة. التسليمات والدرجات والتحديثات تتزامن لحظياً.
+                    </div>
+                    <div class="text-[11px] font-mono text-emerald-700 truncate" title="${currentUrl}">
+                        🔗 ${currentUrl}
+                    </div>
+                `;
+            } else {
+                statusCard.className = 'p-4 rounded-2xl border bg-amber-50 border-amber-300 text-amber-950 space-y-2';
+                statusCard.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                            <span class="font-black text-sm text-amber-900">وضع التخزين المحلي فقط (غير مربوط سحابياً)</span>
+                        </div>
+                        <span class="text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full font-bold">Local Sandbox</span>
+                    </div>
+                    <div class="text-xs text-amber-900/90 leading-relaxed font-bold">
+                        ⚠️ هذا الجهاز معزول حالياً. إذا دخل متدرب من جهاز آخر أو هاتف فلن تظهر تسليماته وتحديثاته هنا حتى يتم ربط قاعدة بيانات Supabase المشتركة.
+                    </div>
+                `;
+            }
+        }
+
+        modal.classList.remove('hidden');
+    }
+    window.openSupabaseCloudModal = openSupabaseCloudModal;
+
+    function closeSupabaseCloudModal() {
+        const modal = document.getElementById('supabaseCloudModal');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeSupabaseCloudModal = closeSupabaseCloudModal;
+
+    async function saveSupabaseCloudManualConfig() {
+        const urlInput = document.getElementById('sbModalUrlInput');
+        const keyInput = document.getElementById('sbModalKeyInput');
+        const url = (urlInput?.value || '').trim().replace(/\\/+$/, '');
+        const key = (keyInput?.value || '').trim();
+
+        if (!url || !key) {
+            showToast('يرجى إدخال كل من رابط المشروع والمفتاح العام (Anon Key)', 'warning');
+            return;
+        }
+
+        showToast('⏳ جاري اختبار الاتصال بسحابة Supabase...', 'info');
+
+        try {
+            if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+                throw new Error('مكتبة Supabase JS غير متوفرة');
+            }
+
+            const testClient = window.supabase.createClient(url, key, { auth: { persistSession: false } });
+            const { data, error } = await testClient.from('lms_courses').select('id').limit(1);
+            if (error) {
+                console.warn('Test query warning:', error);
+                if (error.code === '42P01') {
+                    throw new Error('الاتصال نجح، لكن الجداول غير موجودة! يرجى الضغط على "نسخ كود SQL" وتشغيله في Supabase SQL Editor.');
+                }
+            }
+
+            localStorage.setItem('sys_supabase_url', url);
+            localStorage.setItem('sys_supabase_anon_key', key);
+            supabaseCloudConfig.url = url;
+            supabaseCloudConfig.anonKey = key;
+            supabaseClient = testClient;
+            window.supabaseClient = testClient;
+            isSupabaseConnected = true;
+
+            updateCloudSyncBadge(true);
+            openSupabaseCloudModal();
+            showToast('🎉 تم الاتصال بسحابة Supabase بنجاح! جاري مزامنة كافة البيانات الآن...', 'success');
+
+            await syncAllDataToCloud(false);
+            startCloudPeriodicSync();
+            initSupabaseRealtimeChannel();
+
+        } catch (err) {
+            console.error('saveSupabaseCloudManualConfig error:', err);
+            showToast(`❌ تعذر الاتصال: ${err.message}`, 'error');
+        }
+    }
+    window.saveSupabaseCloudManualConfig = saveSupabaseCloudManualConfig;
+
+    async function copySupabaseSqlScript() {
+        try {
+            let sqlText = '';
+            try {
+                const res = await fetch('/supabase_schema.sql');
+                if (res.ok) sqlText = await res.text();
+            } catch (e) {
+                console.warn('Could not fetch /supabase_schema.sql:', e);
+            }
+
+            if (!sqlText || sqlText.length < 50) {
+                sqlText = `-- BGTI Attendance & LMS Schema
+CREATE TABLE IF NOT EXISTS public.lms_courses (id TEXT PRIMARY KEY, course_key TEXT UNIQUE NOT NULL, title TEXT NOT NULL, trainer_name TEXT, course_code TEXT, weeks JSONB DEFAULT '[]'::jsonb, metadata JSONB DEFAULT '{}'::jsonb, updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL);
+CREATE TABLE IF NOT EXISTS public.student_submissions (id TEXT PRIMARY KEY, student_id TEXT NOT NULL, student_name TEXT NOT NULL, course_key TEXT NOT NULL, week_id TEXT NOT NULL, component_type TEXT NOT NULL, component_id TEXT, answers JSONB DEFAULT '{}'::jsonb, grade NUMERIC(5,2), max_grade NUMERIC(5,2) DEFAULT 10.0, feedback TEXT, submitted_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL);
+CREATE TABLE IF NOT EXISTS public.app_sync_state (key TEXT PRIMARY KEY, data JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL);
+ALTER TABLE public.lms_courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.student_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_sync_state ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public all on lms_courses" ON public.lms_courses FOR ALL USING (true);
+CREATE POLICY "Allow public all on student_submissions" ON public.student_submissions FOR ALL USING (true);
+CREATE POLICY "Allow public all on app_sync_state" ON public.app_sync_state FOR ALL USING (true);`;
+            }
+
+            await navigator.clipboard.writeText(sqlText);
+            showToast('📋 تم نسخ كود إعداد قاعدة بيانات Supabase (SQL) بنجاح! الصقه في Supabase SQL Editor واضغط Run.', 'success');
+        } catch (err) {
+            showToast('يرجى نسخ الكود من ملف supabase_schema.sql الموجود في مجلد المشروع.', 'info');
+        }
+    }
+    window.copySupabaseSqlScript = copySupabaseSqlScript;
 
     function onLmsVideoMaterialTypeChange(val) {
         const durEl = document.getElementById('lmsVideoDuration');
@@ -24076,6 +24809,11 @@
         if (wizardContainer) wizardContainer.classList.add('hidden');
         if (initialActions) initialActions.classList.remove('hidden');
         if (wizardActions) wizardActions.classList.add('hidden');
+        const finishBtn = document.getElementById('aiWizardFinishBtn');
+        if (finishBtn) {
+            finishBtn.classList.add('hidden');
+            finishBtn.disabled = false;
+        }
         if (genBtn) {
             genBtn.disabled = false;
             genBtn.innerHTML = `
@@ -24108,6 +24846,7 @@
         const finishBtn = document.getElementById('aiWizardFinishBtn');
         if (finishBtn) {
             finishBtn.disabled = false;
+            finishBtn.classList.add('hidden');
             finishBtn.innerHTML = `
                 <span>🚀</span>
                 <span>اعتماد وإنشاء المحتوى بالكامل</span>
@@ -24495,9 +25234,13 @@
                 nextBtn.classList.add('hidden');
             }
         }
-        // Always show the Approve/Finish button so the trainer can approve from Step 1 or any step immediately
+        // Approval & full publication is strictly the final step (Step 4 only)
         if (finishBtn) {
-            finishBtn.classList.remove('hidden');
+            if (currentAiStep === 4) {
+                finishBtn.classList.remove('hidden');
+            } else {
+                finishBtn.classList.add('hidden');
+            }
         }
     }
 
@@ -24599,31 +25342,28 @@
 
         const terms = extractedTerms.length >= 3 ? extractedTerms : defaultTerms;
 
-        // Build Suggested Videos with direct YouTube watch links
+        // Build Suggested Videos with direct YouTube watch links (strictly watchable videos, no search queries)
         const videos = [
             {
                 id: 1,
                 title: `شرح تطبيقي شامل: ${detectedTopic}`,
                 description: `استعراض عملي وتدريب تطبيقي على المهارات الأساسية والمصطلحات التقنية في ${detectedTopic}.`,
                 duration: '12:00 دقيقة',
-                search_query: `${detectedTopic} practical tutorial`,
-                youtube_url: resolveClientDirectYouTubeUrl('', detectedTopic, detectedTopic)
+                youtube_url: resolveClientDirectYouTubeUrl('', detectedTopic, detectedTopic, 0)
             },
             {
                 id: 2,
                 title: `إجراءات السلامة والجودة المهنية: ${detectedTopic}`,
                 description: `تطبيق اشتراطات السلامة المهنية ومهمات الوقاية (PPE) وضوابط التشغيل القياسية.`,
                 duration: '10:00 دقيقة',
-                search_query: `industrial safety standards ${detectedTopic}`,
-                youtube_url: resolveClientDirectYouTubeUrl('', 'safety ' + detectedTopic, 'safety')
+                youtube_url: resolveClientDirectYouTubeUrl('', 'safety ' + detectedTopic, 'safety', 1)
             },
             {
                 id: 3,
                 title: `المصطلحات الفنية المعتمدة والتواصل في بيئة العمل`,
                 description: `فيديو إثرائي للمصطلحات التخصصية والنطق السليم في بيئة العمل الصناعية.`,
                 duration: '15:00 دقيقة',
-                search_query: `vocational english terminology tutorial`,
-                youtube_url: resolveClientDirectYouTubeUrl('', 'terminology english', 'english')
+                youtube_url: resolveClientDirectYouTubeUrl('', 'terminology english', 'english', 2)
             }
         ];
 
@@ -24981,29 +25721,69 @@
     }
     window.escapeHtml = escapeHtml;
 
-    // Helper: Map or validate YouTube URLs to ensure direct watchable video links
-    function resolveClientDirectYouTubeUrl(rawUrl, title, query) {
+    // Helper: Map or validate YouTube URLs to ensure direct watchable video links (strictly no search links)
+    function resolveClientDirectYouTubeUrl(rawUrl, title, query, index = 0) {
         const trimmed = (rawUrl || '').trim();
-        if (trimmed && trimmed.includes('watch?v=') && !trimmed.includes('search_query')) {
-            return trimmed;
+        const isSearchUrl = trimmed.includes('results?') || trimmed.includes('search_query=') || trimmed.includes('/results');
+        if (!isSearchUrl) {
+            const m = trimmed.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+            if (m && m[1] && !m[1].startsWith('0000') && !m[1].toLowerCase().includes('example')) {
+                return `https://www.youtube.com/watch?v=${m[1]}`;
+            }
         }
+
+        const safeIdx = Math.max(0, Math.min(2, typeof index === 'number' ? index : 0));
         const txt = `${title || ''} ${query || ''} ${trimmed}`.toLowerCase();
-        if (txt.includes('لحام') || txt.includes('weld')) {
-            return 'https://www.youtube.com/watch?v=k2ZgR2x7l24';
+
+        const catalogs = {
+            weld: [
+                'https://www.youtube.com/watch?v=k2ZgR2x7l24',
+                'https://www.youtube.com/watch?v=3sW4n-87HwA',
+                'https://www.youtube.com/watch?v=TeFXxLw5P-o'
+            ],
+            safety: [
+                'https://www.youtube.com/watch?v=kYv9yYm3sQ0',
+                'https://www.youtube.com/watch?v=j3j_u7tF09I',
+                'https://www.youtube.com/watch?v=Z5z6K-K2j8A'
+            ],
+            electrical: [
+                'https://www.youtube.com/watch?v=mc979OhitAg',
+                'https://www.youtube.com/watch?v=gT1K-W2Zk-E',
+                'https://www.youtube.com/watch?v=WJeo_tK7p8w'
+            ],
+            english: [
+                'https://www.youtube.com/watch?v=mQWpB8u-p6Y',
+                'https://www.youtube.com/watch?v=jW2m1r5k0q8',
+                'https://www.youtube.com/watch?v=9g0H5z7aB8M'
+            ],
+            mechanic: [
+                'https://www.youtube.com/watch?v=4Fqj7b0t6-8',
+                'https://www.youtube.com/watch?v=b1W6hV_L9lQ',
+                'https://www.youtube.com/watch?v=3Xw0r-5r9zY'
+            ],
+            general: [
+                'https://www.youtube.com/watch?v=jBq2c8jE1uQ',
+                'https://www.youtube.com/watch?v=kYJv8Pj3p8k',
+                'https://www.youtube.com/watch?v=5Uq2x3Tq86w'
+            ]
+        };
+
+        if (txt.includes('لحام') || txt.includes('weld') || txt.includes('smaw') || txt.includes('tig') || txt.includes('mig')) {
+            return catalogs.weld[safeIdx];
         }
-        if (txt.includes('سلام') || txt.includes('safety') || txt.includes('ppe') || txt.includes('osha') || txt.includes('وقاي')) {
-            return 'https://www.youtube.com/watch?v=j3j_u7tF09I';
+        if (txt.includes('سلام') || txt.includes('safety') || txt.includes('ppe') || txt.includes('osha') || txt.includes('وقاي') || txt.includes('hse') || txt.includes('مخاطر')) {
+            return catalogs.safety[safeIdx];
         }
-        if (txt.includes('كهرب') || txt.includes('electr') || txt.includes('circuit') || txt.includes('volt') || txt.includes('amp')) {
-            return 'https://www.youtube.com/watch?v=kYJv8Pj3p8k';
+        if (txt.includes('كهرب') || txt.includes('electr') || txt.includes('circuit') || txt.includes('volt') || txt.includes('amp') || txt.includes('تيار') || txt.includes('جهد')) {
+            return catalogs.electrical[safeIdx];
         }
-        if (txt.includes('صيان') || txt.includes('mainten') || txt.includes('فحص') || txt.includes('inspect')) {
-            return 'https://www.youtube.com/watch?v=5Uq2x3Tq86w';
+        if (txt.includes('إنجليز') || txt.includes('english') || txt.includes('مصطلح') || txt.includes('term') || txt.includes('vocab') || txt.includes('لغة')) {
+            return catalogs.english[safeIdx];
         }
-        if (txt.includes('ميكان') || txt.includes('mechanic') || txt.includes('hydraul')) {
-            return 'https://www.youtube.com/watch?v=4b3n8u0L0E0';
+        if (txt.includes('صيان') || txt.includes('mainten') || txt.includes('ميكان') || txt.includes('mechanic') || txt.includes('فحص') || txt.includes('مضخ') || txt.includes('pump') || txt.includes('ورش')) {
+            return catalogs.mechanic[safeIdx];
         }
-        return 'https://www.youtube.com/watch?v=jBq2c8jE1uQ';
+        return catalogs.general[safeIdx];
     }
 
     function populateAiPreview(result) {
@@ -25041,16 +25821,16 @@
         const rawVideos = Array.isArray(data.suggested_videos) && data.suggested_videos.length > 0 
             ? data.suggested_videos 
             : [
-                { id: 1, title: `شرح تطبيقي لـ ${data.lecture?.title || 'المحاضرة'}`, description: 'شرح تطبيقي وتدريب عملي على المهارات الأساسية والمصطلحات', duration: '12:00 دقيقة', search_query: `${data.lecture?.title || 'technical training'} tutorial`, youtube_url: 'https://www.youtube.com/watch?v=k2ZgR2x7l24' },
-                { id: 2, title: `إجراءات ومعايير السلامة المهنية المعتمدة`, description: 'استعراض لإجراءات التشغيل القياسية (SOP) واشتراطات السلامة والجودة', duration: '10:00 دقيقة', search_query: 'industrial safety procedures tutorial', youtube_url: 'https://www.youtube.com/watch?v=j3j_u7tF09I' },
-                { id: 3, title: `المصطلحات الفنية والمحادثة التقنية في بيئة العمل`, description: 'فيديو إثرائي للمصطلحات التخصصية والنطق السليم في بيئة العمل', duration: '15:00 دقيقة', search_query: 'technical english terminology', youtube_url: 'https://www.youtube.com/watch?v=jBq2c8jE1uQ' }
+                { id: 1, title: `شرح تطبيقي لـ ${data.lecture?.title || 'المحاضرة'}`, description: 'شرح تطبيقي وتدريب عملي على المهارات الأساسية والمصطلحات', duration: '12:00 دقيقة', youtube_url: resolveClientDirectYouTubeUrl('', data.lecture?.title, '', 0) },
+                { id: 2, title: `إجراءات ومعايير السلامة المهنية المعتمدة`, description: 'استعراض لإجراءات التشغيل القياسية (SOP) واشتراطات السلامة والجودة', duration: '10:00 دقيقة', youtube_url: resolveClientDirectYouTubeUrl('', 'safety', '', 1) },
+                { id: 3, title: `المصطلحات الفنية والمحادثة التقنية في بيئة العمل`, description: 'فيديو إثرائي للمصطلحات التخصصية والنطق السليم في بيئة العمل', duration: '15:00 دقيقة', youtube_url: resolveClientDirectYouTubeUrl('', 'english', '', 2) }
             ];
 
         if (videosContainer) {
             videosContainer.innerHTML = rawVideos.slice(0, 3).map((v, idx) => {
                 const isChecked = idx === 0 ? 'checked' : '';
                 const ytQuery = v.search_query || v.title;
-                const ytDirectUrl = resolveClientDirectYouTubeUrl(v.youtube_url, v.title, ytQuery);
+                const ytDirectUrl = resolveClientDirectYouTubeUrl(v.youtube_url || v.url, v.title, ytQuery, idx);
                 return `
                     <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs transition hover:border-violet-300">
                         <div class="flex items-start gap-3 flex-1 min-w-0">
@@ -25058,17 +25838,20 @@
                                 <input type="radio" name="aiSelectedVideoRadio" value="${idx}" ${isChecked} class="w-4 h-4 text-violet-600 focus:ring-violet-500 cursor-pointer">
                                 <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-bold text-xs shrink-0">🎥</span>
                             </label>
-                            <div class="space-y-1 flex-1 min-w-0">
+                            <div class="space-y-1.5 flex-1 min-w-0">
                                 <input type="text" id="aiVideoTitle-${idx}" value="${escapeHtml(v.title || `فيديو تدريبي ${idx + 1}`)}" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-black text-slate-900 outline-none focus:border-violet-400">
                                 <p class="text-[11px] text-slate-500 font-bold">${escapeHtml(v.description || '')}</p>
-                                <input type="hidden" id="aiVideoUrl-${idx}" value="${escapeHtml(ytDirectUrl)}">
+                                <div class="flex items-center gap-2 pt-0.5">
+                                    <span class="text-[10px] font-bold text-slate-500 shrink-0">🔗 الرابط المباشر:</span>
+                                    <input type="url" id="aiVideoUrl-${idx}" value="${escapeHtml(ytDirectUrl)}" class="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-0.5 text-[11px] font-mono text-slate-700 outline-none focus:border-violet-400 text-left" dir="ltr">
+                                </div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
                             <span class="bg-violet-50 border border-violet-200 text-violet-800 px-2.5 py-1 rounded-lg text-[10px] font-bold">⏱ ${escapeHtml(v.duration || '12 دقيقة')}</span>
                             <a href="${escapeHtml(ytDirectUrl)}" target="_blank" rel="noopener noreferrer" class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition">
                                 <span>▶️</span>
-                                <span>مشاهدة الفيديو ↗</span>
+                                <span>مشاهدة الفيديو المباشر ↗</span>
                             </a>
                         </div>
                     </div>
@@ -25449,7 +26232,7 @@
             const rawFinalVideoUrl = (customVideoUrlEl && customVideoUrlEl.value.trim()) 
                 ? customVideoUrlEl.value.trim() 
                 : ((videoUrlEl ? videoUrlEl.value.trim() : '') || cloudFileUrl || '');
-            const finalVideoUrl = resolveClientDirectYouTubeUrl(rawFinalVideoUrl, finalVideoTitle, finalVideoTitle);
+            const finalVideoUrl = resolveClientDirectYouTubeUrl(rawFinalVideoUrl, finalVideoTitle, finalVideoTitle, selectedIdx);
 
             const lecTitle = document.getElementById('aiLectureTitle')?.value.trim() || finalVideoTitle;
             const lecDuration = document.getElementById('aiLectureDuration')?.value.trim() || '15';
@@ -26097,8 +26880,7 @@
                     title: `شرح تطبيقي شامل: ${cleanTopic}`,
                     description: `استعراض عملي للمفاهيم الأساسية والمصطلحات التقنية المعتمدة في ${cleanTopic} مع التطبيق في بيئة التدريب.`,
                     duration: '15:00 دقيقة',
-                    search_query: `${cleanTopic} practical guide tutorial`,
-                    youtube_url: resolveClientDirectYouTubeUrl('', cleanTopic, cleanTopic)
+                    youtube_url: resolveClientDirectYouTubeUrl('', cleanTopic, cleanTopic, 0)
                 }
             ],
             lecture: {
@@ -26194,6 +26976,9 @@
 
     function saveTraineeGradebooksToStorage() {
         localStorage.setItem('sys_trainee_gradebooks_v1', JSON.stringify(traineeGradebooks));
+        if (typeof syncGradebooksToCloud === 'function') {
+            syncGradebooksToCloud();
+        }
     }
 
     // ضمان احتواء كل أسبوع في المقرر على الأركان المؤتمتة (الواجب الأسبوعي + الاختبار الأسبوعي + السلوك والمواظبة)
@@ -26432,7 +27217,12 @@
         if (studentAssignmentSubmissions[subKey]) {
             studentAssignmentSubmissions[subKey].score = validScore;
             studentAssignmentSubmissions[subKey].gradedByTrainer = true;
+            studentAssignmentSubmissions[subKey].gradedAt = new Date().toISOString();
+            studentAssignmentSubmissions[subKey].gradedBy = currentUser?.name || 'المدرب المشرف';
             localStorage.setItem('sys_student_assignment_submissions_v1', JSON.stringify(studentAssignmentSubmissions));
+            if (typeof syncStudentSubmissionToCloud === 'function') {
+                syncStudentSubmissionToCloud('assignment', subKey, studentAssignmentSubmissions[subKey]);
+            }
         }
 
         const located = findAssessmentWeekAndCourse('assignment', assignmentId);
@@ -27794,8 +28584,14 @@
             if (studentQuizSubmissions[subKey]) {
                 studentQuizSubmissions[subKey].score = score;
                 studentQuizSubmissions[subKey].bestScore = Math.max(studentQuizSubmissions[subKey].bestScore || 0, score);
+                studentQuizSubmissions[subKey].gradedByTrainer = true;
+                studentQuizSubmissions[subKey].gradedAt = new Date().toISOString();
+                studentQuizSubmissions[subKey].gradedBy = currentUser?.name || 'المدرب المشرف';
             }
             localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+            if (studentQuizSubmissions[subKey] && typeof syncStudentSubmissionToCloud === 'function') {
+                syncStudentSubmissionToCloud('quiz', subKey, studentQuizSubmissions[subKey]);
+            }
         } else {
             gb.weeks[weekNum].weeklyAssignment = score;
             for (let k in studentAssignmentSubmissions) {
@@ -27805,6 +28601,11 @@
                     if (cleanNationalId(sId) === cleanTId || sId === traineeId) {
                         s.score = score;
                         s.gradedByTrainer = true;
+                        s.gradedAt = new Date().toISOString();
+                        s.gradedBy = currentUser?.name || 'المدرب المشرف';
+                        if (typeof syncStudentSubmissionToCloud === 'function') {
+                            syncStudentSubmissionToCloud('assignment', k, s);
+                        }
                     }
                 }
             }
@@ -28372,7 +29173,10 @@
         }
     }
 
-    function syncAllTrainerGradesFromSystem() {
+    async function syncAllTrainerGradesFromSystem() {
+        if (typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
+            await pullSubmissionsAndGradebooksFromSupabase(false);
+        }
         const { pool } = getGradesSystemTargetTrainees();
         let totalPulled = 0;
         pool.forEach(t => {
