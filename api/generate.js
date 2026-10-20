@@ -914,7 +914,7 @@ export default async function handler(req, res) {
 
     const hasDirectText = typeof textInput === 'string' && textInput.trim().length >= 10;
     const hasExtractedPdfText = typeof extractedPdfText === 'string' && extractedPdfText.trim().length >= 10;
-    const hasFile = Boolean(base64);
+    const hasFile = Boolean(base64) || Boolean(filename && (filename.toLowerCase().endsWith('.pptx') || filename.toLowerCase().endsWith('.pdf')));
 
     if (!hasDirectText && !hasFile && !hasExtractedPdfText) {
       return res.status(400).json({
@@ -927,7 +927,7 @@ export default async function handler(req, res) {
     const isPdf = safeFilename.toLowerCase().endsWith('.pdf') || (fileType && fileType.includes('pdf'));
     const isPptx = safeFilename.toLowerCase().endsWith('.pptx') || (fileType && (fileType.includes('presentation') || fileType.includes('powerpoint')));
 
-    if (hasFile && !isPdf && !isPptx) {
+    if (hasFile && !isPdf && !isPptx && !hasDirectText) {
       return res.status(400).json({
         success: false,
         error: 'صيغة الملف غير مدعومة. يرجى رفع ملف PowerPoint (.pptx) أو PDF (.pdf).'
@@ -937,7 +937,7 @@ export default async function handler(req, res) {
     // Convert Base64 string to Buffer if file provided
     let fileBuffer = null;
     let fileSizeKB = 0;
-    if (hasFile) {
+    if (base64) {
       fileBuffer = Buffer.from(base64, 'base64');
       fileSizeKB = Math.round(fileBuffer.length / 1024);
     }
@@ -976,18 +976,18 @@ export default async function handler(req, res) {
     }
 
     let extractedText = '';
-    if (hasExtractedPdfText) {
-      extractedText = extractedPdfText.trim();
-    } else if (hasDirectText && !hasFile) {
+    if (hasDirectText && textInput.trim().length >= 10) {
       extractedText = textInput.trim();
-    } else if (hasFile && isPptx && fileBuffer) {
+    } else if (hasExtractedPdfText) {
+      extractedText = extractedPdfText.trim();
+    } else if (fileBuffer && isPptx) {
       extractedText = extractTextFromPptxBuffer(fileBuffer);
-    } else if (hasFile && fileBuffer) {
+    } else if (fileBuffer) {
       extractedText = await extractTextFromPdfBuffer(fileBuffer);
     }
 
-    // If both file and direct text provided and not already from extractedPdfText, merge them
-    if (hasDirectText && hasFile && extractedText && !hasExtractedPdfText) {
+    // If both file buffer extraction and direct text provided, merge them if different
+    if (hasDirectText && fileBuffer && extractedText && extractedText !== textInput.trim()) {
       extractedText = `${extractedText}\n\n[إضافات وملاحظات نصية من المدرب]:\n${textInput.trim()}`;
     }
 
