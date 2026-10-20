@@ -6373,17 +6373,81 @@
         }
     }
 
+    function syncAttendanceDirectToSupabase(traineeList = trainees) {
+        if (typeof supabaseClient === 'undefined' || !supabaseClient || !isSupabaseConnected || !Array.isArray(traineeList) || traineeList.length === 0) return;
+        try {
+            const studentRows = traineeList.map(t => {
+                const cleanId = String(t.id).replace(/\D/g, '') || String(t.id);
+                return {
+                    national_id: cleanId,
+                    name: t.name,
+                    group_name: t.group || '',
+                    company: t.company || 'معهد الذهب الأسود',
+                    room: t.room || '',
+                    phone: t.phone || '',
+                    qualification: t.qual || 'دبلوم تقني',
+                    attendance_rate: typeof t.rate === 'number' ? t.rate : 100.0,
+                    archive_rate: typeof t.archiveRate === 'number' ? t.archiveRate : 100.0,
+                    combined_rate: typeof t.combinedRate === 'number' ? t.combinedRate : 100.0,
+                    weekly_attendance: Array.isArray(t.weeklyAttendance) ? t.weeklyAttendance : [],
+                    weekly_attended_sessions: t.weeklyAttendedSessions || 0,
+                    password: cleanId.slice(-4),
+                    must_change_password: true,
+                    updated_at: new Date().toISOString()
+                };
+            });
+            supabaseClient.from('students').upsert(studentRows, { onConflict: 'national_id' })
+                .then(({ error }) => {
+                    if (error) console.warn('Direct Supabase students upsert err:', error);
+                    else console.log('✅ تم حفظ كشف الطلاب والحضور مباشرة في جدول students بالسحابة');
+                }).catch(e => console.warn('Direct students upsert exception:', e));
+
+            // تسجيل الحضور اليومي في جدول attendance في Supabase
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const activeDayIdx = (typeof activeDayIndex !== 'undefined') ? activeDayIndex : 0;
+            const attendanceRows = traineeList.map(t => {
+                const cleanId = String(t.id).replace(/\D/g, '') || String(t.id);
+                const checks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIdx] : [false, false, false, false];
+                const st = (typeof calculateStatus === 'function') ? calculateStatus(checks, t) : { label: 'غائب', type: 'absent' };
+                return {
+                    id: `${cleanId}_${todayStr}`,
+                    student_id: cleanId,
+                    student_name: t.name,
+                    group_name: t.group || '',
+                    date: todayStr,
+                    status: st.label || 'غائب',
+                    sessions_attended: (st.type === 'present' ? 2 : (st.type === 'violator' ? 1 : 0)),
+                    total_sessions: 2,
+                    notes: t.notes || '',
+                    recorded_by: (currentUser ? currentUser.name : 'النظام'),
+                    updated_at: new Date().toISOString()
+                };
+            });
+            supabaseClient.from('attendance').upsert(attendanceRows, { onConflict: 'id' }).catch(() => {});
+        } catch(err) {
+            console.warn('syncAttendanceDirectToSupabase err:', err);
+        }
+    }
+    window.syncAttendanceDirectToSupabase = syncAttendanceDirectToSupabase;
+
     function saveData() {
-        localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
-        localStorage.setItem('sys_reports_v9', JSON.stringify(reports));
-        localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
-        localStorage.setItem('sys_users_v9', JSON.stringify(users));
-        localStorage.setItem('sys_schedule_v9', JSON.stringify(scheduleData));
-        localStorage.setItem('sys_la_vacancies_v9', JSON.stringify(laVacancies));
-        if (currentUser) localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
-        else localStorage.removeItem('sys_current_user_v9');
-        if (lastSyncTimestamp) localStorage.setItem('sys_last_sync_v9', lastSyncTimestamp);
+        try {
+            localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+            localStorage.setItem('sys_reports_v9', JSON.stringify(reports));
+            localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
+            localStorage.setItem('sys_users_v9', JSON.stringify(users));
+            localStorage.setItem('sys_schedule_v9', JSON.stringify(scheduleData));
+            localStorage.setItem('sys_la_vacancies_v9', JSON.stringify(laVacancies));
+            if (currentUser) localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
+            else localStorage.removeItem('sys_current_user_v9');
+            if (lastSyncTimestamp) localStorage.setItem('sys_last_sync_v9', lastSyncTimestamp);
+        } catch(lsErr) {
+            console.warn('localStorage write bypassed or unavailable:', lsErr);
+        }
         renderApp();
+        if (typeof syncAttendanceDirectToSupabase === 'function') {
+            syncAttendanceDirectToSupabase();
+        }
         if (typeof syncCoreDataToCloud === 'function') {
             syncCoreDataToCloud();
         }
@@ -11424,6 +11488,28 @@
 
         reports.unshift(newReport);
 
+        // الحفظ المباشر للبلاغ في جدول delay_reports في Supabase عبر supabase.from('delay_reports').insert()
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            try {
+                supabaseClient.from('delay_reports').insert({
+                    id: newReport.id,
+                    student_id: String(newReport.traineeId || ''),
+                    student_name: newReport.traineeName || '',
+                    group_name: newReport.traineeGroup || '—',
+                    delay_minutes: newReport.type.includes('تأخير') ? 15 : 0,
+                    reason: newReport.note || newReport.type || '',
+                    excuse_type: newReport.type || 'ملاحظة عامة',
+                    status: newReport.status || 'pending',
+                    notes: newReport.actionNotes || newReport.actionDecision || '',
+                    report_date: new Date().toISOString().slice(0, 10),
+                    created_at: new Date().toISOString()
+                }).then(({ error }) => {
+                    if (error) console.warn('Supabase direct delay_reports insert error:', error);
+                    else console.log('✅ تم تسجيل وحفظ البلاغ مباشرة في جدول delay_reports بالسحابة');
+                }).catch(err => console.warn('Direct delay_reports insert err:', err));
+            } catch(drErr) { console.warn('Direct delay_reports write err:', drErr); }
+        }
+
         // ربط البلاغ مباشرة بكشف الدرجات: خصم نقطة من السلوك والمواظبة للأسبوع المحدد
         let currentBehScore = 10;
         const isDeductionType = (type.includes('تأخير') || type.includes('مغادرة') || type.includes('سلوكي') || !type.includes('تميز'));
@@ -11518,6 +11604,19 @@
         rep.actionBy = `${currentUser.name} (${currentUser.role === 'superadmin' ? 'سوبر أدمن' : 'مشرف أدمن'})`;
         rep.actionDate = new Date().toLocaleString('ar-SA');
 
+        // تحديث البلاغ مباشرة في جدول delay_reports في Supabase
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            try {
+                supabaseClient.from('delay_reports').update({
+                    status: status,
+                    notes: notes || getReportStatusLabel(status)
+                }).eq('id', reportId).then(({ error }) => {
+                    if (error) console.warn('Supabase direct delay_reports update error:', error);
+                    else console.log('✅ تم تحديث حالة البلاغ مباشرة في جدول delay_reports بالسحابة');
+                }).catch(err => console.warn('Direct delay_reports update err:', err));
+            } catch(drErr) { console.warn('Direct delay_reports update err:', drErr); }
+        }
+
         saveData();
         closeReportActionModal();
         showToast(`✅ تم تسجيل واعتماد الإجراء الإداري للبلاغ بنجاح!`, 'success');
@@ -11530,6 +11629,17 @@
 
         if (!confirm('هل أنت متأكد من رغبتك في حذف هذا البلاغ نهائياً؟')) return;
         reports = reports.filter(r => r.id !== reportId);
+
+        // حذف البلاغ مباشرة من جدول delay_reports في Supabase
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            try {
+                supabaseClient.from('delay_reports').delete().eq('id', reportId).then(({ error }) => {
+                    if (error) console.warn('Supabase direct delay_reports delete error:', error);
+                    else console.log('✅ تم حذف البلاغ مباشرة من جدول delay_reports بالسحابة');
+                }).catch(err => console.warn('Direct delay_reports delete err:', err));
+            } catch(drErr) { console.warn('Direct delay_reports delete err:', drErr); }
+        }
+
         saveData();
         showToast('تم حذف البلاغ بنجاح', 'info');
     }
@@ -19086,6 +19196,173 @@
     let antiCheatWarningsCount = 0;
     let isAntiCheatListenerAttached = false;
 
+    // ═══════════════════════════════════════════════════════════════════
+    // LIVE EXAM ROOM CHANNEL: supabase.channel('exam_room')
+    // إشعارات الغش والتنقل اللحظية المباشرة بين الطلاب والمدرب
+    // ═══════════════════════════════════════════════════════════════════
+    let examRoomChannel = null;
+
+    function playExamRoomAlertSound() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const audioCtx = new AudioCtx();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.35);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.35);
+        } catch(e) {}
+    }
+
+    function handleIncomingLiveExamAlert(p) {
+        if (!p || !p.studentId) return;
+        const subKey = `${p.studentId}_${p.quizId}`;
+        const incidents = getStoredAntiCheatIncidents();
+        incidents[subKey] = {
+            id: p.incidentId || incidents[subKey]?.id || `inc_${p.studentId}_${p.quizId}`,
+            subKey: subKey,
+            studentId: p.studentId,
+            studentName: p.studentName,
+            studentGroup: p.studentGroup || '—',
+            quizId: p.quizId,
+            quizTitle: p.quizTitle,
+            violationsCount: p.warningsCount || incidents[subKey]?.violationsCount || 1,
+            lockedAt: p.timestamp || new Date().toISOString(),
+            status: p.isLocked ? 'locked_pending_trainer' : (p.trainerAction === 'reopened' ? 'resolved' : 'warning'),
+            trainerActionTaken: p.trainerAction || incidents[subKey]?.trainerActionTaken || null
+        };
+        localStorage.setItem('sys_anti_cheat_incidents_v1', JSON.stringify(incidents));
+        updateAntiCheatIncidentsBadges();
+
+        if (currentUser && (currentUser.role === 'trainer' || currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
+            playExamRoomAlertSound();
+            if (p.isLocked) {
+                showToast(`🚨 تنبيه عاجل [غرفة الاختبار exam_room]: تم قفل اختبار المتدرب [${p.studentName}] لمغادرة الشاشة 3 مرات!`, 'error');
+            } else {
+                showToast(`⚠️ رصد مغادرة شاشة الاختبار [exam_room]: المتدرب [${p.studentName}] - تحذير (${p.warningsCount || 1} من 3)`, 'warning');
+            }
+        } else if (currentUser && String(currentUser.id) === String(p.studentId)) {
+            if (p.trainerAction === 'reopened') {
+                isQuizLocked = false;
+                showToast('🎉 قام المدرب بإعادة فتح الاختبار لك في غرفة الاختبار (exam_room)! يمكنك متابعة الحل الآن.', 'success');
+                if (typeof renderStudentLms === 'function') renderStudentLms();
+            }
+        }
+
+        if (typeof renderAntiCheatIncidentsModal === 'function') renderAntiCheatIncidentsModal();
+        if (typeof renderGradesSystemTab === 'function') renderGradesSystemTab();
+        if (typeof renderTrainerSubmissionsTab === 'function') renderTrainerSubmissionsTab();
+    }
+
+    function sendExamRoomCheatingAlert(violationInfo) {
+        if (!supabaseClient) return;
+        try {
+            // 1. البث اللحظي الفوري عبر قناة exam_room
+            if (examRoomChannel) {
+                examRoomChannel.send({
+                    type: 'broadcast',
+                    event: 'cheating_alert',
+                    payload: violationInfo
+                }).catch(() => {});
+            }
+
+            // 2. الحفظ المباشر في جدول cheating_logs عبر Supabase
+            supabaseClient.from('cheating_logs').upsert({
+                id: violationInfo.incidentId || `inc_${violationInfo.studentId}_${violationInfo.quizId}_${Date.now()}`,
+                student_id: String(violationInfo.studentId),
+                student_name: violationInfo.studentName || '',
+                quiz_id: String(violationInfo.quizId),
+                quiz_title: violationInfo.quizTitle || '',
+                course_key: violationInfo.courseKey || 'all',
+                incident_type: violationInfo.incidentType || 'tab_switch',
+                count: violationInfo.warningsCount || 1,
+                details: { reason: violationInfo.reason || 'مغادرة شاشة الاختبار أو التبديل بين النوافذ' },
+                is_locked: Boolean(violationInfo.isLocked),
+                trainer_action: violationInfo.trainerAction || null,
+                detected_at: violationInfo.timestamp || new Date().toISOString()
+            }, { onConflict: 'id' }).catch(e => console.warn('cheating_logs upsert err:', e));
+        } catch(e) {
+            console.warn('sendExamRoomCheatingAlert error:', e);
+        }
+    }
+    window.sendExamRoomCheatingAlert = sendExamRoomCheatingAlert;
+
+    function initExamRoomChannel() {
+        if (!supabaseClient) return;
+        try {
+            if (examRoomChannel) {
+                try { supabaseClient.removeChannel(examRoomChannel); } catch(e){}
+            }
+            examRoomChannel = supabaseClient.channel('exam_room', {
+                config: { broadcast: { ack: true, self: false } }
+            });
+
+            // الاستماع لبث إشعارات الغش اللحظية
+            examRoomChannel.on('broadcast', { event: 'cheating_alert' }, (data) => {
+                console.log('🚨 إشعار غش لحظي بغرفة الاختبار exam_room:', data);
+                handleIncomingLiveExamAlert(data.payload);
+            });
+
+            // الاستماع لبث فك قفل الاختبار
+            examRoomChannel.on('broadcast', { event: 'quiz_unlocked' }, (data) => {
+                console.log('🔓 إشعار فك قفل الاختبار exam_room:', data);
+                const p = data.payload || {};
+                if (currentUser && String(currentUser.id) === String(p.studentId)) {
+                    isQuizLocked = false;
+                    showToast('🎉 قام المدرب بإعادة فتح الاختبار لك في غرفة الاختبار (exam_room)! يمكنك استئناف الحل الآن.', 'success');
+                    if (typeof renderStudentLms === 'function') renderStudentLms();
+                }
+            });
+
+            // الاستماع لبث إتمام التسليمات
+            examRoomChannel.on('broadcast', { event: 'submission_completed' }, (data) => {
+                const p = data.payload || {};
+                if (currentUser && (currentUser.role === 'trainer' || currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
+                    showToast(`📝 تسليم جديد بغرفة الاختبار [${p.type === 'quiz' ? 'اختبار' : 'واجب'}]: المتدرب ${p.studentName}`, 'info');
+                    if (typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
+                        pullSubmissionsAndGradebooksFromSupabase(false);
+                    }
+                }
+            });
+
+            // الاستماع للتغييرات في جدول cheating_logs من قاعدة البيانات
+            examRoomChannel.on('postgres_changes', { event: '*', schema: 'public', table: 'cheating_logs' }, (payload) => {
+                const row = payload.new || payload.old;
+                if (row) {
+                    handleIncomingLiveExamAlert({
+                        studentId: row.student_id,
+                        studentName: row.student_name,
+                        quizId: row.quiz_id,
+                        quizTitle: row.quiz_title,
+                        warningsCount: row.count,
+                        isLocked: row.is_locked,
+                        trainerAction: row.trainer_action,
+                        actionAt: row.action_at,
+                        timestamp: row.detected_at
+                    });
+                }
+            });
+
+            examRoomChannel.subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('⚡ تم تفعيل قناة غرفة الاختبارات المباشرة بنجاح: supabase.channel("exam_room")');
+                }
+            });
+
+            window.examRoomChannel = examRoomChannel;
+        } catch(err) {
+            console.warn('initExamRoomChannel error:', err);
+        }
+    }
+    window.initExamRoomChannel = initExamRoomChannel;
+
     function onTqPledgeCheckboxChange(checkboxEl) {
         const startBtn = document.getElementById('tqStartExamBtn');
         if (startBtn) {
@@ -19210,6 +19487,21 @@
         if (banner) banner.classList.remove('hidden');
         if (countBadge) countBadge.innerText = `تحذير ${antiCheatWarningsCount} من 3`;
 
+        // إرسال إشعار غش لحظي فوري إلى لوحة تحكم المدرب عبر قناة exam_room وجدول cheating_logs
+        if (typeof sendExamRoomCheatingAlert === 'function' && currentUser && currentTakingQuiz) {
+            sendExamRoomCheatingAlert({
+                studentId: currentUser.id,
+                studentName: currentUser.name || 'متدرب',
+                studentGroup: currentUser.group || '—',
+                quizId: currentTakingQuiz.id,
+                quizTitle: currentTakingQuiz.title || 'اختبار',
+                warningsCount: antiCheatWarningsCount,
+                isLocked: (antiCheatWarningsCount >= 3),
+                reason: 'رصد مغادرة شاشة الاختبار أو التبديل بين النوافذ',
+                timestamp: new Date().toISOString()
+            });
+        }
+
         if (antiCheatWarningsCount >= 3) {
             lockQuizOnAntiCheatViolation();
             return;
@@ -19248,26 +19540,20 @@
         };
         saveAntiCheatIncidents(incidents);
 
-        // Immediate non-debounced push to Supabase cheating_logs for instant trainer alert
-        if (typeof supabaseClient !== 'undefined' && supabaseClient && typeof isSupabaseConnected !== 'undefined' && isSupabaseConnected) {
-            try {
-                supabaseClient.from('cheating_logs').upsert({
-                    id: incidentId,
-                    student_id: String(currentUser.id),
-                    student_name: tInfo.name,
-                    quiz_id: currentTakingQuiz.id,
-                    quiz_title: currentTakingQuiz.title || '',
-                    course_key: (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : 'all',
-                    incident_type: 'tab_switch',
-                    count: antiCheatWarningsCount,
-                    details: { reason: 'مغادرة شاشة الاختبار أو التبديل بين النوافذ 3 مرات متتالية' },
-                    is_locked: true,
-                    trainer_action: null,
-                    detected_at: new Date().toISOString()
-                }, { onConflict: 'id' }).then(() => {
-                    console.log('🚨 تم إرسال بلاغ الإقفال فورياً إلى جدول cheating_logs بالسحابة');
-                }).catch(e => console.warn('Instant cheating_logs upsert warning:', e));
-            } catch(rtErr) { console.warn('Instant cheating_logs write error:', rtErr); }
+        // إرسال إشعار الإقفال الفوري عبر قناة exam_room وتوثيقه في جدول cheating_logs بالسحابة
+        if (typeof sendExamRoomCheatingAlert === 'function') {
+            sendExamRoomCheatingAlert({
+                incidentId: incidentId,
+                studentId: currentUser.id,
+                studentName: tInfo.name,
+                studentGroup: tInfo.group,
+                quizId: currentTakingQuiz.id,
+                quizTitle: currentTakingQuiz.title,
+                warningsCount: antiCheatWarningsCount,
+                isLocked: true,
+                reason: 'مغادرة شاشة الاختبار أو التبديل بين النوافذ 3 مرات متتالية (تم إقفال الاختبار)',
+                timestamp: new Date().toISOString()
+            });
         }
 
         // 2. Mark submission in studentQuizSubmissions as locked
@@ -19292,7 +19578,7 @@
         subRecord.lockedAt = new Date().toISOString();
         subRecord.locked = true;
         studentQuizSubmissions[subKey] = subRecord;
-        localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+        try { localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions)); } catch(e){}
 
         if (typeof syncStudentSubmissionToCloud === 'function') {
             syncStudentSubmissionToCloud('quiz', subKey, subRecord);
@@ -19420,7 +19706,7 @@
             subRecord.reopenedBy = currentUser?.name || 'المدرب المشرف';
             subRecord.extraAttemptsAllowed = (subRecord.extraAttemptsAllowed || 0) + 1;
             studentQuizSubmissions[subKey] = subRecord;
-            localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+            try { localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions)); } catch(e){}
             if (typeof syncStudentSubmissionToCloud === 'function') {
                 syncStudentSubmissionToCloud('quiz', subKey, subRecord);
             }
@@ -19435,7 +19721,36 @@
             saveAntiCheatIncidents(incidents);
         }
 
-        showToast('✓ تم إعادة فتح الاختبار للمتدرب بنجاح، ويمكنه الآن استئناف أو إعادة الاختبار.', 'success');
+        // 1. إرسال إشعار فك القفل اللحظي عبر قناة exam_room للمتدرب مباشرة
+        if (typeof examRoomChannel !== 'undefined' && examRoomChannel) {
+            examRoomChannel.send({
+                type: 'broadcast',
+                event: 'quiz_unlocked',
+                payload: {
+                    studentId: studentId,
+                    quizId: quizId,
+                    trainerName: currentUser?.name || 'المدرب المشرف',
+                    timestamp: new Date().toISOString()
+                }
+            }).catch(() => {});
+        }
+
+        // 2. تحديث جدول cheating_logs وجدول quiz_submissions مباشرة في Supabase
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            supabaseClient.from('cheating_logs').update({
+                trainer_action: 'reopened',
+                is_locked: false,
+                action_at: new Date().toISOString()
+            }).eq('student_id', String(studentId)).eq('quiz_id', String(quizId)).catch(e => console.warn('cheating_logs reopen err:', e));
+
+            supabaseClient.from('quiz_submissions').update({
+                is_locked: false,
+                anti_cheat_status: 'reopened_by_trainer',
+                anti_cheat_warnings: 0
+            }).eq('student_id', String(studentId)).eq('quiz_id', String(quizId)).catch(e => console.warn('quiz_submissions unlock err:', e));
+        }
+
+        showToast('✓ تم إعادة فتح الاختبار للمتدرب بنجاح، وتم إرسال الإشعار اللحظي إلى شاشته عبر (exam_room).', 'success');
         if (typeof renderTrainerSubmissionsTab === 'function') renderTrainerSubmissionsTab();
         if (typeof renderGradesSystemTab === 'function') renderGradesSystemTab();
         renderAntiCheatIncidentsModal();
@@ -19477,9 +19792,25 @@
         subRecord.locked = true;
 
         studentQuizSubmissions[subKey] = subRecord;
-        localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+        try { localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions)); } catch(e){}
         if (typeof syncStudentSubmissionToCloud === 'function') {
             syncStudentSubmissionToCloud('quiz', subKey, subRecord);
+        }
+
+        // تحديث جدول cheating_logs وجدول quiz_submissions مباشرة في Supabase
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            supabaseClient.from('cheating_logs').update({
+                trainer_action: 'penalized_zero',
+                is_locked: false,
+                action_at: new Date().toISOString()
+            }).eq('student_id', String(studentId)).eq('quiz_id', String(quizId)).catch(e => console.warn('cheating_logs penalize err:', e));
+
+            supabaseClient.from('quiz_submissions').update({
+                score: 0,
+                best_score: 0,
+                is_locked: true,
+                anti_cheat_status: 'penalized_zero'
+            }).eq('student_id', String(studentId)).eq('quiz_id', String(quizId)).catch(e => console.warn('quiz_submissions penalize err:', e));
         }
 
         // Record 0 in trainee gradebook
@@ -20732,7 +21063,53 @@
         }
 
         studentQuizSubmissions[subKey] = subRecord;
-        localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+        try { localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions)); } catch(e){}
+
+        // الحفظ المباشر في جدول quiz_submissions في Supabase عبر supabase.from('quiz_submissions').upsert()
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            try {
+                supabaseClient.from('quiz_submissions').upsert({
+                    id: subKey,
+                    student_id: String(currentUser.id),
+                    student_name: tInfo.name || currentUser.name || '',
+                    quiz_id: String(currentTakingQuiz.id),
+                    course_key: (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : 'all',
+                    week_id: String(currentTakingQuiz.weekNum || currentTakingQuiz.weekId || 1),
+                    score: Number(subRecord.bestScore || 0),
+                    best_score: Number(subRecord.bestScore || 0),
+                    total_points: Number(totalPoints),
+                    answers: answersMap,
+                    attempts_count: Number(subRecord.attemptsCount || 1),
+                    is_locked: Boolean(subRecord.locked),
+                    anti_cheat_status: subRecord.antiCheatStatus || (subRecord.locked ? 'locked' : 'clean'),
+                    anti_cheat_warnings: Number(subRecord.antiCheatWarnings || 0),
+                    feedback: subRecord.isEarlySubmission ? `تسليم مبكر (بونص +${earlyBonusAwarded})` : '',
+                    submitted_at: subRecord.submittedAt || new Date().toISOString()
+                }, { onConflict: 'id' }).then(({ data, error }) => {
+                    if (error) console.warn('Supabase direct quiz_submissions error:', error);
+                    else console.log('✅ تم حفظ تسليم الاختبار مباشرة في جدول quiz_submissions بسحابة Supabase');
+                }).catch(err => console.warn('Direct quiz_submissions error:', err));
+            } catch(sqErr) { console.warn('Supabase direct quiz write err:', sqErr); }
+        }
+
+        // إرسال إشعار إتمام التسليم اللحظي عبر قناة exam_room للمدرب
+        if (typeof examRoomChannel !== 'undefined' && examRoomChannel) {
+            examRoomChannel.send({
+                type: 'broadcast',
+                event: 'submission_completed',
+                payload: {
+                    type: 'quiz',
+                    studentId: currentUser.id,
+                    studentName: tInfo.name,
+                    studentGroup: tInfo.group,
+                    quizId: currentTakingQuiz.id,
+                    quizTitle: currentTakingQuiz.title,
+                    score: subRecord.bestScore,
+                    totalPoints: totalPoints,
+                    submittedAt: subRecord.submittedAt
+                }
+            }).catch(() => {});
+        }
 
         // الرصد الآلي للدرجة في كشف درجات المتدرب (المحجوب عن المتدرب لحين اعتماد المدرب)
         if (typeof autoRecordAssessmentGradeForTrainee === 'function') {
@@ -21030,7 +21407,53 @@
             file: currentAssignmentSelectedFile || (existing ? existing.file : null),
             submittedAt: new Date().toISOString()
         };
-        localStorage.setItem('sys_student_assignment_submissions_v1', JSON.stringify(studentAssignmentSubmissions));
+        try { localStorage.setItem('sys_student_assignment_submissions_v1', JSON.stringify(studentAssignmentSubmissions)); } catch(e){}
+
+        // الحفظ المباشر في جدول assignment_submissions في Supabase عبر supabase.from('assignment_submissions').upsert()
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            try {
+                supabaseClient.from('assignment_submissions').upsert({
+                    id: subKey,
+                    student_id: String(currentUser.id),
+                    student_name: tInfo.name || currentUser.name || '',
+                    assignment_id: String(ass.id),
+                    course_key: (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : 'all',
+                    week_id: String(ass.weekNum || ass.weekId || 1),
+                    submission_text: notes || '',
+                    file_url: currentAssignmentSelectedFile || (existing ? existing.file : (link || null)),
+                    file_name: currentAssignmentSelectedFile ? 'مرفق واجب' : '',
+                    answers: studentAnswers,
+                    grade: Number(autoScore || 0),
+                    max_points: Number(maxPts || 10),
+                    feedback: earlyCheck.isEarly ? `تسليم مبكر (بونص +${earlyBonusAwarded})` : '',
+                    graded_by: 'النظام الآلي',
+                    graded_by_trainer: Boolean(existing && existing.gradedByTrainer),
+                    submitted_at: new Date().toISOString()
+                }, { onConflict: 'id' }).then(({ data, error }) => {
+                    if (error) console.warn('Supabase direct assignment_submissions error:', error);
+                    else console.log('✅ تم حفظ تسليم الواجب مباشرة في جدول assignment_submissions بسحابة Supabase');
+                }).catch(err => console.warn('Direct assignment_submissions error:', err));
+            } catch(saErr) { console.warn('Supabase direct assignment write err:', saErr); }
+        }
+
+        // إرسال إشعار إتمام التسليم اللحظي عبر قناة exam_room للمدرب
+        if (typeof examRoomChannel !== 'undefined' && examRoomChannel) {
+            examRoomChannel.send({
+                type: 'broadcast',
+                event: 'submission_completed',
+                payload: {
+                    type: 'assignment',
+                    studentId: currentUser.id,
+                    studentName: tInfo.name,
+                    studentGroup: tInfo.group,
+                    assignmentId: ass.id,
+                    assignmentTitle: ass.title,
+                    score: autoScore,
+                    maxPoints: maxPts,
+                    submittedAt: new Date().toISOString()
+                }
+            }).catch(() => {});
+        }
 
         // الرصد الآلي الفوري للدرجة في كشف درجات المتدرب
         if (typeof autoRecordAssessmentGradeForTrainee === 'function') {
@@ -22901,6 +23324,11 @@
 
                 // 4. Realtime subscription (instant sync on submission)
                 initSupabaseRealtimeChannel();
+
+                // 5. Exam Room Realtime Channel (غرفة الاختبارات المباشرة: بث إشعارات الغش والتنقل وفك القفل عبر supabase.channel('exam_room'))
+                if (typeof initExamRoomChannel === 'function') {
+                    initExamRoomChannel();
+                }
             } else {
                 updateCloudSyncBadge(false);
                 // Even if client SDK is not configured, try pull via serverless API if Vercel has credentials
