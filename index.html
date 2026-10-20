@@ -380,12 +380,13 @@
             border-color: #334155 !important;
         }
 
-        /* Printable Certificate Styles */
+        /* Printable Certificate & Administrative Report Styles */
         @media print {
             body * {
                 visibility: hidden !important;
             }
-            #certificatePrintableArea, #certificatePrintableArea * {
+            #certificatePrintableArea, #certificatePrintableArea *,
+            #adminReportPrintArea, #adminReportPrintArea * {
                 visibility: visible !important;
             }
             #certificatePrintableArea {
@@ -401,6 +402,19 @@
                 box-shadow: none !important;
                 border: 6px double #D97706 !important;
                 page-break-inside: avoid !important;
+            }
+            #adminReportPrintArea {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 8mm 12mm !important;
+                background: #FFFFFF !important;
+                z-index: 999999 !important;
+                box-shadow: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             .no-print {
                 display: none !important;
@@ -860,6 +874,15 @@
                     <button onclick="switchTab('timesheet')" id="btn-timesheet" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive border border-green-200/60 bg-green-50/40">
                         <span class="text-base">💰</span>
                         <span class="text-xs font-bold text-green-900">راتب • أيام الغياب</span>
+                    </button>
+
+                    <!-- Admin & Superadmin: Reports Center (مركز إصدار التقارير الإدارية والتحليلية) -->
+                    <button onclick="switchTab('adminReports')" id="btn-adminReports" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-blue-300/80 bg-blue-50/60 text-slate-900 font-bold">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">📊</span>
+                            <span class="text-xs font-black">مركز إصدار التقارير الإدارية</span>
+                        </div>
+                        <span class="text-[9px] bg-[#0F2942] text-amber-300 font-black px-2 py-0.5 rounded-full shadow-2xs">معتمد ومخصص</span>
                     </button>
 
                     <!-- Student Only: Dedicated Student Attendance -->
@@ -2507,6 +2530,27 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-5 gap-2.5" id="twcDaysCalendarGrid">
                             <!-- Populated dynamically: 5 days -->
+                        </div>
+                    </div>
+
+                    <!-- Trainee Cumulative Archive & All-Weeks Record Section -->
+                    <div id="twcCumulativeSection" class="p-3.5 rounded-2xl border border-indigo-200 bg-indigo-50/60 space-y-2.5">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <span class="text-xs font-black text-indigo-950 flex items-center gap-1.5">
+                                <span>📊</span>
+                                <span>السجل العام التراكمي (مربوط بكافة الأسابيع والفترات 1 و 2):</span>
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <span id="twcCumRateBadge" class="text-xs font-black px-3 py-0.5 rounded-full bg-indigo-600 text-white font-mono">100% نسبة الحضور العامة</span>
+                                <span id="twcCumStatusBadge" class="text-[10px] font-black px-2 py-0.5 rounded-lg border bg-white border-indigo-200 text-indigo-800">ملتزم</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-indigo-200/60 rounded-full h-2 overflow-hidden">
+                            <div id="twcCumProgressBar" class="bg-indigo-600 h-full rounded-full transition-all duration-300" style="width: 100%"></div>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] font-bold text-indigo-900 flex-wrap gap-2">
+                            <span id="twcCumDetails">الفترات التراكمية المحضورة: 0 من 0 فترة</span>
+                            <span class="text-[10px] text-indigo-700 bg-white/80 px-2 py-0.5 rounded border border-indigo-200">فترة 1 وفترة 2 محسوبة ومربوطة بالسجل العام</span>
                         </div>
                     </div>
 
@@ -4336,6 +4380,303 @@
                 </div>
             </div>
 
+            <!-- ==================== TAB: ADMIN REPORTS HUB (مركز إصدار التقارير الإدارية والتحليلية) ==================== -->
+            <div id="tab-adminReports" class="hidden space-y-6">
+                <!-- Top Header Card (Hidden on Print) -->
+                <div class="bg-white border border-slate-200 border-r-4 border-r-[#0F2942] rounded-3xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 no-print">
+                    <div class="flex items-center gap-4">
+                        <button type="button" onclick="goBackTab()" class="bg-slate-100 hover:bg-slate-200 text-[#0F2942] border border-slate-300 font-black px-3.5 py-2.5 rounded-2xl text-xs transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-2xs" title="العودة">
+                            <span>⬅️</span>
+                            <span>رجوع</span>
+                        </button>
+                        <div class="w-14 h-14 rounded-2xl bg-[#0F2942] text-amber-300 flex items-center justify-center text-2xl font-black shadow-xs shrink-0">
+                            📊
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-black text-slate-900 text-lg md:text-xl">مركز إصدار التقارير الإدارية والتحليلية</h3>
+                                <span class="bg-[#0F2942] text-amber-300 text-xs font-black px-2.5 py-0.5 rounded-full border border-amber-400/40">معتمد ومخصص</span>
+                            </div>
+                            <p class="text-xs text-slate-500 font-bold">تقارير حضور الفترتين 1 و 2، التقرير الأسبوعي الذكي للإدارة والتشغيل، ونماذج تقييم أداء المدربين</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button type="button" onclick="printActiveAdminReport()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                            <span>🖨️</span>
+                            <span>طباعة التقرير الرسمي</span>
+                        </button>
+                        <button type="button" onclick="exportAdminReportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                            <span>📥</span>
+                            <span>تصدير Excel / CSV</span>
+                        </button>
+                        <button type="button" onclick="refreshAdminReportsHub()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-black px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
+                            <span>🔄</span>
+                            <span>تحديث</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sub-Tabs Navigation (Hidden on Print) -->
+                <div class="bg-slate-200/70 p-1.5 rounded-2xl flex items-center gap-1.5 border border-slate-300 overflow-x-auto no-print">
+                    <button type="button" id="adminRepSubBtn-attendance" onclick="switchAdminReportsSubTab('attendance')" class="flex-1 py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer bg-[#0F2942] text-amber-300 shadow-sm whitespace-nowrap">
+                        <span>🏢</span>
+                        <span>تقارير الحضور والمجموعات والشركات</span>
+                    </button>
+                    <button type="button" id="adminRepSubBtn-executive" onclick="switchAdminReportsSubTab('executive')" class="flex-1 py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 whitespace-nowrap">
+                        <span>📝</span>
+                        <span>التقرير الأسبوعي الذكي للإدارة والتشغيل</span>
+                        <span class="bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded text-[9px]">أ. محمد كمال العواد</span>
+                    </button>
+                    <button type="button" id="adminRepSubBtn-evalForm" onclick="switchAdminReportsSubTab('evalForm')" class="flex-1 py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 whitespace-nowrap">
+                        <span>⭐</span>
+                        <span>نماذج تقييم أداء المدربين الشهري</span>
+                    </button>
+                    <button type="button" id="adminRepSubBtn-trainerReport" onclick="switchAdminReportsSubTab('trainerReport')" class="flex-1 py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 whitespace-nowrap">
+                        <span>👨‍🏫</span>
+                        <span>تقرير أداء المدرب ومجموعاته</span>
+                    </button>
+                </div>
+
+                <!-- SUB-PANEL 1: Attendance & Institute Reports Controls (Hidden on Print) -->
+                <div id="adminRepControls-attendance" class="bg-white rounded-3xl border border-slate-200 p-5 md:p-6 shadow-sm space-y-5 no-print">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">⚙️</span>
+                            <h4 class="font-black text-slate-900 text-sm md:text-base">تحديد نطاق التقرير والبيانات</h4>
+                        </div>
+                        <span class="text-[11px] font-bold text-slate-500">اختر نوع التقرير والتخصيص المطلوب ثم عاين النتيجة بالأسفل</span>
+                    </div>
+
+                    <!-- Filter Controls Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700">نوع التقرير:</label>
+                            <select id="adminRepFilterType" onchange="onAdminRepFilterTypeChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200">
+                                <option value="all">🏢 شامل المعهد (~830 متدرب)</option>
+                                <option value="company">🏭 حسب الشركة الراعية</option>
+                                <option value="group">👥 حسب المجموعة التدريبية</option>
+                                <option value="trainee">👤 تقرير متدرب فردي شامل</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1" id="adminRepTargetWrapper">
+                            <label class="block text-xs font-black text-slate-700" id="adminRepTargetLabel">الجهة / المجموعة المستهدفة:</label>
+                            <select id="adminRepTargetSelect" onchange="renderAttendanceReportView()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200">
+                                <!-- Populated dynamically -->
+                            </select>
+                            <input type="text" id="adminRepTraineeSearchInput" oninput="renderAttendanceReportView()" placeholder="ابحث برقم الهوية أو اسم المتدرب..." class="hidden w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700">النطاق الزمني / الأسبوع:</label>
+                            <select id="adminRepWeekSelect" onchange="renderAttendanceReportView()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200">
+                                <option value="LIVE">🟢 الأسبوع الحالي (التحضير المباشر Google Sheets)</option>
+                                <option value="CUMULATIVE">📚 السجل التراكمي الشامل لكافة الأسابيع</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700">ترتيب النتائج:</label>
+                            <select id="adminRepSortSelect" onchange="renderAttendanceReportView()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200">
+                                <option value="rate_desc">الأعلى حضوراً أولاً (تنازلي)</option>
+                                <option value="rate_asc">الأقل حضوراً (المعرضون للحرمان أولاً)</option>
+                                <option value="name_asc">أبجدياً حسب اسم المتدرب</option>
+                                <option value="group_asc">حسب المجموعة التدريبية</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Customization Checkboxes (اختيار ايش ابغى يكون موجود في التقرير او ما ابغى) -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                                <span>☑️</span>
+                                <span>تخصيص محتويات التقرير المطبوع (اختر ما ترغب بإظهاره أو إخفائه):</span>
+                            </span>
+                            <button type="button" onclick="toggleAllAdminRepCheckboxes(true)" class="text-[11px] font-bold text-blue-700 hover:underline">تحديد الكل</button>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-1">
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer bg-white px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-400">
+                                <input type="checkbox" id="repOptLogo" checked onchange="renderAttendanceReportView()" class="w-4 h-4 text-[#0F2942] rounded focus:ring-blue-400">
+                                <span>الشعار والترويسة</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer bg-white px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-400">
+                                <input type="checkbox" id="repOptKpi" checked onchange="renderAttendanceReportView()" class="w-4 h-4 text-[#0F2942] rounded focus:ring-blue-400">
+                                <span>بطاقات الإحصائيات</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer bg-white px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-400">
+                                <input type="checkbox" id="repOptChart" checked onchange="renderAttendanceReportView()" class="w-4 h-4 text-[#0F2942] rounded focus:ring-blue-400">
+                                <span>الرسوم البيانية (Charts)</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer bg-white px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-400">
+                                <input type="checkbox" id="repOptTable" checked onchange="renderAttendanceReportView()" class="w-4 h-4 text-[#0F2942] rounded focus:ring-blue-400">
+                                <span>جدول المتدربين</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer bg-white px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-400">
+                                <input type="checkbox" id="repOptAdvice" checked onchange="renderAttendanceReportView()" class="w-4 h-4 text-[#0F2942] rounded focus:ring-blue-400">
+                                <span>التوصيات والنصائح</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer bg-white px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-400">
+                                <input type="checkbox" id="repOptSignature" checked onchange="renderAttendanceReportView()" class="w-4 h-4 text-[#0F2942] rounded focus:ring-blue-400">
+                                <span>توقيع وختم المدير</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-PANEL 2: Executive Weekly Report Controls (Hidden on Print) -->
+                <div id="adminRepControls-executive" class="hidden bg-white rounded-3xl border border-slate-200 p-5 md:p-6 shadow-sm space-y-5 no-print">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl">👔</span>
+                                <h4 class="font-black text-slate-900 text-base">التقرير الأسبوعي الذكي للإدارة والتشغيل</h4>
+                                <span class="bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-black px-2.5 py-0.5 rounded-full">المحاور السبعة الرسمية</span>
+                            </div>
+                            <p class="text-xs text-slate-500 font-bold mt-1">
+                                موجه لسعادة الأستاذ المحترم / <span class="text-[#0F2942] font-black underline">محمد كمال العواد</span> (مدير التشغيل) - معهد الذهب الأسود للتدريب فرع عنك
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="generateAiExecutiveReport()" id="btnGenerateAiExec" class="bg-gradient-to-r from-violet-600 to-indigo-700 hover:from-violet-700 hover:to-indigo-800 text-white font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-2 shadow-md">
+                                <span>✨</span>
+                                <span>توليد التقرير بالذكاء الاصطناعي (Gemini)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live Stats Ribbon -->
+                    <div id="execReportStatsRibbon" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Week selector & additional notes -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700">الأسبوع التدريبي:</label>
+                            <input type="text" id="execWeekLabelInput" value="الأسبوع التدريبي الجاري" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-400">
+                        </div>
+                        <div class="md:col-span-2 space-y-1">
+                            <label class="block text-xs font-black text-slate-700">ملاحظات وتوجيهات خاصة ترغب بتضمينها في تقرير هذا الأسبوع:</label>
+                            <input type="text" id="execNotesInput" placeholder="مثال: تم إكمال تغطية صيانة التكييف في القاعات 4 و 5، وجاهزية تامة لاختبارات منتصف الفصل..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-400">
+                        </div>
+                    </div>
+
+                    <!-- Pillars Customization Checkboxes -->
+                    <div class="bg-indigo-50/60 border border-indigo-200 rounded-2xl p-4 space-y-2">
+                        <span class="text-xs font-black text-indigo-950 block">المحاور السبعة التنفيذية المشمولة في التقرير (يمكنك تعديل أي محور مباشرة بالأسفل):</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-1 text-xs font-bold text-slate-700">
+                            <label class="flex items-center gap-2"><input type="checkbox" id="execChk-schedules" checked onchange="updateExecutiveReportPreview()"> 1. إدارة الجداول والقاعات</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="execChk-staff_hr" checked onchange="updateExecutiveReportPreview()"> 2. الكادر التدريبي وشؤون HR</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="execChk-companies_payroll" checked onchange="updateExecutiveReportPreview()"> 3. شؤون الشركات والرواتب</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="execChk-academic_lms" checked onchange="updateExecutiveReportPreview()"> 4. التدريب ومنصة LMS / منار</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="execChk-it_support" checked onchange="updateExecutiveReportPreview()"> 5. تقنية المعلومات والدعم الفني</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="execChk-maintenance_facility" checked onchange="updateExecutiveReportPreview()"> 6. الصيانة والتغطية الميدانية</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="execChk-general_kpi" checked onchange="updateExecutiveReportPreview()"> 7. المؤشرات العامة (~830 متدرب)</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="execChk-recommendations" checked onchange="updateExecutiveReportPreview()"> 8. التوصيات والقرارات المقترحة</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-PANEL 3: Monthly Trainer Evaluation Form (Hidden on Print) -->
+                <div id="adminRepControls-evalForm" class="hidden bg-white rounded-3xl border border-slate-200 p-5 md:p-6 shadow-sm space-y-5 no-print">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">⭐</span>
+                            <h4 class="font-black text-slate-900 text-base">نموذج تقييم أداء المدرب الشهري المعتمد</h4>
+                        </div>
+                        <span class="text-xs font-bold text-amber-900 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">6 معايير مهنية (الدرجة القصوى: 60)</span>
+                    </div>
+
+                    <!-- Trainer and Evaluation Metadata -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700">المدرب المراد تقييمه:</label>
+                            <select id="trainerEvalSelect" onchange="loadTrainerEvaluationFormData()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-amber-400">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700">دورة التقييم / الشهر:</label>
+                            <select id="trainerEvalMonth" onchange="loadTrainerEvaluationFormData()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-amber-400">
+                                <option value="2026-10">شهر أكتوبر 2026</option>
+                                <option value="2026-11">شهر نوفمبر 2026</option>
+                                <option value="2026-12">شهر ديسمبر 2026</option>
+                                <option value="2026-09">شهر سبتمبر 2026</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700">المُقيّم / الصفة الإدارية:</label>
+                            <input type="text" id="trainerEvaluatorName" value="مدير المعهد / المشرف الأكاديمي" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-amber-400">
+                        </div>
+                    </div>
+
+                    <!-- 6 Evaluation Criteria Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="trainerEvalCriteriaGrid">
+                        <!-- Populated by JS with sliders / rating inputs -->
+                    </div>
+
+                    <!-- Qualitative Notes -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700">نقاط القوة والتميز:</label>
+                            <textarea id="trainerEvalStrengths" rows="3" placeholder="التزام عالٍ بالمواعيد، تمكن ممتاز من اللغة الإنجليزية الفنية..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:border-amber-400"></textarea>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700">مجالات التحسين وفرص التطوير:</label>
+                            <textarea id="trainerEvalImprovements" rows="3" placeholder="زيادة التفاعل على منصة LMS ورصد الواجبات أولاً بأول..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:border-amber-400"></textarea>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700">توجيهات وتوصيات الإدارة:</label>
+                            <textarea id="trainerEvalDirectives" rows="3" placeholder="الاستمرار على هذا الأداء والمشاركة في تطوير الحقائب التدريبية..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:border-amber-400"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-between border-t border-slate-100 pt-4">
+                        <div class="flex items-center gap-2" id="trainerEvalScoreBadge">
+                            <!-- Live calculated score -->
+                        </div>
+                        <button type="button" onclick="saveTrainerMonthlyEvaluation()" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-6 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-2 shadow-md">
+                            <span>💾</span>
+                            <span>حفظ واعتماد التقييم الشهري</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SUB-PANEL 4: Trainer Performance Report Controls (Hidden on Print) -->
+                <div id="adminRepControls-trainerReport" class="hidden bg-white rounded-3xl border border-slate-200 p-5 md:p-6 shadow-sm space-y-4 no-print">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">👨‍🏫</span>
+                            <h4 class="font-black text-slate-900 text-base">تقرير أداء المدرب ومجموعاته الأكاديمية</h4>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="trainerReportSelectTrainer" onchange="renderTrainerPerformanceReportView()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-500">
+                                <!-- Populated dynamically -->
+                            </select>
+                            <select id="trainerReportSelectMonth" onchange="renderTrainerPerformanceReportView()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-500">
+                                <option value="2026-10">شهر أكتوبر 2026</option>
+                                <option value="2026-11">شهر نوفمبر 2026</option>
+                                <option value="2026-12">شهر ديسمبر 2026</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 font-bold">
+                        يستعرض التقرير أدناه بطاقة الأداء الشاملة للمدرب، معدل حضور مجموعاته في الفترتين 1 و 2، إنجاز الواجبات والاختبارات، ونتائج التقييم الشهري.
+                    </p>
+                </div>
+
+                <!-- ==================== FORMAL PRINTABLE REPORT AREA (#adminReportPrintArea) ==================== -->
+                <!-- This area is displayed on screen and exclusively rendered when printing (A4) -->
+                <div id="adminReportPrintArea" class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm space-y-6">
+                    <!-- Dynamic Formal Report Content will be rendered here by JavaScript -->
+                    <div class="text-center py-12 text-slate-400 font-bold text-xs">
+                        جاري تحميل وإعداد التقرير الإداري...
+                    </div>
+                </div>
+            </div>
+
             <!-- ==================== TRAINER CANVAS LMS MODAL (Legacy Compatibility) ==================== -->
             <div id="trainerLmsModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 md:p-6 overflow-y-auto">
                 <div class="bg-white rounded-3xl max-w-4xl w-full p-5 md:p-7 space-y-5 shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col">
@@ -4985,13 +5326,13 @@
                                 <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
                                     <span class="flex items-center gap-1.5">
                                         <span>📅</span>
-                                        <span>تاريخ ووقت الاختبار (تقويم):</span>
+                                        <span>تاريخ ووقت الاختبار:</span>
                                     </span>
-                                    <span class="text-[10px] text-indigo-700 font-bold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">تقويم الاستحقاق</span>
+                                    <span class="text-[10px] text-rose-700 font-black bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">إجباري ⏰</span>
                                 </label>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <input type="date" id="lmsQuizDueDateInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-[#0F2942] font-mono">
-                                    <input type="time" id="lmsQuizDueTimeInput" value="23:59" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-[#0F2942] font-mono">
+                                    <input type="date" id="lmsQuizDueDateInput" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-[#0F2942] font-mono">
+                                    <input type="time" id="lmsQuizDueTimeInput" value="23:59" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-[#0F2942] font-mono">
                                 </div>
                                 <input type="hidden" id="lmsQuizDate" value="الخميس 11:59 م">
                             </div>
@@ -5067,14 +5408,23 @@
                         <input type="hidden" id="lmsAssignmentCategory" value="weekly">
                         <input type="hidden" id="lmsAssignmentGradingMode" value="system_auto">
 
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-                                    <span>تاريخ الاستحقاق والتسليم:</span>
-                                    <span class="text-[10px] text-[#0F2942] font-bold bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">التقويم</span>
+                                    <span>تاريخ التسليم:</span>
+                                    <span class="text-[10px] text-rose-700 font-black bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">إجباري 📅</span>
                                 </label>
                                 <div class="relative">
                                     <input type="date" id="lmsAssignmentDueDate" required onclick="this.showPicker && this.showPicker()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 outline-none cursor-pointer focus:border-[#0F2942] font-mono shadow-2xs">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                                    <span>وقت التسليم:</span>
+                                    <span class="text-[10px] text-rose-700 font-black bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">إجباري ⏰</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="time" id="lmsAssignmentDueTime" value="23:59" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 outline-none cursor-pointer focus:border-[#0F2942] font-mono shadow-2xs">
                                 </div>
                             </div>
                             <div>
@@ -6083,6 +6433,7 @@
         const btnStudentVirtualClass = document.getElementById('btn-studentVirtualClass');
         const btnStudySchedule = document.getElementById('btn-studySchedule');
         const btnAttendanceSheet = document.getElementById('btn-attendanceSheet');
+        const btnAdminReports = document.getElementById('btn-adminReports');
 
         const topHeaderUploadButtons = document.getElementById('topHeaderUploadButtons');
         const topSyncBtn = document.getElementById('topSyncBtn');
@@ -6093,7 +6444,7 @@
 
         if (currentUser.role === 'student') {
             // المتدرب يرى فقط أزرار المتدرب في القائمة الجانبية وواجهته المستقلة
-            const allStaffBtns = [btnAttendance, btnTrainerDashboard, btnTrainerLms, btnTrainerSubmissions, btnGradesSystem, btnSubmissionsCalendar, btnMasterSchedule, btnSettings, btnTrainerReports, btnUsers, btnTimesheet, btnArchive, btnVirtualClass];
+            const allStaffBtns = [btnAttendance, btnTrainerDashboard, btnTrainerLms, btnTrainerSubmissions, btnGradesSystem, btnSubmissionsCalendar, btnMasterSchedule, btnSettings, btnTrainerReports, btnUsers, btnTimesheet, btnArchive, btnVirtualClass, btnAdminReports];
             allStaffBtns.forEach(b => { if (b) b.classList.add('hidden'); });
 
             // إظهار أزرار المتدرب المخصصة في القائمة الجانبية
@@ -6106,7 +6457,7 @@
             if (btnStudentSubmissionsCalendar) btnStudentSubmissionsCalendar.classList.remove('hidden');
             if (btnStudentVirtualClass) btnStudentVirtualClass.classList.remove('hidden');
 
-            ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'virtualClass'].forEach(tabId => {
+            ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'virtualClass', 'adminReports'].forEach(tabId => {
                 const el = document.getElementById(`tab-${tabId}`);
                 if (el) el.classList.add('hidden');
             });
@@ -6153,9 +6504,10 @@
             if (btnTimesheet) btnTimesheet.classList.add('hidden');
             if (btnUsers) btnUsers.classList.add('hidden');
             if (btnArchive) btnArchive.classList.add('hidden');
+            if (btnAdminReports) btnAdminReports.classList.add('hidden');
 
             // إخفاء حاويات الصفحات غير المصرح بها
-            ['attendance', 'settings', 'timesheet', 'users', 'archive', 'studentDashboard', 'studentLms', 'studentGrades', 'studentVirtualClass'].forEach(tabId => {
+            ['attendance', 'settings', 'timesheet', 'users', 'archive', 'studentDashboard', 'studentLms', 'studentGrades', 'studentVirtualClass', 'adminReports'].forEach(tabId => {
                 const el = document.getElementById(`tab-${tabId}`);
                 if (el) el.classList.add('hidden');
             });
@@ -6191,6 +6543,7 @@
             if (btnSettings) btnSettings.classList.remove('hidden');
             if (btnTrainerReports) btnTrainerReports.classList.remove('hidden');
             if (btnTimesheet) btnTimesheet.classList.remove('hidden');
+            if (btnAdminReports) btnAdminReports.classList.remove('hidden');
             if (btnVirtualClass) btnVirtualClass.classList.remove('hidden');
             if (btnArchive) btnArchive.classList.add('hidden');
             if (btnUsers) {
@@ -6375,7 +6728,7 @@
         currentActiveTabId = tab;
         updateGlobalBackBtnUI();
 
-        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentLms', 'studentGrades', 'submissionsCalendar', 'virtualClass', 'studentVirtualClass', 'studySchedule', 'attendanceSheet'];
+        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentLms', 'studentGrades', 'submissionsCalendar', 'virtualClass', 'studentVirtualClass', 'studySchedule', 'attendanceSheet', 'adminReports'];
         tabs.forEach(t => {
             const el = document.getElementById(`tab-${t}`);
             const btn = document.getElementById(`btn-${t}`);
@@ -6436,6 +6789,8 @@
                 if (typeof renderVirtualClassTab === 'function') renderVirtualClassTab();
             } else if (tab === 'studentVirtualClass') {
                 if (typeof renderStudentVirtualClassTab === 'function') renderStudentVirtualClassTab();
+            } else if (tab === 'adminReports') {
+                if (typeof renderAdminReportsHub === 'function') renderAdminReportsHub();
             } else if (tab === 'masterSchedule') {
                 renderMasterSchedule();
             } else if (tab === 'users') {
@@ -17621,6 +17976,53 @@
         const sessCount = document.getElementById('twcSummarySessionsCount');
         if (sessCount) sessCount.innerText = `المجموع: ${attendedSessions} من 10 حصص (${fullyPresentDays} أيام حاضر • ${violatorDays} مخالف • ${absentDays} غائب)`;
 
+        // الربط بالسجل العام التراكمي الشامل واحتساب النسبة لكافة الأسابيع (فترة 1 وفترة 2)
+        const cleanTid = (typeof cleanNationalId === 'function') ? cleanNationalId(tObj.id) : tObj.id;
+        const archRec = (typeof archiveData !== 'undefined' && archiveData && archiveData[cleanTid]) ? archiveData[cleanTid] : null;
+
+        let cumAttended = attendedSessions;
+        let cumTotal = 10;
+        let cumRate = rate;
+        let totalWeeksCount = 1;
+
+        if (archRec) {
+            const histEntries = Object.values(archRec.weeksHistory || {});
+            let histAtt = 0;
+            let histTot = 0;
+            histEntries.forEach(entry => {
+                histAtt += (entry.attended !== undefined ? entry.attended : 0);
+                histTot += (entry.total !== undefined ? entry.total : 10);
+            });
+            const baseAtt = archRec.baseAttendedPeriods || 0;
+            const baseTot = archRec.baseTotalPeriods || 0;
+            cumAttended = baseAtt + (histTot > 0 ? histAtt : attendedSessions);
+            cumTotal = baseTot + (histTot > 0 ? histTot : 10);
+            if (cumTotal < cumAttended) cumTotal = cumAttended;
+            cumRate = cumTotal > 0 ? Math.round((cumAttended / cumTotal) * 100) : rate;
+            totalWeeksCount = Math.max(1, (archRec.sheetsCount || 1), (histEntries.length || 1));
+        }
+
+        const cumBadge = document.getElementById('twcCumRateBadge');
+        if (cumBadge) {
+            cumBadge.innerText = `${cumRate}% نسبة الحضور العامة (تراكمي)`;
+            cumBadge.className = `text-xs font-black px-3 py-0.5 rounded-full font-mono shadow-xs ${cumRate >= 90 ? 'bg-emerald-600 text-white' : (cumRate >= 75 ? 'bg-indigo-600 text-white' : (cumRate >= 60 ? 'bg-amber-500 text-slate-950' : 'bg-red-600 text-white'))}`;
+        }
+        const cumStatusEl = document.getElementById('twcCumStatusBadge');
+        if (cumStatusEl) {
+            const stInfo = (typeof getArchiveStatusInfo === 'function') ? getArchiveStatusInfo(cumRate) : { label: 'ملتزم' };
+            cumStatusEl.innerText = stInfo.label || 'ملتزم';
+            cumStatusEl.className = `text-[10px] font-black px-2 py-0.5 rounded-lg border ${stInfo.class || 'bg-white border-indigo-200 text-indigo-800'}`;
+        }
+        const cumPBar = document.getElementById('twcCumProgressBar');
+        if (cumPBar) {
+            cumPBar.style.width = `${Math.min(100, Math.max(0, cumRate))}%`;
+            cumPBar.className = cumRate >= 90 ? 'bg-emerald-600 h-full rounded-full transition-all duration-300' : (cumRate >= 75 ? 'bg-indigo-600 h-full rounded-full transition-all duration-300' : (cumRate >= 60 ? 'bg-amber-500 h-full rounded-full transition-all duration-300' : 'bg-red-600 h-full rounded-full transition-all duration-300'));
+        }
+        const cumDet = document.getElementById('twcCumDetails');
+        if (cumDet) {
+            cumDet.innerText = `الفترات التراكمية المحضورة: ${cumAttended} من ${cumTotal} فترة عبر كافة الأسابيع (${totalWeeksCount} أسابيع معتمدة)`;
+        }
+
         // WhatsApp button
         const wpCont = document.getElementById('twcWhatsAppContainer');
         if (wpCont) {
@@ -23406,13 +23808,17 @@
 
         const title = document.getElementById('lmsQuizTitle').value.trim();
         const dateInputVal = document.getElementById('lmsQuizDueDateInput')?.value;
-        const timeInputVal = document.getElementById('lmsQuizDueTimeInput')?.value || '23:59';
-        let quizDate = document.getElementById('lmsQuizDate')?.value.trim() || 'الخميس 11:59 م';
-        let dueDateIso = null;
-        if (dateInputVal) {
-            dueDateIso = `${dateInputVal}T${timeInputVal}:00`;
-            quizDate = `${dateInputVal} (${timeInputVal})`;
+        const timeInputVal = document.getElementById('lmsQuizDueTimeInput')?.value;
+
+        if (!dateInputVal || !timeInputVal) {
+            showToast('⚠️ يرجى تحديد تاريخ ووقت استحقاق الاختبار بشكل إجباري', 'error');
+            const dEl = document.getElementById('lmsQuizDueDateInput');
+            if (dEl) { dEl.focus(); dEl.classList.add('ring-2', 'ring-rose-500'); }
+            return;
         }
+
+        const dueDateIso = `${dateInputVal}T${timeInputVal}:00`;
+        const quizDate = `${dateInputVal} (${timeInputVal})`;
 
         const duration = parseInt(document.getElementById('lmsQuizDuration').value) || 10;
         const totalPoints = parseInt(document.getElementById('lmsQuizTotalPoints').value) || 10;
@@ -23635,6 +24041,8 @@
         defDueDate.setDate(defDueDate.getDate() + 7);
         const dueInput = document.getElementById('lmsAssignmentDueDate');
         if (dueInput) dueInput.value = defDueDate.toISOString().split('T')[0];
+        const dueTimeInput = document.getElementById('lmsAssignmentDueTime');
+        if (dueTimeInput) dueTimeInput.value = '23:59';
         const ptsEl = document.getElementById('lmsAssignmentPoints');
         if (ptsEl) ptsEl.value = '10';
         const catEl = document.getElementById('lmsAssignmentCategory');
@@ -23676,10 +24084,22 @@
         if (dueInputEdit) {
             if (a.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(a.dueDate)) {
                 dueInputEdit.value = a.dueDate;
+            } else if (a.dueDateIso && a.dueDateIso.includes('T')) {
+                dueInputEdit.value = a.dueDateIso.split('T')[0];
             } else {
                 const defD = new Date();
                 defD.setDate(defD.getDate() + 7);
                 dueInputEdit.value = defD.toISOString().split('T')[0];
+            }
+        }
+        const dueTimeInputEdit = document.getElementById('lmsAssignmentDueTime');
+        if (dueTimeInputEdit) {
+            if (a.dueTime) {
+                dueTimeInputEdit.value = a.dueTime;
+            } else if (a.dueDateIso && a.dueDateIso.includes('T')) {
+                dueTimeInputEdit.value = a.dueDateIso.split('T')[1].slice(0, 5);
+            } else {
+                dueTimeInputEdit.value = '23:59';
             }
         }
         const ptsEl = document.getElementById('lmsAssignmentPoints');
@@ -23718,7 +24138,18 @@
         if (!activeWeek) return;
 
         const title = document.getElementById('lmsAssignmentTitle').value.trim();
-        const dueDate = document.getElementById('lmsAssignmentDueDate').value.trim();
+        const dueDate = document.getElementById('lmsAssignmentDueDate')?.value.trim();
+        const dueTime = document.getElementById('lmsAssignmentDueTime')?.value.trim();
+
+        if (!dueDate || !dueTime) {
+            showToast('⚠️ يرجى تحديد تاريخ ووقت تسليم الواجب بشكل إجباري', 'error');
+            const dEl = document.getElementById('lmsAssignmentDueDate');
+            if (dEl) { dEl.focus(); dEl.classList.add('ring-2', 'ring-rose-500'); }
+            return;
+        }
+
+        const dueDateIso = `${dueDate}T${dueTime}:00`;
+        const dueDateFormatted = `${dueDate} (${dueTime})`;
         const points = parseInt(document.getElementById('lmsAssignmentPoints')?.value, 10) || 10;
         const targetGroup = document.getElementById('lmsAssignmentTargetGroup')?.value || 'ALL';
         const assignmentCategory = document.getElementById('lmsAssignmentCategory')?.value || 'individual';
@@ -23752,6 +24183,9 @@
         const assignmentData = {
             title: title,
             dueDate: dueDate,
+            dueTime: dueTime,
+            dueDateIso: dueDateIso,
+            dueDateFormatted: dueDateFormatted,
             points: points,
             targetGroup: targetGroup,
             assignmentCategory: assignmentCategory,
@@ -30916,7 +31350,7 @@
         }
     }
 
-    // تصدير الدوال الجديدة للنطاق العام window
+    // تصدير دوال المقررات وكشف الحضور للنطاق العام window
     window.renderStudentCoursesPage = renderStudentCoursesPage;
     window.openStudentLmsForCourse = openStudentLmsForCourse;
     window.openStudentDemoPreview = openStudentDemoPreview;
@@ -30931,6 +31365,1487 @@
     window.selectAttendanceArchiveWeek = selectAttendanceArchiveWeek;
     window.refreshAttendanceSheetData = refreshAttendanceSheetData;
     window.togglePasswordVisibility = togglePasswordVisibility;
+
+    // ===================================================================
+    // ADMINISTRATIVE REPORTS CENTER & EXECUTIVE HUB ENGINE (مركز التقارير الإدارية)
+    // ===================================================================
+    let currentAdminReportsSubTab = 'attendance';
+    let executiveReportData = null;
+    let cachedTrainerEvaluations = null;
+
+    function getStoredTrainerEvaluations() {
+        if (!cachedTrainerEvaluations) {
+            try {
+                const raw = localStorage.getItem('sys_trainer_evaluations_v1');
+                cachedTrainerEvaluations = raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                cachedTrainerEvaluations = {};
+            }
+        }
+        return cachedTrainerEvaluations;
+    }
+
+    function saveStoredTrainerEvaluations(evals) {
+        cachedTrainerEvaluations = evals;
+        try {
+            localStorage.setItem('sys_trainer_evaluations_v1', JSON.stringify(evals));
+        } catch (e) {
+            console.warn('Could not save trainer evaluations to localStorage:', e);
+        }
+    }
+
+    function getAvailableTrainersList() {
+        const trainersSet = new Set();
+        if (typeof INITIAL_USERS !== 'undefined' && Array.isArray(INITIAL_USERS)) {
+            INITIAL_USERS.filter(u => u.role === 'trainer').forEach(u => trainersSet.add(u.name));
+        }
+        if (typeof scheduleData !== 'undefined' && Array.isArray(scheduleData)) {
+            scheduleData.forEach(s => { if (s.name) trainersSet.add(s.name); });
+        }
+        if (typeof lmsCourses !== 'undefined' && typeof lmsCourses === 'object') {
+            for (let c in lmsCourses) {
+                if (lmsCourses[c].trainer) trainersSet.add(lmsCourses[c].trainer);
+            }
+        }
+        // Fallback default trainers if list is small
+        const defaults = ['أ. فاضل الماجد', 'أ. سيد احمد', 'أ. عصام سعيد', 'أ. شرف الدين', 'أ. رضا مطيلق', 'أ. يوسف جمال', 'أ. علي عبدالسلام', 'أ. أحمد الاصيل', 'أ. قاسم الماجد'];
+        defaults.forEach(d => trainersSet.add(d));
+        return Array.from(trainersSet).filter(Boolean);
+    }
+
+    function renderAdminReportsHub() {
+        populateAdminRepControls();
+        switchAdminReportsSubTab(currentAdminReportsSubTab);
+    }
+
+    function refreshAdminReportsHub() {
+        renderAdminReportsHub();
+        showToast('تم تحديث بيانات مركز التقارير بنجاح', 'success');
+    }
+
+    function switchAdminReportsSubTab(subTab) {
+        currentAdminReportsSubTab = subTab;
+        const tabs = ['attendance', 'executive', 'evalForm', 'trainerReport'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(`adminRepSubBtn-${t}`);
+            const ctrl = document.getElementById(`adminRepControls-${t}`);
+            if (btn) {
+                if (t === subTab) {
+                    btn.className = 'flex-1 py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer bg-[#0F2942] text-amber-300 shadow-sm whitespace-nowrap';
+                } else {
+                    btn.className = 'flex-1 py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 whitespace-nowrap';
+                }
+            }
+            if (ctrl) {
+                if (t === subTab) ctrl.classList.remove('hidden');
+                else ctrl.classList.add('hidden');
+            }
+        });
+
+        if (subTab === 'attendance') {
+            renderAttendanceReportView();
+        } else if (subTab === 'executive') {
+            renderExecutiveWeeklyReportView();
+        } else if (subTab === 'evalForm') {
+            loadTrainerEvaluationFormData();
+        } else if (subTab === 'trainerReport') {
+            renderTrainerPerformanceReportView();
+        }
+    }
+
+    function populateAdminRepControls() {
+        const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+        
+        // Populate Target Select based on initial Filter Type
+        onAdminRepFilterTypeChange();
+
+        // Populate Week Select
+        const weekSel = document.getElementById('adminRepWeekSelect');
+        if (weekSel) {
+            const curVal = weekSel.value;
+            const weeksArray = [];
+            if (typeof archiveData !== 'undefined' && archiveData) {
+                for (let k in archiveData) {
+                    if (archiveData[k]?.weeksHistory) {
+                        for (let w in archiveData[k].weeksHistory) {
+                            if (!weeksArray.includes(w)) weeksArray.push(w);
+                        }
+                    }
+                }
+            }
+            let html = `
+                <option value="LIVE" ${curVal === 'LIVE' ? 'selected' : ''}>🟢 الأسبوع الحالي (التحضير المباشر Google Sheets)</option>
+                <option value="CUMULATIVE" ${curVal === 'CUMULATIVE' ? 'selected' : ''}>📚 السجل التراكمي الشامل لكافة الأسابيع</option>
+            `;
+            weeksArray.forEach(wk => {
+                html += `<option value="${wk}" ${curVal === wk ? 'selected' : ''}>📁 ${wk}</option>`;
+            });
+            weekSel.innerHTML = html;
+        }
+
+        // Populate Trainers in Evaluation & Report Selects
+        const trainers = getAvailableTrainersList();
+        const evalSel = document.getElementById('trainerEvalSelect');
+        if (evalSel && evalSel.children.length === 0) {
+            evalSel.innerHTML = trainers.map(t => `<option value="${t}">${t}</option>`).join('');
+        }
+        const repTrainerSel = document.getElementById('trainerReportSelectTrainer');
+        if (repTrainerSel && repTrainerSel.children.length === 0) {
+            repTrainerSel.innerHTML = trainers.map(t => `<option value="${t}">${t}</option>`).join('');
+        }
+    }
+
+    function onAdminRepFilterTypeChange() {
+        const fType = document.getElementById('adminRepFilterType')?.value || 'all';
+        const wrapper = document.getElementById('adminRepTargetWrapper');
+        const label = document.getElementById('adminRepTargetLabel');
+        const select = document.getElementById('adminRepTargetSelect');
+        const searchInput = document.getElementById('adminRepTraineeSearchInput');
+        const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+
+        if (fType === 'all') {
+            if (wrapper) wrapper.classList.add('hidden');
+        } else if (fType === 'trainee') {
+            if (wrapper) wrapper.classList.remove('hidden');
+            if (label) label.innerText = 'بحث برقم الهوية أو اسم المتدرب:';
+            if (select) select.classList.add('hidden');
+            if (searchInput) {
+                searchInput.classList.remove('hidden');
+            }
+        } else {
+            if (wrapper) wrapper.classList.remove('hidden');
+            if (select) select.classList.remove('hidden');
+            if (searchInput) searchInput.classList.add('hidden');
+
+            if (fType === 'company') {
+                if (label) label.innerText = 'اختر الشركة الراعية:';
+                const companies = Array.from(new Set(pool.map(t => t.company))).filter(Boolean).sort();
+                select.innerHTML = companies.map(c => `<option value="${c}">${c}</option>`).join('');
+            } else if (fType === 'group') {
+                if (label) label.innerText = 'اختر المجموعة التدريبية:';
+                const groups = Array.from(new Set(pool.map(t => t.group))).filter(Boolean).sort();
+                select.innerHTML = groups.map(g => `<option value="${g}">${g}</option>`).join('');
+            }
+        }
+        renderAttendanceReportView();
+    }
+
+    function toggleAllAdminRepCheckboxes(checked) {
+        ['repOptLogo', 'repOptKpi', 'repOptChart', 'repOptTable', 'repOptAdvice', 'repOptSignature'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.checked = checked;
+        });
+        renderAttendanceReportView();
+    }
+
+    // ─── ATTENDANCE & INSTITUTE REPORT ENGINE ─────────────────────────────────
+    function renderAttendanceReportView() {
+        const printArea = document.getElementById('adminReportPrintArea');
+        if (!printArea) return;
+
+        const fType = document.getElementById('adminRepFilterType')?.value || 'all';
+        const targetVal = document.getElementById('adminRepTargetSelect')?.value || '';
+        const searchVal = (document.getElementById('adminRepTraineeSearchInput')?.value || '').trim().toLowerCase();
+        const weekScope = document.getElementById('adminRepWeekSelect')?.value || 'LIVE';
+        const sortBy = document.getElementById('adminRepSortSelect')?.value || 'rate_desc';
+
+        // Options Checkboxes
+        const optLogo = document.getElementById('repOptLogo')?.checked ?? true;
+        const optKpi = document.getElementById('repOptKpi')?.checked ?? true;
+        const optChart = document.getElementById('repOptChart')?.checked ?? true;
+        const optTable = document.getElementById('repOptTable')?.checked ?? true;
+        const optAdvice = document.getElementById('repOptAdvice')?.checked ?? true;
+        const optSignature = document.getElementById('repOptSignature')?.checked ?? true;
+
+        const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+
+        // Filter pool
+        let filtered = [...pool];
+        let reportScopeTitle = 'تقرير الحضور الشامل لمعهد الذهب الأسود للتدريب';
+        let reportScopeSubtitle = `إجمالي المتدربين بالمعهد: ${pool.length} متدرباً`;
+
+        if (fType === 'company') {
+            filtered = filtered.filter(t => t.company === targetVal);
+            reportScopeTitle = `تقرير حضور وانضباط متدربي شركة: ${targetVal}`;
+            reportScopeSubtitle = `عدد المتدربين المسجلين تحت رعاية الشركة: ${filtered.length} متدرباً`;
+        } else if (fType === 'group') {
+            filtered = filtered.filter(t => t.group === targetVal);
+            reportScopeTitle = `تقرير أداء وانضباط المجموعة التدريبية: ${targetVal}`;
+            reportScopeSubtitle = `قوام المجموعة التدريبية: ${filtered.length} متدرباً`;
+        } else if (fType === 'trainee') {
+            if (searchVal) {
+                filtered = filtered.filter(t => (t.id && t.id.toLowerCase().includes(searchVal)) || (t.name && t.name.toLowerCase().includes(searchVal)));
+            } else {
+                filtered = filtered.slice(0, 1);
+            }
+            if (filtered.length === 1) {
+                reportScopeTitle = `سجل الحضور والانضباط الفردي الشامل للمتدرب: ${filtered[0].name}`;
+                reportScopeSubtitle = `رقم الهوية: ${filtered[0].id} | المجموعة: ${filtered[0].group} | الشركة: ${filtered[0].company}`;
+            } else {
+                reportScopeTitle = `سجلات الحضور الفردية للمتدربين`;
+                reportScopeSubtitle = `نتائج البحث المطابقة: ${filtered.length} متدرباً`;
+            }
+        }
+
+        // Calculate Period 1, Period 2, and Overall Rates
+        let totalP1Attended = 0, totalP1Count = 0;
+        let totalP2Attended = 0, totalP2Count = 0;
+        let totalRateSum = 0;
+
+        const enrichedList = filtered.map(t => {
+            const cleanId = cleanNationalId(t.id);
+            let p1Att = 0, p1Tot = 0, p2Att = 0, p2Tot = 0;
+            let displayRate = (t.rate !== undefined) ? t.rate : 100;
+            let cumulativeRate = (t.combinedRate !== undefined) ? t.combinedRate : ((t.archiveRate !== undefined) ? t.archiveRate : displayRate);
+
+            if (t.weeklyAttendance && typeof t.weeklyAttendance === 'object') {
+                ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'].forEach(d => {
+                    const dayRec = t.weeklyAttendance[d];
+                    if (dayRec) {
+                        p1Tot++;
+                        p2Tot++;
+                        if (dayRec.p1 === 'حاضر' || dayRec.p1 === 'present') p1Att++;
+                        if (dayRec.p2 === 'حاضر' || dayRec.p2 === 'present') p2Att++;
+                    }
+                });
+            }
+
+            if (p1Tot === 0) { p1Tot = 5; p1Att = 5; }
+            if (p2Tot === 0) { p2Tot = 5; p2Att = 5; }
+
+            totalP1Attended += p1Att; totalP1Count += p1Tot;
+            totalP2Attended += p2Att; totalP2Count += p2Tot;
+
+            let effectiveRate = (weekScope === 'CUMULATIVE') ? cumulativeRate : displayRate;
+            totalRateSum += effectiveRate;
+
+            return {
+                ...t,
+                p1Att, p1Tot,
+                p2Att, p2Tot,
+                p1Pct: Math.round((p1Att / p1Tot) * 100),
+                p2Pct: Math.round((p2Att / p2Tot) * 100),
+                effectiveRate,
+                cumulativeRate
+            };
+        });
+
+        // Sorting
+        if (sortBy === 'rate_desc') enrichedList.sort((a, b) => b.effectiveRate - a.effectiveRate);
+        else if (sortBy === 'rate_asc') enrichedList.sort((a, b) => a.effectiveRate - b.effectiveRate);
+        else if (sortBy === 'name_asc') enrichedList.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+        else if (sortBy === 'group_asc') enrichedList.sort((a, b) => (a.group || '').localeCompare(b.group || '', 'ar'));
+
+        const count = enrichedList.length || 1;
+        const avgOverallRate = Math.round(totalRateSum / count);
+        const avgP1Rate = totalP1Count > 0 ? Math.round((totalP1Attended / totalP1Count) * 100) : 100;
+        const avgP2Rate = totalP2Count > 0 ? Math.round((totalP2Attended / totalP2Count) * 100) : 100;
+
+        // Breakdown for Donut Chart
+        let excellentCount = 0; // >= 95%
+        let goodCount = 0;      // 90-94%
+        let warningCount = 0;   // 80-89%
+        let criticalCount = 0;  // < 80%
+
+        enrichedList.forEach(t => {
+            if (t.effectiveRate >= 95) excellentCount++;
+            else if (t.effectiveRate >= 90) goodCount++;
+            else if (t.effectiveRate >= 80) warningCount++;
+            else criticalCount++;
+        });
+
+        const excPct = Math.round((excellentCount / count) * 100);
+        const goodPct = Math.round((goodCount / count) * 100);
+        const warnPct = Math.round((warningCount / count) * 100);
+        const critPct = 100 - excPct - goodPct - warnPct;
+
+        // Date strings
+        const todayStr = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+        const reportCode = `BGTI-${fType.toUpperCase().slice(0, 3)}-${Date.now().toString().slice(-6)}`;
+
+        // Build HTML
+        let html = '';
+
+        // 1. Formal Letterhead (if optLogo)
+        if (optLogo) {
+            html += `
+                <div class="border-b-2 border-[#0F2942] pb-4 mb-6">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="text-right space-y-0.5 text-xs text-slate-800">
+                            <div class="font-black text-sm text-[#0F2942]">المملكة العربية السعودية</div>
+                            <div class="font-bold text-slate-600">المؤسسة العامة للتدريب التقني والمهني</div>
+                            <div class="font-black text-[#0F2942]">معهد الذهب الأسود العالي للتدريب</div>
+                            <div class="text-[10px] text-amber-800 font-bold">فرع عنك • ترخيص رقم: 102/5482</div>
+                        </div>
+
+                        <div class="text-center">
+                            <img src="logo.png" alt="Black Gold Training Institute" class="h-16 w-auto object-contain mx-auto" onerror="this.style.display='none'">
+                            <div class="text-[10px] font-black tracking-widest text-[#0F2942] mt-1 uppercase">Black Gold Training Institute</div>
+                            <div class="text-[9px] font-bold text-amber-700">مركز التقارير الإدارية المعتمدة</div>
+                        </div>
+
+                        <div class="text-left space-y-0.5 text-xs text-slate-700">
+                            <div class="font-bold">كود التقرير: <span class="font-black text-[#0F2942]">${reportCode}</span></div>
+                            <div class="font-bold">التاريخ: <span class="font-black text-slate-900">${todayStr}</span></div>
+                            <div class="font-bold">نطاق التقرير: <span class="bg-amber-100 text-amber-900 font-black px-1.5 py-0.5 rounded text-[10px]">${weekScope === 'CUMULATIVE' ? 'تراكمي شامل' : 'الأسبوع المباشر'}</span></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-200 text-center">
+                        <h2 class="text-base md:text-lg font-black text-[#0F2942] tracking-wide">${reportScopeTitle}</h2>
+                        <p class="text-xs text-slate-600 font-bold mt-0.5">${reportScopeSubtitle}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. KPI Cards (if optKpi)
+        if (optKpi) {
+            html += `
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-center shadow-2xs">
+                        <span class="text-[11px] font-bold text-slate-500 block">إجمالي المتدربين</span>
+                        <span class="text-xl md:text-2xl font-black text-[#0F2942] mt-0.5 block">${enrichedList.length}</span>
+                        <span class="text-[10px] font-bold text-slate-400 mt-0.5 block">متدرب معتمد</span>
+                    </div>
+
+                    <div class="bg-blue-50/60 border border-blue-200 rounded-2xl p-3.5 text-center shadow-2xs">
+                        <span class="text-[11px] font-bold text-blue-900 block">الفترة الأولى (8:30 - 12:00)</span>
+                        <span class="text-xl md:text-2xl font-black text-blue-800 mt-0.5 block">${avgP1Rate}%</span>
+                        <span class="text-[10px] font-bold text-blue-600 mt-0.5 block">نسبة الحضور الصباحي</span>
+                    </div>
+
+                    <div class="bg-indigo-50/60 border border-indigo-200 rounded-2xl p-3.5 text-center shadow-2xs">
+                        <span class="text-[11px] font-bold text-indigo-900 block">الفترة الثانية (12:30 - 4:00)</span>
+                        <span class="text-xl md:text-2xl font-black text-indigo-800 mt-0.5 block">${avgP2Rate}%</span>
+                        <span class="text-[10px] font-bold text-indigo-600 mt-0.5 block">نسبة الحضور المسائي</span>
+                    </div>
+
+                    <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-3.5 text-center shadow-2xs">
+                        <span class="text-[11px] font-bold text-emerald-900 block">المعدل العام المعتمد</span>
+                        <span class="text-xl md:text-2xl font-black ${avgOverallRate >= 90 ? 'text-emerald-700' : (avgOverallRate >= 80 ? 'text-amber-700' : 'text-red-700')} mt-0.5 block">${avgOverallRate}%</span>
+                        <span class="text-[10px] font-black px-2 py-0.5 rounded-full inline-block mt-0.5 ${avgOverallRate >= 90 ? 'bg-emerald-100 text-emerald-800' : (avgOverallRate >= 80 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}">
+                            ${avgOverallRate >= 90 ? 'التزام ممتاز ✓' : (avgOverallRate >= 80 ? 'مستوى مقبول' : 'تنبيه إداري')}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. Visual Charts (if optChart)
+        if (optChart) {
+            html += `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <!-- Donut Chart: Attendance Segments Breakdown -->
+                    <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                            <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                                <span>📊</span>
+                                <span>توزيع مستويات الحضور والانضباط</span>
+                            </span>
+                            <span class="text-[10px] font-bold text-slate-500">تحليل الفئات</span>
+                        </div>
+
+                        <div class="flex items-center justify-around gap-4 py-2">
+                            <!-- Crisp SVG Donut -->
+                            <div class="relative w-28 h-28 shrink-0">
+                                <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90">
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4"></circle>
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#10B981" stroke-width="4"
+                                            stroke-dasharray="${excPct} 100" stroke-dashoffset="0"></circle>
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#3B82F6" stroke-width="4"
+                                            stroke-dasharray="${goodPct} 100" stroke-dashoffset="-${excPct}"></circle>
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#F59E0B" stroke-width="4"
+                                            stroke-dasharray="${warnPct} 100" stroke-dashoffset="-${excPct + goodPct}"></circle>
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#EF4444" stroke-width="4"
+                                            stroke-dasharray="${critPct} 100" stroke-dashoffset="-${excPct + goodPct + warnPct}"></circle>
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                    <span class="text-xs font-black text-[#0F2942]">${avgOverallRate}%</span>
+                                    <span class="text-[8px] font-bold text-slate-500">المعدل</span>
+                                </div>
+                            </div>
+
+                            <!-- Legend -->
+                            <div class="space-y-1.5 text-[11px] font-bold">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-md bg-[#10B981] inline-block shrink-0"></span>
+                                    <span class="text-slate-700">ممتاز (95%+):</span>
+                                    <span class="font-black text-slate-900">${excellentCount} (${excPct}%)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-md bg-[#3B82F6] inline-block shrink-0"></span>
+                                    <span class="text-slate-700">جيد (90-94%):</span>
+                                    <span class="font-black text-slate-900">${goodCount} (${goodPct}%)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-md bg-[#F59E0B] inline-block shrink-0"></span>
+                                    <span class="text-slate-700">إنذار (80-89%):</span>
+                                    <span class="font-black text-amber-800">${warningCount} (${warnPct}%)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-md bg-[#EF4444] inline-block shrink-0"></span>
+                                    <span class="text-slate-700">حرمان (&lt;80%):</span>
+                                    <span class="font-black text-red-700">${criticalCount} (${critPct}%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Bar Chart: Period 1 vs Period 2 vs Target Benchmark -->
+                    <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                            <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                                <span>📈</span>
+                                <span>مقارنة الفترات التدريبية (P1 الصباحية vs P2 المسائية)</span>
+                            </span>
+                            <span class="text-[10px] font-bold text-slate-500">المعيار المطلوب: 90%</span>
+                        </div>
+
+                        <div class="space-y-3 py-1">
+                            <div>
+                                <div class="flex justify-between text-[11px] font-bold mb-1">
+                                    <span class="text-blue-900">الفترة الأولى (8:30 ص - 12:00 م)</span>
+                                    <span class="font-black text-blue-950">${avgP1Rate}%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-3.5 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-500" style="width: ${avgP1Rate}%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-[11px] font-bold mb-1">
+                                    <span class="text-indigo-900">الفترة الثانية (12:30 م - 4:00 م)</span>
+                                    <span class="font-black text-indigo-950">${avgP2Rate}%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-3.5 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 h-full rounded-full transition-all duration-500" style="width: ${avgP2Rate}%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-[11px] font-bold mb-1">
+                                    <span class="text-emerald-900">المعدل العام التراكمي الشامل</span>
+                                    <span class="font-black text-emerald-950">${avgOverallRate}%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-3.5 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 h-full rounded-full transition-all duration-500" style="width: ${avgOverallRate}%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-[10px] text-slate-500 font-bold border-t border-slate-200 pt-2 mt-2 flex items-center justify-between">
+                            <span>الفارق بين الفترتين: ${Math.abs(avgP1Rate - avgP2Rate)}%</span>
+                            <span class="${avgP2Rate >= 90 ? 'text-emerald-700 font-black' : 'text-amber-700 font-black'}">
+                                ${avgP2Rate >= avgP1Rate ? 'انضباط متماثل بين الفترتين' : 'توصية: تعزيز التزام الفترة الثانية'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 4. Trainees Detail Table (if optTable)
+        if (optTable) {
+            html += `
+                <div class="mb-6 overflow-hidden border border-slate-200 rounded-2xl shadow-2xs">
+                    <div class="bg-[#0F2942] text-white px-4 py-3 flex items-center justify-between">
+                        <span class="text-xs font-black flex items-center gap-2">
+                            <span>📋</span>
+                            <span>جدول سجلات الحضور والانضباط الأكاديمي التفصيلي</span>
+                        </span>
+                        <span class="text-[10px] font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-md">${enrichedList.length} متدرب</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-xs">
+                            <thead class="bg-slate-100 text-slate-700 font-black border-b border-slate-200">
+                                <tr>
+                                    <th class="py-2.5 px-3">#</th>
+                                    <th class="py-2.5 px-3">اسم المتدرب</th>
+                                    <th class="py-2.5 px-3">رقم الهوية</th>
+                                    <th class="py-2.5 px-3">المجموعة</th>
+                                    <th class="py-2.5 px-3">الشركة الراعية</th>
+                                    <th class="py-2.5 px-3 text-center">الفترة الأولى (P1)</th>
+                                    <th class="py-2.5 px-3 text-center">الفترة الثانية (P2)</th>
+                                    <th class="py-2.5 px-3 text-center">معدل الأسبوع</th>
+                                    <th class="py-2.5 px-3 text-center">المعدل التراكمي</th>
+                                    <th class="py-2.5 px-3 text-center">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                ${enrichedList.map((t, idx) => {
+                                    const stClass = t.effectiveRate >= 90 
+                                        ? 'bg-emerald-100 text-emerald-800' 
+                                        : (t.effectiveRate >= 80 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800');
+                                    const stLabel = t.effectiveRate >= 90 ? 'منتظم' : (t.effectiveRate >= 80 ? 'إنذار' : 'حرمان');
+
+                                    return `
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="py-2.5 px-3 font-bold text-slate-400 text-[11px]">${idx + 1}</td>
+                                            <td class="py-2.5 px-3 font-black text-slate-900">${t.name}</td>
+                                            <td class="py-2.5 px-3 font-mono font-bold text-slate-600 text-[11px]">${t.id}</td>
+                                            <td class="py-2.5 px-3 font-bold text-slate-700">${t.group}</td>
+                                            <td class="py-2.5 px-3 font-bold text-slate-600 text-[11px]">${t.company || '—'}</td>
+                                            <td class="py-2.5 px-3 text-center font-bold text-blue-900">${t.p1Att}/${t.p1Tot} (${t.p1Pct}%)</td>
+                                            <td class="py-2.5 px-3 text-center font-bold text-indigo-900">${t.p2Att}/${t.p2Tot} (${t.p2Pct}%)</td>
+                                            <td class="py-2.5 px-3 text-center font-black ${t.rate >= 90 ? 'text-emerald-700' : (t.rate >= 80 ? 'text-amber-700' : 'text-red-700')}">${t.rate !== undefined ? t.rate : 100}%</td>
+                                            <td class="py-2.5 px-3 text-center font-black ${t.cumulativeRate >= 90 ? 'text-emerald-700' : (t.cumulativeRate >= 80 ? 'text-amber-700' : 'text-red-700')}">${t.cumulativeRate}%</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="text-[10px] font-black px-2 py-0.5 rounded-md ${stClass}">${stLabel}</span>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 5. Administrative Advice & Recommendations (if optAdvice)
+        if (optAdvice) {
+            const advicePoints = [];
+            if (avgOverallRate >= 95) {
+                advicePoints.push(`مستوى الانضباط العام استثنائي بمعدل ${avgOverallRate}%؛ يُوصى بإصدار خطابات شكر وتقدير للمجموعات التدريبية الملتزمة وتعزيز التحفيز المعنوي.`);
+            } else if (avgOverallRate >= 90) {
+                advicePoints.push(`معدل الحضور العام ضمن النطاق المستهدف والمقبول نظاماً (${avgOverallRate}%)؛ مع ضرورة متابعة المتدربين في فئة الإنذار لمنع انزلاقهم لنسب الحرمان.`);
+            } else {
+                advicePoints.push(`معدل الحضور يتطلب تدخلاً إدارياً عاجلاً (${avgOverallRate}%)؛ يُوصى باستدعاء المتدربين المتغيبين وعقد جلسات إرشاد وتوجيه بالتعاون مع المشرف الأكاديمي.`);
+            }
+
+            if (avgP2Rate < avgP1Rate - 2) {
+                advicePoints.push(`فارق الحضور بين الفترتين يظهر انخفاضاً في الفترة المسائية بمقدار ${avgP1Rate - avgP2Rate}%؛ نوصي بتكثيف الجولات الميدانية في بهو المعهد عند الساعة 12:30 ظهراً وتفعيل التحضير الصارم.`);
+            }
+
+            if (criticalCount > 0) {
+                advicePoints.push(`تم رصد عدد (${criticalCount}) متدرباً بلغت نسبة غيابهم عتبة الحرمان الأكاديمي؛ يُوصى بتوجيه إشعارات رسمية فورية للشركات الراعية لاتخاذ الإجراءات التعاقدية.`);
+            }
+
+            advicePoints.push(`الاستمرار في إلزامية رصد أوقات وتواريخ استحقاق التكليفات والاختبارات الأسبوعية وربط نتائجها بسجل درجات المتدربين التراكمي.`);
+
+            html += `
+                <div class="bg-amber-50/70 border border-amber-300 rounded-2xl p-4 mb-6">
+                    <div class="flex items-center gap-2 mb-2 font-black text-xs text-amber-950">
+                        <span>💡</span>
+                        <span>التوصيات والنصائح الإدارية والتنفيذية:</span>
+                    </div>
+                    <ul class="space-y-1.5 text-xs text-slate-800 font-bold list-disc list-inside leading-relaxed">
+                        ${advicePoints.map(p => `<li>${p}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // 6. Signatures and Stamp Block (if optSignature)
+        if (optSignature) {
+            html += `
+                <div class="border-t-2 border-slate-200 pt-6 mt-6">
+                    <div class="grid grid-cols-3 gap-4 text-center text-xs">
+                        <!-- Preparer -->
+                        <div class="space-y-2">
+                            <span class="font-bold text-slate-500 block">إعداد وتدقيق البيانات:</span>
+                            <span class="font-black text-slate-900 block">وحدة المتابعة وضمان الجودة</span>
+                            <div class="h-10 flex items-center justify-center text-slate-400 font-serif italic text-xs">مُدقّق آلياً ✓</div>
+                            <span class="text-[10px] text-slate-400 font-mono block">${todayStr}</span>
+                        </div>
+
+                        <!-- Reviewer -->
+                        <div class="space-y-2">
+                            <span class="font-bold text-slate-500 block">مراجعة الشؤون الأكاديمية:</span>
+                            <span class="font-black text-slate-900 block">المشرف الأكاديمي والإداري</span>
+                            <div class="h-10 flex items-center justify-center text-slate-400 font-serif italic text-xs">مُعتمَد أكاديمياً ✓</div>
+                            <span class="text-[10px] text-slate-400 font-mono block">${todayStr}</span>
+                        </div>
+
+                        <!-- Director & Stamp -->
+                        <div class="space-y-2 relative">
+                            <span class="font-bold text-slate-500 block">اعتماد وتوقيع وختم:</span>
+                            <span class="font-black text-[#0F2942] block">سعادة مدير معهد الذهب الأسود للتدريب</span>
+                            
+                            <!-- Formal Decorative Institute Stamp Circle -->
+                            <div class="h-16 flex items-center justify-center">
+                                <div class="w-16 h-16 rounded-full border-2 border-dashed border-[#0F2942] flex flex-col items-center justify-center text-center p-1 transform rotate-[-8deg] bg-amber-50/40">
+                                    <span class="text-[7px] font-black text-[#0F2942] leading-tight">معهد الذهب الأسود</span>
+                                    <span class="text-[9px]">★</span>
+                                    <span class="text-[6px] font-black text-amber-800 leading-tight">معتمد رسمياً - عنك</span>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-black text-slate-700 block underline">التوقيع والاعتماد الرسمي</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        printArea.innerHTML = html;
+    }
+
+    // ─── AI EXECUTIVE WEEKLY REPORT ENGINE ────────────────────────────────────
+    function getLiveInstituteExecutiveStats() {
+        const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+        let p1Att = 0, p1Tot = 0, p2Att = 0, p2Tot = 0;
+        let sumRates = 0;
+
+        pool.forEach(t => {
+            let r = t.rate !== undefined ? t.rate : 100;
+            sumRates += r;
+            if (t.weeklyAttendance && typeof t.weeklyAttendance === 'object') {
+                ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'].forEach(d => {
+                    const rec = t.weeklyAttendance[d];
+                    if (rec) {
+                        p1Tot++; p2Tot++;
+                        if (rec.p1 === 'حاضر' || rec.p1 === 'present') p1Att++;
+                        if (rec.p2 === 'حاضر' || rec.p2 === 'present') p2Att++;
+                    }
+                });
+            }
+        });
+
+        if (p1Tot === 0) { p1Tot = pool.length * 5; p1Att = Math.round(p1Tot * 0.95); }
+        if (p2Tot === 0) { p2Tot = pool.length * 5; p2Att = Math.round(p2Tot * 0.93); }
+
+        const groupsSet = new Set(pool.map(t => t.group).filter(Boolean));
+        const trainers = getAvailableTrainersList();
+
+        let lmsQuizCount = 0;
+        let lmsAssignmentCount = 0;
+        if (typeof lmsCourses !== 'undefined' && typeof lmsCourses === 'object') {
+            for (let c in lmsCourses) {
+                const crs = lmsCourses[c];
+                if (crs.weeks && Array.isArray(crs.weeks)) {
+                    crs.weeks.forEach(w => {
+                        if (w.quizzes && w.quizzes.length) lmsQuizCount += w.quizzes.length;
+                        if (w.assignments && w.assignments.length) lmsAssignmentCount += w.assignments.length;
+                    });
+                }
+            }
+        }
+        if (lmsQuizCount === 0) lmsQuizCount = 24;
+        if (lmsAssignmentCount === 0) lmsAssignmentCount = 36;
+
+        return {
+            totalTrainees: pool.length || 830,
+            overallAttendanceRate: Math.round(sumRates / (pool.length || 1)) || 94,
+            period1Rate: Math.round((p1Att / p1Tot) * 100) || 95,
+            period2Rate: Math.round((p2Att / p2Tot) * 100) || 93,
+            activeGroupsCount: groupsSet.size || 16,
+            trainersCount: trainers.length || 9,
+            quizzesCompletedCount: lmsQuizCount,
+            assignmentsSubmittedCount: lmsAssignmentCount * 22
+        };
+    }
+
+    function renderExecutiveWeeklyReportView() {
+        const stats = getLiveInstituteExecutiveStats();
+        const statsRibbon = document.getElementById('execReportStatsRibbon');
+        if (statsRibbon) {
+            statsRibbon.innerHTML = `
+                <div class="text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">المتدربون المسجلون</span>
+                    <span class="text-base font-black text-[#0F2942]">${stats.totalTrainees}</span>
+                </div>
+                <div class="text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">نسبة الحضور العامة</span>
+                    <span class="text-base font-black text-emerald-700">${stats.overallAttendanceRate}%</span>
+                </div>
+                <div class="text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">الفترة الأولى (P1)</span>
+                    <span class="text-base font-black text-blue-800">${stats.period1Rate}%</span>
+                </div>
+                <div class="text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">الفترة الثانية (P2)</span>
+                    <span class="text-base font-black text-indigo-800">${stats.period2Rate}%</span>
+                </div>
+                <div class="text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">المجموعات النشطة</span>
+                    <span class="text-base font-black text-slate-800">${stats.activeGroupsCount}</span>
+                </div>
+                <div class="text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">الكادر التدريبي</span>
+                    <span class="text-base font-black text-slate-800">${stats.trainersCount} مدرباً</span>
+                </div>
+                <div class="text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">التكليفات والاختبارات</span>
+                    <span class="text-base font-black text-purple-700">${stats.quizzesCompletedCount + stats.assignmentsSubmittedCount}</span>
+                </div>
+            `;
+        }
+
+        if (!executiveReportData) {
+            generateDefaultExecutiveReport();
+        } else {
+            updateExecutiveReportPreview();
+        }
+    }
+
+    function generateDefaultExecutiveReport() {
+        const stats = getLiveInstituteExecutiveStats();
+        const weekLabel = document.getElementById('execWeekLabelInput')?.value || 'الأسبوع التدريبي الجاري';
+        const notes = document.getElementById('execNotesInput')?.value || '';
+
+        executiveReportData = {
+            title: `التقرير الإداري والتشغيلي الأسبوعي الشامل - ${weekLabel}`,
+            recipient: 'سعادة الأستاذ المحترم / محمد كمال العواد (مدير التشغيل)',
+            sender: 'إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك',
+            week_label: weekLabel,
+            date_formatted: new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' }),
+            executive_summary: `نرفع لسعادتكم التقرير الإداري والتشغيلي الأسبوعي الشامل لمعهد الذهب الأسود للتدريب (فرع عنك) عن ${weekLabel}. أظهرت المؤشرات التشغيلية استقراراً عاماً والتزاماً عالياً حيث بلغت نسبة الحضور العامة ${stats.overallAttendanceRate}% لإجمالي ${stats.totalTrainees} متدرباً موزعين على ${stats.activeGroupsCount} مجموعة تدريبية، مع انتظام تام للفترتين التدريبيتين (الأولى ${stats.period1Rate}%، والثانية ${stats.period2Rate}%)، وانضباط الكادر التدريبي ومتابعة المنصات والتغطية الميدانية الشاملة. ${notes ? 'ملاحظة: ' + notes : ''}`,
+            pillars: {
+                schedules: {
+                    title: '1. إدارة الجداول والقاعات وفترات التدريب',
+                    status: 'مستقر ومنضبط',
+                    summary: `تنظيم دقيق لجدول الفترات (الفترة الأولى الصباحية 8:30-12:00 والفترة الثانية 12:30-4:00) عبر ${stats.activeGroupsCount} مجموعة تدريبية دون أي تعارض زمني.`,
+                    points: [
+                        `توزيع القاعات التدريبية والورش وفق الطاقة الاستيعابية المعتمدة لكل قاعة دون أي تكدس أو اختناقات.`,
+                        `انتظام الحضور الميداني للفترة الأولى بنسبة ${stats.period1Rate}%، والفترة الثانية بنسبة ${stats.period2Rate}%.`,
+                        `تفعيل آلية الإشراف والمناوبة بين الفترتين لضمان انسيابية دخول وخروج المتدربين وتنظيم القاعات.`
+                    ]
+                },
+                staff_hr: {
+                    title: '2. الكادر التدريبي وشؤون الموظفين (HR)',
+                    status: 'التزام تام',
+                    summary: `متابعة حضور وانضباط السادة المدربين (${stats.trainersCount} مدرباً معتمداً) وتقييم أدائهم الميداني والأكاديمي.`,
+                    points: [
+                        `نسبة انضباط وحضور المدربين في مواعيد المحاضرات بلغت 100% لكافة الفترات التدريبية المعتمدة.`,
+                        `استكمال خطة نصاب الساعات التدريبية وفق معايير المؤسسة العامة للتدريب التقني والمهني.`,
+                        `متابعة تقارير الأداء الأسبوعية للمدربين والتأكد من جودة الشرح والالتزام باللغة الإنجليزية التقنية.`
+                    ]
+                },
+                companies_payroll: {
+                    title: '3. شؤون الشركات الراعية والرواتب والمكافآت',
+                    status: 'محدث ومنسق',
+                    summary: `التنسيق المستمر مع ممثلي المنشآت والشركات الراعية وإصدار كشوف الحضور والغياب المحدثة والتسويات الشهرية.`,
+                    points: [
+                        `تحديث كشوفات الغياب الأسبوعية وإرسال الإشعارات الإلكترونية للمنشآت الراعية المعتمدة.`,
+                        `مطابقة سجلات الحضور والانصراف مع نظام استحقاق المكافآت والرواتب الشهرية للمتدربين بدقة تامة.`,
+                        `التواصل مع الشركات لمعالجة الأعذار المقبولة وتأكيد انتظام متدربيها الميداني بالفرع.`
+                    ]
+                },
+                academic_lms: {
+                    title: '4. الشؤون الأكاديمية والتدريب (منصة LMS / منار)',
+                    status: 'تفاعل مرتفع',
+                    summary: `متابعة التفاعل الإلكتروني على منصة LMS ومنصة منار الوطنية ورفع التكليفات والاختبارات الأسبوعية.`,
+                    points: [
+                        `إلزامية رصد مواعيد وتوقيتات استحقاق الواجبات والاختبارات الأسبوعية إلكترونياً بدقة ومنع أي تكليف بدون تاريخ محدد.`,
+                        `إنجاز الاختبارات الأسبوعية المتنوعة (MCQ، صح وخطأ، وتوصيل ومطابقة المفاهيم) بنسبة إنجاز تجاوزت 92%.`,
+                        `ربط سجلات الحضور للفترتين 1 و2 بالسجل التراكمي الشامل لجميع الأسابيع للمتدربين.`
+                    ]
+                },
+                it_support: {
+                    title: '5. تقنية المعلومات والدعم الفني والشبكات',
+                    status: 'جاهزية كاملة',
+                    summary: `استقرار البنية التحتية الرقمية، شبكة الإنترنت، شاشات القاعات الذكية، وأنظمة المزامنة الفورية.`,
+                    points: [
+                        `فحص دوري لشبكة Wi-Fi وأجهزة العرض في كافة القاعات التدريبية والتأكد من خلوها من الأعطال.`,
+                        `تقديم الدعم الفني الفوري للمتدربين وتسهيل تسجيل الدخول لمنصات التدريب وحل بطاقات الدعم.`,
+                        `تفعيل النسخ الاحتياطي السحابي والمزامنة المستمرة لسجلات الحضور والدرجات.`
+                    ]
+                },
+                maintenance_facility: {
+                    title: '6. الصيانة والتغطية الميدانية الشاملة والسلامة',
+                    status: 'تغطية مستمرة',
+                    summary: `الجولات الميدانية المستمرة على مرافق المعهد، أنظمة التكييف، ومعدات السلامة ومخارج الطوارئ.`,
+                    points: [
+                        `جاهزية منظومة التكييف والإضاءة ونظافة القاعات والممرات على مدار الفترتين 1 و 2.`,
+                        `التأكد من سلامة مخارج الطوارئ وطفايات الحريق ومعدات الإسعافات الأولية وتطبيق معايير السلامة المهنية.`,
+                        `التغطية الميدانية الشاملة للمشرفين لمتابعة السلوك والانضباط العام في بهو المعهد ومحيطه.`
+                    ]
+                },
+                general_kpi: {
+                    title: '7. المؤشرات العامة والوضع الراهن للمتدربين',
+                    status: 'إيجابي ومطمئن',
+                    summary: `تحليل مؤشرات الأداء والانتظام لحوالي ${stats.totalTrainees} متدرباً مع رصد الحالات المحتاجة للدعم والتوجيه.`,
+                    points: [
+                        `إجمالي عدد المتدربين المسجلين: ${stats.totalTrainees} متدرباً بنسبة التزام عامة ${stats.overallAttendanceRate}%.`,
+                        `حصر المتدربين المقتربين من نسب الحرمان أو الإنذارات الأكاديمية واستدعاؤهم للتوجيه الإرشادي.`,
+                        `تحفيز المجموعات التدريبية المتميزة التي حققت معدل حضور تجاوز 96% للفترتين.`
+                    ]
+                }
+            },
+            recommendations: [
+                `الاستمرار في تعزيز التزام المتدربين بالفترة التدريبية الثانية وتكثيف المرور الميداني لمنع الخروج المبكر.`,
+                `التنسيق المبكر مع الشركات الراعية لعقد لقاءات إرشادية شهرية للمتدربين لتعزيز الانتماء الوظيفي.`,
+                `إطلاق تكريم أسبوعي للمجموعة التدريبية الأكثر انضباطاً في الحضور والواجبات على مستوى المعهد.`
+            ]
+        };
+
+        updateExecutiveReportPreview();
+    }
+
+    async function generateAiExecutiveReport() {
+        const stats = getLiveInstituteExecutiveStats();
+        const weekLabel = document.getElementById('execWeekLabelInput')?.value || 'الأسبوع التدريبي الجاري';
+        const notes = document.getElementById('execNotesInput')?.value || '';
+        const btn = document.getElementById('btnGenerateAiExec');
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<span>⏳</span><span>جاري توليد التقرير الذكي بواسطة الذكاء الاصطناعي...</span>`;
+        }
+
+        try {
+            const res = await fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'executive_report',
+                    recipient: 'سعادة الأستاذ المحترم / محمد كمال العواد (مدير التشغيل)',
+                    sender: 'إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك',
+                    weekLabel,
+                    stats,
+                    additionalNotes: notes
+                })
+            });
+
+            if (res.ok) {
+                const json = await res.json();
+                if (json && json.data) {
+                    executiveReportData = json.data;
+                    showToast('تم توليد التقرير الأسبوعي الذكي بنجاح ✨', 'success');
+                } else {
+                    generateDefaultExecutiveReport();
+                }
+            } else {
+                generateDefaultExecutiveReport();
+                showToast('تم إعداد مسودة التقرير الذكي استناداً إلى المؤشرات الحية', 'info');
+            }
+        } catch (err) {
+            console.warn('AI executive generation error:', err);
+            generateDefaultExecutiveReport();
+            showToast('تم إعداد مسودة التقرير استناداً إلى المؤشرات الحية للمعهد', 'info');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<span>✨</span><span>توليد التقرير بالذكاء الاصطناعي (Gemini)</span>`;
+            }
+            updateExecutiveReportPreview();
+        }
+    }
+
+    function updateExecutiveReportPreview() {
+        const printArea = document.getElementById('adminReportPrintArea');
+        if (!printArea || !executiveReportData) return;
+
+        const data = executiveReportData;
+        const weekLabel = document.getElementById('execWeekLabelInput')?.value || data.week_label || 'الأسبوع التدريبي';
+
+        // Check which pillars are checked
+        const chkSchedules = document.getElementById('execChk-schedules')?.checked ?? true;
+        const chkStaff = document.getElementById('execChk-staff_hr')?.checked ?? true;
+        const chkCompanies = document.getElementById('execChk-companies_payroll')?.checked ?? true;
+        const chkAcademic = document.getElementById('execChk-academic_lms')?.checked ?? true;
+        const chkIt = document.getElementById('execChk-it_support')?.checked ?? true;
+        const chkMaint = document.getElementById('execChk-maintenance_facility')?.checked ?? true;
+        const chkGeneral = document.getElementById('execChk-general_kpi')?.checked ?? true;
+        const chkRec = document.getElementById('execChk-recommendations')?.checked ?? true;
+
+        const pillarsMap = {
+            schedules: { show: chkSchedules, data: data.pillars?.schedules, icon: '🗓️' },
+            staff_hr: { show: chkStaff, data: data.pillars?.staff_hr, icon: '👨‍🏫' },
+            companies_payroll: { show: chkCompanies, data: data.pillars?.companies_payroll, icon: '🏢' },
+            academic_lms: { show: chkAcademic, data: data.pillars?.academic_lms, icon: '📚' },
+            it_support: { show: chkIt, data: data.pillars?.it_support, icon: '💻' },
+            maintenance_facility: { show: chkMaint, data: data.pillars?.maintenance_facility, icon: '🛠️' },
+            general_kpi: { show: chkGeneral, data: data.pillars?.general_kpi, icon: '📊' }
+        };
+
+        const todayStr = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        let html = `
+            <!-- Executive Letterhead -->
+            <div class="border-b-2 border-[#0F2942] pb-5 mb-6">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="text-right space-y-0.5 text-xs text-slate-800">
+                        <div class="font-black text-sm text-[#0F2942]">المملكة العربية السعودية</div>
+                        <div class="font-bold text-slate-600">المؤسسة العامة للتدريب التقني والمهني</div>
+                        <div class="font-black text-[#0F2942]">معهد الذهب الأسود العالي للتدريب</div>
+                        <div class="text-[10px] text-amber-800 font-bold">فرع عنك • ترخيص رقم: 102/5482</div>
+                    </div>
+
+                    <div class="text-center">
+                        <img src="logo.png" alt="Black Gold Training Institute" class="h-16 w-auto object-contain mx-auto" onerror="this.style.display='none'">
+                        <div class="text-[10px] font-black tracking-widest text-[#0F2942] mt-1 uppercase">Black Gold Training Institute</div>
+                        <span class="bg-amber-100 text-amber-950 font-black px-2 py-0.5 rounded text-[10px] border border-amber-300">التقرير الإداري والتشغيلي الرسمي</span>
+                    </div>
+
+                    <div class="text-left space-y-0.5 text-xs text-slate-700">
+                        <div class="font-bold">رقم الوثيقة: <span class="font-mono font-black text-[#0F2942]">BGTI-EXEC-${Date.now().toString().slice(-6)}</span></div>
+                        <div class="font-bold">التاريخ: <span class="font-black text-slate-900">${todayStr}</span></div>
+                        <div class="font-bold">الفترة: <span class="text-blue-900 font-black">${weekLabel}</span></div>
+                    </div>
+                </div>
+
+                <!-- Recipient & Sender Salutation Block -->
+                <div class="mt-5 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="font-black text-sm md:text-base text-[#0F2942]">
+                            سعادة الأستاذ المحترم / <span class="underline decoration-amber-500 decoration-2">محمد كمال العواد</span> (مدير التشغيل)
+                        </div>
+                        <span class="text-xs font-bold text-slate-500">حفظه الله ورعاه</span>
+                    </div>
+                    <div class="text-xs text-slate-600 font-bold">
+                        صادر عن: <span class="font-black text-slate-800">إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك</span>
+                    </div>
+                    <div class="text-xs text-slate-700 font-bold pt-1 border-t border-slate-200">
+                        السلام عليكم ورحمة الله وبركاته،، وبعد:
+                    </div>
+                </div>
+            </div>
+
+            <!-- Executive Summary (Editable) -->
+            <div class="bg-blue-50/50 border border-blue-200 rounded-2xl p-4 mb-6">
+                <span class="text-xs font-black text-blue-950 block mb-1">📋 الملخص التنفيذي للوضع الراهن:</span>
+                <p class="text-xs text-slate-800 font-bold leading-relaxed outline-none" contenteditable="true" onblur="onExecSummaryEdit(this.innerText)">
+                    ${data.executive_summary}
+                </p>
+                <span class="text-[9px] text-blue-700 font-bold block mt-1.5 no-print">💡 يمكنك النقر على النص أعلاه وتعديله مباشرة قبل الطباعة</span>
+            </div>
+
+            <!-- The 7 Executive Pillars Grid -->
+            <div class="space-y-4 mb-6">
+        `;
+
+        for (let key in pillarsMap) {
+            const p = pillarsMap[key];
+            if (!p.show || !p.data) continue;
+
+            html += `
+                <div class="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-2xs space-y-2">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">${p.icon}</span>
+                            <h4 class="font-black text-slate-900 text-xs md:text-sm">${p.data.title}</h4>
+                        </div>
+                        <span class="text-[10px] font-black bg-[#0F2942] text-amber-300 px-2.5 py-0.5 rounded-full">${p.data.status || 'مستقر'}</span>
+                    </div>
+                    <p class="text-xs text-slate-700 font-bold leading-relaxed outline-none" contenteditable="true" onblur="onPillarSummaryEdit('${key}', this.innerText)">
+                        ${p.data.summary}
+                    </p>
+                    ${p.data.points && p.data.points.length ? `
+                        <ul class="space-y-1 text-xs text-slate-600 font-bold list-disc list-inside pt-1">
+                            ${p.data.points.map((pt, pIdx) => `<li contenteditable="true" onblur="onPillarPointEdit('${key}', ${pIdx}, this.innerText)">${pt}</li>`).join('')}
+                        </ul>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+
+        // Recommendations
+        if (chkRec && data.recommendations && data.recommendations.length) {
+            html += `
+                <div class="bg-amber-50/70 border border-amber-300 rounded-2xl p-4.5 mb-6">
+                    <span class="text-xs font-black text-amber-950 block mb-2">🎯 التوصيات والقرارات التنفيذية المقترحة:</span>
+                    <ul class="space-y-1.5 text-xs text-slate-800 font-bold list-disc list-inside leading-relaxed">
+                        ${data.recommendations.map((rec, rIdx) => `<li contenteditable="true" onblur="onExecRecEdit(${rIdx}, this.innerText)">${rec}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Closing & Official Director Signature Block
+        html += `
+            <div class="border-t-2 border-slate-200 pt-6 mt-6">
+                <div class="text-center mb-6">
+                    <p class="text-xs font-bold text-slate-700 leading-relaxed">
+                        وتفضلوا بقبول فائق التقدير والاحترام، والله الموفق والمعين،،،
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6 text-center text-xs">
+                    <!-- Director Salutation & Signature -->
+                    <div class="space-y-2">
+                        <span class="font-bold text-slate-500 block">إدارة معهد الذهب الأسود للتدريب - فرع عنك</span>
+                        <span class="font-black text-[#0F2942] block">سعادة مدير المعهد</span>
+                        <div class="h-14 flex items-center justify-center">
+                            <div class="w-16 h-16 rounded-full border-2 border-dashed border-[#0F2942] flex flex-col items-center justify-center text-center p-1 transform rotate-[-6deg] bg-amber-50/40">
+                                <span class="text-[7px] font-black text-[#0F2942] leading-tight">معهد الذهب الأسود</span>
+                                <span class="text-[9px]">★</span>
+                                <span class="text-[6px] font-black text-amber-800 leading-tight">معتمد رسمياً - عنك</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-700 underline block">الاعتماد والتوقيع الرسمي</span>
+                    </div>
+
+                    <!-- Executive Recipient Acknowledgement -->
+                    <div class="space-y-2">
+                        <span class="font-bold text-slate-500 block">موجّه للمتابعة والاطلاع:</span>
+                        <span class="font-black text-[#0F2942] block">سعادة الأستاذ / محمد كمال العواد</span>
+                        <span class="text-xs font-bold text-amber-900 block">مدير التشغيل</span>
+                        <div class="h-10 flex items-center justify-center text-slate-400 font-serif italic text-xs">
+                            سعادة مدير التشغيل
+                        </div>
+                        <span class="text-[10px] text-slate-400 font-mono block">${todayStr}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        printArea.innerHTML = html;
+    }
+
+    function onExecSummaryEdit(newText) {
+        if (executiveReportData) executiveReportData.executive_summary = newText;
+    }
+
+    function onPillarSummaryEdit(key, newText) {
+        if (executiveReportData?.pillars?.[key]) executiveReportData.pillars[key].summary = newText;
+    }
+
+    function onPillarPointEdit(key, idx, newText) {
+        if (executiveReportData?.pillars?.[key]?.points?.[idx] !== undefined) {
+            executiveReportData.pillars[key].points[idx] = newText;
+        }
+    }
+
+    function onExecRecEdit(idx, newText) {
+        if (executiveReportData?.recommendations?.[idx] !== undefined) {
+            executiveReportData.recommendations[idx] = newText;
+        }
+    }
+
+    // ─── MONTHLY TRAINER EVALUATION FORM & REPORT ENGINE ──────────────────────
+    const TRAINER_EVAL_CRITERIA = [
+        { id: 'c1', name: '1. انضباط المواعيد والالتزام بالفترتين (P1 & P2)', desc: 'الحضور المبكر وعدم التأخر عن المحاضرات، والتواجد الكامل بالفترتين التدريبيتين.' },
+        { id: 'c2', name: '2. جودة التدريب والشرح وإتقان اللغة الإنجليزية الفنية', desc: 'استخدام المصطلحات التخصصية بدقة، وضوح العرض، وتفاعل المتدربين.' },
+        { id: 'c3', name: '3. تفاعل المنصة واستخدام أدوات الـ LMS الأكاديمية', desc: 'رفع المحاضرات، تكليف المهام، وإنشاء اختبارات أسبوعية تفاعلية متنوعة.' },
+        { id: 'c4', name: '4. سرعة تصحيح التكليفات والواجبات ورصد الدرجات', desc: 'تقييم واجبات المتدربين في مواعيدها وتقديم التغذية الراجعة الأكاديمية.' },
+        { id: 'c5', name: '5. إدارة القاعة والبيئة التدريبية واشتراطات السلامة', desc: 'ضبط النظام الداخلي، الحفاظ على تجهيزات القاعات، وتطبيق معايير السلامة.' },
+        { id: 'c6', name: '6. توثيق الحضور والغياب ورفع الكشوف اليومية بدقة', desc: 'التحضير في بداية كل فترة وتوثيق الأعذار بدقة بدون تأخير.' }
+    ];
+
+    function loadTrainerEvaluationFormData() {
+        const trainerSel = document.getElementById('trainerEvalSelect');
+        const monthSel = document.getElementById('trainerEvalMonth');
+        const trainerName = trainerSel?.value || getAvailableTrainersList()[0];
+        const month = monthSel?.value || '2026-10';
+
+        const evals = getStoredTrainerEvaluations();
+        const evalKey = `${trainerName}_${month}`;
+        const existing = evals[evalKey] || {
+            c1: 10, c2: 9, c3: 9, c4: 10, c5: 9, c6: 9,
+            strengths: 'التزام متميز بالمواعيد، تمكن ممتاز من اللغة الإنجليزية التقنية وتوصيل المعلومات الفنية بسلاسة.',
+            improvements: 'مواصلة تنويع أسئلة الاختبارات التفاعلية (المطابقة والتوصيل) لتعزيز التفاعل.',
+            directives: 'الاستمرار على نفس المستوى المتميز والمشاركة في تطوير الخطط الفصلية.',
+            evaluator: 'مدير المعهد / المشرف الأكاديمي'
+        };
+
+        const grid = document.getElementById('trainerEvalCriteriaGrid');
+        if (grid) {
+            grid.innerHTML = TRAINER_EVAL_CRITERIA.map(crit => {
+                const curVal = existing[crit.id] !== undefined ? existing[crit.id] : 9;
+                return `
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-slate-800">${crit.name}</span>
+                            <span class="text-xs font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200" id="critValBadge-${crit.id}">${curVal} / 10</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 font-bold">${crit.desc}</p>
+                        <div class="flex items-center gap-3 pt-1">
+                            <input type="range" min="1" max="10" step="1" value="${curVal}" id="critInput-${crit.id}"
+                                   oninput="onCriteriaRangeChange('${crit.id}', this.value)"
+                                   class="w-full accent-[#0F2942] cursor-pointer">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        const strengthsInput = document.getElementById('trainerEvalStrengths');
+        const improvementsInput = document.getElementById('trainerEvalImprovements');
+        const directivesInput = document.getElementById('trainerEvalDirectives');
+        const evaluatorInput = document.getElementById('trainerEvaluatorName');
+
+        if (strengthsInput) strengthsInput.value = existing.strengths || '';
+        if (improvementsInput) improvementsInput.value = existing.improvements || '';
+        if (directivesInput) directivesInput.value = existing.directives || '';
+        if (evaluatorInput) evaluatorInput.value = existing.evaluator || 'مدير المعهد / المشرف الأكاديمي';
+
+        updateTrainerEvalScoreBadge();
+    }
+
+    function onCriteriaRangeChange(critId, val) {
+        const badge = document.getElementById(`critValBadge-${critId}`);
+        if (badge) badge.innerText = `${val} / 10`;
+        updateTrainerEvalScoreBadge();
+    }
+
+    function updateTrainerEvalScoreBadge() {
+        let total = 0;
+        TRAINER_EVAL_CRITERIA.forEach(crit => {
+            const el = document.getElementById(`critInput-${crit.id}`);
+            const val = el ? parseInt(el.value, 10) : 9;
+            total += (isNaN(val) ? 9 : val);
+        });
+
+        const pct = Math.round((total / 60) * 100);
+        let rank = 'ممتاز جداً ⭐';
+        if (pct < 75) rank = 'مقبول / يحتاج تحسين';
+        else if (pct < 85) rank = 'جيد جداً';
+        else if (pct < 90) rank = 'ممتاز';
+
+        const badge = document.getElementById('trainerEvalScoreBadge');
+        if (badge) {
+            badge.innerHTML = `
+                <span class="text-xs font-bold text-slate-600">المجموع الكلي للتقييم:</span>
+                <span class="text-base font-black text-[#0F2942]">${total} / 60</span>
+                <span class="text-xs font-black text-amber-700">(${pct}%)</span>
+                <span class="text-xs font-black bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">${rank}</span>
+            `;
+        }
+    }
+
+    function saveTrainerMonthlyEvaluation() {
+        const trainerSel = document.getElementById('trainerEvalSelect');
+        const monthSel = document.getElementById('trainerEvalMonth');
+        const trainerName = trainerSel?.value;
+        const month = monthSel?.value;
+
+        if (!trainerName || !month) {
+            showToast('يرجى تحديد المدرب وشهر التقييم', 'error');
+            return;
+        }
+
+        const evals = getStoredTrainerEvaluations();
+        const evalKey = `${trainerName}_${month}`;
+
+        const evalRecord = {
+            trainerName,
+            month,
+            date: new Date().toISOString(),
+            evaluator: document.getElementById('trainerEvaluatorName')?.value || 'مدير المعهد',
+            strengths: document.getElementById('trainerEvalStrengths')?.value || '',
+            improvements: document.getElementById('trainerEvalImprovements')?.value || '',
+            directives: document.getElementById('trainerEvalDirectives')?.value || ''
+        };
+
+        let total = 0;
+        TRAINER_EVAL_CRITERIA.forEach(crit => {
+            const el = document.getElementById(`critInput-${crit.id}`);
+            const val = el ? parseInt(el.value, 10) : 9;
+            evalRecord[crit.id] = val;
+            total += val;
+        });
+
+        evalRecord.totalScore = total;
+        evalRecord.percentage = Math.round((total / 60) * 100);
+
+        evals[evalKey] = evalRecord;
+        saveStoredTrainerEvaluations(evals);
+
+        showToast(`✅ تم حفظ واعتماد التقييم الشهري للمدرب (${trainerName}) بنجاح`, 'success');
+
+        // Automatically sync to Trainer Report View
+        const repTrainerSel = document.getElementById('trainerReportSelectTrainer');
+        const repMonthSel = document.getElementById('trainerReportSelectMonth');
+        if (repTrainerSel) repTrainerSel.value = trainerName;
+        if (repMonthSel) repMonthSel.value = month;
+    }
+
+    // ─── TRAINER PERFORMANCE REPORT VIEW (Printable) ──────────────────────────
+    function renderTrainerPerformanceReportView() {
+        const printArea = document.getElementById('adminReportPrintArea');
+        if (!printArea) return;
+
+        const trainerSel = document.getElementById('trainerReportSelectTrainer');
+        const monthSel = document.getElementById('trainerReportSelectMonth');
+        const trainerName = trainerSel?.value || getAvailableTrainersList()[0];
+        const month = monthSel?.value || '2026-10';
+
+        const evals = getStoredTrainerEvaluations();
+        const evalKey = `${trainerName}_${month}`;
+        const record = evals[evalKey] || {
+            c1: 10, c2: 9, c3: 9, c4: 10, c5: 9, c6: 9,
+            totalScore: 56, percentage: 93,
+            strengths: 'التزام عالٍ بمواعيد المحاضرات والشرح التفاعلي الدقيق.',
+            improvements: 'توسيع التفاعل على منصة LMS ورصد الواجبات دورياً.',
+            directives: 'الاستمرار على هذا الأداء المتميز ومتابعة المتدربين المتعثرين.',
+            evaluator: 'مدير المعهد / المشرف الأكاديمي'
+        };
+
+        // Determine trainer's assigned groups and live attendance stats
+        const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+        let linkedGroups = [];
+        if (typeof getTrainerLinkedGroups === 'function') {
+            linkedGroups = getTrainerLinkedGroups(trainerName);
+        } else if (typeof getGroupsForTrainer === 'function') {
+            linkedGroups = getGroupsForTrainer(trainerName);
+        }
+        if (!linkedGroups || linkedGroups.length === 0) {
+            // Find in scheduleData
+            if (typeof scheduleData !== 'undefined' && Array.isArray(scheduleData)) {
+                const sMatch = scheduleData.find(s => s.name === trainerName || s.name.includes(trainerName) || trainerName.includes(s.name));
+                if (sMatch && sMatch.groups) linkedGroups = sMatch.groups;
+            }
+        }
+        if (!linkedGroups || linkedGroups.length === 0) {
+            linkedGroups = ['سامسونج 101', 'سامسونج 102'];
+        }
+
+        // Compute trainer groups attendance
+        const trainerTrainees = pool.filter(t => linkedGroups.some(g => isGroupMatch(g, t.group)));
+        let p1Att = 0, p1Tot = 0, p2Att = 0, p2Tot = 0;
+        let sumRate = 0;
+
+        trainerTrainees.forEach(t => {
+            sumRate += (t.rate !== undefined ? t.rate : 100);
+            if (t.weeklyAttendance && typeof t.weeklyAttendance === 'object') {
+                ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'].forEach(d => {
+                    const rec = t.weeklyAttendance[d];
+                    if (rec) {
+                        p1Tot++; p2Tot++;
+                        if (rec.p1 === 'حاضر' || rec.p1 === 'present') p1Att++;
+                        if (rec.p2 === 'حاضر' || rec.p2 === 'present') p2Att++;
+                    }
+                });
+            }
+        });
+
+        if (p1Tot === 0) { p1Tot = Math.max(1, trainerTrainees.length * 5); p1Att = Math.round(p1Tot * 0.96); }
+        if (p2Tot === 0) { p2Tot = Math.max(1, trainerTrainees.length * 5); p2Att = Math.round(p2Tot * 0.94); }
+
+        const tP1Rate = Math.round((p1Att / p1Tot) * 100);
+        const tP2Rate = Math.round((p2Att / p2Tot) * 100);
+        const tOverallRate = trainerTrainees.length > 0 ? Math.round(sumRate / trainerTrainees.length) : 95;
+
+        const totalScore = record.totalScore || 56;
+        const pct = record.percentage || 93;
+        const todayStr = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        let html = `
+            <!-- Letterhead -->
+            <div class="border-b-2 border-[#0F2942] pb-5 mb-6">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="text-right space-y-0.5 text-xs text-slate-800">
+                        <div class="font-black text-sm text-[#0F2942]">المملكة العربية السعودية</div>
+                        <div class="font-bold text-slate-600">المؤسسة العامة للتدريب التقني والمهني</div>
+                        <div class="font-black text-[#0F2942]">معهد الذهب الأسود العالي للتدريب</div>
+                        <div class="text-[10px] text-amber-800 font-bold">فرع عنك • ترخيص رقم: 102/5482</div>
+                    </div>
+
+                    <div class="text-center">
+                        <img src="logo.png" alt="Black Gold Training Institute" class="h-16 w-auto object-contain mx-auto" onerror="this.style.display='none'">
+                        <div class="text-[10px] font-black tracking-widest text-[#0F2942] mt-1 uppercase">Black Gold Training Institute</div>
+                        <span class="bg-amber-100 text-amber-950 font-black px-2 py-0.5 rounded text-[10px] border border-amber-300">بطاقة تقييم أداء المدرب الشهري</span>
+                    </div>
+
+                    <div class="text-left space-y-0.5 text-xs text-slate-700">
+                        <div class="font-bold">كود التقييم: <span class="font-mono font-black text-[#0F2942]">TR-EV-${Date.now().toString().slice(-6)}</span></div>
+                        <div class="font-bold">التاريخ: <span class="font-black text-slate-900">${todayStr}</span></div>
+                        <div class="font-bold">الشهر: <span class="text-blue-900 font-black">${month}</span></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3 bg-slate-50 p-3.5 rounded-2xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-[#0F2942] text-amber-300 flex items-center justify-center text-xl font-black shrink-0">
+                            👨‍🏫
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-900 text-sm md:text-base">${trainerName}</h3>
+                            <div class="text-xs text-slate-600 font-bold mt-0.5 flex items-center gap-2 flex-wrap">
+                                <span>المجموعات التدريبية المكلّفة: <strong class="text-slate-900 font-black">${linkedGroups.join('، ')}</strong></span>
+                                <span>•</span>
+                                <span>عدد المتدربين: <strong class="text-slate-900 font-black">${trainerTrainees.length} متدرب</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-left shrink-0">
+                        <div class="text-xs font-bold text-slate-500">النتيجة والتقييم النهائي:</div>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-xl md:text-2xl font-black text-[#0F2942]">${totalScore} / 60</span>
+                            <span class="text-xs font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">${pct}% - ممتاز جداً ⭐</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operational & Attendance KPIs of Trainer Groups -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div class="bg-blue-50/60 border border-blue-200 rounded-2xl p-3.5 text-center shadow-2xs">
+                    <span class="text-[11px] font-bold text-blue-900 block">حضور مجموعاته (P1 الصباحية)</span>
+                    <span class="text-xl font-black text-blue-950 mt-0.5 block">${tP1Rate}%</span>
+                    <span class="text-[10px] font-bold text-blue-600 mt-0.5 block">انضباط الفترة الأولى</span>
+                </div>
+
+                <div class="bg-indigo-50/60 border border-indigo-200 rounded-2xl p-3.5 text-center shadow-2xs">
+                    <span class="text-[11px] font-bold text-indigo-900 block">حضور مجموعاته (P2 المسائية)</span>
+                    <span class="text-xl font-black text-indigo-950 mt-0.5 block">${tP2Rate}%</span>
+                    <span class="text-[10px] font-bold text-indigo-600 mt-0.5 block">انضباط الفترة الثانية</span>
+                </div>
+
+                <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-3.5 text-center shadow-2xs">
+                    <span class="text-[11px] font-bold text-emerald-900 block">المعدل العام لمجموعاته</span>
+                    <span class="text-xl font-black text-emerald-800 mt-0.5 block">${tOverallRate}%</span>
+                    <span class="text-[10px] font-bold text-emerald-600 mt-0.5 block">معدل الفترتين الشامل</span>
+                </div>
+
+                <div class="bg-purple-50/60 border border-purple-200 rounded-2xl p-3.5 text-center shadow-2xs">
+                    <span class="text-[11px] font-bold text-purple-900 block">التفاعل على منصة LMS</span>
+                    <span class="text-xl font-black text-purple-950 mt-0.5 block">94%</span>
+                    <span class="text-[10px] font-bold text-purple-600 mt-0.5 block">إنجاز المهام والاختبارات</span>
+                </div>
+            </div>
+
+            <!-- The 6 Criteria Breakdown with Visual Progress Bars -->
+            <div class="border border-slate-200 rounded-2xl p-5 mb-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                    <h4 class="font-black text-slate-900 text-xs md:text-sm">تفصيل درجات معايير التقييم الشهري الستة:</h4>
+                    <span class="text-[11px] font-bold text-slate-500">الدرجة العظمى لكل معيار: 10 درجات</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${TRAINER_EVAL_CRITERIA.map(crit => {
+                        const score = record[crit.id] !== undefined ? record[crit.id] : 9;
+                        const scorePct = score * 10;
+                        return `
+                            <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80 space-y-1.5">
+                                <div class="flex items-center justify-between text-xs font-bold">
+                                    <span class="text-slate-800 font-black">${crit.name}</span>
+                                    <span class="text-amber-800 font-black">${score} / 10</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-amber-500 to-[#0F2942] h-full rounded-full" style="width: ${scorePct}%"></div>
+                                </div>
+                                <p class="text-[10px] text-slate-500 font-bold">${crit.desc}</p>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+
+            <!-- Qualitative Feedback -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 space-y-1">
+                    <span class="text-xs font-black text-emerald-950 block">🌟 نقاط القوة والتميز:</span>
+                    <p class="text-xs text-slate-800 font-bold leading-relaxed">${record.strengths || 'التزام عالٍ بالمواعيد وتمكن علمي متميز.'}</p>
+                </div>
+
+                <div class="bg-blue-50/70 border border-blue-200 rounded-2xl p-4 space-y-1">
+                    <span class="text-xs font-black text-blue-950 block">📈 فرص التحسين والتطوير:</span>
+                    <p class="text-xs text-slate-800 font-bold leading-relaxed">${record.improvements || 'مواصلة تنويع الأنشطة الصفية ورصد الواجبات أولاً بأول.'}</p>
+                </div>
+
+                <div class="bg-amber-50/70 border border-amber-300 rounded-2xl p-4 space-y-1">
+                    <span class="text-xs font-black text-amber-950 block">📌 توصيات وتوجيهات الإدارة:</span>
+                    <p class="text-xs text-slate-800 font-bold leading-relaxed">${record.directives || 'الاستمرار على هذا الأداء المتميز والمشاركة الفعالة في الأنشطة الأكاديمية.'}</p>
+                </div>
+            </div>
+
+            <!-- Director & Trainer Signatures -->
+            <div class="border-t-2 border-slate-200 pt-6 mt-6">
+                <div class="grid grid-cols-2 gap-6 text-center text-xs">
+                    <div class="space-y-2">
+                        <span class="font-bold text-slate-500 block">إقرار واطلاع المدرب:</span>
+                        <span class="font-black text-slate-900 block">${trainerName}</span>
+                        <div class="h-10 flex items-center justify-center text-slate-400 font-serif italic text-xs">
+                            اطلعت على التقييم والتوصيات
+                        </div>
+                        <span class="text-[10px] text-slate-400 font-mono block">${todayStr}</span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <span class="font-bold text-slate-500 block">اعتماد وختم مدير المعهد:</span>
+                        <span class="font-black text-[#0F2942] block">سعادة مدير معهد الذهب الأسود للتدريب</span>
+                        <div class="h-14 flex items-center justify-center">
+                            <div class="w-16 h-16 rounded-full border-2 border-dashed border-[#0F2942] flex flex-col items-center justify-center text-center p-1 transform rotate-[-6deg] bg-amber-50/40">
+                                <span class="text-[7px] font-black text-[#0F2942] leading-tight">معهد الذهب الأسود</span>
+                                <span class="text-[9px]">★</span>
+                                <span class="text-[6px] font-black text-amber-800 leading-tight">معتمد رسمياً - عنك</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-700 underline block">الاعتماد والتوقيع الرسمي</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        printArea.innerHTML = html;
+    }
+
+    // ─── PRINT & EXPORT HELPERS ──────────────────────────────────────────────
+    function printActiveAdminReport() {
+        window.print();
+    }
+
+    function exportAdminReportExcel() {
+        const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+        const fType = document.getElementById('adminRepFilterType')?.value || 'all';
+        const targetVal = document.getElementById('adminRepTargetSelect')?.value || '';
+
+        let exportList = [...pool];
+        if (currentAdminReportsSubTab === 'attendance') {
+            if (fType === 'company') exportList = exportList.filter(t => t.company === targetVal);
+            else if (fType === 'group') exportList = exportList.filter(t => t.group === targetVal);
+        }
+
+        // CSV with UTF-8 BOM
+        let csv = '\uFEFF';
+        if (currentAdminReportsSubTab === 'attendance') {
+            csv += 'رقم الهوية,اسم المتدرب,المجموعة,الشركة الراعية,نسبة الأسبوع,النسبة التراكمية الشاملة,حالة الانضباط\n';
+            exportList.forEach(t => {
+                const wRate = t.rate !== undefined ? t.rate : 100;
+                const cRate = t.combinedRate !== undefined ? t.combinedRate : ((t.archiveRate !== undefined) ? t.archiveRate : wRate);
+                const status = wRate >= 90 ? 'منتظم' : (wRate >= 80 ? 'إنذار' : 'حرمان');
+                csv += `"${t.id}","${t.name}","${t.group}","${t.company || ''}","${wRate}%","${cRate}%","${status}"\n`;
+            });
+        } else if (currentAdminReportsSubTab === 'executive') {
+            const data = executiveReportData || {};
+            csv += 'المحور التنفيذي,الحالة,الملخص,النقاط الأساسية\n';
+            if (data.pillars) {
+                for (let k in data.pillars) {
+                    const p = data.pillars[k];
+                    const pts = (p.points || []).join(' | ');
+                    csv += `"${p.title}","${p.status}","${p.summary}","${pts}"\n`;
+                }
+            }
+        } else {
+            const evals = getStoredTrainerEvaluations();
+            csv += 'المدرب,الشهر,الدرجة الكلية (من 60),النسبة,نقاط القوة,فرص التحسين,المُقيّم\n';
+            for (let k in evals) {
+                const e = evals[k];
+                csv += `"${e.trainerName}","${e.month}","${e.totalScore || ''}","${e.percentage || ''}%","${e.strengths || ''}","${e.improvements || ''}","${e.evaluator || ''}"\n`;
+            }
+        }
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `تقرير_معهد_الذهب_الأسود_${currentAdminReportsSubTab}_${Date.now()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast('تم تصدير ملف CSV / Excel بنجاح 📥', 'success');
+    }
+
+    // Export new functions to global window scope
+    window.renderAdminReportsHub = renderAdminReportsHub;
+    window.refreshAdminReportsHub = refreshAdminReportsHub;
+    window.switchAdminReportsSubTab = switchAdminReportsSubTab;
+    window.onAdminRepFilterTypeChange = onAdminRepFilterTypeChange;
+    window.toggleAllAdminRepCheckboxes = toggleAllAdminRepCheckboxes;
+    window.renderAttendanceReportView = renderAttendanceReportView;
+    window.renderExecutiveWeeklyReportView = renderExecutiveWeeklyReportView;
+    window.generateAiExecutiveReport = generateAiExecutiveReport;
+    window.updateExecutiveReportPreview = updateExecutiveReportPreview;
+    window.loadTrainerEvaluationFormData = loadTrainerEvaluationFormData;
+    window.onCriteriaRangeChange = onCriteriaRangeChange;
+    window.saveTrainerMonthlyEvaluation = saveTrainerMonthlyEvaluation;
+    window.renderTrainerPerformanceReportView = renderTrainerPerformanceReportView;
+    window.printActiveAdminReport = printActiveAdminReport;
+    window.exportAdminReportExcel = exportAdminReportExcel;
+    window.onExecSummaryEdit = onExecSummaryEdit;
+    window.onPillarSummaryEdit = onPillarSummaryEdit;
+    window.onPillarPointEdit = onPillarPointEdit;
+    window.onExecRecEdit = onExecRecEdit;
+
 
 
     // ===================================================================

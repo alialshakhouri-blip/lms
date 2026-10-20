@@ -562,6 +562,244 @@ function buildDemoContentFromText(extractedText, filename) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+//  HELPER: RESILIENT JSON EXTRACTOR
+// ══════════════════════════════════════════════════════════════════════════════
+function safeExtractJson(text) {
+  if (!text) return null;
+  let s = String(text).trim();
+  const blockMatch = s.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  if (blockMatch) s = blockMatch[1].trim();
+
+  const firstBrace = s.indexOf('{');
+  const lastBrace = s.lastIndexOf('}');
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    try {
+      return JSON.parse(s.slice(firstBrace, lastBrace + 1));
+    } catch (e) {
+      // Continue to direct parse
+    }
+  }
+  try {
+    return JSON.parse(s);
+  } catch (e) {
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  EXECUTIVE WEEKLY REPORT GENERATION ENGINE (7 Formal Pillars)
+// ══════════════════════════════════════════════════════════════════════════════
+const EXECUTIVE_PROMPT_TEMPLATE = `أنت مستشار إداري وأكاديمي تنفيذي أول لمعهد الذهب الأسود للتدريب (فرع عنك).
+المطلوب صياغة التقرير الإداري والتشغيلي الأسبوعي الرسمي الموجه إلى:
+{RECIPIENT}
+من قِبل: {SENDER}
+الفترة / الأسبوع: {WEEK_LABEL}
+المؤشرات الحية للمعهد:
+- إجمالي المتدربين: {TOTAL_TRAINEES} متدرب
+- نسبة الحضور العامة: {ATTENDANCE_RATE}% (الفترة الأولى: {P1_RATE}% | الفترة الثانية: {P2_RATE}%)
+- عدد المجموعات التدريبية النشطة: {GROUPS_COUNT}
+- عدد المدربين الأكاديميين: {TRAINERS_COUNT}
+- إحصائيات التكليفات والاختبارات: {LMS_STATS}
+{ADDITIONAL_NOTES}
+
+يجب صياغة التقرير بأسلوب إداري سعودي رفيع، رسمي، مهني، دقيق ومباشر يغطي المحاور السبعة التنفيذية التالية:
+1. schedules: إدارة الجداول والقاعات وفترات التدريب (الفترة الأولى والفترة الثانية) والانتظام الميداني.
+2. staff_hr: الكادر التدريبي وشؤون الموظفين (HR) ومتابعة الأداء والنصاب.
+3. companies_payroll: شؤون الشركات الراعية والرواتب وإشعارات الحسم والالتزام المالي.
+4. academic_lms: الشؤون الأكاديمية وتدريب المتدربين (LMS / منصة منار / نتائج الاختبارات والواجبات).
+5. it_support: تقنية المعلومات والدعم الفني والمنصات والتجهيزات التقنية للقاعات.
+6. maintenance_facility: الصيانة والتغطية الميدانية الشاملة والجاهزية والسلامة المهنية.
+7. general_kpi: المؤشرات العامة والوضع الراهن (~830 متدرب، تحليل نسب الحضور، والإنذارات إن وجدت).
+بالإضافة إلى:
+- recommendations: 3 إلى 5 توصيات وقرارات إدارية تنفيذية مقترحة للأسبوع القادم.
+- executive_summary: ملخص تنفيذي موجز (3-4 أسطر).
+
+أعد الإجابة بتنسيق JSON حصري بدون كتل خارج الـ JSON:
+{
+  "title": "التقرير الإداري والتشغيلي الأسبوعي الشامل",
+  "recipient": "سعادة الأستاذ المحترم / محمد كمال العواد (مدير التشغيل)",
+  "sender": "إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك",
+  "week_label": "{WEEK_LABEL}",
+  "date_formatted": "...",
+  "executive_summary": "...",
+  "pillars": {
+    "schedules": {"title": "1. إدارة الجداول والقاعات وفترات التدريب", "summary": "...", "points": ["...", "..."], "status": "مستقر ومنضبط"},
+    "staff_hr": {"title": "2. الكادر التدريبي وشؤون الموظفين (HR)", "summary": "...", "points": ["...", "..."], "status": "التزام تام"},
+    "companies_payroll": {"title": "3. شؤون الشركات الراعية والرواتب والمكافآت", "summary": "...", "points": ["...", "..."], "status": "محدث ومنسق"},
+    "academic_lms": {"title": "4. الشؤون الأكاديمية والتدريب (منصة LMS / منار)", "summary": "...", "points": ["...", "..."], "status": "تفاعل مرتفع"},
+    "it_support": {"title": "5. تقنية المعلومات والدعم الفني والشبكات", "summary": "...", "points": ["...", "..."], "status": "جاهز ومستقر"},
+    "maintenance_facility": {"title": "6. الصيانة والتغطية الميدانية الشاملة والسلامة", "summary": "...", "points": ["...", "..."], "status": "تغطية مستمرة"},
+    "general_kpi": {"title": "7. المؤشرات العامة والوضع الراهن للمتدربين", "summary": "...", "points": ["...", "..."], "status": "إيجابي ومطمئن"}
+  },
+  "recommendations": ["...", "...", "..."],
+  "closing_salutation": "سائلين المولى عز وجل لسعادتكم دوام التوفيق والسداد، وتقبلوا خالص تحياتنا وتقديرنا،،،"
+}`;
+
+function buildDemoExecutiveReport(params) {
+  const stats = params.stats || {};
+  const totalTrainees = stats.totalTrainees || 830;
+  const overallRate = stats.overallAttendanceRate || 94;
+  const p1Rate = stats.period1Rate || 95;
+  const p2Rate = stats.period2Rate || 93;
+  const groupsCount = stats.activeGroupsCount || 16;
+  const trainersCount = stats.trainersCount || 9;
+  const weekLabel = params.weekLabel || 'الأسبوع التدريبي الجاري';
+  const recipient = params.recipient || 'سعادة الأستاذ المحترم / محمد كمال العواد (مدير التشغيل)';
+  const sender = params.sender || 'إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك';
+  const notes = params.additionalNotes ? `ملاحظات خاصة مرفقة: ${params.additionalNotes}` : '';
+
+  return {
+    title: `التقرير الإداري والتشغيلي الأسبوعي - ${weekLabel}`,
+    recipient: recipient,
+    sender: sender,
+    week_label: weekLabel,
+    date_formatted: new Date().toLocaleDateString('ar-SA'),
+    executive_summary: `نرفع لسعادتكم التقرير الأسبوعي الشامل لمعهد الذهب الأسود للتدريب (فرع عنك) عن ${weekLabel}. أظهرت المؤشرات التشغيلية استقراراً عاماً والتزاماً عالياً حيث بلغت نسبة الحضور العامة ${overallRate}% لإجمالي ${totalTrainees} متدرباً موزعين على ${groupsCount} مجموعة تدريبية، مع انتظام تام للفترتين التدريبيتين (الأولى ${p1Rate}%، والثانية ${p2Rate}%)، وانضباط الكادر التدريبي ومتابعة المنصات والتغطية الميدانية الشاملة. ${notes}`,
+    pillars: {
+      schedules: {
+        title: '1. إدارة الجداول والقاعات وفترات التدريب',
+        status: 'مستقر ومنضبط',
+        summary: `تنظيم دقيق لجدول الفترات (الفترة الأولى الصباحية والفترة الثانية المسائية) عبر ${groupsCount} مجموعة تدريبية دون أي تعارض زمني.`,
+        points: [
+          `توزيع القاعات التدريبية والورش وفق الطاقة الاستيعابية المعتمدة لكل قاعة دون أي تكدس.`,
+          `انتظام الحضور الميداني للفترة الأولى (8:30 ص - 12:00 م) بنسبة ${p1Rate}%، والفترة الثانية (12:30 م - 4:00 م) بنسبة ${p2Rate}%.`,
+          `تفعيل آلية الإشراف والمناوبة بين الفترتين لضمان انسيابية دخول وخروج المتدربين.`
+        ]
+      },
+      staff_hr: {
+        title: '2. الكادر التدريبي وشؤون الموظفين (HR)',
+        status: 'التزام تام',
+        summary: `متابعة حضور وانضباط السادة المدربين (${trainersCount} مدرباً معتمداً) وتقييم أدائهم الميداني والأكاديمي.`,
+        points: [
+          `نسبة انضباط وحضور المدربين في مواعيد المحاضرات بلغت 100% لكافة الفترات التدريبية المعتمدة.`,
+          `استكمال خطة نصاب الساعات التدريبية وفق معايير المؤسسة العامة للتدريب التقني والمهني.`,
+          `متابعة تقارير الأداء الأسبوعية للمدربين والتأكد من جودة الشرح والالتزام باللغة الإنجليزية التقنية.`
+        ]
+      },
+      companies_payroll: {
+        title: '3. شؤون الشركات الراعية والرواتب والمكافآت',
+        status: 'محدث ومنسق',
+        summary: `التنسيق المستمر مع ممثلي الشركات الراعية وإصدار كشوف الحضور والغياب المحدثة والتسويات الشهرية.`,
+        points: [
+          `تحديث كشوفات الغياب الأسبوعية وإرسال الإشعارات الإلكترونية للمنشآت الراعية المعتمدة.`,
+          `مطابقة سجلات الحضور والانصراف مع نظام استحقاق المكافآت والرواتب الشهرية للمتدربين بدقة تامة.`,
+          `التواصل مع الشركات الراعية لمعالجة الأعذار المقبولة وتأكيد انتظام متدربيها الميداني.`
+        ]
+      },
+      academic_lms: {
+        title: '4. الشؤون الأكاديمية والتدريب (منصة LMS / منار)',
+        status: 'تفاعل مرتفع',
+        summary: `متابعة التفاعل الإلكتروني على منصة LMS ومنصة منار الوطنية ورفع التكليفات والاختبارات الأسبوعية.`,
+        points: [
+          `إلزامية رصد مواعيد وتوقيتات استحقاق الواجبات والاختبارات الأسبوعية إلكترونياً بدقة.`,
+          `إنجاز الاختبارات الأسبوعية المتنوعة (MCQ، صح وخطأ، وتوصيل ومطابقة المفاهيم) بنسبة إنجاز عالية.`,
+          `ربط سجلات الحضور للفترتين 1 و2 بالسجل التراكمي الشامل لجميع الأسابيع للمتدربين.`
+        ]
+      },
+      it_support: {
+        title: '5. تقنية المعلومات والدعم الفني والشبكات',
+        status: 'جاهزية كاملة',
+        summary: `استقرار البنية التحتية الرقمية، شبكة الإنترنت، شاشات القاعات الذكية، وأنظمة المزامنة الفورية.`,
+        points: [
+          `فحص دوري لشبكة Wi-Fi وأجهزة العرض في كافة القاعات التدريبية والتأكد من خلوها من الأعطال.`,
+          `تقديم الدعم الفني الفوري للمتدربين وتسهيل تسجيل الدخول لمنصات التدريب وحل بطاقات الدعم.`,
+          `تفعيل النسخ الاحتياطي السحابي والمزامنة المستمرة لسجلات الحضور والدرجات.`
+        ]
+      },
+      maintenance_facility: {
+        title: '6. الصيانة والتغطية الميدانية الشاملة والسلامة',
+        status: 'تغطية مستمرة',
+        summary: `الجولات الميدانية المستمرة على مرافق المعهد، أنظمة التكييف، ومعدات السلامة ومخارج الطوارئ.`,
+        points: [
+          `جاهزية منظومة التكييف والإضاءة ونظافة القاعات والممرات على مدار الفترتين 1 و 2.`,
+          `التأكد من سلامة مخارج الطوارئ وطفايات الحريق ومعدات الإسعافات الأولية وتطبيق معايير السلامة المهنية.`,
+          `التغطية الميدانية الشاملة للمشرفين لمتابعة السلوك والانضباط العام في بهو المعهد ومحيطه.`
+        ]
+      },
+      general_kpi: {
+        title: '7. المؤشرات العامة والوضع الراهن للمتدربين',
+        status: 'إيجابي ومطمئن',
+        summary: `تحليل مؤشرات الأداء والانتظام لحوالي ${totalTrainees} متدرباً مع رصد الحالات المحتاجة للدعم والتوجيه.`,
+        points: [
+          `إجمالي عدد المتدربين المسجلين: ${totalTrainees} متدرباً بنسبة التزام عامة ${overallRate}%.`,
+          `حصر المتدربين المقتربين من نسب الحرمان أو الإنذارات الأكاديمية واستدعاؤهم للتوجيه الإرشادي.`,
+          `تحفيز المجموعات التدريبية المتميزة التي حققت معدل حضور تجاوز 96% للفترتين.`
+        ]
+      }
+    },
+    recommendations: [
+      `الاستمرار في تعزيز التزام المتدربين بالفترة التدريبية الثانية وتكثيف المرور الميداني لمنع الخروج المبكر.`,
+      `التنسيق المبكر مع الشركات الراعية لعقد لقاءات إرشادية شهرية للمتدربين لتعزيز الانتماء الوظيفي.`,
+      `إطلاق تكريم أسبوعي للمجموعة التدريبية الأكثر انضباطاً في الحضور والواجبات على مستوى المعهد.`
+    ],
+    closing_salutation: 'سائلين المولى عز وجل لسعادتكم دوام التوفيق والسداد، وتقبلوا خالص تحياتنا وتقديرنا،،،'
+  };
+}
+
+async function handleExecutiveReport(req, res, startTime) {
+  const { recipient, sender, weekLabel, stats, additionalNotes } = req.body || {};
+  const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
+  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
+  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE' && apiKey.length > 15);
+
+  let generatedData = null;
+  let modeUsed = 'demo_fallback';
+
+  if (hasValidKey) {
+    try {
+      const promptText = EXECUTIVE_PROMPT_TEMPLATE
+        .replace('{RECIPIENT}', recipient || 'سعادة الأستاذ المحترم / محمد كمال العواد (مدير التشغيل)')
+        .replace('{SENDER}', sender || 'إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك')
+        .replace(/{WEEK_LABEL}/g, weekLabel || 'الأسبوع الحالي')
+        .replace('{TOTAL_TRAINEES}', stats?.totalTrainees || 830)
+        .replace('{ATTENDANCE_RATE}', stats?.overallAttendanceRate || 94)
+        .replace('{P1_RATE}', stats?.period1Rate || 95)
+        .replace('{P2_RATE}', stats?.period2Rate || 93)
+        .replace('{GROUPS_COUNT}', stats?.activeGroupsCount || 16)
+        .replace('{TRAINERS_COUNT}', stats?.trainersCount || 9)
+        .replace('{LMS_STATS}', `التكليفات المنجزة: ${stats?.assignmentsSubmittedCount || 780}، الاختبارات المكتملة: ${stats?.quizzesCompletedCount || 42}`)
+        .replace('{ADDITIONAL_NOTES}', additionalNotes ? `\n- ملاحظات إضافية من الإدارة: ${additionalNotes}` : '');
+
+      const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+      const geminiRes = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: promptText }] }],
+          generationConfig: { temperature: 0.35, responseMimeType: 'application/json' }
+        })
+      });
+
+      if (geminiRes.ok) {
+        const geminiJson = await geminiRes.json();
+        const candidateText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = safeExtractJson(candidateText);
+        if (parsed && typeof parsed === 'object') {
+          generatedData = parsed;
+          modeUsed = `gemini (${model})`;
+        }
+      }
+    } catch (err) {
+      console.warn('Gemini executive report error, falling back to smart template:', err.message);
+    }
+  }
+
+  if (!generatedData) {
+    generatedData = buildDemoExecutiveReport(req.body);
+  }
+
+  const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
+  return res.status(200).json({
+    success: true,
+    mode: modeUsed,
+    processing_time_seconds: parseFloat(durationSec),
+    data: generatedData
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 //  MAIN HANDLER (Vercel Serverless Entrypoint)
 // ══════════════════════════════════════════════════════════════════════════════
 export default async function handler(req, res) {
@@ -604,6 +842,11 @@ export default async function handler(req, res) {
   }
 
   const startTime = Date.now();
+
+  // Route: Executive Report Generation
+  if (req.body && req.body.action === 'executive_report') {
+    return handleExecutiveReport(req, res, startTime);
+  }
 
   try {
     const { filename, fileType, base64, textInput, extractedPdfText, courseName, weekTitle, weekTopic } = req.body || {};
