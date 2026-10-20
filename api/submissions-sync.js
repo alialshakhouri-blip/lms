@@ -119,6 +119,12 @@ export default async function handler(req, res) {
         gradebooks: syncStates['sys_trainee_gradebooks_v1'] || {},
         antiCheatIncidents: syncStates['sys_anti_cheat_incidents_v1'] || {},
         studentCreds: syncStates['sys_student_creds_v1'] || null,
+        trainees: syncStates['sys_trainees_v9'] || null,
+        reports: syncStates['sys_reports_v9'] || null,
+        scheduleData: syncStates['sys_schedule_v9'] || null,
+        phoneDirectory: syncStates['sys_phone_dir_v9'] || null,
+        users: syncStates['sys_users_v9'] || null,
+        laVacancies: syncStates['sys_la_vacancies_v9'] || null,
         totalSubmissions: submissionsList.length,
         serverTimestamp: new Date().toISOString()
       });
@@ -265,6 +271,48 @@ export default async function handler(req, res) {
           upsertRows.push({
             key: 'sys_anti_cheat_incidents_v1',
             data: body.antiCheatIncidents,
+            updated_at: new Date().toISOString()
+          });
+        }
+        if (body.trainees && Array.isArray(body.trainees) && body.trainees.length > 0) {
+          upsertRows.push({
+            key: 'sys_trainees_v9',
+            data: body.trainees,
+            updated_at: new Date().toISOString()
+          });
+        }
+        if (body.reports && Array.isArray(body.reports)) {
+          upsertRows.push({
+            key: 'sys_reports_v9',
+            data: body.reports,
+            updated_at: new Date().toISOString()
+          });
+        }
+        if (body.scheduleData && Array.isArray(body.scheduleData)) {
+          upsertRows.push({
+            key: 'sys_schedule_v9',
+            data: body.scheduleData,
+            updated_at: new Date().toISOString()
+          });
+        }
+        if (body.phoneDirectory && typeof body.phoneDirectory === 'object') {
+          upsertRows.push({
+            key: 'sys_phone_dir_v9',
+            data: body.phoneDirectory,
+            updated_at: new Date().toISOString()
+          });
+        }
+        if (body.users && Array.isArray(body.users)) {
+          upsertRows.push({
+            key: 'sys_users_v9',
+            data: body.users,
+            updated_at: new Date().toISOString()
+          });
+        }
+        if (body.laVacancies && typeof body.laVacancies === 'object') {
+          upsertRows.push({
+            key: 'sys_la_vacancies_v9',
+            data: body.laVacancies,
             updated_at: new Date().toISOString()
           });
         }

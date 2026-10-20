@@ -6380,6 +6380,9 @@
         else localStorage.removeItem('sys_current_user_v9');
         if (lastSyncTimestamp) localStorage.setItem('sys_last_sync_v9', lastSyncTimestamp);
         renderApp();
+        if (typeof syncCoreDataToCloud === 'function') {
+            syncCoreDataToCloud();
+        }
     }
 
     // Role-based UI visibility & Views routing
@@ -7348,6 +7351,7 @@
 
             localStorage.setItem('sys_users_v9', JSON.stringify(users));
             localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
+            if (typeof syncCoreDataToCloud === 'function') syncCoreDataToCloud();
 
             const modal = document.getElementById('mandatoryPasswordModal');
             if (modal) modal.classList.add('hidden');
@@ -7364,6 +7368,7 @@
                 mustChangePassword: false
             };
             localStorage.setItem('sys_student_creds_v1', JSON.stringify(studentCreds));
+            if (typeof syncCoreDataToCloud === 'function') syncCoreDataToCloud();
 
             currentUser.mustChangePassword = false;
             localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
@@ -22793,6 +22798,23 @@
 
     async function initSupabaseCloudIntegration() {
         try {
+            // 0. فحص وجود إعدادات سريعة في رابط الصفحة (Quick-Link Hash Sync للأجهزة الجديدة)
+            if (window.location.hash && (window.location.hash.includes('sb_url=') || window.location.hash.includes('supabase_url='))) {
+                try {
+                    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+                    const pUrl = hashParams.get('sb_url') || hashParams.get('supabase_url');
+                    const pKey = hashParams.get('sb_key') || hashParams.get('supabase_key');
+                    if (pUrl && pKey) {
+                        localStorage.setItem('sys_supabase_url', pUrl.trim().replace(/\/+$/, ''));
+                        localStorage.setItem('sys_supabase_anon_key', pKey.trim());
+                        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+                        console.log('✅ تم تفعيل إعدادات سحابة Supabase تلقائياً لهذا الجهاز عبر رابط المزامنة السريع.');
+                    }
+                } catch(e) {
+                    console.warn('Hash sync parse error:', e);
+                }
+            }
+
             let cfg = null;
             try {
                 const res = await fetch('/api/config');
@@ -22802,6 +22824,9 @@
             } catch (e) {
                 console.warn('Could not fetch /api/config:', e);
             }
+
+            const isVercelConfigured = Boolean(cfg && cfg.supabaseUrl && cfg.supabaseAnonKey);
+            window._supabaseFromVercelApi = isVercelConfigured;
 
             const sbUrl = (cfg && cfg.supabaseUrl) ? cfg.supabaseUrl : (localStorage.getItem('sys_supabase_url') || '');
             const sbKey = (cfg && cfg.supabaseAnonKey) ? cfg.supabaseAnonKey : (localStorage.getItem('sys_supabase_anon_key') || '');
@@ -22814,13 +22839,13 @@
                 });
                 isSupabaseConnected = true;
                 window.supabaseClient = supabaseClient;
-                console.log('✅ Supabase Cloud connected:', sbUrl);
+                console.log('✅ Supabase Cloud connected:', sbUrl, isVercelConfigured ? '(via Vercel Config)' : '(via Local Browser)');
                 updateCloudSyncBadge(true);
 
                 // 1. Pull latest courses from cloud
                 await pullLmsCoursesFromSupabase();
 
-                // 2. Pull latest student submissions & gradebooks from cloud
+                // 2. Pull latest student submissions & gradebooks & core app data from cloud
                 if (typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
                     await pullSubmissionsAndGradebooksFromSupabase(false);
                 }
@@ -22832,6 +22857,10 @@
                 initSupabaseRealtimeChannel();
             } else {
                 updateCloudSyncBadge(false);
+                // Even if client SDK is not configured, try pull via serverless API if Vercel has credentials
+                if (typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
+                    pullSubmissionsAndGradebooksFromSupabase(false).catch(() => {});
+                }
             }
         } catch (err) {
             console.warn('Supabase initialization warning:', err);
@@ -23224,6 +23253,13 @@
             let assSubs = null;
             let gbs = null;
             let cloudIncidents = null;
+            let cloudTrainees = null;
+            let cloudReports = null;
+            let cloudSchedule = null;
+            let cloudPhoneDir = null;
+            let cloudUsers = null;
+            let cloudCreds = null;
+            let cloudVacancies = null;
 
             // 1. Try direct Supabase client if connected
             if (supabaseClient && isSupabaseConnected) {
@@ -23248,6 +23284,13 @@
                     assSubs = stateMap['sys_student_assignment_submissions_v1'] || {};
                     gbs = stateMap['sys_trainee_gradebooks_v1'] || null;
                     cloudIncidents = stateMap['sys_anti_cheat_incidents_v1'] || null;
+                    cloudTrainees = stateMap['sys_trainees_v9'] || null;
+                    cloudReports = stateMap['sys_reports_v9'] || null;
+                    cloudSchedule = stateMap['sys_schedule_v9'] || null;
+                    cloudPhoneDir = stateMap['sys_phone_dir_v9'] || null;
+                    cloudUsers = stateMap['sys_users_v9'] || null;
+                    cloudCreds = stateMap['sys_student_creds_v1'] || null;
+                    cloudVacancies = stateMap['sys_la_vacancies_v9'] || null;
 
                     if (!subResult.error && Array.isArray(subResult.data)) {
                         subResult.data.forEach(item => {
@@ -23289,7 +23332,7 @@
             }
 
             // 2. Fallback via /api/submissions-sync serverless endpoint
-            if (!quizSubs && !assSubs) {
+            if (!quizSubs && !assSubs && !cloudTrainees) {
                 try {
                     const res = await fetch('/api/submissions-sync');
                     if (res.ok) {
@@ -23299,6 +23342,13 @@
                             assSubs = json.assignmentSubmissions || {};
                             gbs = json.gradebooks || null;
                             cloudIncidents = json.antiCheatIncidents || null;
+                            cloudTrainees = json.trainees || null;
+                            cloudReports = json.reports || null;
+                            cloudSchedule = json.scheduleData || null;
+                            cloudPhoneDir = json.phoneDirectory || null;
+                            cloudUsers = json.users || null;
+                            cloudCreds = json.studentCreds || null;
+                            cloudVacancies = json.laVacancies || null;
                         }
                     }
                 } catch (apiErr) {
@@ -23306,9 +23356,74 @@
                 }
             }
 
-            if (!quizSubs && !assSubs && !gbs && !cloudIncidents) return;
+            if (!quizSubs && !assSubs && !gbs && !cloudIncidents && !cloudTrainees && !cloudReports && !cloudSchedule && !cloudUsers) return;
 
             let hasChanges = false;
+
+            // Merge Trainees (كشف المتدربين والحضور والغياب)
+            if (cloudTrainees && Array.isArray(cloudTrainees) && cloudTrainees.length > 0) {
+                if (!trainees || trainees.length === 0 || cloudTrainees.length >= trainees.length) {
+                    trainees = cloudTrainees;
+                    localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+                    hasChanges = true;
+                }
+            } else if (trainees && trainees.length > 0 && isSupabaseConnected && supabaseClient) {
+                if (typeof syncCoreDataToCloud === 'function') syncCoreDataToCloud();
+            }
+
+            // Merge Reports (تقارير الحضور)
+            if (cloudReports && Array.isArray(cloudReports) && cloudReports.length > 0) {
+                if (!reports || reports.length === 0 || cloudReports.length >= reports.length) {
+                    reports = cloudReports;
+                    localStorage.setItem('sys_reports_v9', JSON.stringify(reports));
+                    hasChanges = true;
+                }
+            }
+
+            // Merge Schedule (جدول القاعات والشعب)
+            if (cloudSchedule && Array.isArray(cloudSchedule) && cloudSchedule.length > 0) {
+                scheduleData = cloudSchedule;
+                localStorage.setItem('sys_schedule_v9', JSON.stringify(scheduleData));
+                hasChanges = true;
+            }
+
+            // Merge Phone Directory
+            if (cloudPhoneDir && typeof cloudPhoneDir === 'object' && Object.keys(cloudPhoneDir).length > 0) {
+                phoneDirectory = { ...phoneDirectory, ...cloudPhoneDir };
+                localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
+            }
+
+            // Merge Users
+            if (cloudUsers && Array.isArray(cloudUsers) && cloudUsers.length > 0) {
+                let usersChanged = false;
+                cloudUsers.forEach(cu => {
+                    const existing = users.find(u => u.username.toLowerCase() === cu.username.toLowerCase());
+                    if (existing) {
+                        if (cu.password && cu.password !== existing.password) {
+                            existing.password = cu.password;
+                            usersChanged = true;
+                        }
+                    } else {
+                        users.push(cu);
+                        usersChanged = true;
+                    }
+                });
+                if (usersChanged) {
+                    localStorage.setItem('sys_users_v9', JSON.stringify(users));
+                }
+            }
+
+            // Merge Student Creds
+            if (cloudCreds && typeof cloudCreds === 'object' && Object.keys(cloudCreds).length > 0) {
+                studentCreds = { ...studentCreds, ...cloudCreds };
+                localStorage.setItem('sys_student_creds_v1', JSON.stringify(studentCreds));
+            }
+
+            // Merge Vacancies
+            if (cloudVacancies && typeof cloudVacancies === 'object') {
+                laVacancies = cloudVacancies;
+                localStorage.setItem('sys_la_vacancies_v9', JSON.stringify(laVacancies));
+            }
 
             // Merge Quizzes
             if (quizSubs && typeof quizSubs === 'object') {
@@ -23402,7 +23517,9 @@
             }
 
             if (hasChanges) {
-                console.log('🔄 تم مزامنة ودمج تسليمات المتدربين والدرجات من السحابة بنجاح.');
+                console.log('🔄 تم مزامنة ودمج بيانات النظام والمتدربين والدرجات من السحابة بنجاح.');
+                if (typeof renderApp === 'function') renderApp();
+                if (typeof renderMasterSchedule === 'function') renderMasterSchedule();
                 if (typeof renderGradesSystemTab === 'function' && document.getElementById('tab-gradesSystem') && !document.getElementById('tab-gradesSystem').classList.contains('hidden')) {
                     renderGradesSystemTab();
                 }
@@ -23415,8 +23532,14 @@
                 if (typeof renderTrainerSubmissionsTab === 'function' && document.getElementById('tab-trainerSubmissions') && !document.getElementById('tab-trainerSubmissions').classList.contains('hidden')) {
                     renderTrainerSubmissionsTab();
                 }
+                if (typeof renderTrainerDashboard === 'function' && document.getElementById('tab-trainerDashboard') && !document.getElementById('tab-trainerDashboard').classList.contains('hidden')) {
+                    renderTrainerDashboard();
+                }
+                if (typeof renderStudentDashboard === 'function' && document.getElementById('tab-studentDashboard') && !document.getElementById('tab-studentDashboard').classList.contains('hidden')) {
+                    renderStudentDashboard();
+                }
                 if (showNotification && typeof showToast === 'function') {
-                    showToast('✅ تم مزامنة أحدث تسليمات ودرجات المتدربين من السحابة', 'success');
+                    showToast('✅ تم مزامنة أحدث بيانات المتدربين والدرجات من السحابة', 'success');
                 }
             }
         } catch (err) {
@@ -23534,6 +23657,63 @@
     }
     window.syncGradebooksToCloud = syncGradebooksToCloud;
 
+    let _syncCoreDataDebounceTimer = null;
+    function syncCoreDataToCloud() {
+        if (!isSupabaseConnected && !supabaseClient) return;
+        clearTimeout(_syncCoreDataDebounceTimer);
+        _syncCoreDataDebounceTimer = setTimeout(async () => {
+            try {
+                const upsertRows = [];
+                if (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) {
+                    upsertRows.push({ key: 'sys_trainees_v9', data: trainees, updated_at: new Date().toISOString() });
+                }
+                if (typeof reports !== 'undefined' && Array.isArray(reports) && reports.length > 0) {
+                    upsertRows.push({ key: 'sys_reports_v9', data: reports, updated_at: new Date().toISOString() });
+                }
+                if (typeof scheduleData !== 'undefined' && Array.isArray(scheduleData) && scheduleData.length > 0) {
+                    upsertRows.push({ key: 'sys_schedule_v9', data: scheduleData, updated_at: new Date().toISOString() });
+                }
+                if (typeof phoneDirectory !== 'undefined' && phoneDirectory && Object.keys(phoneDirectory).length > 0) {
+                    upsertRows.push({ key: 'sys_phone_dir_v9', data: phoneDirectory, updated_at: new Date().toISOString() });
+                }
+                if (typeof users !== 'undefined' && Array.isArray(users) && users.length > 0) {
+                    upsertRows.push({ key: 'sys_users_v9', data: users, updated_at: new Date().toISOString() });
+                }
+                if (typeof studentCreds !== 'undefined' && studentCreds && Object.keys(studentCreds).length > 0) {
+                    upsertRows.push({ key: 'sys_student_creds_v1', data: studentCreds, updated_at: new Date().toISOString() });
+                }
+                if (typeof laVacancies !== 'undefined' && laVacancies && Object.keys(laVacancies).length > 0) {
+                    upsertRows.push({ key: 'sys_la_vacancies_v9', data: laVacancies, updated_at: new Date().toISOString() });
+                }
+
+                if (upsertRows.length === 0) return;
+
+                if (supabaseClient && isSupabaseConnected) {
+                    await supabaseClient.from('app_sync_state').upsert(upsertRows, { onConflict: 'key' });
+                } else {
+                    await fetch('/api/submissions-sync', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'bulk_sync',
+                            trainees,
+                            reports,
+                            scheduleData,
+                            phoneDirectory,
+                            users,
+                            studentCreds,
+                            laVacancies
+                        })
+                    });
+                }
+                console.log('☁️ تم مزامنة بيانات التطبيق الأساسية (الطلاب والحضور والجدول) مع السحابة.');
+            } catch (coreSyncErr) {
+                console.warn('syncCoreDataToCloud error:', coreSyncErr);
+            }
+        }, 1500);
+    }
+    window.syncCoreDataToCloud = syncCoreDataToCloud;
+
     async function syncAllDataToCloud(showToastMsg = true) {
         if (showToastMsg && typeof showToast === 'function') {
             showToast('⏳ جاري المزامنة الشاملة مع سحابة Supabase...', 'info');
@@ -23545,15 +23725,38 @@
                 await syncAllLmsCoursesToSupabase();
             }
 
-            // 2. Sync Submissions & Gradebooks & Anti-Cheat Incidents
+            // 2. Sync Submissions & Gradebooks & Anti-Cheat Incidents & Full App Data
             const currentIncidents = (typeof getStoredAntiCheatIncidents === 'function') ? getStoredAntiCheatIncidents() : {};
+            const coreUpserts = [
+                { key: 'sys_student_quiz_submissions_v1', data: studentQuizSubmissions, updated_at: new Date().toISOString() },
+                { key: 'sys_student_assignment_submissions_v1', data: studentAssignmentSubmissions, updated_at: new Date().toISOString() },
+                { key: 'sys_trainee_gradebooks_v1', data: traineeGradebooks, updated_at: new Date().toISOString() },
+                { key: 'sys_anti_cheat_incidents_v1', data: currentIncidents, updated_at: new Date().toISOString() }
+            ];
+            if (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) {
+                coreUpserts.push({ key: 'sys_trainees_v9', data: trainees, updated_at: new Date().toISOString() });
+            }
+            if (typeof reports !== 'undefined' && Array.isArray(reports)) {
+                coreUpserts.push({ key: 'sys_reports_v9', data: reports, updated_at: new Date().toISOString() });
+            }
+            if (typeof scheduleData !== 'undefined' && Array.isArray(scheduleData)) {
+                coreUpserts.push({ key: 'sys_schedule_v9', data: scheduleData, updated_at: new Date().toISOString() });
+            }
+            if (typeof phoneDirectory !== 'undefined' && phoneDirectory) {
+                coreUpserts.push({ key: 'sys_phone_dir_v9', data: phoneDirectory, updated_at: new Date().toISOString() });
+            }
+            if (typeof users !== 'undefined' && Array.isArray(users)) {
+                coreUpserts.push({ key: 'sys_users_v9', data: users, updated_at: new Date().toISOString() });
+            }
+            if (typeof studentCreds !== 'undefined' && studentCreds) {
+                coreUpserts.push({ key: 'sys_student_creds_v1', data: studentCreds, updated_at: new Date().toISOString() });
+            }
+            if (typeof laVacancies !== 'undefined' && laVacancies) {
+                coreUpserts.push({ key: 'sys_la_vacancies_v9', data: laVacancies, updated_at: new Date().toISOString() });
+            }
+
             if (supabaseClient && isSupabaseConnected) {
-                await supabaseClient.from('app_sync_state').upsert([
-                    { key: 'sys_student_quiz_submissions_v1', data: studentQuizSubmissions, updated_at: new Date().toISOString() },
-                    { key: 'sys_student_assignment_submissions_v1', data: studentAssignmentSubmissions, updated_at: new Date().toISOString() },
-                    { key: 'sys_trainee_gradebooks_v1', data: traineeGradebooks, updated_at: new Date().toISOString() },
-                    { key: 'sys_anti_cheat_incidents_v1', data: currentIncidents, updated_at: new Date().toISOString() }
-                ], { onConflict: 'key' });
+                await supabaseClient.from('app_sync_state').upsert(coreUpserts, { onConflict: 'key' });
             } else {
                 await fetch('/api/submissions-sync', {
                     method: 'POST',
@@ -23563,7 +23766,14 @@
                         quizSubmissions: studentQuizSubmissions,
                         assignmentSubmissions: studentAssignmentSubmissions,
                         gradebooks: traineeGradebooks,
-                        antiCheatIncidents: currentIncidents
+                        antiCheatIncidents: currentIncidents,
+                        trainees: trainees,
+                        reports: reports,
+                        scheduleData: scheduleData,
+                        phoneDirectory: phoneDirectory,
+                        users: users,
+                        studentCreds: studentCreds,
+                        laVacancies: laVacancies
                     })
                 });
             }
@@ -23573,7 +23783,7 @@
             await pullSubmissionsAndGradebooksFromSupabase(false);
 
             if (showToastMsg && typeof showToast === 'function') {
-                showToast('✅ اكتملت المزامنة السحابية الشاملة بنجاح!', 'success');
+                showToast('✅ اكتملت المزامنة السحابية الشاملة بنجاح لكافة البيانات!', 'success');
             }
         } catch (err) {
             console.error('syncAllDataToCloud error:', err);
@@ -23603,21 +23813,28 @@
 
         if (statusCard) {
             if (isSupabaseConnected) {
-                statusCard.className = 'p-4 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-950 space-y-2';
+                const isVercel = Boolean(window._supabaseFromVercelApi);
+                statusCard.className = 'p-4 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-950 space-y-2.5';
                 statusCard.innerHTML = `
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span class="font-black text-sm text-emerald-800">سحابة Supabase متصلة ونشطة ✓</span>
                         </div>
-                        <span class="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Multi-Device Live</span>
+                        <span class="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">${isVercel ? '🌐 Vercel Auto-Sync' : '💻 Local Browser Config'}</span>
                     </div>
-                    <div class="text-xs text-emerald-900/80 leading-relaxed">
-                        جميع أجهزة المتدربين والمدربين متصلة الآن بسحابة واحدة. التسليمات والدرجات والتحديثات تتزامن لحظياً.
+                    <div class="text-xs text-emerald-900/80 leading-relaxed font-bold">
+                        ${isVercel 
+                            ? '✅ تم تهيئة السحابة مركزياً عبر Vercel. تتصل جميع أجهزة المتدربين والمدربين والهواتف تلقائياً دون أي خطوات إضافية!' 
+                            : '⚡ السحابة متصلة على هذا المتصفح. لربط أجهزتك الأخرى وهواتفك بنقرة واحدة، استخدم زر "نسخ رابط الربط المباشر" أدناه أو أضف المفاتيح في إعدادات Vercel.'}
                     </div>
                     <div class="text-[11px] font-mono text-emerald-700 truncate" title="${currentUrl}">
                         🔗 ${currentUrl}
                     </div>
+                    <button type="button" onclick="copyMultiDeviceQuickSyncLink()" class="w-full bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-900 font-black py-2 px-3 rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-2 shadow-2xs">
+                        <span>📲</span>
+                        <span>نسخ رابط الربط المباشر لفتحه على الأجهزة الأخرى أو الهواتف</span>
+                    </button>
                 `;
             } else {
                 statusCard.className = 'p-4 rounded-2xl border bg-amber-50 border-amber-300 text-amber-950 space-y-2';
@@ -23639,6 +23856,29 @@
         modal.classList.remove('hidden');
     }
     window.openSupabaseCloudModal = openSupabaseCloudModal;
+
+    function copyMultiDeviceQuickSyncLink() {
+        const urlInput = document.getElementById('sbModalUrlInput');
+        const keyInput = document.getElementById('sbModalKeyInput');
+        const url = (urlInput?.value || supabaseCloudConfig.url || localStorage.getItem('sys_supabase_url') || '').trim();
+        const key = (keyInput?.value || supabaseCloudConfig.anonKey || localStorage.getItem('sys_supabase_anon_key') || '').trim();
+        if (!url || !key) {
+            showToast('⚠️ يرجى حفظ بيانات السحابة (الرابط والمفتاح) أولاً لتتمكن من مشاركة الرابط.', 'warning');
+            return;
+        }
+
+        const shareUrl = `${window.location.origin}${window.location.pathname}#supabase_url=${encodeURIComponent(url)}&supabase_key=${encodeURIComponent(key)}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                showToast('📋 تم نسخ رابط المزامنة الفوري! افتح هذا الرابط على الجهاز الآخر أو الهاتف ليتم ربطه تلقائياً بضغطة واحدة.', 'success');
+            }).catch(() => {
+                prompt('انسخ هذا الرابط وافتحه على جهازك الثاني:', shareUrl);
+            });
+        } else {
+            prompt('انسخ هذا الرابط وافتحه على جهازك الثاني:', shareUrl);
+        }
+    }
+    window.copyMultiDeviceQuickSyncLink = copyMultiDeviceQuickSyncLink;
 
     function closeSupabaseCloudModal() {
         const modal = document.getElementById('supabaseCloudModal');
