@@ -55,6 +55,41 @@ export default async function handler(req, res) {
         console.warn('Failed to fetch from student_submissions table:', subErr);
       }
 
+      // 1.1 Fetch from `quiz_submissions`
+      let quizSubsFromTable = [];
+      try {
+        const qzRes = await fetch(`${supabaseUrl}/rest/v1/quiz_submissions?select=*&order=submitted_at.desc&limit=2000`, { headers });
+        if (qzRes.ok) quizSubsFromTable = await qzRes.json();
+      } catch (e) {}
+
+      // 1.2 Fetch from `assignment_submissions`
+      let assSubsFromTable = [];
+      try {
+        const asgRes = await fetch(`${supabaseUrl}/rest/v1/assignment_submissions?select=*&order=submitted_at.desc&limit=2000`, { headers });
+        if (asgRes.ok) assSubsFromTable = await asgRes.json();
+      } catch (e) {}
+
+      // 1.3 Fetch from `cheating_logs`
+      let cheatingFromTable = [];
+      try {
+        const chRes = await fetch(`${supabaseUrl}/rest/v1/cheating_logs?select=*&order=detected_at.desc&limit=1000`, { headers });
+        if (chRes.ok) cheatingFromTable = await chRes.json();
+      } catch (e) {}
+
+      // 1.4 Fetch from `students`
+      let studentsFromTable = [];
+      try {
+        const stRes = await fetch(`${supabaseUrl}/rest/v1/students?select=*&limit=3000`, { headers });
+        if (stRes.ok) studentsFromTable = await stRes.json();
+      } catch (e) {}
+
+      // 1.5 Fetch from `delay_reports`
+      let delayReportsFromTable = [];
+      try {
+        const delRes = await fetch(`${supabaseUrl}/rest/v1/delay_reports?select=*&order=created_at.desc&limit=1000`, { headers });
+        if (delRes.ok) delayReportsFromTable = await delRes.json();
+      } catch (e) {}
+
       // 2. Fetch shared state snapshots from `app_sync_state`
       let syncStates = {};
       try {
@@ -74,6 +109,103 @@ export default async function handler(req, res) {
       // Transform submissionsList into dictionary maps
       const quizSubs = syncStates['sys_student_quiz_submissions_v1'] || {};
       const assignmentSubs = syncStates['sys_student_assignment_submissions_v1'] || {};
+      const antiCheatMap = syncStates['sys_anti_cheat_incidents_v1'] || {};
+
+      if (Array.isArray(quizSubsFromTable)) {
+        quizSubsFromTable.forEach(item => {
+          if (!item.id) return;
+          quizSubs[item.id] = {
+            studentId: item.student_id,
+            studentName: item.student_name,
+            quizId: item.quiz_id,
+            score: item.score !== null ? Number(item.score) : null,
+            bestScore: item.best_score !== null ? Number(item.best_score) : null,
+            totalPoints: item.total_points !== null ? Number(item.total_points) : 10,
+            answers: item.answers || {},
+            attemptsCount: item.attempts_count || 1,
+            locked: Boolean(item.is_locked),
+            antiCheatStatus: item.anti_cheat_status || null,
+            antiCheatWarnings: item.anti_cheat_warnings || 0,
+            notes: item.feedback || '',
+            submittedAt: item.submitted_at
+          };
+        });
+      }
+
+      if (Array.isArray(assSubsFromTable)) {
+        assSubsFromTable.forEach(item => {
+          if (!item.id) return;
+          assignmentSubs[item.id] = {
+            studentId: item.student_id,
+            studentName: item.student_name,
+            assignmentId: item.assignment_id,
+            submissionText: item.submission_text || '',
+            fileUrl: item.file_url || '',
+            fileName: item.file_name || '',
+            answers: item.answers || {},
+            score: item.grade !== null ? Number(item.grade) : null,
+            maxPoints: item.max_points !== null ? Number(item.max_points) : 10,
+            notes: item.feedback || '',
+            gradedBy: item.graded_by || '',
+            gradedByTrainer: Boolean(item.graded_by_trainer),
+            submittedAt: item.submitted_at,
+            gradedAt: item.graded_at
+          };
+        });
+      }
+
+      if (Array.isArray(cheatingFromTable)) {
+        cheatingFromTable.forEach(item => {
+          const key = `${item.student_id}_${item.quiz_id}`;
+          antiCheatMap[key] = {
+            id: item.id,
+            subKey: key,
+            studentId: item.student_id,
+            studentName: item.student_name,
+            quizId: item.quiz_id,
+            quizTitle: item.quiz_title,
+            courseKey: item.course_key,
+            violationsCount: item.count,
+            lockedAt: item.detected_at,
+            status: item.is_locked ? 'locked_pending_trainer' : 'resolved',
+            trainerActionTaken: item.trainer_action
+          };
+        });
+      }
+
+      let traineesData = syncStates['sys_trainees_v9'] || null;
+      if (Array.isArray(studentsFromTable) && studentsFromTable.length > 0) {
+        traineesData = studentsFromTable.map(s => ({
+          id: s.national_id,
+          name: s.name,
+          group: s.group_name,
+          company: s.company,
+          room: s.room,
+          phone: s.phone,
+          qual: s.qualification,
+          rate: Number(s.attendance_rate) || 100,
+          archiveRate: Number(s.archive_rate) || 100,
+          combinedRate: Number(s.combined_rate) || 100,
+          weeklyAttendance: s.weekly_attendance || [],
+          weeklyAttendedSessions: s.weekly_attended_sessions || 0
+        }));
+      }
+
+      let reportsData = syncStates['sys_reports_v9'] || null;
+      if (Array.isArray(delayReportsFromTable) && delayReportsFromTable.length > 0) {
+        reportsData = delayReportsFromTable.map(r => ({
+          id: r.id,
+          traineeId: r.student_id,
+          traineeName: r.student_name,
+          traineeGroup: r.group_name || '—',
+          type: r.excuse_type || 'ملاحظة عامة',
+          note: r.reason || '',
+          delayMinutes: r.delay_minutes || 0,
+          status: r.status || 'pending',
+          date: r.created_at || new Date().toISOString(),
+          actionNotes: r.notes || ''
+        }));
+      }
 
       if (Array.isArray(submissionsList)) {
         submissionsList.forEach(item => {
@@ -117,10 +249,10 @@ export default async function handler(req, res) {
         quizSubmissions: quizSubs,
         assignmentSubmissions: assignmentSubs,
         gradebooks: syncStates['sys_trainee_gradebooks_v1'] || {},
-        antiCheatIncidents: syncStates['sys_anti_cheat_incidents_v1'] || {},
+        antiCheatIncidents: antiCheatMap,
         studentCreds: syncStates['sys_student_creds_v1'] || null,
-        trainees: syncStates['sys_trainees_v9'] || null,
-        reports: syncStates['sys_reports_v9'] || null,
+        trainees: traineesData,
+        reports: reportsData,
         scheduleData: syncStates['sys_schedule_v9'] || null,
         phoneDirectory: syncStates['sys_phone_dir_v9'] || null,
         users: syncStates['sys_users_v9'] || null,
@@ -180,6 +312,63 @@ export default async function handler(req, res) {
           });
         } catch (subUpsertErr) {
           console.warn('Upsert to student_submissions table warning:', subUpsertErr);
+        }
+
+        // 1.1 Upsert into dedicated `quiz_submissions` or `assignment_submissions` table
+        if (isQuiz) {
+          try {
+            await fetch(`${supabaseUrl}/rest/v1/quiz_submissions?on_conflict=id`, {
+              method: 'POST',
+              headers: { ...headers, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+              body: JSON.stringify([{
+                id: subKey,
+                student_id: studentId,
+                student_name: subRecord.studentName || '',
+                quiz_id: compId,
+                course_key: courseKey || 'all',
+                week_id: String(weekNum || subRecord.weekNum || 1),
+                score: (typeof subRecord.score === 'number' && !isNaN(subRecord.score)) ? subRecord.score : (subRecord.bestScore || null),
+                best_score: (typeof subRecord.bestScore === 'number' && !isNaN(subRecord.bestScore)) ? subRecord.bestScore : (subRecord.score || null),
+                total_points: subRecord.totalPoints || 10,
+                answers: subRecord.answers || {},
+                attempts_count: subRecord.attemptsCount || 1,
+                is_locked: Boolean(subRecord.locked || subRecord.isLockedByAntiCheat),
+                anti_cheat_status: subRecord.antiCheatStatus || null,
+                anti_cheat_warnings: subRecord.antiCheatWarnings || 0,
+                feedback: subRecord.notes || '',
+                submitted_at: subRecord.submittedAt || new Date().toISOString()
+              }])
+            });
+          } catch (qzErr) {
+            console.warn('Upsert to quiz_submissions table warning:', qzErr);
+          }
+        } else {
+          try {
+            await fetch(`${supabaseUrl}/rest/v1/assignment_submissions?on_conflict=id`, {
+              method: 'POST',
+              headers: { ...headers, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+              body: JSON.stringify([{
+                id: subKey,
+                student_id: studentId,
+                student_name: subRecord.studentName || '',
+                assignment_id: compId,
+                course_key: courseKey || 'all',
+                week_id: String(weekNum || subRecord.weekNum || 1),
+                submission_text: subRecord.submissionText || '',
+                file_url: subRecord.fileUrl || '',
+                file_name: subRecord.fileName || '',
+                answers: subRecord.answers || {},
+                grade: (typeof subRecord.score === 'number' && !isNaN(subRecord.score)) ? subRecord.score : null,
+                max_points: subRecord.maxPoints || 10,
+                feedback: subRecord.notes || '',
+                graded_by: subRecord.gradedBy || '',
+                graded_by_trainer: Boolean(subRecord.gradedByTrainer),
+                submitted_at: subRecord.submittedAt || new Date().toISOString()
+              }])
+            });
+          } catch (asgErr) {
+            console.warn('Upsert to assignment_submissions table warning:', asgErr);
+          }
         }
 
         // 2. Also update full state map in app_sync_state
@@ -280,6 +469,33 @@ export default async function handler(req, res) {
             data: body.trainees,
             updated_at: new Date().toISOString()
           });
+          try {
+            const stRows = body.trainees.map(t => {
+              const cleanId = String(t.id).replace(/\D/g, '') || t.id;
+              return {
+                national_id: cleanId,
+                name: t.name,
+                group_name: t.group || '',
+                company: t.company || 'معهد الذهب الأسود',
+                room: t.room || '',
+                phone: t.phone || '',
+                qualification: t.qual || 'دبلوم تقني',
+                attendance_rate: typeof t.rate === 'number' ? t.rate : 100.0,
+                archive_rate: typeof t.archiveRate === 'number' ? t.archiveRate : 100.0,
+                combined_rate: typeof t.combinedRate === 'number' ? t.combinedRate : 100.0,
+                weekly_attendance: Array.isArray(t.weeklyAttendance) ? t.weeklyAttendance : [],
+                weekly_attended_sessions: t.weeklyAttendedSessions || 0,
+                password: cleanId.slice(-4),
+                must_change_password: true,
+                updated_at: new Date().toISOString()
+              };
+            });
+            await fetch(`${supabaseUrl}/rest/v1/students?on_conflict=national_id`, {
+              method: 'POST',
+              headers: { ...headers, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+              body: JSON.stringify(stRows)
+            });
+          } catch(stErr) { console.warn('students table upsert error:', stErr); }
         }
         if (body.reports && Array.isArray(body.reports)) {
           upsertRows.push({
@@ -287,6 +503,25 @@ export default async function handler(req, res) {
             data: body.reports,
             updated_at: new Date().toISOString()
           });
+          try {
+            const delRows = body.reports.map(r => ({
+              id: r.id,
+              student_id: String(r.traineeId || '').replace(/\D/g, '') || String(r.traineeId || ''),
+              student_name: r.traineeName || '',
+              group_name: r.traineeGroup || '',
+              delay_minutes: r.delayMinutes || 0,
+              reason: r.note || r.type || '',
+              excuse_type: r.type || 'ملاحظة عامة',
+              status: r.status || 'pending',
+              notes: r.actionNotes || r.actionDecision || '',
+              report_date: r.date ? (new Date(r.date).toISOString().slice(0, 10)) : (new Date().toISOString().slice(0, 10))
+            }));
+            await fetch(`${supabaseUrl}/rest/v1/delay_reports?on_conflict=id`, {
+              method: 'POST',
+              headers: { ...headers, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+              body: JSON.stringify(delRows)
+            });
+          } catch(delErr) { console.warn('delay_reports table upsert error:', delErr); }
         }
         if (body.scheduleData && Array.isArray(body.scheduleData)) {
           upsertRows.push({
