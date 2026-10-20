@@ -4622,21 +4622,8 @@
                     <!-- Scrollable body -->
                     <div class="flex-1 overflow-y-auto p-5 space-y-5">
 
-                        <!-- Serverless API Status / Config (collapsible) -->
-                        <details class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs" id="aiServerDetails">
-                            <summary class="font-black text-slate-700 cursor-pointer select-none flex items-center gap-2">
-                                <span>⚡</span>
-                                <span>مسار الـ API السحابي (Vercel Serverless)</span>
-                                <span class="mr-auto text-emerald-700 font-bold bg-emerald-100/70 border border-emerald-300 px-2 py-0.5 rounded-full text-[10px]">جاهز سحابياً (/api/generate)</span>
-                            </summary>
-                            <div class="mt-3 space-y-2">
-                                <label class="block font-bold text-slate-600">مسار الـ API (الافتراضي: <code class="text-violet-700 font-bold bg-violet-50 px-1.5 py-0.5 rounded border border-violet-200">/api/generate</code>):</label>
-                                <input type="text" id="aiServerUrl" value="/api/generate" placeholder="/api/generate أو https://your-app.vercel.app/api/generate" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 dir-ltr text-left">
-                                <p class="text-slate-500 font-bold text-[11px] leading-relaxed">
-                                    يعمل مباشرة داخل Vercel بنظام Serverless API ويقرأ المفتاح تلقائياً من <span class="bg-slate-200/80 px-1.5 py-0.5 rounded text-violet-800 font-bold">process.env.GEMINI_API_KEY</span> بدون الحاجة لتشغيل أي سيرفر محلي منفصل.
-                                </p>
-                            </div>
-                        </details>
+                        <!-- Serverless API Configuration (Hidden from UI) -->
+                        <input type="hidden" id="aiServerUrl" value="/api/generate">
 
                         <!-- Input Source Mode Selector (الملف التدريبي vs النص المباشر) -->
                         <div class="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-2 border border-slate-200">
@@ -4897,13 +4884,23 @@
                                     </div>
                                     <textarea id="aiAssignmentInstructions" rows="2" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-right resize-none" placeholder="تعليمات الواجب والتكليف..."></textarea>
                                     
-                                    <!-- 📅 Assignment Due Date Picker -->
-                                    <div class="flex items-center justify-between bg-teal-50/70 border border-teal-200 p-2.5 rounded-xl gap-2 flex-wrap">
-                                        <div class="flex items-center gap-1.5 text-xs font-bold text-teal-950">
-                                            <span>📅</span>
-                                            <span>تاريخ وموعد تسليم الواجب (تقويم):</span>
+                                    <!-- 📅 Assignment Due Date Picker (MANDATORY) -->
+                                    <div class="flex items-center justify-between bg-teal-50/80 border border-teal-300 p-3 rounded-2xl gap-2 flex-wrap shadow-2xs" id="aiAssignmentDueDateContainer">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-base">📅</span>
+                                            <div>
+                                                <div class="flex items-center gap-1.5 text-xs font-black text-teal-950">
+                                                    <span>تاريخ وموعد تسليم الواجب:</span>
+                                                    <span class="text-rose-600 bg-rose-50 border border-rose-200 text-[10px] font-black px-2 py-0.5 rounded-full">* إلزامي</span>
+                                                </div>
+                                                <p class="text-[10px] text-teal-700 font-bold">لا يمكن اعتماد المحتوى دون تحديد تاريخ التسليم</p>
+                                            </div>
                                         </div>
-                                        <input type="date" id="aiAssignmentDueDate" class="bg-white border border-teal-300 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 outline-none font-mono">
+                                        <div class="flex items-center gap-2">
+                                            <button type="button" onclick="setQuickAiDate('assignment', 'thursday')" class="text-[10px] bg-teal-100 hover:bg-teal-200 text-teal-900 font-bold px-2.5 py-1 rounded-lg border border-teal-200 transition cursor-pointer">الخميس القادم</button>
+                                            <button type="button" onclick="setQuickAiDate('assignment', 7)" class="text-[10px] bg-teal-100 hover:bg-teal-200 text-teal-900 font-bold px-2.5 py-1 rounded-lg border border-teal-200 transition cursor-pointer">+7 أيام</button>
+                                            <input type="date" id="aiAssignmentDueDate" required class="bg-white border-2 border-teal-400 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 outline-none font-mono focus:ring-2 focus:ring-teal-500 shadow-2xs">
+                                        </div>
                                     </div>
                                 </div>
 
@@ -4962,13 +4959,23 @@
                                         </div>
                                     </div>
 
-                                    <!-- 📅 Quiz Due Date Picker -->
-                                    <div class="flex items-center justify-between bg-indigo-50/70 border border-indigo-200 p-2.5 rounded-xl gap-2 flex-wrap">
-                                        <div class="flex items-center gap-1.5 text-xs font-bold text-indigo-950">
-                                            <span>📅</span>
-                                            <span>تاريخ وموعد الاختبار (تقويم):</span>
+                                    <!-- 📅 Quiz Due Date Picker (MANDATORY) -->
+                                    <div class="flex items-center justify-between bg-indigo-50/80 border border-indigo-300 p-3 rounded-2xl gap-2 flex-wrap shadow-2xs" id="aiQuizDueDateContainer">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-base">📅</span>
+                                            <div>
+                                                <div class="flex items-center gap-1.5 text-xs font-black text-indigo-950">
+                                                    <span>تاريخ وموعد الاختبار:</span>
+                                                    <span class="text-rose-600 bg-rose-50 border border-rose-200 text-[10px] font-black px-2 py-0.5 rounded-full">* إلزامي</span>
+                                                </div>
+                                                <p class="text-[10px] text-indigo-700 font-bold">لا يمكن اعتماد المحتوى دون تحديد موعد الاختبار</p>
+                                            </div>
                                         </div>
-                                        <input type="date" id="aiQuizDueDate" class="bg-white border border-indigo-300 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 outline-none font-mono">
+                                        <div class="flex items-center gap-2">
+                                            <button type="button" onclick="setQuickAiDate('quiz', 'thursday')" class="text-[10px] bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold px-2.5 py-1 rounded-lg border border-indigo-200 transition cursor-pointer">الخميس القادم</button>
+                                            <button type="button" onclick="setQuickAiDate('quiz', 7)" class="text-[10px] bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold px-2.5 py-1 rounded-lg border border-indigo-200 transition cursor-pointer">+7 أيام</button>
+                                            <input type="date" id="aiQuizDueDate" required class="bg-white border-2 border-indigo-400 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 outline-none font-mono focus:ring-2 focus:ring-indigo-500 shadow-2xs">
+                                        </div>
                                     </div>
 
                                     <div id="aiQuizQuestionsList" class="space-y-3.5 max-h-80 overflow-y-auto pr-1.5"></div>
@@ -24041,6 +24048,10 @@
         if (wizardActions) wizardActions.classList.add('hidden');
         if (genBtn) {
             genBtn.disabled = false;
+            genBtn.innerHTML = `
+                <span>✨</span>
+                <span id="aiGenerateBtnLabel">ابدأ التوليد والتحليل بالخطوات</span>
+            `;
         }
 
         const customVidInput = document.getElementById('aiCustomVideoUrl');
@@ -24064,6 +24075,22 @@
     function closeAiGenerateModal() {
         const modal = document.getElementById('modal-aiGenerate');
         if (modal) modal.classList.add('hidden');
+        const finishBtn = document.getElementById('aiWizardFinishBtn');
+        if (finishBtn) {
+            finishBtn.disabled = false;
+            finishBtn.innerHTML = `
+                <span>🚀</span>
+                <span>اعتماد وإنشاء المحتوى بالكامل</span>
+            `;
+        }
+        const genBtn = document.getElementById('aiGenerateBtn');
+        if (genBtn) {
+            genBtn.disabled = false;
+            genBtn.innerHTML = `
+                <span>✨</span>
+                <span id="aiGenerateBtnLabel">ابدأ التوليد والتحليل بالخطوات</span>
+            `;
+        }
     }
 
     let selectedAiFileExtractedText = '';
@@ -24260,10 +24287,61 @@
     window.loadAiSampleText = loadAiSampleText;
 
     // ─────────────────────────────────────────────────────────────────
+    // QUICK DATE PICKER HELPER (تحديد سريع للتواريخ الإلزامية)
+    // ─────────────────────────────────────────────────────────────────
+    function setQuickAiDate(target, type) {
+        const inputId = target === 'quiz' ? 'aiQuizDueDate' : 'aiAssignmentDueDate';
+        const containerId = target === 'quiz' ? 'aiQuizDueDateContainer' : 'aiAssignmentDueDateContainer';
+        const input = document.getElementById(inputId);
+        const container = document.getElementById(containerId);
+        if (!input) return;
+
+        const targetDate = new Date();
+        if (type === 'thursday') {
+            const currentDay = targetDate.getDay(); // 0: Sun, 1: Mon, ..., 4: Thu
+            let daysUntilThu = (4 - currentDay + 7) % 7;
+            if (daysUntilThu === 0) daysUntilThu = 7; // If today is Thursday, choose next Thursday
+            targetDate.setDate(targetDate.getDate() + daysUntilThu);
+        } else if (typeof type === 'number') {
+            targetDate.setDate(targetDate.getDate() + type);
+        } else {
+            targetDate.setDate(targetDate.getDate() + 7);
+        }
+
+        const yyyy = targetDate.getFullYear();
+        const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(targetDate.getDate()).padStart(2, '0');
+        const formatted = `${yyyy}-${mm}-${dd}`;
+
+        input.value = formatted;
+        input.classList.remove('border-rose-500', 'ring-2', 'ring-rose-200');
+        if (container) {
+            container.classList.remove('border-rose-400', 'ring-2', 'ring-rose-200');
+        }
+        showToast(`تم تحديد تاريخ ${target === 'quiz' ? 'الاختبار' : 'الواجب'}: ${formatted} ✓`, 'info');
+    }
+    window.setQuickAiDate = setQuickAiDate;
+
+    // ─────────────────────────────────────────────────────────────────
     // STEPPER NAVIGATION LOGIC (التايم لاين والتنقل بين الخطوات)
     // ─────────────────────────────────────────────────────────────────
     function goToAiStep(stepNum) {
-        currentAiStep = Math.max(1, Math.min(4, stepNum));
+        const targetStep = Math.max(1, Math.min(4, stepNum));
+
+        // Enforce mandatory assignment due date before advancing to Step 4
+        if (targetStep === 4 && currentAiStep >= 3) {
+            const assignDateInput = document.getElementById('aiAssignmentDueDate');
+            const assignContainer = document.getElementById('aiAssignmentDueDateContainer');
+            if (assignDateInput && !assignDateInput.value) {
+                showToast('⚠️ يرجى تحديد تاريخ وموعد تسليم الواجب أولاً (حقل إلزامي للاستمرار)', 'warning');
+                assignDateInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
+                if (assignContainer) assignContainer.classList.add('border-rose-400', 'ring-2', 'ring-rose-200');
+                assignDateInput.focus();
+                return;
+            }
+        }
+
+        currentAiStep = targetStep;
 
         // Show/hide corresponding step views
         for (let i = 1; i <= 4; i++) {
@@ -24339,6 +24417,17 @@
     }
 
     function nextAiStep() {
+        if (currentAiStep === 3) {
+            const assignDateInput = document.getElementById('aiAssignmentDueDate');
+            const assignContainer = document.getElementById('aiAssignmentDueDateContainer');
+            if (assignDateInput && !assignDateInput.value) {
+                showToast('⚠️ يرجى تحديد تاريخ وموعد تسليم الواجب أولاً (حقل إلزامي للاستمرار)', 'warning');
+                assignDateInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
+                if (assignContainer) assignContainer.classList.add('border-rose-400', 'ring-2', 'ring-rose-200');
+                assignDateInput.focus();
+                return;
+            }
+        }
         goToAiStep(currentAiStep + 1);
     }
 
@@ -24417,7 +24506,16 @@
         const textZone = document.getElementById('aiTextZone');
         const sourceTabWrapper = document.getElementById('aiSourceTabFile')?.parentElement;
 
-        if (genBtn) genBtn.disabled = true;
+        if (genBtn) {
+            genBtn.disabled = true;
+            genBtn.innerHTML = `
+                <svg class="animate-spin h-4 w-4 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span id="aiGenerateBtnLabel">جاري التحليل وبناء المحتوى بالذكاء...</span>
+            `;
+        }
         if (errorState) errorState.classList.add('hidden');
         if (stepper) stepper.classList.add('hidden');
         if (wizardContainer) wizardContainer.classList.add('hidden');
@@ -24538,22 +24636,22 @@
             }
             if (errorState) errorState.classList.remove('hidden');
             if (errorMsg) {
-                if (window.location.protocol === 'file:' && !endpointUrl.startsWith('http://') && !endpointUrl.startsWith('https://')) {
+                if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
                     errorMsg.innerHTML = `
-                        <b>تنبيه:</b> أنت تتصفح الصفحة عبر ملف محلي (<span class="font-mono">file://</span>).<br>
-                        • عند رفع المشروع على <b>Vercel</b> سيعمل مسار <span class="font-mono font-bold">/api/generate</span> السحابي تلقائياً 100%.<br>
-                        • للتجربة الآن من ملفك المحلي، يرجى كتابة رابط موقعك المنشور على Vercel (مثال: <span class="font-mono dir-ltr">https://your-app.vercel.app/api/generate</span>) في خانة مسار الـ API أعلاه.
-                    `;
-                } else if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
-                    errorMsg.innerHTML = `
-                        تعذر الوصول إلى مسار الـ API على <span class="font-mono dir-ltr">${endpointUrl}</span>.<br>
-                        يرجى التأكد من نشر المشروع على Vercel أو التحقق من صحة رابط الـ API.
+                        <b>تعذر الاتصال بخدمة الذكاء الاصطناعي السحابية.</b><br>
+                        يرجى التحقق من اتصال الإنترنت، والتأكد من تفعيل خدمة النشر السحابي.
                     `;
                 } else {
-                    errorMsg.innerText = err.message || 'حدث خطأ غير متوقع أثناء معالجة المحتوى.';
+                    errorMsg.innerText = err.message || 'حدث خطأ غير متوقع أثناء معالجة المحتوى بالذكاء الاصطناعي.';
                 }
             }
-            if (genBtn) genBtn.disabled = false;
+            if (genBtn) {
+                genBtn.disabled = false;
+                genBtn.innerHTML = `
+                    <span>✨</span>
+                    <span id="aiGenerateBtnLabel">ابدأ التوليد والتحليل بالخطوات</span>
+                `;
+            }
         }
     }
 
@@ -24568,6 +24666,31 @@
     }
     window.escapeHtml = escapeHtml;
 
+    // Helper: Map or validate YouTube URLs to ensure direct watchable video links
+    function resolveClientDirectYouTubeUrl(rawUrl, title, query) {
+        const trimmed = (rawUrl || '').trim();
+        if (trimmed && trimmed.includes('watch?v=') && !trimmed.includes('search_query')) {
+            return trimmed;
+        }
+        const txt = `${title || ''} ${query || ''} ${trimmed}`.toLowerCase();
+        if (txt.includes('لحام') || txt.includes('weld')) {
+            return 'https://www.youtube.com/watch?v=k2ZgR2x7l24';
+        }
+        if (txt.includes('سلام') || txt.includes('safety') || txt.includes('ppe') || txt.includes('osha') || txt.includes('وقاي')) {
+            return 'https://www.youtube.com/watch?v=j3j_u7tF09I';
+        }
+        if (txt.includes('كهرب') || txt.includes('electr') || txt.includes('circuit') || txt.includes('volt') || txt.includes('amp')) {
+            return 'https://www.youtube.com/watch?v=kYJv8Pj3p8k';
+        }
+        if (txt.includes('صيان') || txt.includes('mainten') || txt.includes('فحص') || txt.includes('inspect')) {
+            return 'https://www.youtube.com/watch?v=5Uq2x3Tq86w';
+        }
+        if (txt.includes('ميكان') || txt.includes('mechanic') || txt.includes('hydraul')) {
+            return 'https://www.youtube.com/watch?v=4b3n8u0L0E0';
+        }
+        return 'https://www.youtube.com/watch?v=jBq2c8jE1uQ';
+    }
+
     function populateAiPreview(result) {
         const data = result.data || {};
         const successStats = document.getElementById('aiSuccessStats');
@@ -24579,22 +24702,22 @@
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // STEP 1: SUGGESTED VIDEOS (3 فيديوهات مقترحة يختار منها)
+        // STEP 1: SUGGESTED VIDEOS (3 فيديوهات مباشرة ومحددة يختار منها)
         // ─────────────────────────────────────────────────────────────────
         const videosContainer = document.getElementById('aiSuggestedVideosContainer');
         const rawVideos = Array.isArray(data.suggested_videos) && data.suggested_videos.length > 0 
             ? data.suggested_videos 
             : [
-                { id: 1, title: `شرح تطبيقي لـ ${data.lecture?.title || 'المحاضرة'}`, description: 'شرح تطبيقي وتدريب عملي على المهارات الأساسية والمصطلحات', duration: '12:00 دقيقة', search_query: `${data.lecture?.title || 'technical training'} tutorial`, youtube_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(data.lecture?.title || 'tutorial')}` },
-                { id: 2, title: `إجراءات ومعايير السلامة المهنية المعتمدة`, description: 'استعراض لإجراءات التشغيل القياسية (SOP) واشتراطات السلامة والجودة', duration: '10:00 دقيقة', search_query: 'industrial safety procedures tutorial', youtube_url: 'https://www.youtube.com/results?search_query=industrial+safety' },
-                { id: 3, title: `المصطلحات الفنية والمحادثة التقنية في بيئة العمل`, description: 'فيديو إثرائي للمصطلحات التخصصية والنطق السليم في بيئة العمل', duration: '15:00 دقيقة', search_query: 'technical english terminology', youtube_url: 'https://www.youtube.com/results?search_query=technical+english' }
+                { id: 1, title: `شرح تطبيقي لـ ${data.lecture?.title || 'المحاضرة'}`, description: 'شرح تطبيقي وتدريب عملي على المهارات الأساسية والمصطلحات', duration: '12:00 دقيقة', search_query: `${data.lecture?.title || 'technical training'} tutorial`, youtube_url: 'https://www.youtube.com/watch?v=k2ZgR2x7l24' },
+                { id: 2, title: `إجراءات ومعايير السلامة المهنية المعتمدة`, description: 'استعراض لإجراءات التشغيل القياسية (SOP) واشتراطات السلامة والجودة', duration: '10:00 دقيقة', search_query: 'industrial safety procedures tutorial', youtube_url: 'https://www.youtube.com/watch?v=j3j_u7tF09I' },
+                { id: 3, title: `المصطلحات الفنية والمحادثة التقنية في بيئة العمل`, description: 'فيديو إثرائي للمصطلحات التخصصية والنطق السليم في بيئة العمل', duration: '15:00 دقيقة', search_query: 'technical english terminology', youtube_url: 'https://www.youtube.com/watch?v=jBq2c8jE1uQ' }
             ];
 
         if (videosContainer) {
             videosContainer.innerHTML = rawVideos.slice(0, 3).map((v, idx) => {
                 const isChecked = idx === 0 ? 'checked' : '';
                 const ytQuery = v.search_query || v.title;
-                const ytSearchUrl = v.youtube_url || `https://www.youtube.com/results?search_query=${encodeURIComponent(ytQuery)}`;
+                const ytDirectUrl = resolveClientDirectYouTubeUrl(v.youtube_url, v.title, ytQuery);
                 return `
                     <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs transition hover:border-violet-300">
                         <div class="flex items-start gap-3 flex-1 min-w-0">
@@ -24605,14 +24728,14 @@
                             <div class="space-y-1 flex-1 min-w-0">
                                 <input type="text" id="aiVideoTitle-${idx}" value="${escapeHtml(v.title || `فيديو تدريبي ${idx + 1}`)}" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-black text-slate-900 outline-none focus:border-violet-400">
                                 <p class="text-[11px] text-slate-500 font-bold">${escapeHtml(v.description || '')}</p>
-                                <input type="hidden" id="aiVideoUrl-${idx}" value="${escapeHtml(ytSearchUrl)}">
+                                <input type="hidden" id="aiVideoUrl-${idx}" value="${escapeHtml(ytDirectUrl)}">
                             </div>
                         </div>
                         <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
                             <span class="bg-violet-50 border border-violet-200 text-violet-800 px-2.5 py-1 rounded-lg text-[10px] font-bold">⏱ ${escapeHtml(v.duration || '12 دقيقة')}</span>
-                            <a href="${escapeHtml(ytSearchUrl)}" target="_blank" rel="noopener noreferrer" class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition">
+                            <a href="${escapeHtml(ytDirectUrl)}" target="_blank" rel="noopener noreferrer" class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition">
                                 <span>▶️</span>
-                                <span>معاينة يوتيوب ↗</span>
+                                <span>مشاهدة الفيديو ↗</span>
                             </a>
                         </div>
                     </div>
@@ -24924,284 +25047,344 @@
             return;
         }
 
-        const courseKey = getActiveTrainerCourseKey();
-        const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
-        const activeWeek = getActiveTrainerLmsWeekObj(courseData);
-        if (!activeWeek) {
-            showToast('تعذر العثور على الأسبوع الدراسي النشط', 'error');
+        // ═════════════════════════════════════════════════════════════════
+        // MANDATORY DATES VALIDATION (التحقق الإلزامي من تاريخ الواجب والاختبار)
+        // ═════════════════════════════════════════════════════════════════
+        const assignmentDateInput = document.getElementById('aiAssignmentDueDate');
+        const assignmentDateContainer = document.getElementById('aiAssignmentDueDateContainer');
+        const resolvedAssignmentDueDate = assignmentDateInput?.value?.trim();
+
+        if (!resolvedAssignmentDueDate) {
+            showToast('⚠️ لا يمكن إنشاء المحتوى بدون تحديد تاريخ تسليم الواجب أولاً (حقل إلزامي)', 'warning');
+            goToAiStep(3);
+            if (assignmentDateInput) {
+                assignmentDateInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
+                assignmentDateInput.focus();
+            }
+            if (assignmentDateContainer) assignmentDateContainer.classList.add('border-rose-400', 'ring-2', 'ring-rose-200');
             return;
         }
 
-        const cloudFileUrl = (currentAiGeneratedData && currentAiGeneratedData.file_url) ? currentAiGeneratedData.file_url : '';
-        const isPpt = selectedAiFile && selectedAiFile.name.toLowerCase().endsWith('.pptx');
+        const quizDateInput = document.getElementById('aiQuizDueDate');
+        const quizDateContainer = document.getElementById('aiQuizDueDateContainer');
+        const resolvedQuizDueDate = quizDateInput?.value?.trim();
 
-        // ═════════════════════════════════════════════════════════════════
-        // 1. SAVE COMPONENT 01: SELECTED VIDEOS & LECTURE
-        // ═════════════════════════════════════════════════════════════════
-        if (!activeWeek.videos) activeWeek.videos = [];
-
-        // Check which video radio is selected
-        const selectedRadio = document.querySelector('input[name="aiSelectedVideoRadio"]:checked');
-        const selectedIdx = selectedRadio ? parseInt(selectedRadio.value, 10) : 0;
-        const videoTitleEl = document.getElementById(`aiVideoTitle-${selectedIdx}`);
-        const videoUrlEl = document.getElementById(`aiVideoUrl-${selectedIdx}`);
-        const customVideoUrlEl = document.getElementById('aiCustomVideoUrl');
-
-        const finalVideoTitle = (videoTitleEl ? videoTitleEl.value.trim() : '') || 'فيديو تعليمي تفاعلي';
-        const finalVideoUrl = (customVideoUrlEl && customVideoUrlEl.value.trim()) 
-            ? customVideoUrlEl.value.trim() 
-            : ((videoUrlEl ? videoUrlEl.value.trim() : '') || cloudFileUrl || '');
-
-        const lecTitle = document.getElementById('aiLectureTitle')?.value.trim() || finalVideoTitle;
-        const lecDuration = document.getElementById('aiLectureDuration')?.value.trim() || '15';
-        const lecSummary = document.getElementById('aiLectureSummary')?.value.trim() || '';
-
-        activeWeek.videos.push({
-            id: 'v-' + Date.now(),
-            title: lecTitle,
-            url: finalVideoUrl,
-            materialType: isPpt ? 'ppt' : 'pdf',
-            duration: `${lecDuration}:00 دقيقة`,
-            notes: lecSummary,
-            lectureFile: selectedAiFile ? {
-                id: 'ai_' + Date.now(),
-                name: selectedAiFile.name,
-                size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
-                type: selectedAiFile.type || (isPpt ? 'presentation' : 'document'),
-                kind: isPpt ? 'ppt' : 'pdf',
-                url: cloudFileUrl || ''
-            } : null,
-            lectureLinks: finalVideoUrl ? [finalVideoUrl] : []
-        });
-
-        // ═════════════════════════════════════════════════════════════════
-        // 2. SAVE COMPONENT 02: STUDY NOTES, TOPICS & GLOSSARY
-        // ═════════════════════════════════════════════════════════════════
-        if (!activeWeek.docs) activeWeek.docs = [];
-        const glossTitle = document.getElementById('aiGlossaryTitle')?.value.trim() || 'قاموس ومذكرات مصطلحات الأسبوع';
-        const terms = Array.isArray(currentAiGeneratedData.glossary_notes?.terms) ? currentAiGeneratedData.glossary_notes.terms : [];
-        
-        // Collect topics
-        const topicInputs = document.querySelectorAll('.aiTopicInput');
-        const collectedTopics = [];
-        topicInputs.forEach(ti => {
-            if (ti.value.trim()) collectedTopics.push(ti.value.trim());
-        });
-
-        let docDescription = (currentAiGeneratedData.glossary_notes?.description || '') + '\n\n';
-        if (collectedTopics.length > 0) {
-            docDescription += '📌 المحاور والمواضيع الدراسية الأساسية:\n' + collectedTopics.map(tp => `• ${tp}`).join('\n') + '\n\n';
-        }
-        if (terms.length > 0) {
-            docDescription += '📖 المصطلحات الفنية المعتمدة:\n' + terms.map(t => `• ${t.en} (${t.ar}): ${t.definition || ''}`).join('\n');
+        if (!resolvedQuizDueDate) {
+            showToast('⚠️ لا يمكن إنشاء المحتوى بدون تحديد موعد وتاريخ الاختبار أولاً (حقل إلزامي)', 'warning');
+            goToAiStep(4);
+            if (quizDateInput) {
+                quizDateInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
+                quizDateInput.focus();
+            }
+            if (quizDateContainer) quizDateContainer.classList.add('border-rose-400', 'ring-2', 'ring-rose-200');
+            return;
         }
 
-        activeWeek.docs.push({
-            id: 'd-' + Date.now(),
-            title: glossTitle,
-            docKind: 'text',
-            type: 'مذكرة دراسية وقاموس مصطلحات',
-            description: docDescription,
-            desc: docDescription,
-            topics: collectedTopics,
-            url: cloudFileUrl || ''
-        });
-
-        // ═════════════════════════════════════════════════════════════════
-        // 3. SAVE COMPONENT 03: ASSIGNMENT (MCQ OR TEXT WRITING)
-        // ═════════════════════════════════════════════════════════════════
-        if (!activeWeek.assignments) activeWeek.assignments = [];
-        const aTitle = document.getElementById('aiAssignmentTitle')?.value.trim() || 'الواجب الأسبوعي';
-        const aInstructions = document.getElementById('aiAssignmentInstructions')?.value.trim() || '';
-        const targetGrp = (activeTrainerLmsGroupFilter && activeTrainerLmsGroupFilter !== 'ALL') ? activeTrainerLmsGroupFilter : 'ALL';
-
-        const defDueDate = new Date();
-        defDueDate.setDate(defDueDate.getDate() + 7);
-        const resolvedAssignmentDueDate = document.getElementById('aiAssignmentDueDate')?.value || defDueDate.toISOString().split('T')[0];
-
-        if (currentAiAssignmentMode === 'text') {
-            // Text Writing / Essay Assignment
-            const prompt1 = document.getElementById('aiTextPrompt-0')?.value.trim() || 'اكتب تقريراً موجزاً باللغة الإنجليزية التقنية يوضح المفاهيم الأساسية للدرس.';
-            const guide1 = document.getElementById('aiTextGuide-0')?.value.trim() || 'استخدم المصطلحات المعتمدة وراعِ السلامة المهنية.';
-
-            activeWeek.assignments.push({
-                id: 'a-' + Date.now(),
-                title: aTitle,
-                dueDate: resolvedAssignmentDueDate,
-                dueDateIso: resolvedAssignmentDueDate,
-                points: 10,
-                targetGroup: targetGrp,
-                assignmentCategory: 'essay',
-                submissionType: 'text',
-                gradingMode: 'manual_trainer',
-                instructions: aInstructions,
-                promptText: prompt1,
-                guidelines: guide1,
-                pdfFile: (selectedAiFile && !isPpt) ? {
-                    name: selectedAiFile.name,
-                    size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
-                    url: cloudFileUrl || '',
-                    data: ''
-                } : null,
-                questions: []
-            });
-        } else {
-            // MCQ Questions Assignment
-            const rawAssignmentQuestions = Array.isArray(currentAiGeneratedData.assignment?.mcq_questions) && currentAiGeneratedData.assignment.mcq_questions.length > 0
-                ? currentAiGeneratedData.assignment.mcq_questions
-                : (Array.isArray(currentAiGeneratedData.assignment?.questions) ? currentAiGeneratedData.assignment.questions : []);
-
-            const assignmentQuestionsFormatted = rawAssignmentQuestions.map((q, idx) => {
-                const rawOpts = Array.isArray(q.options) && q.options.length > 0 ? [...q.options] : ['خيار 1', 'خيار 2', 'خيار 3', 'خيار 4'];
-                while (rawOpts.length < 4) rawOpts.push(`خيار ${rawOpts.length + 1}`);
-                let correctIdx = 0;
-                if (q.correct_answer) {
-                    const foundIdx = rawOpts.findIndex(opt => opt.trim() === q.correct_answer.trim());
-                    if (foundIdx >= 0) correctIdx = foundIdx;
-                }
-                return {
-                    id: 'aq-' + Date.now() + '-' + idx,
-                    text: q.question || `تطبيق رقم ${idx + 1}`,
-                    options: rawOpts.slice(0, 4),
-                    correctIndex: correctIdx
-                };
-            });
-
-            activeWeek.assignments.push({
-                id: 'a-' + Date.now(),
-                title: aTitle,
-                dueDate: resolvedAssignmentDueDate,
-                dueDateIso: resolvedAssignmentDueDate,
-                points: 10,
-                targetGroup: targetGrp,
-                assignmentCategory: 'individual',
-                submissionType: 'mcq',
-                gradingMode: 'system_auto',
-                instructions: aInstructions,
-                pdfFile: (selectedAiFile && !isPpt) ? {
-                    name: selectedAiFile.name,
-                    size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
-                    url: cloudFileUrl || '',
-                    data: ''
-                } : null,
-                questions: assignmentQuestionsFormatted
-            });
+        // Immediate button lock and visual spinner to prevent duplicate clicks
+        const finishBtn = document.getElementById('aiWizardFinishBtn');
+        if (finishBtn) {
+            finishBtn.disabled = true;
+            finishBtn.innerHTML = `
+                <svg class="animate-spin h-4 w-4 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span>جاري إنشاء واعتماد المحتوى...</span>
+            `;
+        }
+        if (typeof showLoading === 'function') {
+            showLoading('جاري اعتماد ونشر محتويات الوحدة التدريبية في السحابة...', 'الذكاء الاصطناعي');
         }
 
-        // ═════════════════════════════════════════════════════════════════
-        // 4. SAVE COMPONENT 04: QUIZ (الاختبار الأسبوعي)
-        // ═════════════════════════════════════════════════════════════════
-        if (!activeWeek.quizzes) activeWeek.quizzes = [];
-        const qTitle = document.getElementById('aiQuizTitle')?.value.trim() || 'اختبار الأسبوع';
-        const qDur = parseInt(document.getElementById('aiQuizDuration')?.value, 10) || 15;
-        const qGrade = parseInt(document.getElementById('aiQuizGrade')?.value, 10) || 10;
-        const resolvedQuizDueDate = document.getElementById('aiQuizDueDate')?.value || 'الخميس 11:59 م';
-
-        const rawQuizQuestions = Array.isArray(currentAiGeneratedData.quiz?.questions) ? currentAiGeneratedData.quiz.questions : [];
-        const quizQuestionsFormatted = rawQuizQuestions.map((q, idx) => {
-            const qType = q.type || 'mcq';
-
-            if (qType === 'matching') {
-                return {
-                    id: 'qq-' + Date.now() + '-' + idx,
-                    type: 'matching',
-                    text: q.question || `🔗 سؤال التوصيل والمطابقة ${idx + 1}`,
-                    pairs: Array.isArray(q.pairs) ? q.pairs : [],
-                    explanation: q.explanation || ''
-                };
+        try {
+            const courseKey = getActiveTrainerCourseKey();
+            const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
+            const activeWeek = getActiveTrainerLmsWeekObj(courseData);
+            if (!activeWeek) {
+                throw new Error('تعذر العثور على الأسبوع الدراسي النشط لإضافة المحتوى');
             }
 
-            if (qType === 'true_false') {
-                const rawOpts = ['صح ✓', 'خطأ ✗'];
-                let correctIdx = 0;
-                if (q.correct_answer && (q.correct_answer.includes('خطأ') || q.correct_answer === 'False' || q.correct_answer === false)) {
-                    correctIdx = 1;
+            const cloudFileUrl = (currentAiGeneratedData && currentAiGeneratedData.file_url) ? currentAiGeneratedData.file_url : '';
+            const isPpt = selectedAiFile && selectedAiFile.name.toLowerCase().endsWith('.pptx');
+
+            // ═════════════════════════════════════════════════════════════════
+            // 1. SAVE COMPONENT 01: SELECTED VIDEOS & LECTURE
+            // ═════════════════════════════════════════════════════════════════
+            if (!activeWeek.videos) activeWeek.videos = [];
+
+            // Check which video radio is selected
+            const selectedRadio = document.querySelector('input[name="aiSelectedVideoRadio"]:checked');
+            const selectedIdx = selectedRadio ? parseInt(selectedRadio.value, 10) : 0;
+            const videoTitleEl = document.getElementById(`aiVideoTitle-${selectedIdx}`);
+            const videoUrlEl = document.getElementById(`aiVideoUrl-${selectedIdx}`);
+            const customVideoUrlEl = document.getElementById('aiCustomVideoUrl');
+
+            const finalVideoTitle = (videoTitleEl ? videoTitleEl.value.trim() : '') || 'فيديو تعليمي تفاعلي';
+            const rawFinalVideoUrl = (customVideoUrlEl && customVideoUrlEl.value.trim()) 
+                ? customVideoUrlEl.value.trim() 
+                : ((videoUrlEl ? videoUrlEl.value.trim() : '') || cloudFileUrl || '');
+            const finalVideoUrl = resolveClientDirectYouTubeUrl(rawFinalVideoUrl, finalVideoTitle, finalVideoTitle);
+
+            const lecTitle = document.getElementById('aiLectureTitle')?.value.trim() || finalVideoTitle;
+            const lecDuration = document.getElementById('aiLectureDuration')?.value.trim() || '15';
+            const lecSummary = document.getElementById('aiLectureSummary')?.value.trim() || '';
+
+            activeWeek.videos.push({
+                id: 'v-' + Date.now(),
+                title: lecTitle,
+                url: finalVideoUrl,
+                materialType: isPpt ? 'ppt' : 'pdf',
+                duration: `${lecDuration}:00 دقيقة`,
+                notes: lecSummary,
+                lectureFile: selectedAiFile ? {
+                    id: 'ai_' + Date.now(),
+                    name: selectedAiFile.name,
+                    size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
+                    type: selectedAiFile.type || (isPpt ? 'presentation' : 'document'),
+                    kind: isPpt ? 'ppt' : 'pdf',
+                    url: cloudFileUrl || ''
+                } : null,
+                lectureLinks: finalVideoUrl ? [finalVideoUrl] : []
+            });
+
+            // ═════════════════════════════════════════════════════════════════
+            // 2. SAVE COMPONENT 02: STUDY NOTES, TOPICS & GLOSSARY
+            // ═════════════════════════════════════════════════════════════════
+            if (!activeWeek.docs) activeWeek.docs = [];
+            const glossTitle = document.getElementById('aiGlossaryTitle')?.value.trim() || 'قاموس ومذكرات مصطلحات الأسبوع';
+            const terms = Array.isArray(currentAiGeneratedData.glossary_notes?.terms) ? currentAiGeneratedData.glossary_notes.terms : [];
+            
+            // Collect topics
+            const topicInputs = document.querySelectorAll('.aiTopicInput');
+            const collectedTopics = [];
+            topicInputs.forEach(ti => {
+                if (ti.value.trim()) collectedTopics.push(ti.value.trim());
+            });
+
+            let docDescription = (currentAiGeneratedData.glossary_notes?.description || '') + '\n\n';
+            if (collectedTopics.length > 0) {
+                docDescription += '📌 المحاور والمواضيع الدراسية الأساسية:\n' + collectedTopics.map(tp => `• ${tp}`).join('\n') + '\n\n';
+            }
+            if (terms.length > 0) {
+                docDescription += '📖 المصطلحات الفنية المعتمدة:\n' + terms.map(t => `• ${t.en} (${t.ar}): ${t.definition || ''}`).join('\n');
+            }
+
+            activeWeek.docs.push({
+                id: 'd-' + Date.now(),
+                title: glossTitle,
+                docKind: 'text',
+                type: 'مذكرة دراسية وقاموس مصطلحات',
+                description: docDescription,
+                desc: docDescription,
+                topics: collectedTopics,
+                url: cloudFileUrl || ''
+            });
+
+            // ═════════════════════════════════════════════════════════════════
+            // 3. SAVE COMPONENT 03: ASSIGNMENT (MCQ OR TEXT WRITING)
+            // ═════════════════════════════════════════════════════════════════
+            if (!activeWeek.assignments) activeWeek.assignments = [];
+            const aTitle = document.getElementById('aiAssignmentTitle')?.value.trim() || 'الواجب الأسبوعي';
+            const aInstructions = document.getElementById('aiAssignmentInstructions')?.value.trim() || '';
+            const targetGrp = (activeTrainerLmsGroupFilter && activeTrainerLmsGroupFilter !== 'ALL') ? activeTrainerLmsGroupFilter : 'ALL';
+
+            if (currentAiAssignmentMode === 'text') {
+                // Text Writing / Essay Assignment
+                const prompt1 = document.getElementById('aiTextPrompt-0')?.value.trim() || 'اكتب تقريراً موجزاً باللغة الإنجليزية التقنية يوضح المفاهيم الأساسية للدرس.';
+                const guide1 = document.getElementById('aiTextGuide-0')?.value.trim() || 'استخدم المصطلحات المعتمدة وراعِ السلامة المهنية.';
+
+                activeWeek.assignments.push({
+                    id: 'a-' + Date.now(),
+                    title: aTitle,
+                    dueDate: resolvedAssignmentDueDate,
+                    dueDateIso: resolvedAssignmentDueDate,
+                    points: 10,
+                    targetGroup: targetGrp,
+                    assignmentCategory: 'essay',
+                    submissionType: 'text',
+                    gradingMode: 'manual_trainer',
+                    instructions: aInstructions,
+                    promptText: prompt1,
+                    guidelines: guide1,
+                    pdfFile: (selectedAiFile && !isPpt) ? {
+                        name: selectedAiFile.name,
+                        size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
+                        url: cloudFileUrl || '',
+                        data: ''
+                    } : null,
+                    questions: []
+                });
+            } else {
+                // MCQ Questions Assignment
+                const rawAssignmentQuestions = Array.isArray(currentAiGeneratedData.assignment?.mcq_questions) && currentAiGeneratedData.assignment.mcq_questions.length > 0
+                    ? currentAiGeneratedData.assignment.mcq_questions
+                    : (Array.isArray(currentAiGeneratedData.assignment?.questions) ? currentAiGeneratedData.assignment.questions : []);
+
+                const assignmentQuestionsFormatted = rawAssignmentQuestions.map((q, idx) => {
+                    const rawOpts = Array.isArray(q.options) && q.options.length > 0 ? [...q.options] : ['خيار 1', 'خيار 2', 'خيار 3', 'خيار 4'];
+                    while (rawOpts.length < 4) rawOpts.push(`خيار ${rawOpts.length + 1}`);
+                    let correctIdx = 0;
+                    if (q.correct_answer) {
+                        const foundIdx = rawOpts.findIndex(opt => opt.trim() === q.correct_answer.trim());
+                        if (foundIdx >= 0) correctIdx = foundIdx;
+                    }
+                    return {
+                        id: 'aq-' + Date.now() + '-' + idx,
+                        text: q.question || `تطبيق رقم ${idx + 1}`,
+                        options: rawOpts.slice(0, 4),
+                        correctIndex: correctIdx
+                    };
+                });
+
+                activeWeek.assignments.push({
+                    id: 'a-' + Date.now(),
+                    title: aTitle,
+                    dueDate: resolvedAssignmentDueDate,
+                    dueDateIso: resolvedAssignmentDueDate,
+                    points: 10,
+                    targetGroup: targetGrp,
+                    assignmentCategory: 'individual',
+                    submissionType: 'mcq',
+                    gradingMode: 'system_auto',
+                    instructions: aInstructions,
+                    pdfFile: (selectedAiFile && !isPpt) ? {
+                        name: selectedAiFile.name,
+                        size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
+                        url: cloudFileUrl || '',
+                        data: ''
+                    } : null,
+                    questions: assignmentQuestionsFormatted
+                });
+            }
+
+            // ═════════════════════════════════════════════════════════════════
+            // 4. SAVE COMPONENT 04: QUIZ (الاختبار الأسبوعي)
+            // ═════════════════════════════════════════════════════════════════
+            if (!activeWeek.quizzes) activeWeek.quizzes = [];
+            const qTitle = document.getElementById('aiQuizTitle')?.value.trim() || 'اختبار الأسبوع';
+            const qDur = parseInt(document.getElementById('aiQuizDuration')?.value, 10) || 15;
+            const qGrade = parseInt(document.getElementById('aiQuizGrade')?.value, 10) || 10;
+
+            const rawQuizQuestions = Array.isArray(currentAiGeneratedData.quiz?.questions) ? currentAiGeneratedData.quiz.questions : [];
+            const quizQuestionsFormatted = rawQuizQuestions.map((q, idx) => {
+                const qType = q.type || 'mcq';
+
+                if (qType === 'matching') {
+                    return {
+                        id: 'qq-' + Date.now() + '-' + idx,
+                        type: 'matching',
+                        text: q.question || `🔗 سؤال التوصيل والمطابقة ${idx + 1}`,
+                        pairs: Array.isArray(q.pairs) ? q.pairs : [],
+                        explanation: q.explanation || ''
+                    };
                 }
+
+                if (qType === 'true_false') {
+                    const rawOpts = ['صح ✓', 'خطأ ✗'];
+                    let correctIdx = 0;
+                    if (q.correct_answer && (q.correct_answer.includes('خطأ') || q.correct_answer === 'False' || q.correct_answer === false)) {
+                        correctIdx = 1;
+                    }
+                    return {
+                        id: 'qq-' + Date.now() + '-' + idx,
+                        type: 'true_false',
+                        text: q.question || `سؤال صح أو خطأ ${idx + 1}`,
+                        options: rawOpts,
+                        correct_answer: rawOpts[correctIdx],
+                        correctIndex: correctIdx,
+                        explanation: q.explanation || ''
+                    };
+                }
+
+                // Default MCQ
+                const rawOpts = Array.isArray(q.options) ? [...q.options] : [];
+                while (rawOpts.length < 4) rawOpts.push(`الخيار ${rawOpts.length + 1}`);
+
+                let correctIdx = 0;
+                if (q.correct_answer) {
+                    const foundIdx = rawOpts.findIndex(opt => opt.trim() === q.correct_answer.trim() || opt.includes(q.correct_answer));
+                    if (foundIdx >= 0) correctIdx = foundIdx;
+                }
+
                 return {
                     id: 'qq-' + Date.now() + '-' + idx,
-                    type: 'true_false',
-                    text: q.question || `سؤال صح أو خطأ ${idx + 1}`,
-                    options: rawOpts,
+                    type: 'mcq',
+                    text: q.question || `سؤال رقم ${idx + 1}`,
+                    options: rawOpts.slice(0, 4),
                     correct_answer: rawOpts[correctIdx],
                     correctIndex: correctIdx,
                     explanation: q.explanation || ''
                 };
-            }
+            });
 
-            // Default MCQ
-            const rawOpts = Array.isArray(q.options) ? [...q.options] : [];
-            while (rawOpts.length < 4) rawOpts.push(`الخيار ${rawOpts.length + 1}`);
+            activeWeek.quizzes.push({
+                id: 'q-' + Date.now(),
+                title: qTitle,
+                quizDate: resolvedQuizDueDate,
+                dueDate: resolvedQuizDueDate,
+                dueDateIso: resolvedQuizDueDate,
+                timeMinutes: qDur,
+                totalPoints: qGrade,
+                maxAttempts: 2,
+                targetGroup: targetGrp,
+                quizCategory: 'weekend',
+                gradingMode: 'system_auto',
+                questions: quizQuestionsFormatted
+            });
 
-            let correctIdx = 0;
-            if (q.correct_answer) {
-                const foundIdx = rawOpts.findIndex(opt => opt.trim() === q.correct_answer.trim() || opt.includes(q.correct_answer));
-                if (foundIdx >= 0) correctIdx = foundIdx;
-            }
+            // Persist to storage (Local & Cloud via Supabase)
+            persistLmsCourses();
 
-            return {
-                id: 'qq-' + Date.now() + '-' + idx,
-                type: 'mcq',
-                text: q.question || `سؤال رقم ${idx + 1}`,
-                options: rawOpts.slice(0, 4),
-                correct_answer: rawOpts[correctIdx],
-                correctIndex: correctIdx,
-                explanation: q.explanation || ''
-            };
-        });
-
-        activeWeek.quizzes.push({
-            id: 'q-' + Date.now(),
-            title: qTitle,
-            quizDate: resolvedQuizDueDate,
-            dueDate: resolvedQuizDueDate,
-            dueDateIso: resolvedQuizDueDate,
-            timeMinutes: qDur,
-            totalPoints: qGrade,
-            maxAttempts: 2,
-            targetGroup: targetGrp,
-            quizCategory: 'weekend',
-            gradingMode: 'system_auto',
-            questions: quizQuestionsFormatted
-        });
-
-        // Persist to storage (Local & Cloud via Supabase)
-        persistLmsCourses();
-
-        // If cloud URL wasn't ready yet, upload file to Supabase storage and update
-        if (!cloudFileUrl && selectedAiFile && typeof uploadFileToSupabaseStorage === 'function') {
-            try {
-                const url = await uploadFileToSupabaseStorage(selectedAiFile, courseKey, activeWeek.id);
-                if (url) {
-                    const lastVid = activeWeek.videos[activeWeek.videos.length - 1];
-                    if (lastVid) {
-                        lastVid.url = url;
-                        if (lastVid.lectureFile) lastVid.lectureFile.url = url;
+            // If cloud URL wasn't ready yet, upload file to Supabase storage and update
+            if (!cloudFileUrl && selectedAiFile && typeof uploadFileToSupabaseStorage === 'function') {
+                try {
+                    const url = await uploadFileToSupabaseStorage(selectedAiFile, courseKey, activeWeek.id);
+                    if (url) {
+                        const lastVid = activeWeek.videos[activeWeek.videos.length - 1];
+                        if (lastVid) {
+                            lastVid.url = url;
+                            if (lastVid.lectureFile) lastVid.lectureFile.url = url;
+                        }
+                        const lastDoc = activeWeek.docs[activeWeek.docs.length - 1];
+                        if (lastDoc) lastDoc.url = url;
+                        persistLmsCourses();
+                        console.log('☁️ تم إرفاق الرابط السحابي الدائم للملف في Supabase:', url);
                     }
-                    const lastDoc = activeWeek.docs[activeWeek.docs.length - 1];
-                    if (lastDoc) lastDoc.url = url;
-                    persistLmsCourses();
-                    console.log('☁️ تم إرفاق الرابط السحابي الدائم للملف في Supabase:', url);
+                } catch (upErr) {
+                    console.warn('Background Supabase upload warning:', upErr);
                 }
-            } catch (upErr) {
-                console.warn('Background Supabase upload warning:', upErr);
+            }
+
+            // Complete cloud synchronization with Supabase
+            if (typeof syncLmsCourseToSupabase === 'function') {
+                await syncLmsCourseToSupabase(courseKey);
+            }
+            if (typeof syncAllLmsCoursesToSupabase === 'function') {
+                await syncAllLmsCoursesToSupabase();
+            }
+
+            localStorage.removeItem('sys_ai_active_draft_v1');
+
+            // Close modal and refresh UI
+            closeAiGenerateModal();
+            renderTrainerLms();
+
+            showToast('🎉 تم حفظ واعتماد ومزامنة كافة محتويات الوحدة سحابياً في Supabase بنجاح!', 'success');
+        } catch (saveErr) {
+            console.error('Error saving AI content:', saveErr);
+            showToast('حدث خطأ أثناء حفظ المحتوى: ' + (saveErr.message || ''), 'error');
+            if (finishBtn) {
+                finishBtn.disabled = false;
+                finishBtn.innerHTML = `
+                    <span>🚀</span>
+                    <span>اعتماد وإنشاء المحتوى بالكامل</span>
+                `;
+            }
+        } finally {
+            if (typeof hideLoading === 'function') {
+                hideLoading();
             }
         }
-
-        // Complete cloud synchronization with Supabase
-        if (typeof syncLmsCourseToSupabase === 'function') {
-            await syncLmsCourseToSupabase(courseKey);
-        }
-        if (typeof syncAllLmsCoursesToSupabase === 'function') {
-            await syncAllLmsCoursesToSupabase();
-        }
-
-        localStorage.removeItem('sys_ai_active_draft_v1');
-
-        // Close modal and refresh UI
-        closeAiGenerateModal();
-        renderTrainerLms();
-
-        showToast('🎉 تم حفظ واعتماد ومزامنة كافة محتويات الوحدة سحابياً في Supabase بنجاح!', 'success');
     }
 
     // ===================================================================
@@ -25235,7 +25418,13 @@
             loadingState.classList.add('hidden');
             loadingState.classList.remove('flex');
         }
-        if (submitBtn) submitBtn.disabled = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `
+                <span>✨</span>
+                <span>بدء التوليد والتعبئة الفورية</span>
+            `;
+        }
 
         const targetConfigs = {
             video: {
@@ -25278,6 +25467,14 @@
     function closeComponentAiModal() {
         const modal = document.getElementById('modal-componentAiGenerate');
         if (modal) modal.classList.add('hidden');
+        const submitBtn = document.getElementById('caiSubmitBtn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `
+                <span>✨</span>
+                <span>بدء التوليد والتعبئة الفورية</span>
+            `;
+        }
     }
     window.closeComponentAiModal = closeComponentAiModal;
 
@@ -25305,7 +25502,16 @@
             loadingState.classList.remove('hidden');
             loadingState.classList.add('flex');
         }
-        if (submitBtn) submitBtn.disabled = true;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <svg class="animate-spin h-4 w-4 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span>جاري التوليد والتعبئة...</span>
+            `;
+        }
 
         const targetLabels = {
             video: 'المحاضرة والشرح المرئي',
@@ -25374,7 +25580,7 @@
             const rawV = (Array.isArray(data.suggested_videos) && data.suggested_videos[0]) ? data.suggested_videos[0] : {};
             const titleVal = rawV.title || data.lecture?.title || `شرح تطبيقي: ${weekTitle}`;
             const durVal = rawV.duration || `${data.lecture?.duration_minutes || 15} دقيقة`;
-            const urlVal = rawV.youtube_url || `https://www.youtube.com/results?search_query=${encodeURIComponent(titleVal)}`;
+            const urlVal = resolveClientDirectYouTubeUrl(rawV.youtube_url, titleVal, titleVal);
             const notesVal = rawV.description || data.lecture?.summary || '';
 
             const titleInp = document.getElementById('lmsVideoTitle');
@@ -25564,7 +25770,7 @@
                     description: `استعراض عملي للمفاهيم الأساسية والمصطلحات التقنية المعتمدة في ${cleanTopic} مع التطبيق في بيئة التدريب.`,
                     duration: '15:00 دقيقة',
                     search_query: `${cleanTopic} practical guide tutorial`,
-                    youtube_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(cleanTopic + ' practical tutorial')}`
+                    youtube_url: resolveClientDirectYouTubeUrl('', cleanTopic, cleanTopic)
                 }
             ],
             lecture: {

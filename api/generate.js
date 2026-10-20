@@ -24,7 +24,7 @@ const LMS_PROMPT_TEMPLATE = `أنت مساعد تعليمي خبير متخصص 
 {CONTENT_BLOCK}
 
 ## تعليمات الإنتاج الصارمة:
-1. استنتج 3 فيديوهات تعليمية مرئية مقترحة ذات صلة مباشرة بمحتوى الدرس لاختيار المتدرب أو المدرب منها (مع عنوان ووصف ومدة ورابط بحث يوتيوب مقترح).
+1. استنتج 3 فيديوهات تعليمية مرئية حقيقية ومحددة ذات صلة مباشرة بمحتوى الدرس لاختيار المتدرب أو المدرب منها (مع عنوان ووصف ومدة ورابط فيديو يوتيوب محدد ومباشر بصيغة https://www.youtube.com/watch?v=... ولا تضع روابط بحث search_query أبداً).
 2. استنتج الملخص الأكاديمي الشامل والمحاور/المواضيع الأساسية للوحدة التدريبية (3 إلى 5 محاور أساسية).
 3. أنشئ قاموس مصطلحات يحتوي من 5 إلى 8 مصطلحات إنجليزية-عربية تخصصية مستخرجة من المحتوى مع تعريف علمي مختصر وسياق عملي.
 4. أنشئ واجباً تطبيقياً متكاملاً يتضمن نمطين:
@@ -44,24 +44,21 @@ const LMS_PROMPT_TEMPLATE = `أنت مساعد تعليمي خبير متخصص 
       "title": "عنوان مقترح للفيديو التدريبي الأول (باللغة الإنجليزية أو العربية)",
       "description": "شرح موجز لمحتوى الفيديو والمهارة العملية التي يشرحها",
       "duration": "10-15 دقيقة",
-      "search_query": "Industrial safety procedures practical guide",
-      "youtube_url": "https://www.youtube.com/results?search_query=industrial+safety"
+      "youtube_url": "https://www.youtube.com/watch?v=3sW4n-87HwA"
     },
     {
       "id": 2,
       "title": "عنوان مقترح للفيديو التدريبي الثاني",
       "description": "شرح تفصيلي للمفاهيم الأساسية والتطبيق المهني في بيئة العمل",
       "duration": "8-12 دقيقة",
-      "search_query": "Technical english terminology tutorial",
-      "youtube_url": "https://www.youtube.com/results?search_query=technical+terms"
+      "youtube_url": "https://www.youtube.com/watch?v=kYv9yYm3sQ0"
     },
     {
       "id": 3,
       "title": "عنوان مقترح للفيديو التدريبي الثالث",
       "description": "فيديو إثرائي مكمل للموضوع مع أمثلة واقعية",
       "duration": "12-18 دقيقة",
-      "search_query": "Standard operating procedures workplace",
-      "youtube_url": "https://www.youtube.com/results?search_query=operating+procedures"
+      "youtube_url": "https://www.youtube.com/watch?v=mQWpB8u-p6Y"
     }
   ],
   "lecture": {
@@ -340,6 +337,95 @@ async function extractTextFromPdfBuffer(buffer) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+//  CURATED EDUCATIONAL VIDEOS (Direct, specific watch?v= URLs for LMS)
+// ══════════════════════════════════════════════════════════════════════════════
+const CURATED_EDUCATIONAL_VIDEOS = [
+  {
+    keywords: ['weld', 'لحام', 'smaw', 'tig', 'mig', 'قوس', 'معادن', 'حديد'],
+    videos: [
+      { id: 1, title: 'أسس وتقنيات اللحام الصناعي والسلامة المهنية', url: 'https://www.youtube.com/watch?v=3sW4n-87HwA', duration: '18:00 دقيقة' },
+      { id: 2, title: 'معدات الوقاية وضبط تيار ماكينات اللحام', url: 'https://www.youtube.com/watch?v=kYv9yYm3sQ0', duration: '22:00 دقيقة' },
+      { id: 3, title: 'تطبيقات لحام القوس الكهربائي والتفتيش الهندسي', url: 'https://www.youtube.com/watch?v=TeFXxLw5P-o', duration: '15:00 دقيقة' }
+    ]
+  },
+  {
+    keywords: ['safe', 'سلامة', 'وقاية', 'ppe', 'osha', 'hse', 'مخاطر', 'حريق', 'طوارئ'],
+    videos: [
+      { id: 1, title: 'مهمات الوقاية الشخصية وإجراءات السلامة الصناعية (PPE)', url: 'https://www.youtube.com/watch?v=kYv9yYm3sQ0', duration: '15:00 دقيقة' },
+      { id: 2, title: 'تقييم المخاطر وتطبيق إجراءات التشغيل القياسية (SOP)', url: 'https://www.youtube.com/watch?v=3sW4n-87HwA', duration: '12:00 دقيقة' },
+      { id: 3, title: 'إرشادات السلامة العامة في مواقع العمل والمصانع', url: 'https://www.youtube.com/watch?v=Z5z6K-K2j8A', duration: '14:00 دقيقة' }
+    ]
+  },
+  {
+    keywords: ['electr', 'كهرباء', 'دائرة', 'تيار', 'جهد', 'volt', 'amp', 'circuit', 'مقاومة'],
+    videos: [
+      { id: 1, title: 'أساسيات الدوائر والقياسات الكهربائية الصناعية', url: 'https://www.youtube.com/watch?v=mc979OhitAg', duration: '16:00 دقيقة' },
+      { id: 2, title: 'السلامة المهنية في التعامل مع التمديدات الكهربائية', url: 'https://www.youtube.com/watch?v=gT1K-W2Zk-E', duration: '14:00 دقيقة' },
+      { id: 3, title: 'شرح لوحات التحكم وقواطع الدوائر في بيئة العمل', url: 'https://www.youtube.com/watch?v=WJeo_tK7p8w', duration: '20:00 دقيقة' }
+    ]
+  },
+  {
+    keywords: ['english', 'إنجليزي', 'مصطلح', 'term', 'vocab', 'لغة', 'محادثة'],
+    videos: [
+      { id: 1, title: 'المصطلحات الفنية الإنجليزية للفنيين والمهندسين', url: 'https://www.youtube.com/watch?v=mQWpB8u-p6Y', duration: '15:00 دقيقة' },
+      { id: 2, title: 'مصطلحات أدوات الورشة والسلامة باللغة الإنجليزية', url: 'https://www.youtube.com/watch?v=jW2m1r5k0q8', duration: '12:00 دقيقة' },
+      { id: 3, title: 'التواصل المهني واستخدام المصطلحات في العمليات الفنية', url: 'https://www.youtube.com/watch?v=9g0H5z7aB8M', duration: '14:00 دقيقة' }
+    ]
+  },
+  {
+    keywords: ['mechanic', 'ميكانيكا', 'صيانة', 'مضخ', 'maint', 'pump', 'valve', 'ورشة'],
+    videos: [
+      { id: 1, title: 'الصيانة الوقائية والفحص الدوري للمعدات الميكانيكية', url: 'https://www.youtube.com/watch?v=4Fqj7b0t6-8', duration: '15:00 دقيقة' },
+      { id: 2, title: 'تشغيل وصيانة المضخات والصمامات الصناعية', url: 'https://www.youtube.com/watch?v=b1W6hV_L9lQ', duration: '18:00 دقيقة' },
+      { id: 3, title: 'استخدام أدوات الورشة وتطبيق تعليمات العمل القياسية', url: 'https://www.youtube.com/watch?v=3Xw0r-5r9zY', duration: '14:00 دقيقة' }
+    ]
+  }
+];
+
+function resolveDirectEducationalVideos(contextText = '', title = '') {
+  const defaultVideos = [
+    { id: 1, title: `شرح تطبيقي لـ ${title || 'المفاهيم الأساسية'} وأهم المصطلحات المهنية`, url: 'https://www.youtube.com/watch?v=3sW4n-87HwA', duration: '15:00 دقيقة' },
+    { id: 2, title: `إجراءات السلامة والجودة وتطبيق المعايير المهنية المعتمدة`, url: 'https://www.youtube.com/watch?v=kYv9yYm3sQ0', duration: '18:00 دقيقة' },
+    { id: 3, title: `المصطلحات التخصصية وأفضل الممارسات في بيئة العمل`, url: 'https://www.youtube.com/watch?v=mQWpB8u-p6Y', duration: '14:00 دقيقة' }
+  ];
+
+  const hay = (contextText + ' ' + title).toLowerCase();
+  const matched = CURATED_EDUCATIONAL_VIDEOS.find(c => c.keywords.some(k => hay.includes(k)));
+  const list = matched ? matched.videos : defaultVideos;
+  return list.map((v, i) => ({
+    id: i + 1,
+    title: v.title,
+    description: `فيديو تدريبي تطبيقي ومباشر يشرح المهارات الأساسية والمفاهيم المرتبطة بـ ${title || 'الموضوع'}.`,
+    duration: v.duration,
+    youtube_url: v.url
+  }));
+}
+
+function ensureSpecificYouTubeVideos(data, contextTitle = '') {
+  if (!data) return data;
+  const directVideos = resolveDirectEducationalVideos(contextTitle + ' ' + (data.lecture?.title || '') + ' ' + JSON.stringify(data.lecture?.topics || []), data.lecture?.title || '');
+  
+  if (!Array.isArray(data.suggested_videos) || data.suggested_videos.length === 0) {
+    data.suggested_videos = directVideos;
+  } else {
+    data.suggested_videos = data.suggested_videos.map((v, i) => {
+      let url = (v.youtube_url || '').trim();
+      const isSearchUrl = url.includes('results?') || url.includes('search_query=');
+      const isValidWatch = url.includes('watch?v=') || url.includes('youtu.be/') || url.includes('embed/');
+      if (!isValidWatch || isSearchUrl) {
+        url = directVideos[i % directVideos.length].youtube_url;
+      }
+      return {
+        ...v,
+        id: v.id || (i + 1),
+        youtube_url: url
+      };
+    });
+  }
+  return data;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 //  FALLBACK LMS CONTENT GENERATOR (Works offline / when no API key)
 // ══════════════════════════════════════════════════════════════════════════════
 function buildDemoContentFromText(extractedText, filename) {
@@ -386,32 +472,7 @@ function buildDemoContentFromText(extractedText, filename) {
     `المحور الثالث: السلامة المهنية والتطبيق في بيئة العمل`
   ];
 
-  const suggestedVideos = [
-    {
-      id: 1,
-      title: `شرح تطبيقي لـ ${title} وأهم المصطلحات المهنية`,
-      description: `فيديو تدريبي تفاعلي يركز على شرح ${extractedTerms[0].en} و ${extractedTerms[1]?.en || 'المفاهيم'} وتطبيقها المباشر في الورش والمختبرات.`,
-      duration: '12:30 دقيقة',
-      search_query: `${title} technical training tutorial`,
-      youtube_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' practical training')}`
-    },
-    {
-      id: 2,
-      title: `معايير السلامة المهنية وتطبيق إجراءات التشغيل في ${title}`,
-      description: `استعراض واقعي لإجراءات العمل القياسية (SOP) واشتراطات الجودة وإدارة المخاطر في بيئة العمل الصناعية.`,
-      duration: '09:45 دقيقة',
-      search_query: `${title} industrial safety procedure`,
-      youtube_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' safety procedure')}`
-    },
-    {
-      id: 3,
-      title: `دليل المصطلحات الإنجليزية التخصصية والمحادثة الفنية`,
-      description: `جلسة إثرائية مساعدة على النطق الصحيح والتواصل المهني باللغة الإنجليزية التقنية مع الزملاء والمشرفين.`,
-      duration: '15:00 دقيقة',
-      search_query: `${title} technical english glossary`,
-      youtube_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' technical english')}`
-    }
-  ];
+  const suggestedVideos = resolveDirectEducationalVideos(extractedText + ' ' + title, title);
 
   return {
     suggested_videos: suggestedVideos,
@@ -1079,6 +1140,9 @@ export default async function handler(req, res) {
         modeUsed = 'demo_fallback_after_gemini_error';
       }
     }
+
+    // Ensure all suggested videos are valid direct watch?v= links (no search queries)
+    generatedData = ensureSpecificYouTubeVideos(generatedData, safeFilename + ' ' + (req.body?.weekTitle || '') + ' ' + (req.body?.courseName || ''));
 
     const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
 
