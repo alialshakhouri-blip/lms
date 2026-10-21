@@ -564,16 +564,21 @@ function ensureMinQuizQuestions(data, contextTitle = '') {
       const qText = `ما هو المدلول العلمي والتطبيقي للمفهوم '${t.en || t.ar}' وفق سياق هذا الدرس؟`;
       const exists = data.quiz.questions.some(q => q.question === qText);
       if (!exists) {
+        // Collect realistic distractors from OTHER real terms in the lesson
+        const otherTerms = terms.filter(item => item !== t);
+        const optA = t.definition ? t.definition.slice(0, 75) : `المفهوم المعتمد لـ ${t.en || t.ar}`;
+        const optB = (otherTerms[0] && otherTerms[0].definition) ? otherTerms[0].definition.slice(0, 75) : `تطبيق يتعلق بـ ${otherTerms[0]?.ar || 'محور آخر في الدرس'}`;
+        const optC = (otherTerms[1] && otherTerms[1].definition) ? otherTerms[1].definition.slice(0, 75) : `الإجراء الميداني المقابل لـ ${t.ar || 'المفهوم'}`;
+        const optD = (otherTerms[2] && otherTerms[2].definition) ? otherTerms[2].definition.slice(0, 75) : `المصطلح الفني المرتبط بالمرحلة التالية`;
+
+        const options = [optA, optB, optC, optD];
+
         data.quiz.questions.push({
           type: 'mcq',
           question: qText,
-          options: [
-            t.definition ? t.definition.slice(0, 75) : `المفهوم الصحيح الخاص بـ ${t.en || t.ar}`,
-            'مفهوم خارج سياق وأهداف هذا الدرس',
-            'سلوك أو إجراء غير متوافق مع المفهوم المقصود',
-            'تعريف عام غير دقيق ولا يعبر عن المعنى الصحيح'
-          ],
-          correct_answer: t.definition ? t.definition.slice(0, 75) : `المفهوم الصحيح الخاص بـ ${t.en || t.ar}`,
+          options,
+          correct_answer: optA,
+          correctIndex: 0,
           explanation: `يرتبط مفهوم ${t.en || t.ar} بـ ${t.definition || t.ar}`
         });
       }
@@ -584,8 +589,9 @@ function ensureMinQuizQuestions(data, contextTitle = '') {
         data.quiz.questions.push({
           type: 'true_false',
           question: qText,
-          options: ['صح ✓', 'خطأ ✗'],
-          correct_answer: 'صح ✓',
+          options: ['صح', 'خطأ'],
+          correct_answer: 'صح',
+          correctIndex: 0,
           explanation: `صواب؛ لأن استيعاب ${t.en || t.ar} يدعم تحقيق أهداف الدرس والتطبيق السليم.`
         });
       }
@@ -594,6 +600,89 @@ function ensureMinQuizQuestions(data, contextTitle = '') {
   }
 
   return data;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  QUIZ DATA NORMALIZER & INTEGRITY VALIDATOR
+// ══════════════════════════════════════════════════════════════════════════════
+function normalizeAndValidateQuizData(quizData, contextTopic = '') {
+  if (!quizData) return null;
+  const questions = Array.isArray(quizData.questions) ? quizData.questions : [];
+  
+  const validatedQuestions = [];
+  
+  questions.forEach((q, idx) => {
+    if (!q || !q.question) return;
+    const isTf = (q.type === 'true_false' || q.type === 'tf');
+    const isMatching = (q.type === 'matching' || (Array.isArray(q.pairs) && q.pairs.length >= 2));
+    
+    if (isMatching) {
+      const validPairs = (q.pairs || []).filter(p => p && p.left && p.right).map(p => ({
+        left: String(p.left).trim(),
+        right: String(p.right).trim()
+      }));
+      if (validPairs.length >= 2) {
+        validatedQuestions.push({
+          id: idx + 1,
+          type: 'matching',
+          question: q.question.trim(),
+          pairs: validPairs.slice(0, 4),
+          explanation: q.explanation ? String(q.explanation).trim() : 'تم توصيل كافة المفاهيم بتعريفاتها الصحيحة بدقة.'
+        });
+      }
+    } else if (isTf) {
+      let rawAns = String(q.correct_answer || '').trim();
+      const isTrue = /^(صح|صواب|نعم|true|1|✓)/i.test(rawAns);
+      const cleanAns = isTrue ? 'صح' : 'خطأ';
+      validatedQuestions.push({
+        id: idx + 1,
+        type: 'true_false',
+        question: q.question.trim(),
+        options: ['صح', 'خطأ'],
+        correct_answer: cleanAns,
+        correctIndex: isTrue ? 0 : 1,
+        explanation: q.explanation ? String(q.explanation).trim() : (isTrue ? 'العبارة صحيحة ومتوافقة مع المادة العلمية.' : 'العبارة غير صحيحة.')
+      });
+    } else {
+      // MCQ
+      let rawOpts = Array.isArray(q.options) ? q.options.map(o => String(o).trim()).filter(Boolean) : [];
+      let correctAns = q.correct_answer ? String(q.correct_answer).trim() : '';
+      
+      // Filter out any fake/placeholder distractors if present
+      rawOpts = rawOpts.filter(o => !o.includes('خارج سياق') && !o.includes('غير متوافق مع المفهوم') && !o.includes('تعريف عام غير دقيق'));
+
+      if (correctAns && !rawOpts.some(o => o === correctAns || o.includes(correctAns))) {
+        rawOpts.unshift(correctAns);
+      }
+      while (rawOpts.length < 4) {
+        rawOpts.push(`الخيار ${rawOpts.length + 1}`);
+      }
+      rawOpts = rawOpts.slice(0, 4);
+      
+      let cIdx = rawOpts.findIndex(o => o === correctAns);
+      if (cIdx === -1) {
+        cIdx = rawOpts.findIndex(o => correctAns.includes(o) || o.includes(correctAns));
+      }
+      if (cIdx === -1) cIdx = 0;
+      
+      validatedQuestions.push({
+        id: idx + 1,
+        type: 'mcq',
+        question: q.question.trim(),
+        options: rawOpts,
+        correct_answer: rawOpts[cIdx],
+        correctIndex: cIdx,
+        explanation: q.explanation ? String(q.explanation).trim() : `الإجابة الصحيحة هي: ${rawOpts[cIdx]}`
+      });
+    }
+  });
+  
+  return {
+    title: quizData.title || `اختبار تقييم الدرس: ${contextTopic || 'الوحدة التدريبية'}`,
+    duration_minutes: quizData.duration_minutes || 15,
+    total_grade: quizData.total_grade || 10,
+    questions: validatedQuestions
+  };
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1379,6 +1468,310 @@ function buildDemoExecutiveReport(params) {
   };
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+//  DEDICATED FAST QUIZ GENERATION HANDLER (Gemini 2.0 Flash - Ground Truth)
+// ══════════════════════════════════════════════════════════════════════════════
+async function handleDedicatedQuizGeneration(req, res, startTime) {
+  const { courseName, weekTitle, weekTopic, textInput, lessonContent, questionsCount = 10 } = req.body || {};
+  
+  const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
+  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
+  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE' && apiKey.length > 15);
+
+  const effectiveCourse = (courseName || '').trim() || 'المقرر التدريبي المعتمد';
+  const effectiveWeek = (weekTitle || '').trim() || 'الوحدة التدريبية';
+  const effectiveTopic = (weekTopic || '').trim() || effectiveWeek;
+  const rawContent = (lessonContent || textInput || '').trim();
+
+  // Guard: if absolutely no content and no topic provided
+  if (!rawContent && !weekTopic && !courseName) {
+    return res.status(400).json({
+      success: false,
+      error: 'لم يتم توفير أي محتوى دراسي أو موضوع لتوليد أسئلة الاختبار.'
+    });
+  }
+
+  const effectiveContent = rawContent || `${effectiveCourse} - ${effectiveWeek}: ${effectiveTopic}`;
+
+  let generatedData = null;
+  let modeUsed = 'demo_fallback';
+  let geminiApiErrors = [];
+
+  if (hasValidKey) {
+    const promptText = `أنت خبير أكاديمي ورئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI).
+مهمتك: صياغة اختبار أسبوعي عالي الجودة والاحترافية مكون من 10 أسئلة مستنبطة 100% من صلب المادة العلمية والدرس المرفق:
+
+## بيانات المقرر والدرس:
+- المقرر التدريبي: ${effectiveCourse}
+- الأسبوع / الوحدة: ${effectiveWeek}
+- موضوع الدرس الأساسي: ${effectiveTopic}
+
+## المادة العلمية ومحتوى الدرس (المصدر الوحيد للأسئلة - Ground Truth):
+---
+${effectiveContent.slice(0, 20000)}
+---
+
+## معايير الجودة الأكاديمية الصارمة:
+1. الالتزام بالموضوع بنسبة 100%: تُبنى جميع الأسئلة حصراً من صلب المادة العلمية ومفاهيمها أعلاه. يُمنع منعاً باتاً استدعاء مواضيع السلامة الصناعية (PPE/SOP) أو إجراءات المصانع والورش إذا لم تكن واردة في النص المرفق صراحة.
+2. تنوع وشمولية بنية الأسئلة (10 أسئلة متكاملة):
+   - 6 أسئلة اختيار من متعدد (MCQ):
+     * لكل سؤال 4 خيارات منطقية ومتمايزة من صلب موضوع الدرس.
+     * يُمنع منعاً باتاً استخدام خيارات اصطناعية أو هزلية أو بدائل عامة (مثل "مفهوم خارج سياق الدرس" أو "خيار 3").
+     * يجب أن تطابق الإجابة المحددة في "correct_answer" حرفياً أحد الخيارات الأربعة الموجودة في "options".
+   - 3 أسئلة صح وخطأ (True/False):
+     * مصفوفة الخيارات "options" يجب أن تكون بالضبط وبحرفية: ["صح", "خطأ"].
+     * حقل الإجابة "correct_answer" يجب أن يكون إما "صح" أو "خطأ" بالضبط.
+     * كتابة تعليل علمي دقيق في "explanation" يوضح سبب الصحة أو الخطأ.
+   - سؤال توصيل ومطابقة واحد (Matching):
+     * يحتوي على 4 أزواج مطابقة من صلب الدرس: مصفوفة "pairs" بها 4 كائنات، كل كائن به "left" (المصطلح أو المفهوم) و "right" (التعريف أو الاستخدام الصحيح له).
+3. التنسيق المطلوب: أعد فقط كائن JSON الصالح التالي دون أي نصوص تمهيدية أو كتل تعليق:
+{
+  "title": "اختبار تقييم الدرس: ${effectiveTopic}",
+  "duration_minutes": 15,
+  "total_grade": 10,
+  "questions": [
+    {
+      "id": 1,
+      "type": "mcq",
+      "question": "نص السؤال الأول...",
+      "options": ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
+      "correct_answer": "خيار 1",
+      "explanation": "شرح توضيحي لسبب صحة الإجابة..."
+    },
+    {
+      "id": 7,
+      "type": "true_false",
+      "question": "نص العبارة الأولى...",
+      "options": ["صح", "خطأ"],
+      "correct_answer": "صح",
+      "explanation": "التعليل..."
+    },
+    {
+      "id": 10,
+      "type": "matching",
+      "question": "🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم في القائمة (أ) بتعريفه الدقيق في القائمة (ب):",
+      "pairs": [
+        {"left": "المفهوم 1", "right": "التعريف 1"},
+        {"left": "المفهوم 2", "right": "التعريف 2"},
+        {"left": "المفهوم 3", "right": "التعريف 3"},
+        {"left": "المفهوم 4", "right": "التعريف 4"}
+      ],
+      "explanation": "تم توصيل كافة المفاهيم بتعريفاتها الصحيحة بدقة."
+    }
+  ]
+}`;
+
+    const preferredModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+    const modelsToTry = [preferredModel];
+    if (!modelsToTry.includes('gemini-2.0-flash')) modelsToTry.push('gemini-2.0-flash');
+    if (!modelsToTry.includes('gemini-1.5-flash')) modelsToTry.push('gemini-1.5-flash');
+
+    for (const curModel of modelsToTry) {
+      if (generatedData) break;
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${curModel}:generateContent?key=${apiKey}`;
+        const geminiRes = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: promptText }] }],
+            generationConfig: {
+              temperature: 0.3,
+              responseMimeType: 'application/json'
+            }
+          })
+        });
+
+        if (!geminiRes.ok) {
+          const errBody = await geminiRes.text();
+          console.error(`Gemini quiz API error on model ${curModel} (Status ${geminiRes.status}):`, errBody.slice(0, 300));
+          geminiApiErrors.push(`[${curModel} HTTP ${geminiRes.status}]: ${errBody.slice(0, 150)}`);
+          continue;
+        }
+
+        const geminiJson = await geminiRes.json();
+        const candidateText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = safeExtractJson(candidateText);
+        if (parsed && Array.isArray(parsed.questions) && parsed.questions.length >= 3) {
+          generatedData = parsed;
+          modeUsed = `gemini (${curModel})`;
+          break;
+        } else if (parsed && parsed.quiz && Array.isArray(parsed.quiz.questions)) {
+          generatedData = parsed.quiz;
+          modeUsed = `gemini (${curModel})`;
+          break;
+        }
+      } catch (geminiError) {
+        console.error(`Gemini quiz execution error on model ${curModel}: ${geminiError.message}`);
+        geminiApiErrors.push(`[${curModel} Exception]: ${geminiError.message}`);
+      }
+    }
+  }
+
+  // If Gemini failed or no key: build high-quality semantic fallback derived 100% from the lesson text
+  if (!generatedData) {
+    const fullSmart = buildSmartLmsContentFromText(effectiveContent, 'quiz_source.txt', effectiveCourse, effectiveTopic);
+    generatedData = fullSmart.quiz;
+    modeUsed = (hasValidKey && geminiApiErrors.length > 0)
+      ? 'semantic_fallback_after_gemini_error'
+      : 'semantic_local_generator';
+  }
+
+  // Sanitize, normalize and validate all questions
+  generatedData = normalizeAndValidateQuizData(generatedData, effectiveTopic);
+
+  const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
+  return res.status(200).json({
+    success: true,
+    mode: modeUsed,
+    hasGeminiApiKey: hasValidKey,
+    courseName: effectiveCourse,
+    weekTopic: effectiveTopic,
+    processing_time_seconds: parseFloat(durationSec),
+    data: {
+      quiz: generatedData
+    },
+    geminiErrors: geminiApiErrors.length > 0 ? geminiApiErrors : undefined
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  DEDICATED ASSIGNMENT GENERATION HANDLER
+// ══════════════════════════════════════════════════════════════════════════════
+async function handleDedicatedAssignmentGeneration(req, res, startTime) {
+  const { courseName, weekTitle, weekTopic, textInput, lessonContent } = req.body || {};
+  
+  const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
+  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
+  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE' && apiKey.length > 15);
+
+  const effectiveCourse = (courseName || '').trim() || 'المقرر التدريبي المعتمد';
+  const effectiveWeek = (weekTitle || '').trim() || 'الوحدة التدريبية';
+  const effectiveTopic = (weekTopic || '').trim() || effectiveWeek;
+  const rawContent = (lessonContent || textInput || '').trim();
+
+  if (!rawContent && !weekTopic && !courseName) {
+    return res.status(400).json({
+      success: false,
+      error: 'لم يتم توفير أي محتوى دراسي أو موضوع لتوليد الواجب.'
+    });
+  }
+
+  const effectiveContent = rawContent || `${effectiveCourse} - ${effectiveWeek}: ${effectiveTopic}`;
+
+  let generatedData = null;
+  let modeUsed = 'demo_fallback';
+  let geminiApiErrors = [];
+
+  if (hasValidKey) {
+    const promptText = `أنت خبير أكاديمي ومصمم تكليفات تدريبية لدى معهد الذهب الأسود للتدريب (BGTI).
+المهمة: صياغة واجب أسبوعي تطبيقي عالي الجودة مستنبط 100% من صلب الدرس والمادة العلمية المرفقة:
+
+## بيانات المقرر والدرس:
+- المقرر التدريبي: ${effectiveCourse}
+- الوحدة / الأسبوع: ${effectiveWeek}
+- موضوع الدرس: ${effectiveTopic}
+
+## المادة العلمية ومحتوى الدرس:
+---
+${effectiveContent.slice(0, 20000)}
+---
+
+## المعايير المطلوبة:
+1. الالتزام بموضوع الدرس بنسبة 100% وتجنب أي مواضيع خارجية.
+2. يتضمن الواجب:
+   - عنوان واضح وتعليمات مفصلة للمتدرب.
+   - 2 إلى 3 أسئلة تطبيقية اختيار من متعدد مرتبطة بحالات واقعية من الدرس.
+   - تكليف عملي تحريري يطلب من المتدرب تطبيق المفاهيم في فقرة محددة مع إرشادات ونموذج إجابة استرشادي للمدرب.
+3. التنسيق: أعد فقط كائن JSON الصالح التالي:
+{
+  "title": "الواجب الأسبوعي التطبيقي: ${effectiveTopic}",
+  "total_grade": 10,
+  "instructions": "تعليمات واضحة للمتدرب لكيفية حل التكليف...",
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "سؤال تطبيقي...",
+      "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
+      "correct_answer": "الخيار أ",
+      "explanation": "التوضيح..."
+    }
+  ],
+  "text_questions": [
+    {
+      "prompt": "المطلوب التحريري...",
+      "guidelines": "إرشادات الصياغة...",
+      "model_answer": "نموذج الإجابة..."
+    }
+  ]
+}`;
+
+    const preferredModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+    const modelsToTry = [preferredModel];
+    if (!modelsToTry.includes('gemini-2.0-flash')) modelsToTry.push('gemini-2.0-flash');
+    if (!modelsToTry.includes('gemini-1.5-flash')) modelsToTry.push('gemini-1.5-flash');
+
+    for (const curModel of modelsToTry) {
+      if (generatedData) break;
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${curModel}:generateContent?key=${apiKey}`;
+        const geminiRes = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: promptText }] }],
+            generationConfig: {
+              temperature: 0.35,
+              responseMimeType: 'application/json'
+            }
+          })
+        });
+
+        if (!geminiRes.ok) {
+          const errBody = await geminiRes.text();
+          console.error(`Gemini assignment API error on model ${curModel} (Status ${geminiRes.status}):`, errBody.slice(0, 300));
+          geminiApiErrors.push(`[${curModel} HTTP ${geminiRes.status}]: ${errBody.slice(0, 150)}`);
+          continue;
+        }
+
+        const geminiJson = await geminiRes.json();
+        const candidateText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = safeExtractJson(candidateText);
+        if (parsed && (parsed.instructions || parsed.questions || parsed.title)) {
+          generatedData = parsed.assignment || parsed;
+          modeUsed = `gemini (${curModel})`;
+          break;
+        }
+      } catch (geminiError) {
+        console.error(`Gemini assignment execution error on model ${curModel}: ${geminiError.message}`);
+        geminiApiErrors.push(`[${curModel} Exception]: ${geminiError.message}`);
+      }
+    }
+  }
+
+  if (!generatedData) {
+    const fullSmart = buildSmartLmsContentFromText(effectiveContent, 'assignment_source.txt', effectiveCourse, effectiveTopic);
+    generatedData = fullSmart.assignment;
+    modeUsed = (hasValidKey && geminiApiErrors.length > 0)
+      ? 'semantic_fallback_after_gemini_error'
+      : 'semantic_local_generator';
+  }
+
+  const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
+  return res.status(200).json({
+    success: true,
+    mode: modeUsed,
+    hasGeminiApiKey: hasValidKey,
+    courseName: effectiveCourse,
+    weekTopic: effectiveTopic,
+    processing_time_seconds: parseFloat(durationSec),
+    data: {
+      assignment: generatedData
+    },
+    geminiErrors: geminiApiErrors.length > 0 ? geminiApiErrors : undefined
+  });
+}
+
 async function handleExecutiveReport(req, res, startTime) {
   const { recipient, sender, weekLabel, stats, additionalNotes } = req.body || {};
   const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
@@ -1489,6 +1882,16 @@ export default async function handler(req, res) {
   // Route: Executive Report Generation
   if (req.body && req.body.action === 'executive_report') {
     return handleExecutiveReport(req, res, startTime);
+  }
+
+  // Route: Dedicated Quiz Generation (Fast, high-precision, 100% ground-truth)
+  if (req.body && (req.body.action === 'generate_quiz' || req.body.targetComponent === 'quiz')) {
+    return handleDedicatedQuizGeneration(req, res, startTime);
+  }
+
+  // Route: Dedicated Assignment Generation
+  if (req.body && (req.body.action === 'generate_assignment' || req.body.targetComponent === 'assignment')) {
+    return handleDedicatedAssignmentGeneration(req, res, startTime);
   }
 
   try {

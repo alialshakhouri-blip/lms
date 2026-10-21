@@ -5725,8 +5725,12 @@
                                         <span>✨</span>
                                         <span>+ إضافة 5 أسئلة بالذكاء الاصطناعي</span>
                                     </button>
-                                    <button type="button" onclick="addQuestionToQuizBuilder()" class="text-xs bg-slate-100 hover:bg-slate-200 text-[#0F2942] font-bold px-3 py-1.5 rounded-xl border border-slate-300 cursor-pointer">
-                                        + إضافة سؤال يدوي
+                                    <button type="button" onclick="addQuestionToQuizBuilder('mcq')" class="text-xs bg-slate-100 hover:bg-slate-200 text-[#0F2942] font-bold px-2.5 py-1.5 rounded-xl border border-slate-300 cursor-pointer">
+                                        + سؤال اختيار
+                                    </button>
+                                    <button type="button" onclick="addQuestionToQuizBuilder('true_false')" class="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-black px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-2xs flex items-center gap-1">
+                                        <span>✓/✗</span>
+                                        <span>+ سؤال صح وخطأ</span>
                                     </button>
                                 </div>
                             </div>
@@ -26893,13 +26897,24 @@ END $$;`;
         if (modal) modal.classList.remove('hidden');
     }
 
-    function addQuestionToQuizBuilder() {
-        tempQuizQuestions.push({
-            id: 'qq-' + Date.now() + '-' + tempQuizQuestions.length,
-            text: '',
-            options: ['', '', '', ''],
-            correctIndex: 0
-        });
+    function addQuestionToQuizBuilder(type = 'mcq') {
+        if (type === 'true_false') {
+            tempQuizQuestions.push({
+                id: 'qq-' + Date.now() + '-' + tempQuizQuestions.length,
+                type: 'true_false',
+                text: '',
+                options: ['صح', 'خطأ'],
+                correctIndex: 0
+            });
+        } else {
+            tempQuizQuestions.push({
+                id: 'qq-' + Date.now() + '-' + tempQuizQuestions.length,
+                type: 'mcq',
+                text: '',
+                options: ['', '', '', ''],
+                correctIndex: 0
+            });
+        }
         renderQuizBuilderQuestions();
     }
 
@@ -26912,42 +26927,100 @@ END $$;`;
         const courseTitle = courseData.courseTitle || courseKey || 'المقرر التدريبي';
         const topic = (activeWeek && activeWeek.topic) ? activeWeek.topic : (document.getElementById('lmsQuizTitle')?.value || courseTitle);
 
-        const newQBatch = [
-            {
-                text: `ما هو الإجراء الوقائي الأول المعتمد عند التعامل مع معدات ${topic} في بيئة العمل؟`,
-                options: ['فحص أجهزة الأمان ومهمات الوقاية الشخصية قبل التشغيل', 'زيادة السرعة لتفادي التأخير', 'تجاوز كتيبات التشغيل القياسية', 'إيقاف الإنذارات الصوتية'],
-                correctIndex: 0
-            },
-            {
-                text: `أي من الخيارات التالية يمثل دلالة مصطلح 'Standard Operating Procedure (SOP)' في ${topic}؟`,
-                options: ['إجراءات التشغيل القياسية المعتمدة لضمان الجودة والسلامة', 'جدول حوافز العاملين السنوي', 'إلغاء الصيانة الدورية للأجهزة', 'تقارير التسويق والمبيعات'],
-                correctIndex: 0
-            },
-            {
-                text: `ما هي النتيجة المباشرة لتطبيق معايير ضبط الجودة والتفتيش المستمر في ${topic}؟`,
-                options: ['تقليص الأخطاء الفنية ورفع كفاءة ومأمونية التشغيل', 'زيادة معدلات الحوادث والأعطال', 'الاستغناء عن تدريب الكوادر', 'إلغاء إجراءات الفحص الدوري'],
-                correctIndex: 0
-            },
-            {
-                text: `عبارة: الالتزام بمهمات الوقاية الشخصية (PPE) واشتراطات السلامة المهنية يُعد إلزامياً لحماية الكوادر الفنية في ${topic}.`,
-                options: ['صح', 'خطأ', 'حسب الرغبة', 'غير محدد'],
-                correctIndex: 0
-            },
-            {
-                text: `عبارة: يجوز للمتدرب تشغيل الأجهزة والمعدات الصناعية دون ارتداء النظارات الواقية أو حذاء السلامة إذا كانت المهمة سريعة.`,
-                options: ['صح', 'خطأ', 'حسب توجيه الزملاء', 'غير محدد'],
-                correctIndex: 1
+        // Harvest actual lesson content from activeWeek
+        const lectureSummary = activeWeek?.lecture?.summary || '';
+        const docsSummary = (activeWeek?.docs || activeWeek?.documents || []).map(d => `${d.title || ''}: ${d.desc || ''}`).join('\n');
+        const contextText = [topic, lectureSummary, docsSummary].filter(Boolean).join('\n');
+
+        let generatedQuestions = [];
+        if (typeof buildSmartLmsContentFromText === 'function') {
+            const smartRes = buildSmartLmsContentFromText(contextText || topic, 'quiz_questions.txt', courseTitle, topic);
+            if (smartRes?.quiz?.questions && Array.isArray(smartRes.quiz.questions)) {
+                generatedQuestions = smartRes.quiz.questions.slice(0, 5);
             }
-        ];
+        }
+
+        if (!generatedQuestions || generatedQuestions.length === 0) {
+            generatedQuestions = [
+                {
+                    type: 'mcq',
+                    text: `ما هو المفهوم الأساسي المرتبط بدراسة "${topic}" في إطار مقرر ${courseTitle}؟`,
+                    options: [
+                        `فهم وتطبيق القواعد والمهارات المهنية المعتمدة لـ ${topic}`,
+                        `تجاوز الاشتراطات القياسية والتطبيقات العملية المحددة`,
+                        `الاعتماد على التقدير الشخصي دون الرجوع للمراجع الفنية`,
+                        `إلغاء المتابعة والتقييم المستمر لنتائج العمل`
+                    ],
+                    correctIndex: 0
+                },
+                {
+                    type: 'mcq',
+                    text: `أي من الممارسات التالية تعبر عن الأداء المهني السليم عند تطبيق مهام ${topic}؟`,
+                    options: [
+                        `الالتزام بالخطوات المنهجية والتسلسل الفني الصحيح`,
+                        `تخطي مراحل الفحص الأولي لتوفير الوقت`,
+                        `عدم توثيق الملاحظات في السجلات المعتمدة`,
+                        `تأجيل إجراءات الضبط والمراجعة لنهاية المشروع`
+                    ],
+                    correctIndex: 0
+                },
+                {
+                    type: 'mcq',
+                    text: `ما النتيجة المرجوة من التطبيق الدقيق لمعايير وإرشادات ${topic}؟`,
+                    options: [
+                        `رفع جودة المخرجات وتقليص الأخطاء والتكاليف غير الضرورية`,
+                        `زيادة معدل الهدر وتكرار الأعطال الميدانية`,
+                        `الاستغناء عن تدريب الكوادر ومتابعة تقييمهم`,
+                        `إلغاء متطلبات التوثيق الدوري للعمليات`
+                    ],
+                    correctIndex: 0
+                },
+                {
+                    type: 'true_false',
+                    text: `يعد استيعاب المفاهيم التطبيقية لـ "${topic}" ركيزة أساسية لاجتياز متطلبات مقرر ${courseTitle} بنجاح.`,
+                    options: ['صح', 'خطأ'],
+                    correctIndex: 0
+                },
+                {
+                    type: 'true_false',
+                    text: `يجوز تطبيق مهام "${topic}" بصورة عشوائية دون اتباع المنهجيات والضوابط المعتمدة بالمعهد.`,
+                    options: ['صح', 'خطأ'],
+                    correctIndex: 1
+                }
+            ];
+        }
 
         const startIdx = tempQuizQuestions.length;
-        newQBatch.forEach((q, i) => {
-            tempQuizQuestions.push({
-                id: 'qq-' + Date.now() + '-' + (startIdx + i),
-                text: q.text,
-                options: [...q.options],
-                correctIndex: q.correctIndex
-            });
+        generatedQuestions.forEach((q, i) => {
+            const isTf = q.type === 'true_false' || (q.options && q.options.length === 2 && (q.options.includes('صح') || q.options.includes('صحيح')));
+            if (isTf) {
+                let cIdx = (q.correctIndex !== undefined) ? q.correctIndex : 0;
+                if (q.correct_answer && (q.correct_answer === 'خطأ' || q.correct_answer === 'False' || q.correct_answer === false)) cIdx = 1;
+                tempQuizQuestions.push({
+                    id: 'qq-' + Date.now() + '-' + (startIdx + i),
+                    type: 'true_false',
+                    text: q.question || q.text || `عبارة تقييم ${startIdx + i + 1}`,
+                    options: ['صح', 'خطأ'],
+                    correctIndex: cIdx
+                });
+            } else {
+                let opts = Array.isArray(q.options) ? [...q.options] : [];
+                opts = opts.map(o => String(o).trim()).filter(o => o && !o.includes('خارج سياق وأهداف'));
+                while (opts.length < 4) opts.push(`خيار ${opts.length + 1}`);
+                opts = opts.slice(0, 4);
+                let cIdx = (q.correctIndex !== undefined) ? q.correctIndex : 0;
+                if (q.correct_answer) {
+                    const fIdx = opts.findIndex(o => o.trim() === String(q.correct_answer).trim());
+                    if (fIdx >= 0) cIdx = fIdx;
+                }
+                tempQuizQuestions.push({
+                    id: 'qq-' + Date.now() + '-' + (startIdx + i),
+                    type: 'mcq',
+                    text: q.question || q.text || `سؤال ${startIdx + i + 1}`,
+                    options: opts,
+                    correctIndex: cIdx
+                });
+            }
         });
 
         renderQuizBuilderQuestions();
@@ -26957,7 +27030,7 @@ END $$;`;
             cont.scrollTop = cont.scrollHeight;
         }
 
-        showToast(`✨ تم إضافة 5 أسئلة جديدة بنجاح بالذكاء الاصطناعي (الإجمالي: ${tempQuizQuestions.length} أسئلة)`, 'success');
+        showToast(`✨ تم إضافة 5 أسئلة ذكية بنجاح من صلب الدرس (الإجمالي: ${tempQuizQuestions.length} أسئلة)`, 'success');
     }
     window.addFiveAiQuestionsToQuizBuilder = addFiveAiQuestionsToQuizBuilder;
 
@@ -26969,23 +27042,83 @@ END $$;`;
     function renderQuizBuilderQuestions() {
         const cont = document.getElementById('lmsQuizQuestionsList');
         if (!cont) return;
-        cont.innerHTML = tempQuizQuestions.map((q, idx) => `
-            <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50 space-y-2">
-                <div class="flex items-center justify-between">
-                    <span class="font-black text-xs text-slate-800">السؤال رقم ${idx + 1}:</span>
-                    ${tempQuizQuestions.length > 1 ? `<button type="button" onclick="removeQuestionFromQuizBuilder(${idx})" class="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer">حذف السؤال</button>` : ''}
-                </div>
-                <input type="text" value="${q.text}" oninput="tempQuizQuestions[${idx}].text = this.value" placeholder="اكتب نص السؤال هنا..." required class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-bold outline-none focus:border-[#0F2942]">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                    ${[0, 1, 2, 3].map(oIdx => `
-                        <div class="flex items-center gap-1.5 bg-white p-1.5 rounded-xl border border-slate-200">
-                            <input type="radio" name="correct_${idx}" value="${oIdx}" ${q.correctIndex === oIdx ? 'checked' : ''} onchange="tempQuizQuestions[${idx}].correctIndex = ${oIdx}" title="حدد كإجابة صحيحة" class="accent-[#0F2942]">
-                            <input type="text" value="${q.options[oIdx] || ''}" oninput="tempQuizQuestions[${idx}].options[${oIdx}] = this.value" placeholder="الخيار ${oIdx + 1}" required class="w-full text-xs font-bold outline-none">
+        if (!tempQuizQuestions || tempQuizQuestions.length === 0) {
+            cont.innerHTML = `<div class="border border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 text-[11px] text-slate-500 font-bold">لم تتم إضافة أسئلة للاختبار بعد.</div>`;
+            return;
+        }
+        cont.innerHTML = tempQuizQuestions.map((q, idx) => {
+            const isTf = q.type === 'true_false';
+            const isMatch = q.type === 'matching' && Array.isArray(q.pairs);
+
+            if (isMatch) {
+                return `
+                    <div class="border-2 border-indigo-200 bg-indigo-50/50 rounded-2xl p-3.5 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="font-black text-xs text-indigo-950">السؤال رقم ${idx + 1}:</span>
+                                <span class="text-[10px] bg-indigo-100 text-indigo-900 border border-indigo-200 font-black px-2 py-0.5 rounded-full">🔗 سؤال توصيل ومطابقة</span>
+                            </div>
+                            ${tempQuizQuestions.length > 1 ? `<button type="button" onclick="removeQuestionFromQuizBuilder(${idx})" class="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer">حذف السؤال ✕</button>` : ''}
                         </div>
-                    `).join('')}
+                        <input type="text" value="${escapeHtml(q.text || '')}" oninput="tempQuizQuestions[${idx}].text = this.value" placeholder="اكتب تعليمات التوصيل..." required class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-bold outline-none focus:border-indigo-600">
+                        <div class="space-y-1.5 pt-1">
+                            ${(q.pairs || []).map((p, pIdx) => `
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" value="${escapeHtml(p.left || '')}" oninput="tempQuizQuestions[${idx}].pairs[${pIdx}].left = this.value" placeholder="المصطلح (العمود أ)" class="bg-white border border-slate-200 rounded-xl p-1.5 text-xs font-bold outline-none">
+                                    <input type="text" value="${escapeHtml(p.right || '')}" oninput="tempQuizQuestions[${idx}].pairs[${pIdx}].right = this.value" placeholder="التعريف (العمود ب)" class="bg-white border border-slate-200 rounded-xl p-1.5 text-xs font-bold outline-none">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (isTf) {
+                return `
+                    <div class="border-2 border-emerald-200 bg-emerald-50/40 rounded-2xl p-3.5 space-y-2 shadow-xs">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="font-black text-xs text-emerald-950">السؤال رقم ${idx + 1}:</span>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-300 font-black px-2 py-0.5 rounded-full">⚖️ سؤال صح أو خطأ ✓/✗</span>
+                            </div>
+                            ${tempQuizQuestions.length > 1 ? `<button type="button" onclick="removeQuestionFromQuizBuilder(${idx})" class="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer">حذف السؤال ✕</button>` : ''}
+                        </div>
+                        <input type="text" value="${escapeHtml(q.text || '')}" oninput="tempQuizQuestions[${idx}].text = this.value" placeholder="اكتب نص عبارة الصح أو الخطأ هنا..." required class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-bold outline-none focus:border-emerald-600">
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <label class="flex items-center gap-2 bg-white p-2 rounded-xl border-2 transition cursor-pointer ${q.correctIndex === 0 ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-black' : 'border-slate-200 text-slate-700 font-bold'}">
+                                <input type="radio" name="quiz_builder_q_${idx}" value="0" ${q.correctIndex === 0 ? 'checked' : ''} onchange="tempQuizQuestions[${idx}].correctIndex = 0; renderQuizBuilderQuestions();" class="accent-emerald-600">
+                                <span class="text-xs">✅ الإجابة الصحيحة: صح</span>
+                            </label>
+                            <label class="flex items-center gap-2 bg-white p-2 rounded-xl border-2 transition cursor-pointer ${q.correctIndex === 1 ? 'border-rose-600 bg-rose-50 text-rose-950 font-black' : 'border-slate-200 text-slate-700 font-bold'}">
+                                <input type="radio" name="quiz_builder_q_${idx}" value="1" ${q.correctIndex === 1 ? 'checked' : ''} onchange="tempQuizQuestions[${idx}].correctIndex = 1; renderQuizBuilderQuestions();" class="accent-rose-600">
+                                <span class="text-xs">❌ الإجابة الصحيحة: خطأ</span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="font-black text-xs text-slate-800">السؤال رقم ${idx + 1}:</span>
+                            <span class="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 font-black px-2 py-0.5 rounded-full">اختيار من متعدد</span>
+                        </div>
+                        ${tempQuizQuestions.length > 1 ? `<button type="button" onclick="removeQuestionFromQuizBuilder(${idx})" class="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer">حذف السؤال ✕</button>` : ''}
+                    </div>
+                    <input type="text" value="${escapeHtml(q.text || '')}" oninput="tempQuizQuestions[${idx}].text = this.value" placeholder="اكتب نص السؤال هنا..." required class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-bold outline-none focus:border-[#0F2942]">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        ${[0, 1, 2, 3].map(oIdx => `
+                            <div class="flex items-center gap-1.5 bg-white p-1.5 rounded-xl border border-slate-200">
+                                <input type="radio" name="quiz_builder_q_${idx}" value="${oIdx}" ${q.correctIndex === oIdx ? 'checked' : ''} onchange="tempQuizQuestions[${idx}].correctIndex = ${oIdx}" title="حدد كإجابة صحيحة" class="accent-[#0F2942]">
+                                <input type="text" value="${escapeHtml((q.options && q.options[oIdx]) || '')}" oninput="if (!tempQuizQuestions[${idx}].options) tempQuizQuestions[${idx}].options = ['', '', '', '']; tempQuizQuestions[${idx}].options[${oIdx}] = this.value" placeholder="الخيار ${oIdx + 1}" required class="w-full text-xs font-bold outline-none bg-transparent">
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function saveLmsQuiz(e) {
@@ -27022,13 +27155,22 @@ END $$;`;
         }
         for (let i = 0; i < tempQuizQuestions.length; i++) {
             const q = tempQuizQuestions[i];
-            if (!q.text.trim()) {
+            if (!q.text || !q.text.trim()) {
                 showToast(`يرجى كتابة نص السؤال رقم ${i + 1}`, 'error');
                 return;
             }
-            if (q.options.some(opt => !opt.trim())) {
-                showToast(`يرجى تعبئة كافة خيارات الإجابة للسؤال رقم ${i + 1}`, 'error');
-                return;
+            const isTf = q.type === 'true_false' || (q.options && q.options.length === 2);
+            const isMatch = q.type === 'matching' && Array.isArray(q.pairs);
+            if (isMatch) {
+                if (!q.pairs || q.pairs.length < 2 || q.pairs.some(p => !p.left?.trim() || !p.right?.trim())) {
+                    showToast(`يرجى تعبئة كافة أزواج التوصيل للسؤال رقم ${i + 1}`, 'error');
+                    return;
+                }
+            } else if (!isTf) {
+                if (!q.options || q.options.length < 2 || q.options.some(opt => !opt.trim())) {
+                    showToast(`يرجى تعبئة كافة خيارات الإجابة للسؤال رقم ${i + 1}`, 'error');
+                    return;
+                }
             }
         }
 
@@ -29057,68 +29199,7 @@ function buildDemoExecutiveReport(params) {
   };
 }
 
-async function handleExecutiveReport(req, res, startTime) {
-  const { recipient, sender, weekLabel, stats, additionalNotes } = req.body || {};
-  const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
-  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
-  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE' && apiKey.length > 15);
-
-  let generatedData = null;
-  let modeUsed = 'demo_fallback';
-
-  if (hasValidKey) {
-    try {
-      const promptText = EXECUTIVE_PROMPT_TEMPLATE
-        .replace('{RECIPIENT}', recipient || 'سعادة الأستاذ المحترم / محمد كمال العواد (مدير التشغيل)')
-        .replace('{SENDER}', sender || 'إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك')
-        .replace(/{WEEK_LABEL}/g, weekLabel || 'الأسبوع الحالي')
-        .replace('{TOTAL_TRAINEES}', stats?.totalTrainees || 830)
-        .replace('{ATTENDANCE_RATE}', stats?.overallAttendanceRate || 94)
-        .replace('{P1_RATE}', stats?.period1Rate || 95)
-        .replace('{P2_RATE}', stats?.period2Rate || 93)
-        .replace('{GROUPS_COUNT}', stats?.activeGroupsCount || 16)
-        .replace('{TRAINERS_COUNT}', stats?.trainersCount || 9)
-        .replace('{LMS_STATS}', `التكليفات المنجزة: ${stats?.assignmentsSubmittedCount || 780}، الاختبارات المكتملة: ${stats?.quizzesCompletedCount || 42}`)
-        .replace('{ADDITIONAL_NOTES}', additionalNotes ? `\n- ملاحظات إضافية من الإدارة: ${additionalNotes}` : '');
-
-      const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-      const geminiRes = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: promptText }] }],
-          generationConfig: { temperature: 0.35, responseMimeType: 'application/json' }
-        })
-      });
-
-      if (geminiRes.ok) {
-        const geminiJson = await geminiRes.json();
-        const candidateText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
-        const parsed = safeExtractJson(candidateText);
-        if (parsed && typeof parsed === 'object') {
-          generatedData = parsed;
-          modeUsed = `gemini (${model})`;
-        }
-      }
-    } catch (err) {
-      console.warn('Gemini executive report error, falling back to smart template:', err.message);
-    }
-  }
-
-  if (!generatedData) {
-    generatedData = buildDemoExecutiveReport(req.body);
-  }
-
-  const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
-  return res.status(200).json({
-    success: true,
-    mode: modeUsed,
-    processing_time_seconds: parseFloat(durationSec),
-    data: generatedData
-  });
-}
+// Executive report generation is handled securely server-side in api/generate.js
 
     function buildClientSideAiModule(sourceText, filename, courseName, weekTitle) {
         const smartResult = buildSmartLmsContentFromText(sourceText, filename, courseName, weekTitle);
@@ -30501,7 +30582,7 @@ async function handleExecutiveReport(req, res, startTime) {
         const userPrompt = promptInput ? promptInput.value.trim() : '';
 
         const courseKey = getActiveTrainerCourseKey();
-        const courseData = (typeof lmsCourses !== 'undefined' && lmsCourses[courseKey]) ? lmsCourses[courseKey] : (lmsCourses['اللحام'] || {});
+        const courseData = (typeof lmsCourses !== 'undefined' && lmsCourses[courseKey]) ? lmsCourses[courseKey] : ((typeof lmsCourses !== 'undefined' && lmsCourses['اللحام']) || {});
         const activeWeek = (typeof getActiveTrainerLmsWeekObj === 'function')
             ? getActiveTrainerLmsWeekObj(courseData)
             : ((courseData.weeks && courseData.weeks[0]) || {});
@@ -30510,6 +30591,33 @@ async function handleExecutiveReport(req, res, startTime) {
         const weekNum = activeWeek ? (activeWeek.week || activeWeek.weekNum || 1) : 1;
         const weekTitle = activeWeek ? (activeWeek.title || `الأسبوع ${weekNum}`) : `الأسبوع ${weekNum}`;
         const weekTopic = activeWeek ? (activeWeek.topic || '') : '';
+
+        // Harvest comprehensive lesson content from activeWeek
+        const docsText = (activeWeek.docs || activeWeek.documents || [])
+            .map(d => `${d.title || ''}: ${d.desc || d.notes || d.content || ''}`)
+            .filter(t => t.trim().length > 2)
+            .join('\n');
+        const lectureText = activeWeek.lecture
+            ? `${activeWeek.lecture.title || ''}\n${activeWeek.lecture.summary || ''}\n${(activeWeek.lecture.topics || []).join(', ')}`
+            : '';
+        const glossaryText = (activeWeek.glossary_notes?.terms || [])
+            .map(t => `${t.en} (${t.ar}): ${t.definition || ''}`)
+            .join('\n');
+        const videosText = (activeWeek.videos || [])
+            .map(v => `${v.title || ''}: ${v.description || ''}`)
+            .filter(t => t.trim().length > 2)
+            .join('\n');
+
+        const gatheredContent = [
+            userPrompt ? `توجيه خاص من المدرب: ${userPrompt}` : '',
+            weekTopic ? `موضوع الدرس: ${weekTopic}` : '',
+            lectureText ? `ملخص وشرح المحاضرة:\n${lectureText}` : '',
+            docsText ? `المذكرات والمراجع المرفقة:\n${docsText}` : '',
+            glossaryText ? `المصطلحات الفنية المعتمدة:\n${glossaryText}` : '',
+            videosText ? `عناوين الشروحات المرئية:\n${videosText}` : ''
+        ].filter(Boolean).join('\n\n');
+
+        const finalContent = gatheredContent.trim() || userPrompt || `${courseTitle} - ${weekTitle}: ${weekTopic || 'الدرس التطبيقي'}`;
 
         const loadingState = document.getElementById('caiLoadingState');
         const loadingMsg = document.getElementById('caiLoadingMsg');
@@ -30546,12 +30654,14 @@ async function handleExecutiveReport(req, res, startTime) {
         }
 
         const payload = {
+            action: target === 'quiz' ? 'generate_quiz' : (target === 'assignment' ? 'generate_assignment' : undefined),
+            targetComponent: target,
             courseName: courseTitle,
             weekTitle: `${weekTitle} (الأسبوع ${weekNum})`,
             weekTopic: userPrompt || weekTopic || weekTitle,
-            textInput: userPrompt || `${courseTitle} - ${weekTitle}: ${weekTopic}`,
-            filename: `توليد_${target}.txt`,
-            targetComponent: target
+            textInput: finalContent,
+            lessonContent: finalContent,
+            filename: `محتوى_${courseTitle}_${weekTitle}.txt`
         };
 
         let generatedData = null;
@@ -30567,14 +30677,17 @@ async function handleExecutiveReport(req, res, startTime) {
                 if (json && json.success && json.data) {
                     generatedData = json.data;
                 }
+            } else {
+                const errText = await resp.text();
+                console.warn(`AI generate HTTP error ${resp.status}:`, errText);
             }
         } catch (fetchErr) {
-            console.warn('Network call to AI generate failed, using smart local generator:', fetchErr);
+            console.warn('Network call to AI generate failed, falling back to smart local generator:', fetchErr);
         }
 
-        // Smart local rule-based fallback if offline or API unavailable
+        // Domain-aware semantic fallback if offline or API unavailable
         if (!generatedData) {
-            generatedData = generateSmartComponentFallback(target, courseTitle, weekTitle, userPrompt || weekTopic);
+            generatedData = generateSmartComponentFallback(target, courseTitle, weekTitle, userPrompt || weekTopic, finalContent);
         }
 
         // Apply generated data directly to the respective target builder modal
@@ -30634,7 +30747,7 @@ async function handleExecutiveReport(req, res, startTime) {
             const modal = document.getElementById('lmsDocModal');
             if (modal) modal.classList.remove('hidden');
         } else if (target === 'quiz') {
-            const qz = data.quiz || {};
+            const qz = data.quiz || data || {};
             const qTitle = document.getElementById('lmsQuizTitle');
             const qDur = document.getElementById('lmsQuizDuration');
             const qPts = document.getElementById('lmsQuizTotalPoints');
@@ -30648,125 +30761,64 @@ async function handleExecutiveReport(req, res, startTime) {
                 : [
                     {
                         type: 'mcq',
-                        question: `ما هو المفهوم الأساسي المرتبط بـ ${weekTitle} في بيئة العمل الصناعية؟`,
-                        options: ['تطبيق إجراءات التشغيل والسلامة القياسية', 'تجاهل مؤشرات الفحص الدوري', 'الاعتماد على التقدير الشخصي غير الموثق', 'تعطيل أنظمة الإنذار المبكر'],
-                        correctIndex: 0
-                    },
-                    {
-                        type: 'mcq',
-                        question: `أي مما يلي يمثل الاستخدام الأمثل للمصطلحات الفنية المعتمدة؟`,
-                        options: ['توحيد لغة التواصل الفني ودقة توثيق التقارير', 'إلغاء سجلات الفحص الميداني', 'تقليل فترات الصيانة الوقائية', 'تجاوز اشتراطات الجودة المعتمدة'],
+                        question: `ما هو المفهوم الأساسي المرتبط بـ ${weekTitle}؟`,
+                        options: ['استيعاب المفاهيم والتطبيقات العملية المقررة', 'تجاهل متطلبات التدريب المقررة', 'الاعتماد على التقدير الشخصي غير الموثق', 'تعطيل إجراءات المتابعة والتقييم'],
                         correctIndex: 0
                     },
                     {
                         type: 'true_false',
-                        question: `يعد الالتزام بمهمات الوقاية الشخصية (PPE) إلزامياً لكافة العاملين في بيئة العمل.`,
+                        question: `يعد استيعاب محتوى ${weekTitle} متطلباً أساسياً لاجتياز التقييمات الأسبوعية.`,
                         options: ['صح', 'خطأ'],
                         correctIndex: 0
-                    },
-                    {
-                        type: 'true_false',
-                        question: `يجوز تشغيل الآلات والمعدات الدوارة دون التأكد من تثبيت حواجز الحماية الوقائية.`,
-                        options: ['صح', 'خطأ'],
-                        correctIndex: 1
                     }
                 ];
 
-            const finalQuestions = Array.isArray(rawQuestions) ? [...rawQuestions] : [];
-            const backupQuestionsPool = [
-                {
-                    type: 'mcq',
-                    question: `ما هي الوظيفة الأساسية لقائمة الفحص الفني (Inspection Checklist) في ${weekTitle}؟`,
-                    options: ['توثيق جاهزية المعدات والتحقق من سلامة بيئة العمل قبل البدء', 'إلغاء إجراءات الصيانة الوقائية المقررة', 'الاستغناء عن ارتداء مهمات الوقاية الشخصية', 'زيادة سرعة الإنتاج على حساب معايير الأمان'],
-                    correctIndex: 0
-                },
-                {
-                    type: 'mcq',
-                    question: `أي من المصطلحات التالية يمثل مهمات الوقاية الشخصية الإلزامية؟`,
-                    options: ['Personal Protective Equipment (PPE)', 'Plant Process Evaluation (PPE)', 'Primary Performance Estimation (PPE)', 'Power Plant Engineering (PPE)'],
-                    correctIndex: 0
-                },
-                {
-                    type: 'mcq',
-                    question: `ما الهدف التشغيلي من تطبيق إجراءات التشغيل القياسية (SOP) في العمليات الفنية؟`,
-                    options: ['توحيد خطوات العمل والحد من الأخطاء التشغيلية والحوادث', 'تسجيل الحضور والانصراف اليومي فقط', 'الاستغناء عن فحص الأجهزة قبل التشغيل', 'إلغاء خطط الطوارئ في الورشة'],
-                    correctIndex: 0
-                },
-                {
-                    type: 'mcq',
-                    question: `ماذا يقصد بمفهوم 'Quality Assurance' في سياق الممارسات المهنية؟`,
-                    options: ['التحقق المنهجي من مطابقة العمليات والمخرجات للمواصفات الهندسية المعتمدة', 'استخدام أدوات غير مطابقة لتقليل النفقات', 'تأجيل فحص المنتجات إلى نهاية المشروع', 'إلغاء التوثيق الفني للعمليات'],
-                    correctIndex: 0
-                },
-                {
-                    type: 'mcq',
-                    question: `ما هو الإجراء الفني السليم المتبع قبل تشغيل أي معدة أو أداة في الورشة؟`,
-                    options: ['إجراء المعاينة البصرية والتحقق من وسائل الحماية ومهمات الوقاية', 'تشغيل المعدة بأقصى حمل ممكن فوراً', 'تعطيل مفاتيح الطوارئ للسرعة', 'تجاوز كتيبات التشغيل القياسية'],
-                    correctIndex: 0
-                },
-                {
-                    type: 'mcq',
-                    question: `أي مما يلي يمثل الخطوة الأولى في إدارة وتقييم المخاطر (Risk Assessment)؟`,
-                    options: ['تحديد مصادر الخطر المحتملة في موقع العمل وتقدير شدتها', 'تجاهل تقارير السلامة الميدانية', 'تعطيل أجهزة الإنذار المبكر', 'مغادرة بيئة العمل دون إبلاغ المشرف'],
-                    correctIndex: 0
-                },
-                {
-                    type: 'true_false',
-                    question: `عبارة: يعد الالتزام بمهمات الوقاية الشخصية (PPE) وإجراءات التشغيل القياسية (SOP) أمراً إلزامياً لكافة المتدربين.`,
-                    options: ['صح', 'خطأ'],
-                    correctIndex: 0
-                },
-                {
-                    type: 'true_false',
-                    question: `عبارة: يجوز تشغيل الآلات والمعدات الفنية دون التحقق المسبق من جاهزية أجهزة الأمان وحواجز الحماية.`,
-                    options: ['صح', 'خطأ'],
-                    correctIndex: 1
-                },
-                {
-                    type: 'true_false',
-                    question: `عبارة: المصطلحات الفنية المعتمدة باللغة الإنجليزية تمثل أداة تواصل ميدانية أساسية في بيئات العمل الصناعية.`,
-                    options: ['صح', 'خطأ'],
-                    correctIndex: 0
-                },
-                {
-                    type: 'true_false',
-                    question: `عبارة: توثيق ملاحظات التشغيل والأعطال في سجلات الصيانة يساهم مباشرة في تجنب الحوادث المستقبلية.`,
-                    options: ['صح', 'خطأ'],
-                    correctIndex: 0
-                }
-            ];
+            tempQuizQuestions = rawQuestions.map((q, idx) => {
+                const isTf = q.type === 'true_false' || (Array.isArray(q.options) && q.options.length === 2 && (q.options.includes('صح') || q.options.includes('صحيح')));
+                const isMatching = q.type === 'matching' && Array.isArray(q.pairs);
 
-            let bIdx = 0;
-            while (finalQuestions.length < 10 && bIdx < backupQuestionsPool.length * 3) {
-                const cand = backupQuestionsPool[bIdx % backupQuestionsPool.length];
-                const exists = finalQuestions.some(q => (q.question || q.text) === cand.question);
-                if (!exists) {
-                    finalQuestions.push(JSON.parse(JSON.stringify(cand)));
-                } else if (finalQuestions.length < 10) {
-                    const cl = JSON.parse(JSON.stringify(cand));
-                    cl.question = `[إضافي] ${cl.question}`;
-                    finalQuestions.push(cl);
+                if (isMatching) {
+                    return {
+                        id: 'qq-' + Date.now() + '-' + idx,
+                        type: 'matching',
+                        text: q.question || q.text || 'صل بين المفهوم في العمود (أ) وتعريفه في العمود (ب):',
+                        pairs: q.pairs
+                    };
                 }
-                bIdx++;
-            }
 
-            tempQuizQuestions = finalQuestions.map((q, idx) => {
-                const isTf = q.type === 'true_false';
-                let opts = Array.isArray(q.options) ? [...q.options] : [];
                 if (isTf) {
-                    opts = ['صح', 'خطأ', 'حسب طبيعة العمل', 'غير محدد'];
-                } else {
-                    while (opts.length < 4) opts.push(`خيار ${opts.length + 1}`);
+                    let cIdx = (q.correctIndex !== undefined) ? q.correctIndex : 0;
+                    const cAns = String(q.correct_answer || '').trim();
+                    if (cAns === 'خطأ' || cAns === 'false' || cAns === 'False' || cAns === '0' || cAns.includes('خطأ')) {
+                        cIdx = 1;
+                    } else if (cAns === 'صح' || cAns === 'true' || cAns === 'True' || cAns === '1' || cAns.includes('صح')) {
+                        cIdx = 0;
+                    }
+                    return {
+                        id: 'qq-' + Date.now() + '-' + idx,
+                        type: 'true_false',
+                        text: q.question || q.text || `عبارة تقييم ${idx + 1}`,
+                        options: ['صح', 'خطأ'],
+                        correctIndex: cIdx
+                    };
                 }
+
+                // Default MCQ
+                let opts = Array.isArray(q.options) ? [...q.options] : [];
+                opts = opts.map(o => String(o).trim()).filter(o => o && !o.includes('خارج سياق وأهداف'));
+                while (opts.length < 4) opts.push(`خيار بديل ${opts.length + 1}`);
+                opts = opts.slice(0, 4);
+
                 let cIdx = (q.correctIndex !== undefined) ? q.correctIndex : 0;
                 if (q.correct_answer) {
-                    const fIdx = opts.findIndex(o => o.trim() === String(q.correct_answer).trim() || o.includes(String(q.correct_answer)));
+                    const fIdx = opts.findIndex(o => o.trim() === String(q.correct_answer).trim());
                     if (fIdx >= 0) cIdx = fIdx;
                 }
                 return {
                     id: 'qq-' + Date.now() + '-' + idx,
+                    type: 'mcq',
                     text: q.question || q.text || `سؤال ${idx + 1}`,
-                    options: opts.slice(0, 4),
+                    options: opts,
                     correctIndex: cIdx
                 };
             });
@@ -30855,14 +30907,23 @@ async function handleExecutiveReport(req, res, startTime) {
         }
     }
 
-    function generateSmartComponentFallback(target, courseTitle, weekTitle, topic) {
-        const cleanTopic = topic || weekTitle || 'المهارات التقنية والمصطلحات المهنية';
+    function generateSmartComponentFallback(target, courseTitle, weekTitle, topic, sourceText = '') {
+        const cleanTopic = topic || weekTitle || 'المهارات التقنية والتطبيقية';
+        const combinedSource = sourceText || `${courseTitle} - ${weekTitle}: ${cleanTopic}`;
+
+        if (typeof buildSmartLmsContentFromText === 'function') {
+            const smartData = buildSmartLmsContentFromText(combinedSource, `${courseTitle}_${cleanTopic}.txt`, courseTitle, weekTitle);
+            if (smartData) {
+                return smartData;
+            }
+        }
+
         return {
             suggested_videos: [
                 {
                     id: 1,
-                    title: `شرح تطبيقي شامل: ${cleanTopic}`,
-                    description: `استعراض عملي للمفاهيم الأساسية والمصطلحات التقنية المعتمدة في ${cleanTopic} مع التطبيق في بيئة التدريب.`,
+                    title: `شرح تطبيقي: ${cleanTopic}`,
+                    description: `استعراض المفاهيم الأساسية لـ ${cleanTopic} في إطار مقرر ${courseTitle}.`,
                     duration: '15:00 دقيقة',
                     youtube_url: resolveClientDirectYouTubeUrl('', cleanTopic, cleanTopic, 0)
                 }
@@ -30870,118 +30931,69 @@ async function handleExecutiveReport(req, res, startTime) {
             lecture: {
                 title: `محاضرة وشرح: ${cleanTopic}`,
                 duration_minutes: 15,
-                summary: `تتناول هذه الوحدة التدريبية دراسة شاملة لمفاهيم ${cleanTopic}، مع التركيز على الممارسات المهنية المعتمدة، وضوابط السلامة الصناعية وإجراءات التشغيل القياسية (SOP)، وتمكين المتدربين من استيعاب المصطلحات التخصصية بدقة.`,
+                summary: `تتناول هذه الوحدة دراسة مفاهيم ${cleanTopic} في إطار مقرر ${courseTitle}، مع التركيز على التطبيقات الميدانية وإتقان المهارات التخصصية.`,
                 topics: [
-                    `المحور الأول: المفاهيم الأساسية والأطر النظرية لـ ${cleanTopic}`,
-                    `المحور الثاني: إجراءات السلامة المهنية ومهمات الوقاية الشخصية (PPE)`,
-                    `المحور الثالث: التطبيق العملي ومعايير الجودة والتفتيش الدوري`
+                    `المحور الأول: المفاهيم الأساسية لـ ${cleanTopic}`,
+                    `المحور الثاني: التطبيقات المهنية المعتمدة لـ ${cleanTopic}`,
+                    `المحور الثالث: معايير الجودة والتقييم المستمر`
                 ]
             },
             glossary_notes: {
-                title: `قاموس ومذكرة مراجعة: ${cleanTopic}`,
-                description: `ملخص دراسي مكثف للمصطلحات الفنية والمفاهيم التطبيقية لـ ${cleanTopic}.`,
+                title: `مذكرة ومصطلحات: ${cleanTopic}`,
                 terms: [
-                    { en: 'Standard Operating Procedure (SOP)', ar: 'إجراءات التشغيل القياسية', definition: 'التعليمات والخطوات المكتوبة والمعتمدة لتنفيذ العمليات بأعلى معايير الجودة والسلامة.' },
-                    { en: 'Personal Protective Equipment (PPE)', ar: 'مهمات الوقاية الشخصية', definition: 'المعدات الواقية الواجب ارتداؤها لحماية المتدرب والفني من مخاطر العمل.' },
-                    { en: 'Quality Assurance (QA)', ar: 'ضمان الجودة', definition: 'السياسات المنهجية التي تضمن توافق المخرجات مع المواصفات الفنية المعتمدة.' },
-                    { en: 'Preventive Maintenance', ar: 'الصيانة الوقائية', definition: 'أعمال الفحص والخدمة الدورية المجدولة لتفادي الأعطال والتوقفات غير المخططة.' },
-                    { en: 'Inspection Checklist', ar: 'قائمة الفحص الفني', definition: 'وثيقة رسمية تستخدم للتحقق من سلامة كافة الأجزاء قبل بدء التشغيل.' }
-                ]
-            },
-            assignment: {
-                title: `الواجب الأسبوعي التطبيقي: ${cleanTopic}`,
-                total_grade: 10,
-                instructions: `يرجى دراسة موضوع ${cleanTopic} وحل الأسئلة التطبيقية أدناه ورفع ملف الحل أو توثيق الملاحظات المهنية قبل موعد الاستحقاق (استفد من بونص التسليم المبكر +1).`,
-                questions: [
-                    {
-                        type: 'mcq',
-                        question: `ما هو الإجراء الفني الأولي الواجب اتباعه قبل بدء تشغيل معدات ${cleanTopic}؟`,
-                        options: ['فحص قائمة التحقق والتأكد من توافر مهمات الوقاية (PPE)', 'البدء بالتشغيل دون فحص مسبق', 'تجاهل إشارات التحذير من الحمل الزائد', 'تأخير تسجيل بيانات الوردية'],
-                        correctIndex: 0
-                    },
-                    {
-                        type: 'mcq',
-                        question: `المصطلح الفني الذي يرمز لإجراءات التشغيل القياسية المكتوبة هو:`,
-                        options: ['Standard Operating Procedure (SOP)', 'Safety Hazard Identification (SHI)', 'Personal Warning Sign (PWS)', 'Machine Breakdown Limit (MBL)'],
-                        correctIndex: 0
-                    },
-                    {
-                        type: 'true_false',
-                        question: `تعتبر إجراءات الفحص الدوري والصيانة الوقائية ركيزة أساسية لمنع توقف خطوط الإنتاج وحوادث العمل.`,
-                        options: ['صح', 'خطأ'],
-                        correctIndex: 0
-                    },
-                    {
-                        type: 'true_false',
-                        question: `يسمح النظام بتشغيل الماكينات دون ارتداء نظارات الأمان أو حذاء السلامة إذا كانت الوردية قصيرة.`,
-                        options: ['صح', 'خطأ'],
-                        correctIndex: 1
-                    }
+                    { en: 'Core Principles', ar: 'المبادئ الجوهرية', definition: `الأسس والمنطلقات الرئيسية لـ ${cleanTopic}.` },
+                    { en: 'Standard Practice', ar: 'الممارسة القياسية', definition: `الطريقة المهنية المعتمدة لتطبيق مهارات ${cleanTopic}.` },
+                    { en: 'Quality Assurance', ar: 'ضمان الجودة', definition: `المعايير المحددة لقياس مطابقة العمل للمواصفات.` }
                 ]
             },
             quiz: {
-                title: `اختبار الأسبوع التفاعلي: ${cleanTopic}`,
+                title: `اختبار تقييم: ${cleanTopic}`,
                 duration_minutes: 15,
                 total_grade: 10,
                 questions: [
                     {
                         type: 'mcq',
-                        question: `ما هي الوظيفة الأساسية لقائمة الفحص الفني (Inspection Checklist) في ${cleanTopic}؟`,
-                        options: ['توثيق سلامة مكونات المعدة والتأكد من جاهزيتها قبل التشغيل', 'إلغاء إجراءات الصيانة الدورية', 'استبدال مهمات الوقاية الشخصية', 'زيادة سرعة العمل على حساب معايير الأمان'],
-                        correctIndex: 0
-                    },
-                    {
-                        type: 'mcq',
-                        question: `أي من المصطلحات التالية يمثل مهمات الوقاية الشخصية في بيئة الورش والمعامل؟`,
-                        options: ['Personal Protective Equipment (PPE)', 'Preventive Process Estimation (PPE)', 'Pre-Production Evaluation (PPE)', 'Power Plant Engineering (PPE)'],
-                        correctIndex: 0
-                    },
-                    {
-                        type: 'mcq',
-                        question: `ما الغرض من تطبيق إجراءات التشغيل القياسية (SOP) في العمليات الفنية؟`,
-                        options: ['توحيد جودة العمل والحد من احتمالية وقوع الأخطاء والحوادث', 'تسجيل مواعيد الإجازات السنوية', 'إلغاء الفحص الدوري للأجهزة', 'تقليص اشتراطات السلامة'],
-                        correctIndex: 0
-                    },
-                    {
-                        type: 'mcq',
-                        question: `ماذا يعني مصطلح 'Quality Assurance' في سياق الممارسات المهنية المعتمدة؟`,
-                        options: ['التحقق المنهجي من مطابقة العمليات للمواصفات القياسية المعتمدة', 'استخدام خامات غير معتمدة لتقليل التكلفة', 'تأجيل عمليات التفتيش الفني', 'إلغاء التوثيق الدوري'],
-                        correctIndex: 0
-                    },
-                    {
-                        type: 'mcq',
-                        question: `ما هي الخطوة الأولى الواجب اتباعها قبل تشغيل أي آلة أو معدة صناعية؟`,
-                        options: ['إجراء الفحص المسبق والتحقق من مهمات الوقاية ومفاتيح الطوارئ', 'تشغيل الآلة بأقصى سرعة فوراً', 'تعطيل الحواجز الواقية للسرعة', 'تجاهل إرشادات السلامة'],
-                        correctIndex: 0
-                    },
-                    {
-                        type: 'mcq',
-                        question: `أي من العوامل التالية يمثل ركيزة رئيسية في تقييم المخاطر المهنية (Risk Assessment)؟`,
-                        options: ['تحديد مصادر الخطر وتطبيق الإجراءات الوقائية للحد منها', 'تجاهل تقارير الحوادث الوشيكة', 'تعطيل مسارات الإخلاء', 'إلغاء تدريب الكوادر'],
+                        question: `ما الهدف الأساسي من دراسة وتطبيق موضوع "${cleanTopic}" في مقرر ${courseTitle}؟`,
+                        options: [
+                            `استيعاب المفاهيم الجوهرية وتطبيقها عملياً في بيئة التدريب والعمل`,
+                            `الاطلاع النظري دون أي تطبيق عملي أو مهني`,
+                            `تجاوز الضوابط والاشتراطات الأكاديمية والمهنية المعتمدة`,
+                            `إلغاء المتابعة والتقييم المستمر لمخرجات التعلم`
+                        ],
+                        correct_answer: `استيعاب المفاهيم الجوهرية وتطبيقها عملياً في بيئة التدريب والعمل`,
                         correctIndex: 0
                     },
                     {
                         type: 'true_false',
-                        question: `الالتزام بإجراءات السلامة المهنية يضمن سلامة الكادر البشري وسلامة المعدات ورفع كفاءة الإنتاج.`,
+                        question: `يعد إتقان مهارات "${cleanTopic}" متطلباً رئيسياً لنجاح المتدرب في مقرر ${courseTitle}.`,
                         options: ['صح', 'خطأ'],
+                        correct_answer: 'صح',
+                        correctIndex: 0
+                    }
+                ]
+            },
+            assignment: {
+                title: `الواجب التطبيقي: ${cleanTopic}`,
+                total_grade: 10,
+                instructions: `يرجى مراجعة محتوى الدرس وتلخيص أهم نقاط ${cleanTopic} وتطبيقها في تمرين عملي.`,
+                questions: [
+                    {
+                        type: 'mcq',
+                        question: `أي مما يلي يعبر عن أفضل ممارسة عند تطبيق مهام ${cleanTopic}؟`,
+                        options: [
+                            `اتباع التوجيهات القياسية المعتمدة بدقة`,
+                            `الارتجال والتراجع عن المعايير المحددة`,
+                            `تأجيل التوثيق والمراجعة حتى نهاية الفصل`,
+                            `عدم الرجوع للمراجع والمصادر التعليمية`
+                        ],
+                        correct_answer: `اتباع التوجيهات القياسية المعتمدة بدقة`,
                         correctIndex: 0
                     },
                     {
                         type: 'true_false',
-                        question: `يقتصر توثيق الأعطال وملاحظات التشغيل على المشرف العام فقط دون حاجة لمشاركة الفنيين.`,
+                        question: `التسليم المبكر للواجب يمنح المتدرب بونص تميز إضافي.`,
                         options: ['صح', 'خطأ'],
-                        correctIndex: 1
-                    },
-                    {
-                        type: 'true_false',
-                        question: `يُعد ارتداء مهمات الوقاية الشخصية المناسبة في بيئة الورش إجراءً إلزامياً غير قابل للتهاون.`,
-                        options: ['صح', 'خطأ'],
-                        correctIndex: 0
-                    },
-                    {
-                        type: 'true_false',
-                        question: `المصطلحات الفنية المعتمدة باللغة الإنجليزية تسهل التواصل الفني الموحد والدقيق في الورش.`,
-                        options: ['صح', 'خطأ'],
+                        correct_answer: 'صح',
                         correctIndex: 0
                     }
                 ]
