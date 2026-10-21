@@ -207,6 +207,516 @@ const LMS_PROMPT_TEMPLATE = `أنت خبير أكاديمي ومصمم مناه�
 }`;
 
 // ══════════════════════════════════════════════════════════════════════════════
+//  PROMPT FORMATTER WITH PEDAGOGICAL EXPANSION FOR SHORT INPUTS
+// ══════════════════════════════════════════════════════════════════════════════
+function formatLmsPrompt(contentSection, courseDiscipline = '', weekDiscipline = '', expandedTopic = null) {
+  let prompt = LMS_PROMPT_TEMPLATE
+    .replace(/{COURSE_DISCIPLINE}/g, courseDiscipline || 'المقرر التدريبي المعتمد')
+    .replace(/{WEEK_DISCIPLINE}/g, weekDiscipline || 'الوحدة التدريبية')
+    .replace('{CONTENT_BLOCK}', contentSection);
+
+  if (expandedTopic && expandedTopic.pillars && expandedTopic.pillars.length > 0) {
+    const pillarsText = expandedTopic.pillars
+      .map((p, i) => `${i + 1}. ${p.title} (${p.concept || ''}): ${p.description}`)
+      .join('\n');
+    prompt += `\n\n## التوسيع الأكاديمي والتربوي الإلزامي للدرس (بناء تعليمي منضبط):\n` +
+      `الموضوع الأصلي المدخل: "${expandedTopic.original_user_input}"\n` +
+      `لقد تم تحليل وتوسيع هذا الموضوع إلى 5 محاور تعليمية أساسية يجب أن تنبثق منها المحاضرة والمصطلحات والواجب وجميع الأسئلة الـ 10 حصراً:\n` +
+      pillarsText + `\n\n` +
+      `تحذير صارم: يُحظر حظراً باتاً صياغة أسئلة عامة أو معلبة (مثل الأسئلة الإنشائية المكررة أو العبارات العامة عن مراعاة المعايير دون سياق). كل سؤال يجب أن يقيس موقفاً سلوكياً أو تطبيقياً أو إجرائياً محدداً من المحاور الخمسة أعلاه.`;
+  }
+  return prompt;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  ANTI-GENERIC BOILERPLATE DETECTOR & BANNED PATTERNS
+// ══════════════════════════════════════════════════════════════════════════════
+const BANNED_GENERIC_PATTERNS = [
+  /الأسلوب\s*الأمثل\s*لتطبيق\s*المعارف/i,
+  /الالتزام\s*بالممارسة\s*الدقيقة\s*ومراعاة\s*المعايير/i,
+  /تطبيق\s*المفاهيم\s*المكتسبة\s*في\s*['"].*?['"]\s*يسهم\s*إيجاباً/i,
+  /استيعاب\s*المفاهيم\s*الجوهرية\s*وتطبيقها\s*عملياً/i,
+  /اتباع\s*التوجيهات\s*القياسية\s*المعتمدة\s*بدقة/i,
+  /الارتجال\s*والتراجع\s*عن\s*المعايير/i,
+  /مجرد\s*نصوص\s*نظرية\s*ولا\s*تتطلب\s*أي\s*تطبيق/i,
+  /المفاهيم\s*المطروحة\s*في\s*هذا\s*الدرس\s*هي\s*مجرد\s*نصوص/i,
+  /المراجعة\s*المنتظمة\s*والحرص\s*على\s*حل\s*التكليفات/i,
+  /كيف\s*يسهم\s*استيعاب\s*.*?في\s*تحقيق\s*أهداف\s*الدرس/i,
+  /ما\s*هي\s*الخطوة\s*الأولى\s*الموصى\s*بها\s*للاستفادة\s*الكاملة/i,
+  /أي\s*مما\s*يلي\s*يعبر\s*عن\s*الأثر\s*الإيجابي\s*لتحقيق\s*مخرجات/i,
+  /خارج\s*سياق\s*الدرس/i,
+  /غير\s*متوافق\s*مع\s*المفهوم/i,
+  /تعريف\s*عام\s*غير\s*دقيق/i
+];
+
+function isGenericTemplateQuestion(q) {
+  if (!q) return false;
+  const qText = String(q.question || '');
+  const opts = Array.isArray(q.options) ? q.options.join(' ') : '';
+  const expl = String(q.explanation || '');
+  const full = `${qText} ${opts} ${expl}`;
+  return BANNED_GENERIC_PATTERNS.some(pat => pat.test(full));
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  EDUCATIONAL TOPIC EXPANDER (Pedagogical Scaffolding for Short Inputs)
+// ══════════════════════════════════════════════════════════════════════════════
+function expandEducationalTopic(rawInput, courseName = '', weekTitle = '') {
+  const cleanInput = (rawInput || '').trim();
+  const lower = cleanInput.toLowerCase();
+
+  const isEthics = /(?:أخلاق|أخلاقيات|سلوك|قيم|احترام|انضباط|أمانة|نزاهة|ميثاق|لوائح|غش|مسؤولية|تعامل|زملاء|مدربين|معهد|conduct|ethics|integrity|discipline|behavior|morals)/i.test(lower);
+  const isParents = /(?:أمي|أبي|والد|والدين|بر\s*الوالدين|الأسرة|عقوق|طاعة\s*الوالدين|إحسان|filial)/i.test(lower);
+  const isComputer = /(?:حاسب|كمبيوتر|لوحة\s*المفاتيح|اختصارات|نظام\s*التشغيل|برمج|computer|keyboard|windows)/i.test(lower);
+  const isSafety = /(?:سلامة|وقاية|مخاطر|ppe|hse|osha|إسعاف|طوارئ|حريق|hazard|safety)/i.test(lower);
+  const isWelding = /(?:لحام|قوس|إلكترود|تنجستن|أرجون|weld|smaw|tig|mig)/i.test(lower);
+  const isElectrical = /(?:كهرباء|تيار|جهد|دائرة|مقاومة|volt|amp|circuit|electrical)/i.test(lower);
+  const isAdmin = /(?:إدارة\s*مكتبية|سكرتارية|أرشفة|مراسلات|سجلات|اجتماعات|تنظيم\s*الوقت|office|archive)/i.test(lower);
+
+  // 1. TRAINEE ETHICS & CONDUCT (أخلاقيات المتدرب والسلوك المهني في المعهد)
+  if (isEthics) {
+    return {
+      domain_key: 'trainee_ethics_and_conduct',
+      topic_title: 'أخلاقيات المتدرب والسلوك المهني في المعهد',
+      original_user_input: cleanInput,
+      is_short_topic: cleanInput.length < 250,
+      pedagogical_summary: `الموضوع الأصلي المدخل: "${cleanInput}"\n\nتوسيع المنهج التعليمي المُعتمد (بناء تربوي لتغطية أبعاد الموضوع دون نسبها كمعلومات واردة بالنص الأصلي):\nتتناول هذه الوحدة ترسيخ منظومة الأخلاق المهنية والسلوك الأكاديمي القويم لمتدرب معهد الذهب الأسود للتدريب (BGTI)، من خلال 5 محاور تربوية وتطبيقية متكاملة: 1) احترام هيئة التدريس والزملاء وثقافة الاستماع، 2) الأمانة العلمية والنزاهة ومكافحة الغش في التقييمات، 3) الانضباط المؤسسي والتقيد بالمواعيد والزي واللوائح، 4) المحافظة على ممتلكات المعهد ومعدات التدريب، 5) المسؤولية الذاتية وحل النزاعات باحترافية وتغليب روح الفريق.`,
+      pillars: [
+        {
+          title: 'احترام المدربين والزملاء وآداب الحوار في القاعات والورش التدريبية',
+          description: 'مخاطبة الكادر التدريبي والإداري بأدب وتوقير، والتعامل مع الزملاء بتقدير متبادل وتجنب التنمر أو الاستهزاء أو مقاطعة الشرح.',
+          concept: 'Mutual Respect & Professional Communication'
+        },
+        {
+          title: 'النزاهة الأكاديمية والأمانة في الاختبارات والواجبات ورفض الغش',
+          description: 'الاعتماد الكامل على الجهد الذاتي، والالتزام الصارم بقواعد الاختبارات ومنع الغش بجميع وسائله أو انتحال حلول الآخرين.',
+          concept: 'Academic & Professional Integrity'
+        },
+        {
+          title: 'الانضباط الذاتي والالتزام بمواعيد الحضور والزي والأنظمة المعتمدة',
+          description: 'الحضور في الوقت المحدد للمحاضرات والورش التدريبية، والالتزام بالزي المهني المعتمد، واتباع لوائح المعهد دون تسويف.',
+          concept: 'Institutional Discipline & Punctuality'
+        },
+        {
+          title: 'المحافظة على ممتلكات المعهد ومعدات التدريب والنظافة العامة',
+          description: 'صيانة الأجهزة والمقاعد والأدوات واستخدامها بالمسؤولية الكاملة، وإعادة الأدوات لأماكنها وترك المكان نظيفاً بعد انتهاء التدريب.',
+          concept: 'Stewardship of Facilities & Equipment'
+        },
+        {
+          title: 'تحمّل المسؤولية الشخصية والعمل بروح الفريق وحل الخلافات برقي',
+          description: 'الاعتراف بالخطأ والحرص على تصحيحه، وحل أي خلاف مع الزملاء عبر الحوار العقلاني وتغليب مصلحة الفريق والتعاون البنّاء.',
+          concept: 'Personal Accountability & Conflict Resolution'
+        }
+      ],
+      glossary_terms: [
+        { en: 'Academic Integrity', ar: 'النزاهة الأكاديمية', definition: 'الالتزام بالأمانة والاعتماد على الجهد الشخصي في التقييمات والواجبات ورفض الغش بكافة صوره.' },
+        { en: 'Mutual Respect', ar: 'الاحترام المتبادل', definition: 'توقير المدربين وتقدير الزملاء والاستماع باهتمام وتجنب المقاطعة أو السخرية داخل المعهد.' },
+        { en: 'Institutional Discipline', ar: 'الانضباط المؤسسي', definition: 'الالتزام التام بمواعيد المحاضرات والورش التدريبية، والتقيد بالزي الرسمي ولوائح المعهد.' },
+        { en: 'Stewardship of Assets', ar: 'المحافظة على الممتلكات', definition: 'العناية بمرافق المعهد ومعدات الورش والمعامل، واستخدامها بمسؤولية والإبلاغ الفوري عن الأعطال.' },
+        { en: 'Personal Accountability', ar: 'تحمّل المسؤولية', definition: 'تحمّل تبعات القرارات والاعتراف بالأخطاء وتصويبها، والتعامل الراقي لحل الخلافات بروح الفريق.' }
+      ],
+      quiz_questions: [
+        {
+          id: 1,
+          type: 'mcq',
+          pillar: 'النزاهة الأكاديمية',
+          question: 'أثناء تأدية الاختبار الفصلي في المعهد، طلب منك أحد زملائك في القاعة إظهار ورقة إجابتك لنقل الحل. ما هو التصرف الأخلاقي السليم الذي يمليه ميثاق النزاهة في المعهد؟',
+          options: [
+            'حجب الورقة بهدوء والتركيز في الاختبار الشخصي، وتنبيهه بحزم وأدب ليعتمد على نفسه',
+            'إعطاؤه الإجابة سراً بدافع الصداقة والتعاطف معه ليتجنب الرسوب',
+            'إثارة الفوضى والصراخ في القاعة لفضحه أمام المدرب والمشرفين',
+            'الانسحاب من الاختبار وترك ورقة الإجابة فارغة لتفادي إحراجه'
+          ],
+          correct_answer: 'حجب الورقة بهدوء والتركيز في الاختبار الشخصي، وتنبيهه بحزم وأدب ليعتمد على نفسه',
+          correctIndex: 0,
+          explanation: 'النزاهة الأكاديمية توجب صون الأمانة ومنع الغش بجميع وسائله، مع الحفاظ على هدوء قاعة الاختبار والتركيز الذاتي.'
+        },
+        {
+          id: 2,
+          type: 'mcq',
+          pillar: 'احترام المدربين',
+          question: 'عندما يوجه لك المدرب نقداً مهنياً لملاحظة خطأ في تطبيق مهارة تدريبية أمام زملائك، كيف يتصرف المتدرب ذو الأخلاق العالية؟',
+          options: [
+            'تقبل الملاحظة بصدر رحب، والاستفسار بأدب عن الطريقة الصحيحة لتصحيح الخطأ وتطوير المهارة',
+            'الاعتراض بحدة وإلقاء اللوم على صعوبة الأدوات أو إهمال الزملاء',
+            'مقاطعة المدرب وإظهار عدم الاهتمام بما يقوله وتجاهل التوجيه',
+            'مغادرة القاعة فوراً والامتناع عن إكمال الحصة التدريبية'
+          ],
+          correct_answer: 'تقبل الملاحظة بصدر رحب، والاستفسار بأدب عن الطريقة الصحيحة لتصحيح الخطأ وتطوير المهارة',
+          correctIndex: 0,
+          explanation: 'احترام المدربين وتقبل التوجيهات الفنية ركيزة أساسية في التطور المهني للمتدرب المتميز.'
+        },
+        {
+          id: 3,
+          type: 'mcq',
+          pillar: 'المحافظة على الممتلكات',
+          question: 'لاحظ متدرب وجود عطل بسيط أو تسريب في إحدى معدات المعمل بعد انتهاء التدريب. ما الإجراء المسؤول الواجب عليه؟',
+          options: [
+            'إبلاغ مشرف الورشة أو المدرب بالخلل فوراً لضمان سلامة الآخرين وعدم تفاقم العطل',
+            'مغادرة المكان دون إبلاغ أحد طالما أن وقت الوردية التدريبية قد انتهى',
+            'إخفاء الأداة المعطلة في خزانة الأدوات لتجنب المساءلة',
+            'محاولة فك الجهاز بشكل عشوائي دون تدريب مسبق أو إذن'
+          ],
+          correct_answer: 'إبلاغ مشرف الورشة أو المدرب بالخلل فوراً لضمان سلامة الآخرين وعدم تفاقم العطل',
+          correctIndex: 0,
+          explanation: 'المحافظة على ممتلكات المعهد تتطلب المبادرة الإيجابية والإبلاغ الفوري عن الأعطال لصيانتها وحماية الجميع.'
+        },
+        {
+          id: 4,
+          type: 'mcq',
+          pillar: 'الانضباط والالتزام بالمواعيد',
+          question: 'أي من الممارسات التالية يعكس أقصى درجات الانضباط السلوكي والحرص على الاستفادة من التدريب؟',
+          options: [
+            'الحضور قبل بدء المحاضرة بالزي التدريبي المعتمد والمشاركة الإيجابية مع المدرب',
+            'الاعتياد على التأخر المتكرر والتبرير الدائم بازدحام الطريق',
+            'مغادرة القاعة التدريبية قبل انتهاء الوقت دون استئذان مسبق',
+            'استخدام الهاتف المحمول للألعاب وتصفح وسائل التواصل أثناء الشرح'
+          ],
+          correct_answer: 'الحضور قبل بدء المحاضرة بالزي التدريبي المعتمد والمشاركة الإيجابية مع المدرب',
+          correctIndex: 0,
+          explanation: 'الانضباط في المواعيد والمظهر العام يعكس احترام المتدرب للعملية التعليمية ويسهم في جاهزيته لسوق العمل.'
+        },
+        {
+          id: 5,
+          type: 'mcq',
+          pillar: 'حل النزاعات والعمل الجماعي',
+          question: 'نشأ خلاف في وجهات النظر بين عضوين في فريق عمل تطبيقي داخل الورشة. ما هو المسار الأخلاقي الصحيح لإدارة الموقف؟',
+          options: [
+            'الحوار الهادئ المبني على الدليل الفني، والرجوع للمدرب كمرجع تحكيمي إذا تعذر الاتفاق',
+            'الانسحاب من الفريق وتعطيل تسليم المشروع لإثبات صحة الرأي',
+            'تصعيد الأمر إلى مشاحنات شخصية واستقطاب بقية الزملاء للخلاف',
+            'إلغاء أفكار الزميل دون نقاش وفرض الرأي الفردي بالقوة'
+          ],
+          correct_answer: 'الحوار الهادئ المبني على الدليل الفني، والرجوع للمدرب كمرجع تحكيمي إذا تعذر الاتفاق',
+          correctIndex: 0,
+          explanation: 'حل المشكلات برقي وروح الفريق يضمن جودة العمل ويصون الروابط المهنية والأخوية بين المتدربين.'
+        },
+        {
+          id: 6,
+          type: 'mcq',
+          pillar: 'الأمانة في التكاليف الفنية',
+          question: 'عند تكليف المتدرب بإعداد تقرير تدريبي ميداني، أي الإجراءات يمثل الالتزام بالأمانة المهنية؟',
+          options: [
+            'جمع البيانات وتدوين القياسات الواقعية بدقة دون تحريف أو نسخ تقرير زميل آخر',
+            'نسخ تقرير من متدرب في دفعة سابقة مع تغيير الاسم والصفحة الأولى فقط',
+            'تلفيق قراءات قياس وهمية لتفادي النزول الميداني للقاعة والورشة',
+            'دفع مقابل مالي لشخص آخر لكتابة التقرير بالكامل'
+          ],
+          correct_answer: 'جمع البيانات وتدوين القياسات الواقعية بدقة دون تحريف أو نسخ تقرير زميل آخر',
+          correctIndex: 0,
+          explanation: 'الأمانة العلمية تقتضي توثيق البيانات الحقيقية؛ لأن التقرير الفني المزور قد يتسبب في أخطاء كارثية مستقبلاً.'
+        },
+        {
+          id: 7,
+          type: 'true_false',
+          pillar: 'آداب الحوار',
+          question: 'يجوز للمتدرب مقاطعة زميله أثناء طرح فكرته في المحاضرة إذا كان متأكداً تماماً من خطأ المعلومة المطروحة.',
+          options: ['صح', 'خطأ'],
+          correct_answer: 'خطأ',
+          correctIndex: 1,
+          explanation: 'من آداب الاستماع والحديث انتظار انتهاء الزميل ثم الاستئذان من المدرب للتعقيب بأدب وتقديم المعلومة الصحيحة بلباقة.'
+        },
+        {
+          id: 8,
+          type: 'true_false',
+          pillar: 'المحافظة على المرافق العامة',
+          question: 'تُعد نظافة القاعات والمعامل مسؤولية مشتركة بين إدارة المعهد والمتدرب الذي يجب أن يترك مكانه منظماً ونظيفاً.',
+          options: ['صح', 'خطأ'],
+          correct_answer: 'صح',
+          correctIndex: 0,
+          explanation: 'المحافظة على البيئة التدريبية والمرافق العامة تعكس رقي المتدرب وشعوره بالمسؤولية والانتماء لمعهده.'
+        },
+        {
+          id: 9,
+          type: 'true_false',
+          pillar: 'مكافحة الغش',
+          question: 'من متطلبات الأمانة الأكاديمية والمهنية رفض مساعدة الزملاء في الغش أثناء الاختبارات والتقييمات المعتمدة.',
+          options: ['صح', 'خطأ'],
+          correct_answer: 'صح',
+          correctIndex: 0,
+          explanation: 'مساعدة الزميل في الغش لا تُعد تعاوناً بل هي تضليل وضرر له ولعدالة التقييم ومخالفة صريحة للوائح المعهد.'
+        },
+        {
+          id: 10,
+          type: 'matching',
+          pillar: 'المفاهيم الأخلاقية وتطبيقاتها',
+          question: '🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم أخلاقي وسلوكي في القائمة (أ) بتطبيقه العملي في المعهد في القائمة (ب):',
+          pairs: [
+            { left: 'النزاهة الأكاديمية (Academic Integrity)', right: 'الاعتماد على الجهد الشخصي والامتناع التام عن الغش في التقييمات.' },
+            { left: 'الانضباط المؤسسي (Institutional Discipline)', right: 'الالتزام التام بمواعيد المحاضرات والزي المعتمد ولوائح المعهد.' },
+            { left: 'حسن التعامل (Mutual Respect)', right: 'مخاطبة المدربين والزملاء بأدب وتوقير وتجنب السخرية والمقاطعة.' },
+            { left: 'المسؤولية المهنية (Personal Accountability)', right: 'المحافظة على ممتلكات المعهد والاعتراف بالخطأ وتغليب مصلحة الفريق.' }
+          ],
+          explanation: 'تم توصيل كافة المفاهيم الأخلاقية بتطبيقاتها السلوكية الدقيقة بنجاح.'
+        }
+      ],
+      assignment: {
+        title: 'الواجب والتكليف السلوكي: ميثاق أخلاقيات المتدرب في المعهد',
+        total_grade: 10,
+        instructions: 'اقرأ الحالة السلوكية التالية بعناية، ثم أجب عن الأسئلة التطبيقية مع تقديم تحليلك المكتوب لكيفية تطبيق السلوك الأخلاقي القويم.',
+        questions: [
+          {
+            type: 'mcq',
+            question: 'في مشروع تطبيقي مشترك، امتنع أحد أعضاء الفريق عن أداء مهامه المحددة واعتمد على عمل بقية زملائه. ما الإجراء الأخلاقي والمهني السليم؟',
+            options: [
+              'عقد جلسة حوار ودية معه وتوضيح أهمية مساهمته، وإبلاغ المدرب بشفافية في حال استمراره بالتقاعس',
+              'التستر عليه وكتابة اسمه في التقرير كأنه أنجز العمل بالكامل',
+              'طرد الزميل من الفريق والاعتداء عليه لفظياً أمام بقية المجموعات',
+              'إلغاء المشروع المشترك والغياب عن المحاضرات'
+            ],
+            correct_answer: 'عقد جلسة حوار ودية معه وتوضيح أهمية مساهمته، وإبلاغ المدرب بشفافية في حال استمراره بالتقاعس',
+            correctIndex: 0,
+            explanation: 'التصرف المهني يجمع بين النصح الودي أولاً ثم الشفافية المؤسسية مع المشرف دون تستر أو اعتداء.'
+          },
+          {
+            type: 'true_false',
+            question: 'الالتزام الأخلاقي بالنزاهة والأمانة في المعهد ينعكس مباشرة على نجاح المتدرب واستقراره الوظيفي في الشركات الراعية مستقبلاً.',
+            options: ['صح', 'خطأ'],
+            correct_answer: 'صح',
+            correctIndex: 0,
+            explanation: 'الشركات الراعية تضع الأمانة والانضباط كأهم معيار للاحتفاظ بالموظفين وترقيتهم.'
+          }
+        ],
+        text_questions: [
+          {
+            prompt: 'صف موقفاً واقعياً داخل قاعات أو ورش المعهد يتطلب من المتدرب إظهار أمانة عالية أو تحملاً للمسؤولية، وبيّن كيف ينبغي أن يتصرف المتدرب ذو الأخلاق العالية.',
+            guidelines: 'اذكر الموقف، والخيار السلوكي الصحيح، والنتيجة الإيجابية المترتبة على ذلك الالتزام.',
+            model_answer: 'مثال: العثور على أداة قياس أو هاتف شخصي مفقود في الورشة؛ التصرف السليم هو تسليمه فوراً لإدارة المعهد أو المدرب، مما يرسخ بيئة تدريبية يسودها الأمان والثقة.'
+          }
+        ]
+      }
+    };
+  }
+
+  // 2. FILIAL PIETY & FAMILY (بر الوالدين والأسرة)
+  if (isParents) {
+    return {
+      domain_key: 'filial_piety_and_family',
+      topic_title: 'بر الوالدين: المنزلة العظيمة والتطبيقات العملية في الحياة',
+      original_user_input: cleanInput,
+      is_short_topic: cleanInput.length < 250,
+      pedagogical_summary: `الموضوع الأصلي المدخل: "${cleanInput}"\n\nتوسيع المنهج التعليمي المُعتمد:\nتتناول هذه الوحدة قيمة بر الوالدين ومنزلتها العظيمة وتطبيقاتها الملموسة عبر 5 محاور: 1) الإحسان والقول الكريم وخفض الجناح، 2) المبادرة بالرعاية وتلمس الاحتياجات، 3) حسن الاستماع والمشورة وتجنب الضجر والتأفف، 4) صلة قرابة وأصدقاء الوالدين وإكرامهم، 5) استمرار البر بالدعاء والصدقة في الحياة وبعد الممات.`,
+      pillars: [
+        { title: 'الإحسان والقول الكريم وخفض الجناح', description: 'التأدب في الخطاب وتجنب التأفف وإظهار التواضع التام أمام الوالدين.', concept: 'Benevolence & Gentle Speech' },
+        { title: 'المبادرة بالرعاية وتقديم العون دون انتظار الطلب', description: 'قضاء حوائج الوالدين والعناية بصحتهما وراحتهما بمحبة وطواعية.', concept: 'Proactive Dutiful Care' },
+        { title: 'حسن الاستماع والإنصات وتجنب إظهار الانشغال', description: 'الإصغاء لحديثهما باهتمام وعدم مقاطعتهما أو إظهار التبرم.', concept: 'Active Listening & Reverence' },
+        { title: 'صلة قرابة الوالدين وأصدقائهما', description: 'إكرام أهل ودهما وصلة الأرحام المنوطة بهما تعظيماً لمقامهما.', concept: 'Extended Kinship Respect' },
+        { title: 'استدامة البر بالدعاء والاستغفار في الحياة وبعد الممات', description: 'طلب الرحمة والمغفرة لهما والوفاء بعهودهما والتصدق عنهما.', concept: 'Continuous Supplication' }
+      ],
+      glossary_terms: [
+        { en: 'Filial Piety', ar: 'بر الوالدين', definition: 'الإحسان التام للوالدين وطاعتهما في المعروف والتفاني في رعايتهما.' },
+        { en: 'Benevolent Speech', ar: 'القول الكريم', definition: 'مخاطبة الوالدين بألطف الألفاظ وألين العبارات وتجنب كل كلمة توحي بالضجر.' },
+        { en: 'Reverence & Respect', ar: 'التوقير والإجلال', definition: 'تعظيم مكانتهما وتقديم راحتهما ومشورتهما في شؤون الحياة.' },
+        { en: 'Continuous Supplication', ar: 'الدعاء المستمر', definition: 'سؤال الله لهما المغفرة والرحمة والصحة في حياتهما وبعد رحيلهما.' }
+      ],
+      quiz_questions: [
+        {
+          id: 1,
+          type: 'mcq',
+          pillar: 'القول الكريم',
+          question: 'عندما يتكرر سؤال الوالدين عن أمر استفسرا عنه سابقاً، ما السلوك الذي يجسد "القول الكريم" وفق تعاليم البر؟',
+          options: [
+            'إعادة الشرح بلطف وصوت هادئ وبشاشة وجه دون إظهار أي تذمر',
+            'التأفف وإخبارهما بأنهما نسيا المعلومة كالعادة',
+            'تجاهل الرد والانشغال بالهاتف المحمول',
+            'رفع الصوت لإنهاء الحديث سريعاً'
+          ],
+          correct_answer: 'إعادة الشرح بلطف وصوت هادئ وبشاشة وجه دون إظهار أي تذمر',
+          correctIndex: 0,
+          explanation: 'البر يقتضي الصبر وخفض الجناح والرد بألطف عبارة تقديراً لتقدم عمرهما أو حرصهما.'
+        },
+        {
+          id: 2,
+          type: 'mcq',
+          pillar: 'المبادرة بالرعاية',
+          question: 'أي من الأفعال التالية يمثل أعلى مراتب الإحسان والمبادرة بالرعاية تجاه الوالدين؟',
+          options: [
+            'تفقد احتياجاتهما المعيشية والصحية مسبقاً وتلبيتها قبل أن يطلباها',
+            'الانتظار حتى يكررا الطلب عدة مرات لتقديم المساعدة',
+            'الاكتفاء بالتحية السريعة والغياب لفترات طويلة دون سؤال',
+            'تقديم المساعدة مع المنّ والتذكير الدائم بالجهد المبذول'
+          ],
+          correct_answer: 'تفقد احتياجاتهما المعيشية والصحية مسبقاً وتلبيتها قبل أن يطلباها',
+          correctIndex: 0,
+          explanation: 'المبادرة الذاتية بالعناية قبل الطلب تعبر عن عمق المحبة والتفاني في بر الوالدين.'
+        },
+        {
+          id: 3,
+          type: 'true_false',
+          pillar: 'استدامة البر',
+          question: 'ينتهي حق الوالدين في البر والإحسان بوفاتهما وانقطاع صلتهما بالدنيا.',
+          options: ['صح', 'خطأ'],
+          correct_answer: 'خطأ',
+          correctIndex: 1,
+          explanation: 'البر مستمر بعد الوفاة بالدعاء، والاستغفار لهما، وإنفاذ عهدهما، وإكرام صديقهما، وصلة الرحم التي لا توصل إلا بهما.'
+        },
+        {
+          id: 4,
+          type: 'matching',
+          pillar: 'أبعاد البر',
+          question: '🔗 سؤال التوصيل والمطابقة: صِل كل مظهر من مظاهر البر في القائمة (أ) بتطبيقه العملي في القائمة (ب):',
+          pairs: [
+            { left: 'خفض الجناح', right: 'التواضع التام ولين الجانب وعدم التعالي أمام الوالدين.' },
+            { left: 'القول الكريم', right: 'انتقاء أرقى العبارات وتجنب كلمة (أُفّ) أو إظهار الضجر.' },
+            { left: 'صلة ود الوالدين', right: 'إكرام أصدقائهما وأقاربهما والوفاء لعلاقاتهما.' },
+            { left: 'الدعاء والاستغفار', right: 'سؤال الله لهما الرحمة والدرجات العلى دائماً.' }
+          ],
+          explanation: 'تم توصيل كافة المفاهيم الدينية والأخلاقية لبر الوالدين بنجاح.'
+        }
+      ],
+      assignment: {
+        title: 'الواجب العملي: تطبيقات البر في الحياة اليومية',
+        total_grade: 10,
+        instructions: 'اقرأ الحالة وقدم حلاً تطبيقياً يبرهن على استيعابك لقيمة بر الوالدين.',
+        questions: [
+          {
+            type: 'mcq',
+            question: 'إذا تعارض موعد لقاء ترفيهي مع الأصدقاء مع حاجة أحد الوالدين لمرافقة طبية عاجلة، ما القرار الأخلاقي والواجب؟',
+            options: [
+              'الاعتذار للأصدقاء بكل فخر ومرافقة الوالد/الوالدة فوراً',
+              'الذهاب مع الأصدقاء والطلب من الجيران مرافقة الوالد',
+              'إلغاء الموعد الطبي وتأجيله دون استشارة الطبيب',
+              'التذمر وتحميل الوالدين مسؤولية فوات النزهة'
+            ],
+            correct_answer: 'الاعتذار للأصدقاء بكل فخر ومرافقة الوالد/الوالدة فوراً',
+            correctIndex: 0,
+            explanation: 'حق الوالدين مقدم على كافة الارتباطات الشخصية والترفيهية.'
+          }
+        ],
+        text_questions: [
+          {
+            prompt: 'اكتب خطة عملية من 3 نقاط لتطبيق بر الوالدين يومياً في حياتك رغم الانشغال بالدراسة والعمل.',
+            guidelines: 'ركز على التواصل، والرعاية، والدعاء.',
+            model_answer: '1) الاتصال والاطمئنان اليومي، 2) تخصيص وقت لقضاء حوائجهما، 3) ملازمة الدعاء لهما في كل صلاة.'
+          }
+        ]
+      }
+    };
+  }
+
+  // 3. UNIVERSAL ACADEMIC DECOMPOSITION (For any concise topic)
+  const safeTitle = cleanInput.replace(/^[\d\.\-\*#:]+\s*/, '').slice(0, 70) || (courseName ? `${courseName}: الوحدة التدريبية` : 'الموضوع التدريبي المستقل');
+  
+  return {
+    domain_key: 'universal_academic_decomposition',
+    topic_title: safeTitle,
+    original_user_input: cleanInput,
+    is_short_topic: cleanInput.length < 250,
+    pedagogical_summary: `الموضوع الأصلي المدخل: "${cleanInput}"\n\nتوسيع المنهج التعليمي المُعتمد:\nتتناول هذه الوحدة تحليلاً شاملاً وتطبيقياً لموضوع "${safeTitle}"، مع تفكيكه إلى 5 محاور تعليمية أساسية تشمل المفاهيم المحورية، والخطوات الإجرائية التنفيذية، والتطبيق الميداني في بيئة العمل، وتجنب الأخطاء الشائعة، وآليات القياس وضمان الجودة.`,
+    pillars: [
+      { title: `المفاهيم الجوهرية والأسس النظرية لـ ${safeTitle}`, description: `استيعاب المبادئ والتعريفات والركائز التي يقوم عليها هذا المفهوم.`, concept: 'Theoretical Foundations & Core Principles' },
+      { title: `الإجراءات والمعايير التنفيذية لتطبيق ${safeTitle}`, description: `الخطوات المنهجية والمواصفات المعتمدة لتنفيذ المهام بدقة وكفاءة.`, concept: 'Standard Operating Procedures & Standards' },
+      { title: `التطبيق الميداني والسيناريوهات العملية لـ ${safeTitle}`, description: `ربط المفهوم بالواقع العملي وحل المشكلات التشغيلية والتطبيقية.`, concept: 'Practical Field Application & Troubleshooting' },
+      { title: `الأخطاء الشائعة ومخاطر التطبيق الخاطئ لـ ${safeTitle}`, description: `تحديد التحديات والممارسات الخاطئة وطرق تلافيها ومعالجتها فورياً.`, concept: 'Error Prevention & Risk Mitigation' },
+      { title: `معايير الجودة والتقييم المستمر لمخرجات ${safeTitle}`, description: `مؤشرات قياس الأداء وضمان مطابقة النتائج للمواصفات المستهدفة.`, concept: 'Quality Assurance & Continuous Improvement' }
+    ],
+    glossary_terms: [
+      { en: 'Core Principles', ar: `المبادئ الأساسية لـ ${safeTitle}`, definition: `المنطلقات العلمية والمعرفية التي يبنى عليها فهم الموضوع.` },
+      { en: 'Operating Standards', ar: `المعايير التشغيلية`, definition: `الضوابط والمحددات المعتمدة لضمان صحة الإجراءات والتنفيذ.` },
+      { en: 'Practical Execution', ar: `التنفيذ الميداني`, definition: `تحويل المعارف النظرية إلى ممارسات واقعية تحقق النتائج المطلوبة.` },
+      { en: 'Quality Verification', ar: `التحقق وضمان الجودة`, definition: `فحص المخرجات للتأكد من خلوها من العيوب ومطابقتها للمواصفات.` }
+    ],
+    quiz_questions: [
+      {
+        id: 1,
+        type: 'mcq',
+        pillar: 'المفاهيم الجوهرية',
+        question: `ما هو المنطلق العلمي والتطبيقي الرئيسي الذي يرتكز عليه موضوع "${safeTitle}"؟`,
+        options: [
+          `بناء الفهم العميق للمبادئ وتطبيقها بدقة لتحقيق النتائج المستهدفة`,
+          `الاعتماد على التخمين الفردي وتجاهل الأسس العلمية المعتمدة`,
+          `الاقتصار على الحفظ النظري دون أي ممارسة في بيئة العمل`,
+          `إلغاء المعايير الإجرائية وتطبيق خطوات غير مدروسة`
+        ],
+        correct_answer: `بناء الفهم العميق للمبادئ وتطبيقها بدقة لتحقيق النتائج المستهدفة`,
+        correctIndex: 0,
+        explanation: `النجاح في تطبيق ${safeTitle} يتطلب فهماً رصيناً للمبادئ وربطها بالممارسة الدقيقة.`
+      },
+      {
+        id: 2,
+        type: 'mcq',
+        pillar: 'المعايير الإجرائية',
+        question: `عند الشروع في تطبيق متطلبات "${safeTitle}" ميدانياً، ما الإجراء التشغيلي الموصى به أولاً؟`,
+        options: [
+          `فحص بيئة العمل ومراجعة الخطوات الإجرائية والجاهزية قبل البدء`,
+          `البدء العشوائي الفوري دون مراجعة المتطلبات أو التجهيزات`,
+          `تجاهل معايير السلامة والجودة لتسريع الإنجاز الشكلي`,
+          `تفويض العمل لأشخاص غير مؤهلين دون إشراف أو توجيه`
+        ],
+        correct_answer: `فحص بيئة العمل ومراجعة الخطوات الإجرائية والجاهزية قبل البدء`,
+        correctIndex: 0,
+        explanation: `المراجعة المسبقة والتأكد من الجاهزية تضمن سلامة التنفيذ وجودة المخرجات.`
+      },
+      {
+        id: 3,
+        type: 'mcq',
+        pillar: 'تجنب الأخطاء',
+        question: `أي من الممارسات التالية يُعد خطأً تشغيلياً جسيماً أثناء ممارسة مهام "${safeTitle}"؟`,
+        options: [
+          `تجاوز الخطوات المعيارية والاعتماد على الارتجال غير المعتمد`,
+          `التواصل الفعّال مع المشرف وطرح الاستفسارات التوضيحية`,
+          `التوثيق الدوري للنتائج ومقارنتها بالمستهدفات`,
+          `الالتزام بمواعيد التسليم ومعايير السلامة المهنية`
+        ],
+        correct_answer: `تجاوز الخطوات المعيارية والاعتماد على الارتجال غير المعتمد`,
+        correctIndex: 0,
+        explanation: `الارتجال وتجاوز المعايير يؤدي إلى تراكم الأخطاء وتدني كفاءة العمل.`
+      },
+      {
+        id: 4,
+        type: 'true_false',
+        pillar: 'الربط بالميدان',
+        question: `التطبيق السليم لمفاهيم "${safeTitle}" يساهم مباشرة في تعزيز الإنتاجية وتقليل الهدر في بيئة التدريب والعمل.`,
+        options: ['صح', 'خطأ'],
+        correct_answer: 'صح',
+        correctIndex: 0,
+        explanation: `التطبيق الصحيح الممنهج يحقق كفاءة استخدام الموارد ويرفع مستويات الجودة.`
+      },
+      {
+        id: 5,
+        type: 'matching',
+        pillar: 'المصطلحات والمفاهيم',
+        question: `🔗 سؤال التوصيل والمطابقة: صِل كل عنصر في موضوع "${safeTitle}" بالقائمة (أ) بمدلوله الصحيح بالقائمة (ب):`,
+        pairs: [
+          { left: `الأساس النظري لـ ${safeTitle}`, right: `المبادئ والقواعد العلمية التي تحكم الموضوع.` },
+          { left: `المعايير التشغيلية`, right: `الخطوات الدقيقة والضوابط المعتمدة للتنفيذ.` },
+          { left: `الأخطاء الشائعة`, right: `الممارسات السلبية التي يجب تفاديها ورصدها.` },
+          { left: `التحقق وضمان الجودة`, right: `قياس النتائج ومطابقتها للمواصفات المطلوبة.` }
+        ],
+        explanation: `تم توصيل كافة الأبعاد المنهجية لموضوع ${safeTitle} بنجاح.`
+      }
+    ],
+    assignment: {
+      title: `الواجب التطبيقي: ${safeTitle}`,
+      total_grade: 10,
+      instructions: `راجع المحتوى العلمي لـ "${safeTitle}"، وأجب عن الأسئلة مع كتابة ملخص تطبيقي يوضح كيفية تنفيذ المهام بدقة.`,
+      questions: [
+        {
+          type: 'mcq',
+          question: `ما القرار الصائب عند اكتشاف خلل في إحدى خطوات تنفيذ مهام "${safeTitle}"؟`,
+          options: [
+            `إيقاف الإجراء فوراً، ومراجعة المعايير وتصحيح الخطأ قبل المتابعة`,
+            `تجاهل الخلل والاستمرار في العمل لإخفائه عن المشرف`,
+            `إلقاء اللوم على الأدوات وإلغاء المهمة بالكامل`,
+            `تعديل النتائج كتابياً دون تصحيح التطبيق الواقعي`
+          ],
+          correct_answer: `إيقاف الإجراء فوراً، ومراجعة المعايير وتصحيح الخطأ قبل المتابعة`,
+          correctIndex: 0,
+          explanation: 'التصحيح الفوري يمنع تفاقم الأخطاء ويضمن موثوقية العمل النهائي.'
+        }
+      ],
+      text_questions: [
+        {
+          prompt: `اكتب تقريراً موجزاً يوضح خطتك لتطبيق مفاهيم "${safeTitle}" في بيئة العمل الواقعية، محدداً الخطوات الرئيسية ومعايير النجاح.`,
+          guidelines: 'اذكر 3 خطوات تنفيذية ومعيارين لقياس جودة المخرجات.',
+          model_answer: 'يتضمن التقرير: 1) التحضير والمراجعة، 2) التنفيذ المنهجي وفق المعايير، 3) الفحص والتقييم النهائي مع الالتزام بالدقة والسلامة.'
+        }
+      ]
+    }
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 //  PURE NODE.js PPTX TEXT EXTRACTOR (0 External Dependencies)
 //  Reads ZIP Central Directory, inflates slide XMLs via zlib, extracts text
 // ══════════════════════════════════════════════════════════════════════════════
@@ -386,6 +896,14 @@ async function extractTextFromPdfBuffer(buffer) {
 // ══════════════════════════════════════════════════════════════════════════════
 const CURATED_EDUCATIONAL_VIDEOS = [
   {
+    keywords: ['أخلاق', 'أخلاقيات', 'سلوك', 'قيم', 'نزاهة', 'انضباط', 'احترام', 'ميثاق', 'غش', 'ethics', 'conduct', 'integrity', 'discipline'],
+    videos: [
+      { id: 1, title: 'أخلاقيات العمل والسلوك المهني في بيئة التدريب والوظيفة', url: 'https://www.youtube.com/results?search_query=' + encodeURIComponent('أخلاقيات العمل والسلوك المهني في بيئة التدريب'), duration: '12:30 دقيقة' },
+      { id: 2, title: 'النزاهة الأكاديمية والأمانة في بيئة التعليم والتدريب', url: 'https://www.youtube.com/results?search_query=' + encodeURIComponent('النزاهة الأكاديمية والأمانة في بيئة التدريب'), duration: '10:15 دقيقة' },
+      { id: 3, title: 'مهارات الاتصال الفعّال والاحترام المتبادل وحل النزاعات', url: 'https://www.youtube.com/results?search_query=' + encodeURIComponent('مهارات الاتصال والاحترام المتبادل وحل النزاعات'), duration: '14:00 دقيقة' }
+    ]
+  },
+  {
     keywords: ['أمي', 'أبي', 'والد', 'والدين', 'بر الوالدين', 'parent', 'filial', 'أسرة', 'عقوق', 'إحسان'],
     videos: [
       { id: 1, title: 'فضل بر الوالدين والإحسان إليهما وتطبيقاته في الحياة اليومية', url: 'https://www.youtube.com/results?search_query=' + encodeURIComponent('فضل بر الوالدين والإحسان إليهما'), duration: '12:00 دقيقة' },
@@ -554,49 +1072,19 @@ function ensureMinQuizQuestions(data, contextTitle = '') {
     }
   }
 
-  // 2. If questions count is under 10, synthesize questions ONLY from the lesson's terms or lecture topics
-  let termIdx = 0;
-  while (data.quiz.questions.length < 10 && terms.length > 0 && termIdx < terms.length * 3) {
-    const t = terms[termIdx % terms.length];
-    const isMcq = (data.quiz.questions.length % 2 === 0);
-
-    if (isMcq) {
-      const qText = `ما هو المدلول العلمي والتطبيقي للمفهوم '${t.en || t.ar}' وفق سياق هذا الدرس؟`;
-      const exists = data.quiz.questions.some(q => q.question === qText);
-      if (!exists) {
-        // Collect realistic distractors from OTHER real terms in the lesson
-        const otherTerms = terms.filter(item => item !== t);
-        const optA = t.definition ? t.definition.slice(0, 75) : `المفهوم المعتمد لـ ${t.en || t.ar}`;
-        const optB = (otherTerms[0] && otherTerms[0].definition) ? otherTerms[0].definition.slice(0, 75) : `تطبيق يتعلق بـ ${otherTerms[0]?.ar || 'محور آخر في الدرس'}`;
-        const optC = (otherTerms[1] && otherTerms[1].definition) ? otherTerms[1].definition.slice(0, 75) : `الإجراء الميداني المقابل لـ ${t.ar || 'المفهوم'}`;
-        const optD = (otherTerms[2] && otherTerms[2].definition) ? otherTerms[2].definition.slice(0, 75) : `المصطلح الفني المرتبط بالمرحلة التالية`;
-
-        const options = [optA, optB, optC, optD];
-
-        data.quiz.questions.push({
-          type: 'mcq',
-          question: qText,
-          options,
-          correct_answer: optA,
-          correctIndex: 0,
-          explanation: `يرتبط مفهوم ${t.en || t.ar} بـ ${t.definition || t.ar}`
-        });
-      }
-    } else {
-      const qText = `عبارة: تطبيق واستيعاب '${t.en || t.ar}' يُعد عنصراً رئيساً في إتقان متطلبات هذا الدرس وتحقيق أهدافه.`;
-      const exists = data.quiz.questions.some(q => q.question === qText);
-      if (!exists) {
-        data.quiz.questions.push({
-          type: 'true_false',
-          question: qText,
-          options: ['صح', 'خطأ'],
-          correct_answer: 'صح',
-          correctIndex: 0,
-          explanation: `صواب؛ لأن استيعاب ${t.en || t.ar} يدعم تحقيق أهداف الدرس والتطبيق السليم.`
-        });
+  // 2. If questions count is under 10, pull scenario/concept questions from topic expansion first
+  if (data.quiz.questions.length < 10) {
+    const topicKey = contextTitle || data.quiz.title || data.lecture?.title || '';
+    const expanded = expandEducationalTopic(topicKey);
+    if (expanded && Array.isArray(expanded.quiz_questions)) {
+      for (const extraQ of expanded.quiz_questions) {
+        if (data.quiz.questions.length >= 10) break;
+        const exists = data.quiz.questions.some(q => q.question === extraQ.question || (q.type === 'matching' && extraQ.type === 'matching'));
+        if (!exists) {
+          data.quiz.questions.push({ ...extraQ });
+        }
       }
     }
-    termIdx++;
   }
 
   return data;
@@ -609,10 +1097,23 @@ function normalizeAndValidateQuizData(quizData, contextTopic = '') {
   if (!quizData) return null;
   const questions = Array.isArray(quizData.questions) ? quizData.questions : [];
   
+  // Prepare replacement pool from expanded educational curriculum in case any question is generic
+  const expanded = expandEducationalTopic(contextTopic || quizData.title || '');
+  const replacementPool = (expanded && Array.isArray(expanded.quiz_questions)) ? [...expanded.quiz_questions] : [];
+
   const validatedQuestions = [];
   
   questions.forEach((q, idx) => {
     if (!q || !q.question) return;
+
+    // Active Anti-Generic Filter: Intercept and replace any banned boilerplate questions
+    if (isGenericTemplateQuestion(q)) {
+      const repIdx = replacementPool.findIndex(rq => !validatedQuestions.some(vq => vq.question === rq.question));
+      if (repIdx !== -1) {
+        q = replacementPool.splice(repIdx, 1)[0];
+      }
+    }
+
     const isTf = (q.type === 'true_false' || q.type === 'tf');
     const isMatching = (q.type === 'matching' || (Array.isArray(q.pairs) && q.pairs.length >= 2));
     
@@ -623,7 +1124,7 @@ function normalizeAndValidateQuizData(quizData, contextTopic = '') {
       }));
       if (validPairs.length >= 2) {
         validatedQuestions.push({
-          id: idx + 1,
+          id: validatedQuestions.length + 1,
           type: 'matching',
           question: q.question.trim(),
           pairs: validPairs.slice(0, 4),
@@ -635,7 +1136,7 @@ function normalizeAndValidateQuizData(quizData, contextTopic = '') {
       const isTrue = /^(صح|صواب|نعم|true|1|✓)/i.test(rawAns);
       const cleanAns = isTrue ? 'صح' : 'خطأ';
       validatedQuestions.push({
-        id: idx + 1,
+        id: validatedQuestions.length + 1,
         type: 'true_false',
         question: q.question.trim(),
         options: ['صح', 'خطأ'],
@@ -666,7 +1167,7 @@ function normalizeAndValidateQuizData(quizData, contextTopic = '') {
       if (cIdx === -1) cIdx = 0;
       
       validatedQuestions.push({
-        id: idx + 1,
+        id: validatedQuestions.length + 1,
         type: 'mcq',
         question: q.question.trim(),
         options: rawOpts,
@@ -696,6 +1197,7 @@ function buildSmartLmsContentFromText(extractedText, filename, courseName = '', 
     .filter(l => l && !l.startsWith('[') && l.length > 2);
 
   // 1. Detect Topic & Domain from the actual input
+  const hasEthics = /(?:أخلاق|أخلاقيات|سلوك|قيم|احترام|انضباط|أمانة|نزاهة|ميثاق|لوائح|غش|مسؤولية|تعامل|زملاء|مدربين|معهد|conduct|ethics|integrity|discipline|behavior|morals)/i.test(lower);
   const hasParents = /(?:أمي|أبي|والد|والدين|بر\s*الوالدين|الأسرة|عقوق|طاعة\s*الوالدين|إحسان)/i.test(lower);
   const hasComputer = /(?:حاسب|كمبيوتر|لوحة\s*المفاتيح|اختصارات|نظام\s*التشغيل|برمج|computer|keyboard|windows)/i.test(lower);
   const hasSafety = /(?:سلامة|وقاية|مخاطر|ppe|hse|osha|إسعاف|طوارئ|حريق|hazard|safety)/i.test(lower);
@@ -714,10 +1216,39 @@ function buildSmartLmsContentFromText(extractedText, filename, courseName = '', 
     }
   }
   if (!title || title.length < 3) {
-    if (hasParents) title = 'بر الوالدين والإحسان إليهما';
+    if (hasEthics) title = 'أخلاقيات المتدرب والسلوك المهني في المعهد';
+    else if (hasParents) title = 'بر الوالدين والإحسان إليهما';
     else if (hasComputer) title = 'أساسيات استخدام الحاسب واختصارات لوحة المفاتيح';
     else if (hasSafety) title = 'مبادئ السلامة الصناعية ومهمات الوقاية الشخصية';
     else title = 'الوحدة التدريبية التخصصية';
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // DOMAIN 0: TRAINEE ETHICS & CONDUCT (أخلاقيات المتدرب والسلوك المهني)
+  // ─────────────────────────────────────────────────────────────────────────────
+  if (hasEthics) {
+    const ethicsExp = expandEducationalTopic(cleanText || title, courseName, weekTitle);
+    return {
+      suggested_videos: resolveDirectEducationalVideos(cleanText, ethicsExp.topic_title),
+      lecture: {
+        title: `محاضرة: ${ethicsExp.topic_title}`,
+        duration_minutes: 15,
+        summary: ethicsExp.pedagogical_summary,
+        topics: ethicsExp.pillars.map((p, i) => `المحور ${i + 1}: ${p.title}`)
+      },
+      glossary_notes: {
+        title: `قاموس ومذكرات: ${ethicsExp.topic_title}`,
+        description: `مفاهيم ومصطلحات سلوكية ومهنية مستنبطة مباشرة من ميثاق أخلاقيات المتدرب.`,
+        terms: ethicsExp.glossary_terms
+      },
+      quiz: {
+        title: `اختبار تقييم الدرس: ${ethicsExp.topic_title}`,
+        duration_minutes: 15,
+        total_grade: 10,
+        questions: ethicsExp.quiz_questions
+      },
+      assignment: ethicsExp.assignment
+    };
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -1072,224 +1603,31 @@ function buildSmartLmsContentFromText(extractedText, filename, courseName = '', 
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // DOMAIN C: GENERAL TEXT ANALYSIS & UNIVERSAL GROUND TRUTH
+  // DOMAIN C: GENERAL TEXT ANALYSIS VIA PEDAGOGICAL DECOMPOSITION
   // ─────────────────────────────────────────────────────────────────────────────
-  const extractedTerms = [];
-  const termRegex = /([\u0600-\u06FFA-Za-z0-9\s()\/\\-]{2,45})\s*[:\-=–—]\s*([^\n\r]{3,150})/g;
-  let tMatch;
-  while ((tMatch = termRegex.exec(cleanText)) !== null && extractedTerms.length < 6) {
-    const tLabel = tMatch[1].replace(/^[\d\.\-\*•)]+\s*/, '').trim();
-    const tDesc = tMatch[2].trim();
-    if (tLabel.length > 2 && tLabel.length < 45 && !tLabel.toLowerCase().includes('slide') && !tLabel.toLowerCase().includes('page')) {
-      extractedTerms.push({
-        en: tLabel,
-        ar: tLabel,
-        definition: tDesc || `مفهوم تعليمي مشتق من نص الدرس.`
-      });
-    }
-  }
-
-  // If no colon pattern found, extract terms from sentences
-  if (extractedTerms.length === 0) {
-    const words = lines.join(' ').split(/\s+/).filter(w => w.length >= 4);
-    const keyPhrases = lines.slice(0, 4).map(l => l.replace(/[\.\-\*]/g, '').trim()).filter(Boolean);
-    keyPhrases.forEach((phrase, idx) => {
-      if (phrase.length >= 3 && phrase.length <= 40) {
-        extractedTerms.push({
-          en: phrase,
-          ar: phrase,
-          definition: `مفهوم رئيسي تم استخلاصه مباشرة من نص الدرس ومحاوره.`
-        });
-      }
-    });
-  }
-
-  // Fallback safe terms derived purely from topic name
-  if (extractedTerms.length === 0) {
-    extractedTerms.push(
-      { en: `${title} - المفهوم الأول`, ar: `${title} - المفهوم الأول`, definition: `المفهوم الأساسي والمدخل الأكاديمي لموضوع ${title}.` },
-      { en: `${title} - التطبيق العملي`, ar: `${title} - التطبيق العملي`, definition: `التطبيق والممارسة العملية للمهارات المرتبطة بـ ${title}.` },
-      { en: `${title} - المعايير والأهداف`, ar: `${title} - المعايير والأهداف`, definition: `المعايير المعتمدة لتقييم استيعاب ${title}.` },
-      { en: `${title} - الأثر والنتائج`, ar: `${title} - الأثر والنتائج`, definition: `الأثر الإيجابي والنتائج المحققة من دراسة وممارسة ${title}.` }
-    );
-  }
-
-  const summaryText = lines.slice(0, 5).join(' ') || `تتناول هذه الوحدة دراسة تفصيلية لموضوع "${title}" والمفاهيم المرتبطة به.`;
-
-  const dynamicQuestions = [
-    {
-      type: 'mcq',
-      question: `ما هو المحور الأساسي الذي يركز عليه موضوع '${title}'؟`,
-      options: [
-        `استيعاب وتطبيق المفاهيم الأساسية الخاصة بـ ${title}`,
-        'تجاهل المبادئ والمعارف الواردة في الدرس',
-        'التركيز على موضوعات خارج سياق وأهداف الدرس',
-        'الاقتصار على الحفظ الشكلي دون فهم حقيقي'
-      ],
-      correct_answer: `استيعاب وتطبيق المفاهيم الأساسية الخاصة بـ ${title}`,
-      explanation: `الدرس يهدف بشكل رئيسي إلى بناء الفهم العملي والتطبيقي لـ ${title}.`
-    },
-    {
-      type: 'mcq',
-      question: `ما هو المدلول التعليمي للمفهوم '${extractedTerms[0].en}' في هذا الدرس؟`,
-      options: [
-        extractedTerms[0].definition.slice(0, 75),
-        'مفهوم عام لا علاقة له بمحتوى هذه الوحدة',
-        'إجراء غير معتمد ولا يحقق أهداف الدرس',
-        'تعريف مضلل يختلف كلياً عن موضوع الدرس'
-      ],
-      correct_answer: extractedTerms[0].definition.slice(0, 75),
-      explanation: `يرتبط المفهوم ${extractedTerms[0].en} مباشرة بـ ${extractedTerms[0].definition}`
-    },
-    {
-      type: 'mcq',
-      question: `أي من الممارسات التالية يدعم التطبيق الأمثل لمخرجات موضوع '${title}'؟`,
-      options: [
-        'الممارسة المستمرة وربط المفاهيم بالتطبيق الواقعي العملي',
-        'تأجيل التطبيق والاعتماد على التخمين',
-        'إهمال الملاحظات والإرشادات التوجيهية للدرس',
-        'عدم مراجعة المعارف المستفادة من الوحدة'
-      ],
-      correct_answer: 'الممارسة المستمرة وربط المفاهيم بالتطبيق الواقعي العملي',
-      explanation: 'التطبيق العملي والممارسة المستمرة يرسخان المفاهيم ويرفعان مستوى الإتقان.'
-    },
-    {
-      type: 'mcq',
-      question: `كيف يسهم استيعاب '${extractedTerms[Math.min(1, extractedTerms.length - 1)].ar}' في تحقيق أهداف الدرس؟`,
-      options: [
-        'بتعزيز الفهم المنهجي ورفع دقة التطبيق والنتائج',
-        'بزيادة التشتت أثناء تنفيذ المهام',
-        'بإلغاء الحاجة للتقييم والمراجعة',
-        'بعدم مراعاة الخطوات المعتمدة'
-      ],
-      correct_answer: 'بتعزيز الفهم المنهجي ورفع دقة التطبيق والنتائج',
-      explanation: 'الفهم المنهجي السليم هو الركيزة الأساسية لجودة المخرجات والتطبيق.'
-    },
-    {
-      type: 'mcq',
-      question: `ما هي الخطوة الأولى الموصى بها للاستفادة الكاملة من محتوى '${title}'؟`,
-      options: [
-        'قراءة واستيعاب الأفكار الرئيسية وفهم دلالات المفاهيم المطروحة',
-        'تخطي المحتوى النظري والبدء العشوائي دون معرفة مسبقة',
-        'إلغاء التقييمات الذاتية والواجبات الملحقة',
-        'تجاهل المصطلحات والمفردات التخصصية'
-      ],
-      correct_answer: 'قراءة واستيعاب الأفكار الرئيسية وفهم دلالات المفاهيم المطروحة',
-      explanation: 'البداية الصحيحة تنطلق من القراءة الواعية واستيعاب الأفكار الجوهرية للدرس.'
-    },
-    {
-      type: 'mcq',
-      question: `أي مما يلي يعبر عن الأثر الإيجابي لتحقيق مخرجات التعلم في '${title}'؟`,
-      options: [
-        'اكتساب مهارات ومعارف تطبيقية تعزز الكفاءة وجودة الأداء',
-        'البقاء عند نفس المستوى دون تطور معرفي',
-        'الاعتماد الكلي على الآخرين لتنفيذ المهام',
-        'فقدان الترابط بين المفاهيم النظرية والتطبيق'
-      ],
-      correct_answer: 'اكتساب مهارات ومعارف تطبيقية تعزز الكفاءة وجودة الأداء',
-      explanation: 'الهدف النهائي للتعلم هو النمو المعرفي وامتلاك القدرة على التطبيق الفعلي.'
-    },
-    {
-      type: 'true_false',
-      question: `عبارة: استيعاب المفاهيم والمصطلحات الواردة في '${title}' يُعد أساساً لبناء المعرفة المتكاملة وتحقيق أهداف الدرس.`,
-      options: ['صح ✓', 'خطأ ✗'],
-      correct_answer: 'صح ✓',
-      explanation: 'صواب؛ لأن استيعاب المفاهيم يمثل حجر الأساس للتطبيق والنجاح.'
-    },
-    {
-      type: 'true_false',
-      question: `عبارة: المفاهيم المطروحة في هذا الدرس هي مجرد نصوص نظرية ولا تتطلب أي تطبيق واقعي في الحياة أو العمل.`,
-      options: ['صح ✓', 'خطأ ✗'],
-      correct_answer: 'خطأ ✗',
-      explanation: 'خطأ؛ لأن الهدف الأساسي من المنهج هو تحويل المعرفة إلى تطبيق وسلوك عملي ملموس.'
-    },
-    {
-      type: 'true_false',
-      question: `عبارة: المراجعة المنتظمة والحرص على حل التكليفات يضمنان تثبيت المعارف وتحقيق أعلى درجات الإتقان.`,
-      options: ['صح ✓', 'خطأ ✗'],
-      correct_answer: 'صح ✓',
-      explanation: 'صواب؛ المراجعة والحل التطبيقي عنصران حاسمان لرسوخ المعلومات في الذهن.'
-    },
-    {
-      type: 'matching',
-      question: '🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم بتعريفه ودلالته الصحيحة وفق ما ورد في الدرس:',
-      pairs: [
-        { left: extractedTerms[0]?.en || 'المفهوم الأول', right: extractedTerms[0]?.definition.slice(0, 60) || 'الأساس المعرفي للدرس' },
-        { left: extractedTerms[Math.min(1, extractedTerms.length - 1)]?.en || 'المفهوم الثاني', right: extractedTerms[Math.min(1, extractedTerms.length - 1)]?.definition.slice(0, 60) || 'التطبيق العملي في الميدان' },
-        { left: extractedTerms[Math.min(2, extractedTerms.length - 1)]?.en || 'المفهوم الثالث', right: extractedTerms[Math.min(2, extractedTerms.length - 1)]?.definition.slice(0, 60) || 'معايير الإتقان والجودة' },
-        { left: extractedTerms[Math.min(3, extractedTerms.length - 1)]?.en || 'المفهوم الرابع', right: extractedTerms[Math.min(3, extractedTerms.length - 1)]?.definition.slice(0, 60) || 'الأثر والنتائج الإيجابية' }
-      ],
-      explanation: 'ممتاز! تم توصيل كافة المفاهيم بتعريفاتها الدقيقة بنجاح.'
-    }
-  ];
+  const universalExp = expandEducationalTopic(cleanText || title, courseName, weekTitle);
+  const activeTitle = universalExp.topic_title || title || 'الوحدة التدريبية التخصصية';
 
   return {
-    suggested_videos: resolveDirectEducationalVideos(cleanText, title),
+    suggested_videos: resolveDirectEducationalVideos(cleanText, activeTitle),
     lecture: {
-      title: `محاضرة: ${title}`,
+      title: `محاضرة: ${activeTitle}`,
       duration_minutes: 15,
-      summary: summaryText.length > 80 ? summaryText : `تتناول هذه الوحدة دراسة شاملة لمفاهيم "${title}"، مع التركيز على استيعاب المبادئ الأساسية، وتطبيق المعايير والممارسات المعتمدة، وربط المعارف المكتسبة بالممارسة الواقعية.`,
-      topics: [
-        `المحور الأول: أسس ومفاهيم ${title}`,
-        `المحور الثاني: الإجراءات والمعايير التطبيقية`,
-        `المحور الثالث: التطبيق العملي والنتائج الإيجابية`
-      ]
+      summary: universalExp.pedagogical_summary,
+      topics: universalExp.pillars.map((p, i) => `المحور ${i + 1}: ${p.title}`)
     },
     glossary_notes: {
-      title: `قاموس ومذكرات: ${title}`,
-      description: `مفاهيم ومصطلحات تخصصية مستنبطة مباشرة من محتوى الدرس.`,
-      terms: extractedTerms
+      title: `قاموس ومذكرات: ${activeTitle}`,
+      description: `مفاهيم ومصطلحات تخصصية مستنبطة مباشرة من محتوى الدرس ومحاوره.`,
+      terms: universalExp.glossary_terms
     },
     quiz: {
-      title: `اختبار الدرس: ${title}`,
+      title: `اختبار الدرس: ${activeTitle}`,
       duration_minutes: 15,
       total_grade: 10,
-      questions: dynamicQuestions
+      questions: universalExp.quiz_questions
     },
-    assignment: {
-      title: `الواجب والتكليف: ${title}`,
-      total_grade: 10,
-      instructions: `راجع المحتوى العلمي لدرس "${title}" ونفّذ المطلوب مستخدماً المفاهيم والمصطلحات المكتسبة.`,
-      assignment_type: 'mcq_or_text',
-      mcq_questions: [
-        {
-          question: `سؤال تطبيقي: ما هو الأسلوب الأمثل لتطبيق المعارف المكتسبة في '${title}'؟`,
-          options: [
-            'الالتزام بالممارسة الدقيقة ومراعاة المعايير والخطوات المعتمدة',
-            'التنفيذ العشوائي دون الرجوع للإرشادات',
-            'تجاهل التوجيهات الأساسية للدرس',
-            'الاكتفاء بالجانب النظري دون تطبيق'
-          ],
-          correct_answer: 'الالتزام بالممارسة الدقيقة ومراعاة المعايير والخطوات المعتمدة'
-        }
-      ],
-      text_questions: [
-        {
-          prompt: `اكتب تقريراً موجزاً توضح فيه كيف يمكن الاستفادة من موضوع "${title}" في تحسين الأداء وتطوير المهارات.`,
-          guidelines: 'اذكر أمثلة واقعية واستخدم المفاهيم والمصطلحات المناسبة.',
-          model_answer: 'تتضمن الإجابة شرحاً واضحاً لآليات التطبيق، مع ذكر أمثلة واقعية وأثرها في رفع مستوى الكفاءة.'
-        }
-      ],
-      questions: [
-        {
-          type: 'mcq',
-          question: `سؤال تطبيقي: ما هو الأسلوب الأمثل لتطبيق المعارف المكتسبة في '${title}'؟`,
-          options: [
-            'الالتزام بالممارسة الدقيقة ومراعاة المعايير والخطوات المعتمدة',
-            'التنفيذ العشوائي دون الرجوع للإرشادات',
-            'تجاهل التوجيهات الأساسية للدرس',
-            'الاكتفاء بالجانب النظري دون تطبيق'
-          ],
-          correct_answer: 'الالتزام بالممارسة الدقيقة ومراعاة المعايير والخطوات المعتمدة'
-        },
-        {
-          type: 'true_false',
-          question: `عبارة: تطبيق المفاهيم المكتسبة في '${title}' يسهم إيجاباً في رفع جودة الأداء وإتقان المهام.`,
-          options: ['صح ✓', 'خطأ ✗'],
-          correct_answer: 'صح ✓'
-        }
-      ]
-    }
+    assignment: universalExp.assignment
   };
 }
 
@@ -1560,12 +1898,24 @@ async function handleDedicatedQuizGeneration(req, res, startTime) {
   }
 
   const effectiveContent = rawContent || (effectiveCourse + " - " + effectiveWeek + ": " + effectiveTopic);
+  const expandedCurriculum = (effectiveContent.length < 300)
+    ? expandEducationalTopic(effectiveContent, effectiveCourse, effectiveTopic)
+    : null;
 
   let generatedData = null;
   let modeUsed = "demo_fallback";
   let groqApiErrors = [];
 
   if (hasValidKey) {
+    let curriculumInstruction = "";
+    if (expandedCurriculum && expandedCurriculum.pillars) {
+      curriculumInstruction = "\n\n## التوسيع الأكاديمي والتربوي الإلزامي للدرس (بناء تعليمي منضبط):\n" +
+        "الموضوع الأصلي المدخل: \"" + expandedCurriculum.original_user_input + "\"\n" +
+        "يجب أن تنبثق جميع الأسئلة الـ 10 وسيناريوهاتها حصراً ومباشرة من المحاور الخمسة التالية:\n" +
+        expandedCurriculum.pillars.map((p, i) => `${i + 1}. ${p.title} (${p.concept || ''}): ${p.description}`).join("\n") + "\n\n" +
+        "تحذير صارم: يُحظر حظراً باتاً صياغة أي أسئلة عامة أو معلبة (مثل الأسئلة التجريدية المكررة حول مراعاة المعايير دون موقف فني). كل سؤال يجب أن يقيس موقفاً سلوكياً أو تطبيقياً محدداً من هذه المحاور.";
+    }
+
     const promptText = "أنت رئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI).\n" +
       "مهمتك: صياغة اختبار أسبوعي عالي الجودة والاحترافية مكون من 10 أسئلة مستنبطة 100% من صلب المادة العلمية والدرس المرفق أدناه، بصيغة JSON نقي فقط:\n\n" +
       "## بيانات المقرر والدرس:\n" +
@@ -1573,10 +1923,12 @@ async function handleDedicatedQuizGeneration(req, res, startTime) {
       "- الأسبوع / الوحدة: " + effectiveWeek + "\n" +
       "- موضوع الدرس الأساسي: " + effectiveTopic + "\n\n" +
       "## المادة العلمية ومحتوى الدرس (المصدر الوحيد للأسئلة - Ground Truth):\n---\n" +
-      effectiveContent.slice(0, 20000) + "\n---\n\n" +
+      effectiveContent.slice(0, 20000) + "\n---" +
+      curriculumInstruction + "\n\n" +
       "## معايير الجودة الأكاديمية الصارمة:\n" +
       "1. الالتزام بالموضوع بنسبة 100%: تُبنى جميع الأسئلة حصراً من صلب المادة العلمية ومفاهيمها أعلاه. يُمنع منعاً باتاً استدعاء مواضيع السلامة الصناعية (PPE/SOP) أو إجراءات المصانع والورش إذا لم تكن واردة في النص المرفق صراحة.\n" +
-      "2. تنوع وشمولية بنية الأسئلة (10 أسئلة متكاملة):\n" +
+      "2. حظر الأسئلة المعلبة: يُحظر صياغة أسئلة عامة تصلح لأي درس بدون سيناريو واقعي. كل سؤال يجب أن يختبر مفهوماً أو موقفاً حقيقياً ومحدداً.\n" +
+      "3. تنوع وشمولية بنية الأسئلة (10 أسئلة متكاملة):\n" +
       "   - 6 أسئلة اختيار من متعدد (MCQ):\n" +
       "     * لكل سؤال 4 خيارات منطقية ومتمايزة من صلب موضوع الدرس.\n" +
       "     * يُمنع منعاً باتاً استخدام خيارات اصطناعية أو هزلية أو بدائل عامة (مثل \"مفهوم خارج سياق الدرس\" أو \"خيار 3\").\n" +
@@ -1587,7 +1939,7 @@ async function handleDedicatedQuizGeneration(req, res, startTime) {
       "     * كتابة تعليل علمي دقيق في \"explanation\" يوضح سبب الصحة أو الخطأ.\n" +
       "   - سؤال توصيل ومطابقة واحد (Matching):\n" +
       "     * يحتوي على 4 أزواج مطابقة من صلب الدرس: مصفوفة \"pairs\" بها 4 كائنات، كل كائن به \"left\" (المصطلح أو المفهوم) و \"right\" (التعريف أو الاستخدام الصحيح له).\n" +
-      "3. التنسيق المطلوب: أعد فقط كائن JSON الصالح التالي دون أي نصوص تمهيدية أو كتل تعليق:\n" +
+      "4. التنسيق المطلوب: أعد فقط كائن JSON الصالح التالي دون أي نصوص تمهيدية أو كتل تعليق:\n" +
       JSON.stringify({
         title: "اختبار تقييم الدرس: " + effectiveTopic,
         duration_minutes: 15,
@@ -1695,12 +2047,24 @@ async function handleDedicatedAssignmentGeneration(req, res, startTime) {
   }
 
   const effectiveContent = rawContent || (effectiveCourse + " - " + effectiveWeek + ": " + effectiveTopic);
+  const expandedCurriculum = (effectiveContent.length < 300)
+    ? expandEducationalTopic(effectiveContent, effectiveCourse, effectiveTopic)
+    : null;
 
   let generatedData = null;
   let modeUsed = "demo_fallback";
   let groqApiErrors = [];
 
   if (hasValidKey) {
+    let curriculumInstruction = "";
+    if (expandedCurriculum && expandedCurriculum.pillars) {
+      curriculumInstruction = "\n\n## التوسيع الأكاديمي والتربوي الإلزامي للواجب:\n" +
+        "الموضوع الأصلي المدخل: \"" + expandedCurriculum.original_user_input + "\"\n" +
+        "يجب صياغة أسئلة وتكليفات الواجب حصراً حول المحاور الخمسة التالية وسيناريوهاتها:\n" +
+        expandedCurriculum.pillars.map((p, i) => `${i + 1}. ${p.title} (${p.concept || ''}): ${p.description}`).join("\n") + "\n\n" +
+        "تحذير صارم: يُحظر حظراً باتاً استخدام أسئلة معلبة وغير مخصصة للموضوع. يجب أن يقيس كل سؤال وتكليف موقفاً عملياً وسلوكياً محدداً.";
+    }
+
     const promptText = "أنت خبير أكاديمي ومصمم تكليفات تدريبية لدى معهد الذهب الأسود للتدريب (BGTI).\n" +
       "المهمة: صياغة واجب أسبوعي تطبيقي عالي الجودة مستنبط 100% من صلب الدرس والمادة العلمية المرفقة، بصيغة JSON نقي فقط:\n\n" +
       "## بيانات المقرر والدرس:\n" +
@@ -1708,9 +2072,10 @@ async function handleDedicatedAssignmentGeneration(req, res, startTime) {
       "- الوحدة / الأسبوع: " + effectiveWeek + "\n" +
       "- موضوع الدرس: " + effectiveTopic + "\n\n" +
       "## المادة العلمية ومحتوى الدرس:\n---\n" +
-      effectiveContent.slice(0, 20000) + "\n---\n\n" +
+      effectiveContent.slice(0, 20000) + "\n---" +
+      curriculumInstruction + "\n\n" +
       "## المعايير المطلوبة:\n" +
-      "1. الالتزام بموضوع الدرس بنسبة 100% وتجنب أي مواضيع خارجية.\n" +
+      "1. الالتزام بموضوع الدرس بنسبة 100% وتجنب أي مواضيع خارجية أو أسئلة عامة معلبة.\n" +
       "2. يتضمن الواجب:\n" +
       "   - عنوان واضح وتعليمات مفصلة للمتدرب.\n" +
       "   - 2 إلى 3 أسئلة تطبيقية اختيار من متعدد مرتبطة بحالات واقعية من الدرس.\n" +
@@ -2017,7 +2382,11 @@ export default async function handler(req, res) {
         contentSection = contextBlock + "\n## المحتوى المُستخرج من شرائح العرض (" + safeFilename + "):\n---\n" + trimmedText + "\n---";
       }
 
-      const fullPromptText = formatLmsPrompt(contentSection);
+      let expandedTopic = null;
+      if (extractedText.length < 300 || isTextMode) {
+        expandedTopic = expandEducationalTopic(extractedText, courseDiscipline, weekDiscipline);
+      }
+      const fullPromptText = formatLmsPrompt(contentSection, courseDiscipline, weekDiscipline, expandedTopic);
 
       const groqCall = await callGroqChatCompletion({
         prompt: fullPromptText,
@@ -2049,8 +2418,11 @@ export default async function handler(req, res) {
     const effectiveTopic = isTextMode ? (detectedLessonTopic || weekDiscipline) : (req.body?.weekTopic || req.body?.weekTitle || req.body?.courseName || safeFilename);
     generatedData = ensureSpecificYouTubeVideos(generatedData, effectiveTopic + " " + (generatedData?.lecture?.title || ""));
 
-    // Strictly ensure quiz questions count never falls below 10 questions
+    // Strictly ensure quiz questions count never falls below 10 questions and validate integrity
     generatedData = ensureMinQuizQuestions(generatedData, effectiveTopic);
+    if (generatedData && generatedData.quiz) {
+      generatedData.quiz = normalizeAndValidateQuizData(generatedData.quiz, effectiveTopic);
+    }
 
     const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
 
