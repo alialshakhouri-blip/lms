@@ -1,5 +1,5 @@
 // Vercel Serverless Function: api/generate.js
-// Handles AI Auto-Generation for LMS Modules via Google Gemini API
+// Handles AI Auto-Generation for LMS Modules via Groq Cloud API (Llama 3.3 70B Versatile)
 // Supports PPTX & PDF upload directly on Vercel without a local Python server.
 
 import zlib from 'zlib';
@@ -1319,6 +1319,74 @@ function safeExtractJson(text) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+//  GROQ CLOUD API CLIENT (LLAMA 3.3 70B VERSATILE - OPENAI COMPATIBLE)
+// ══════════════════════════════════════════════════════════════════════════════
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const DEFAULT_GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+
+async function callGroqChatCompletion({ prompt, systemPrompt, apiKey, model = DEFAULT_GROQ_MODEL, temperature = 0.3 }) {
+  const modelsToTry = [model];
+  if (!modelsToTry.includes("llama-3.3-70b-versatile")) modelsToTry.push("llama-3.3-70b-versatile");
+  if (!modelsToTry.includes("llama-3.1-70b-versatile")) modelsToTry.push("llama-3.1-70b-versatile");
+  if (!modelsToTry.includes("llama-3.1-8b-instant")) modelsToTry.push("llama-3.1-8b-instant");
+
+  const errors = [];
+  let parsedData = null;
+  let modelUsed = null;
+
+  for (const curModel of modelsToTry) {
+    try {
+      const res = await fetch(GROQ_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + apiKey
+        },
+        body: JSON.stringify({
+          model: curModel,
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt || "أنت خبير أكاديمي وتربوي معتمد في معهد الذهب الأسود للتدريب (BGTI). أعد فقط كائن JSON نقي وصالح يتوافق 100% مع البنية المطلوبة دون أي نصوص إضافية خارج الـ JSON."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          response_format: { type: "json_object" },
+          temperature: temperature
+        })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("Groq API error on model " + curModel + " (Status " + res.status + "):", errText.slice(0, 300));
+        errors.push("[" + curModel + " HTTP " + res.status + "]: " + errText.slice(0, 150));
+        continue;
+      }
+
+      const json = await res.json();
+      const content = json.choices?.[0]?.message?.content;
+      const extracted = safeExtractJson(content);
+      if (extracted && typeof extracted === "object") {
+        parsedData = extracted;
+        modelUsed = curModel;
+        break;
+      } else {
+        console.warn("Groq model " + curModel + " response could not be parsed as JSON:", content?.slice(0, 200));
+        errors.push("[" + curModel + " JSON Parse Error]: failed to parse response");
+      }
+    } catch (err) {
+      console.error("Groq API exception on model " + curModel + ":", err.message);
+      errors.push("[" + curModel + " Exception]: " + err.message);
+    }
+  }
+
+  return { data: parsedData, model: modelUsed, errors };
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 //  EXECUTIVE WEEKLY REPORT GENERATION ENGINE (7 Formal Pillars)
 // ══════════════════════════════════════════════════════════════════════════════
 const EXECUTIVE_PROMPT_TEMPLATE = `أنت مستشار إداري وأكاديمي تنفيذي أول لمعهد الذهب الأسود للتدريب (فرع عنك).
@@ -1469,152 +1537,121 @@ function buildDemoExecutiveReport(params) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  DEDICATED FAST QUIZ GENERATION HANDLER (Gemini 2.0 Flash - Ground Truth)
+//  DEDICATED FAST QUIZ GENERATION HANDLER (Groq Cloud API - Llama 3.3 70B)
 // ══════════════════════════════════════════════════════════════════════════════
 async function handleDedicatedQuizGeneration(req, res, startTime) {
   const { courseName, weekTitle, weekTopic, textInput, lessonContent, questionsCount = 10 } = req.body || {};
   
-  const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
-  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
-  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE' && apiKey.length > 15);
+  const rawApiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || "";
+  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, "");
+  const hasValidKey = Boolean(apiKey && apiKey !== "YOUR_GROQ_API_KEY_HERE" && apiKey.length > 15);
 
-  const effectiveCourse = (courseName || '').trim() || 'المقرر التدريبي المعتمد';
-  const effectiveWeek = (weekTitle || '').trim() || 'الوحدة التدريبية';
-  const effectiveTopic = (weekTopic || '').trim() || effectiveWeek;
-  const rawContent = (lessonContent || textInput || '').trim();
+  const effectiveCourse = (courseName || "").trim() || "المقرر التدريبي المعتمد";
+  const effectiveWeek = (weekTitle || "").trim() || "الوحدة التدريبية";
+  const effectiveTopic = (weekTopic || "").trim() || effectiveWeek;
+  const rawContent = (lessonContent || textInput || "").trim();
 
   // Guard: if absolutely no content and no topic provided
   if (!rawContent && !weekTopic && !courseName) {
     return res.status(400).json({
       success: false,
-      error: 'لم يتم توفير أي محتوى دراسي أو موضوع لتوليد أسئلة الاختبار.'
+      error: "لم يتم توفير أي محتوى دراسي أو موضوع لتوليد أسئلة الاختبار."
     });
   }
 
-  const effectiveContent = rawContent || `${effectiveCourse} - ${effectiveWeek}: ${effectiveTopic}`;
+  const effectiveContent = rawContent || (effectiveCourse + " - " + effectiveWeek + ": " + effectiveTopic);
 
   let generatedData = null;
-  let modeUsed = 'demo_fallback';
-  let geminiApiErrors = [];
+  let modeUsed = "demo_fallback";
+  let groqApiErrors = [];
 
   if (hasValidKey) {
-    const promptText = `أنت خبير أكاديمي ورئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI).
-مهمتك: صياغة اختبار أسبوعي عالي الجودة والاحترافية مكون من 10 أسئلة مستنبطة 100% من صلب المادة العلمية والدرس المرفق:
+    const promptText = "أنت رئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI).\n" +
+      "مهمتك: صياغة اختبار أسبوعي عالي الجودة والاحترافية مكون من 10 أسئلة مستنبطة 100% من صلب المادة العلمية والدرس المرفق أدناه، بصيغة JSON نقي فقط:\n\n" +
+      "## بيانات المقرر والدرس:\n" +
+      "- المقرر التدريبي: " + effectiveCourse + "\n" +
+      "- الأسبوع / الوحدة: " + effectiveWeek + "\n" +
+      "- موضوع الدرس الأساسي: " + effectiveTopic + "\n\n" +
+      "## المادة العلمية ومحتوى الدرس (المصدر الوحيد للأسئلة - Ground Truth):\n---\n" +
+      effectiveContent.slice(0, 20000) + "\n---\n\n" +
+      "## معايير الجودة الأكاديمية الصارمة:\n" +
+      "1. الالتزام بالموضوع بنسبة 100%: تُبنى جميع الأسئلة حصراً من صلب المادة العلمية ومفاهيمها أعلاه. يُمنع منعاً باتاً استدعاء مواضيع السلامة الصناعية (PPE/SOP) أو إجراءات المصانع والورش إذا لم تكن واردة في النص المرفق صراحة.\n" +
+      "2. تنوع وشمولية بنية الأسئلة (10 أسئلة متكاملة):\n" +
+      "   - 6 أسئلة اختيار من متعدد (MCQ):\n" +
+      "     * لكل سؤال 4 خيارات منطقية ومتمايزة من صلب موضوع الدرس.\n" +
+      "     * يُمنع منعاً باتاً استخدام خيارات اصطناعية أو هزلية أو بدائل عامة (مثل \"مفهوم خارج سياق الدرس\" أو \"خيار 3\").\n" +
+      "     * يجب أن تطابق الإجابة المحددة في \"correct_answer\" حرفياً أحد الخيارات الأربعة الموجودة في \"options\".\n" +
+      "   - 3 أسئلة صح وخطأ (True/False):\n" +
+      "     * مصفوفة الخيارات \"options\" يجب أن تكون بالضبط وبحرفية: [\"صح\", \"خطأ\"].\n" +
+      "     * حقل الإجابة \"correct_answer\" يجب أن يكون إما \"صح\" أو \"خطأ\" بالضبط.\n" +
+      "     * كتابة تعليل علمي دقيق في \"explanation\" يوضح سبب الصحة أو الخطأ.\n" +
+      "   - سؤال توصيل ومطابقة واحد (Matching):\n" +
+      "     * يحتوي على 4 أزواج مطابقة من صلب الدرس: مصفوفة \"pairs\" بها 4 كائنات، كل كائن به \"left\" (المصطلح أو المفهوم) و \"right\" (التعريف أو الاستخدام الصحيح له).\n" +
+      "3. التنسيق المطلوب: أعد فقط كائن JSON الصالح التالي دون أي نصوص تمهيدية أو كتل تعليق:\n" +
+      JSON.stringify({
+        title: "اختبار تقييم الدرس: " + effectiveTopic,
+        duration_minutes: 15,
+        total_grade: 10,
+        questions: [
+          {
+            id: 1,
+            type: "mcq",
+            question: "نص السؤال الأول...",
+            options: ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
+            correct_answer: "خيار 1",
+            explanation: "شرح توضيحي لسبب صحة الإجابة..."
+          },
+          {
+            id: 7,
+            type: "true_false",
+            question: "نص العبارة الأولى...",
+            options: ["صح", "خطأ"],
+            correct_answer: "صح",
+            explanation: "التعليل..."
+          },
+          {
+            id: 10,
+            type: "matching",
+            question: "🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم في القائمة (أ) بتعريفه الدقيق في القائمة (ب):",
+            pairs: [
+              { left: "المفهوم 1", right: "التعريف 1" },
+              { left: "المفهوم 2", right: "التعريف 2" },
+              { left: "المفهوم 3", right: "التعريف 3" },
+              { left: "المفهوم 4", right: "التعريف 4" }
+            ],
+            explanation: "تم توصيل كافة المفاهيم بتعريفاتها الصحيحة بدقة."
+          }
+        ]
+      }, null, 2);
 
-## بيانات المقرر والدرس:
-- المقرر التدريبي: ${effectiveCourse}
-- الأسبوع / الوحدة: ${effectiveWeek}
-- موضوع الدرس الأساسي: ${effectiveTopic}
+    const groqCall = await callGroqChatCompletion({
+      prompt: promptText,
+      systemPrompt: "أنت رئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI). صغ اختباراً مكوناً من 10 أسئلة مستنبطة 100% من نص الدرس المرفق بصيغة JSON نقي فقط.",
+      apiKey,
+      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+      temperature: 0.25
+    });
 
-## المادة العلمية ومحتوى الدرس (المصدر الوحيد للأسئلة - Ground Truth):
----
-${effectiveContent.slice(0, 20000)}
----
-
-## معايير الجودة الأكاديمية الصارمة:
-1. الالتزام بالموضوع بنسبة 100%: تُبنى جميع الأسئلة حصراً من صلب المادة العلمية ومفاهيمها أعلاه. يُمنع منعاً باتاً استدعاء مواضيع السلامة الصناعية (PPE/SOP) أو إجراءات المصانع والورش إذا لم تكن واردة في النص المرفق صراحة.
-2. تنوع وشمولية بنية الأسئلة (10 أسئلة متكاملة):
-   - 6 أسئلة اختيار من متعدد (MCQ):
-     * لكل سؤال 4 خيارات منطقية ومتمايزة من صلب موضوع الدرس.
-     * يُمنع منعاً باتاً استخدام خيارات اصطناعية أو هزلية أو بدائل عامة (مثل "مفهوم خارج سياق الدرس" أو "خيار 3").
-     * يجب أن تطابق الإجابة المحددة في "correct_answer" حرفياً أحد الخيارات الأربعة الموجودة في "options".
-   - 3 أسئلة صح وخطأ (True/False):
-     * مصفوفة الخيارات "options" يجب أن تكون بالضبط وبحرفية: ["صح", "خطأ"].
-     * حقل الإجابة "correct_answer" يجب أن يكون إما "صح" أو "خطأ" بالضبط.
-     * كتابة تعليل علمي دقيق في "explanation" يوضح سبب الصحة أو الخطأ.
-   - سؤال توصيل ومطابقة واحد (Matching):
-     * يحتوي على 4 أزواج مطابقة من صلب الدرس: مصفوفة "pairs" بها 4 كائنات، كل كائن به "left" (المصطلح أو المفهوم) و "right" (التعريف أو الاستخدام الصحيح له).
-3. التنسيق المطلوب: أعد فقط كائن JSON الصالح التالي دون أي نصوص تمهيدية أو كتل تعليق:
-{
-  "title": "اختبار تقييم الدرس: ${effectiveTopic}",
-  "duration_minutes": 15,
-  "total_grade": 10,
-  "questions": [
-    {
-      "id": 1,
-      "type": "mcq",
-      "question": "نص السؤال الأول...",
-      "options": ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
-      "correct_answer": "خيار 1",
-      "explanation": "شرح توضيحي لسبب صحة الإجابة..."
-    },
-    {
-      "id": 7,
-      "type": "true_false",
-      "question": "نص العبارة الأولى...",
-      "options": ["صح", "خطأ"],
-      "correct_answer": "صح",
-      "explanation": "التعليل..."
-    },
-    {
-      "id": 10,
-      "type": "matching",
-      "question": "🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم في القائمة (أ) بتعريفه الدقيق في القائمة (ب):",
-      "pairs": [
-        {"left": "المفهوم 1", "right": "التعريف 1"},
-        {"left": "المفهوم 2", "right": "التعريف 2"},
-        {"left": "المفهوم 3", "right": "التعريف 3"},
-        {"left": "المفهوم 4", "right": "التعريف 4"}
-      ],
-      "explanation": "تم توصيل كافة المفاهيم بتعريفاتها الصحيحة بدقة."
-    }
-  ]
-}`;
-
-    const preferredModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-    const modelsToTry = [preferredModel];
-    if (!modelsToTry.includes('gemini-2.0-flash')) modelsToTry.push('gemini-2.0-flash');
-    if (!modelsToTry.includes('gemini-1.5-flash')) modelsToTry.push('gemini-1.5-flash');
-
-    for (const curModel of modelsToTry) {
-      if (generatedData) break;
-      try {
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${curModel}:generateContent?key=${apiKey}`;
-        const geminiRes = await fetch(geminiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: promptText }] }],
-            generationConfig: {
-              temperature: 0.3,
-              responseMimeType: 'application/json'
-            }
-          })
-        });
-
-        if (!geminiRes.ok) {
-          const errBody = await geminiRes.text();
-          console.error(`Gemini quiz API error on model ${curModel} (Status ${geminiRes.status}):`, errBody.slice(0, 300));
-          geminiApiErrors.push(`[${curModel} HTTP ${geminiRes.status}]: ${errBody.slice(0, 150)}`);
-          continue;
-        }
-
-        const geminiJson = await geminiRes.json();
-        const candidateText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
-        const parsed = safeExtractJson(candidateText);
-        if (parsed && Array.isArray(parsed.questions) && parsed.questions.length >= 3) {
-          generatedData = parsed;
-          modeUsed = `gemini (${curModel})`;
-          break;
-        } else if (parsed && parsed.quiz && Array.isArray(parsed.quiz.questions)) {
-          generatedData = parsed.quiz;
-          modeUsed = `gemini (${curModel})`;
-          break;
-        }
-      } catch (geminiError) {
-        console.error(`Gemini quiz execution error on model ${curModel}: ${geminiError.message}`);
-        geminiApiErrors.push(`[${curModel} Exception]: ${geminiError.message}`);
+    groqApiErrors = groqCall.errors;
+    if (groqCall.data) {
+      const parsed = groqCall.data;
+      if (Array.isArray(parsed.questions) && parsed.questions.length >= 3) {
+        generatedData = parsed;
+        modeUsed = "groq (" + groqCall.model + ")";
+      } else if (parsed.quiz && Array.isArray(parsed.quiz.questions)) {
+        generatedData = parsed.quiz;
+        modeUsed = "groq (" + groqCall.model + ")";
       }
     }
   }
 
-  // If Gemini failed or no key: build high-quality semantic fallback derived 100% from the lesson text
+  // If Groq failed or no key: build high-quality semantic fallback derived 100% from the lesson text
   if (!generatedData) {
-    const fullSmart = buildSmartLmsContentFromText(effectiveContent, 'quiz_source.txt', effectiveCourse, effectiveTopic);
+    const fullSmart = buildSmartLmsContentFromText(effectiveContent, "quiz_source.txt", effectiveCourse, effectiveTopic);
     generatedData = fullSmart.quiz;
-    modeUsed = (hasValidKey && geminiApiErrors.length > 0)
-      ? 'semantic_fallback_after_gemini_error'
-      : 'semantic_local_generator';
+    modeUsed = (hasValidKey && groqApiErrors.length > 0)
+      ? "semantic_fallback_after_groq_error"
+      : "semantic_local_generator";
   }
 
   // Sanitize, normalize and validate all questions
@@ -1624,6 +1661,7 @@ ${effectiveContent.slice(0, 20000)}
   return res.status(200).json({
     success: true,
     mode: modeUsed,
+    hasGroqApiKey: hasValidKey,
     hasGeminiApiKey: hasValidKey,
     courseName: effectiveCourse,
     weekTopic: effectiveTopic,
@@ -1631,136 +1669,106 @@ ${effectiveContent.slice(0, 20000)}
     data: {
       quiz: generatedData
     },
-    geminiErrors: geminiApiErrors.length > 0 ? geminiApiErrors : undefined
+    groqErrors: groqApiErrors.length > 0 ? groqApiErrors : undefined
   });
 }
-
 // ══════════════════════════════════════════════════════════════════════════════
-//  DEDICATED ASSIGNMENT GENERATION HANDLER
+//  DEDICATED ASSIGNMENT GENERATION HANDLER (Groq Cloud API - Llama 3.3 70B)
 // ══════════════════════════════════════════════════════════════════════════════
 async function handleDedicatedAssignmentGeneration(req, res, startTime) {
   const { courseName, weekTitle, weekTopic, textInput, lessonContent } = req.body || {};
   
-  const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
-  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
-  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE' && apiKey.length > 15);
+  const rawApiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || "";
+  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, "");
+  const hasValidKey = Boolean(apiKey && apiKey !== "YOUR_GROQ_API_KEY_HERE" && apiKey.length > 15);
 
-  const effectiveCourse = (courseName || '').trim() || 'المقرر التدريبي المعتمد';
-  const effectiveWeek = (weekTitle || '').trim() || 'الوحدة التدريبية';
-  const effectiveTopic = (weekTopic || '').trim() || effectiveWeek;
-  const rawContent = (lessonContent || textInput || '').trim();
+  const effectiveCourse = (courseName || "").trim() || "المقرر التدريبي المعتمد";
+  const effectiveWeek = (weekTitle || "").trim() || "الوحدة التدريبية";
+  const effectiveTopic = (weekTopic || "").trim() || effectiveWeek;
+  const rawContent = (lessonContent || textInput || "").trim();
 
   if (!rawContent && !weekTopic && !courseName) {
     return res.status(400).json({
       success: false,
-      error: 'لم يتم توفير أي محتوى دراسي أو موضوع لتوليد الواجب.'
+      error: "لم يتم توفير أي محتوى دراسي أو موضوع لتوليد الواجب."
     });
   }
 
-  const effectiveContent = rawContent || `${effectiveCourse} - ${effectiveWeek}: ${effectiveTopic}`;
+  const effectiveContent = rawContent || (effectiveCourse + " - " + effectiveWeek + ": " + effectiveTopic);
 
   let generatedData = null;
-  let modeUsed = 'demo_fallback';
-  let geminiApiErrors = [];
+  let modeUsed = "demo_fallback";
+  let groqApiErrors = [];
 
   if (hasValidKey) {
-    const promptText = `أنت خبير أكاديمي ومصمم تكليفات تدريبية لدى معهد الذهب الأسود للتدريب (BGTI).
-المهمة: صياغة واجب أسبوعي تطبيقي عالي الجودة مستنبط 100% من صلب الدرس والمادة العلمية المرفقة:
+    const promptText = "أنت خبير أكاديمي ومصمم تكليفات تدريبية لدى معهد الذهب الأسود للتدريب (BGTI).\n" +
+      "المهمة: صياغة واجب أسبوعي تطبيقي عالي الجودة مستنبط 100% من صلب الدرس والمادة العلمية المرفقة، بصيغة JSON نقي فقط:\n\n" +
+      "## بيانات المقرر والدرس:\n" +
+      "- المقرر التدريبي: " + effectiveCourse + "\n" +
+      "- الوحدة / الأسبوع: " + effectiveWeek + "\n" +
+      "- موضوع الدرس: " + effectiveTopic + "\n\n" +
+      "## المادة العلمية ومحتوى الدرس:\n---\n" +
+      effectiveContent.slice(0, 20000) + "\n---\n\n" +
+      "## المعايير المطلوبة:\n" +
+      "1. الالتزام بموضوع الدرس بنسبة 100% وتجنب أي مواضيع خارجية.\n" +
+      "2. يتضمن الواجب:\n" +
+      "   - عنوان واضح وتعليمات مفصلة للمتدرب.\n" +
+      "   - 2 إلى 3 أسئلة تطبيقية اختيار من متعدد مرتبطة بحالات واقعية من الدرس.\n" +
+      "   - تكليف عملي تحريري يطلب من المتدرب تطبيق المفاهيم في فقرة محددة مع إرشادات ونموذج إجابة استرشادي للمدرب.\n" +
+      "3. التنسيق: أعد فقط كائن JSON الصالح التالي:\n" +
+      JSON.stringify({
+        title: "الواجب الأسبوعي التطبيقي: " + effectiveTopic,
+        total_grade: 10,
+        instructions: "تعليمات واضحة للمتدرب لكيفية حل التكليف...",
+        questions: [
+          {
+            type: "mcq",
+            question: "سؤال تطبيقي...",
+            options: ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
+            correct_answer: "الخيار أ",
+            explanation: "التوضيح..."
+          }
+        ],
+        text_questions: [
+          {
+            prompt: "المطلوب التحريري...",
+            guidelines: "إرشادات الصياغة...",
+            model_answer: "نموذج الإجابة..."
+          }
+        ]
+      }, null, 2);
 
-## بيانات المقرر والدرس:
-- المقرر التدريبي: ${effectiveCourse}
-- الوحدة / الأسبوع: ${effectiveWeek}
-- موضوع الدرس: ${effectiveTopic}
+    const groqCall = await callGroqChatCompletion({
+      prompt: promptText,
+      systemPrompt: "أنت مصمم تكليفات تدريبية في معهد الذهب الأسود للتدريب (BGTI). صغ واجباً أسبوعياً تطبيقياً بصيغة JSON نقي فقط.",
+      apiKey,
+      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+      temperature: 0.3
+    });
 
-## المادة العلمية ومحتوى الدرس:
----
-${effectiveContent.slice(0, 20000)}
----
-
-## المعايير المطلوبة:
-1. الالتزام بموضوع الدرس بنسبة 100% وتجنب أي مواضيع خارجية.
-2. يتضمن الواجب:
-   - عنوان واضح وتعليمات مفصلة للمتدرب.
-   - 2 إلى 3 أسئلة تطبيقية اختيار من متعدد مرتبطة بحالات واقعية من الدرس.
-   - تكليف عملي تحريري يطلب من المتدرب تطبيق المفاهيم في فقرة محددة مع إرشادات ونموذج إجابة استرشادي للمدرب.
-3. التنسيق: أعد فقط كائن JSON الصالح التالي:
-{
-  "title": "الواجب الأسبوعي التطبيقي: ${effectiveTopic}",
-  "total_grade": 10,
-  "instructions": "تعليمات واضحة للمتدرب لكيفية حل التكليف...",
-  "questions": [
-    {
-      "type": "mcq",
-      "question": "سؤال تطبيقي...",
-      "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
-      "correct_answer": "الخيار أ",
-      "explanation": "التوضيح..."
-    }
-  ],
-  "text_questions": [
-    {
-      "prompt": "المطلوب التحريري...",
-      "guidelines": "إرشادات الصياغة...",
-      "model_answer": "نموذج الإجابة..."
-    }
-  ]
-}`;
-
-    const preferredModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-    const modelsToTry = [preferredModel];
-    if (!modelsToTry.includes('gemini-2.0-flash')) modelsToTry.push('gemini-2.0-flash');
-    if (!modelsToTry.includes('gemini-1.5-flash')) modelsToTry.push('gemini-1.5-flash');
-
-    for (const curModel of modelsToTry) {
-      if (generatedData) break;
-      try {
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${curModel}:generateContent?key=${apiKey}`;
-        const geminiRes = await fetch(geminiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: promptText }] }],
-            generationConfig: {
-              temperature: 0.35,
-              responseMimeType: 'application/json'
-            }
-          })
-        });
-
-        if (!geminiRes.ok) {
-          const errBody = await geminiRes.text();
-          console.error(`Gemini assignment API error on model ${curModel} (Status ${geminiRes.status}):`, errBody.slice(0, 300));
-          geminiApiErrors.push(`[${curModel} HTTP ${geminiRes.status}]: ${errBody.slice(0, 150)}`);
-          continue;
-        }
-
-        const geminiJson = await geminiRes.json();
-        const candidateText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
-        const parsed = safeExtractJson(candidateText);
-        if (parsed && (parsed.instructions || parsed.questions || parsed.title)) {
-          generatedData = parsed.assignment || parsed;
-          modeUsed = `gemini (${curModel})`;
-          break;
-        }
-      } catch (geminiError) {
-        console.error(`Gemini assignment execution error on model ${curModel}: ${geminiError.message}`);
-        geminiApiErrors.push(`[${curModel} Exception]: ${geminiError.message}`);
+    groqApiErrors = groqCall.errors;
+    if (groqCall.data) {
+      const parsed = groqCall.data;
+      if (parsed && (parsed.instructions || parsed.questions || parsed.title)) {
+        generatedData = parsed.assignment || parsed;
+        modeUsed = "groq (" + groqCall.model + ")";
       }
     }
   }
 
   if (!generatedData) {
-    const fullSmart = buildSmartLmsContentFromText(effectiveContent, 'assignment_source.txt', effectiveCourse, effectiveTopic);
+    const fullSmart = buildSmartLmsContentFromText(effectiveContent, "assignment_source.txt", effectiveCourse, effectiveTopic);
     generatedData = fullSmart.assignment;
-    modeUsed = (hasValidKey && geminiApiErrors.length > 0)
-      ? 'semantic_fallback_after_gemini_error'
-      : 'semantic_local_generator';
+    modeUsed = (hasValidKey && groqApiErrors.length > 0)
+      ? "semantic_fallback_after_groq_error"
+      : "semantic_local_generator";
   }
 
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
   return res.status(200).json({
     success: true,
     mode: modeUsed,
+    hasGroqApiKey: hasValidKey,
     hasGeminiApiKey: hasValidKey,
     courseName: effectiveCourse,
     weekTopic: effectiveTopic,
@@ -1768,57 +1776,47 @@ ${effectiveContent.slice(0, 20000)}
     data: {
       assignment: generatedData
     },
-    geminiErrors: geminiApiErrors.length > 0 ? geminiApiErrors : undefined
+    groqErrors: groqApiErrors.length > 0 ? groqApiErrors : undefined
   });
 }
-
 async function handleExecutiveReport(req, res, startTime) {
   const { recipient, sender, weekLabel, stats, additionalNotes } = req.body || {};
-  const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
-  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
-  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE' && apiKey.length > 15);
+  const rawApiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || "";
+  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, "");
+  const hasValidKey = Boolean(apiKey && apiKey !== "YOUR_GROQ_API_KEY_HERE" && apiKey.length > 15);
 
   let generatedData = null;
-  let modeUsed = 'demo_fallback';
+  let modeUsed = "demo_fallback";
 
   if (hasValidKey) {
     try {
       const promptText = EXECUTIVE_PROMPT_TEMPLATE
-        .replace('{RECIPIENT}', recipient || 'سعادة الأستاذ المحترم / محمد كمال العواد (مدير التشغيل)')
-        .replace('{SENDER}', sender || 'إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك')
-        .replace(/{WEEK_LABEL}/g, weekLabel || 'الأسبوع الحالي')
-        .replace('{TOTAL_TRAINEES}', stats?.totalTrainees || 830)
-        .replace('{ATTENDANCE_RATE}', stats?.overallAttendanceRate || 94)
-        .replace('{P1_RATE}', stats?.period1Rate || 95)
-        .replace('{P2_RATE}', stats?.period2Rate || 93)
-        .replace('{GROUPS_COUNT}', stats?.activeGroupsCount || 16)
-        .replace('{TRAINERS_COUNT}', stats?.trainersCount || 9)
-        .replace('{LMS_STATS}', `التكليفات المنجزة: ${stats?.assignmentsSubmittedCount || 780}، الاختبارات المكتملة: ${stats?.quizzesCompletedCount || 42}`)
-        .replace('{ADDITIONAL_NOTES}', additionalNotes ? `\n- ملاحظات إضافية من الإدارة: ${additionalNotes}` : '');
+        .replace("{RECIPIENT}", recipient || "سعادة الأستاذ المحترم / محمد كمال العواد (مدير التشغيل)")
+        .replace("{SENDER}", sender || "إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك")
+        .replace(/{WEEK_LABEL}/g, weekLabel || "الأسبوع الحالي")
+        .replace("{TOTAL_TRAINEES}", stats?.totalTrainees || 830)
+        .replace("{ATTENDANCE_RATE}", stats?.overallAttendanceRate || 94)
+        .replace("{P1_RATE}", stats?.period1Rate || 95)
+        .replace("{P2_RATE}", stats?.period2Rate || 93)
+        .replace("{GROUPS_COUNT}", stats?.activeGroupsCount || 16)
+        .replace("{TRAINERS_COUNT}", stats?.trainersCount || 9)
+        .replace("{LMS_STATS}", "التكليفات المنجزة: " + (stats?.assignmentsSubmittedCount || 780) + "، الاختبارات المكتملة: " + (stats?.quizzesCompletedCount || 42))
+        .replace("{ADDITIONAL_NOTES}", additionalNotes ? ("\n- ملاحظات إضافية من الإدارة: " + additionalNotes) : "");
 
-      const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-      const geminiRes = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: promptText }] }],
-          generationConfig: { temperature: 0.35, responseMimeType: 'application/json' }
-        })
+      const groqCall = await callGroqChatCompletion({
+        prompt: promptText,
+        systemPrompt: "أنت مستشار إداري وأكاديمي تنفيذي أول لمعهد الذهب الأسود للتدريب (BGTI). صغ تقريراً إدارياً شاملاً بصيغة JSON نقي فقط.",
+        apiKey,
+        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        temperature: 0.3
       });
 
-      if (geminiRes.ok) {
-        const geminiJson = await geminiRes.json();
-        const candidateText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
-        const parsed = safeExtractJson(candidateText);
-        if (parsed && typeof parsed === 'object') {
-          generatedData = parsed;
-          modeUsed = `gemini (${model})`;
-        }
+      if (groqCall.data && typeof groqCall.data === "object") {
+        generatedData = groqCall.data;
+        modeUsed = "groq (" + groqCall.model + ")";
       }
     } catch (err) {
-      console.warn('Gemini executive report error, falling back to smart template:', err.message);
+      console.warn("Groq executive report error, falling back to smart template:", err.message);
     }
   }
 
@@ -1834,7 +1832,6 @@ async function handleExecutiveReport(req, res, startTime) {
     data: generatedData
   });
 }
-
 // ══════════════════════════════════════════════════════════════════════════════
 //  MAIN HANDLER (Vercel Serverless Entrypoint)
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1854,21 +1851,22 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
-    const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
+    const rawApiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || '';
     const cleanKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
-    const hasValidKey = Boolean(cleanKey && cleanKey !== 'YOUR_GEMINI_API_KEY_HERE' && cleanKey.length > 15);
+    const hasValidKey = Boolean(cleanKey && cleanKey !== 'YOUR_GROQ_API_KEY_HERE' && cleanKey.length > 15);
     const sbUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').trim();
     const sbKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
 
     return res.status(200).json({
       status: 'ready',
-      service: 'BGTI LMS AI Auto-Generation API (Vercel Serverless)',
+      service: 'BGTI LMS AI Auto-Generation API (Groq Cloud API - Llama 3.3 70B)',
       endpoints: {
         generate: 'POST /api/generate'
       },
+      hasGroqApiKey: hasValidKey,
       hasGeminiApiKey: hasValidKey,
       keyPrefix: hasValidKey ? cleanKey.substring(0, 8) + '...' : null,
-      defaultModel: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+      defaultModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
       hasSupabaseConfigured: Boolean(sbUrl && sbKey)
     });
   }
@@ -1977,188 +1975,79 @@ export default async function handler(req, res) {
     }
 
     const textLength = extractedText ? extractedText.length : 0;
-    const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_KEY || '';
-    const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
-    const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GEMINI_API_KEY_HERE' && apiKey.length > 15);
+    const rawApiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || "";
+    const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, "");
+    const hasValidKey = Boolean(apiKey && apiKey !== "YOUR_GROQ_API_KEY_HERE" && apiKey.length > 15);
 
     let generatedData = null;
-    let modeUsed = 'demo_fallback';
-    let geminiApiErrors = [];
+    let modeUsed = "demo_fallback";
+    let groqApiErrors = [];
 
-    // Helper: Resilient JSON extractor
-    function safeExtractJson(text) {
-      if (!text) return null;
-      let s = String(text).trim();
-      // Match markdown code block ```json ... ```
-      const blockMatch = s.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-      if (blockMatch) s = blockMatch[1].trim();
-
-      const firstBrace = s.indexOf('{');
-      const lastBrace = s.lastIndexOf('}');
-      if (firstBrace >= 0 && lastBrace > firstBrace) {
-        try {
-          return JSON.parse(s.slice(firstBrace, lastBrace + 1));
-        } catch (e) {
-          // Continue to direct parse
-        }
-      }
-      try {
-        return JSON.parse(s);
-      } catch (e) {
-        return null;
-      }
-    }
-
-    let detectedLessonTopic = '';
+    let detectedLessonTopic = "";
     if (hasDirectText) {
-      const firstLine = extractedText.split('\n')[0].replace(/^[\d\.\-\*#:]+\s*/, '').trim();
-      detectedLessonTopic = (firstLine.length >= 3 && firstLine.length <= 90) ? firstLine : '';
+      const firstLine = extractedText.split("\n")[0].replace(/^[\d\.\-\*#:]+\s*/, "").trim();
+      detectedLessonTopic = (firstLine.length >= 3 && firstLine.length <= 90) ? firstLine : "";
     }
 
     const isTextMode = Boolean(req.body?.isDirectText || (hasDirectText && !hasFile));
     const courseDiscipline = isTextMode
-      ? (detectedLessonTopic || req.body?.topic || 'الموضوع التعليمي المستقل')
-      : (courseName || 'المقرر التدريبي المعتمد');
-    const weekDiscipline = detectedLessonTopic || req.body?.topic || weekTopic || weekTitle || 'الوحدة التدريبية';
+      ? (detectedLessonTopic || req.body?.topic || "الموضوع التعليمي المستقل")
+      : (courseName || "المقرر التدريبي المعتمد");
+    const weekDiscipline = detectedLessonTopic || req.body?.topic || weekTopic || weekTitle || "الوحدة التدريبية";
 
-    // ─── Call Gemini API if Key is Available ─────────────────────────────────
+    // ─── Call Groq Cloud API if Key is Available ──────────────────────────
     if (hasValidKey) {
-      // Build context block
-      let contextBlock = `## بيانات الكورس والأسبوع:\n`;
-      if (courseName) contextBlock += `- اسم الكورس التدريبي: ${courseName}\n`;
-      if (weekTitle) contextBlock += `- الأسبوع: ${weekTitle}\n`;
-      if (weekTopic) contextBlock += `- موضوع الوحدة: ${weekTopic}\n`;
+      let contextBlock = "## بيانات الكورس والأسبوع:\n";
+      if (courseName) contextBlock += "- اسم الكورس التدريبي: " + courseName + "\n";
+      if (weekTitle) contextBlock += "- الأسبوع: " + weekTitle + "\n";
+      if (weekTopic) contextBlock += "- موضوع الوحدة: " + weekTopic + "\n";
 
-      const parts = [];
-
-      const formatLmsPrompt = (content) => {
-        return LMS_PROMPT_TEMPLATE
-          .replace(/{COURSE_DISCIPLINE}/g, courseDiscipline)
-          .replace(/{WEEK_DISCIPLINE}/g, weekDiscipline)
-          .replace('{CONTENT_BLOCK}', content);
-      };
-
-      // If direct text only (no file attached)
-      if (hasDirectText && !hasFile) {
+      let contentSection = "";
+      if (isTextMode) {
+        contentSection = contextBlock + "\n## المحتوى أو الموضوع الدراسي المُدخل:\n---\n" + extractedText + "\n---";
+      } else if (isPdf) {
         const trimmedText = extractedText.length > 25000
-          ? extractedText.slice(0, 25000) + '\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]'
+          ? extractedText.slice(0, 25000) + "\n\n[... تم الاكتفاء بهذا الجزء من المستند ...]"
           : extractedText;
-
-        const contentSection = `${contextBlock}\n## الموضوع والمحتوى التدريبي المدخل مباشرة من المدرب:\n---\n${trimmedText}\n---\n` +
-          `\n## توجيه إلزامي لمعالجة النص والموضوع بالذكاء الاصطناعي (Ground Truth 100%):\n` +
-          `- هذا الدرس والمحتوى يتمحور حصراً حول موضوع: "${weekDiscipline}".\n` +
-          `- النص والموضوع المدخل هو المصدر الأساسي للحقيقة؛ التزم به بنسبة 100% في جميع المكونات الأربعة (المحاضرة، المصطلحات، الواجب، والاختبار).\n` +
-          `- يمنع منعاً باتاً فرض أي تخصص صناعي أو هندسي أو مصطلحات سلامة (مثل PPE أو SOP أو غيرها) إذا لم تكن واردة في النص المرفق صراحة.\n` +
-          `- إذا كان النص قصيراً أو يعرض مفهوماً عاماً أو قيمياً (مثل بر الوالدين أو الأخلاق أو أساسيات الحاسب)، قم بالتوسع الأكاديمي والتربوي المنضبط في صلب هذا الموضوع بالذات.\n` +
-          `- ولد 3 فيديوهات ذات صلة وثيقة بعنوان الموضوع (بروابط بحث يوتيوب صريحة)، ملخصاً وافياً، 4 إلى 6 مصطلحات إنجليزية مترجمة للعربية ومحددة بدقة من صلب الموضوع، واجباً تطبيقياً، واختباراً من 10 أسئلة متكاملة (6 MCQ + 3 صح وخطأ + 1 توصيل 4 أزواج).`;
-
-        parts.push({
-          text: formatLmsPrompt(contentSection)
-        });
-      } else if (isPdf && (hasFile || hasExtractedPdfText)) {
-        // If base64 is available and under reasonable limit (under 4MB), pass inlineData
-        if (base64 && base64.length < 4500000) {
-          parts.push({
-            inlineData: {
-              mimeType: 'application/pdf',
-              data: base64
-            }
-          });
-        }
-
-        let contentSection = `${contextBlock}\n## المحتوى المُستخرج من وثيقة الـ PDF (${safeFilename}):\n`;
-        if (extractedText && extractedText.length > 20) {
-          const trimmedText = extractedText.length > 25000
-            ? extractedText.slice(0, 25000) + '\n\n[... تم الاكتفاء بهذا الجزء من المستند ...]'
-            : extractedText;
-          contentSection += `---\n${trimmedText}\n---`;
-        } else {
-          contentSection += `(راجع وثيقة الـ PDF المرفقة أعلاه بالكامل)`;
-        }
-
-        parts.push({
-          text: formatLmsPrompt(contentSection)
-        });
+        contentSection = contextBlock + "\n## المحتوى المُستخرج من وثيقة الـ PDF (" + safeFilename + "):\n---\n" + trimmedText + "\n---";
       } else {
-        // For PPTX or merged: provide extracted slide texts
         const trimmedText = extractedText.length > 20000
-          ? extractedText.slice(0, 20000) + '\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]'
+          ? extractedText.slice(0, 20000) + "\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]"
           : extractedText;
-
-        const contentSection = `${contextBlock}\n## المحتوى المُستخرج من شرائح العرض (${safeFilename}):\n---\n${trimmedText}\n---`;
-        parts.push({
-          text: formatLmsPrompt(contentSection)
-        });
+        contentSection = contextBlock + "\n## المحتوى المُستخرج من شرائح العرض (" + safeFilename + "):\n---\n" + trimmedText + "\n---";
       }
 
-      const preferredModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-      const modelsToTry = [preferredModel];
-      if (!modelsToTry.includes('gemini-2.0-flash')) modelsToTry.push('gemini-2.0-flash');
-      if (!modelsToTry.includes('gemini-1.5-flash')) modelsToTry.push('gemini-1.5-flash');
-      if (!modelsToTry.includes('gemini-1.5-pro')) modelsToTry.push('gemini-1.5-pro');
+      const fullPromptText = formatLmsPrompt(contentSection);
 
-      for (const curModel of modelsToTry) {
-        if (generatedData) break;
-        try {
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${curModel}:generateContent?key=${apiKey}`;
+      const groqCall = await callGroqChatCompletion({
+        prompt: fullPromptText,
+        systemPrompt: "أنت خبير أكاديمي ومصمم مناهج لدى معهد الذهب الأسود للتدريب (BGTI). أعد كائن JSON صالحاً بنسبة 100% يحتوي على المكونات التعليمية الأربعة للوحدة التدريبية دون أي نصوص إضافية خارج الـ JSON.",
+        apiKey,
+        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        temperature: 0.3
+      });
 
-          const geminiRes = await fetch(geminiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              contents: [
-                {
-                  role: 'user',
-                  parts
-                }
-              ],
-              generationConfig: {
-                temperature: 0.4,
-                responseMimeType: 'application/json'
-              }
-            })
-          });
-
-          if (!geminiRes.ok) {
-            const errBody = await geminiRes.text();
-            console.error(`Gemini API error on model ${curModel} (Status ${geminiRes.status}):`, errBody);
-            geminiApiErrors.push(`[${curModel} HTTP ${geminiRes.status}]: ${errBody.slice(0, 200)}`);
-            continue; // Fallback to next model in list
-          }
-
-          const geminiJson = await geminiRes.json();
-          const candidateText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text;
-          const parsed = safeExtractJson(candidateText);
-          if (parsed && typeof parsed === 'object') {
-            generatedData = parsed;
-            modeUsed = `gemini (${curModel})`;
-            break;
-          } else {
-            console.warn(`Gemini candidate text could not be parsed as JSON on model ${curModel}:`, candidateText?.slice(0, 200));
-          }
-        } catch (geminiError) {
-          console.error(`Gemini execution error on model ${curModel}:`, geminiError);
-          geminiApiErrors.push(`[${curModel} Exception]: ${geminiError.message}`);
-        }
+      groqApiErrors = groqCall.errors;
+      if (groqCall.data && typeof groqCall.data === "object") {
+        generatedData = groqCall.data;
+        modeUsed = "groq (" + groqCall.model + ")";
       }
     }
 
-    // ─── Smart Semantic Fallback if Gemini not used or failed ──────────────────────────
+    // ─── Smart Semantic Fallback if Groq not used or failed ──────────────────────────
     if (!generatedData) {
       const activeTopic = isTextMode ? (detectedLessonTopic || weekDiscipline) : (req.body?.weekTopic || req.body?.weekTitle || req.body?.courseName || safeFilename);
       generatedData = buildSmartLmsContentFromText(extractedText, safeFilename, courseDiscipline, activeTopic);
-      if (hasValidKey && geminiApiErrors.length > 0) {
-        modeUsed = 'semantic_fallback_after_gemini_error';
+      if (hasValidKey && groqApiErrors.length > 0) {
+        modeUsed = "semantic_fallback_after_groq_error";
       } else {
-        modeUsed = 'semantic_local_generator';
+        modeUsed = "semantic_local_generator";
       }
     }
 
     // Ensure all suggested videos match the actual lesson topic
     const effectiveTopic = isTextMode ? (detectedLessonTopic || weekDiscipline) : (req.body?.weekTopic || req.body?.weekTitle || req.body?.courseName || safeFilename);
-    generatedData = ensureSpecificYouTubeVideos(generatedData, effectiveTopic + ' ' + (generatedData?.lecture?.title || ''));
+    generatedData = ensureSpecificYouTubeVideos(generatedData, effectiveTopic + " " + (generatedData?.lecture?.title || ""));
 
     // Strictly ensure quiz questions count never falls below 10 questions
     generatedData = ensureMinQuizQuestions(generatedData, effectiveTopic);
@@ -2168,17 +2057,18 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       mode: modeUsed,
+      hasGroqApiKey: hasValidKey,
       hasGeminiApiKey: hasValidKey,
       filename: safeFilename,
       fileSizeKB,
-      file_url: cloudFileUrl || '',
+      file_url: cloudFileUrl || "",
       text_length: textLength,
       processing_time_seconds: parseFloat(durationSec),
       data: generatedData,
-      geminiErrors: geminiApiErrors.length > 0 ? geminiApiErrors : undefined
+      groqErrors: groqApiErrors.length > 0 ? groqApiErrors : undefined
     });
-
-  } catch (err) {
+  
+} catch (err) {
     console.error('api/generate handler fatal error:', err);
     return res.status(500).json({
       success: false,
