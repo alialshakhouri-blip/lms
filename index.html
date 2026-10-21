@@ -17697,7 +17697,26 @@
         if (!lmsCourses["فاضل الماجد"]) lmsCourses["فاضل الماجد"] = INITIAL_LMS_COURSES["فاضل الماجد"];
         if (!lmsCourses["السلامة والصحة"]) lmsCourses["السلامة والصحة"] = lmsCourses["فاضل الماجد"];
     }
-    // تهيئة مذكرات المراجعة كنصوص وتجريد أسماء الملفات من أية لاحقات (PDF / Excel) وضمان اختصار أسماء المقررات
+    // تطهير وحذف أي مقررات أو مستندات أو اختبارات تجريبية غير رسمية (بناءً على طلب المستخدم)
+    const OFFICIAL_COURSE_KEYS = new Set([
+        "اللحام", "رضا مطيلق",
+        "الكهرباء", "حسين العبد المحسن",
+        "الميكانيكا", "الميكانيكية", "ميكانيكا", "سيد احمد", "سيد أحمد",
+        "السلامة والصحة", "فاضل الماجد",
+        "الادارة المكتبية والسكرتارية", "ادارة مكتبية", "إدارة مكتبية", "أحمد الاصيل", "احمد الاصيل",
+        "لغة إنجليزية", "الانجليزي", "اللغة الانجليزية", "قاسم الماجد",
+        "إنشاءات", "انشاءات", "ناجي محمد",
+        "الحاسب الالي", "حاسب الي", "إمام يعقوب", "امام يعقوب"
+    ]);
+
+    // مسح أية مقررات غير معتمدة أو تجريبية
+    for (let k in lmsCourses) {
+        if (!OFFICIAL_COURSE_KEYS.has(k)) {
+            delete lmsCourses[k];
+        }
+    }
+
+    // تهيئة مذكرات المراجعة كنصوص وتجريد أسماء الملفات من أية لاحقات (PDF / Excel) وتطهير الملفات التجريبية
     for (let k in lmsCourses) {
         const c = lmsCourses[k];
         if (c) {
@@ -17708,15 +17727,36 @@
                 c.weeks.forEach(w => {
                     if (!w.docs && w.documents) w.docs = w.documents;
                     if (!w.docs) w.docs = [];
+                    // حذف أي مستندات أو ملفات تعليمية تجريبية
+                    w.docs = w.docs.filter(d => {
+                        if (!d || !d.title) return false;
+                        const t = d.title.toLowerCase();
+                        if (t.includes('كيف تحترم') || t.includes('تجريب') || t.includes('sample_') || t.includes('blank')) {
+                            return false;
+                        }
+                        return true;
+                    });
                     w.docs.forEach(d => {
                         if (d && d.title) {
                             d.title = d.title.replace(/\s*\((?:PDF|Excel|DOCX|XLSX)\)\s*/gi, '').trim();
                         }
                     });
+                    // حذف أي اختبارات تجريبية
+                    if (w.quizzes && Array.isArray(w.quizzes)) {
+                        w.quizzes = w.quizzes.filter(q => {
+                            if (!q || !q.title) return true;
+                            const qt = q.title.toLowerCase();
+                            return !qt.includes('كيف تحترم') && !qt.includes('اختبار تجريبي');
+                        });
+                    }
                 });
             }
         }
     }
+    try {
+        localStorage.setItem('sys_lms_courses_v2', JSON.stringify(lmsCourses));
+        localStorage.setItem('sys_lms_courses_v1', JSON.stringify(lmsCourses));
+    } catch(e) {}
     let studentCreds = JSON.parse(localStorage.getItem('sys_student_creds_v1')) || {};
     let studentQuizSubmissions = JSON.parse(localStorage.getItem('sys_student_quiz_submissions_v1')) || {};
     let studentAssignmentSubmissions = JSON.parse(localStorage.getItem('sys_student_assignment_submissions_v1')) || {};
@@ -28201,102 +28241,113 @@ END $$;`;
         if (qGrade) qGrade.value = quiz.total_grade || 10;
         
         if (!Array.isArray(quiz.questions)) quiz.questions = [];
-        padQuestionsToTen(quiz.questions, quiz.title || (data.lecture && data.lecture.title) || 'المحتوى التدريبي');
+        padQuestionsToTen(quiz.questions, quiz.title || (data.lecture && data.lecture.title) || 'المحتوى التدريبي', data);
 
         renderAiQuizQuestionsInModal();
     }
 
-    function padQuestionsToTen(questionsList, topic) {
+    function padQuestionsToTen(questionsList, topic, fullData) {
         if (!Array.isArray(questionsList)) return;
-        const backupPool = [
-            {
-                type: 'mcq',
-                question: `ما هو التعريف الدقيق للمصطلحات الفنية المعتمدة في سياق ${topic}؟`,
-                options: ['مفاهيم مهنية محددة ومعتمدة تضمن دقة التواصل وجودة التشغيل', 'أدوات يدوية عامة غير تخصصية', 'مستندات مالية سنوية', 'إجراءات غير معتمدة'],
-                correct_answer: 'مفاهيم مهنية محددة ومعتمدة تضمن دقة التواصل وجودة التشغيل',
-                explanation: 'المصطلحات الفنية المعتمدة تمثل لغة التخاطب الأساسية في الورش الصناعية.'
-            },
-            {
-                type: 'mcq',
-                question: `ما الغرض الأساسي من تطبيق إجراءات التشغيل القياسية (SOP) في ${topic}؟`,
-                options: ['توحيد خطوات العمل والحد من الأخطاء التشغيلية والحوادث', 'تسجيل مواعيد الإجازات الأسبوعية', 'إلغاء الصيانة الوقائية للأجهزة', 'تقليص اشتراطات السلامة'],
-                correct_answer: 'توحيد خطوات العمل والحد من الأخطاء التشغيلية والحوادث',
-                explanation: 'إجراءات SOP تضمن معيارية الأداء وسلامة المنشأة.'
-            },
-            {
-                type: 'mcq',
-                question: `أي من الخيارات التالية يُعد الخطوة الأولى قبل البدء بتشغيل المعدات الفنية؟`,
-                options: ['فحص أجهزة الأمان والتأكد من ارتداء مهمات الوقاية الشخصية', 'تشغيل الماكينة بأقصى حمل مباشرة', 'إلغاء تقارير الفحص الفني', 'مغادرة منطقة العمل'],
-                correct_answer: 'فحص أجهزة الأمان والتأكد من ارتداء مهمات الوقاية الشخصية',
-                explanation: 'الفحص المسبق والتحقق من مهمات الوقاية يحمي الكوادر من المخاطر.'
-            },
-            {
-                type: 'mcq',
-                question: `ماذا يقصد بمفهوم 'Quality Assurance' في العمليات المهنية المرتبطة بـ ${topic}؟`,
-                options: ['التحقق المنهجي من مطابقة المخرجات للمواصفات الهندسية المعتمدة', 'استخدام خامات غير معتمدة لتقليل النفقات', 'تأجيل عمليات التفتيش الفني', 'إلغاء سجلات الجودة'],
-                correct_answer: 'التحقق المنهجي من مطابقة المخرجات للمواصفات الهندسية المعتمدة',
-                explanation: 'ضمان الجودة ركيزة رئيسية لاعتماد مخرجات التدريب والعمليات الصناعية.'
-            },
-            {
-                type: 'mcq',
-                question: `أي من العناصر التالية يمثل ركيزة في تقييم المخاطر المهنية (Risk Assessment)؟`,
-                options: ['تحديد مصادر الخطر ووضع تدابير وقائية للحد منها', 'تجاهل الحوادث الوشيكة في بيئة العمل', 'تعطيل مخارج الطوارئ ومسارات الهروب', 'إلغاء تدريب الكوادر'],
-                correct_answer: 'تحديد مصادر الخطر ووضع تدابير وقائية للحد منها',
-                explanation: 'تقييم المخاطر يهدف لتوفير بيئة عمل آمنة ومستقرة.'
-            },
-            {
-                type: 'true_false',
-                question: `عبارة: الالتزام باشتراطات السلامة المهنية ومهمات الوقاية في ${topic} يُعد إلزامياً لحماية المتدربين والمنشأة.`,
-                options: ['صح ✓', 'خطأ ✗'],
-                correct_answer: 'صح ✓',
-                explanation: 'صواب؛ السلامة الصناعية إلزامية وغير قابلة للتهاون.'
-            },
-            {
-                type: 'true_false',
-                question: `عبارة: المصطلحات الفنية المكتسبة في التدريب هي مفاهيم نظرية فقط ولا تطبق في كتيبات التشغيل الميدانية.`,
-                options: ['صح ✓', 'خطأ ✗'],
-                correct_answer: 'خطأ ✗',
-                explanation: 'خطأ؛ المصطلحات الفنية تطبق يومياً في قراءة كتيبات التشغيل والتقارير الفنية.'
-            },
-            {
-                type: 'true_false',
-                question: `عبارة: ارتداء مهمات الوقاية الشخصية (PPE) هو إجراء اختياري يمكن الاستغناء عنه أثناء فترات العمل القصيرة.`,
-                options: ['صح ✓', 'خطأ ✗'],
-                correct_answer: 'صح ✓',
-                explanation: 'خطأ؛ ارتداء مهمات الوقاية الشخصية إلزامي طوال فترة التواجد في الورش.'
-            },
-            {
-                type: 'true_false',
-                question: `عبارة: توثيق ملاحظات التشغيل والأعطال في سجلات الصيانة يساهم مباشرة في تجنب الحوادث المستقبلية.`,
-                options: ['صح ✓', 'خطأ ✗'],
-                correct_answer: 'صح ✓',
-                explanation: 'صواب؛ التوثيق الدوري يساعد في تنفيذ الصيانة الوقائية الاستباقية.'
-            },
-            {
-                type: 'matching',
-                question: '🔗 سؤال التوصيل والمطابقة: صِل كل مصطلح فني في القائمة (أ) بتعريفه وتطبيقه الصحيح في القائمة (ب):',
-                pairs: [
-                    { left: 'PPE', right: 'مهمات الوقاية الشخصية' },
-                    { left: 'SOP', right: 'إجراءات التشغيل القياسية' },
-                    { left: 'QA', right: 'ضمان وتأكيد الجودة' },
-                    { left: 'Safety', right: 'السلامة والصحة المهنية' }
-                ],
-                explanation: 'ممتاز! تم توصيل كافة المصطلحات بتعريفاتها ومجالاتها الفنية الصحيحة بنجاح.'
-            }
-        ];
+        const data = fullData || (typeof currentAiGeneratedData !== 'undefined' ? currentAiGeneratedData : null);
+        const terms = (data && data.glossary_notes && Array.isArray(data.glossary_notes.terms)) ? data.glossary_notes.terms : [];
+        const topics = (data && data.lecture && Array.isArray(data.lecture.topics)) ? data.lecture.topics : [];
+        const lectureTitle = (data && data.lecture && data.lecture.title) ? data.lecture.title : (topic || 'المحتوى التدريبي');
 
-        let pIdx = 0;
-        while (questionsList.length < 10 && pIdx < backupPool.length * 3) {
-            const nextQ = backupPool[pIdx % backupPool.length];
-            const exists = questionsList.some(q => q.question === nextQ.question);
-            if (!exists) {
-                questionsList.push(JSON.parse(JSON.stringify(nextQ)));
-            } else if (questionsList.length < 10) {
-                const cloned = JSON.parse(JSON.stringify(nextQ));
-                cloned.question = `سؤال تطبيقي (${questionsList.length + 1}): ${cloned.question.replace(/^سؤال تطبيقي \(\d+\): /, '')}`;
-                questionsList.push(cloned);
+        // 1. Ensure matching question exists from real glossary terms
+        const hasMatching = questionsList.some(q => q.type === 'matching');
+        if (!hasMatching && terms.length >= 2) {
+            const matchPairs = terms.slice(0, 4).map(t => ({
+                left: t.term || t.en || 'مصطلح فني',
+                right: t.definition || t.ar || t.term || 'التعريف المعتمد'
+            }));
+            questionsList.push({
+                type: 'matching',
+                question: `🔗 سؤال التوصيل والمطابقة: صِل كل مصطلح علمي أو عملي من محتوى (${lectureTitle}) بالقائمة (أ) بتعريفه وتطبيقه الدقيق في القائمة (ب):`,
+                pairs: matchPairs,
+                explanation: `تم ربط ومطابقة كافة المصطلحات الفنية الخاصة بـ (${lectureTitle}) بتعريفاتها ومجالاتها بدقة.`
+            });
+        }
+
+        // 2. Synthesize MCQs from terms if questions count is under 10
+        let tIdx = 0;
+        while (questionsList.length < 10 && tIdx < terms.length) {
+            const t = terms[tIdx];
+            const termLabel = t.term || t.en || '';
+            const termDef = t.definition || t.ar || '';
+            if (termLabel && termDef) {
+                const qText = `ما هو التعريف أو التطبيق المعتمد لمفهوم "${termLabel}" في سياق ${lectureTitle}؟`;
+                const exists = questionsList.some(q => q.question === qText);
+                if (!exists) {
+                    const otherDefs = terms.filter((_, idx) => idx !== tIdx).map(x => x.definition || x.ar).filter(Boolean);
+                    const distractors = [
+                        otherDefs[0] || `إجراء تشغيلي غير مرتبط بمفهوم ${termLabel}`,
+                        otherDefs[1] || `مفهوم إداري عام منفصل عن هذا المحور الفني`,
+                        otherDefs[2] || `تطبيق عشوائي لا يحقق المعايير المطلوبة`
+                    ];
+                    const opts = [termDef, distractors[0], distractors[1], distractors[2]].sort(() => Math.random() - 0.5);
+                    questionsList.push({
+                        type: 'mcq',
+                        question: qText,
+                        options: opts,
+                        correct_answer: termDef,
+                        explanation: `المدلول الفني الدقيق لمفهوم "${termLabel}" هو: ${termDef}.`
+                    });
+                }
             }
-            pIdx++;
+            tIdx++;
+        }
+
+        // 3. Synthesize True/False from topics if questions count is under 10
+        let topIdx = 0;
+        while (questionsList.length < 10 && topIdx < topics.length) {
+            const top = topics[topIdx];
+            const isTrue = (topIdx % 2 === 0);
+            const qText = isTrue
+                ? `عبارة: في سياق درس (${lectureTitle})، يركز محور "${top.title}" على: ${top.summary || 'التطبيق العملي والمهني المباشر'}.`
+                : `عبارة: في سياق درس (${lectureTitle})، يُعد محور "${top.title}" مجرد إجراء اختياري لا يؤثر على جودة المخرجات.`;
+            const exists = questionsList.some(q => q.question === qText);
+            if (!exists) {
+                questionsList.push({
+                    type: 'true_false',
+                    question: qText,
+                    options: ['صح ✓', 'خطأ ✗'],
+                    correct_answer: isTrue ? 'صح ✓' : 'خطأ ✗',
+                    explanation: isTrue
+                        ? `صواب؛ يمثل محور "${top.title}" ركيزة أساسية في ${lectureTitle}.`
+                        : `خطأ؛ بل يمثل محور "${top.title}" ركيزة إلزامية لضمان دقة التنفيذ والمطابقة.`
+                });
+            }
+            topIdx++;
+        }
+
+        // 4. Synthesize direct domain questions referencing lectureTitle if still under 10
+        let fallbackStep = 1;
+        while (questionsList.length < 10 && fallbackStep <= 5) {
+            const qText = `سؤال تقييمي (${questionsList.length + 1}): ما هو العامل الحاسم لضمان إتقان المهارات والمفاهيم المشروحة في (${lectureTitle})؟`;
+            const exists = questionsList.some(q => q.question === qText);
+            if (!exists) {
+                questionsList.push({
+                    type: 'mcq',
+                    question: qText,
+                    options: [
+                        `الفهم المنهجي والتطبيق العملي الدقيق لكافة محاور ${lectureTitle}`,
+                        'التنفيذ السريع دون مراجعة الخطوات والمعايير الفنية',
+                        'إلغاء التوثيق الفني والتقارير الدورية المرتبطة بالعملية',
+                        'الاعتماد على التخمين الفردي بدلاً من الأدلة المعتمدة'
+                    ],
+                    correct_answer: `الفهم المنهجي والتطبيق العملي الدقيق لكافة محاور ${lectureTitle}`,
+                    explanation: `التطبيق المنهجي والالتزام بالمعايير المشروحة هما الأساس لإتقان ${lectureTitle}.`
+                });
+            } else {
+                questionsList.push({
+                    type: 'true_false',
+                    question: `عبارة: التوثيق الفني والمتابعة المستمرة في (${lectureTitle}) يسهمان مباشرة في رفع الكفاءة والحد من الأخطاء.`,
+                    options: ['صح ✓', 'خطأ ✗'],
+                    correct_answer: 'صح ✓',
+                    explanation: `صواب؛ التوثيق المنهجي يحقق المعيارية والاعتمادية في ${lectureTitle}.`
+                });
+            }
+            fallbackStep++;
         }
     }
     window.padQuestionsToTen = padQuestionsToTen;
@@ -28319,10 +28370,10 @@ END $$;`;
             if (qType === 'matching') {
                 const pairs = Array.isArray(q.pairs) ? q.pairs : [];
                 return `
-                    <div class="p-4 bg-white border border-indigo-200 rounded-2xl shadow-xs space-y-3 transition hover:border-indigo-400">
+                    <div class="p-4 bg-white border-2 border-indigo-200 rounded-2xl shadow-xs space-y-3.5 transition hover:border-indigo-400">
                         <div class="flex items-start justify-between gap-3 flex-wrap border-b border-indigo-100 pb-2.5">
                             <div class="flex items-center gap-2.5 flex-1 min-w-[200px]">
-                                <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-900 font-black text-xs shrink-0 shadow-2xs">
+                                <span class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-black text-xs shrink-0 shadow-2xs">
                                     سؤال ${i + 1}
                                 </span>
                                 <span class="font-black text-slate-900 text-xs md:text-sm leading-relaxed">
@@ -28331,24 +28382,60 @@ END $$;`;
                             </div>
                             <span class="text-[10px] font-black bg-indigo-50 text-indigo-900 border border-indigo-200 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
                                 <span>🔗</span>
-                                <span>سؤال توصيل ومطابقة</span>
+                                <span>سؤال توصيل ومطابقة (لوحة ملونة ثنائية الأعمدة)</span>
                             </span>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
-                            ${pairs.map((p, pIdx) => `
-                                <div class="p-2.5 rounded-xl border border-indigo-200/80 bg-indigo-50/40 text-xs font-bold flex items-center justify-between gap-2">
-                                    <div class="flex items-center gap-2 flex-1 min-w-0">
-                                        <span class="w-5 h-5 rounded-md bg-indigo-600 text-white font-black text-[10px] flex items-center justify-center shrink-0">
-                                            ${pIdx + 1}
-                                        </span>
-                                        <span class="font-black text-indigo-950 truncate">${escapeHtml(p.left)}</span>
-                                    </div>
-                                    <span class="text-indigo-400 font-bold shrink-0">➔</span>
-                                    <span class="font-bold text-slate-700 flex-1 min-w-0 text-left truncate">${escapeHtml(p.right)}</span>
+
+                        <!-- Dual-Column Visual Matching Board Preview with MATCHING_COLORS -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                            <!-- Column A -->
+                            <div class="space-y-2">
+                                <div class="text-[11px] font-black text-slate-700 flex items-center gap-1.5 px-1">
+                                    <span class="w-2 h-2 rounded-full bg-violet-600"></span>
+                                    <span>العمود (أ) - المصطلحات:</span>
                                 </div>
-                            `).join('')}
+                                <div class="space-y-2">
+                                    ${pairs.map((p, pIdx) => {
+                                        const c = MATCHING_COLORS[pIdx % MATCHING_COLORS.length];
+                                        return `
+                                            <div class="p-2.5 rounded-xl border-2 ${c.border} ${c.bg} ${c.text} text-xs font-black flex items-center justify-between gap-2 shadow-2xs">
+                                                <div class="flex items-center gap-2 flex-1 min-w-0">
+                                                    <span class="px-2 py-0.5 rounded-md ${c.badgeBg} ${c.badgeText} text-[10px] font-mono font-black shrink-0">
+                                                        زوج ${pIdx + 1}
+                                                    </span>
+                                                    <span class="truncate">${escapeHtml(p.left)}</span>
+                                                </div>
+                                                <span class="w-3.5 h-3.5 rounded-full ${c.badgeBg} shrink-0 ring-2 ring-white"></span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+
+                            <!-- Column B -->
+                            <div class="space-y-2">
+                                <div class="text-[11px] font-black text-slate-700 flex items-center gap-1.5 px-1">
+                                    <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                                    <span>العمود (ب) - التعريفات والتطبيقات:</span>
+                                </div>
+                                <div class="space-y-2">
+                                    ${pairs.map((p, pIdx) => {
+                                        const c = MATCHING_COLORS[pIdx % MATCHING_COLORS.length];
+                                        return `
+                                            <div class="p-2.5 rounded-xl border-2 ${c.border} ${c.bg} ${c.text} text-xs font-bold flex items-center justify-between gap-2 shadow-2xs">
+                                                <span class="w-3.5 h-3.5 rounded-full ${c.badgeBg} shrink-0 ring-2 ring-white"></span>
+                                                <span class="flex-1 min-w-0 leading-relaxed text-right">${escapeHtml(p.right)}</span>
+                                                <span class="px-2 py-0.5 rounded-md ${c.badgeBg} ${c.badgeText} text-[10px] font-mono font-black shrink-0">
+                                                    زوج ${pIdx + 1}
+                                                </span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
                         </div>
-                        ${q.explanation ? `<p class="text-[11px] text-emerald-800 font-bold bg-emerald-50 border border-emerald-200/60 p-2 rounded-xl">💡 ${escapeHtml(q.explanation)}</p>` : ''}
+
+                        ${q.explanation ? `<p class="text-[11px] text-emerald-800 font-bold bg-emerald-50 border border-emerald-200/60 p-2.5 rounded-xl">💡 ${escapeHtml(q.explanation)}</p>` : ''}
                     </div>
                 `;
             }
@@ -30751,6 +30838,72 @@ END $$;`;
             let questionsHtml = '';
             if (questions.length > 0) {
                 questionsHtml = questions.map((q, qIdx) => {
+                    const qType = q.type || 'mcq';
+
+                    if (qType === 'matching') {
+                        const pairs = Array.isArray(q.pairs) ? q.pairs : [];
+                        let studentPairs = {};
+                        if (quizSub && quizSub.answers) {
+                            if (quizSub.answers[q.id] && typeof quizSub.answers[q.id] === 'object') {
+                                studentPairs = quizSub.answers[q.id];
+                            } else if (quizSub.answers[qIdx] && typeof quizSub.answers[qIdx] === 'object') {
+                                studentPairs = quizSub.answers[qIdx];
+                            }
+                        }
+
+                        let correctCount = 0;
+                        pairs.forEach(p => {
+                            const sRight = studentPairs[p.left];
+                            if (sRight && String(sRight).trim() === String(p.right).trim()) {
+                                correctCount++;
+                            }
+                        });
+                        const isAllCorrect = (pairs.length > 0 && correctCount === pairs.length);
+                        const isPartial = (correctCount > 0 && correctCount < pairs.length);
+
+                        return `
+                            <div class="bg-white border-2 border-indigo-200 rounded-xl p-3.5 space-y-3">
+                                <div class="flex items-start justify-between gap-2 flex-wrap">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-lg bg-[#0F2942] text-amber-300 flex items-center justify-center text-xs font-black shrink-0">${qIdx + 1}</span>
+                                        <span class="text-xs font-black text-slate-900">${escapeHtml(q.text || q.question || 'سؤال توصيل ومطابقة')}</span>
+                                    </div>
+                                    <span class="text-[10px] font-bold px-2.5 py-1 rounded-md ${
+                                        isAllCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' :
+                                        (isPartial ? 'bg-amber-50 text-amber-800 border border-amber-300' : 'bg-red-50 text-red-800 border border-red-300')
+                                    }">
+                                        🔗 توصيل: ${correctCount} من ${pairs.length} صحيح ${isAllCorrect ? '✅ (درجة كاملة)' : (isPartial ? '⚠️ (درجة جزئية)' : '❌')}
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                    ${pairs.map((p, pIdx) => {
+                                        const c = MATCHING_COLORS[pIdx % MATCHING_COLORS.length];
+                                        const studentR = studentPairs[p.left];
+                                        const hasAnswered = (studentR !== undefined && studentR !== null && String(studentR).trim() !== '');
+                                        const isMatch = (hasAnswered && String(studentR).trim() === String(p.right).trim());
+                                        return `
+                                            <div class="p-2.5 rounded-xl border-2 ${isMatch ? c.border : 'border-red-300'} ${isMatch ? c.bg : 'bg-red-50/40'} text-xs space-y-1">
+                                                <div class="flex items-center justify-between gap-1.5 font-black">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="px-1.5 py-0.5 rounded text-[10px] ${c.badgeBg} ${c.badgeText}">زوج ${pIdx + 1}</span>
+                                                        <span class="${c.text}">${escapeHtml(p.left)}</span>
+                                                    </div>
+                                                    <span class="text-[10px] font-bold ${isMatch ? 'text-emerald-700' : 'text-red-700'}">
+                                                        ${isMatch ? 'صحيح ✅' : (hasAnswered ? 'غير متطابق ❌' : 'لم يتم التوصيل ⚠️')}
+                                                    </span>
+                                                </div>
+                                                <div class="text-[11px] text-slate-600 flex items-center justify-between pt-1 border-t border-slate-200/60">
+                                                    <span>إجابة المتدرب: <b class="${isMatch ? 'text-emerald-950 font-black' : 'text-red-950 font-black'}">${escapeHtml(hasAnswered ? studentR : 'لم يوصل')}</b></span>
+                                                </div>
+                                                ${!isMatch ? `<div class="text-[10px] text-slate-600">الإجابة النموذجية: <span class="font-bold text-slate-900">${escapeHtml(p.right)}</span></div>` : ''}
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     let userAnsIdx = null;
                     if (quizSub && quizSub.answers && quizSub.answers[q.id] !== undefined) {
                         userAnsIdx = quizSub.answers[q.id];
@@ -30766,7 +30919,7 @@ END $$;`;
                             <div class="flex items-start justify-between gap-2 flex-wrap">
                                 <div class="flex items-center gap-2">
                                     <span class="w-6 h-6 rounded-lg bg-[#0F2942] text-amber-300 flex items-center justify-center text-xs font-black shrink-0">${qIdx + 1}</span>
-                                    <span class="text-xs font-black text-slate-900">${q.text}</span>
+                                    <span class="text-xs font-black text-slate-900">${q.text || q.question || ''}</span>
                                 </div>
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${
                                     isAnsCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :

@@ -35,8 +35,8 @@ const LMS_PROMPT_TEMPLATE = `أنت خبير أكاديمي متقدم ومصم�
 3. الفيديوهات التعليمية المقترحة:
    - وفر 3 فيديوهات ذات عناوين دقيقة تركز على "{COURSE_DISCIPLINE} - {WEEK_DISCIPLINE}" مع روابط يوتيوب تعليمية حقيقية بصيغة https://www.youtube.com/watch?v=... ولا تضع روابط بحث search_query إطلاقاً.
 4. مكونات التقييمات:
-   - الواجب: أسئلة تطبيقية محددة + تكليف نصي عملي يربط المهارة ببيئة العمل.
-   - الاختبار الأسبوعي: اختبار شامل لا يقل عن 10 أسئلة (6 MCQ على الأقل + 4 صح وخطأ + سؤال مطابقة متكامل).
+   - الواجب الأسبوعي: أسئلة تطبيقية محددة + تكليف نصي عملي يربط المهارة ببيئة العمل.
+   - الاختبار الأسبوعي: يجب عليك توليد 10 أسئلة متكاملة ومستنبطة 100% من صلب النص والمحتوى المرفق دون أي حشو خارجي (6 أسئلة اختيار من متعدد MCQ + 3 أسئلة صح وخطأ + سؤال توصيل ومطابقة Matching واحد يحتوي على 4 أزواج متطابقة تماماً). لا تنقص عن 10 أسئلة إطلاقاً!
 5. أعد فقط كائن JSON الصالح التالي بدون أي نصوص تمهيدية أو كتل تعليق خارج الـ JSON:
 
 ## JSON Schema المطلوبة (أعد هذه البنية بالضبط):
@@ -69,17 +69,19 @@ const LMS_PROMPT_TEMPLATE = `أنت خبير أكاديمي متقدم ومصم�
     "duration_minutes": 15,
     "summary": "ملخص شامل ومكثف لمحتوى المحاضرة والنقاط الأساسية (لا يقل عن 80 كلمة بالعربية الفصحى)",
     "topics": [
-      "المحور الأول: مقدمة وأسس المفهوم التدريبي",
+      "المحور الأول: مقدمة وأسس المفهوم التدريبي في هذا الدرس",
       "المحور الثاني: الإجراءات والمعايير المهنية المعتمدة",
-      "المحور الثالث: التطبيق العملي والسلامة في بيئة العمل"
+      "المحور الثالث: التطبيق العملي والسلامة التخصصية في بيئة العمل"
     ]
   },
   "glossary_notes": {
     "title": "قاموس ومذكرات مصطلحات الأسبوع",
-    "description": "قاموس مصطلحات فنية ومهنية إنجليزية مترجمة للعربية وموضحة وفق المنهج التدريبي",
+    "description": "قاموس مصطلحات فنية ومهنية إنجليزية مترجمة للعربية وموضحة وفق المنهج التدريبي المرفق",
     "terms": [
-      {"en": "Term 1", "ar": "المصطلح بالعربية", "definition": "شرح مختصر للمصطلح وسياق استخدامه في بيئة العمل"},
-      {"en": "Term 2", "ar": "المصطلح بالعربية", "definition": "شرح مختصر للمصطلح وسياق استخدامه في بيئة العمل"}
+      {"en": "Term 1", "ar": "المصطلح 1 بالعربية", "definition": "شرح دقيق للمصطلح مشتق من المحتوى المرفق"},
+      {"en": "Term 2", "ar": "المصطلح 2 بالعربية", "definition": "شرح دقيق للمصطلح مشتق من المحتوى المرفق"},
+      {"en": "Term 3", "ar": "المصطلح 3 بالعربية", "definition": "شرح دقيق للمصطلح مشتق من المحتوى المرفق"},
+      {"en": "Term 4", "ar": "المصطلح 4 بالعربية", "definition": "شرح دقيق للمصطلح مشتق من المحتوى المرفق"}
     ]
   },
   "assignment": {
@@ -96,8 +98,8 @@ const LMS_PROMPT_TEMPLATE = `أنت خبير أكاديمي متقدم ومصم�
     ],
     "text_questions": [
       {
-        "prompt": "اكتب فقرة باللغة الإنجليزية التقنية لا تقل عن 50 كلمة توضح فيها كيفية تطبيق إجراءات السلامة المذكورة في المحاضرة.",
-        "guidelines": "استخدم على الأقل 3 من المصطلحات الفنية المكتسبة في سياق مهني صحيح.",
+        "prompt": "اكتب فقرة فنية مهنية توضح فيها كيفية تطبيق المفاهيم المكتسبة في هذه الوحدة التدريبية.",
+        "guidelines": "استخدم المصطلحات الفنية المناسبة الواردة في المحتوى.",
         "model_answer": "نموذج إجابة استرشادي يوضح للمدرب المعايير المقبولة للتقييم."
       }
     ],
@@ -110,7 +112,7 @@ const LMS_PROMPT_TEMPLATE = `أنت خبير أكاديمي متقدم ومصم�
       },
       {
         "type": "true_false",
-        "question": "عبارة صح وخطأ حول تطبيق المصطلحات وإجراءات العمل والمهام المهنية",
+        "question": "عبارة صح وخطأ حول تطبيق المصطلحات وإجراءات العمل والمهام المهنية في هذا الموضوع",
         "options": ["صح", "خطأ"],
         "correct_answer": "صح"
       }
@@ -123,42 +125,77 @@ const LMS_PROMPT_TEMPLATE = `أنت خبير أكاديمي متقدم ومصم�
     "questions": [
       {
         "type": "mcq",
-        "question": "نص السؤال الأول من متعدد بالإنجليزية أو العربية يختبر فهماً دقيقاً",
-        "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
-        "correct_answer": "الخيار أ",
-        "explanation": "شرح وتوضيح لسبب صحة الخيار"
+        "question": "سؤال 1 من متعدد مشتق بدقة متناهية من المحتوى",
+        "options": ["الخيار الصحيح", "خيار غير صحيح 1", "خيار غير صحيح 2", "خيار غير صحيح 3"],
+        "correct_answer": "الخيار الصحيح",
+        "explanation": "شرح وتفسير علمي دقيق لسبب صحة الخيار"
       },
       {
         "type": "mcq",
-        "question": "نص السؤال الثاني من متعدد يربط بين المصطلح والممارسة المهنية",
-        "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
-        "correct_answer": "الخيار أ",
-        "explanation": "شرح توضيحي"
+        "question": "سؤال 2 من متعدد يختبر مفهوماً رئيسياً من النص المرفق",
+        "options": ["الخيار الصحيح", "خيار غير صحيح 1", "خيار غير صحيح 2", "خيار غير صحيح 3"],
+        "correct_answer": "الخيار الصحيح",
+        "explanation": "شرح توضيحي مباشر"
+      },
+      {
+        "type": "mcq",
+        "question": "سؤال 3 من متعدد يقيس التطبيق الفني العملي للموضوع",
+        "options": ["الخيار الصحيح", "خيار غير صحيح 1", "خيار غير صحيح 2", "خيار غير صحيح 3"],
+        "correct_answer": "الخيار الصحيح",
+        "explanation": "شرح توضيحي مباشر"
+      },
+      {
+        "type": "mcq",
+        "question": "سؤال 4 من متعدد يقيس الإجراءات والمعايير المذكورة بالدرس",
+        "options": ["الخيار الصحيح", "خيار غير صحيح 1", "خيار غير صحيح 2", "خيار غير صحيح 3"],
+        "correct_answer": "الخيار الصحيح",
+        "explanation": "شرح توضيحي مباشر"
+      },
+      {
+        "type": "mcq",
+        "question": "سؤال 5 من متعدد يختبر التمييز بين المصطلحات التقنية",
+        "options": ["الخيار الصحيح", "خيار غير صحيح 1", "خيار غير صحيح 2", "خيار غير صحيح 3"],
+        "correct_answer": "الخيار الصحيح",
+        "explanation": "شرح توضيحي مباشر"
+      },
+      {
+        "type": "mcq",
+        "question": "سؤال 6 من متعدد يربط بين النظرية والتطبيق الميداني",
+        "options": ["الخيار الصحيح", "خيار غير صحيح 1", "خيار غير صحيح 2", "خيار غير صحيح 3"],
+        "correct_answer": "الخيار الصحيح",
+        "explanation": "شرح توضيحي مباشر"
       },
       {
         "type": "true_false",
-        "question": "عبارة محددة من المحتوى يطلب من المتدرب الحكم بصحتها أو خطئها",
+        "question": "سؤال 7 (صح/خطأ): عبارة دقيقة مستنبطة من المحتوى",
         "options": ["صح ✓", "خطأ ✗"],
         "correct_answer": "صح ✓",
-        "explanation": "تفسير صحة العبارة وفقاً للمعايير المهنية"
+        "explanation": "تفسير صحة العبارة وفقاً للمحتوى العلمي"
       },
       {
         "type": "true_false",
-        "question": "عبارة ثانية تقيس الدقة في تطبيق إجراءات العمل والتشغيل",
+        "question": "سؤال 8 (صح/خطأ): عبارة ثانية تقيس الدقة في استيعاب المادة",
         "options": ["صح ✓", "خطأ ✗"],
         "correct_answer": "خطأ ✗",
-        "explanation": "تفسير سبب خطأ العبارة وتصحيحها"
+        "explanation": "تفسير سبب خطأ العبارة والتصحيح الدقيق لها"
+      },
+      {
+        "type": "true_false",
+        "question": "سؤال 9 (صح/خطأ): عبارة ثالثة تركز على التطبيق والاشتراطات",
+        "options": ["صح ✓", "خطأ ✗"],
+        "correct_answer": "صح ✓",
+        "explanation": "تفسير صواب العبارة"
       },
       {
         "type": "matching",
-        "question": "🔗 سؤال التوصيل والمطابقة: صِل كل مصطلح/مفهوم في القائمة (أ) بما يناسبه في القائمة (ب)",
+        "question": "🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم/مصطلح في القائمة (أ) بتعريفه وتطبيقه الصحيح في القائمة (ب):",
         "pairs": [
-          {"left": "المصطلح أو المفهوم 1", "right": "التعريف أو التطبيق المقابل 1"},
-          {"left": "المصطلح أو المفهوم 2", "right": "التعريف أو التطبيق المقابل 2"},
-          {"left": "المصطلح أو المفهوم 3", "right": "التعريف أو التطبيق المقابل 3"},
-          {"left": "المصطلح أو المفهوم 4", "right": "التعريف أو التطبيق المقابل 4"}
+          {"left": "المصطلح 1 من الدرس", "right": "التعريف المطابق 1"},
+          {"left": "المصطلح 2 من الدرس", "right": "التعريف المطابق 2"},
+          {"left": "المصطلح 3 من الدرس", "right": "التعريف المطابق 3"},
+          {"left": "المصطلح 4 من الدرس", "right": "التعريف المطابق 4"}
         ],
-        "explanation": "أحسنت! جميع المصطلحات تم توصيلها بتعريفاتها ومجالاتها الفنية الصحيحة"
+        "explanation": "أحسنت! جميع المصطلحات تم توصيلها بتعريفاتها الفنية الصحيحة بنجاح."
       }
     ]
   }
@@ -454,143 +491,82 @@ function ensureMinQuizQuestions(data, contextTitle = '') {
     data.quiz.questions = [];
   }
 
+  // 1. Check if matching question exists
+  const hasMatching = data.quiz.questions.some(q => q.type === 'matching' && Array.isArray(q.pairs) && q.pairs.length >= 2);
   const terms = (data.glossary_notes && Array.isArray(data.glossary_notes.terms) && data.glossary_notes.terms.length > 0)
     ? data.glossary_notes.terms
-    : [
-        { en: 'Technical English', ar: 'اللغة الإنجليزية الفنية', definition: 'استخدام المصطلحات المهنية الدقيقة للتواصل في بيئة العمل الفنية.' },
-        { en: 'Industrial Safety', ar: 'السلامة الصناعية', definition: 'مجموعة القواعد والإجراءات المتبعة لحماية الكوادر والمعدات من المخاطر المهنية.' },
-        { en: 'Standard Operating Procedure (SOP)', ar: 'إجراءات التشغيل القياسية', definition: 'وثيقة تصف الخطوات المعتمدة لتنفيذ مهمة فنية محددة بدقة وأمان.' },
-        { en: 'Quality Assurance (QA)', ar: 'ضمان وتأكيد الجودة', definition: 'التحقق المنهجي من مطابقة المنتجات والعمليات للمعايير الهندسية المطلوبة.' },
-        { en: 'Personal Protective Equipment (PPE)', ar: 'مهمات الوقاية الشخصية', definition: 'الأدوات والمعدات الوقائية التي يرتديها الفني لحمايته من المخاطر المباشرة.' },
-        { en: 'Risk Assessment', ar: 'تقييم المخاطر المهنية', definition: 'تحديد المخاطر المحتملة في موقع العمل وتقدير شدتها لوضع خطط تفادي ملائمة.' }
-      ];
+    : [];
 
-  const pool = [
-    {
-      type: 'mcq',
-      question: `ما هو التعريف الدقيق للمصطلح المهني '${terms[0]?.en || 'Technical Safety'}' وفق المنهج التدريبي؟`,
-      options: [
-        terms[0]?.definition?.slice(0, 75) || 'إجراءات وقائية لحماية المنشأة',
-        'أداة صيانة يدوية غير متصلة بالموضوع',
-        'مستند إداري مالي دوري للشركات',
-        'إجراء غير معتمد في الورش الفنية'
-      ],
-      correct_answer: terms[0]?.definition?.slice(0, 75) || 'إجراءات وقائية لحماية المنشأة',
-      explanation: `يشير مصطلح ${terms[0]?.en} إلى ${terms[0]?.definition}`
-    },
-    {
-      type: 'mcq',
-      question: `Which technical term best corresponds to: '${terms[Math.min(1, terms.length - 1)]?.definition?.slice(0, 75)}'?`,
-      options: [
-        terms[Math.min(1, terms.length - 1)]?.en || 'Industrial Safety',
-        'General Utility Hardware',
-        'Draft Blueprint Specification',
-        'Hazard Evacuation Alert'
-      ],
-      correct_answer: terms[Math.min(1, terms.length - 1)]?.en || 'Industrial Safety',
-      explanation: `The correct technical term is ${terms[Math.min(1, terms.length - 1)]?.en}.`
-    },
-    {
-      type: 'mcq',
-      question: `ما الغرض الأساسي من تطبيق إجراءات '${terms[Math.min(2, terms.length - 1)]?.en}' في بيئة العمل الفنية؟`,
-      options: [
-        terms[Math.min(2, terms.length - 1)]?.definition?.slice(0, 75) || 'توحيد جودة العمل والحد من الأخطاء',
-        'تسجيل مواعيد الإجازات الأسبوعية للعاملين',
-        'الاستغناء عن فحص المعدات الميدانية',
-        'إلغاء خطط الطوارئ والصيانة الوقائية'
-      ],
-      correct_answer: terms[Math.min(2, terms.length - 1)]?.definition?.slice(0, 75) || 'توحيد جودة العمل والحد من الأخطاء',
-      explanation: `تطبيق ${terms[Math.min(2, terms.length - 1)]?.en} يهدف إلى ${terms[Math.min(2, terms.length - 1)]?.definition}`
-    },
-    {
-      type: 'mcq',
-      question: `في الفحص الميداني، يُعتبر تطبيق معيار '${terms[Math.min(3, terms.length - 1)]?.en}' ركيزة أساسية من أجل:`,
-      options: [
-        terms[Math.min(3, terms.length - 1)]?.definition?.slice(0, 75) || 'ضمان سلامة العمليات ومطابقتها للمواصفات',
-        'تأجيل عمليات المعايرة المجدولة',
-        'إلغاء تدريب الكوادر الفنية',
-        'تقليص معدلات الأمان الصناعي'
-      ],
-      correct_answer: terms[Math.min(3, terms.length - 1)]?.definition?.slice(0, 75) || 'ضمان سلامة العمليات ومطابقتها للمواصفات',
-      explanation: `الهدف من ${terms[Math.min(3, terms.length - 1)]?.en} هو ${terms[Math.min(3, terms.length - 1)]?.definition}`
-    },
-    {
-      type: 'mcq',
-      question: `أي مما يلي يُعد من المتطلبات الفنية الإلزامية لـ '${terms[Math.min(4, terms.length - 1)]?.en}'؟`,
-      options: [
-        terms[Math.min(4, terms.length - 1)]?.definition?.slice(0, 75) || 'ارتداء واستخدام الأدوات الوقائية المعتمدة',
-        'إيقاف أنظمة الإنذار في موقع العمل',
-        'تجاهل كتيبات التشغيل القياسية',
-        'العمل بدون إشراف في المناطق الخطرة'
-      ],
-      correct_answer: terms[Math.min(4, terms.length - 1)]?.definition?.slice(0, 75) || 'ارتداء واستخدام الأدوات الوقائية المعتمدة',
-      explanation: `يرتبط مصطلح ${terms[Math.min(4, terms.length - 1)]?.en} بـ ${terms[Math.min(4, terms.length - 1)]?.definition}`
-    },
-    {
-      type: 'mcq',
-      question: `ما هي النتيجة المباشرة لتطبيق معايير '${terms[Math.min(5, terms.length - 1)]?.en}' في المنشآت الصناعية؟`,
-      options: [
-        terms[Math.min(5, terms.length - 1)]?.definition?.slice(0, 75) || 'تحديد وتقليل المخاطر المحتملة وضمان بيئة عمل آمنة',
-        'زيادة نسبة الحوادث والأعطال التشغيلية',
-        'تعطيل سلاسل الإمداد ومسارات الطوارئ',
-        'إلغاء سجلات التدريب الميداني'
-      ],
-      correct_answer: terms[Math.min(5, terms.length - 1)]?.definition?.slice(0, 75) || 'تحديد وتقليل المخاطر المحتملة وضمان بيئة عمل آمنة',
-      explanation: `يشير مفهوم ${terms[Math.min(5, terms.length - 1)]?.en} إلى ${terms[Math.min(5, terms.length - 1)]?.definition}`
-    },
-    {
-      type: 'true_false',
-      question: `عبارة: الالتزام بالمصطلحات الفنية المعتمدة وإجراءات السلامة في '${contextTitle || 'المقرر'}' يُعد إلزامياً لحماية الكوادر الفنية وضمان جودة التشغيل الميداني.`,
-      options: ['صح ✓', 'خطأ ✗'],
-      correct_answer: 'صح ✓',
-      explanation: 'صواب؛ لأن الالتزام بالمعايير الفنية واشتراطات السلامة يقلل من الحوادث ويوحد التواصل المهني الدقيق.'
-    },
-    {
-      type: 'true_false',
-      question: `عبارة: المصطلحات الفنية المذكورة في الدرس هي مجرد مفاهيم نظرية ولا علاقة لها بالتطبيق الميداني أو كتيبات التشغيل القياسية.`,
-      options: ['صح ✓', 'خطأ ✗'],
-      correct_answer: 'خطأ ✗',
-      explanation: 'خطأ؛ لأن المصطلحات التقنية هي أدوات تواصل ميدانية أساسية وتطبق في صلب العمليات الفنية اليومية.'
-    },
-    {
-      type: 'true_false',
-      question: `عبارة: استخدام مهمات الوقاية الشخصية المناسبة يُعد إجراءً اختيارياً يمكن تجاوزه في الورش التدريبية.`,
-      options: ['صح ✓', 'خطأ ✗'],
-      correct_answer: 'خطأ ✗',
-      explanation: 'خطأ؛ لأن ارتداء مهمات الوقاية الشخصية إلزامي ومفروض لحماية المتدربين من المخاطر.'
-    },
-    {
-      type: 'true_false',
-      question: `عبارة: إجراءات التشغيل القياسية تساهم بشكل مباشر في توحيد جودة العمل وتقليل احتمالية الأخطاء البشرية.`,
-      options: ['صح ✓', 'خطأ ✗'],
-      correct_answer: 'صح ✓',
-      explanation: 'صواب؛ توفر الإجراءات القياسية خطوات واضحة ومحددة تضمن سلامة ودقة التنفيذ.'
-    },
-    {
-      type: 'matching',
-      question: '🔗 سؤال التوصيل والمطابقة: صِل كل مصطلح مهني في القائمة (أ) بتعريفه وتطبيقه الصحيح في القائمة (ب):',
-      pairs: [
-        { left: terms[0]?.en || 'Safety', right: terms[0]?.ar || 'السلامة الفنية' },
-        { left: terms[Math.min(1, terms.length - 1)]?.en || 'Procedures', right: terms[Math.min(1, terms.length - 1)]?.ar || 'الإجراءات القياسية' },
-        { left: terms[Math.min(2, terms.length - 1)]?.en || 'Quality', right: terms[Math.min(2, terms.length - 1)]?.ar || 'ضبط الجودة' },
-        { left: terms[Math.min(3, terms.length - 1)]?.en || 'Risks', right: terms[Math.min(3, terms.length - 1)]?.ar || 'إدارة المخاطر' }
-      ],
-      explanation: 'تم توصيل كافة المصطلحات بتعريفاتها ومجالاتها الفنية الصحيحة بنجاح.'
-    }
-  ];
+  const topics = (data.lecture && Array.isArray(data.lecture.topics) && data.lecture.topics.length > 0)
+    ? data.lecture.topics
+    : [];
 
-  let poolIdx = 0;
-  while (data.quiz.questions.length < 10 && poolIdx < pool.length * 3) {
-    const candidate = pool[poolIdx % pool.length];
-    const exists = data.quiz.questions.some(q => q.question === candidate.question);
-    if (!exists) {
-      data.quiz.questions.push(JSON.parse(JSON.stringify(candidate)));
-    } else if (data.quiz.questions.length < 10) {
-      const cloned = JSON.parse(JSON.stringify(candidate));
-      cloned.question = `سؤال تطبيقي إضافي (${data.quiz.questions.length + 1}): ${cloned.question.replace(/^سؤال تطبيقي إضافي \(\d+\): /, '')}`;
-      data.quiz.questions.push(cloned);
+  // If no matching question exists, synthesize one from the lesson's extracted terms or topics
+  if (!hasMatching && (terms.length >= 2 || topics.length >= 2)) {
+    const pairs = [];
+    if (terms.length >= 2) {
+      for (let i = 0; i < Math.min(4, terms.length); i++) {
+        pairs.push({
+          left: terms[i].en || terms[i].ar || `المفهوم ${i + 1}`,
+          right: terms[i].definition ? terms[i].definition.slice(0, 70) : (terms[i].ar || `التعريف ${i + 1}`)
+        });
+      }
+    } else {
+      for (let i = 0; i < Math.min(4, topics.length); i++) {
+        const parts = topics[i].split(/[:\-–]/);
+        pairs.push({
+          left: (parts[0] || `المحور ${i + 1}`).trim(),
+          right: (parts[1] || topics[i]).trim().slice(0, 70)
+        });
+      }
     }
-    poolIdx++;
+    if (pairs.length >= 2) {
+      data.quiz.questions.push({
+        type: 'matching',
+        question: '🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم أو مصطلح في القائمة (أ) بتعريفه وتطبيقه الصحيح في القائمة (ب):',
+        pairs,
+        explanation: 'ممتاز! تم توصيل كافة المفاهيم بتعريفاتها الفنية الصحيحة بدقة.'
+      });
+    }
+  }
+
+  // 2. If questions count is under 10, synthesize questions ONLY from the lesson's terms or lecture topics
+  let termIdx = 0;
+  while (data.quiz.questions.length < 10 && terms.length > 0 && termIdx < terms.length * 3) {
+    const t = terms[termIdx % terms.length];
+    const isMcq = (data.quiz.questions.length % 2 === 0);
+
+    if (isMcq) {
+      const qText = `ما هو المدلول العلمي والتطبيقي للمصطلح '${t.en || t.ar}' وفق سياق المحاضرة؟`;
+      const exists = data.quiz.questions.some(q => q.question === qText);
+      if (!exists) {
+        data.quiz.questions.push({
+          type: 'mcq',
+          question: qText,
+          options: [
+            t.definition ? t.definition.slice(0, 75) : `المفهوم الصحيح الخاص بـ ${t.en || t.ar}`,
+            'إجراء غير مرتبط بموضوع ومحاور المحاضرة',
+            'مفهوم إداري عام خارج إطار هذا التخصص',
+            'أداة غير معتمدة في بيئة التدريب'
+          ],
+          correct_answer: t.definition ? t.definition.slice(0, 75) : `المفهوم الصحيح الخاص بـ ${t.en || t.ar}`,
+          explanation: `يرتبط مصطلح ${t.en || t.ar} بـ ${t.definition || t.ar}`
+        });
+      }
+    } else {
+      const qText = `عبارة: تطبيق واستيعاب '${t.en || t.ar}' يُعد عنصراً رئيساً في إتقان متطلبات هذه الوحدة التدريبية.`;
+      const exists = data.quiz.questions.some(q => q.question === qText);
+      if (!exists) {
+        data.quiz.questions.push({
+          type: 'true_false',
+          question: qText,
+          options: ['صح ✓', 'خطأ ✗'],
+          correct_answer: 'صح ✓',
+          explanation: `صواب؛ لأن استيعاب ${t.en || t.ar} يدعم الممارسة المهنية الصحيحة للمقرر.`
+        });
+      }
+    }
+    termIdx++;
   }
 
   return data;

@@ -236,11 +236,12 @@ def build_demo_content_from_text(extracted_text: str, filename: str) -> dict:
             break
 
     if not extracted_terms:
+        clean_title = title.replace("دورة", "").replace("مقرر", "").strip() or "المحتوى التخصصي"
         extracted_terms = [
-            {"en": "Technical English", "ar": "اللغة الإنجليزية الفنية", "definition": "استخدام المصطلحات المهنية الدقيقة للتواصل في بيئة العمل الفنية."},
-            {"en": "Industrial Safety", "ar": "السلامة الصناعية", "definition": "مجموعة القواعد والإجراءات المتبعة لحماية الكوادر والمعدات من المخاطر."},
-            {"en": "Standard Operating Procedure (SOP)", "ar": "إجراءات التشغيل القياسية", "definition": "وثيقة تصف الخطوات المعتمدة لتنفيذ مهمة فنية محددة بدقة."},
-            {"en": "Quality Assurance (QA)", "ar": "ضمان الجودة", "definition": "التحقق المنهجي من مطابقة المنتجات والعمليات للمعايير الهندسية المطلوبة."}
+            {"en": f"{clean_title} Core Concept", "ar": f"المفهوم الأساسي لـ {clean_title}", "definition": f"الركيزة النظرية والتطبيقية المعتمدة في دراسة وممارسة {clean_title}."},
+            {"en": f"{clean_title} Practical Workflow", "ar": f"مسار العمل التطبيقي لـ {clean_title}", "definition": f"تسلسل الخطوات التنفيذية المنهجية المتبعة لتطبيق مهارات {clean_title} بدقة."},
+            {"en": f"{clean_title} Standards", "ar": f"المعايير المعتمدة لـ {clean_title}", "definition": f"المواصفات الفنية والمهنية التي تضمن جودة المخرجات في {clean_title}."},
+            {"en": f"{clean_title} Verification", "ar": f"التحقق وضبط جودة {clean_title}", "definition": f"إجراءات الفحص والتقييم الدوري لضمان مطابقة مخرجات {clean_title} للمواصفات."}
         ]
 
     summary_text = " ".join(lines[:6]) if len(lines) >= 3 else extracted_text[:400]
