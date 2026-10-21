@@ -18014,25 +18014,122 @@
 
 
 
+    function normalizeStudentLmsCourseKey(rawKey) {
+        if (!rawKey || typeof rawKey !== 'string') return null;
+        const clean = rawKey.replace(/^أ\.\s*/, '').trim();
+        if (lmsCourses && lmsCourses[clean]) return clean;
+
+        // مطابقة الأسماء الشائعة للمقررات والمدربين الثمانية
+        if (clean.includes('سلامة') || clean.includes('صحة') || clean.includes('فاضل')) {
+            return (lmsCourses && lmsCourses['فاضل الماجد']) ? 'فاضل الماجد' : ((lmsCourses && lmsCourses['السلامة والصحة']) ? 'السلامة والصحة' : clean);
+        }
+        if (clean.includes('لحام') || clean.includes('رضا')) {
+            return (lmsCourses && lmsCourses['اللحام']) ? 'اللحام' : ((lmsCourses && lmsCourses['رضا مطيلق']) ? 'رضا مطيلق' : clean);
+        }
+        if (clean.includes('كهربا') || clean.includes('حسين') || clean.includes('عصام')) {
+            return (lmsCourses && lmsCourses['الكهرباء']) ? 'الكهرباء' : ((lmsCourses && lmsCourses['حسين العبد المحسن']) ? 'حسين العبد المحسن' : clean);
+        }
+        if (clean.includes('ميكانيك') || clean.includes('سيد')) {
+            return (lmsCourses && lmsCourses['الميكانيكا']) ? 'الميكانيكا' : ((lmsCourses && lmsCourses['سيد احمد']) ? 'سيد احمد' : clean);
+        }
+        if (clean.includes('ادارة') || clean.includes('إدارة') || clean.includes('مكتبي') || clean.includes('اصيل') || clean.includes('أصيل')) {
+            return (lmsCourses && lmsCourses['الادارة المكتبية والسكرتارية']) ? 'الادارة المكتبية والسكرتارية' : ((lmsCourses && lmsCourses['أحمد الاصيل']) ? 'أحمد الاصيل' : clean);
+        }
+        if (clean.includes('انجليز') || clean.includes('إنجليز') || clean.includes('english') || clean.includes('شرف') || clean.includes('يوسف جمال') || clean.includes('علي عبدالسلام')) {
+            return (lmsCourses && lmsCourses['لغة إنجليزية']) ? 'لغة إنجليزية' : ((lmsCourses && lmsCourses['قاسم الماجد']) ? 'قاسم الماجد' : ((lmsCourses && lmsCourses['شرف الدين']) ? 'شرف الدين' : clean));
+        }
+        if (clean.includes('انشاء') || clean.includes('إنشاء') || clean.includes('ناجي')) {
+            return (lmsCourses && lmsCourses['إنشاءات']) ? 'إنشاءات' : ((lmsCourses && lmsCourses['ناجي محمد']) ? 'ناجي محمد' : clean);
+        }
+        if (clean.includes('حاسب') || clean.includes('إمام') || clean.includes('امام')) {
+            return (lmsCourses && lmsCourses['الحاسب الالي']) ? 'الحاسب الالي' : ((lmsCourses && lmsCourses['إمام يعقوب']) ? 'إمام يعقوب' : clean);
+        }
+
+        if (lmsCourses) {
+            for (let k in lmsCourses) {
+                const c = lmsCourses[k];
+                if (!c) continue;
+                if (c.trainer && (c.trainer.includes(clean) || clean.includes(c.trainer))) return k;
+                if (c.courseTitle && (c.courseTitle.includes(clean) || clean.includes(c.courseTitle))) return k;
+            }
+        }
+        return clean;
+    }
+    window.normalizeStudentLmsCourseKey = normalizeStudentLmsCourseKey;
+
     function getTrainerAndCourseForTrainee(trainee) {
         const all = getAllCoursesForTrainee(trainee);
-        if (activeStudentLmsCourse) {
-            const found = all.find(c => c.lmsKey === activeStudentLmsCourse || c.rawTrainerName === activeStudentLmsCourse);
+        const candidateKey = activeStudentLmsCourse || 
+                             localStorage.getItem('sys_active_student_lms_course_v1') || 
+                             sessionStorage.getItem('sys_active_student_lms_course_v1');
+
+        if (candidateKey) {
+            const normActive = normalizeStudentLmsCourseKey(candidateKey);
+            const found = all.find(c => {
+                const normC = normalizeStudentLmsCourseKey(c.lmsKey);
+                const normTr = normalizeStudentLmsCourseKey(c.rawTrainerName);
+                return normC === normActive || 
+                       normTr === normActive || 
+                       c.lmsKey === candidateKey || 
+                       c.rawTrainerName === candidateKey ||
+                       (normActive && (c.lmsKey.includes(normActive) || normActive.includes(c.lmsKey))) ||
+                       (c.courseTitle && normActive && (c.courseTitle.includes(normActive) || normActive.includes(c.courseTitle)));
+            });
             if (found) return found;
+
+            // في حال اختار المتدرب مقرراً موجوداً في النظام ولكنه ليس مقرراً رئيسياً في الجدول
+            // نُنشئ له كائناً كاملاً ليبقى فيه ولا يرجع أبداً للمقرر الافتراضي
+            if (normActive && lmsCourses && lmsCourses[normActive]) {
+                const cData = lmsCourses[normActive];
+                return {
+                    period: 1,
+                    periodLabel: 'المقرر المختار',
+                    trainerName: 'أ. ' + (cData.trainer || normActive),
+                    rawTrainerName: cData.trainer || normActive,
+                    courseTitle: getConciseCourseTitle(cData.courseTitle || normActive),
+                    courseShort: getConciseCourseTitle(cData.courseTitle || normActive),
+                    specialty: cData.courseTitle || normActive,
+                    room: cData.room || 'القاعة التدريبية',
+                    lmsKey: normActive,
+                    isAicExempt: false
+                };
+            }
         }
         return all[0];
     }
     window.getTrainerAndCourseForTrainee = getTrainerAndCourseForTrainee;
 
-    function switchStudentActiveCourse(lmsKey) {
-        activeStudentLmsCourse = lmsKey;
-        if (typeof renderStudentDashboard === 'function') renderStudentDashboard();
-        if (typeof renderStudentLms === 'function') renderStudentLms();
-        if (typeof renderStudentSubmissionsCalendar === 'function') renderStudentSubmissionsCalendar();
-        if (typeof renderSubmissionsCalendarPage === 'function' && !document.getElementById('tab-submissionsCalendar')?.classList.contains('hidden')) {
-            renderSubmissionsCalendarPage();
+    function switchStudentActiveCourse(lmsKey, preserveWeek = true) {
+        if (!lmsKey) return;
+        const normKey = normalizeStudentLmsCourseKey(lmsKey) || lmsKey;
+        activeStudentLmsCourse = normKey;
+        try {
+            localStorage.setItem('sys_active_student_lms_course_v1', normKey);
+            sessionStorage.setItem('sys_active_student_lms_course_v1', normKey);
+        } catch(e) {}
+
+        if (!activeStudentLmsWeek || activeStudentLmsWeek < 1 || activeStudentLmsWeek > 6) {
+            activeStudentLmsWeek = (typeof getCurrentAcademicWeekNum === 'function') ? getCurrentAcademicWeekNum() : 1;
         }
-        showToast(`تم التبديل إلى مقرر: ${lmsCourses[lmsKey]?.courseTitle || lmsKey}`, 'info');
+        try {
+            localStorage.setItem('sys_active_student_lms_week_v1', String(activeStudentLmsWeek));
+            sessionStorage.setItem('sys_active_student_lms_week_v1', String(activeStudentLmsWeek));
+        } catch(e) {}
+
+        if (typeof renderStudentDashboard === 'function' && document.getElementById('tab-studentDashboard') && !document.getElementById('tab-studentDashboard').classList.contains('hidden')) {
+            renderStudentDashboard();
+        }
+        if (typeof renderStudentLms === 'function' && document.getElementById('tab-studentLms') && !document.getElementById('tab-studentLms').classList.contains('hidden')) {
+            renderStudentLms();
+        }
+        if (typeof renderStudentCoursesPage === 'function' && document.getElementById('tab-studentCourses') && !document.getElementById('tab-studentCourses').classList.contains('hidden')) {
+            renderStudentCoursesPage();
+        }
+        if (typeof renderStudentSubmissionsCalendar === 'function' && document.getElementById('tab-submissionsCalendar') && !document.getElementById('tab-submissionsCalendar').classList.contains('hidden')) {
+            renderStudentSubmissionsCalendar();
+        }
+        const cTitle = lmsCourses[normKey]?.courseTitle || lmsCourses[lmsKey]?.courseTitle || normKey;
+        showToast(`تم تثبيت المقرر: ${cTitle} (الأسبوع ${activeStudentLmsWeek})`, 'info');
     }
     window.switchStudentActiveCourse = switchStudentActiveCourse;
 
@@ -18471,12 +18568,22 @@
     }
     window.getStudentLmsDetailedProgress = getStudentLmsDetailedProgress;
 
-    function openStudentLmsToWeek(weekNum) {
-        if (typeof setStudentLmsWeek === 'function') {
-            setStudentLmsWeek(weekNum);
-        } else {
-            activeStudentLmsWeek = weekNum;
+    function openStudentLmsToWeek(weekNum, optCourseKey) {
+        if (optCourseKey) {
+            const normKey = (typeof normalizeStudentLmsCourseKey === 'function') ? normalizeStudentLmsCourseKey(optCourseKey) : optCourseKey;
+            activeStudentLmsCourse = normKey;
+            try {
+                localStorage.setItem('sys_active_student_lms_course_v1', normKey);
+                sessionStorage.setItem('sys_active_student_lms_course_v1', normKey);
+            } catch(e) {}
         }
+        const w = parseInt(weekNum, 10) || 1;
+        activeStudentLmsWeek = Math.min(6, Math.max(1, w));
+        try {
+            localStorage.setItem('sys_active_student_lms_week_v1', String(activeStudentLmsWeek));
+            sessionStorage.setItem('sys_active_student_lms_week_v1', String(activeStudentLmsWeek));
+        } catch(e) {}
+
         if (typeof switchTab === 'function') {
             switchTab('studentLms');
         }
@@ -18919,8 +19026,9 @@
         }
 
         if (dualCardsContainer) {
+            const normActive = (typeof normalizeStudentLmsCourseKey === 'function') ? normalizeStudentLmsCourseKey(activeStudentLmsCourse) : activeStudentLmsCourse;
             dualCardsContainer.innerHTML = allStudentCourses.map((c, idx) => {
-                const isSelected = (binding.lmsKey === c.lmsKey || activeStudentLmsCourse === c.lmsKey);
+                const isSelected = (normActive && (normalizeStudentLmsCourseKey(c.lmsKey) === normActive || c.lmsKey === normActive)) || (!normActive && idx === 0);
                 const isP1 = (idx === 0 || c.period === 1);
                 const periodTime = c.timing || (isP1 ? '08:00 ص - 12:00 م' : '12:30 م - 04:00 م');
                 const periodDuration = c.durationHours || (isP1 ? '4 ساعات تدريبية' : '3.5 ساعات تدريبية');
@@ -18965,11 +19073,11 @@
 
                         <!-- Action Buttons -->
                         <div class="flex flex-col sm:flex-row items-center gap-2 pt-1">
-                            <button type="button" onclick="openStudentLmsForCourse('${c.lmsKey}')" class="w-full sm:flex-1 ${btnClass} font-black py-3 px-4 rounded-2xl text-xs md:text-sm transition duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-95">
-                                <span>دخول المقرر واستعراض المحتوى والواجبات</span>
+                            <button type="button" onclick="openStudentLmsForCourse('${c.lmsKey}', activeStudentLmsWeek)" class="w-full sm:flex-1 ${btnClass} font-black py-3 px-4 rounded-2xl text-xs md:text-sm transition duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-95">
+                                <span>دخول المقرر (الأسبوع ${activeStudentLmsWeek}) واستعراض المحتوى والواجبات</span>
                                 <span class="text-base">👈</span>
                             </button>
-                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}'); switchTab('studentGrades');" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-800 font-bold px-3.5 py-3 rounded-2xl border border-slate-200 text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap" title="عرض كشف الدرجات والتقييم لهذا المقرر">
+                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}', true); switchTab('studentGrades');" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-800 font-bold px-3.5 py-3 rounded-2xl border border-slate-200 text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap" title="عرض كشف الدرجات والتقييم لهذا المقرر">
                                 <span>🎓</span>
                                 <span>عرض كشف الدرجات</span>
                             </button>
@@ -19347,8 +19455,11 @@
     // ===================================================================
     // STUDENT DEDICATED LMS RENDERER (منصة المتدرب للمحتوى الأكاديمي)
     // ===================================================================
-    let activeStudentLmsWeek = 1;
-    let activeStudentLmsCourse = null;
+    let activeStudentLmsCourse = localStorage.getItem('sys_active_student_lms_course_v1') || sessionStorage.getItem('sys_active_student_lms_course_v1') || null;
+    let activeStudentLmsWeek = parseInt(localStorage.getItem('sys_active_student_lms_week_v1') || sessionStorage.getItem('sys_active_student_lms_week_v1') || '0', 10);
+    if (!activeStudentLmsWeek || isNaN(activeStudentLmsWeek) || activeStudentLmsWeek < 1 || activeStudentLmsWeek > 6) {
+        activeStudentLmsWeek = (typeof getCurrentAcademicWeekNum === 'function') ? getCurrentAcademicWeekNum() : 1;
+    }
 
     // دالة مساعدة: جلب اسم المتدرب ومجموعته بدقة من بيانات المتدربين المعتمدة
     function resolveTraineeInfoById(studentId, fallbackName, fallbackGroup) {
@@ -19376,11 +19487,26 @@
             ensureLmsCourseWeeklyPillars();
         }
 
-        // ربط المتدرب حصرياً ومباشرة بالمدرب والتخصص المربوط به في الجدول التدريبي
+        // ربط المتدرب بالمدرب والمقرر مع احترام المقرر النشط المختار بدقة 100% وعدم الرجوع للافتراضي
         const binding = getTrainerAndCourseForTrainee(currentUser);
-        const courseKey = binding.lmsKey || 'رضا مطيلق';
+        const candidateKey = activeStudentLmsCourse || 
+                             localStorage.getItem('sys_active_student_lms_course_v1') || 
+                             sessionStorage.getItem('sys_active_student_lms_course_v1') || 
+                             binding.lmsKey || 
+                             'فاضل الماجد';
+        const courseKey = (typeof normalizeStudentLmsCourseKey === 'function') 
+            ? (normalizeStudentLmsCourseKey(candidateKey) || candidateKey)
+            : candidateKey;
         activeStudentLmsCourse = courseKey;
-        const courseData = lmsCourses[courseKey] || lmsCourses[binding.trainerName.replace(/^أ\.\s*/, '')] || Object.values(lmsCourses)[0];
+        try {
+            localStorage.setItem('sys_active_student_lms_course_v1', courseKey);
+            sessionStorage.setItem('sys_active_student_lms_course_v1', courseKey);
+        } catch(e) {}
+
+        const courseData = lmsCourses[courseKey] || 
+                           (typeof normalizeStudentLmsCourseKey === 'function' && lmsCourses[normalizeStudentLmsCourseKey(courseKey)]) || 
+                           lmsCourses[binding.trainerName.replace(/^أ\.\s*/, '')] || 
+                           Object.values(lmsCourses)[0];
         if (!courseData) return;
 
         if (typeof renderStudentPublishedGradebookCard === 'function') {
@@ -19409,24 +19535,26 @@
         const courseDescEl = document.getElementById('sdLmsCourseDesc');
         if (courseDescEl) courseDescEl.innerText = courseData.description || 'المنهج والمهام التدريبية المعتمدة لهذا المقرر';
 
-        // شريط التبديل السلس بين مقرري المتدرب (نظام الفترتين)
+        // شريط التبديل السلس بين مقرري المتدرب (نظام الفترتين) مع إبراز المقرر المختار حالياً
         const switcherContainer = document.getElementById('sdCourseSwitcherContainer');
         const allStudentCourses = getAllCoursesForTrainee(currentUser);
         if (switcherContainer) {
             if (allStudentCourses.length > 1) {
+                const normActive = (typeof normalizeStudentLmsCourseKey === 'function') ? normalizeStudentLmsCourseKey(activeStudentLmsCourse) : activeStudentLmsCourse;
                 switcherContainer.className = 'flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap w-full';
                 switcherContainer.innerHTML = `
-                    <span class="text-xs font-black text-slate-700 pl-1">مقرراتك التدريبية:</span>
+                    <span class="text-xs font-black text-slate-700 pl-1">مقرراتك التدريبية المعتمدة:</span>
                     ${allStudentCourses.map((c, cIdx) => {
-                        const isAct = (courseKey === c.lmsKey);
+                        const isAct = (normActive && (normalizeStudentLmsCourseKey(c.lmsKey) === normActive || c.lmsKey === normActive));
                         return `
-                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}')" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-2xs border ${
+                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}', true)" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-2xs border ${
                                 isAct
                                     ? 'bg-[#0F2942] text-amber-300 border-[#0F2942] ring-2 ring-amber-300/40'
                                     : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
                             }">
                                 <span>${cIdx === 0 ? '📘' : '💻'}</span>
                                 <span>${c.periodLabel || `الفترة ${cIdx + 1}`}: ${c.courseShort} (${c.trainerName})</span>
+                                ${isAct ? '<span class="text-[9px] bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded font-black">المقرر النشط</span>' : ''}
                             </button>
                         `;
                     }).join('')}
@@ -19830,14 +19958,17 @@
     }
 
     function setStudentLmsWeek(weekNum) {
-        activeStudentLmsWeek = weekNum;
+        const w = parseInt(weekNum, 10) || 1;
+        activeStudentLmsWeek = Math.min(6, Math.max(1, w));
+        try {
+            localStorage.setItem('sys_active_student_lms_week_v1', String(activeStudentLmsWeek));
+            sessionStorage.setItem('sys_active_student_lms_week_v1', String(activeStudentLmsWeek));
+        } catch(e) {}
         renderStudentLms();
     }
 
     function setStudentLmsCourse(courseKey) {
-        activeStudentLmsCourse = courseKey;
-        activeStudentLmsWeek = 1;
-        renderStudentLms();
+        switchStudentActiveCourse(courseKey, true);
     }
 
     function calculateLmsProgress(courseData) {
@@ -34703,9 +34834,14 @@ END $$;`;
             return;
         }
 
+        const normActive = (typeof normalizeStudentLmsCourseKey === 'function') 
+            ? normalizeStudentLmsCourseKey(activeStudentLmsCourse) 
+            : activeStudentLmsCourse;
+
         container.innerHTML = courses.map((c, idx) => {
             const courseData = (typeof lmsCourses !== 'undefined' && lmsCourses[c.lmsKey]) ? lmsCourses[c.lmsKey] : {};
             const isP1 = (idx === 0 || c.period === 1);
+            const isAct = (normActive && (normalizeStudentLmsCourseKey(c.lmsKey) === normActive || c.lmsKey === normActive)) || (!normActive && idx === 0);
             
             // Color palettes per subject/period:
             // Course 1: Royal Blue / Indigo palette
@@ -34724,16 +34860,19 @@ END $$;`;
                 : 'bg-gradient-to-r from-purple-900 to-violet-900 hover:from-purple-800 hover:to-violet-800 text-amber-300';
 
             return `
-                <div class="${themeCard} rounded-3xl p-6 transition-all duration-300 flex flex-col justify-between space-y-5 text-right group">
+                <div class="${themeCard} rounded-3xl p-6 transition-all duration-300 flex flex-col justify-between space-y-5 text-right group ${isAct ? 'ring-2 ring-amber-400' : ''}">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between gap-2 flex-wrap">
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black border ${badgeClass} shadow-2xs">
                                 <span>${icon}</span>
                                 <span>${c.periodLabel || (isP1 ? 'المقرر الأول' : 'المقرر الثاني')}</span>
                             </span>
-                            <span class="text-xs font-black text-slate-800 bg-white px-3 py-1 rounded-xl border border-slate-200 shadow-2xs">
-                                📍 ${c.room || 'القاعة التدريبية'}
-                            </span>
+                            <div class="flex items-center gap-1.5">
+                                ${isAct ? `<span class="text-[10px] font-black bg-amber-400 text-slate-950 px-2.5 py-0.5 rounded-lg shadow-2xs">المقرر النشط حالياً</span>` : ''}
+                                <span class="text-xs font-black text-slate-800 bg-white px-3 py-1 rounded-xl border border-slate-200 shadow-2xs">
+                                    📍 ${c.room || 'القاعة التدريبية'}
+                                </span>
+                            </div>
                         </div>
 
                         <div class="pt-1">
@@ -34746,8 +34885,8 @@ END $$;`;
                     </div>
 
                     <!-- Direct Launch Button -->
-                    <button type="button" onclick="openStudentLmsForCourse('${c.lmsKey}')" class="w-full ${btnClass} font-black py-3.5 px-5 rounded-2xl text-xs md:text-sm transition duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-95">
-                        <span>دخول المقرر واستعراض المحتوى والواجبات</span>
+                    <button type="button" onclick="openStudentLmsForCourse('${c.lmsKey}', activeStudentLmsWeek)" class="w-full ${btnClass} font-black py-3.5 px-5 rounded-2xl text-xs md:text-sm transition duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-95">
+                        <span>دخول المقرر (الأسبوع ${activeStudentLmsWeek}) واستعراض المحتوى والواجبات</span>
                         <span class="text-base">👈</span>
                     </button>
                 </div>
@@ -34755,17 +34894,23 @@ END $$;`;
         }).join('');
     }
 
-    function openStudentLmsForCourse(courseKey) {
-        const curWeek = (typeof getCurrentAcademicWeekNum === 'function') ? getCurrentAcademicWeekNum() : 1;
-        activeStudentLmsWeek = curWeek;
-        if (typeof switchStudentActiveCourse === 'function') {
-            switchStudentActiveCourse(courseKey, true);
-        } else {
-            activeStudentLmsCourse = courseKey;
-        }
-        if (typeof setStudentLmsWeek === 'function') {
-            setStudentLmsWeek(curWeek);
-        }
+    function openStudentLmsForCourse(courseKey, targetWeek) {
+        const normKey = (typeof normalizeStudentLmsCourseKey === 'function') ? normalizeStudentLmsCourseKey(courseKey) : courseKey;
+        activeStudentLmsCourse = normKey;
+        try {
+            localStorage.setItem('sys_active_student_lms_course_v1', normKey);
+            sessionStorage.setItem('sys_active_student_lms_course_v1', normKey);
+        } catch(e) {}
+
+        const chosenWeek = (targetWeek && targetWeek >= 1 && targetWeek <= 6)
+            ? targetWeek
+            : (activeStudentLmsWeek || ((typeof getCurrentAcademicWeekNum === 'function') ? getCurrentAcademicWeekNum() : 1));
+        activeStudentLmsWeek = Math.min(6, Math.max(1, chosenWeek));
+        try {
+            localStorage.setItem('sys_active_student_lms_week_v1', String(activeStudentLmsWeek));
+            sessionStorage.setItem('sys_active_student_lms_week_v1', String(activeStudentLmsWeek));
+        } catch(e) {}
+
         switchTab('studentLms');
     }
 
