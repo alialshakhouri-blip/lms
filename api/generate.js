@@ -2050,7 +2050,6 @@ async function handleDedicatedQuizGeneration(req, res, startTime) {
     }
   });
 }
-}
 // ══════════════════════════════════════════════════════════════════════════════
 //  DEDICATED ASSIGNMENT GENERATION HANDLER (Groq Cloud API - Unified Model)
 // ══════════════════════════════════════════════════════════════════════════════
