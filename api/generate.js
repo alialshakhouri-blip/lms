@@ -1,5 +1,5 @@
 // Vercel Serverless Function: api/generate.js
-// Handles AI Auto-Generation for LMS Modules via Groq Cloud API (Llama 3.3 70B Versatile)
+// Handles AI Auto-Generation for LMS Modules via Groq Cloud API (openai/gpt-oss-120b)
 // Supports PPTX & PDF upload directly on Vercel without a local Python server.
 
 import zlib from 'zlib';
@@ -11,6 +11,17 @@ export const config = {
     }
   },
   maxDuration: 60
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  CENTRALIZED SERVER-SIDE AI MODEL CONFIGURATION (Unified Engine Settings)
+// ══════════════════════════════════════════════════════════════════════════════
+export const AI_CONFIG = {
+  primaryModel: (process.env.GROQ_MODEL || 'openai/gpt-oss-120b').trim(),
+  fallbackModels: ['openai/gpt-oss-20b'],
+  apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
+  temperature: 0.3,
+  serviceName: 'BGTI LMS AI Auto-Generation API (Groq Cloud API - openai/gpt-oss-120b)'
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1657,24 +1668,22 @@ function safeExtractJson(text) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  GROQ CLOUD API CLIENT (LLAMA 3.3 70B VERSATILE - OPENAI COMPATIBLE)
+//  GROQ CLOUD API CLIENT (OPENAI COMPATIBLE - UNIFIED CONFIG)
 // ══════════════════════════════════════════════════════════════════════════════
-const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const DEFAULT_GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-
-async function callGroqChatCompletion({ prompt, systemPrompt, apiKey, model = DEFAULT_GROQ_MODEL, temperature = 0.3 }) {
+async function callGroqChatCompletion({ prompt, systemPrompt, apiKey, model = AI_CONFIG.primaryModel, temperature = AI_CONFIG.temperature }) {
   const modelsToTry = [model];
-  if (!modelsToTry.includes("llama-3.3-70b-versatile")) modelsToTry.push("llama-3.3-70b-versatile");
-  if (!modelsToTry.includes("llama-3.1-70b-versatile")) modelsToTry.push("llama-3.1-70b-versatile");
-  if (!modelsToTry.includes("llama-3.1-8b-instant")) modelsToTry.push("llama-3.1-8b-instant");
+  for (const fb of AI_CONFIG.fallbackModels) {
+    if (!modelsToTry.includes(fb)) modelsToTry.push(fb);
+  }
 
   const errors = [];
   let parsedData = null;
   let modelUsed = null;
+  let lastHttpStatus = null;
 
   for (const curModel of modelsToTry) {
     try {
-      const res = await fetch(GROQ_API_URL, {
+      const res = await fetch(AI_CONFIG.apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1697,10 +1706,13 @@ async function callGroqChatCompletion({ prompt, systemPrompt, apiKey, model = DE
         })
       });
 
+      lastHttpStatus = res.status;
+
       if (!res.ok) {
         const errText = await res.text();
-        console.error("Groq API error on model " + curModel + " (Status " + res.status + "):", errText.slice(0, 300));
-        errors.push("[" + curModel + " HTTP " + res.status + "]: " + errText.slice(0, 150));
+        const safeErr = errText.replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***').slice(0, 300);
+        console.error(`Groq API error on model ${curModel} (Status ${res.status}):`, safeErr);
+        errors.push(`[${curModel} HTTP ${res.status}]: ${safeErr}`);
         continue;
       }
 
@@ -1712,16 +1724,17 @@ async function callGroqChatCompletion({ prompt, systemPrompt, apiKey, model = DE
         modelUsed = curModel;
         break;
       } else {
-        console.warn("Groq model " + curModel + " response could not be parsed as JSON:", content?.slice(0, 200));
-        errors.push("[" + curModel + " JSON Parse Error]: failed to parse response");
+        console.warn(`Groq model ${curModel} response could not be parsed as JSON:`, content?.slice(0, 200));
+        errors.push(`[${curModel} JSON Parse Error]: failed to parse response`);
       }
     } catch (err) {
-      console.error("Groq API exception on model " + curModel + ":", err.message);
-      errors.push("[" + curModel + " Exception]: " + err.message);
+      const safeMsg = (err.message || '').replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
+      console.error(`Groq API exception on model ${curModel}:`, safeMsg);
+      errors.push(`[${curModel} Exception]: ${safeMsg}`);
     }
   }
 
-  return { data: parsedData, model: modelUsed, errors };
+  return { data: parsedData, model: modelUsed, errors, lastHttpStatus };
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1875,7 +1888,7 @@ function buildDemoExecutiveReport(params) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  DEDICATED FAST QUIZ GENERATION HANDLER (Groq Cloud API - Llama 3.3 70B)
+//  DEDICATED FAST QUIZ GENERATION HANDLER (Groq Cloud API - Unified Model)
 // ══════════════════════════════════════════════════════════════════════════════
 async function handleDedicatedQuizGeneration(req, res, startTime) {
   const { courseName, weekTitle, weekTopic, textInput, lessonContent, questionsCount = 10 } = req.body || {};
@@ -1883,6 +1896,16 @@ async function handleDedicatedQuizGeneration(req, res, startTime) {
   const rawApiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || "";
   const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, "");
   const hasValidKey = Boolean(apiKey && apiKey !== "YOUR_GROQ_API_KEY_HERE" && apiKey.length > 15);
+
+  if (!hasValidKey) {
+    return res.status(500).json({
+      success: false,
+      source: 'groq_cloud',
+      modelAttempted: AI_CONFIG.primaryModel,
+      error: 'لم يتم العثور على مفتاح GROQ_API_KEY صالح في بيئة Vercel Production. يرجى تهيئة المتغير في إعدادات المشروع.',
+      code: 'missing_api_key'
+    });
+  }
 
   const effectiveCourse = (courseName || "").trim() || "المقرر التدريبي المعتمد";
   const effectiveWeek = (weekTitle || "").trim() || "الوحدة التدريبية";
@@ -1903,107 +1926,109 @@ async function handleDedicatedQuizGeneration(req, res, startTime) {
     : null;
 
   let generatedData = null;
-  let modeUsed = "demo_fallback";
   let groqApiErrors = [];
 
-  if (hasValidKey) {
-    let curriculumInstruction = "";
-    if (expandedCurriculum && expandedCurriculum.pillars) {
-      curriculumInstruction = "\n\n## التوسيع الأكاديمي والتربوي الإلزامي للدرس (بناء تعليمي منضبط):\n" +
-        "الموضوع الأصلي المدخل: \"" + expandedCurriculum.original_user_input + "\"\n" +
-        "يجب أن تنبثق جميع الأسئلة الـ 10 وسيناريوهاتها حصراً ومباشرة من المحاور الخمسة التالية:\n" +
-        expandedCurriculum.pillars.map((p, i) => `${i + 1}. ${p.title} (${p.concept || ''}): ${p.description}`).join("\n") + "\n\n" +
-        "تحذير صارم: يُحظر حظراً باتاً صياغة أي أسئلة عامة أو معلبة (مثل الأسئلة التجريدية المكررة حول مراعاة المعايير دون موقف فني). كل سؤال يجب أن يقيس موقفاً سلوكياً أو تطبيقياً محدداً من هذه المحاور.";
-    }
+  let curriculumInstruction = "";
+  if (expandedCurriculum && expandedCurriculum.pillars) {
+    curriculumInstruction = "\n\n## التوسيع الأكاديمي والتربوي الإلزامي للدرس (بناء تعليمي منضبط):\n" +
+      "الموضوع الأصلي المدخل: \"" + expandedCurriculum.original_user_input + "\"\n" +
+      "يجب أن تنبثق جميع الأسئلة الـ 10 وسيناريوهاتها حصراً ومباشرة من المحاور الخمسة التالية:\n" +
+      expandedCurriculum.pillars.map((p, i) => `${i + 1}. ${p.title} (${p.concept || ''}): ${p.description}`).join("\n") + "\n\n" +
+      "تحذير صارم: يُحظر حظراً باتاً صياغة أي أسئلة عامة أو معلبة. كل سؤال يجب أن يقيس موقفاً سلوكياً أو تطبيقياً محدداً من هذه المحاور.";
+  }
 
-    const promptText = "أنت رئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI).\n" +
-      "مهمتك: صياغة اختبار أسبوعي عالي الجودة والاحترافية مكون من 10 أسئلة مستنبطة 100% من صلب المادة العلمية والدرس المرفق أدناه، بصيغة JSON نقي فقط:\n\n" +
-      "## بيانات المقرر والدرس:\n" +
-      "- المقرر التدريبي: " + effectiveCourse + "\n" +
-      "- الأسبوع / الوحدة: " + effectiveWeek + "\n" +
-      "- موضوع الدرس الأساسي: " + effectiveTopic + "\n\n" +
-      "## المادة العلمية ومحتوى الدرس (المصدر الوحيد للأسئلة - Ground Truth):\n---\n" +
-      effectiveContent.slice(0, 20000) + "\n---" +
-      curriculumInstruction + "\n\n" +
-      "## معايير الجودة الأكاديمية الصارمة:\n" +
-      "1. الالتزام بالموضوع بنسبة 100%: تُبنى جميع الأسئلة حصراً من صلب المادة العلمية ومفاهيمها أعلاه. يُمنع منعاً باتاً استدعاء مواضيع السلامة الصناعية (PPE/SOP) أو إجراءات المصانع والورش إذا لم تكن واردة في النص المرفق صراحة.\n" +
-      "2. حظر الأسئلة المعلبة: يُحظر صياغة أسئلة عامة تصلح لأي درس بدون سيناريو واقعي. كل سؤال يجب أن يختبر مفهوماً أو موقفاً حقيقياً ومحدداً.\n" +
-      "3. تنوع وشمولية بنية الأسئلة (10 أسئلة متكاملة):\n" +
-      "   - 6 أسئلة اختيار من متعدد (MCQ):\n" +
-      "     * لكل سؤال 4 خيارات منطقية ومتمايزة من صلب موضوع الدرس.\n" +
-      "     * يُمنع منعاً باتاً استخدام خيارات اصطناعية أو هزلية أو بدائل عامة (مثل \"مفهوم خارج سياق الدرس\" أو \"خيار 3\").\n" +
-      "     * يجب أن تطابق الإجابة المحددة في \"correct_answer\" حرفياً أحد الخيارات الأربعة الموجودة في \"options\".\n" +
-      "   - 3 أسئلة صح وخطأ (True/False):\n" +
-      "     * مصفوفة الخيارات \"options\" يجب أن تكون بالضبط وبحرفية: [\"صح\", \"خطأ\"].\n" +
-      "     * حقل الإجابة \"correct_answer\" يجب أن يكون إما \"صح\" أو \"خطأ\" بالضبط.\n" +
-      "     * كتابة تعليل علمي دقيق في \"explanation\" يوضح سبب الصحة أو الخطأ.\n" +
-      "   - سؤال توصيل ومطابقة واحد (Matching):\n" +
-      "     * يحتوي على 4 أزواج مطابقة من صلب الدرس: مصفوفة \"pairs\" بها 4 كائنات، كل كائن به \"left\" (المصطلح أو المفهوم) و \"right\" (التعريف أو الاستخدام الصحيح له).\n" +
-      "4. التنسيق المطلوب: أعد فقط كائن JSON الصالح التالي دون أي نصوص تمهيدية أو كتل تعليق:\n" +
-      JSON.stringify({
-        title: "اختبار تقييم الدرس: " + effectiveTopic,
-        duration_minutes: 15,
-        total_grade: 10,
-        questions: [
-          {
-            id: 1,
-            type: "mcq",
-            question: "نص السؤال الأول...",
-            options: ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
-            correct_answer: "خيار 1",
-            explanation: "شرح توضيحي لسبب صحة الإجابة..."
-          },
-          {
-            id: 7,
-            type: "true_false",
-            question: "نص العبارة الأولى...",
-            options: ["صح", "خطأ"],
-            correct_answer: "صح",
-            explanation: "التعليل..."
-          },
-          {
-            id: 10,
-            type: "matching",
-            question: "🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم في القائمة (أ) بتعريفه الدقيق في القائمة (ب):",
-            pairs: [
-              { left: "المفهوم 1", right: "التعريف 1" },
-              { left: "المفهوم 2", right: "التعريف 2" },
-              { left: "المفهوم 3", right: "التعريف 3" },
-              { left: "المفهوم 4", right: "التعريف 4" }
-            ],
-            explanation: "تم توصيل كافة المفاهيم بتعريفاتها الصحيحة بدقة."
-          }
-        ]
-      }, null, 2);
+  const promptText = "أنت رئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI).\n" +
+    "مهمتك: صياغة اختبار أسبوعي عالي الجودة والاحترافية مكون من 10 أسئلة مستنبطة 100% من صلب المادة العلمية والدرس المرفق أدناه، بصيغة JSON نقي فقط:\n\n" +
+    "## بيانات المقرر والدرس:\n" +
+    "- المقرر التدريبي: " + effectiveCourse + "\n" +
+    "- الأسبوع / الوحدة: " + effectiveWeek + "\n" +
+    "- موضوع الدرس الأساسي: " + effectiveTopic + "\n\n" +
+    "## المادة العلمية ومحتوى الدرس (المصدر الوحيد للأسئلة - Ground Truth):\n---\n" +
+    effectiveContent.slice(0, 20000) + "\n---" +
+    curriculumInstruction + "\n\n" +
+    "## معايير الجودة الأكاديمية الصارمة:\n" +
+    "1. الالتزام بالموضوع بنسبة 100%: تُبنى جميع الأسئلة حصراً من صلب المادة العلمية ومفاهيمها أعلاه. يُمنع منعاً باتاً استدعاء مواضيع السلامة الصناعية (PPE/SOP) أو إجراءات المصانع والورش إذا لم تكن واردة في النص المرفق صراحة.\n" +
+    "2. حظر الأسئلة المعلبة: يُحظر صياغة أسئلة عامة تصلح لأي درس بدون سيناريو واقعي. كل سؤال يجب أن يختبر مفهوماً أو موقفاً حقيقياً ومحدداً.\n" +
+    "3. تنوع وشمولية بنية الأسئلة (10 أسئلة متكاملة):\n" +
+    "   - 6 أسئلة اختيار من متعدد (MCQ):\n" +
+    "     * لكل سؤال 4 خيارات منطقية ومتمايزة من صلب موضوع الدرس.\n" +
+    "     * يُمنع منعاً باتاً استخدام خيارات اصطناعية أو هزلية أو بدائل عامة.\n" +
+    "     * يجب أن تطابق الإجابة المحددة في \"correct_answer\" حرفياً أحد الخيارات الأربعة الموجودة في \"options\".\n" +
+    "   - 3 أسئلة صح وخطأ (True/False):\n" +
+    "     * مصفوفة الخيارات \"options\" يجب أن تكون بالضبط وبحرفية: [\"صح\", \"خطأ\"].\n" +
+    "     * حقل الإجابة \"correct_answer\" يجب أن يكون إما \"صح\" أو \"خطأ\" بالضبط.\n" +
+    "     * كتابة تعليل علمي دقيق في \"explanation\" يوضح سبب الصحة أو الخطأ.\n" +
+    "   - سؤال توصيل ومطابقة واحد (Matching):\n" +
+    "     * يحتوي على 4 أزواج مطابقة من صلب الدرس: مصفوفة \"pairs\" بها 4 كائنات، كل كائن به \"left\" و \"right\".\n" +
+    "4. التنسيق المطلوب: أعد فقط كائن JSON الصالح التالي دون أي نصوص تمهيدية أو كتل تعليق:\n" +
+    JSON.stringify({
+      title: "اختبار تقييم الدرس: " + effectiveTopic,
+      duration_minutes: 15,
+      total_grade: 10,
+      questions: [
+        {
+          id: 1,
+          type: "mcq",
+          question: "نص السؤال الأول...",
+          options: ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
+          correct_answer: "خيار 1",
+          explanation: "شرح توضيحي لسبب صحة الإجابة..."
+        },
+        {
+          id: 7,
+          type: "true_false",
+          question: "نص العبارة الأولى...",
+          options: ["صح", "خطأ"],
+          correct_answer: "صح",
+          explanation: "التعليل..."
+        },
+        {
+          id: 10,
+          type: "matching",
+          question: "🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم في القائمة (أ) بتعريفه الدقيق في القائمة (ب):",
+          pairs: [
+            { left: "المفهوم 1", right: "التعريف 1" },
+            { left: "المفهوم 2", right: "التعريف 2" },
+            { left: "المفهوم 3", right: "التعريف 3" },
+            { left: "المفهوم 4", right: "التعريف 4" }
+          ],
+          explanation: "تم توصيل كافة المفاهيم بتعريفاتها الصحيحة بدقة."
+        }
+      ]
+    }, null, 2);
 
-    const groqCall = await callGroqChatCompletion({
-      prompt: promptText,
-      systemPrompt: "أنت رئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI). صغ اختباراً مكوناً من 10 أسئلة مستنبطة 100% من نص الدرس المرفق بصيغة JSON نقي فقط.",
-      apiKey,
-      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-      temperature: 0.25
-    });
+  const groqCall = await callGroqChatCompletion({
+    prompt: promptText,
+    systemPrompt: "أنت رئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI). صغ اختباراً مكوناً من 10 أسئلة مستنبطة 100% من نص الدرس المرفق بصيغة JSON نقي فقط.",
+    apiKey,
+    model: AI_CONFIG.primaryModel,
+    temperature: 0.25
+  });
 
-    groqApiErrors = groqCall.errors;
-    if (groqCall.data) {
-      const parsed = groqCall.data;
-      if (Array.isArray(parsed.questions) && parsed.questions.length >= 3) {
-        generatedData = parsed;
-        modeUsed = "groq (" + groqCall.model + ")";
-      } else if (parsed.quiz && Array.isArray(parsed.quiz.questions)) {
-        generatedData = parsed.quiz;
-        modeUsed = "groq (" + groqCall.model + ")";
-      }
+  groqApiErrors = groqCall.errors;
+  if (groqCall.data) {
+    const parsed = groqCall.data;
+    if (Array.isArray(parsed.questions) && parsed.questions.length >= 3) {
+      generatedData = parsed;
+    } else if (parsed.quiz && Array.isArray(parsed.quiz.questions)) {
+      generatedData = parsed.quiz;
     }
   }
 
-  // If Groq failed or no key: build high-quality semantic fallback derived 100% from the lesson text
+  // Strict Rule: NEVER substitute Groq errors with silent local generation
   if (!generatedData) {
-    const fullSmart = buildSmartLmsContentFromText(effectiveContent, "quiz_source.txt", effectiveCourse, effectiveTopic);
-    generatedData = fullSmart.quiz;
-    modeUsed = (hasValidKey && groqApiErrors.length > 0)
-      ? "semantic_fallback_after_groq_error"
-      : "semantic_local_generator";
+    const sanitizedErrors = (groqApiErrors || []).map(e => e.replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***'));
+    const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
+    return res.status(502).json({
+      success: false,
+      source: 'groq_cloud',
+      modelAttempted: AI_CONFIG.primaryModel,
+      httpStatus: groqCall.lastHttpStatus || 502,
+      error: `فشل استدعاء نموذج Groq (${AI_CONFIG.primaryModel}): ${sanitizedErrors[0] || 'لم يتم استلام كائن أسئلة صالح من النموذج'}`,
+      code: 'groq_api_error',
+      groqErrors: sanitizedErrors,
+      processing_time_seconds: parseFloat(durationSec)
+    });
   }
 
   // Sanitize, normalize and validate all questions
@@ -2012,20 +2037,22 @@ async function handleDedicatedQuizGeneration(req, res, startTime) {
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
   return res.status(200).json({
     success: true,
-    mode: modeUsed,
-    hasGroqApiKey: hasValidKey,
-    hasGeminiApiKey: hasValidKey,
+    source: 'groq_cloud',
+    model: groqCall.model,
+    mode: "groq (" + groqCall.model + ")",
+    httpStatus: 200,
+    hasGroqApiKey: true,
     courseName: effectiveCourse,
     weekTopic: effectiveTopic,
     processing_time_seconds: parseFloat(durationSec),
     data: {
       quiz: generatedData
-    },
-    groqErrors: groqApiErrors.length > 0 ? groqApiErrors : undefined
+    }
   });
 }
+}
 // ══════════════════════════════════════════════════════════════════════════════
-//  DEDICATED ASSIGNMENT GENERATION HANDLER (Groq Cloud API - Llama 3.3 70B)
+//  DEDICATED ASSIGNMENT GENERATION HANDLER (Groq Cloud API - Unified Model)
 // ══════════════════════════════════════════════════════════════════════════════
 async function handleDedicatedAssignmentGeneration(req, res, startTime) {
   const { courseName, weekTitle, weekTopic, textInput, lessonContent } = req.body || {};
@@ -2033,6 +2060,16 @@ async function handleDedicatedAssignmentGeneration(req, res, startTime) {
   const rawApiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || "";
   const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, "");
   const hasValidKey = Boolean(apiKey && apiKey !== "YOUR_GROQ_API_KEY_HERE" && apiKey.length > 15);
+
+  if (!hasValidKey) {
+    return res.status(500).json({
+      success: false,
+      source: 'groq_cloud',
+      modelAttempted: AI_CONFIG.primaryModel,
+      error: 'لم يتم العثور على مفتاح GROQ_API_KEY صالح في بيئة Vercel Production. يرجى تهيئة المتغير في إعدادات المشروع.',
+      code: 'missing_api_key'
+    });
+  }
 
   const effectiveCourse = (courseName || "").trim() || "المقرر التدريبي المعتمد";
   const effectiveWeek = (weekTitle || "").trim() || "الوحدة التدريبية";
@@ -2052,98 +2089,104 @@ async function handleDedicatedAssignmentGeneration(req, res, startTime) {
     : null;
 
   let generatedData = null;
-  let modeUsed = "demo_fallback";
   let groqApiErrors = [];
 
-  if (hasValidKey) {
-    let curriculumInstruction = "";
-    if (expandedCurriculum && expandedCurriculum.pillars) {
-      curriculumInstruction = "\n\n## التوسيع الأكاديمي والتربوي الإلزامي للواجب:\n" +
-        "الموضوع الأصلي المدخل: \"" + expandedCurriculum.original_user_input + "\"\n" +
-        "يجب صياغة أسئلة وتكليفات الواجب حصراً حول المحاور الخمسة التالية وسيناريوهاتها:\n" +
-        expandedCurriculum.pillars.map((p, i) => `${i + 1}. ${p.title} (${p.concept || ''}): ${p.description}`).join("\n") + "\n\n" +
-        "تحذير صارم: يُحظر حظراً باتاً استخدام أسئلة معلبة وغير مخصصة للموضوع. يجب أن يقيس كل سؤال وتكليف موقفاً عملياً وسلوكياً محدداً.";
-    }
+  let curriculumInstruction = "";
+  if (expandedCurriculum && expandedCurriculum.pillars) {
+    curriculumInstruction = "\n\n## التوسيع الأكاديمي والتربوي الإلزامي للواجب:\n" +
+      "الموضوع الأصلي المدخل: \"" + expandedCurriculum.original_user_input + "\"\n" +
+      "يجب صياغة أسئلة وتكليفات الواجب حصراً حول المحاور الخمسة التالية وسيناريوهاتها:\n" +
+      expandedCurriculum.pillars.map((p, i) => `${i + 1}. ${p.title} (${p.concept || ''}): ${p.description}`).join("\n") + "\n\n" +
+      "تحذير صارم: يُحظر حظراً باتاً استخدام أسئلة معلبة وغير مخصصة للموضوع. يجب أن يقيس كل سؤال وتكليف موقفاً عملياً وسلوكياً محدداً.";
+  }
 
-    const promptText = "أنت خبير أكاديمي ومصمم تكليفات تدريبية لدى معهد الذهب الأسود للتدريب (BGTI).\n" +
-      "المهمة: صياغة واجب أسبوعي تطبيقي عالي الجودة مستنبط 100% من صلب الدرس والمادة العلمية المرفقة، بصيغة JSON نقي فقط:\n\n" +
-      "## بيانات المقرر والدرس:\n" +
-      "- المقرر التدريبي: " + effectiveCourse + "\n" +
-      "- الوحدة / الأسبوع: " + effectiveWeek + "\n" +
-      "- موضوع الدرس: " + effectiveTopic + "\n\n" +
-      "## المادة العلمية ومحتوى الدرس:\n---\n" +
-      effectiveContent.slice(0, 20000) + "\n---" +
-      curriculumInstruction + "\n\n" +
-      "## المعايير المطلوبة:\n" +
-      "1. الالتزام بموضوع الدرس بنسبة 100% وتجنب أي مواضيع خارجية أو أسئلة عامة معلبة.\n" +
-      "2. يتضمن الواجب:\n" +
-      "   - عنوان واضح وتعليمات مفصلة للمتدرب.\n" +
-      "   - 2 إلى 3 أسئلة تطبيقية اختيار من متعدد مرتبطة بحالات واقعية من الدرس.\n" +
-      "   - تكليف عملي تحريري يطلب من المتدرب تطبيق المفاهيم في فقرة محددة مع إرشادات ونموذج إجابة استرشادي للمدرب.\n" +
-      "3. التنسيق: أعد فقط كائن JSON الصالح التالي:\n" +
-      JSON.stringify({
-        title: "الواجب الأسبوعي التطبيقي: " + effectiveTopic,
-        total_grade: 10,
-        instructions: "تعليمات واضحة للمتدرب لكيفية حل التكليف...",
-        questions: [
-          {
-            type: "mcq",
-            question: "سؤال تطبيقي...",
-            options: ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
-            correct_answer: "الخيار أ",
-            explanation: "التوضيح..."
-          }
-        ],
-        text_questions: [
-          {
-            prompt: "المطلوب التحريري...",
-            guidelines: "إرشادات الصياغة...",
-            model_answer: "نموذج الإجابة..."
-          }
-        ]
-      }, null, 2);
+  const promptText = "أنت خبير أكاديمي ومصمم تكليفات تدريبية لدى معهد الذهب الأسود للتدريب (BGTI).\n" +
+    "المهمة: صياغة واجب أسبوعي تطبيقي عالي الجودة مستنبط 100% من صلب الدرس والمادة العلمية المرفقة، بصيغة JSON نقي فقط:\n\n" +
+    "## بيانات المقرر والدرس:\n" +
+    "- المقرر التدريبي: " + effectiveCourse + "\n" +
+    "- الوحدة / الأسبوع: " + effectiveWeek + "\n" +
+    "- موضوع الدرس: " + effectiveTopic + "\n\n" +
+    "## المادة العلمية ومحتوى الدرس:\n---\n" +
+    effectiveContent.slice(0, 20000) + "\n---" +
+    curriculumInstruction + "\n\n" +
+    "## المعايير المطلوبة:\n" +
+    "1. الالتزام بموضوع الدرس بنسبة 100% وتجنب أي مواضيع خارجية أو أسئلة عامة معلبة.\n" +
+    "2. يتضمن الواجب:\n" +
+    "   - عنوان واضح وتعليمات مفصلة للمتدرب.\n" +
+    "   - 2 إلى 3 أسئلة تطبيقية اختيار من متعدد مرتبطة بحالات واقعية من الدرس.\n" +
+    "   - تكليف عملي تحريري يطلب من المتدرب تطبيق المفاهيم في فقرة محددة مع إرشادات ونموذج إجابة استرشادي للمدرب.\n" +
+    "3. التنسيق: أعد فقط كائن JSON الصالح التالي:\n" +
+    JSON.stringify({
+      title: "الواجب الأسبوعي التطبيقي: " + effectiveTopic,
+      total_grade: 10,
+      instructions: "تعليمات واضحة للمتدرب لكيفية حل التكليف...",
+      questions: [
+        {
+          type: "mcq",
+          question: "سؤال تطبيقي...",
+          options: ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"],
+          correct_answer: "الخيار أ",
+          explanation: "التوضيح..."
+        }
+      ],
+      text_questions: [
+        {
+          prompt: "المطلوب التحريري...",
+          guidelines: "إرشادات الصياغة...",
+          model_answer: "نموذج الإجابة..."
+        }
+      ]
+    }, null, 2);
 
-    const groqCall = await callGroqChatCompletion({
-      prompt: promptText,
-      systemPrompt: "أنت مصمم تكليفات تدريبية في معهد الذهب الأسود للتدريب (BGTI). صغ واجباً أسبوعياً تطبيقياً بصيغة JSON نقي فقط.",
-      apiKey,
-      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-      temperature: 0.3
-    });
+  const groqCall = await callGroqChatCompletion({
+    prompt: promptText,
+    systemPrompt: "أنت مصمم تكليفات تدريبية في معهد الذهب الأسود للتدريب (BGTI). صغ واجباً أسبوعياً تطبيقياً بصيغة JSON نقي فقط.",
+    apiKey,
+    model: AI_CONFIG.primaryModel,
+    temperature: 0.3
+  });
 
-    groqApiErrors = groqCall.errors;
-    if (groqCall.data) {
-      const parsed = groqCall.data;
-      if (parsed && (parsed.instructions || parsed.questions || parsed.title)) {
-        generatedData = parsed.assignment || parsed;
-        modeUsed = "groq (" + groqCall.model + ")";
-      }
+  groqApiErrors = groqCall.errors;
+  if (groqCall.data) {
+    const parsed = groqCall.data;
+    if (parsed && (parsed.instructions || parsed.questions || parsed.title)) {
+      generatedData = parsed.assignment || parsed;
     }
   }
 
+  // Strict Rule: NEVER substitute Groq errors with silent local generation
   if (!generatedData) {
-    const fullSmart = buildSmartLmsContentFromText(effectiveContent, "assignment_source.txt", effectiveCourse, effectiveTopic);
-    generatedData = fullSmart.assignment;
-    modeUsed = (hasValidKey && groqApiErrors.length > 0)
-      ? "semantic_fallback_after_groq_error"
-      : "semantic_local_generator";
+    const sanitizedErrors = (groqApiErrors || []).map(e => e.replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***'));
+    const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
+    return res.status(502).json({
+      success: false,
+      source: 'groq_cloud',
+      modelAttempted: AI_CONFIG.primaryModel,
+      httpStatus: groqCall.lastHttpStatus || 502,
+      error: `فشل استدعاء نموذج Groq (${AI_CONFIG.primaryModel}): ${sanitizedErrors[0] || 'لم يتم استلام كائن واجب صالح من النموذج'}`,
+      code: 'groq_api_error',
+      groqErrors: sanitizedErrors,
+      processing_time_seconds: parseFloat(durationSec)
+    });
   }
 
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
   return res.status(200).json({
     success: true,
-    mode: modeUsed,
-    hasGroqApiKey: hasValidKey,
-    hasGeminiApiKey: hasValidKey,
+    source: 'groq_cloud',
+    model: groqCall.model,
+    mode: "groq (" + groqCall.model + ")",
+    httpStatus: 200,
+    hasGroqApiKey: true,
     courseName: effectiveCourse,
     weekTopic: effectiveTopic,
     processing_time_seconds: parseFloat(durationSec),
     data: {
       assignment: generatedData
-    },
-    groqErrors: groqApiErrors.length > 0 ? groqApiErrors : undefined
+    }
   });
 }
+
 async function handleExecutiveReport(req, res, startTime) {
   const { recipient, sender, weekLabel, stats, additionalNotes } = req.body || {};
   const rawApiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || "";
@@ -2172,7 +2215,7 @@ async function handleExecutiveReport(req, res, startTime) {
         prompt: promptText,
         systemPrompt: "أنت مستشار إداري وأكاديمي تنفيذي أول لمعهد الذهب الأسود للتدريب (BGTI). صغ تقريراً إدارياً شاملاً بصيغة JSON نقي فقط.",
         apiKey,
-        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        model: AI_CONFIG.primaryModel,
         temperature: 0.3
       });
 
@@ -2192,6 +2235,8 @@ async function handleExecutiveReport(req, res, startTime) {
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
   return res.status(200).json({
     success: true,
+    source: 'groq_cloud',
+    model: AI_CONFIG.primaryModel,
     mode: modeUsed,
     processing_time_seconds: parseFloat(durationSec),
     data: generatedData
@@ -2224,14 +2269,14 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       status: 'ready',
-      service: 'BGTI LMS AI Auto-Generation API (Groq Cloud API - Llama 3.3 70B)',
+      service: AI_CONFIG.serviceName,
       endpoints: {
         generate: 'POST /api/generate'
       },
       hasGroqApiKey: hasValidKey,
-      hasGeminiApiKey: hasValidKey,
       keyPrefix: hasValidKey ? cleanKey.substring(0, 8) + '...' : null,
-      defaultModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+      defaultModel: AI_CONFIG.primaryModel,
+      fallbackModels: AI_CONFIG.fallbackModels,
       hasSupabaseConfigured: Boolean(sbUrl && sbKey)
     });
   }
@@ -2360,58 +2405,71 @@ export default async function handler(req, res) {
       : (courseName || "المقرر التدريبي المعتمد");
     const weekDiscipline = detectedLessonTopic || req.body?.topic || weekTopic || weekTitle || "الوحدة التدريبية";
 
-    // ─── Call Groq Cloud API if Key is Available ──────────────────────────
-    if (hasValidKey) {
-      let contextBlock = "## بيانات الكورس والأسبوع:\n";
-      if (courseName) contextBlock += "- اسم الكورس التدريبي: " + courseName + "\n";
-      if (weekTitle) contextBlock += "- الأسبوع: " + weekTitle + "\n";
-      if (weekTopic) contextBlock += "- موضوع الوحدة: " + weekTopic + "\n";
-
-      let contentSection = "";
-      if (isTextMode) {
-        contentSection = contextBlock + "\n## المحتوى أو الموضوع الدراسي المُدخل:\n---\n" + extractedText + "\n---";
-      } else if (isPdf) {
-        const trimmedText = extractedText.length > 25000
-          ? extractedText.slice(0, 25000) + "\n\n[... تم الاكتفاء بهذا الجزء من المستند ...]"
-          : extractedText;
-        contentSection = contextBlock + "\n## المحتوى المُستخرج من وثيقة الـ PDF (" + safeFilename + "):\n---\n" + trimmedText + "\n---";
-      } else {
-        const trimmedText = extractedText.length > 20000
-          ? extractedText.slice(0, 20000) + "\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]"
-          : extractedText;
-        contentSection = contextBlock + "\n## المحتوى المُستخرج من شرائح العرض (" + safeFilename + "):\n---\n" + trimmedText + "\n---";
-      }
-
-      let expandedTopic = null;
-      if (extractedText.length < 300 || isTextMode) {
-        expandedTopic = expandEducationalTopic(extractedText, courseDiscipline, weekDiscipline);
-      }
-      const fullPromptText = formatLmsPrompt(contentSection, courseDiscipline, weekDiscipline, expandedTopic);
-
-      const groqCall = await callGroqChatCompletion({
-        prompt: fullPromptText,
-        systemPrompt: "أنت خبير أكاديمي ومصمم مناهج لدى معهد الذهب الأسود للتدريب (BGTI). أعد كائن JSON صالحاً بنسبة 100% يحتوي على المكونات التعليمية الأربعة للوحدة التدريبية دون أي نصوص إضافية خارج الـ JSON.",
-        apiKey,
-        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-        temperature: 0.3
+    // ─── Call Groq Cloud API with Unified Model Configuration ───────────────
+    if (!hasValidKey) {
+      return res.status(500).json({
+        success: false,
+        source: 'groq_cloud',
+        modelAttempted: AI_CONFIG.primaryModel,
+        error: 'لم يتم العثور على مفتاح GROQ_API_KEY صالح في بيئة Vercel Production. يرجى تهيئة المتغير في إعدادات المشروع.',
+        code: 'missing_api_key'
       });
-
-      groqApiErrors = groqCall.errors;
-      if (groqCall.data && typeof groqCall.data === "object") {
-        generatedData = groqCall.data;
-        modeUsed = "groq (" + groqCall.model + ")";
-      }
     }
 
-    // ─── Smart Semantic Fallback if Groq not used or failed ──────────────────────────
+    let contextBlock = "## بيانات الكورس والأسبوع:\n";
+    if (courseName) contextBlock += "- اسم الكورس التدريبي: " + courseName + "\n";
+    if (weekTitle) contextBlock += "- الأسبوع: " + weekTitle + "\n";
+    if (weekTopic) contextBlock += "- موضوع الوحدة: " + weekTopic + "\n";
+
+    let contentSection = "";
+    if (isTextMode) {
+      contentSection = contextBlock + "\n## المحتوى أو الموضوع الدراسي المُدخل:\n---\n" + extractedText + "\n---";
+    } else if (isPdf) {
+      const trimmedText = extractedText.length > 25000
+        ? extractedText.slice(0, 25000) + "\n\n[... تم الاكتفاء بهذا الجزء من المستند ...]"
+        : extractedText;
+      contentSection = contextBlock + "\n## المحتوى المُستخرج من وثيقة الـ PDF (" + safeFilename + "):\n---\n" + trimmedText + "\n---";
+    } else {
+      const trimmedText = extractedText.length > 20000
+        ? extractedText.slice(0, 20000) + "\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]"
+        : extractedText;
+      contentSection = contextBlock + "\n## المحتوى المُستخرج من شرائح العرض (" + safeFilename + "):\n---\n" + trimmedText + "\n---";
+    }
+
+    let expandedTopic = null;
+    if (extractedText.length < 300 || isTextMode) {
+      expandedTopic = expandEducationalTopic(extractedText, courseDiscipline, weekDiscipline);
+    }
+    const fullPromptText = formatLmsPrompt(contentSection, courseDiscipline, weekDiscipline, expandedTopic);
+
+    const groqCall = await callGroqChatCompletion({
+      prompt: fullPromptText,
+      systemPrompt: "أنت خبير أكاديمي ومصمم مناهج لدى معهد الذهب الأسود للتدريب (BGTI). أعد كائن JSON صالحاً بنسبة 100% يحتوي على المكونات التعليمية الأربعة للوحدة التدريبية دون أي نصوص إضافية خارج الـ JSON.",
+      apiKey,
+      model: AI_CONFIG.primaryModel,
+      temperature: 0.3
+    });
+
+    groqApiErrors = groqCall.errors;
+    if (groqCall.data && typeof groqCall.data === "object") {
+      generatedData = groqCall.data;
+      modeUsed = "groq (" + groqCall.model + ")";
+    }
+
+    // Strict Rule: NEVER substitute Groq errors with silent local generation
     if (!generatedData) {
-      const activeTopic = isTextMode ? (detectedLessonTopic || weekDiscipline) : (req.body?.weekTopic || req.body?.weekTitle || req.body?.courseName || safeFilename);
-      generatedData = buildSmartLmsContentFromText(extractedText, safeFilename, courseDiscipline, activeTopic);
-      if (hasValidKey && groqApiErrors.length > 0) {
-        modeUsed = "semantic_fallback_after_groq_error";
-      } else {
-        modeUsed = "semantic_local_generator";
-      }
+      const sanitizedErrors = (groqApiErrors || []).map(e => e.replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***'));
+      const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
+      return res.status(502).json({
+        success: false,
+        source: 'groq_cloud',
+        modelAttempted: AI_CONFIG.primaryModel,
+        httpStatus: groqCall.lastHttpStatus || 502,
+        error: `فشل استدعاء نموذج Groq (${AI_CONFIG.primaryModel}): ${sanitizedErrors[0] || 'لم يتم استلام رد صالح من الذكاء الاصطناعي'}`,
+        code: 'groq_api_error',
+        groqErrors: sanitizedErrors,
+        processing_time_seconds: parseFloat(durationSec)
+      });
     }
 
     // Ensure all suggested videos match the actual lesson topic
@@ -2428,16 +2486,17 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
+      source: 'groq_cloud',
+      model: groqCall.model,
       mode: modeUsed,
-      hasGroqApiKey: hasValidKey,
-      hasGeminiApiKey: hasValidKey,
+      httpStatus: 200,
+      hasGroqApiKey: true,
       filename: safeFilename,
       fileSizeKB,
       file_url: cloudFileUrl || "",
       text_length: textLength,
       processing_time_seconds: parseFloat(durationSec),
-      data: generatedData,
-      groqErrors: groqApiErrors.length > 0 ? groqApiErrors : undefined
+      data: generatedData
     });
   
 } catch (err) {

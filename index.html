@@ -4684,7 +4684,7 @@
                         <div class="flex items-center gap-2">
                             <button type="button" onclick="generateAiExecutiveReport()" id="btnGenerateAiExec" class="bg-gradient-to-r from-violet-600 to-indigo-700 hover:from-violet-700 hover:to-indigo-800 text-white font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-2 shadow-md">
                                 <span>✨</span>
-                                <span>توليد التقرير بالذكاء الاصطناعي (Gemini)</span>
+                                <span>توليد التقرير بالذكاء الاصطناعي (Groq AI)</span>
                             </button>
                         </div>
                     </div>
@@ -5885,7 +5885,7 @@
                         <!-- Target Component Info Badge -->
                         <div class="bg-violet-50 border border-violet-200 rounded-2xl p-3 flex items-center justify-between text-xs">
                             <span class="font-bold text-violet-950" id="caiTargetBadge">العنصر المستهدف: --</span>
-                            <span class="font-mono text-[10px] bg-violet-200/80 text-violet-950 font-black px-2 py-0.5 rounded-lg">Gemini 2.5 Flash</span>
+                            <span class="font-mono text-[10px] bg-violet-200/80 text-violet-950 font-black px-2 py-0.5 rounded-lg">Groq: openai/gpt-oss-120b</span>
                         </div>
 
                         <!-- Prompt / Topic Input -->
@@ -29616,7 +29616,7 @@ function buildDemoExecutiveReport(params) {
             currentAiSourceMode === 'text'
                 ? 'جاري فحص النص وصياغة اختبار تفاعلي شامل بالذكاء الاصطناعي...'
                 : `جاري معالجة وقراءة محتوى "${(selectedAiFile && selectedAiFile.name) || 'الملف'}"...`,
-            'جاري استدعاء نموذج Google Gemini لتحليل المفاهيم الفنية للدرس...',
+            'جاري استدعاء نموذج Groq (openai/gpt-oss-120b) لتحليل المفاهيم الفنية للدرس...',
             'جاري صياغة 10 أسئلة تفاعلية متنوعة (اختيارات، صح وخطأ، وتوصيل ومطابقة)...',
             'جاري تدقيق المصطلحات التخصصية وانتقاء الفيديوهات التعليمية المباشرة...',
             'جاري إعداد الواجب والتكليف الأسبوعي وتجهيز الخطوات النهائية...'
@@ -29687,10 +29687,11 @@ function buildDemoExecutiveReport(params) {
 
             let result = null;
 
-            // Attempt cloud API call with a 40-second timeout to allow full Gemini generation
+            let apiErrorMessage = null;
+            // Call Groq Cloud AI API (openai/gpt-oss-120b) with timeout
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 40000);
+                const timeoutId = setTimeout(() => controller.abort(), 45000);
 
                 const response = await fetch(endpointUrl, {
                     method: 'POST',
@@ -29700,20 +29701,36 @@ function buildDemoExecutiveReport(params) {
                 });
                 clearTimeout(timeoutId);
 
-                if (response.ok) {
-                    const json = await response.json();
-                    if (json && json.success && json.data) {
-                        result = json;
-                    }
+                const json = await response.json().catch(() => null);
+                if (response.ok && json && json.success && json.data) {
+                    result = json;
+                } else {
+                    const errDetail = (json && (json.error || json.message)) || `HTTP ${response.status} (${response.statusText})`;
+                    const safeErr = String(errDetail).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
+                    apiErrorMessage = `فشل استدعاء الذكاء الاصطناعي Groq [${json?.modelAttempted || 'openai/gpt-oss-120b'} - رمز ${response.status}]: ${safeErr}`;
+                    console.error('Groq AI error response:', apiErrorMessage);
                 }
             } catch (netErr) {
-                console.warn('Cloud API call bypassed or timed out, activating zero-failure local generator:', netErr);
+                const safeNetErr = String(netErr?.message || netErr).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
+                apiErrorMessage = `تعذر الاتصال بخدمة الذكاء الاصطناعي: ${safeNetErr}`;
+                console.error('Cloud API network error:', safeNetErr);
             }
 
-            // ZERO-FAILURE GUARANTEE: If cloud call didn't return complete data, generate rich module locally
+            // Strict Policy: NEVER substitute Groq errors with silent local generation
             if (!result || !result.data) {
-                const fname = (currentAiSourceMode === 'file' && selectedAiFile) ? selectedAiFile.name : 'نص_دراسي_مباشر.txt';
-                result = buildClientSideAiModule(sourceText, fname, courseName, weekTitle);
+                clearInterval(stepInterval);
+                if (loadingState) {
+                    loadingState.classList.add('hidden');
+                    loadingState.classList.remove('flex');
+                }
+                if (genBtn) {
+                    genBtn.disabled = false;
+                    genBtn.innerHTML = `<span>✨</span><span id="aiGenerateBtnLabel">توليد الاختبار والوحدة بالذكاء</span>`;
+                }
+                if (errorState) errorState.classList.remove('hidden');
+                if (errorMsg) errorMsg.innerText = apiErrorMessage || 'فشل استدعاء نموذج الذكاء الاصطناعي دون إرجاع بيانات صالحة.';
+                showToast(apiErrorMessage || 'فشل استدعاء الذكاء الاصطناعي Groq', 'error');
+                return;
             }
 
             currentAiGeneratedData = result.data;
@@ -29754,35 +29771,15 @@ function buildDemoExecutiveReport(params) {
         } catch (err) {
             clearInterval(stepInterval);
             console.error('AI Generation Error:', err);
-            // Ultra-safe fallback: Even on unexpected client error, guarantee UI transition
-            try {
-                const fname = (selectedAiFile && selectedAiFile.name) || 'الملف_المرفوع';
-                const activeCourseKey = getActiveTrainerCourseKey();
-                const activeCourseObj = (typeof lmsCourses !== 'undefined' && lmsCourses[activeCourseKey]) ? lmsCourses[activeCourseKey] : {};
-                const courseName = activeCourseObj.title || 'اللغة الإنجليزية الفنية والمصطلحات المهنية';
-                const safeResult = buildClientSideAiModule(selectedAiFileExtractedText || directText || fname, fname, courseName, 'الوحدة التدريبية');
-                currentAiGeneratedData = safeResult.data;
-                populateAiPreview(safeResult);
-                if (loadingState) { loadingState.classList.add('hidden'); loadingState.classList.remove('flex'); }
-                if (uploadZone) uploadZone.classList.add('hidden');
-                if (textZone) textZone.classList.add('hidden');
-                if (sourceTabWrapper) sourceTabWrapper.classList.add('hidden');
-                if (stepper) stepper.classList.remove('hidden');
-                if (wizardContainer) wizardContainer.classList.remove('hidden');
-                if (initialActions) initialActions.classList.add('hidden');
-                if (wizardActions) wizardActions.classList.remove('hidden');
-                goToAiStep(1);
-                showToast('تم استخراج وتجهيز المحتوى التدريبي والاختبار بنجاح! ✓', 'success');
-            } catch (recoveryErr) {
-                console.error('Critical AI Recovery Error:', recoveryErr);
-                if (loadingState) { loadingState.classList.add('hidden'); loadingState.classList.remove('flex'); }
-                if (errorState) errorState.classList.remove('hidden');
-                if (errorMsg) errorMsg.innerText = 'يرجى مراجعة الملف والمحاولة مرة أخرى.';
-                if (genBtn) {
-                    genBtn.disabled = false;
-                    genBtn.innerHTML = `<span>✨</span><span id="aiGenerateBtnLabel">ابدأ التوليد والتحليل بالخطوات</span>`;
-                }
+            const safeErr = String(err?.message || err).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
+            if (loadingState) { loadingState.classList.add('hidden'); loadingState.classList.remove('flex'); }
+            if (errorState) errorState.classList.remove('hidden');
+            if (errorMsg) errorMsg.innerText = `حدث خطأ أثناء معالجة التوليد: ${safeErr}`;
+            if (genBtn) {
+                genBtn.disabled = false;
+                genBtn.innerHTML = `<span>✨</span><span id="aiGenerateBtnLabel">توليد الاختبار والوحدة بالذكاء</span>`;
             }
+            showToast(`حدث خطأ أثناء التوليد: ${safeErr}`, 'error');
         }
     }
 
@@ -29877,7 +29874,7 @@ function buildDemoExecutiveReport(params) {
         if (successStats) {
             const chars = result.text_length || result.extracted_chars || 0;
             const timeSec = result.processing_time_seconds || result.elapsed_seconds || 1;
-            const modeText = result.mode === 'gemini' ? 'Google Gemini 2.0 Flash 🚀' : 'الوضع الذكي السحابي ✨';
+            const modeText = result.model || (result.mode && result.mode.includes('groq') ? 'Groq Cloud (openai/gpt-oss-120b) 🚀' : 'الوضع الذكي السحابي ✨');
             successStats.innerHTML = `تم تحليل <b>${chars}</b> حرف من الملف "${result.filename || ''}" خلال <b>${timeSec}s</b> عبر <b>${modeText}</b>`;
         }
 
@@ -31004,40 +31001,47 @@ function buildDemoExecutiveReport(params) {
 
         let generatedData = null;
 
+        let compApiError = null;
         try {
             const resp = await fetch(endpointUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            if (resp.ok) {
-                const json = await resp.json();
-                if (json && json.success && json.data) {
-                    generatedData = json.data;
-                }
+            const json = await resp.json().catch(() => null);
+            if (resp.ok && json && json.success && json.data) {
+                generatedData = json.data;
             } else {
-                const errText = await resp.text();
-                console.warn(`AI generate HTTP error ${resp.status}:`, errText);
+                const errDetail = (json && (json.error || json.message)) || `HTTP ${resp.status} (${resp.statusText})`;
+                const safeErr = String(errDetail).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
+                compApiError = `فشل استدعاء الذكاء الاصطناعي Groq [رمز ${resp.status}]: ${safeErr}`;
+                console.error(`Component AI Groq error (Status ${resp.status}):`, safeErr);
             }
         } catch (fetchErr) {
-            console.warn('Network call to AI generate failed, falling back to smart local generator:', fetchErr);
+            const safeNetErr = String(fetchErr?.message || fetchErr).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
+            compApiError = `تعذر الاتصال بخدمة الذكاء الاصطناعي: ${safeNetErr}`;
+            console.error('Network call to AI generate failed:', safeNetErr);
         }
-
-        // Domain-aware semantic fallback if offline or API unavailable
-        if (!generatedData) {
-            generatedData = generateSmartComponentFallback(target, courseTitle, weekTitle, userPrompt || weekTopic, finalContent);
-        }
-
-        // Apply generated data directly to the respective target builder modal
-        applyAiDataToComponentModal(target, generatedData, weekTitle);
 
         if (loadingState) {
             loadingState.classList.add('hidden');
             loadingState.classList.remove('flex');
         }
-        if (submitBtn) submitBtn.disabled = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<span>✨</span><span>بدء التوليد والتعبئة الذكية</span>`;
+        }
+
+        // Strict Policy: NEVER substitute Groq errors with silent local generation
+        if (!generatedData) {
+            showToast(compApiError || 'فشل التوليد عبر الذكاء الاصطناعي دون إرجاع بيانات صالحة', 'error');
+            return;
+        }
+
+        // Apply generated data directly to the respective target builder modal
+        applyAiDataToComponentModal(target, generatedData, weekTitle);
         closeComponentAiModal();
-        showToast(`✨ تم توليد وتعبئة بيانات ${targetLabel} بنجاح!`, 'success');
+        showToast(`✨ تم توليد وتعبئة بيانات ${targetLabel} بنجاح عبر Groq Cloud!`, 'success');
     }
     window.runComponentAiGenerate = runComponentAiGenerate;
 
@@ -38193,7 +38197,7 @@ function buildDemoExecutiveReport(params) {
         } finally {
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = `<span>✨</span><span>توليد التقرير بالذكاء الاصطناعي (Gemini)</span>`;
+                btn.innerHTML = `<span>✨</span><span>توليد التقرير بالذكاء الاصطناعي (Groq AI)</span>`;
             }
             updateExecutiveReportPreview();
         }
