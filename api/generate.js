@@ -578,24 +578,37 @@ function ensureMinQuizQuestions(data, contextTitle = '') {
 function buildDemoContentFromText(extractedText, filename) {
   const lines = (extractedText || '').split('\n')
     .map(l => l.trim())
-    .filter(l => l && !l.startsWith('[') && l.length > 4);
+    .filter(l => l && !l.startsWith('[') && l.length > 3);
 
-  const title = lines[0] || filename.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') || 'الوحدة الدراسية';
+  let cleanTitle = '';
+  if (lines.length > 0) {
+    const raw = lines[0].replace(/^\[(شريحة|صفحة|الوحدة|درس|محاضرة|موضوع|عنوان)\s*[\dأ-ي]*\]:?\s*/i, '').trim();
+    cleanTitle = raw.split(/[:\-–—\.]/)[0].trim() || raw;
+  }
+  if (!cleanTitle || cleanTitle.includes('نص_دراسي') || cleanTitle.includes('نص دراسي') || cleanTitle.length < 3) {
+    const fnClean = (filename || '').replace(/\.[^/.]+$/, '').replace(/[_\\-]/g, ' ').trim();
+    if (fnClean && !fnClean.includes('نص_دراسي') && !fnClean.includes('نص دراسي')) {
+      cleanTitle = fnClean;
+    }
+  }
+  if (!cleanTitle || cleanTitle.includes('نص_دراسي') || cleanTitle.includes('نص دراسي') || cleanTitle.length < 3) {
+    cleanTitle = 'الوحدة التدريبية التخصصية';
+  }
+  const title = cleanTitle;
 
-  // Extract terms (looking for lines with colons or bullet points)
+  // Extract terms (looking for lines with colons, dashes or bullet points in Arabic or English)
   const extractedTerms = [];
-  for (const line of lines.slice(1)) {
-    if (line.includes(':') && extractedTerms.length < 6) {
-      const parts = line.split(':');
-      const termEn = parts[0].replace(/^[\d\.\-\*•)]+\s*/, '').trim();
-      const desc = parts.slice(1).join(':').trim();
-      if (termEn.length > 2 && termEn.length < 50) {
-        extractedTerms.push({
-          en: termEn,
-          ar: `مصطلح: ${termEn}`,
-          definition: desc || 'مصطلح تقني تخصصي معتمد في بيئة العمل الصناعية والتدريبية.'
-        });
-      }
+  const termRegex = /([\u0600-\u06FFA-Za-z0-9\s()\/\\-]{2,45})\s*[:\-=–—]\s*([^\n\r]{3,150})/g;
+  let tMatch;
+  while ((tMatch = termRegex.exec(extractedText || '')) !== null && extractedTerms.length < 6) {
+    const tLabel = tMatch[1].replace(/^[\d\.\-\*•)]+\s*/, '').trim();
+    const tDesc = tMatch[2].trim();
+    if (tLabel.length > 2 && tLabel.length < 45 && !tLabel.toLowerCase().includes('slide') && !tLabel.toLowerCase().includes('page')) {
+      extractedTerms.push({
+        en: tLabel,
+        ar: tLabel,
+        definition: tDesc || 'مفهوم ومصطلح تقني تخصصي معتمد في بيئة العمل الصناعية والتدريبية.'
+      });
     }
   }
 
@@ -1254,7 +1267,12 @@ export default async function handler(req, res) {
           ? extractedText.slice(0, 25000) + '\n\n[... تم اقتصاص بقية النص لتفادي تجاوز الحدود ...]'
           : extractedText;
 
-        const contentSection = `${contextBlock}\n## النص التدريبي والمحتوى المدخل مباشرة من المدرب (${safeFilename}):\n---\n${trimmedText}\n---`;
+        const contentSection = `${contextBlock}\n## الموضوع والمحتوى التدريبي المدخل مباشرة من المدرب:\n---\n${trimmedText}\n---\n` +
+          `\n## توجيه إلزامي لمعالجة النص والموضوع بالذكاء الاصطناعي:\n` +
+          `- قم بتحليل النص أو الموضوع المدخل والتوسع الأكاديمي والمهني المنضبط لتغطية المحاور الأربعة للدرس التابع لمادة "${courseDiscipline}".\n` +
+          `- ولد 3 فيديوهات حقيقية ذات صلة بالموضوع من يوتيوب، ملخصاً شاملاً، 4 إلى 6 مصطلحات إنجليزية مترجمة للعربية ومحددة بدقة، واجباً أسبوعياً، واختباراً أسبوعياً تفاعلياً من 10 أسئلة (6 MCQ + 3 صح وخطأ + 1 توصيل 4 أزواج).\n` +
+          `- يجب أن ترتبط جميع الأسئلة والمصطلحات والواجبات حصراً بموضوع الدرس المذكور ومجال "${courseDiscipline}".`;
+
         parts.push({
           text: formatLmsPrompt(contentSection)
         });
@@ -1296,8 +1314,9 @@ export default async function handler(req, res) {
 
       const preferredModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
       const modelsToTry = [preferredModel];
+      if (!modelsToTry.includes('gemini-2.0-flash')) modelsToTry.push('gemini-2.0-flash');
       if (!modelsToTry.includes('gemini-1.5-flash')) modelsToTry.push('gemini-1.5-flash');
-      if (!modelsToTry.includes('gemini-2.5-flash')) modelsToTry.push('gemini-2.5-flash');
+      if (!modelsToTry.includes('gemini-1.5-pro')) modelsToTry.push('gemini-1.5-pro');
 
       for (const curModel of modelsToTry) {
         if (generatedData) break;

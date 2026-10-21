@@ -4916,12 +4916,25 @@
                                 <span id="aiDirectTextCount" class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">0 حرف</span>
                             </div>
 
-                            <textarea id="aiDirectTextInput" rows="6" oninput="updateAiTextCount()" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 resize-y leading-relaxed text-right placeholder-slate-400 transition" placeholder="الصق هنا نص المحاضرة أو ملخص الدرس أو فقرات الشرح أو المصطلحات الفنية (مثال: محاضرة عن السلامة المهنية، أدوات الورشة، أو المصطلحات الفنية باللغة الإنجليزية)...&#10;&#10;وسيقوم المساعد الذكي تلقائياً بتحويلها إلى اختبار أسبوعي متنوع (اختيارات، صح وخطأ، وتوصيل ومطابقة المفاهيم) بالإضافة إلى خطة الوحدة الأسبوعية كاملة."></textarea>
+                            <textarea id="aiDirectTextInput" rows="6" oninput="onAiDirectTextInputChanged(this)" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 resize-y leading-relaxed text-right placeholder-slate-400 transition" placeholder="اكتب هنا عنوان الدرس أو الموضوع (مثال: مهمات الوقاية الشخصية PPE، أو لحام القوس SMAW) أو الصق فقرات الشرح والمحتوى التدريبي والمصطلحات...&#10;&#10;وسيقوم المساعد الذكي تلقائياً بتحليل الموضوع وتوليد 10 أسئلة تفاعلية متنوعة (اختيارات، صح وخطأ، وتوصيل) مع خطة الوحدة وفيديوهات الشرح بالكامل ✨"></textarea>
 
-                            <!-- Inline Validation Notice for < 20 Characters -->
+                            <!-- Inline Validation Notice for < 3 Characters -->
                             <div id="aiDirectTextWarning" class="hidden text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 p-2.5 rounded-xl flex items-center gap-2 transition animate-pulse">
                                 <span class="text-base shrink-0">⚠️</span>
-                                <span>تنبيه: يلزم إدخال أو لصق نص دراسي لا يقل عن 20 حرفاً (الحالي: <b id="aiDirectTextCurrentLen">0</b> حرف) ليتمكن الذكاء الاصطناعي من تحليل المحتوى وتوليد الأسئلة بدقة.</span>
+                                <span>تنبيه: يلزم كتابة عنوان الدرس أو موضوع الوحدة (الحالي: <b id="aiDirectTextCurrentLen">0</b> حرف) ليتمكن الذكاء الاصطناعي من توليد الأسئلة والوحدة بدقة.</span>
+                            </div>
+
+                            <!-- Course-Specific Dynamic Topic Suggestions -->
+                            <div id="aiCourseSpecificTopicsWrapper" class="space-y-1.5 pt-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-black text-violet-800 flex items-center gap-1">
+                                        <span>💡</span>
+                                        <span>مواضيع مقترحة لمقررك التدريبي (اضغط لتعبئة الموضوع والبدء فوراً):</span>
+                                    </span>
+                                </div>
+                                <div id="aiDynamicTopicSuggestions" class="flex items-center gap-1.5 flex-wrap">
+                                    <!-- Populated dynamically based on trainer course -->
+                                </div>
                             </div>
 
                             <!-- Quick Sample Presets -->
@@ -27054,6 +27067,9 @@ END $$;`;
             subTitleEl.innerText = `مقرر: ${cTitle} — الأسبوع ${wNum}`;
         }
 
+        // Render dynamic topic suggestions tailored for active course
+        renderAiDynamicTopicSuggestions(courseKey);
+
         selectedAiFile = null;
         currentAiGeneratedData = null;
         currentAiStep = 1;
@@ -27325,6 +27341,99 @@ END $$;`;
     }
     window.setAiSourceMode = setAiSourceMode;
 
+    function onAiDirectTextInputChanged(input) {
+        updateAiTextCount();
+        if (input && input.value.trim().length >= 3 && currentAiSourceMode !== 'text') {
+            setAiSourceMode('text');
+        }
+    }
+    window.onAiDirectTextInputChanged = onAiDirectTextInputChanged;
+
+    function renderAiDynamicTopicSuggestions(rawCourseKey) {
+        const container = document.getElementById('aiDynamicTopicSuggestions');
+        if (!container) return;
+        const k = (rawCourseKey || getActiveTrainerCourseKey() || '').toLowerCase();
+        let chips = [];
+
+        if (k.includes('سلام') || k.includes('فاضل')) {
+            chips = [
+                { icon: '🛡️', title: 'مهمات الوقاية الشخصية (PPE) والاشتراطات المهنية' },
+                { icon: '🔒', title: 'إجراءات العزل وتثبيت بطاقات التحذير (LOTO)' },
+                { icon: '⚠️', title: 'إدارة وتقييم المخاطر المهنية (OSHA)' },
+                { icon: '🩹', title: 'الإسعافات الأولية وتدابير الطوارئ' }
+            ];
+        } else if (k.includes('لحام') || k.includes('رضا')) {
+            chips = [
+                { icon: '⚡', title: 'لحام القوس المعدني المحجب (SMAW)' },
+                { icon: '🛡️', title: 'قواعد السلامة في ورشة اللحام' },
+                { icon: '🔩', title: 'فحص وتجهيز وصلات اللحام التناكبي' },
+                { icon: '💨', title: 'لحام الأرجون (TIG) وضبط تيار القوس' }
+            ];
+        } else if (k.includes('كهربا') || k.includes('حسين') || k.includes('عصام')) {
+            chips = [
+                { icon: '⚡', title: 'أساسيات الدوائر الكهربائية وقانون أوم' },
+                { icon: '🔒', title: 'إجراءات العزل والإقفال (LOTO)' },
+                { icon: '🔌', title: 'استخدام أجهزة القياس والفولتميتر' },
+                { icon: '⚡', title: 'صيانة اللوحات وقواطع الدوائر الصناعية' }
+            ];
+        } else if (k.includes('ميكانيك') || k.includes('سيد')) {
+            chips = [
+                { icon: '🔧', title: 'تشغيل وصيانة المضخات الطاردة المركزية' },
+                { icon: '⚙️', title: 'التزييت والتشحيم والصيانة الوقائية' },
+                { icon: '📐', title: 'معايرة وضبط الآلات الميكانيكية' },
+                { icon: '🛡️', title: 'اشتراطات السلامة في ورشة الميكانيكا' }
+            ];
+        } else if (k.includes('ادارة') || k.includes('إدارة') || k.includes('مكتب') || k.includes('اصيل') || k.includes('أصيل')) {
+            chips = [
+                { icon: '📑', title: 'إعداد المراسلات والتقارير الإدارية الرسمية' },
+                { icon: '🗄️', title: 'أنظمة الحفظ والأرشفة الإلكترونية' },
+                { icon: '📅', title: 'تنظيم الاجتماعات وصياغة جدول الأعمال' },
+                { icon: '🔒', title: 'السرية والخصوصية في بيئة العمل المكتبي' }
+            ];
+        } else if (k.includes('حاسب') || k.includes('يعقوب') || k.includes('إمام') || k.includes('امام')) {
+            chips = [
+                { icon: '💻', title: 'مكونات العتاد الحاسوبي وصيانة الأجهزة' },
+                { icon: '📊', title: 'معالجة الجداول والصيغ المتقدمة في Excel' },
+                { icon: '🌐', title: 'أمن المعلومات والحماية من الهجمات السيبرانية' },
+                { icon: '⚙️', title: 'إدارة الملفات واستكشاف أعطال أنظمة التشغيل' }
+            ];
+        } else if (k.includes('انشاء') || k.includes('إنشاء') || k.includes('ناجي')) {
+            chips = [
+                { icon: '🏗️', title: 'خواص الخرسانة المسلحة وتجهيز القوالب' },
+                { icon: '📐', title: 'أساسيات المساحة وقراءة المخططات الهندسية' },
+                { icon: '🛡️', title: 'السلامة المهنية في السقالات ومواقع الإنشاءات' },
+                { icon: '🧱', title: 'تقنيات العزل الحراري والمائي للمباني' }
+            ];
+        } else {
+            chips = [
+                { icon: '🗣️', title: 'Technical English: Workplace Terminology & SOP' },
+                { icon: '📖', title: 'Technical Listening & Communication Skills' },
+                { icon: '🛡️', title: 'Industrial Safety Signs & Warning Alerts' },
+                { icon: '📝', title: 'Writing Technical Work Orders & Inspection Reports' }
+            ];
+        }
+
+        container.innerHTML = chips.map(c => `
+            <button type="button" onclick="selectAiTopicSuggestion('${escapeHtml(c.title)}')" class="text-[10px] font-bold bg-white hover:bg-violet-50 text-slate-700 hover:text-violet-900 border border-slate-200 hover:border-violet-300 px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-2xs flex items-center gap-1.5 group">
+                <span class="text-xs group-hover:scale-110 transition-transform">${c.icon}</span>
+                <span>${escapeHtml(c.title)}</span>
+            </button>
+        `).join('');
+    }
+    window.renderAiDynamicTopicSuggestions = renderAiDynamicTopicSuggestions;
+
+    function selectAiTopicSuggestion(topicTitle) {
+        const input = document.getElementById('aiDirectTextInput');
+        if (input) {
+            input.value = `الوحدة التدريبية: ${topicTitle}.\nيرجى بناء اختبار أسبوعي تفاعلي متكامل ووحدة تدريبية شاملة تتضمن المحاور الأساسية، المصطلحات الفنية المعتمدة، التكليفات العملية، وفيديوهات الشرح المباشرة.`;
+            setAiSourceMode('text');
+            updateAiTextCount();
+            input.focus();
+            showToast(`تم اختيار «${topicTitle}»! اضغط على زر التوليد بالذكاء الاصطناعي لبدء التحليل الفوري ✨`, 'info');
+        }
+    }
+    window.selectAiTopicSuggestion = selectAiTopicSuggestion;
+
     function updateAiTextCount() {
         const input = document.getElementById('aiDirectTextInput');
         const countEl = document.getElementById('aiDirectTextCount');
@@ -27335,7 +27444,7 @@ END $$;`;
         countEl.innerText = `${len} حرف`;
         if (curLenEl) curLenEl.innerText = len;
 
-        if (len >= 20) {
+        if (len >= 3) {
             countEl.className = 'text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200';
             if (warnEl) warnEl.classList.add('hidden');
             input.classList.remove('border-amber-400', 'ring-2', 'ring-amber-200');
@@ -27577,84 +27686,508 @@ END $$;`;
         const text = (sourceText || '').trim();
         const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
-        // Try to identify a specific subject/topic from first lines or filename
+        // 1. Identify specific subject/topic from explicit prefix, lines, or course context
         let detectedTopic = '';
-        for (const line of lines.slice(0, 5)) {
-            const clean = line.replace(/^\[(شريحة|صفحة)\s*\d+\]:?\s*/i, '').trim();
-            if (clean.length >= 4 && clean.length <= 80 && !clean.includes('http') && !clean.toLowerCase().includes('welcome')) {
-                detectedTopic = clean;
-                break;
-            }
+        const explicitTopicMatch = text.match(/(?:الوحدة التدريبية|الموضوع|الدرس|درس|محاضرة|عنوان الوحدة)\s*[:\-–—]\s*([^\n\r]+)/i);
+        if (explicitTopicMatch && explicitTopicMatch[1]) {
+            detectedTopic = explicitTopicMatch[1].trim();
         }
         if (!detectedTopic) {
-            detectedTopic = (filename || '').replace(/\.[^/.]+$/, '').replace(/[_\\-]/g, ' ').trim();
+            for (const line of lines.slice(0, 5)) {
+                const clean = line.replace(/^\[(شريحة|صفحة|درس|محاضرة|الوحدة|عنوان)\s*[\dأ-ي]*\]:?\s*/i, '').replace(/^[\d\.\-\*•)]+\s*/, '').trim();
+                if (clean.length >= 3 && clean.length <= 80 && !clean.includes('http') && !clean.toLowerCase().includes('welcome')) {
+                    detectedTopic = clean.split(/[:\-–—\.]/)[0].trim() || clean;
+                    break;
+                }
+            }
         }
-        if (!detectedTopic || detectedTopic.length < 3) {
-            detectedTopic = `${cleanCourse} - ${cleanWeek}`;
+        if (!detectedTopic || detectedTopic.includes('نص_دراسي') || detectedTopic.includes('نص دراسي')) {
+            const fnClean = (filename || '').replace(/\.[^/.]+$/, '').replace(/[_\\-]/g, ' ').trim();
+            if (fnClean && !fnClean.includes('نص_دراسي') && !fnClean.includes('نص دراسي')) {
+                detectedTopic = fnClean;
+            }
+        }
+        if (!detectedTopic || detectedTopic.includes('نص_دراسي') || detectedTopic.includes('نص دراسي') || detectedTopic.length < 3) {
+            detectedTopic = cleanWeek && !cleanWeek.includes('الوحدة التدريبية') ? `${cleanCourse} - ${cleanWeek}` : cleanCourse;
         }
 
-        // Extract vocabulary terms if found in text (e.g. "Term: Definition" or "Term - Definition")
+        // 2. Classify technical discipline domain
+        const domainCorpus = `${cleanCourse} ${cleanWeek} ${detectedTopic} ${text}`.toLowerCase();
+        let domain = 'english';
+        if (domainCorpus.includes('سلام') || domainCorpus.includes('safety') || domainCorpus.includes('وقاي') || domainCorpus.includes('مخاطر') || domainCorpus.includes('osha') || domainCorpus.includes('فاضل')) {
+            domain = 'safety';
+        } else if (domainCorpus.includes('لحام') || domainCorpus.includes('weld') || domainCorpus.includes('قوس') || domainCorpus.includes('معادن') || domainCorpus.includes('رضا')) {
+            domain = 'welding';
+        } else if (domainCorpus.includes('كهرب') || domainCorpus.includes('electr') || domainCorpus.includes('دوائر') || domainCorpus.includes('أوم') || domainCorpus.includes('حسين') || domainCorpus.includes('عصام')) {
+            domain = 'electrical';
+        } else if (domainCorpus.includes('ميكان') || domainCorpus.includes('mechanic') || domainCorpus.includes('مضخ') || domainCorpus.includes('محرك') || domainCorpus.includes('هيدروليك') || domainCorpus.includes('سيد')) {
+            domain = 'mechanical';
+        } else if (domainCorpus.includes('ادارة') || domainCorpus.includes('إدارة') || domainCorpus.includes('مكتب') || domainCorpus.includes('أرشفة') || domainCorpus.includes('سكرتار') || domainCorpus.includes('اصيل') || domainCorpus.includes('أصيل')) {
+            domain = 'admin';
+        } else if (domainCorpus.includes('حاسب') || domainCorpus.includes('شبك') || domainCorpus.includes('برمج') || domainCorpus.includes('it') || domainCorpus.includes('computer') || domainCorpus.includes('يعقوب') || domainCorpus.includes('إمام') || domainCorpus.includes('امام')) {
+            domain = 'it';
+        } else if (domainCorpus.includes('انشاء') || domainCorpus.includes('إنشاء') || domainCorpus.includes('خرسان') || domainCorpus.includes('مساح') || domainCorpus.includes('مبان') || domainCorpus.includes('سقالات') || domainCorpus.includes('ناجي')) {
+            domain = 'construction';
+        }
+
+        // 3. Extract vocabulary terms if found in text (Arabic or English)
         const extractedTerms = [];
-        const termRegex = /([A-Za-z0-9\s\\-]{3,35})\s*[:\-=–—]\s*([^\n\r]{4,140})/g;
+        const termRegex = /([\u0600-\u06FFA-Za-z0-9\s()\/\\-]{2,45})\s*[:\-=–—]\s*([^\n\r]{3,140})/g;
         let match;
         while ((match = termRegex.exec(text)) !== null && extractedTerms.length < 8) {
-            const enPart = match[1].trim();
+            const rawLabel = match[1].replace(/^[\d\.\-\*•)]+\s*/, '').trim();
             const descPart = match[2].trim();
-            if (enPart && descPart && !enPart.toLowerCase().includes('slide') && !enPart.toLowerCase().includes('page')) {
+            if (rawLabel.length >= 2 && descPart.length >= 3 && !rawLabel.toLowerCase().includes('slide') && !rawLabel.toLowerCase().includes('page') && !rawLabel.includes('الوحدة') && !rawLabel.includes('درس')) {
                 extractedTerms.push({
-                    en: enPart,
-                    ar: descPart.split(/[,.;]/)[0].trim(),
+                    en: rawLabel,
+                    ar: rawLabel,
                     definition: descPart
                 });
             }
         }
 
-        // Standard vocational safety and technical terms fallback
-        const defaultTerms = [
-            { en: 'Personal Protective Equipment (PPE)', ar: 'مهمات الوقاية الشخصية', definition: 'التجهيزات والمعدات الواقية الواجب ارتداؤها لحماية المتدرب من مخاطر بيئة العمل.' },
-            { en: 'Standard Operating Procedure (SOP)', ar: 'إجراءات التشغيل القياسية', definition: 'الخطوات والتعليمات المعتمدة لضمان جودة الأداء ودقة العمليات التشغيلية.' },
-            { en: 'Quality Assurance (QA)', ar: 'ضمان وتوكيد الجودة', definition: 'المنهجيات والمعايير الفنية لضمان مطابقة المخرجات للمواصفات المعتمدة.' },
-            { en: 'Hazard Identification', ar: 'تحديد وتشخيص المخاطر', definition: 'الرصد الاستباقي لمسببات الحوادث للسيطرة عليها والحد من خطورتها.' },
-            { en: 'Preventive Maintenance', ar: 'الصيانة الوقائية الدورية', definition: 'أعمال الفحص والخدمة المجدولة لتفادي الأعطال والتوقفات الفجائية.' }
-        ];
+        const domainKnowledge = {
+            safety: {
+                defaultTerms: [
+                    { en: 'Personal Protective Equipment (PPE)', ar: 'مهمات الوقاية الشخصية', definition: 'التجهيزات والمعدات الواقية الواجب ارتداؤها لحماية المتدرب من مخاطر بيئة العمل.' },
+                    { en: 'Standard Operating Procedure (SOP)', ar: 'إجراءات التشغيل القياسية', definition: 'الخطوات والتعليمات المعتمدة لضمان جودة الأداء ودقة العمليات التشغيلية بأمان.' },
+                    { en: 'Hazard Identification', ar: 'تحديد وتشخيص المخاطر', definition: 'الرصد الاستباقي لمسببات الحوادث للسيطرة عليها والحد من خطورتها.' },
+                    { en: 'Lockout / Tagout (LOTO)', ar: 'إجراءات العزل والتأمين', definition: 'بروتوكول عزل مصادر الطاقة وتثبيت بطاقات التحذير أثناء الصيانة.' },
+                    { en: 'Safety Data Sheet (SDS)', ar: 'صحيفة بيانات سلامة المواد', definition: 'وثيقة فنية تشرح المخاطر الكيميائية وطرق التعامل والإسعافات الأولية.' }
+                ],
+                videos: [
+                    { id: 1, title: `شرح تطبيقي: مهمات الوقاية الشخصية (PPE) والسلامة المهنية`, description: `استعراض عملي لمهمات الوقاية والاشتراطات المعتمدة في بيئة التدريب المهني.`, duration: '12:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=yJhSlH8AvHs' },
+                    { id: 2, title: `إجراءات السلامة الصناعية وتفادي المخاطر في ورش العمل`, description: `تطبيق معايير السلامة المهنية وإجراءات الفحص والتشغيل الآمن للمعدات.`, duration: '10:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=XpcCUtYzwy0' },
+                    { id: 3, title: `قواعد السلامة وإجراءات الطوارئ والإخلاء في بيئة العمل`, description: `فيديو إثرائي لخطط الطوارئ وتدابير الاستجابة السريعة لمخاطر العمل.`, duration: '14:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=pMtqDWUpJds' }
+                ],
+                lecture: {
+                    summary: `تتناول هذه الوحدة دراسة شاملة لمفاهيم "${detectedTopic}"، مع التركيز على الممارسات المهنية المعتمدة، وضوابط السلامة وإجراءات التشغيل القياسية (SOP)، وتحديد المخاطر وطرق الوقاية منها لضمان بيئة عمل آمنة وخالية من الإصابات.`,
+                    topics: [
+                        `المحور الأول: المفاهيم الأساسية والأطر المعتمدة لـ ${detectedTopic}`,
+                        `المحور الثاني: إجراءات السلامة المهنية ومهمات الوقاية الشخصية (PPE)`,
+                        `المحور الثالث: التطبيق العملي ومعايير الجودة والتفتيش الميداني`
+                    ]
+                },
+                assignment: {
+                    instructions: `يرجى مراجعة محتوى المحاضرة وملف الدرس وحل الأسئلة التطبيقية وإرفاق ملف الحل أو كتابة الملاحظات المهنية قبل موعد الاستحقاق (استفد من بونص التسليم المبكر +1).`,
+                    mcqs: [
+                        { question: `ما هو الإجراء الفني الأولي الواجب اتباعه في موضوع ${detectedTopic}؟`, options: ['فحص قائمة التحقق والتأكد من توافر مهمات الوقاية (PPE)', 'البدء في العمل دون فحص مسبق لأجهزة السلامة', 'تجاهل التعليمات التحذيرية الخاصة بالمعدة', 'تأجيل توثيق إجراءات الفحص الدوري'], correct_answer: 'فحص قائمة التحقق والتأكد من توافر مهمات الوقاية (PPE)' },
+                        { question: `أي مما يلي يمثل الهدف الأساسي من تطبيق اشتراطات السلامة المهنية؟`, options: ['حماية الأرواح والحد من وقوع الحوادث والإصابات', 'زيادة سرعة الإنتاج على حساب معايير الأمان', 'الاستغناء عن صيانة المعدات الدورية', 'إلغاء سجلات التدقيق والتفتيش'], correct_answer: 'حماية الأرواح والحد من وقوع الحوادث والإصابات' },
+                        { question: `المصطلح الفني الذي يرمز لإجراءات التشغيل القياسية المعتمدة هو:`, options: ['Standard Operating Procedure (SOP)', 'Daily Machine Checklist (DMC)', 'General Plant Rule (GPR)', 'Workplace Safety Protocol (WSP)'], correct_answer: 'Standard Operating Procedure (SOP)' },
+                        { question: `ما الغرض الرئيسي من تطبيق نظام العزل والإقفال (LOTO)؟`, options: ['عزل مصادر الطاقة ومنع تشغيل المعدة أثناء صيانتها', 'زيادة الحمل الكهربائي في اللوحات', 'تسريع تشغيل خط الإنتاج دون فحص', 'إلغاء بطاقات التحذير والتنبيه'], correct_answer: 'عزل مصادر الطاقة ومنع تشغيل المعدة أثناء صيانتها' }
+                    ],
+                    text_prompt: `اكتب تقريراً مهنياً موجزاً توضح فيه أهمية الالتزام بمعايير السلامة ومهمات الوقاية في سياق "${detectedTopic}".`,
+                    guidelines: 'استخدم ما لا يقل عن 3 مصطلحات فنية معتمدة واكتب بوضوح ودقة مهنية.',
+                    model_answer: 'Adhering to standard operating procedures and wearing proper PPE ensures personal safety and optimizes productivity in industrial workshops.'
+                },
+                quizQuestions: [
+                    { type: 'mcq', question: `ما هي الوظيفة الأساسية لقائمة الفحص الفني (Inspection Checklist) في ${detectedTopic}؟`, options: ['توثيق جاهزية المعدات والتحقق من سلامة بيئة العمل قبل البدء', 'إلغاء إجراءات الصيانة الوقائية المقررة', 'الاستغناء عن ارتداء مهمات الوقاية الشخصية', 'زيادة سرعة الإنتاج على حساب معايير الأمان'], correct_answer: 'توثيق جاهزية المعدات والتحقق من سلامة بيئة العمل قبل البدء', explanation: 'قائمة الفحص تضمن التأكد المنهجي من جاهزية المعدات وسلامة بيئة الورشة.' },
+                    { type: 'mcq', question: `أي من المصطلحات التالية يمثل مهمات الوقاية الشخصية الإلزامية؟`, options: ['Personal Protective Equipment (PPE)', 'Plant Process Evaluation (PPE)', 'Primary Performance Estimation (PPE)', 'Power Plant Engineering (PPE)'], correct_answer: 'Personal Protective Equipment (PPE)', explanation: 'PPE هي مهمات الوقاية الشخصية المعتمدة عالمياً.' },
+                    { type: 'mcq', question: `ما الهدف التشغيلي من تطبيق إجراءات التشغيل القياسية (SOP) في ${detectedTopic}؟`, options: ['توحيد خطوات العمل والحد من الأخطاء التشغيلية والحوادث', 'تسجيل الحضور والانصراف اليومي فقط', 'الاستغناء عن فحص الأجهزة قبل التشغيل', 'إلغاء خطط الطوارئ في الورشة'], correct_answer: 'توحيد خطوات العمل والحد من الأخطاء التشغيلية والحوادث', explanation: 'إجراءات التشغيل القياسية تحدد المسار الآمن والمعتمد لتنفيذ المهام.' },
+                    { type: 'mcq', question: `ماذا يقصد بمفهوم 'Hazard Identification' في بيئة التدريب والعمل؟`, options: ['الرصد الاستباقي لمسببات الحوادث للسيطرة عليها والحد من خطورتها', 'تجاهل مصادر الخطورة حتى وقوع الحادث', 'تعطيل حساسات الإنذار المبكر', 'التخلص من معدات الإطفاء والسلامة'], correct_answer: 'الرصد الاستباقي لمسببات الحوادث للسيطرة عليها والحد من خطورتها', explanation: 'تحديد المخاطر خطوة استباقية للحد من الحوادث.' },
+                    { type: 'mcq', question: `ما هو الإجراء الفني السليم المتبع قبل تشغيل أي معدة أو أداة في الورشة؟`, options: ['إجراء المعاينة البصرية والتحقق من وسائل الحماية ومهمات الوقاية', 'تشغيل المعدة بأقصى حمل ممكن فوراً', 'تعطيل مفاتيح الطوارئ للسرعة', 'تجاوز كتيبات التشغيل القياسية'], correct_answer: 'إجراء المعاينة البصرية والتحقق من وسائل الحماية ومهمات الوقاية', explanation: 'المعاينة المسبقة تجنب الأعطال المفاجئة والإصابات المهنية.' },
+                    { type: 'mcq', question: `أي مما يلي يمثل الخطوة الأولى في إدارة وتقييم المخاطر (Risk Assessment)؟`, options: ['تحديد وتصنيف مصادر الخطر المحتملة في موقع العمل وتقدير شدتها', 'تجاهل تقارير السلامة الميدانية', 'تعطيل أجهزة الإنذار المبكر', 'مغادرة بيئة العمل دون إبلاغ المشرف'], correct_answer: 'تحديد وتصنيف مصادر الخطر المحتملة في موقع العمل وتقدير شدتها', explanation: 'تقييم المخاطر يبدأ بتحديد المخاطر ووضع ضوابط تفاديها.' },
+                    { type: 'true_false', question: `عبارة: يعد الالتزام بمهمات الوقاية الشخصية (PPE) وإجراءات التشغيل القياسية (SOP) أمراً إلزامياً لكافة المتدربين.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ اشتراطات السلامة والالتزام المهني ملزمان لحماية الجميع.' },
+                    { type: 'true_false', question: `عبارة: يجوز تشغيل الآلات والمعدات الفنية دون التحقق المسبق من جاهزية أجهزة الأمان وحواجز الحماية.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'خطأ ✗', explanation: 'خطأ؛ يحظر تشغيل أي ماكينة إذا كانت حواجز الأمان أو مفاتيح الطوارئ معطلة.' },
+                    { type: 'true_false', question: `عبارة: المصطلحات الفنية المعتمدة تمثل أداة تواصل ميدانية أساسية في بيئات العمل المهنية والصناعية.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ تضمن المصطلحات الفنية فهماً موحداً ودقيقاً بين الفنيين والمشرفين.' },
+                    { type: 'matching', question: `قم بمطابقة وتوصيل المصطلح الفني باللغة الإنجليزية مع المعنى والمفهوم المناسب له في السلامة:`, pairs: [
+                        { left: 'PPE', right: 'مهمات الوقاية الشخصية' },
+                        { left: 'SOP', right: 'إجراءات التشغيل القياسية' },
+                        { left: 'LOTO', right: 'عزل مصادر الطاقة وتأمينها' },
+                        { left: 'Hazard Identification', right: 'تحديد وتشخيص المخاطر' }
+                    ], explanation: 'المصطلحات الفنية المعتمدة تمثل لغة التخاطب الأساسية في السلامة وبيئات العمل الاحترافية.' }
+                ]
+            },
+            welding: {
+                defaultTerms: [
+                    { en: 'Shielded Metal Arc Welding (SMAW)', ar: 'لحام القوس المعدني المحجب', definition: 'عملية لحام انصهاري تعتمد على قوس كهربائي بين قطب مستهلك ومعدن الأساس.' },
+                    { en: 'Electrode Coating / Flux', ar: 'مساعد الصهر / كسوة الإلكترود', definition: 'المادة المغلفة لسلك اللحام التي توفر غازات حماية وطبقة خبث واقية للحوض المنصهر.' },
+                    { en: 'Arc Length', ar: 'طول القوس الكهربائي', definition: 'المسافة الدقيقة بين رأس سلك اللحام وسطح حوض اللحام المنصهر.' },
+                    { en: 'Slag Inclusion', ar: 'شوائب الخبث المحتبسة', definition: 'عيب لحام ينتج عن احتباس مادة الخبث داخل خط اللحام نتيجة تنظيف غير سليم.' },
+                    { en: 'Tungsten Inert Gas (TIG)', ar: 'لحام الأرجون بالقطب غير المستهلك', definition: 'طريقة لحام عالية الدقة باستخدام قطب تنجستن وغاز خامل واقٍ.' }
+                ],
+                videos: [
+                    { id: 1, title: `شرح أساسيات لحام القوس المعدني للمبتدئين (SMAW Basics)`, description: `شرح تطبيقي لخطوات إشعال القوس وضبط زاوية الإلكترود وسرعة التغذية.`, duration: '14:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=pMtqDWUpJds' },
+                    { id: 2, title: `ضبط شدة التيار والتحكم في حوض المنصهر والوصلات`, description: `معايير ضبط أمبير اللحام والوقاية من التناثر وعيوب خطوط اللحام.`, duration: '12:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=1pMHayXqoMY' },
+                    { id: 3, title: `تقنيات لحام الأرجون (TIG) واشتراطات السلامة في ورشة اللحام`, description: `تطبيقات لحام الأرجون وحماية العين والجهاز التنفسي في الورشة.`, duration: '15:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=2od_jRAAQ6w' }
+                ],
+                lecture: {
+                    summary: `تتناول هذه الوحدة التطبيق العملي لمهارات "${detectedTopic}"، مع التركيز على تقنيات اللحام، وتحديد الأقطاب المناسبة، وضبط تيار القوس الكهربائي، واشتراطات السلامة وحماية العينين والتنفس في بيئة ورشة اللحام.`,
+                    topics: [
+                        `المحور الأول: أسس ومبادئ تقنية ${detectedTopic} ومعدات التشغيل`,
+                        `المحور الثاني: اشتراطات السلامة وقناع اللحام ومهمات الحماية المعتمدة`,
+                        `المحور الثالث: ضبط معايير اللحام وفحص جودة خطوط اللحام وخلوها من العيوب`
+                    ]
+                },
+                assignment: {
+                    instructions: `يرجى مراجعة محتوى المحاضرة وملف درس اللحام وحل الأسئلة التطبيقية وإرفاق ملف الحل أو كتابة الملاحظات المهنية قبل موعد الاستحقاق.`,
+                    mcqs: [
+                        { question: `ما هو التأثير المباشر لزيادة طول القوس الكهربائي عن الحد الموصى به أثناء اللحام؟`, options: ['عدم استقرار القوس وزيادة التناثر (Spatters) وضعف التغلغل', 'زيادة نعومة ونظافة خط اللحام', 'انخفاض الجهد الكهربائي بشكل مفاجئ', 'حماية حوض المنصهر من الأكسدة الجوية'], correct_answer: 'عدم استقرار القوس وزيادة التناثر (Spatters) وضعف التغلغل' },
+                        { question: `ما هي الوظيفة الرئيسية لكسوة الإلكترود (Flux Coating) في عملية SMAW؟`, options: ['توليد غاز واقٍ وتكوين طبقة خبث لحماية حوض اللحام من الأكسدة', 'زيادة التوصيل الكهربائي لقطعة العمل فقط', 'تبريد خط اللحام بشكل فوري وسريع', 'تغيير لون المعدن الأساسي'], correct_answer: 'توليد غاز واقٍ وتكوين طبقة خبث لحماية حوض اللحام من الأكسدة' },
+                        { question: `أي من درجات عتامة عدسة قناع اللحام (Shade Number) تعد مناسبة للحام القوس الكهربائي؟`, options: ['عدسة رقم 10 إلى 12 لحماية العينين من الأشعة فوق البنفسجية', 'عدسة شفافة تماماً بدون عتامة', 'عدسة شمسية عادية رقم 2', 'لا يشترط ارتداء قناع للحام'], correct_answer: 'عدسة رقم 10 إلى 12 لحماية العينين من الأشعة فوق البنفسجية' },
+                        { question: `كيف يمكن تجنب عيب احتباس الخبث (Slag Inclusion) بين طبقات اللحام المتعددة؟`, options: ['إزالة الخبث وتنظيف السطح بفرشاة السلك والمطرقة بعد كل مسار', 'زيادة سرعة التغذية دون تنظيف', 'اللحام مباشرة فوق الخبث السابق لتوفير الوقت', 'استخدام تيار كهربائي منخفض جداً'], correct_answer: 'إزالة الخبث وتنظيف السطح بفرشاة السلك والمطرقة بعد كل مسار' }
+                    ],
+                    text_prompt: `صف الخطوات الفنية لضبط ماكينة اللحام واختيار القطب المناسب لتنفيذ وصلة تناكبية في موضوع "${detectedTopic}".`,
+                    guidelines: 'اذكر رقم القطب، شدة التيار، واشتراطات السلامة والوقاية الشخصية.',
+                    model_answer: 'Select proper electrode (e.g. E6013), adjust amperage based on plate thickness, wear auto-darkening helmet and leather gloves, and clean slag thoroughly after each pass.'
+                },
+                quizQuestions: [
+                    { type: 'mcq', question: `ما المقصود برقم 60 في ترميز القطب E6013 طبقاً لمواصفات AWS؟`, options: ['الحد الأدنى لمقاومة الشد لمعدن اللحام (60,000 رطل/بوصة مربعة)', 'قطر سلك اللحام بالملليمتر', 'التيار الكهربائي الأقصى لماكينة اللحام', 'درجة حرارة انصهار القطب بالمئوية'], correct_answer: 'الحد الأدنى لمقاومة الشد لمعدن اللحام (60,000 رطل/بوصة مربعة)', explanation: 'الرقمين الأولين في تصنيف قطب اللحام يرمزان لمقاومة الشد بالآلاف من PSI.' },
+                    { type: 'mcq', question: `أي من غازات الحماية التالية يستخدم بكثرة في عمليات لحام الأرجون (TIG)؟`, options: ['غاز الأرجون الخامل (Argon)', 'غاز الأكسجين النقي', 'غاز الهيدروجين سريع الاشتعال', 'غاز أول أكسيد الكربون'], correct_answer: 'غاز الأرجون الخامل (Argon)', explanation: 'غاز الأرجون خامل كيميائياً ويوفر حماية ممتازة لحوض اللحام المنصهر.' },
+                    { type: 'mcq', question: `ما هو السبب الرئيسي لحدوث المسامية (Porosity) داخل خط اللحام؟`, options: ['احتباس الغازات داخل المنصهر بسبب الرطوبة أو الأوساخ على سطح المعدن', 'تنظيف قطعة العمل بشكل مفرط', 'استخدام قناع لحام عاتم', 'زيادة سماكة سلك اللحام'], correct_answer: 'احتباس الغازات داخل المنصهر بسبب الرطوبة أو الأوساخ على سطح المعدن', explanation: 'الرطوبة والزيوت والصدأ تؤدي لتحلل الغازات واحتباسها داخل معدن اللحام.' },
+                    { type: 'mcq', question: `ما الإجراء الفني السليم المتبع قبل بدء عملية اللحام في ${detectedTopic}؟`, options: ['تجهيز حواف الوصلة وتنظيفها من الزيوت والصدأ وارتداء ملابس الجلد الواقية', 'البدء باللحام مباشرة على الصدأ', 'إلغاء استخدام مروحة شفط الأدخنة', 'تجاوز فحص كابلات وماكينة اللحام'], correct_answer: 'تجهيز حواف الوصلة وتنظيفها من الزيوت والصدأ وارتداء ملابس الجلد الواقية', explanation: 'نظافة المعدن الأساس وارتداء واقيات الجلد يحميان من الإصابة والعيوب.' },
+                    { type: 'mcq', question: `ما هي وظيفة مطرقة الخبث (Chipping Hammer) وفرشاة السلك في ورشة اللحام؟`, options: ['تنظيف وإزالة طبقة الخبث بعد تبريد خط اللحام', 'تسخين معدن الأساس قبل اللحام', 'قياس شدة التيار الكهربائي في القوس', 'تثبيت ألواح الصلب ببعضها البعض'], correct_answer: 'تنظيف وإزالة طبقة الخبث بعد تبريد خط اللحام', explanation: 'المطرقة والفرشاة ضروريتان لإزالة الخبث والتأكد من جودة خط اللحام.' },
+                    { type: 'mcq', question: `أي زاوية ميلان (Travel Angle) تعد مثالية لإلكترود اللحام في الوضع المسطح 1G؟`, options: ['من 10 إلى 20 درجة باتجاه حركة اللحام', 'زاوية مائلة 80 درجة للخلف', 'زاوية أفقية تماماً موازية للقطعة', 'تغيير الزاوية عشوائياً أثناء السير'], correct_answer: 'من 10 إلى 20 درجة باتجاه حركة اللحام', explanation: 'ميل الإلكترود بزاوية 10-20 درجة يوفر تغلغلاً متزناً وشكلاً منتظماً لخط اللحام.' },
+                    { type: 'true_false', question: `عبارة: يجوز إجراء عمليات اللحام بالقوس دون ارتداء قناع اللحام المجهز بعدسة عاتمة مناسبة.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'خطأ ✗', explanation: 'خطأ؛ قناع اللحام إلزامي لحماية العينين من الأشعة فوق البنفسجية والأشعة تحت الحمراء.' },
+                    { type: 'true_false', question: `عبارة: يساعد تنظيف معدن الأساس من الصدأ والشحوم قبل اللحام في تجنب المسامية والعيوب الهيكلية.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ نظافة الوصلة شرط أساسي لضمان جودة وتغلغل معدن اللحام.' },
+                    { type: 'true_false', question: `عبارة: في عملية SMAW، يتولى مساعد الصهر (Flux) حماية المعدن المنصهر من التفاعل مع أكسجين الهواء.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ يحترق مساعد الصهر مولداً غازات حماية وطبقة خبث تمنع الأكسدة.' },
+                    { type: 'matching', question: `قم بمطابقة مصطلحات اللحام الفنية مع ما يقابلها باللغة العربية:`, pairs: [
+                        { left: 'SMAW', right: 'لحام القوس المعدني المحجب' },
+                        { left: 'TIG', right: 'لحام قطب التنجستن بالغاز الخامل' },
+                        { left: 'Electrode Flux', right: 'مساعد الصهر وكسوة القطب' },
+                        { left: 'Slag Inclusion', right: 'عيب احتباس شوائب الخبث' }
+                    ], explanation: 'مصطلحات اللحام الفنية معتمدة من الجمعية الأمريكية للحام (AWS).' }
+                ]
+            },
+            electrical: {
+                defaultTerms: [
+                    { en: 'Ohm’s Law', ar: 'قانون أوم الكهربائي', definition: 'العلاقة الأساسية بين الجهد والتيار والمقاومة في الدوائر: V = I × R.' },
+                    { en: 'Circuit Breaker', ar: 'قاطع الدائرة الكهربائية', definition: 'جهاز حماية أوتوماتيكي يفصل التغذية عند حدوث حمل زائد أو قصر في الدائرة.' },
+                    { en: 'Multimeter', ar: 'مقياس رقمي متعدد الأغراض', definition: 'جهاز قياس كهربائي لقياس الجهد والتيار والمقاومة واختبار الاستمرارية.' },
+                    { en: 'Alternating Current (AC)', ar: 'التيار المتردد / المتناوب', definition: 'تيار كهربائي يعكس اتجاهه وقيمته دورياً عبر الزمن.' },
+                    { en: 'Lockout / Tagout (LOTO)', ar: 'إجراءات العزل والتأمين الكهربائي', definition: 'منهجية فصل وتأمين القواطع الكهربائية قبل بدء أعمال الصيانة والتوصيل.' }
+                ],
+                videos: [
+                    { id: 1, title: `شرح أساسيات الكهرباء والدوائر الكهربائية للمبتدئين`, description: `استعراض عملي لمفاهيم الجهد والتيار والمقاومة وقانون أوم.`, duration: '12:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=EJeAuQ7pkpc' },
+                    { id: 2, title: `قانون أوم وطرق قياس الجهد والتيار عملياً`, description: `تطبيقات قياس المقاومات وتوصيل الدوائر على التوالي والتوازي.`, duration: '14:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=bHIhgxav9LY' },
+                    { id: 3, title: `استخدام جهاز الملتيميتر وضوابط السلامة الكهربائية`, description: `فيديو تطبيقي لاختبار الاستمرارية وفحص الدوائر وإجراءات العزل LOTO.`, duration: '11:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=Cu3R5it4cQs' }
+                ],
+                lecture: {
+                    summary: `تتناول هذه الوحدة دراسة تفصيلية لمفاهيم "${detectedTopic}"، مع التركيز على فهم سلوك الدوائر الكهربائية، وحسابات الجهد والتيار، وطرق القياس السليمة، وتطبيق بروتوكولات العزل والسلامة الكهربائية في الورش الصناعية.`,
+                    topics: [
+                        `المحور الأول: القوانين الأساسية والمفاهيم النظرية في ${detectedTopic}`,
+                        `المحور الثاني: استخدام أجهزة القياس والفحص والتحقق من الاستمرارية`,
+                        `المحور الثالث: معايير السلامة الكهربائية وإجراءات العزل (LOTO)`
+                    ]
+                },
+                assignment: {
+                    instructions: `يرجى مراجعة محتوى المحاضرة وملف درس الكهرباء وحل المسائل التطبيقية وإرفاق ملف الحل أو كتابة الملاحظات المهنية قبل موعد الاستحقاق.`,
+                    mcqs: [
+                        { question: `طبقاً لقانون أوم، إذا كان الجهد الكهربائي 24V والمقاومة 8Ω، فإن شدة التيار المار تساوي:`, options: ['3 أمبير (3A)', '192 أمبير (192A)', '0.33 أمبير (0.33A)', '16 أمبير (16A)'], correct_answer: '3 أمبير (3A)' },
+                        { question: `ما هو وضع الضبط الصحيح في جهاز الملتيميتر لاختبار سلامة مسار سلك مقطوع؟`, options: ['وضع اختبار الاستمرارية (Continuity / Buzzer)', 'وضع قياس الجهد المتردد العالي', 'وضع قياس التردد (Hz)', 'وضع قياس الأمبير بالموجات'], correct_answer: 'وضع اختبار الاستمرارية (Continuity / Buzzer)' },
+                        { question: `ما هي الوظيفة الأساسية لقاطع التأريض (ELCB / RCD) في اللوحات الكهربائية؟`, options: ['الحماية من التسريب الأرضي وتفادي الصدمات الكهربائية للإنسان', 'رفع جهد الدائرة الكهربائية', 'تثبيت تردد الشبكة', 'تخزين الطاقة الاحتياطية'], correct_answer: 'الحماية من التسريب الأرضي وتفادي الصدمات الكهربائية للإنسان' },
+                        { question: `ما هو الإجراء الإلزامي قبل لمس أي موصل كهربائي مراد صيانته؟`, options: ['فصل التغذية والتحقق من انعدام الجهد بمقياس معتمد', 'لمس السلك بظهر اليد للتأكد', 'تشغيل المحرك لاختبار العزم', 'تغطية السلك بشريط لاصق دون قطع الكهرباء'], correct_answer: 'فصل التغذية والتحقق من انعدام الجهد بمقياس معتمد' }
+                    ],
+                    text_prompt: `وضح بالخطوات كيفية إجراء فحص الأمان والعزل الكهربائي LOTO قبل صيانة لوحة توزيع في درس "${detectedTopic}".`,
+                    guidelines: 'اذكر أدوات القياس المستخدمة، خطوات العزل، وإجراءات تثبيت قفل وبطاقة السلامة.',
+                    model_answer: 'Isolate power supply, apply safety lockout padlock and danger tag, verify zero voltage using calibrated multimeter, and discharge residual energy before maintenance.'
+                },
+                quizQuestions: [
+                    { type: 'mcq', question: `ما هي العلاقة الرياضية الصحيحة التي تمثل قانون أوم (Ohm’s Law)؟`, options: ['V = I × R (الجهد = التيار × المقاومة)', 'I = V × R', 'R = V × I', 'V = I / R'], correct_answer: 'V = I × R (الجهد = التيار × المقاومة)', explanation: 'قانون أوم ينص على أن الجهد يتناسب طردياً مع التيار والمقاومة.' },
+                    { type: 'mcq', question: `في دوائر التوصيل على التوالي (Series Circuits)، أي من القيم التالية يظل ثابتاً في كافة العناصر؟`, options: ['شدة التيار الكهربائي (Current)', 'فرق الجهد عبر كل مقاومة', 'قيمة المقاومة الفردية', 'القدرة المستهلكة'], correct_answer: 'شدة التيار الكهربائي (Current)', explanation: 'في دوائر التوالي، يوجد مسار واحد فقط للتيار لذلك قيمته متساوية في جميع النقاط.' },
+                    { type: 'mcq', question: `ماذا يحدث لمقاومة موصل نحاسي عند زيادة طوله مع ثبات مساحة مقطعه؟`, options: ['تزداد مقاومة الموصل الكهربائية', 'تنخفض المقاومة للنصف', 'تظل المقاومة ثابتة لا تتغير', 'تتحول المقاومة إلى سعة كهربائية'], correct_answer: 'تزداد مقاومة الموصل الكهربائية', explanation: 'مقاومة الموصل تتناسب طردياً مع طوله وعكسياً مع مساحة مقطعه.' },
+                    { type: 'mcq', question: `أي مما يلي يعد من متطلبات الوقاية الشخصية الإلزامية عند التعامل مع اللوحات الكهربائية الحية؟`, options: ['ارتداء أحذية وقفازات عازلة للجهد ونظارات حماية الوجه من القوس الكهربائي (Arc Flash)', 'ارتداء ساعات وأساور معدنية', 'استخدام مفكات بدون عوازل', 'العمل بأيدٍ مبللة'], correct_answer: 'ارتداء أحذية وقفازات عازلة للجهد ونظارات حماية الوجه من القوس الكهربائي (Arc Flash)', explanation: 'مهمات العزل المعتمدة تحمي الفني من خطر الصعق والقوس الكهربائي.' },
+                    { type: 'mcq', question: `ما هي الوحدة الدولية المعتمدة لقياس المقاومة الكهربائية؟`, options: ['الأوم (Ohm - Ω)', 'الفولت (Volt)', 'الأمبير (Ampere)', 'الواط (Watt)'], correct_answer: 'الأوم (Ohm - Ω)', explanation: 'الأوم هي الوحدة القياسية المعتمدة لقياس المقاومة الكهربائية.' },
+                    { type: 'mcq', question: `ما هو الغرض من استخدام المحولات الكهربائية (Transformers) في الشبكات؟`, options: ['رفع أو خفض الجهد المتردد لنقل وتوزيع الطاقة بكفاءة', 'تحويل التيار المستمر إلى متردد', 'تخزين الشحنات الكهربائية', 'قياس استهلاك الورشة من الكهرباء'], correct_answer: 'رفع أو خفض الجهد المتردد لنقل وتوزيع الطاقة بكفاءة', explanation: 'المحولات تستخدم للتحكم بمستويات الجهد وتقليل الفواقد في خطوط النقل.' },
+                    { type: 'true_false', question: `عبارة: في دوائر التوصيل على التوازي، يكون فرق الجهد متساوياً عبر جميع الفروع المتصلة.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ الجهد الكهربائي متساوٍ عبر كافة فروع التوازي.' },
+                    { type: 'true_false', question: `عبارة: يجوز استبدال الفيوز التالف بسلك نحاسي مكشوف لتسريع استعادة التغذية الكهربائية.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'خطأ ✗', explanation: 'خطأ جسيم؛ استبدال الفيوز بسلك يلغي الحماية وقد يتسبب في احتراق اللوحة أو حريق.' },
+                    { type: 'true_false', question: `عبارة: يجب تفريغ شحنة المكثفات الكهربائية قبل لمس الدائرة حتى بعد فصل المصدر الرئيسي.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ المكثفات تحتفظ بشحنات كهربائية خطرة لفترة بعد فصل التيار.' },
+                    { type: 'matching', question: `قم بمطابقة المصطلحات الكهربائية مع التعريف المناسب لها:`, pairs: [
+                        { left: 'Ohm’s Law', right: 'قانون أوم (V = I × R)' },
+                        { left: 'Multimeter', right: 'جهاز قياس متعدد رقمي' },
+                        { left: 'Circuit Breaker', right: 'قاطع أوتوماتيكي لحماية الدائرة' },
+                        { left: 'LOTO Protocol', right: 'إجراءات العزل والتأمين الكهربائي' }
+                    ], explanation: 'المصطلحات الكهربائية أساسية لفهم وتطبيق معايير السلامة المهنية.' }
+                ]
+            },
+            mechanical: {
+                defaultTerms: [
+                    { en: 'Centrifugal Pump', ar: 'المضخة الطاردة المركزية', definition: 'آلة هيدروليكية تحول الطاقة الميكانيكية إلى طاقة ضغط وسريان للسوائل.' },
+                    { en: 'Impeller', ar: 'دافعة / مروحة المضخة', definition: 'العنصر الدوار المسؤول عن نقل الطاقة الحركية إلى السائل داخل الغلاف.' },
+                    { en: 'Cavitation', ar: 'ظاهرة التكهف الهيدروليكي', definition: 'تكون وانهيار فقاعات بخارية في السائل مسببة تآكلاً واهتزازات عنيفة.' },
+                    { en: 'Mechanical Seal', ar: 'مانع التسرب الميكانيكي', definition: 'عنصر إحكام لمنع تسرب السوائل بين عمود الدوران وجسم المضخة.' },
+                    { en: 'Preventive Maintenance', ar: 'الصيانة الوقائية المجدولة', definition: 'إجراءات الفحص والتشحيم الدورية لمنع التوقف المفاجئ للأجهزة.' }
+                ],
+                videos: [
+                    { id: 1, title: `شرح مكونات وطريقة عمل المضخات الطاردة المركزية`, description: `استعراض عملي لأجزاء المضخة، الدافعة، الغلاف الحلزوني ومانع التسرب.`, duration: '15:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=XpcCUtYzwy0' },
+                    { id: 2, title: `طرق التزييت والتشحيم وصيانة رولمان البلي (Bearings)`, description: `معايير اختيار الشحوم وفترات التزييت والحد من الاحتكاك الميكانيكي.`, duration: '12:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=pMtqDWUpJds' },
+                    { id: 3, title: `معايرة المحاذاة (Alignment) وضبط الآلات الميكانيكية`, description: `تقنيات ضبط استقامة المحاور وتجنب الاهتزازات الميكانيكية في المعدات.`, duration: '13:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=1pMHayXqoMY' }
+                ],
+                lecture: {
+                    summary: `تتناول هذه الوحدة دراسة تفصيلية لمفاهيم "${detectedTopic}"، مع التركيز على المبادئ الهيدروليكية والميكانيكية، وصيانة المضخات، وتقنيات التشحيم، والتحكم في التكهف والاهتزازات لضمان كفاءة المعدات واستدامة تشغيلها.`,
+                    topics: [
+                        `المحور الأول: نظرية التشغيل والمكونات الميكانيكية لـ ${detectedTopic}`,
+                        `المحور الثاني: جداول الصيانة الوقائية والتزييت وفحص المحامل`,
+                        `المحور الثالث: تشخيص الأعطال والاهتزازات واشتراطات السلامة المهنية`
+                    ]
+                },
+                assignment: {
+                    instructions: `يرجى مراجعة محتوى المحاضرة وملف الدرس الميكانيكي وحل الأسئلة التطبيقية وإرفاق ملف الحل قبل موعد الاستحقاق.`,
+                    mcqs: [
+                        { question: `ما هي الوظيفة الأساسية للدافعة (Impeller) في المضخة الطاردة المركزية؟`, options: ['إكساب السائل طاقة حركية عبر قوة الطرد المركزي', 'منع تسرب السوائل خارج المضخة', 'تبريد عمود الدوران الميكانيكي', 'تصفية الشوائب الصلبة من خط السحب'], correct_answer: 'إكساب السائل طاقة حركية عبر قوة الطرد المركزي' },
+                        { question: `ما السبب الرئيسي لظاهرة التكهف (Cavitation) في المضخات الهيدروليكية؟`, options: ['انخفاض الضغط عند خط السحب إلى أقل من ضغط التبخر للسائل', 'ارتفاع لزوجة زيت التزييت في المحامل', 'زيادة سرعة الدوران بشكل تدريجي', 'استخدام مانع تسرب ميكانيكي عالي الجودة'], correct_answer: 'انخفاض الضغط عند خط السحب إلى أقل من ضغط التبخر للسائل' },
+                        { question: `ما هو الغرض الأساسي من استخدام مانع التسرب الميكانيكي (Mechanical Seal)؟`, options: ['منع تسرب السائل المضغوط حول عمود الدوران إلى الخارج', 'زيادة ضغط السائل الخارج من المضخة', 'تثبيت المضخة على القاعدة الخرسانية', 'تقليل شدة التيار الكهربائي للمحرك'], correct_answer: 'منع تسرب السائل المضغوط حول عمود الدوران إلى الخارج' },
+                        { question: `ما النتيجة المباشرة لعدم محاذاة المحاور (Misalignment) بين المضخة ومحرك الإدارة؟`, options: ['زيادة الاهتزازات وتآكل المحامل ومانع التسرب بسرعة', 'انخفاض حرارة التشغيل للمحرك', 'تحسين معدل تدفق السائل', 'اطالة العمر الافتراضي للقارنة الميكانيكية'], correct_answer: 'زيادة الاهتزازات وتآكل المحامل ومانع التسرب بسرعة' }
+                    ],
+                    text_prompt: `صف خطوات فحص وصيانة المضخة والتأكد من استقامة المحاذاة والتشحيم في درس "${detectedTopic}".`,
+                    guidelines: 'اذكر أدوات المحاذاة، نوع الشحم، وضوابط تشغيل المضخة بعد الصيانة.',
+                    model_answer: 'Check shaft alignment using dial indicators or laser tools, apply recommended grease to bearings, inspect mechanical seal for leakage, and verify priming before start.'
+                },
+                quizQuestions: [
+                    { type: 'mcq', question: `ما هو الإجراء الإلزامي قبل تشغيل المضخة الطاردة المركزية لأول مرة؟`, options: ['تحضير وملء المضخة بالسائل وطرد الهواء (Priming)', 'تشغيل المضخة جافة على السرعة القصوى', 'إغلاق صمام السحب وصمام الطرد بإحكام تام', 'تفريغ زيت التشحيم من كراسي التحميل'], correct_answer: 'تحضير وملء المضخة بالسائل وطرد الهواء (Priming)', explanation: 'التحضير (Priming) يضمن عدم تشغيل المضخة جافة وتفادي تلف أسطح مانع التسرب.' },
+                    { type: 'mcq', question: `أي نوع من المحامل (Bearings) يستخدم عادة لتحمل الأحمال المحورية في الآلات الميكانيكية؟`, options: ['محامل التلامس الزاوي أو محامل الدفع (Thrust Bearings)', 'محامل الإبر البسيطة للأحمال الشعاعية فقط', 'جلب من البلاستيك غير المقوى', 'محامل بدون عناصر تدحرج'], correct_answer: 'محامل التلامس الزاوي أو محامل الدفع (Thrust Bearings)', explanation: 'محامل الدفع والتلامس الزاوي مصممة خصيصاً لمقاومة القوى المحورية على عمود الدوران.' },
+                    { type: 'mcq', question: `ماذا يشير الصوت الشبيه بفرقعة الحصى أو الحجارة داخل جسم المضخة؟`, options: ['حدوث ظاهرة التكهف الهيدروليكي (Cavitation)', 'عمل المضخة في وضع التشغيل المثالي', 'انخفاض سرعة المحرك الكهربائي', 'امتلاء خزان الطرد بالسائل'], correct_answer: 'حدوث ظاهرة التكهف الهيدروليكي (Cavitation)', explanation: 'صوت الحصى والفرقعة هو المؤشر الكلاسيكي لانهيار فقاعات التكهف وتآكل الدافعة.' },
+                    { type: 'mcq', question: `ما هي الفائدة المباشرة لتطبيق برامج الصيانة الوقائية (Preventive Maintenance)؟`, options: ['تفادي الأعطال المفاجئة وإطالة العمر التشغيلي للمعدات', 'زيادة تكاليف قطع الغيار والصيانة الطارئة', 'إيقاف خط الإنتاج بدون تخطيط', 'إلغاء جداول الفحص الميداني'], correct_answer: 'تفادي الأعطال المفاجئة وإطالة العمر التشغيلي للمعدات', explanation: 'الصيانة المجدولة تحد من التوقفات غير المخططة وتوفر تكاليف الإصلاحات الكبرى.' },
+                    { type: 'mcq', question: `ما هو الغرض من استخدام الغلاف الحلزوني (Volute Casing) في المضخات الطاردة؟`, options: ['تحويل الطاقة الحركية للسائل إلى طاقة ضغط مع توجيهه لمخرج الطرد', 'تقليل وزن المضخة لتسهيل نقلها', 'تسخين السائل قبل خروجه', 'عزل المحرك الكهربائي عن الأرضية'], correct_answer: 'تحويل الطاقة الحركية للسائل إلى طاقة ضغط مع توجيهه لمخرج الطرد', explanation: 'المساحة المتدرجة للغلاف الحلزوني تقلل السرعة وتزيد الضغط طبقاً لمبدأ برنولي.' },
+                    { type: 'mcq', question: `أي من أدوات القياس التالية تعد الأكثر دقة لقياس الأبعاد الداخلية والخارجية للأعمدة؟`, options: ['القدمة ذات الورنية (Vernier Caliper) أو الميكرومتر', 'الشريط المتري القماشي', 'المسطرة الخشبية العادية', 'المعاينة بالنظر فقط'], correct_answer: 'القدمة ذات الورنية (Vernier Caliper) أو الميكرومتر', explanation: 'القدمة والميكرومتر توفران دقة تصل إلى أجزاء من المليمتر لقياس التفاوتات الهندسية.' },
+                    { type: 'true_false', question: `عبارة: يحظر تشغيل المضخات الطاردة المركزية ذات مانع التسرب الميكانيكي وهي جافة تماماً بدون سائل.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ التشغيل الجاف يتسبب في ارتفاع حرارة أسطح الاحتكاك وتلف مانع التسرب فوراً.' },
+                    { type: 'true_false', question: `عبارة: الإفراط في تشحيم رولمان البلي لا يضر أبداً ويزيد دائماً من كفاءة الدوران.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'خطأ ✗', explanation: 'خطأ؛ الإفراط في التشحيم يسبب ارتفاع درجة الحرارة وزيادة مقاومة التدحرج وتلف المحمل.' },
+                    { type: 'true_false', question: `عبارة: الفحص الدوري لمستويات الاهتزاز (Vibration Analysis) يساعد في اكتشاف عدم المحاذاة وتآكل المحامل مبكراً.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ تحليل الاهتزازات أداة رئيسية في الصيانة التنبؤية المتقدمة.' },
+                    { type: 'matching', question: `قم بمطابقة المصطلحات الميكانيكية مع تعريفها الصحيح:`, pairs: [
+                        { left: 'Centrifugal Pump', right: 'المضخة الطاردة المركزية' },
+                        { left: 'Impeller', right: 'دافعة السائل الدوارة' },
+                        { left: 'Cavitation', right: 'ظاهرة التكهف الهيدروليكي' },
+                        { left: 'Mechanical Seal', right: 'مانع التسرب الميكانيكي' }
+                    ], explanation: 'المصطلحات الهيدروليكية والميكانيكية أساسية في تشغيل وصيانة المحطات والورش.' }
+                ]
+            },
+            admin: {
+                defaultTerms: [
+                    { en: 'Official Memorandum', ar: 'المذكرة الإدارية الرسمية', definition: 'وثيقة تواصل داخلي رسمية لتبادل التوجيهات والمعلومات بين الأقسام.' },
+                    { en: 'Minutes of Meeting (MoM)', ar: 'محضر الاجتماع الرسمي', definition: 'سجل مكتوب يوثق القرارات والنقاشات والتكليفات الصادرة عن الاجتماع.' },
+                    { en: 'Electronic Archiving', ar: 'الأرشفة والتوثيق الإلكتروني', definition: 'نظام رقمي لفهرسة وحفظ واسترجاع المستندات المؤسسية بأمان.' },
+                    { en: 'Standard Operating Procedure (SOP)', ar: 'إجراءات العمل القياسية', definition: 'الخطوات المنظمة المعتمدة لإنجاز المعاملات الإدارية بدقة.' },
+                    { en: 'Confidentiality Agreement', ar: 'اتفاقية السرية وحماية البيانات', definition: 'التزام مهني بعدم إفشاء المعلومات والوثائق الإدارية الحساسة.' }
+                ],
+                videos: [
+                    { id: 1, title: `مهارات إعداد وصياغة التقارير والمراسلات الإدارية الرسمية`, description: `تطبيقات عملية على الهيكل النموذجي للمذكرات والخطابات والتقارير الإدارية.`, duration: '12:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=Cu3R5it4cQs' },
+                    { id: 2, title: `أنظمة الحفظ والأرشفة الإلكترونية وإدارة الوثائق الحديثة`, description: `شرح تصنيف الملفات وتطبيق معايير الأمان وسرية البيانات المؤسسية.`, duration: '14:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=O5nskjZ_GoI' },
+                    { id: 3, title: `تنظيم الاجتماعات الاحترافية وتدوين محاضر الجلسات (MoM)`, description: `خطوات إعداد جدول الأعمال، توجيه الدعوات وتوثيق القرارات والمتابعة.`, duration: '10:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=pMtqDWUpJds' }
+                ],
+                lecture: {
+                    summary: `تتناول هذه الوحدة دراسة شاملة لمفاهيم "${detectedTopic}"، مع التركيز على أساليب إدارة المكاتب الحديثة، وإعداد المراسلات الرسمية، وأنظمة التوثيق والأرشفة، وتطبيق ضوابط السرية والمهنية في بيئة العمل الإداري.`,
+                    topics: [
+                        `المحور الأول: أسس وقواعد صياغة المراسلات والتقارير في ${detectedTopic}`,
+                        `المحور الثاني: إدارة الوثائق والأرشفة الرقمية وضوابط السرية المؤسسية`,
+                        `المحور الثالث: تنظيم الاجتماعات وتوثيق محاضر الجلسات ومتابعة القرارات`
+                    ]
+                },
+                assignment: {
+                    instructions: `يرجى مراجعة محتوى المحاضرة وملف درس الإدارة المكتبية وحل الأسئلة التطبيقية وإرفاق ملف الحل قبل موعد الاستحقاق.`,
+                    mcqs: [
+                        { question: `ما هو العنصر الإلزامي الذي يجب أن يتصدر المذكرة الإدارية الرسمية؟`, options: ['الترويسة الرسمية وتاريخ التحرير والجهة الموجه إليها والموضوع', 'التوقيع الشخصي فقط بدون تاريخ', 'فقرة ختامية دون تحديد موضوع', 'شعار تجاري غير معتمد'], correct_answer: 'الترويسة الرسمية وتاريخ التحرير والجهة الموجه إليها والموضوع' },
+                        { question: `ما هي الوظيفة الأساسية لمحضر الاجتماع الرسمي (Minutes of Meeting)؟`, options: ['توثيق النقاشات والقرارات المتفق عليها وتحديد مسؤوليات ومواعيد التنفيذ', 'تسجيل الحوارات الجانبية الشخصية فقط', 'إلغاء القرارات السابقة دون مرجعية', 'استبدال جدول الأعمال الأصلي'], correct_answer: 'توثيق النقاشات والقرارات المتفق عليها وتحديد مسؤوليات ومواعيد التنفيذ' },
+                        { question: `أي مما يلي يمثل الميزة الرئيسية للأرشفة الإلكترونية مقارنة بالأرشفة الورقية؟`, options: ['سرعة الاسترجاع وسهولة البحث وتوفير المساحة وتأمين النسخ الاحتياطية', 'زيادة صعوبة العثور على الوثائق القديمة', 'احتمالية فقدان المستندات دون تتبع', 'تقييد مشاركة البيانات المصرح بها'], correct_answer: 'سرعة الاسترجاع وسهولة البحث وتوفير المساحة وتأمين النسخ الاحتياطية' },
+                        { question: `ما هو السلوك المهني السليم عند التعامل مع ملفات تحتوي على بيانات موظفين سرية؟`, options: ['حفظها في مجلدات مشفرة ومحمية بصلاحيات وصول محددة للمصرح لهم فقط', 'ترك الملفات مفتوحة على أجهزة الحاسب المشتركة', 'مشاركة كلمات المرور مع الزملاء شفهياً', 'طباعة المستندات وتركها في طابعة المكتب العامة'], correct_answer: 'حفظها في مجلدات مشفرة ومحمية بصلاحيات وصول محددة للمصرح لهم فقط' }
+                    ],
+                    text_prompt: `صغ نموذج مذكرة إدارية رسمية موجهة لمدير القسم تتضمن ملخصاً وتوصيات في موضوع "${detectedTopic}".`,
+                    guidelines: 'التزم بالهيكل الإداري الرسمي: الترويسة، الموضوع، المقدمة، التوصيات، والختام.',
+                    model_answer: 'Official Memorandum header with Date, To, From, Subject, professional structured body with recommendations, and formal closing.'
+                },
+                quizQuestions: [
+                    { type: 'mcq', question: `ما هو الفرق الجوهري بين الخطاب الإداري الخارجي والمذكرة الداخلية؟`, options: ['الخطاب يوجه لجهات خارج المنشأة والمذكرة للتواصل بين الإدارات الداخلية', 'الخطاب لا يحتاج إلى توقيع أو تاريخ', 'المذكرة وثيقة غير رسمية ولا يعتد بها', 'لا يوجد أي فرق بينهما شكلاً أو موضوعاً'], correct_answer: 'الخطاب يوجه لجهات خارج المنشأة والمذكرة للتواصل بين الإدارات الداخلية', explanation: 'الخطابات تمثل المنشأة أمام الأطراف الخارجية بينما المذكرات تنظم العمل الداخلي.' },
+                    { type: 'mcq', question: `ما هي الخطوة الأولى في إدارة وتنظيم الاجتماعات المهنية الناجحة؟`, options: ['إعداد جدول الأعمال وتحديد الأهداف وتوجيه الدعوات المسبقة للأعضاء', 'بدء الاجتماع بدون خطة وانتظار الاقتراحات', 'كتابة محضر الاجتماع قبل انعقاده', 'إلغاء النقاشات الفنية والتركيز على الشكليات'], correct_answer: 'إعداد جدول الأعمال وتحديد الأهداف وتوجيه الدعوات المسبقة للأعضاء', explanation: 'جدول الأعمال الواضح هو الركيزة الأساسية لفاعلية الاجتماع واستثمار الوقت.' },
+                    { type: 'mcq', question: `ماذا يقصد بمفهوم الرقم المرجعي (Reference Number) في المراسلات الإدارية؟`, options: ['كود تعريفي موحد يربط المعاملة بملفها وسجل الصادر والوارد لتسهيل المتابعة', 'رقم هاتف الموظف المحرر للخطاب', 'عدد كلمات المستند الإداري', 'رقم الصفحة الأخيرة من التقرير'], correct_answer: 'كود تعريفي موحد يربط المعاملة بملفها وسجل الصادر والوارد لتسهيل المتابعة', explanation: 'الرقم المرجعي يضمن الأرشفة المنضبطة وسهولة الرجوع للمعاملات السابقة.' },
+                    { type: 'mcq', question: `أي من المهارات التالية تعد جوهرية لموظف السكرتارية وإدارة المكاتب الحديثة؟`, options: ['تنظيم الوقت، إتقان برامج الأوفيس، وحفظ سرية المعلومات المؤسسية', 'تجاهل بريد العمل الوارد', 'إفشاء القرارات الإدارية قبل اعتمادها', 'الاعتماد الحصري على المعاملات الورقية اليدوية'], correct_answer: 'تنظيم الوقت، إتقان برامج الأوفيس، وحفظ سرية المعلومات المؤسسية', explanation: 'إدارة الوقت والسرية والمهارة الرقمية ركائز النجاح الإداري المكتبي.' },
+                    { type: 'mcq', question: `ما هو الإجراء السليم عند استلام بريد رسمي يحتوي على معاملة عاجلة وهامة؟`, options: ['تسجيلها فوراً في سجل الوارد وعرضها على المسؤول المباشر لاتخاذ الإجراء', 'تأجيل تسجيلها لنهاية الأسبوع', 'إعادة توجيهها دون قراءة أو تدقيق', 'الاحتفاظ بها دون إبلاغ المعنيين'], correct_answer: 'تسجيلها فوراً في سجل الوارد وعرضها على المسؤول المباشر لاتخاذ الإجراء', explanation: 'المعاملات العاجلة تستوجب القيد الفوري والإحالة السريعة لأصحاب الصلاحية.' },
+                    { type: 'mcq', question: `ما هو الهدف من الاحتفاظ بنسخ احتياطية (Backups) لقواعد البيانات والأرشيف الإداري؟`, options: ['ضمان استمرارية الأعمال وحماية الوثائق من التلف أو الفقدان في حالات الطوارئ', 'زيادة الحمل على الخوادم بدون داعٍ', 'منع الموظفين من الوصول للمعلومات', 'إلغاء الحاجة لبرامج الحماية ضد الفيروسات'], correct_answer: 'ضمان استمرارية الأعمال وحماية الوثائق من التلف أو الفقدان في حالات الطوارئ', explanation: 'النسخ الاحتياطي الدوري صمام الأمان لأصول وبيانات المنشأة.' },
+                    { type: 'true_false', question: `عبارة: يعد التوقيع والاعتماد الرسمي شرطاً لازماً لكي تكتسب الوثيقة الإدارية حجيتها القانونية والتنفيذية.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ لا تصبح المراسلات نافذة إلا باعتماد صاحب الصلاحية المخول.' },
+                    { type: 'true_false', question: `عبارة: يجوز للموظف الإداري مشاركة وثائق العمل الحساسة عبر البريد الإلكتروني الشخصي دون إذن.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'خطأ ✗', explanation: 'خطأ؛ يعد ذلك إخلالاً بسياسات أمن المعلومات وميثاق السرية المهنية.' },
+                    { type: 'true_false', question: `عبارة: التنسيق الجيد واللغة الواضحة المباشرة في التقارير الإدارية يسهلان عملية اتخاذ القرار.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ وضوح الصياغة ودقة البيانات يقدمان رؤية متكاملة لصانع القرار.' },
+                    { type: 'matching', question: `قم بمطابقة المصطلحات الإدارية مع تعريفها المهني المناسب:`, pairs: [
+                        { left: 'Official Memorandum', right: 'المذكرة الإدارية الرسمية' },
+                        { left: 'Minutes of Meeting', right: 'محضر توثيق الاجتماع الرسمي' },
+                        { left: 'Electronic Archiving', right: 'الأرشفة والتوثيق الإلكتروني' },
+                        { left: 'Confidentiality', right: 'السرية وحماية البيانات المؤسسية' }
+                    ], explanation: 'إتقان المصطلحات الإدارية ضرورة أساسية للتميز في بيئة العمل المكتبي.' }
+                ]
+            },
+            it: {
+                defaultTerms: [
+                    { en: 'Central Processing Unit (CPU)', ar: 'وحدة المعالجة المركزية', definition: 'المعالج الرئيسي المسؤول عن تنفيذ التعليمات والعمليات الحسابية والمنطقية.' },
+                    { en: 'Random Access Memory (RAM)', ar: 'ذاكرة الوصول العشوائي', definition: 'ذاكرة قراءة وكتابة مؤقتة لتشغيل البرامج والتطبيقات النشطة بسرعة.' },
+                    { en: 'Operating System (OS)', ar: 'نظام التشغيل', definition: 'البرمجية الأساسية لإدارة موارد الحاسب والتواصل بين المستخدم والعتاد.' },
+                    { en: 'Network Gateway / Router', ar: 'بوابة الشبكة / الموجه', definition: 'جهاز يربط الشبكات المحلية بشبكة الإنترنت ويوجه حزم البيانات.' },
+                    { en: 'Cybersecurity Awareness', ar: 'الوعي بالأمن السيبراني', definition: 'الممارسات الوقائية لحماية الأنظمة والبيانات من الاختراق والبرمجيات الخبيثة.' }
+                ],
+                videos: [
+                    { id: 1, title: `شرح مكونات الحاسب الآلي وصيانة العتاد للمبتدئين`, description: `استعراض عملي لأجزاء اللوحة الأم، المعالج، الذاكرة العشوائية ووحدات التخزين.`, duration: '15:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=Cu3R5it4cQs' },
+                    { id: 2, title: `أساسيات الشبكات وأنظمة التشغيل واستكشاف الأعطال`, description: `تطبيقات إعداد عناوين IP وإدارة المستخدمين واستكشاف مشكلات الاتصال.`, duration: '13:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=O5nskjZ_GoI' },
+                    { id: 3, title: `أمن المعلومات وحماية البيانات في بيئة العمل الرقمية`, description: `إجراءات حماية كلمات المرور، تفادي التصيد الاحتيالي وإدارة النسخ الاحتياطي.`, duration: '12:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=pMtqDWUpJds' }
+                ],
+                lecture: {
+                    summary: `تتناول هذه الوحدة دراسة شاملة لمفاهيم "${detectedTopic}"، مع التركيز على بنية عتاد الحاسب، وأنظمة التشغيل، وإدارة الشبكات السلكية واللاسلكية، وتطبيق ضوابط الأمن السيبراني وصيانة النظم البرمجية والمادية.`,
+                    topics: [
+                        `المحور الأول: معمارية العتاد والمكونات المادية في ${detectedTopic}`,
+                        `المحور الثاني: أنظمة التشغيل وإدارة الملفات وبروتوكولات الشبكات`,
+                        `المحور الثالث: أمن المعلومات، الصيانة الوقائية واستكشاف الأعطال البرمجية`
+                    ]
+                },
+                assignment: {
+                    instructions: `يرجى مراجعة محتوى المحاضرة وملف درس تقنية المعلومات وحل الأسئلة التطبيقية وإرفاق ملف الحل قبل موعد الاستحقاق.`,
+                    mcqs: [
+                        { question: `ما هي الوظيفة الأساسية لذاكرة الوصول العشوائي (RAM) في جهاز الحاسوب؟`, options: ['تخزين التعليمات والبيانات النشطة مؤقتاً لتسريع وصول المعالج إليها', 'الاحتفاظ بالملفات بشكل دائم حتى بعد إيقاف التشغيل', 'تزويد اللوحة الأم بالطاقة الكهربائية', 'حماية الجهاز من الفيروسات والبرمجيات الضارة'], correct_answer: 'تخزين التعليمات والبيانات النشطة مؤقتاً لتسريع وصول المعالج إليها' },
+                        { question: `ما هو دور بروتوكول DHCP في الشبكات المحلية؟`, options: ['توزيع عناوين IP تلقائياً على الأجهزة المتصلة بالشبكة', 'تشفير كلمات المرور في المواقع الإلكترونية', 'قياس سرعة المعالج في الثانية', 'منع تدفق الرسائل المزعجة في البريد'], correct_answer: 'توزيع عناوين IP تلقائياً على الأجهزة المتصلة بالشبكة' },
+                        { question: `أي من المكونات التالية يعد مسؤولاً عن عرض الرسومات ومعالجة المشاهد البصرية المتقدمة؟`, options: ['وحدة معالجة الرسوميات (GPU)', 'مزود الطاقة (Power Supply Unit)', 'محرك الأقراص الضوئية', 'كابل الشبكة'], correct_answer: 'وحدة معالجة الرسوميات (GPU)' },
+                        { question: `ما هو أفضل إجراء وقائي لحماية الحسابات المؤسسية من الاختراق والتصيد؟`, options: ['تفعيل المصادقة متعددة العوامل (MFA) واستخدام كلمات مرور قوية ومعقدة', 'كتابة كلمة المرور على ورقة ملصقة بالشاشة', 'استخدام نفس كلمة المرور لكافة المواقع', 'تعطيل برامج مكافحة الفيروسات'], correct_answer: 'تفعيل المصادقة متعددة العوامل (MFA) واستخدام كلمات مرور قوية ومعقدة' }
+                    ],
+                    text_prompt: `صف خطوات تشخيص وإصلاح عطل توقف جهاز الحاسوب عن الاتصال بالشبكة المحلية في درس "${detectedTopic}".`,
+                    guidelines: 'اذكر أوامر الفحص (مثل ping و ipconfig)، فحص الكابلات، والتحقق من بوابة الشبكة.',
+                    model_answer: 'Check physical cable connection, run ipconfig to verify IP and default gateway, use ping command to test loopback and gateway, and check DNS settings.'
+                },
+                quizQuestions: [
+                    { type: 'mcq', question: `ما هو الأمر المستخدم في سطر الأوامر (CMD) لاختبار الاتصال بجهاز آخر على الشبكة؟`, options: ['ping', 'ipconfig', 'format', 'shutdown'], correct_answer: 'ping', explanation: 'الأمر ping يرسل حزم ICMP للتحقق من استجابة الجهاز والاتصال الشبكي.' },
+                    { type: 'mcq', question: `أي من وسائط التخزين التالية يتميز بسرعة قراءة وكتابة أعلى لعدم احتوائه على أجزاء متحركة؟`, options: ['محركات الحالة الصلبة (Solid State Drive - SSD)', 'محركات الأقراص الصلبة الميكانيكية (HDD)', 'الأقراص المدمجة (CD-ROM)', 'أشرطة التخزين المغناطيسية القديمة'], correct_answer: 'محركات الحالة الصلبة (Solid State Drive - SSD)', explanation: 'تعتمد وحدات SSD على شرائح ذاكرة فلاش ساكنة وتوفر سرعات فائقة مقارنة بـ HDD.' },
+                    { type: 'mcq', question: `ماذا يقصد بمفهوم جدار الحماية (Firewall) في أمن الشبكات؟`, options: ['نظام أمني يراقب ويتحكم في حركة مرور البيانات الواردة والصادرة طبقاً لقواعد أمان محددة', 'برنامج لمعالجة الصور والفيديوهات', 'أداة لتسريع معالج الحاسوب', 'وحدة تخزين سحابية عامة'], correct_answer: 'نظام أمني يراقب ويتحكم في حركة مرور البيانات الواردة والصادرة طبقاً لقواعد أمان محددة', explanation: 'جدار الحماية هو خط الدفاع الأول لمنع الاتصالات غير المصرح بها والاختراقات.' },
+                    { type: 'mcq', question: `ما هي وظيفة نظام الإدخال والإخراج الأساسي (BIOS / UEFI) في اللوحة الأم؟`, options: ['تهيئة العتاد وفحص المكونات وإقلاع نظام التشغيل من القرص', 'تحرير المستندات النصية', 'الاتصال بشبكة الواي فاي تلقائياً', 'تثبيت البرامج والتطبيقات الترفيهية'], correct_answer: 'تهيئة العتاد وفحص المكونات وإقلاع نظام التشغيل من القرص', explanation: 'نظام BIOS ينفذ اختبار POST ويهيئ العتاد قبل تسليم التحكم لنظام التشغيل.' },
+                    { type: 'mcq', question: `ما هو المعيار المعتمد لتشفير مواقع الويب الآمنة في شريط المتصفح؟`, options: ['بروتوكول HTTPS المشفر بواسطة شهادات SSL/TLS', 'بروتوكول HTTP العادي غير المشفر', 'بروتوكول FTP لنقل الملفات بدون تشفير', 'بروتوكول Telnet القديم'], correct_answer: 'بروتوكول HTTPS المشفر بواسطة شهادات SSL/TLS', explanation: 'HTTPS يضمن تشفير وسرية البيانات المتبادلة بين المتصفح والخادم.' },
+                    { type: 'mcq', question: `أي صيغة من الصيغ التالية تمثل عنوان IPv4 صالحاً في الشبكات؟`, options: ['192.168.1.10', '256.400.1.0', '192:168:1:10', '192.168.1'], correct_answer: '192.168.1.10', explanation: 'عناوين IPv4 تتكون من 4 خانات تفصلها نقاط، وقيمة كل خانة تتراوح بين 0 و 255.' },
+                    { type: 'true_false', question: `عبارة: إعادة تشغيل جهاز الحاسب تساعد في تفريغ ذاكرة RAM وإنهاء العمليات العالقة وتجاوز التباطؤ المؤقت.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ إعادة التشغيل تصفي الذاكرة المؤقتة وتعيد ضبط الخدمات غير المستجيبة.' },
+                    { type: 'true_false', question: `عبارة: يجب فتح المرفقات مجهولة المصدر في رسائل البريد الإلكتروني دون فحص للتأكد من هويتها.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'خطأ ✗', explanation: 'خطأ جسيم؛ فتح المرفقات المجهولة يعد المدخل الرئيسي للإصابة ببرمجيات الفدية والاختراق.' },
+                    { type: 'true_false', question: `عبارة: المعجون الحراري (Thermal Paste) ضروري لضمان كفاءة انتقال الحرارة من المعالج إلى المشتت.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ المعجون يملأ الفجوات الهوائية المجهرية ويمنع ارتفاع حرارة المعالج وتوقفه.' },
+                    { type: 'matching', question: `قم بمطابقة مصطلحات تقنية المعلومات مع وظائفها الصحيحة:`, pairs: [
+                        { left: 'CPU', right: 'وحدة المعالجة المركزية للحاسب' },
+                        { left: 'RAM', right: 'ذاكرة الوصول العشوائي المؤقتة' },
+                        { left: 'Firewall', right: 'جدار حماية الشبكة من الاختراق' },
+                        { left: 'SSD', right: 'وحدة تخزين الحالة الصلبة فائقة السرعة' }
+                    ], explanation: 'مصطلحات الحاسب وتقنية المعلومات معتمدة في شهادات CompTIA و Cisco.' }
+                ]
+            },
+            construction: {
+                defaultTerms: [
+                    { en: 'Reinforced Concrete', ar: 'الخرسانة المسلحة', definition: 'مركب إنشائي من الخرسانة وحديد التسليح لمقاومة إجهادات الضغط والشد.' },
+                    { en: 'Formwork / Shuttering', ar: 'الشدات وقوالب الصب', definition: 'الهياكل المؤقتة المجهزة لاحتواء الخرسانة الطرية وتشكيلها حتى تتصلد.' },
+                    { en: 'Curing Process', ar: 'معالجة ورش الخرسانة', definition: 'الحفاظ على رطوبة الخرسانة لفترة زمنية لضمان تفاعل الإماهة وبلوغ المقاومة المطلوبة.' },
+                    { en: 'Scaffolding Safety', ar: 'اشتراطات سلامة السقالات', definition: 'معايير تركيب واستخدام منصات العمل المرتفعة مع توفير درابزينات الحماية.' },
+                    { en: 'Shop Drawings', ar: 'المخططات التنفيذية التفصيلية', definition: 'رسومات هندسية دقيقة توضح تفاصيل التنفيذ وقطاعات التسليح في الموقع.' }
+                ],
+                videos: [
+                    { id: 1, title: `خواص واختبارات الخرسانة المسلحة وضبط الجودة بالموقع`, description: `شرح اختبار الهبوط (Slump Test) وأخذ المكعبات القياسية لاختبار مقاومة الضغط.`, duration: '14:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=XpcCUtYzwy0' },
+                    { id: 2, title: `قراءة المخططات الهندسية وأساسيات المساحة الميدانية`, description: `تطبيقات قراءة جداول التسليح ومحاور الأعمدة واستخدام أجهزة الميزان.`, duration: '12:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=1pMHayXqoMY' },
+                    { id: 3, title: `اشتراطات السلامة في السقالات ومواقع الإنشاءات`, description: `معايير العمل على ارتفاعات وارتداء حزام الأمان (Safety Harness) وتثبيت القوالب.`, duration: '13:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=yJhSlH8AvHs' }
+                ],
+                lecture: {
+                    summary: `تتناول هذه الوحدة دراسة تفصيلية لمفاهيم "${detectedTopic}"، مع التركيز على تكنولوجيا المواد الإنشائية، وتنفيذ القوالب الخرسانية، وقراءة المخططات الهندسية، واشتراطات السلامة المهنية الميدانية في مواقع الإنشاءات.`,
+                    topics: [
+                        `المحور الأول: خواص المواد والخرسانة المسلحة واختبارات الجودة في ${detectedTopic}`,
+                        `المحور الثاني: تنفيذ الشدات والقوالب وتسليح العناصر الإنشائية`,
+                        `المحور الثالث: السلامة في مواقع العمل والسقالات وضوابط التفتيش الميداني`
+                    ]
+                },
+                assignment: {
+                    instructions: `يرجى مراجعة محتوى المحاضرة وملف درس الإنشاءات وحل الأسئلة التطبيقية وإرفاق ملف الحل قبل موعد الاستحقاق.`,
+                    mcqs: [
+                        { question: `ما هو الغرض الأساسي من إضافة حديد التسليح إلى الخرسانة العادية؟`, options: ['مقاومة إجهادات الشد التي تعجز الخرسانة العادية عن تحملها بمفردها', 'تقليل الوزن الكلي للمبنى', 'تسريع زمن جفاف وتصلد الخرسانة', 'تخفيض كمية الأسمنت في الخلطة'], correct_answer: 'مقاومة إجهادات الشد التي تعجز الخرسانة العادية عن تحملها بمفردها' },
+                        { question: `ما هو اختبار الموقع القياسي المستخدم لقياس قابلية تشغيل وتشغيلية الخرسانة الطازجة (Workability)؟`, options: ['اختبار الهبوط (Slump Test)', 'اختبار الشد المباشر للحديد', 'اختبار قياس سمك الدهانات', 'اختبار التوصيل الكهربائي للركام'], correct_answer: 'اختبار الهبوط (Slump Test)' },
+                        { question: `لماذا تعد معالجة الخرسانة بالماء (Curing) ضرورية بعد عملية الصب والتصلد الأولي؟`, options: ['لإتمام تفاعل الإماهة وتفادي حدوث شروخ الانكماش وبلوغ المقاومة القصوى', 'لتغيير لون الخرسانة إلى الأبيض', 'لتسهيل إزالة حديد التسليح لاحقاً', 'لتقليل سمك الغطاء الخرساني'], correct_answer: 'لإتمام تفاعل الإماهة وتفادي حدوث شروخ الانكماش وبلوغ المقاومة القصوى' },
+                        { question: `ما هو الإجراء الإلزامي عند العمل على سقالات بارتفاع يتجاوز 2 متر عن سطح الأرض؟`, options: ['ارتداء حزام الأمان الكامل (Full Body Harness) وربطه بنقطة تثبيت آمنة', 'العمل دون ارتداء خوذة لتقليل الوزن', 'إزالة درابزين الحماية لتسهيل الحركة', 'استخدام ألواح خشبية مكسورة أو غير مثبتة'], correct_answer: 'ارتداء حزام الأمان الكامل (Full Body Harness) وربطه بنقطة تثبيت آمنة' }
+                    ],
+                    text_prompt: `صف خطوات فحص الشدات الخشبية والغطاء الخرساني (Concrete Cover) قبل صب عنصر إنشائي في درس "${detectedTopic}".`,
+                    guidelines: 'اذكر استخدام البسكويت الخرساني، نظافة القالب، ومطابقة قطر وأبعاد حديد التسليح للمخطط.',
+                    model_answer: 'Inspect formwork dimensions and stability, verify concrete spacers (biscuits) for adequate cover, clean debris from forms, and check rebar spacing against shop drawings.'
+                },
+                quizQuestions: [
+                    { type: 'mcq', question: `ما هي الوظيفة الهندسية للغطاء الخرساني (Concrete Cover) المحيط بحديد التسليح؟`, options: ['حماية أسياخ الحديد من الصدأ والتآكل وتوفير العزل المقاوم للحريق', 'زيادة مساحة الفراغات داخل العمود', 'تقليل كمية الركام في الخلطة الخرسانية', 'السماح للرطوبة بالوصول للحديد بسهولة'], correct_answer: 'حماية أسياخ الحديد من الصدأ والتآكل وتوفير العزل المقاوم للحريق', explanation: 'الغطاء الخرساني يمنع نفاذ الرطوبة للحديد ويحميه من التآكل وعوامل الحريق.' },
+                    { type: 'mcq', question: `ما هو زمن المعالجة المائية الأدنى الموصى به للخرسانة المسلحة العادية؟`, options: ['لا يقل عن 7 أيام متتالية مع الحفاظ على الرطوبة', 'ساعتان فقط بعد الصب', 'يوم واحد فقط دون رش مستمر', 'لا حاجة لمعالجة الخرسانة بالماء'], correct_answer: 'لا يقل عن 7 أيام متتالية مع الحفاظ على الرطوبة', explanation: 'الرش والمعالجة لمدة 7 أيام تضمن وصول الخرسانة لمعظم مقاومتها التصميمية.' },
+                    { type: 'mcq', question: `أي من العناصر الإنشائية التالية يصنف كعنصر رأسي ينقل الأحمال إلى القواعد؟`, options: ['الأعمدة الخرسانية (Columns)', 'الكمرات الساقطة (Beams)', 'بلاطات الأسقف (Slabs)', 'الأعتاب العلوية للأبواب'], correct_answer: 'الأعمدة الخرسانية (Columns)', explanation: 'الأعمدة هي العناصر الرئيسية الحاملة للضغط الرأسي والناقلة للأحمال للأساسات.' },
+                    { type: 'mcq', question: `ما هو التأثير السلبي لزيادة نسبة الماء إلى الأسمنت (W/C Ratio) عن الحد المصمم؟`, options: ['انخفاض مقاومة الخرسانة وزيادة المسامية والنفاذية للشروخ', 'زيادة صلابة ومتانة الخرسانة', 'منع حدوث الانكماش الجفافي', 'تسريع زمن الشك الابتدائي'], correct_answer: 'انخفاض مقاومة الخرسانة وزيادة المسامية والنفاذية للشروخ', explanation: 'زيادة الماء تؤدي لتبخره لاحقاً وترك فراغات مسامية تضعف مقاومة الخرسانة.' },
+                    { type: 'mcq', question: `ما هي وظيفة الهزاز الميكانيكي (Concrete Vibrator) أثناء عملية الصب؟`, options: ['دمك الخرسانة وطرد فقاعات الهواء المحتبسة ومنع حدوث التعشيش (Honeycombing)', 'خلط الأسمنت مع الركام في الموقع', 'رفع درجة حرارة الخرسانة', 'تلوين الأسطح الخارجية'], correct_answer: 'دمك الخرسانة وطرد فقاعات الهواء المحتبسة ومنع حدوث التعشيش (Honeycombing)', explanation: 'الدمك الميكانيكي يضمن تغلغل الخرسانة حول الأسياخ ومنع التعشيش والفجوات.' },
+                    { type: 'mcq', question: `ما هو المخطط الهندسي الذي يوضح أبعاد المبنى وحدود قطعة الأرض والارتدادات النظامية؟`, options: ['المخطط العام للموقع (Site Plan)', 'مخطط تفاصيل الأبواب والشبابيك', 'مخطط مسار كابلات التكييف', 'جدول مواصفات الدهانات الداخلية'], correct_answer: 'المخطط العام للموقع (Site Plan)', explanation: 'المخطط العام يوضح تموضع المبنى وعلاقته بالشوارع والحدود المجاورة.' },
+                    { type: 'true_false', question: `عبارة: يجب تنظيف قوالب الصب وإزالة بقايا الخشب والأسلاك قبل البدء في صب الخرسانة.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ وجود الشوائب داخل القالب يسبب نقاط ضعف وفواصل معيبة في الخرسانة.' },
+                    { type: 'true_false', question: `عبارة: يجوز فك الشدات الحاملة للكمرات والأسقف بعد 24 ساعة فقط من صبها دون انتظار.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'خطأ ✗', explanation: 'خطأ كارثي؛ فك الشدات مبكراً قبل بلوغ المقاومة الكافية يسبب ترخيماً أو انهياراً إنشائياً.' },
+                    { type: 'true_false', question: `عبارة: ارتداء الخوذة الواقية وحذاء السلامة المقوى بمقدمة فولاذية إلزامي لجميع المتواجدين في موقع البناء.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'صواب؛ اشتراطات السلامة الميدانية تحمي العمال والمهندسين من مخاطر سقوط الأجسام والأدوات.' },
+                    { type: 'matching', question: `قم بمطابقة المصطلحات الإنشائية مع ما يناسبها باللغة العربية:`, pairs: [
+                        { left: 'Reinforced Concrete', right: 'الخرسانة المسلحة بحديد التسليح' },
+                        { left: 'Slump Test', right: 'اختبار الهبوط لقوام الخرسانة' },
+                        { left: 'Formwork', right: 'قوالب وشدات الصب المؤقتة' },
+                        { left: 'Curing Process', right: 'المعالجة المائية ورش الخرسانة' }
+                    ], explanation: 'المصطلحات الإنشائية ركيزة التواصل الفني بين المهندسين والمشرفين الميدانيين.' }
+                ]
+            },
+            english: {
+                defaultTerms: [
+                    { en: 'Standard Operating Procedure (SOP)', ar: 'إجراءات التشغيل القياسية', definition: 'الخطوات والتعليمات المعتمدة لضمان جودة الأداء ودقة العمليات التشغيلية.' },
+                    { en: 'Quality Assurance (QA)', ar: 'ضمان وتوكيد الجودة', definition: 'المنهجيات والمعايير الفنية لضمان مطابقة المخرجات للمواصفات المعتمدة.' },
+                    { en: 'Preventive Maintenance', ar: 'الصيانة الوقائية الدورية', definition: 'أعمال الفحص والخدمة المجدولة لتفادي الأعطال والتوقفات الفجائية.' },
+                    { en: 'Hazard Identification', ar: 'تحديد وتشخيص المخاطر', definition: 'الرصد الاستباقي لمسببات الحوادث للسيطرة عليها والحد من خطورتها.' },
+                    { en: 'Technical Specification', ar: 'المواصفات الفنية المعتمدة', definition: 'المعايير والاشتراطات الهندسية الدقيقة الخاصة بالمنتج أو الخدمة.' }
+                ],
+                videos: [
+                    { id: 1, title: `Technical English: Industrial Vocabulary & Workplace Terms`, description: `Comprehensive practical lesson on technical vocabulary and professional shopfloor phrases.`, duration: '14:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=Cu3R5it4cQs' },
+                    { id: 2, title: `Standard Operating Procedures (SOP) & Technical Writing`, description: `How to write and read clear work orders, hazard warnings, and inspection reports.`, duration: '12:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=O5nskjZ_GoI' },
+                    { id: 3, title: `Industrial Safety Signs & Technical Workplace Communication`, description: `Understanding international warning symbols, instruction manuals, and team protocols.`, duration: '15:00 دقيقة', youtube_url: 'https://www.youtube.com/watch?v=pMtqDWUpJds' }
+                ],
+                lecture: {
+                    summary: `تتناول هذه الوحدة دراسة تطبيقية شاملة لمفاهيم "${detectedTopic}"، مع التركيز على المصطلحات الفنية المعتمدة في بيئات العمل المهنية والصناعية، وقراءة كتيبات التشغيل، وصياغة التقارير الفنية بدقة ووضوح.`,
+                    topics: [
+                        `المحور الأول: المصطلحات الفنية الأساسية ومفردات بيئة العمل في ${detectedTopic}`,
+                        `المحور الثاني: قراءة تعليمات التشغيل القياسية (SOP) وإشارات التحذير المهنية`,
+                        `المحور الثالث: مهارات التواصل التقني وإعداد تقارير التفتيش وأوامر العمل`
+                    ]
+                },
+                assignment: {
+                    instructions: `يرجى مراجعة محتوى المحاضرة وملف درس المصطلحات الفنية وحل الأسئلة التطبيقية وإرفاق ملف الحل قبل موعد الاستحقاق.`,
+                    mcqs: [
+                        { question: `What is the primary function of a 'Standard Operating Procedure (SOP)' in industrial plants?`, options: ['To provide step-by-step instructions for consistent, safe, and quality operations', 'To eliminate scheduled preventive maintenance', 'To track daily employee attendance only', 'To bypass equipment safety alarms'], correct_answer: 'To provide step-by-step instructions for consistent, safe, and quality operations' },
+                        { question: `Which term refers to routine, scheduled inspections conducted to prevent unexpected breakdowns?`, options: ['Preventive Maintenance (PM)', 'Emergency Breakdown Repair', 'Disaster Recovery Plan', 'Post-Accident Investigation'], correct_answer: 'Preventive Maintenance (PM)' },
+                        { question: `What is the meaning of the technical abbreviation 'PPE' in vocational workshops?`, options: ['Personal Protective Equipment', 'Plant Process Evaluation', 'Primary Production Engine', 'Power Performance Estimation'], correct_answer: 'Personal Protective Equipment' },
+                        { question: `Which document outlines hazardous chemical properties, handling procedures, and emergency response?`, options: ['Safety Data Sheet (SDS)', 'Daily Attendance Roster', 'Invoice Receipt Voucher', 'Equipment Purchase Order'], correct_answer: 'Safety Data Sheet (SDS)' }
+                    ],
+                    text_prompt: `Write a short technical paragraph explaining the importance of following Standard Operating Procedures (SOP) in "${detectedTopic}".`,
+                    guidelines: 'Use at least 3 technical vocabulary terms (e.g. SOP, Safety, Maintenance) with clear grammar.',
+                    model_answer: 'Following standard operating procedures and wearing proper PPE ensures workshop safety, minimizes machine failure, and maintains high quality standards.'
+                },
+                quizQuestions: [
+                    { type: 'mcq', question: `What does the technical term 'Quality Assurance (QA)' primarily stand for?`, options: ['Systematic monitoring to ensure deliverables meet required engineering standards', 'Producing low-cost items without safety inspection', 'Delaying final inspection until product delivery', 'Cancelling documentation to speed up work'], correct_answer: 'Systematic monitoring to ensure deliverables meet required engineering standards', explanation: 'Quality Assurance ensures adherence to rigorous international technical specifications.' },
+                    { type: 'mcq', question: `Which technical phrase describes proactive measures taken before starting work to identify potential hazards?`, options: ['Hazard Identification & Risk Assessment', 'Post-incident analysis', 'Workplace evacuation call', 'Equipment disposal procedure'], correct_answer: 'Hazard Identification & Risk Assessment', explanation: 'Hazard identification prevents accidents by mitigating risks in advance.' },
+                    { type: 'mcq', question: `What does the industrial warning sign 'CAUTION' typically indicate in workshops?`, options: ['A potential hazard that may cause minor to moderate injury if not avoided', 'An area where safety glasses are strictly prohibited', 'A mandatory high-speed production zone', 'A completed maintenance operation'], correct_answer: 'A potential hazard that may cause minor to moderate injury if not avoided', explanation: 'CAUTION indicates a moderate potential hazard requiring vigilance and protective gear.' },
+                    { type: 'mcq', question: `Which term describes an official written document authorizing technical repair or maintenance tasks?`, options: ['Work Order (WO)', 'Employee Resignation Letter', 'Informal Chat Message', 'Customer Receipt Note'], correct_answer: 'Work Order (WO)', explanation: 'A work order formalizes maintenance tasks, equipment target, and assigned technician.' },
+                    { type: 'mcq', question: `In technical manuals, what does the section titled 'Troubleshooting' provide?`, options: ['A diagnostic guide to identify, analyze, and resolve equipment faults', 'The history and founders of the manufacturing company', 'General employee vacation policies', 'A list of advertising sponsors'], correct_answer: 'A diagnostic guide to identify, analyze, and resolve equipment faults', explanation: 'Troubleshooting guides technicians step-by-step to diagnose and repair issues.' },
+                    { type: 'mcq', question: `What is the primary role of a 'Checklist' in technical operations?`, options: ['To verify systematically that all pre-operational safety and setup steps are completed', 'To replace machine instruction manuals', 'To cancel shift handovers', 'To estimate company financial profit'], correct_answer: 'To verify systematically that all pre-operational safety and setup steps are completed', explanation: 'Checklists prevent human errors by verifying critical steps before running equipment.' },
+                    { type: 'true_false', question: `Statement: Technical English terminology provides a standardized, universal communication language across engineering fields.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'Correct; standardized English terms ensure clear, precise coordination among multinational teams.' },
+                    { type: 'true_false', question: `Statement: Technicians are allowed to ignore warning labels on machinery if they have long years of experience.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'خطأ ✗', explanation: 'False; safety guidelines and equipment warning labels are strictly mandatory for all personnel.' },
+                    { type: 'true_false', question: `Statement: A 'Safety Data Sheet (SDS)' must be readily accessible in any workshop where chemicals are stored.`, options: ['صح ✓', 'خطأ ✗'], correct_answer: 'صح ✓', explanation: 'Correct; SDS documentation is legally mandatory to safeguard workers handling hazardous materials.' },
+                    { type: 'matching', question: `Match the technical English terms with their approved professional definitions:`, pairs: [
+                        { left: 'SOP', right: 'Standard Operating Procedure (إجراءات التشغيل)' },
+                        { left: 'QA', right: 'Quality Assurance (ضمان وتوكيد الجودة)' },
+                        { left: 'PPE', right: 'Personal Protective Equipment (مهمات الوقاية)' },
+                        { left: 'Work Order', right: 'تكليف وأمر العمل الفني المعتمد' }
+                    ], explanation: 'Technical terminology is indispensable for effective workplace documentation and safety.' }
+                ]
+            }
+        };
 
-        const terms = extractedTerms.length >= 3 ? extractedTerms : defaultTerms;
+        const activeKnowledge = domainKnowledge[domain] || domainKnowledge.english;
+
+        // Use extracted terms if sufficient, supplemented by domain defaults
+        let terms = [];
+        if (extractedTerms.length >= 3) {
+            terms = [...extractedTerms];
+            for (const defTerm of activeKnowledge.defaultTerms) {
+                if (terms.length >= 6) break;
+                if (!terms.some(t => t.en.toLowerCase() === defTerm.en.toLowerCase())) {
+                    terms.push(defTerm);
+                }
+            }
+        } else {
+            terms = activeKnowledge.defaultTerms;
+        }
 
         // Build Suggested Videos with direct YouTube watch links (strictly watchable videos, no search queries)
-        const videos = [
-            {
-                id: 1,
-                title: `شرح تطبيقي شامل: ${detectedTopic}`,
-                description: `استعراض عملي وتدريب تطبيقي على المهارات الأساسية والمصطلحات التقنية في ${detectedTopic}.`,
-                duration: '12:00 دقيقة',
-                youtube_url: resolveClientDirectYouTubeUrl('', detectedTopic, detectedTopic, 0)
-            },
-            {
-                id: 2,
-                title: `إجراءات السلامة والجودة المهنية: ${detectedTopic}`,
-                description: `تطبيق اشتراطات السلامة المهنية ومهمات الوقاية (PPE) وضوابط التشغيل القياسية.`,
-                duration: '10:00 دقيقة',
-                youtube_url: resolveClientDirectYouTubeUrl('', 'safety ' + detectedTopic, 'safety', 1)
-            },
-            {
-                id: 3,
-                title: `المصطلحات الفنية المعتمدة والتواصل في بيئة العمل`,
-                description: `فيديو إثرائي للمصطلحات التخصصية والنطق السليم في بيئة العمل الصناعية.`,
-                duration: '15:00 دقيقة',
-                youtube_url: resolveClientDirectYouTubeUrl('', 'terminology english', 'english', 2)
-            }
-        ];
+        const videos = activeKnowledge.videos.map((v, idx) => ({
+            id: idx + 1,
+            title: v.title.includes(detectedTopic) ? v.title : `${v.title}: ${detectedTopic}`,
+            description: v.description,
+            duration: v.duration,
+            youtube_url: v.youtube_url || resolveClientDirectYouTubeUrl('', detectedTopic, domain, idx)
+        }));
 
         // Build Lecture
         const lecture = {
             title: `محاضرة وشرح: ${detectedTopic}`,
             duration_minutes: 15,
-            summary: `تتناول هذه الوحدة التدريبية دراسة شاملة لمفاهيم "${detectedTopic}"، مع التركيز على الممارسات المهنية المعتمدة، وضوابط السلامة وإجراءات التشغيل القياسية (SOP)، وتمكين المتدربين من تطبيق المصطلحات الفنية المعتمدة بدقة وكفاءة.`,
-            topics: [
-                `المحور الأول: المفاهيم الأساسية والأطر الفنية لـ ${detectedTopic}`,
-                `المحور الثاني: إجراءات السلامة المهنية ومهمات الوقاية الشخصية (PPE)`,
-                `المحور الثالث: التطبيق العملي ومعايير الجودة والتفتيش الميداني`
-            ]
+            summary: activeKnowledge.lecture.summary,
+            topics: activeKnowledge.lecture.topics
         };
 
         // Build Glossary Notes
@@ -27668,44 +28201,13 @@ END $$;`;
         const assignment = {
             title: `الواجب الأسبوعي التطبيقي: ${detectedTopic}`,
             total_grade: 10,
-            instructions: `يرجى مراجعة محتوى المحاضرة وملف الدرس وحل الأسئلة التطبيقية وإرفاق ملف الحل أو كتابة الملاحظات المهنية قبل موعد الاستحقاق (استفد من بونص التسليم المبكر +1).`,
-            mcq_questions: [
-                {
-                    question: `ما هو الإجراء الفني الأولي الواجب اتباعه في موضوع ${detectedTopic}؟`,
-                    options: [
-                        'فحص قائمة التحقق والتأكد من توافر مهمات الوقاية (PPE)',
-                        'البدء في العمل دون فحص مسبق لأجهزة السلامة',
-                        'تجاهل التعليمات التحذيرية الخاصة بالمعدة',
-                        'تأجيل توثيق إجراءات الفحص الدوري'
-                    ],
-                    correct_answer: 'فحص قائمة التحقق والتأكد من توافر مهمات الوقاية (PPE)'
-                },
-                {
-                    question: `أي مما يلي يمثل الاستخدام الأمثل لمصطلحات ${detectedTopic} في بيئة العمل؟`,
-                    options: [
-                        'توحيد لغة التواصل الفني ودقة توثيق التقارير المهنية',
-                        'إلغاء سجلات المتابعة والتدقيق الميداني',
-                        'تقليص فترات الصيانة الوقائية دون إشعار',
-                        'تجاوز المواصفات الفنية المعتمدة'
-                    ],
-                    correct_answer: 'توحيد لغة التواصل الفني ودقة توثيق التقارير المهنية'
-                },
-                {
-                    question: `المصطلح الفني الذي يرمز لإجراءات التشغيل القياسية المعتمدة هو:`,
-                    options: ['Standard Operating Procedure (SOP)', 'Daily Machine Checklist (DMC)', 'General Plant Rule (GPR)', 'Workplace Safety Protocol (WSP)'],
-                    correct_answer: 'Standard Operating Procedure (SOP)'
-                },
-                {
-                    question: `ما هي النتيجة المباشرة لتطبيق اشتراطات الجودة والسلامة في بيئة التدريب؟`,
-                    options: ['تفادي الحوادث وضمان كفاءة وسلامة المخرجات', 'زيادة احتمالية الأعطال الميكانيكية', 'إطالة زمن التوقفات غير المخططة', 'تعطيل أنظمة الاستجابة للطوارئ'],
-                    correct_answer: 'تفادي الحوادث وضمان كفاءة وسلامة المخرجات'
-                }
-            ],
+            instructions: activeKnowledge.assignment.instructions,
+            mcq_questions: activeKnowledge.assignment.mcqs,
             text_questions: [
                 {
-                    prompt: `اكتب فقرة باللغة الإنجليزية التقنية توضح فيها أهمية الالتزام بمعايير السلامة ومصطلحات درس "${detectedTopic}".`,
-                    guidelines: 'استخدم ما لا يقل عن 3 مصطلحات فنية معتمدة واكتب بوضوح ودقة مهنية.',
-                    model_answer: 'Adhering to standard operating procedures and wearing proper PPE ensures personal safety and optimizes productivity in industrial workshops.'
+                    prompt: activeKnowledge.assignment.text_prompt,
+                    guidelines: activeKnowledge.assignment.guidelines,
+                    model_answer: activeKnowledge.assignment.model_answer
                 }
             ]
         };
@@ -27716,117 +28218,21 @@ END $$;`;
             right: t.ar || t.definition.split(/[,.;]/)[0]
         }));
 
+        const quizQuestions = [...activeKnowledge.quizQuestions];
+        // Ensure matching question uses dynamic extracted pairs if available
+        if (matchingPairs.length >= 2 && quizQuestions.length > 0) {
+            const lastQ = quizQuestions[quizQuestions.length - 1];
+            if (lastQ.type === 'matching') {
+                lastQ.pairs = matchingPairs;
+            }
+        }
+
         const quiz = {
             title: `اختبار الأسبوع التفاعلي: ${detectedTopic}`,
             duration_minutes: 15,
             total_grade: 10,
             passing_grade: 6,
-            questions: [
-                {
-                    type: 'mcq',
-                    question: `ما هي الوظيفة الأساسية لقائمة الفحص الفني (Inspection Checklist) في ${detectedTopic}؟`,
-                    options: [
-                        'توثيق جاهزية المعدات والتحقق من سلامة بيئة العمل قبل البدء',
-                        'إلغاء إجراءات الصيانة الوقائية المقررة',
-                        'الاستغناء عن ارتداء مهمات الوقاية الشخصية',
-                        'زيادة سرعة الإنتاج على حساب معايير الأمان'
-                    ],
-                    correct_answer: 'توثيق جاهزية المعدات والتحقق من سلامة بيئة العمل قبل البدء',
-                    explanation: 'قائمة الفحص تضمن التأكد المنهجي من جاهزية المعدات وسلامة بيئة الورشة.'
-                },
-                {
-                    type: 'mcq',
-                    question: `أي من المصطلحات التالية يمثل مهمات الوقاية الشخصية الإلزامية؟`,
-                    options: [
-                        'Personal Protective Equipment (PPE)',
-                        'Plant Process Evaluation (PPE)',
-                        'Primary Performance Estimation (PPE)',
-                        'Power Plant Engineering (PPE)'
-                    ],
-                    correct_answer: 'Personal Protective Equipment (PPE)',
-                    explanation: 'PPE هي مهمات الوقاية الشخصية المعتمدة عالمياً.'
-                },
-                {
-                    type: 'mcq',
-                    question: `ما الهدف التشغيلي من تطبيق إجراءات التشغيل القياسية (SOP) في ${detectedTopic}؟`,
-                    options: [
-                        'توحيد خطوات العمل والحد من الأخطاء التشغيلية والحوادث',
-                        'تسجيل الحضور والانصراف اليومي فقط',
-                        'الاستغناء عن فحص الأجهزة قبل التشغيل',
-                        'إلغاء خطط الطوارئ في الورشة'
-                    ],
-                    correct_answer: 'توحيد خطوات العمل والحد من الأخطاء التشغيلية والحوادث',
-                    explanation: 'إجراءات التشغيل القياسية تحدد المسار الآمن والمعتمد لتنفيذ المهام.'
-                },
-                {
-                    type: 'mcq',
-                    question: `ماذا يقصد بمفهوم 'Quality Assurance' في سياق الممارسات المهنية؟`,
-                    options: [
-                        'التحقق المنهجي من مطابقة العمليات والمخرجات للمواصفات الهندسية المعتمدة',
-                        'استخدام أدوات غير مطابقة لتقليل النفقات',
-                        'تأجيل فحص المنتجات إلى نهاية المشروع',
-                        'إلغاء التوثيق الفني للعمليات'
-                    ],
-                    correct_answer: 'التحقق المنهجي من مطابقة العمليات والمخرجات للمواصفات الهندسية المعتمدة',
-                    explanation: 'ضمان الجودة ركيزة لضمان مخرجات آمنة ومطابقة للمواصفات القياسية.'
-                },
-                {
-                    type: 'mcq',
-                    question: `ما هو الإجراء الفني السليم المتبع قبل تشغيل أي معدة أو أداة في الورشة؟`,
-                    options: [
-                        'إجراء المعاينة البصرية والتحقق من وسائل الحماية ومهمات الوقاية',
-                        'تشغيل المعدة بأقصى حمل ممكن فوراً',
-                        'تعطيل مفاتيح الطوارئ للسرعة',
-                        'تجاوز كتيبات التشغيل القياسية'
-                    ],
-                    correct_answer: 'إجراء المعاينة البصرية والتحقق من وسائل الحماية ومهمات الوقاية',
-                    explanation: 'المعاينة المسبقة تجنب الأعطال المفاجئة والإصابات المهنية.'
-                },
-                {
-                    type: 'mcq',
-                    question: `أي مما يلي يمثل الخطوة الأولى في إدارة وتقييم المخاطر (Risk Assessment)؟`,
-                    options: [
-                        'تحديد مصادر الخطر المحتملة في موقع العمل وتقدير شدتها',
-                        'تجاهل تقارير السلامة الميدانية',
-                        'تعطيل أجهزة الإنذار المبكر',
-                        'مغادرة بيئة العمل دون إبلاغ المشرف'
-                    ],
-                    correct_answer: 'تحديد مصادر الخطر المحتملة في موقع العمل وتقدير شدتها',
-                    explanation: 'تقييم المخاطر يبدأ بتحديد المخاطر ووضع ضوابط تفاديها.'
-                },
-                {
-                    type: 'true_false',
-                    question: `عبارة: يعد الالتزام بمهمات الوقاية الشخصية (PPE) وإجراءات التشغيل القياسية (SOP) أمراً إلزامياً لكافة المتدربين.`,
-                    options: ['صح ✓', 'خطأ ✗'],
-                    correct_answer: 'صح ✓',
-                    explanation: 'صواب؛ اشتراطات السلامة والالتزام المهني ملزمان لحماية الجميع.'
-                },
-                {
-                    type: 'true_false',
-                    question: `عبارة: يجوز تشغيل الآلات والمعدات الفنية دون التحقق المسبق من جاهزية أجهزة الأمان وحواجز الحماية.`,
-                    options: ['صح ✓', 'خطأ ✗'],
-                    correct_answer: 'خطأ ✗',
-                    explanation: 'خطأ؛ يحظر تشغيل أي ماكينة إذا كانت حواجز الأمان أو مفاتيح الطوارئ معطلة.'
-                },
-                {
-                    type: 'true_false',
-                    question: `عبارة: المصطلحات الفنية المعتمدة باللغة الإنجليزية تمثل أداة تواصل ميدانية أساسية في بيئات العمل الصناعية.`,
-                    options: ['صح ✓', 'خطأ ✗'],
-                    correct_answer: 'صح ✓',
-                    explanation: 'صواب؛ تضمن المصطلحات الفنية فهماً موحداً ودقيقاً بين الفنيين والمهندسين.'
-                },
-                {
-                    type: 'matching',
-                    question: `قم بمطابقة وتوصيل المصطلح الفني باللغة الإنجليزية مع المعنى والمفهوم المناسب له:`,
-                    pairs: matchingPairs.length >= 2 ? matchingPairs : [
-                        { left: 'PPE', right: 'مهمات الوقاية الشخصية' },
-                        { left: 'SOP', right: 'إجراءات التشغيل القياسية' },
-                        { left: 'QA', right: 'ضمان الجودة' },
-                        { left: 'Maintenance', right: 'الصيانة الوقائية' }
-                    ],
-                    explanation: 'المصطلحات الفنية المعتمدة تمثل لغة التخاطب الأساسية في الورش الصناعية وبيئات العمل الاحترافية.'
-                }
-            ]
+            questions: quizQuestions
         };
 
         return {
@@ -27849,12 +28255,17 @@ END $$;`;
         const directTextInput = document.getElementById('aiDirectTextInput');
         const directText = directTextInput ? directTextInput.value.trim() : '';
 
+        // Intelligent auto-mode detection: If trainer typed, pasted text or clicked a suggestion, auto-switch to text mode
+        if (currentAiSourceMode === 'file' && !selectedAiFile && directText.length >= 3) {
+            setAiSourceMode('text');
+        }
+
         if (currentAiSourceMode === 'file' && !selectedAiFile) {
             showToast('يرجى اختيار ملف PowerPoint (.pptx) أو PDF (.pdf) أولاً، أو الانتقال إلى تبويب النص المباشر', 'warning');
             return;
         }
 
-        if (currentAiSourceMode === 'text' && directText.length < 20) {
+        if (currentAiSourceMode === 'text' && directText.length < 3) {
             const warnEl = document.getElementById('aiDirectTextWarning');
             const curLenEl = document.getElementById('aiDirectTextCurrentLen');
             if (curLenEl) curLenEl.innerText = directText.length;
@@ -27863,7 +28274,7 @@ END $$;`;
                 directTextInput.classList.add('border-amber-400', 'ring-2', 'ring-amber-200');
                 directTextInput.focus();
             }
-            showToast('⚠️ يرجى كتابة أو لصق نص دراسي لا يقل عن 20 حرفاً لتوليد الاختبار والوحدة بالذكاء الاصطناعي', 'warning');
+            showToast('⚠️ يرجى كتابة عنوان الدرس أو نص المحتوى التدريبي للبدء بالذكاء الاصطناعي', 'warning');
             return;
         }
 
@@ -27905,11 +28316,22 @@ END $$;`;
             loadingState.classList.add('flex');
         }
 
-        if (currentAiSourceMode === 'text') {
-            if (loadingMsg) loadingMsg.innerText = `جاري تحليل النص وصياغة اختبار تفاعلي متنوع (اختيارات، صح وخطأ، وتوصيل ومطابقة) عبر الذكاء الاصطناعي...`;
-        } else {
-            if (loadingMsg) loadingMsg.innerText = `جاري معالجة وقراءة محتوى "${selectedAiFile.name}" بالذكاء الاصطناعي...`;
-        }
+        // Animated rotating loading steps for enhanced feedback
+        const loadSteps = [
+            currentAiSourceMode === 'text'
+                ? 'جاري فحص النص وصياغة اختبار تفاعلي شامل بالذكاء الاصطناعي...'
+                : `جاري معالجة وقراءة محتوى "${(selectedAiFile && selectedAiFile.name) || 'الملف'}"...`,
+            'جاري استدعاء نموذج Google Gemini لتحليل المفاهيم الفنية للدرس...',
+            'جاري صياغة 10 أسئلة تفاعلية متنوعة (اختيارات، صح وخطأ، وتوصيل ومطابقة)...',
+            'جاري تدقيق المصطلحات التخصصية وانتقاء الفيديوهات التعليمية المباشرة...',
+            'جاري إعداد الواجب والتكليف الأسبوعي وتجهيز الخطوات النهائية...'
+        ];
+        let stepIdx = 0;
+        if (loadingMsg) loadingMsg.innerText = loadSteps[0];
+        const stepInterval = setInterval(() => {
+            stepIdx = (stepIdx + 1) % loadSteps.length;
+            if (loadingMsg) loadingMsg.innerText = loadSteps[stepIdx];
+        }, 3500);
 
         try {
             // Guarantee client-side text extraction before API call
@@ -27957,10 +28379,10 @@ END $$;`;
 
             let result = null;
 
-            // Attempt cloud API call with a 15-second timeout
+            // Attempt cloud API call with a 40-second timeout to allow full Gemini generation
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
+                const timeoutId = setTimeout(() => controller.abort(), 40000);
 
                 const response = await fetch(endpointUrl, {
                     method: 'POST',
@@ -27988,6 +28410,9 @@ END $$;`;
 
             currentAiGeneratedData = result.data;
 
+            // Stop animated loading messages
+            clearInterval(stepInterval);
+
             // Populate all 4 Steps with generated data
             populateAiPreview(result);
 
@@ -28010,10 +28435,11 @@ END $$;`;
 
             const modeLabel = result.mode === 'gemini' 
                 ? 'تم تحليل المحتوى عبر Google Gemini 2.0 Flash وبناء الاختبار التفاعلي والوحدة بنجاح! ✨' 
-                : 'تم استخراج محتوى الملف وبناء الاختبار التفاعلي والوحدة التدريبية بنجاح! ✓';
+                : 'تم تحليل المحتوى وبناء الاختبار التفاعلي والوحدة التدريبية بنجاح! ✓';
             showToast(modeLabel, 'success');
 
         } catch (err) {
+            clearInterval(stepInterval);
             console.error('AI Generation Error:', err);
             // Ultra-safe fallback: Even on unexpected client error, guarantee UI transition
             try {
@@ -28433,9 +28859,11 @@ END $$;`;
         while (questionsList.length < 10 && topIdx < topics.length) {
             const top = topics[topIdx];
             const isTrue = (topIdx % 2 === 0);
+            const topTitle = (typeof top === 'object' && top) ? (top.title || top.name) : (typeof top === 'string' ? top.replace(/^المحور\s*[\dأ-ي]+:?\s*/, '').trim() : `المحور ${topIdx + 1}`);
+            const topSummary = (typeof top === 'object' && top && top.summary) ? top.summary : 'التطبيق العملي والمهني المباشر';
             const qText = isTrue
-                ? `عبارة: في سياق درس (${lectureTitle})، يركز محور "${top.title}" على: ${top.summary || 'التطبيق العملي والمهني المباشر'}.`
-                : `عبارة: في سياق درس (${lectureTitle})، يُعد محور "${top.title}" مجرد إجراء اختياري لا يؤثر على جودة المخرجات.`;
+                ? `عبارة: في سياق درس (${lectureTitle})، يركز محور "${topTitle}" على: ${topSummary}.`
+                : `عبارة: في سياق درس (${lectureTitle})، يُعد محور "${topTitle}" مجرد إجراء اختياري لا يؤثر على جودة المخرجات.`;
             const exists = questionsList.some(q => q.question === qText);
             if (!exists) {
                 questionsList.push({
@@ -28444,8 +28872,8 @@ END $$;`;
                     options: ['صح ✓', 'خطأ ✗'],
                     correct_answer: isTrue ? 'صح ✓' : 'خطأ ✗',
                     explanation: isTrue
-                        ? `صواب؛ يمثل محور "${top.title}" ركيزة أساسية في ${lectureTitle}.`
-                        : `خطأ؛ بل يمثل محور "${top.title}" ركيزة إلزامية لضمان دقة التنفيذ والمطابقة.`
+                        ? `صواب؛ يمثل محور "${topTitle}" ركيزة أساسية في ${lectureTitle}.`
+                        : `خطأ؛ بل يمثل محور "${topTitle}" ركيزة إلزامية لضمان دقة التنفيذ والمطابقة.`
                 });
             }
             topIdx++;
