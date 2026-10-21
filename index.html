@@ -897,6 +897,15 @@
                         <span class="text-[9px] bg-[#0F2942] text-amber-300 font-black px-2 py-0.5 rounded-full shadow-2xs">معتمد ومخصص</span>
                     </button>
 
+                    <!-- Admin & Superadmin: Course Completion Certificates Center (إدارة واعتماد نشر شهادات إتمام المقررات) -->
+                    <button onclick="switchTab('adminCertificates')" id="btn-adminCertificates" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-amber-300/80 bg-amber-50/60 text-slate-900 font-bold">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">🎓</span>
+                            <span class="text-xs font-black">اعتماد ونشر شهادات إتمام المقررات</span>
+                        </div>
+                        <span class="text-[9px] bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-full shadow-2xs">صلاحية الإدارة</span>
+                    </button>
+
                     <!-- Student Only: Dedicated Student Attendance -->
                     <button onclick="switchTab('studentDashboard')" id="btn-studentDashboard" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive">
                         <span class="text-base">🏠</span>
@@ -4646,6 +4655,153 @@
                 </div>
             </div>
 
+            <!-- ==================== TAB: ADMIN CERTIFICATES MANAGEMENT (مركز إدارة واعتماد نشر شهادات إتمام المقررات) ==================== -->
+            <div id="tab-adminCertificates" class="hidden space-y-6">
+                <!-- Top Header Card -->
+                <div class="bg-white border border-slate-200 border-r-4 border-r-amber-500 rounded-3xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <button type="button" onclick="goBackTab('attendance')" class="bg-slate-100 hover:bg-slate-200 text-[#0F2942] border border-slate-300 font-black px-3.5 py-2.5 rounded-2xl text-xs transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-2xs" title="العودة">
+                            <span>⬅️</span>
+                            <span>رجوع</span>
+                        </button>
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0F2942] to-[#1E3A8A] text-amber-300 flex items-center justify-center text-2xl font-black shadow-xs shrink-0">
+                            🎓
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-black text-slate-900 text-lg md:text-xl">مركز إدارة واعتماد شهادات إتمام المقررات الأكاديمية</h3>
+                                <span class="bg-amber-500 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow-2xs">صلاحية الإدارة والسوبر أدمن</span>
+                            </div>
+                            <p class="text-xs text-slate-500 font-bold">إصدار واعتماد ونشر وثائق شهادات التخرج وإتمام المقررات فور انتهاء الدورة • حجب الشهادات عن المتدربين حتى اكتمال المتطلبات والاعتماد الرسمي</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button type="button" onclick="renderAdminCertificatesTab()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 border border-slate-200 shadow-2xs cursor-pointer">
+                            <span>🔄</span>
+                            <span>تحديث القائمة</span>
+                        </button>
+                        <button type="button" onclick="switchTab('gradesSystem')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+                            <span>📋</span>
+                            <span>نظام الدرجات</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 KPI Stat Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-slate-500">إجمالي المتدربين</span>
+                            <div class="text-2xl font-black text-slate-900 font-mono mt-1" id="acStatTotal">0</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-[#0F2942] flex items-center justify-center text-lg font-black">👥</div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-700">أتموا متطلبات المقرر</span>
+                            <div class="text-2xl font-black text-emerald-600 font-mono mt-1" id="acStatCompleted">0</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-lg font-black">🏆</div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-amber-800">شهادات منشورة ومعتمدة</span>
+                            <div class="text-2xl font-black text-amber-600 font-mono mt-1" id="acStatPublished">0</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-black">📢</div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-rose-700">بانتظار قرار الإدارة</span>
+                            <div class="text-2xl font-black text-rose-600 font-mono mt-1" id="acStatPending">0</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center text-lg font-black">⏳</div>
+                    </div>
+                </div>
+
+                <!-- Filters & Bulk Actions Toolbar -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-4">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 flex-wrap">
+                        <!-- Filters -->
+                        <div class="flex items-center gap-2.5 flex-wrap flex-1">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">المقرر التدريبي:</label>
+                                <select id="acCourseFilter" onchange="renderAdminCertificatesTab()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-[#0F2942]">
+                                    <option value="ALL">كافة المقررات التدريبية</option>
+                                    <option value="اللغة الإنجليزية">اللغة الإنجليزية الفنية</option>
+                                    <option value="الحاسب الالي">تطبيقات الحاسب الآلي</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">الشعبة / المجموعة:</label>
+                                <select id="acGroupFilter" onchange="renderAdminCertificatesTab()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-[#0F2942]">
+                                    <option value="ALL">كافة المجموعات</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">حالة الشهادة:</label>
+                                <select id="acStatusFilter" onchange="renderAdminCertificatesTab()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-[#0F2942]">
+                                    <option value="ALL">كافة الحالات</option>
+                                    <option value="completed">المتمون للمقرر فقط (مؤهل للشهادة)</option>
+                                    <option value="published">الشهادات المنشورة والمعتمدة فقط</option>
+                                    <option value="pending">المعلقة بانتظار الاعتماد فقط</option>
+                                </select>
+                            </div>
+
+                            <div class="flex-1 min-w-[200px]">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">بحث بالاسم أو الهوية الوطنية:</label>
+                                <input type="text" id="acSearchInput" oninput="renderAdminCertificatesTab()" placeholder="ابحث برقم الهوية أو اسم المتدرب..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-[#0F2942]">
+                            </div>
+                        </div>
+
+                        <!-- Bulk Actions -->
+                        <div class="flex items-center gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 flex-wrap">
+                            <button type="button" onclick="bulkPublishAdminCertificates(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2.5 rounded-xl text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer" title="اعتماد ونشر الشهادات لكافة المتدربين المتمين في التصفية الحالية">
+                                <span>📢</span>
+                                <span>نشر واعتماد شهادات المتمين فوراً</span>
+                            </button>
+                            <button type="button" onclick="bulkPublishAdminCertificates(false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-3.5 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer" title="حجب الشهادات وسحب إتاحتها للمتدربين">
+                                <span>🔒</span>
+                                <span>حجب الشهادات</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trainees Certificates Table -->
+                <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+                    <div class="p-4 bg-[#0F2942] text-white flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2">
+                            <span>📋</span>
+                            <h4 class="font-black text-sm">سجل اعتماد شهادات إتمام المقررات الأكاديمية</h4>
+                        </div>
+                        <span class="text-xs font-bold text-amber-300" id="acTableCountBadge">عرض 0 متدرب</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-xs">
+                            <thead class="bg-slate-100 text-slate-700 font-black border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3.5">#</th>
+                                    <th class="p-3.5">المتدرب</th>
+                                    <th class="p-3.5">المجموعة والشركة</th>
+                                    <th class="p-3.5">المقرر التدريبي</th>
+                                    <th class="p-3.5 text-center">حالة إتمام المقرر</th>
+                                    <th class="p-3.5 text-center">حالة الاعتماد والنشر</th>
+                                    <th class="p-3.5 text-center">إجراءات الإدارة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="acTraineesTableBody" class="divide-y divide-slate-100">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- ==================== TRAINER CANVAS LMS MODAL (Legacy Compatibility) ==================== -->
             <div id="trainerLmsModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 md:p-6 overflow-y-auto">
                 <div class="bg-white rounded-3xl max-w-4xl w-full p-5 md:p-7 space-y-5 shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col">
@@ -5288,6 +5444,36 @@
                 </div>
             </div>
 
+            <!-- MODAL: Audio Player Preview (مشغل ومعاينة الملفات والمقاطع الصوتية) -->
+            <div id="audioPreviewModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-70 flex items-center justify-center p-3 md:p-5">
+                <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 text-right flex flex-col">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">🎧</span>
+                            <h4 class="font-black text-slate-900 text-sm sm:text-base" id="audioModalTitle">المشغل الصوتي للمقرر</h4>
+                        </div>
+                        <button type="button" onclick="closeAudioPreviewModal()" class="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 w-7 h-7 rounded-full flex items-center justify-center text-xs transition cursor-pointer">✕</button>
+                    </div>
+                    <div class="space-y-3 py-2">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-center">
+                            <div class="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-[#0F2942] to-[#1E3A8A] text-amber-300 flex items-center justify-center text-2xl shadow-xs">
+                                🎵
+                            </div>
+                            <div class="font-black text-slate-800 text-xs md:text-sm truncate" id="audioModalFileName">--</div>
+                            <div class="text-[11px] text-slate-500 font-mono" id="audioModalMeta">تسجيل صوتي معتمد للمقرر الأكاديمي</div>
+                        </div>
+                        <audio id="audioPreviewPlayer" controls class="w-full rounded-xl focus:outline-none shadow-xs"></audio>
+                    </div>
+                    <div class="pt-2 border-t flex items-center justify-between gap-2">
+                        <a id="audioModalDownloadBtn" href="#" download="" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow-2xs">
+                            <span>⬇️</span>
+                            <span>تحميل المقطع</span>
+                        </a>
+                        <button type="button" onclick="closeAudioPreviewModal()" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold px-4 py-2 rounded-xl text-xs cursor-pointer">إغلاق</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- SUB-MODAL: Add Quiz Builder -->
             <div id="lmsQuizModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-60 flex items-center justify-center p-3 md:p-5 overflow-y-auto">
                 <div class="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-right max-h-[90vh] flex flex-col">
@@ -5627,7 +5813,7 @@
                     </div>
 
                     <!-- STAGE 2: بيئة الاختبار الاحترافية والأسئلة (توقيت + مراقبة الغش) -->
-                    <div id="tqStageExam" class="hidden space-y-4 flex flex-col flex-1 overflow-y-auto">
+                    <div id="tqStageExam" class="hidden space-y-4 flex flex-col flex-1 overflow-hidden">
                         <div class="flex items-center justify-between border-b pb-3">
                             <div>
                                 <h4 class="font-black text-slate-900 text-base" id="tqQuizTitle">الاختبار التفاعلي</h4>
@@ -5754,23 +5940,30 @@
                 </div>
             </div>
 
-            <!-- MODAL: Submit Assignment (Student) with Direct File Attachment -->
-            <div id="submitAssignmentModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-60 flex items-center justify-center p-4">
-                <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-right max-h-[92vh] flex flex-col">
+            <!-- MODAL: Submit Assignment (Student) with Direct File & Audio Attachment -->
+            <div id="submitAssignmentModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-60 flex items-start sm:items-center justify-center p-3 sm:p-5 overflow-y-auto">
+                <div class="bg-white rounded-3xl max-w-xl w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 text-right my-auto">
                     <div class="flex items-center justify-between border-b pb-3">
-                        <h4 class="font-black text-slate-900 text-sm">حل وتسليم الواجب الأسبوعي</h4>
-                        <button type="button" onclick="closeSubmitAssignmentModal()" class="text-slate-400 hover:text-slate-700 text-xs cursor-pointer">✕</button>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">📝</span>
+                            <h4 class="font-black text-slate-900 text-sm sm:text-base">حل وتسليم الواجب الأسبوعي</h4>
+                        </div>
+                        <button type="button" onclick="closeSubmitAssignmentModal()" class="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 w-7 h-7 rounded-full flex items-center justify-center text-xs transition cursor-pointer">✕</button>
                     </div>
                     
-                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-xs space-y-1">
-                        <div class="font-black text-slate-900" id="saModalTitle">عنوان الواجب</div>
-                        <p class="text-slate-700 text-[11px]" id="saModalInstructions">تعليمات الواجب...</p>
-                        <div class="text-[10px] text-slate-500 font-mono font-bold" id="saModalDueDate">تاريخ الاستحقاق: --</div>
+                    <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-xs space-y-1.5">
+                        <div class="font-black text-slate-900 text-sm" id="saModalTitle">عنوان الواجب</div>
+                        <p class="text-slate-700 text-xs leading-relaxed" id="saModalInstructions">تعليمات الواجب...</p>
+                        <div class="text-[11px] text-slate-500 font-mono font-bold flex items-center gap-1.5 pt-0.5" id="saModalDueDate">
+                            <span>⏰</span>
+                            <span>تاريخ الاستحقاق: --</span>
+                        </div>
                     </div>
 
-                    <form onsubmit="submitStudentAssignment(event)" class="space-y-3 flex-1 overflow-y-auto pr-1">
-                        <!-- أسئلة الاختيار من متعدد إن وجدت للواجب -->
-                        <div id="saQuestionsSection" class="hidden space-y-3 bg-slate-50 border border-slate-200 p-3.5 rounded-2xl max-h-72 overflow-y-auto">
+                    <!-- Single Clean Unified Flow Without Nested Scrollbars -->
+                    <form onsubmit="submitStudentAssignment(event)" class="space-y-4">
+                        <!-- أسئلة الاختيار من متعدد التفاعلية إن وجدت للواجب (تدفق انسيابي بدون أي سكرول داخلي) -->
+                        <div id="saQuestionsSection" class="hidden space-y-3 bg-slate-50 border border-slate-200 p-3.5 sm:p-4 rounded-2xl">
                             <div class="flex items-center justify-between border-b border-slate-200 pb-2">
                                 <span class="text-xs font-black text-slate-800">🎯 أسئلة الواجب (اختيار من متعدد):</span>
                                 <span class="text-[10px] text-indigo-800 font-bold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">تصحيح ورصد آلي</span>
@@ -5781,13 +5974,13 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1" id="saFileLabel">إرفاق ملف حل الواجب (PDF, Word, Excel, صور, Zip) - اختياري:</label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" id="saFileLabel">إرفاق ملف حل الواجب (PDF, Word, Excel, صور, ملف صوتي MP3/WAV, Zip) - اختياري:</label>
                             <div class="border-2 border-dashed border-slate-300 hover:border-[#0F2942] bg-slate-50 rounded-2xl p-4 text-center cursor-pointer transition" onclick="document.getElementById('saFileInput').click()">
-                                <input type="file" id="saFileInput" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.png,.jpg,.jpeg" onchange="handleStudentAssignmentFile(this)">
+                                <input type="file" id="saFileInput" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.png,.jpg,.jpeg,.mp3,.wav,.m4a,.ogg,.aac" onchange="handleStudentAssignmentFile(this)">
                                 
                                 <div id="saFilePlaceholder">
-                                    <span class="text-xs font-black text-slate-800 block">اضغط هنا لإرفاق ملف حل الواجب من جهازك</span>
-                                    <span class="text-[11px] text-slate-400 block mt-0.5">يدعم PDF ومستندات Word وExcel والصور والملفات المضغوطة</span>
+                                    <span class="text-xs font-black text-slate-800 block">اضغط هنا لإرفاق ملف حل الواجب أو تسجيل صوتي من جهازك</span>
+                                    <span class="text-[11px] text-slate-400 block mt-0.5">يدعم PDF ومستندات Word وExcel والصوتيات (MP3/WAV) والصور والملفات المضغوطة</span>
                                 </div>
                                 
                                 <div id="saFileSelectedPreview" class="hidden flex items-center justify-between bg-white border border-emerald-200 p-2.5 rounded-xl mt-1 text-right">
@@ -5795,9 +5988,14 @@
                                         <div class="text-xs font-black text-slate-900 truncate" id="saSelectedFileName">--</div>
                                         <div class="text-[10px] text-slate-500 font-mono" id="saSelectedFileSize">--</div>
                                     </div>
-                                    <button type="button" onclick="removeSelectedAssignmentFile(event)" class="text-red-600 hover:text-red-800 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-red-50 transition cursor-pointer">
-                                        إزالة ✕
-                                    </button>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <button type="button" id="saAudioPlayBtn" onclick="previewCurrentSelectedAudio()" class="hidden bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[11px] px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 shadow-2xs">
+                                            <span>▶️</span><span>استماع</span>
+                                        </button>
+                                        <button type="button" onclick="removeSelectedAssignmentFile(event)" class="text-red-600 hover:text-red-800 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-red-50 transition cursor-pointer">
+                                            إزالة ✕
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -5812,11 +6010,12 @@
                             <input type="text" id="saStudentLink" placeholder="https://drive.google.com/... (اختياري)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold font-mono outline-none focus:border-[#0F2942]">
                         </div>
 
-                        <div class="flex gap-2 pt-2">
-                            <button type="submit" class="flex-1 bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black py-2.5 rounded-xl text-xs transition shadow-sm cursor-pointer">
-                                تسليم الواجب للمدرب
+                        <div class="flex gap-2.5 pt-3 border-t border-slate-100">
+                            <button type="submit" class="flex-1 bg-gradient-to-r from-[#0F2942] to-[#1E3A8A] hover:brightness-110 text-white font-black py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                                <span>تسليم الواجب للمدرب</span>
+                                <span>📤</span>
                             </button>
-                            <button type="button" onclick="closeSubmitAssignmentModal()" class="px-4 py-2 border rounded-xl text-xs font-bold text-slate-600 cursor-pointer">إلغاء</button>
+                            <button type="button" onclick="closeSubmitAssignmentModal()" class="px-5 py-3 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-bold text-slate-600 transition cursor-pointer">إلغاء</button>
                         </div>
                     </form>
                 </div>
@@ -6493,6 +6692,7 @@
         const btnStudentVirtualClass = document.getElementById('btn-studentVirtualClass');
         const btnAttendanceSheet = document.getElementById('btn-attendanceSheet');
         const btnAdminReports = document.getElementById('btn-adminReports');
+        const btnAdminCertificates = document.getElementById('btn-adminCertificates');
 
         const topHeaderUploadButtons = document.getElementById('topHeaderUploadButtons');
         const topSyncBtn = document.getElementById('topSyncBtn');
@@ -6504,7 +6704,7 @@
 
         if (currentUser.role === 'student') {
             // المتدرب يرى فقط أزرار المتدرب في القائمة الجانبية وواجهته المستقلة
-            const allStaffBtns = [btnAttendance, btnTrainerDashboard, btnTrainerLms, btnTrainerSubmissions, btnGradesSystem, btnSubmissionsCalendar, btnMasterSchedule, btnSettings, btnTrainerReports, btnUsers, btnTimesheet, btnArchive, btnVirtualClass, btnAdminReports];
+            const allStaffBtns = [btnAttendance, btnTrainerDashboard, btnTrainerLms, btnTrainerSubmissions, btnGradesSystem, btnSubmissionsCalendar, btnMasterSchedule, btnSettings, btnTrainerReports, btnUsers, btnTimesheet, btnArchive, btnVirtualClass, btnAdminReports, btnAdminCertificates];
             allStaffBtns.forEach(b => { if (b) b.classList.add('hidden'); });
 
             // إظهار أزرار المتدرب المخصصة في القائمة الجانبية
@@ -6519,7 +6719,7 @@
             const sideTotalCont = document.getElementById('sidebarTotalTraineesContainer');
             if (sideTotalCont) sideTotalCont.classList.add('hidden'); // إخفاء إجمالي المتدربين المسجلين بحساب المتدرب
 
-            ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'virtualClass', 'adminReports', 'attendanceSheet'].forEach(tabId => {
+            ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'virtualClass', 'adminReports', 'adminCertificates', 'attendanceSheet'].forEach(tabId => {
                 const el = document.getElementById(`tab-${tabId}`);
                 if (el) el.classList.add('hidden');
             });
@@ -6571,9 +6771,10 @@
             if (btnUsers) btnUsers.classList.add('hidden');
             if (btnArchive) btnArchive.classList.add('hidden');
             if (btnAdminReports) btnAdminReports.classList.add('hidden');
+            if (btnAdminCertificates) btnAdminCertificates.classList.add('hidden');
 
             // إخفاء حاويات الصفحات غير المصرح بها
-            ['attendance', 'settings', 'timesheet', 'users', 'archive', 'studentDashboard', 'studentLms', 'studentGrades', 'studentVirtualClass', 'adminReports'].forEach(tabId => {
+            ['attendance', 'settings', 'timesheet', 'users', 'archive', 'studentDashboard', 'studentLms', 'studentGrades', 'studentVirtualClass', 'adminReports', 'adminCertificates'].forEach(tabId => {
                 const el = document.getElementById(`tab-${tabId}`);
                 if (el) el.classList.add('hidden');
             });
@@ -6611,6 +6812,7 @@
             if (btnTrainerReports) btnTrainerReports.classList.remove('hidden');
             if (btnTimesheet) btnTimesheet.classList.remove('hidden');
             if (btnAdminReports) btnAdminReports.classList.remove('hidden');
+            if (btnAdminCertificates) btnAdminCertificates.classList.remove('hidden');
             if (btnVirtualClass) btnVirtualClass.classList.remove('hidden');
             if (btnArchive) btnArchive.classList.add('hidden');
             if (btnUsers) {
@@ -6719,7 +6921,7 @@
                 const targetTab = (candidateTab && allowedTrainerTabs.includes(candidateTab)) ? candidateTab : 'trainerDashboard';
                 switchTab(targetTab);
             } else {
-                const allowedAdminTabs = ['attendance', 'masterSchedule', 'settings', 'timesheet', 'archive', 'users', 'gradesSystem', 'trainerReports', 'adminReports', 'submissionsCalendar', 'attendanceSheet'];
+                const allowedAdminTabs = ['attendance', 'masterSchedule', 'settings', 'timesheet', 'archive', 'users', 'gradesSystem', 'trainerReports', 'adminReports', 'adminCertificates', 'submissionsCalendar', 'attendanceSheet'];
                 let candidateTab = savedTab;
                 if (candidateTab === 'users' && currentUser.role !== 'superadmin') candidateTab = 'attendance';
                 const targetTab = (candidateTab && allowedAdminTabs.includes(candidateTab)) ? candidateTab : 'attendance';
@@ -6819,7 +7021,7 @@
             }
         } catch (tabSaveErr) {}
 
-        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentLms', 'studentGrades', 'submissionsCalendar', 'virtualClass', 'studentVirtualClass', 'attendanceSheet', 'adminReports'];
+        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentLms', 'studentGrades', 'submissionsCalendar', 'virtualClass', 'studentVirtualClass', 'attendanceSheet', 'adminReports', 'adminCertificates'];
         tabs.forEach(t => {
             const el = document.getElementById(`tab-${t}`);
             const btn = document.getElementById(`btn-${t}`);
@@ -6880,6 +7082,8 @@
                 if (typeof renderStudentVirtualClassTab === 'function') renderStudentVirtualClassTab();
             } else if (tab === 'adminReports') {
                 if (typeof renderAdminReportsHub === 'function') renderAdminReportsHub();
+            } else if (tab === 'adminCertificates') {
+                if (typeof renderAdminCertificatesTab === 'function') renderAdminCertificatesTab();
             } else if (tab === 'masterSchedule') {
                 renderMasterSchedule();
             } else if (tab === 'users') {
@@ -13088,10 +13292,25 @@
         }
     ];
 
+    function getConciseCourseTitle(name) {
+        if (!name) return 'مقرر عام';
+        const s = String(name).trim();
+        if (/سلام[ةه]|صحة|OSHA|أوشا|مخاطر/i.test(s)) return 'صحة وسلامة';
+        if (/إنجليز|انجليز|English|لغ[ةه]|محادث/i.test(s)) return 'إنجليزي';
+        if (/لحام|معادن|Weld/i.test(s)) return 'لحام';
+        if (/كهرب|تمديد|تحكم كهرب/i.test(s)) return 'كهرباء';
+        if (/ميكانيك|هيدروليك/i.test(s)) return 'ميكانيكا';
+        if (/حاسب|كمبيوتر|برمجيات|أوفيس|مكتبية تقنية/i.test(s)) return 'حاسب آلي';
+        if (/إدار[ةه]|ادار[ةه]|سكرتار/i.test(s)) return 'إدارة مكتبية';
+        if (/إنشاء|انشاء|مخطط/i.test(s)) return 'إنشاءات';
+        return s.replace(/\s*\(.*?\)/g, '').replace(/^(كورس|دورة|مقرر|برنامج)\s+/, '').trim().split(/\s+/).slice(0, 2).join(' ') || s;
+    }
+    window.getConciseCourseTitle = getConciseCourseTitle;
+
     const INITIAL_LMS_COURSES = {
         "اللحام": {
             trainer: "رضا مطيلق",
-            courseTitle: "كورس اللحام وتشكيل المعادن المتقدم (6 أسابيع)",
+            courseTitle: "لحام",
             description: "برنامج تدريبي وتطبيقي مكثف يغطي لحام القوس الكهربائي المحمي (SMAW) ولحام TIG/MIG وقراءة الرموز الهندسية واختبارات الجودة غير الإتلافية NDT.",
             room: "القاعة 9",
             weeks: [
@@ -13428,7 +13647,7 @@
         },
         "انجليزية": {
             trainer: "شرف الدين",
-            courseTitle: "كورس اللغة الإنجليزية الفنية والمصطلحات المهنية (6 أسابيع)",
+            courseTitle: "إنجليزي",
             description: "برنامج تدريبي مخصص لتطوير مهارات المحادثة والمصطلحات الإنجليزية لقطاعات النفط والغاز والسلامة الصناعية والتواصل الميداني.",
             room: "القاعة 8",
             weeks: [
@@ -13572,7 +13791,7 @@
         },
         "الكهرباء": {
             trainer: "عصام سعيد",
-            courseTitle: "كورس التمديدات والتحكم الكهربائي الصناعي (6 أسابيع)",
+            courseTitle: "كهرباء",
             description: "برنامج تدريبي يغطي أسس الكهرباء الصناعية، لوحات التوزيع، أجهزة القياس، دوائر التحكم بالريليهات، وأساسيات PLC.",
             room: "القاعة 6",
             weeks: [
@@ -13635,7 +13854,7 @@
     ,
         "يوسف جمال": {
         "trainer": "يوسف جمال",
-        "courseTitle": "كورس مهارات المحادثة والتواصل الإنجليزي في بيئة العمل (6 أسابيع)",
+        "courseTitle": "إنجليزي",
         "description": "تطوير طلاقة المحادثة الإنجليزية والتواصل الفعال مع فرق العمل والمشرفين الأجانب في مواقع العمل الصناعية.",
         "room": "القاعة 2",
         "weeks": [
@@ -14075,7 +14294,7 @@
 },
         "علي عبدالسلام": {
         "trainer": "علي عبدالسلام",
-        "courseTitle": "كورس اللغة الإنجليزية الصناعية وقراءة التعليمات (6 أسابيع)",
+        "courseTitle": "إنجليزي",
         "description": "تعلم قراءة اللوحات الإرشادية الصناعية، وكتيبات التشغيل، والمصطلحات الإنجليزية الدقيقة في المنشآت النفطية والمصانع.",
         "room": "القاعة 3",
         "weeks": [
@@ -14515,7 +14734,7 @@
 },
         "سيد احمد": {
         "trainer": "سيد احمد",
-        "courseTitle": "كورس الميكانيكا العامة وأنظمة الهيدروليك والمحركات (6 أسابيع)",
+        "courseTitle": "ميكانيكا",
         "description": "تدريب عملي متخصص في صيانة المعدات الميكانيكية، الدوائر الهيدروليكية، النيوماتيك، وفحص المحركات والمضخات.",
         "room": "القاعة 7",
         "weeks": [
@@ -14955,7 +15174,7 @@
 },
         "فاضل الماجد": {
         "trainer": "فاضل الماجد",
-        "courseTitle": "كورس السلامة والصحة المهنية ومكافحة المخاطر الصناعية (OSHA) (6 أسابيع)",
+        "courseTitle": "صحة وسلامة",
         "description": "برنامج تدريبي مكثف وفق المعايير الدولية لإدارة السلامة والصحة المهنية (OSHA)، تصنيف المخاطر، السلامة من الحرائق، المواد الكيميائية، والإجراءات الهندسية وهرم السيطرة.",
         "room": "القاعة 5",
         "weeks": [
@@ -15671,7 +15890,7 @@
 },
         "أحمد الاصيل": {
         "trainer": "أحمد الاصيل",
-        "courseTitle": "كورس الإدارة المكتبية والسكرتارية التنفيذية وتطبيقات العمل (6 أسابيع)",
+        "courseTitle": "إدارة مكتبية",
         "description": "إتقان إدارة المكاتب التنفيذية، تنظيم الاجتماعات، الاتصالات الإدارية، وإعداد المحاضر والمراسلات الرسمية.",
         "room": "القاعة 1",
         "weeks": [
@@ -16111,7 +16330,7 @@
 },
         "ناجي محمد": {
         "trainer": "ناجي محمد",
-        "courseTitle": "كورس هندسة الإنشاءات والمقاولات وقراءة المخططات الفنية (6 أسابيع)",
+        "courseTitle": "إنشاءات",
         "description": "قراءة المخططات الهندسية الإنشائية والمعمارية، حساب الكميات، إدارة مواقع البناء، واشتراطات الجودة.",
         "room": "القاعة 10",
         "weeks": [
@@ -16551,7 +16770,7 @@
 },
         "إمام يعقوب": {
         "trainer": "إمام يعقوب",
-        "courseTitle": "كورس تطبيقات الحاسب الآلي وبرامج الأوفيس وقواعد البيانات (6 أسابيع)",
+        "courseTitle": "حاسب آلي",
         "description": "تطبيقات الحاسب المتقدمة، معالجة النصوص، إكسيل، تحليل البيانات، وقواعد البيانات التطبيقية في سوق العمل.",
         "room": "القاعة 4",
         "weeks": [
@@ -16991,7 +17210,7 @@
 },
         "قاسم الماجد": {
         "trainer": "قاسم الماجد",
-        "courseTitle": "كورس مهارات الحاسب الآلي المتقدمة والأنظمة المكتبية (6 أسابيع)",
+        "courseTitle": "حاسب آلي",
         "description": "مهارات الطباعة السريعة، إعداد التقارير الرقمية، إدارة الملفات السحابية، واستخدام أدوات التحليل المكتبي.",
         "room": "معمل حاسب2",
         "weeks": [
@@ -17478,19 +17697,24 @@
         if (!lmsCourses["فاضل الماجد"]) lmsCourses["فاضل الماجد"] = INITIAL_LMS_COURSES["فاضل الماجد"];
         if (!lmsCourses["السلامة والصحة"]) lmsCourses["السلامة والصحة"] = lmsCourses["فاضل الماجد"];
     }
-    // تهيئة مذكرات المراجعة كنصوص وتجريد أسماء الملفات من أية لاحقات (PDF / Excel)
+    // تهيئة مذكرات المراجعة كنصوص وتجريد أسماء الملفات من أية لاحقات (PDF / Excel) وضمان اختصار أسماء المقررات
     for (let k in lmsCourses) {
         const c = lmsCourses[k];
-        if (c && c.weeks) {
-            c.weeks.forEach(w => {
-                if (!w.docs && w.documents) w.docs = w.documents;
-                if (!w.docs) w.docs = [];
-                w.docs.forEach(d => {
-                    if (d && d.title) {
-                        d.title = d.title.replace(/\s*\((?:PDF|Excel|DOCX|XLSX)\)\s*/gi, '').trim();
-                    }
+        if (c) {
+            if (c.courseTitle) {
+                c.courseTitle = getConciseCourseTitle(c.courseTitle);
+            }
+            if (c.weeks) {
+                c.weeks.forEach(w => {
+                    if (!w.docs && w.documents) w.docs = w.documents;
+                    if (!w.docs) w.docs = [];
+                    w.docs.forEach(d => {
+                        if (d && d.title) {
+                            d.title = d.title.replace(/\s*\((?:PDF|Excel|DOCX|XLSX)\)\s*/gi, '').trim();
+                        }
+                    });
                 });
-            });
+            }
         }
     }
     let studentCreds = JSON.parse(localStorage.getItem('sys_student_creds_v1')) || {};
@@ -17566,7 +17790,7 @@
                 periodLabel: 'الفترة الأولى',
                 trainerName: 'أ. ' + defTr.name,
                 rawTrainerName: defTr.name,
-                courseTitle: lmsCourses[defKey]?.courseTitle || 'كورس تدريبي ممتد (6 أسابيع)',
+                courseTitle: getConciseCourseTitle(lmsCourses[defKey]?.courseTitle || defTr.course || 'مقرر عام'),
                 courseShort: defTr.course || 'تخصص عام',
                 specialty: defTr.course || 'تخصص عام',
                 room: defTr.room || 'القاعة التدريبية',
@@ -17591,7 +17815,7 @@
                     periodLabel: 'الفترة الأولى (الميكانيكا)',
                     trainerName: 'أ. سيد أحمد',
                     rawTrainerName: 'سيد أحمد',
-                    courseTitle: lmsCourses[c1Key]?.courseTitle || 'دورة الميكانيكا العامة وعلوم وتطبيقات الهيدروليك (6 أسابيع)',
+                    courseTitle: getConciseCourseTitle(lmsCourses[c1Key]?.courseTitle || 'ميكانيكا'),
                     courseShort: 'الميكانيكا العامة',
                     specialty: 'الميكانيكية',
                     room: 'القاعة 7',
@@ -17603,7 +17827,7 @@
                     periodLabel: 'الفترة الثانية (الحاسب الآلي)',
                     trainerName: 'أ. قاسم الماجد',
                     rawTrainerName: 'قاسم الماجد',
-                    courseTitle: lmsCourses[c2Key]?.courseTitle || 'دورة مهارات وتطبيقات الحاسب والبرمجيات المكتبية (6 أسابيع)',
+                    courseTitle: getConciseCourseTitle(lmsCourses[c2Key]?.courseTitle || 'حاسب آلي'),
                     courseShort: 'الحاسب الآلي',
                     specialty: 'الحاسب الالي',
                     room: 'معمل حاسب2',
@@ -17645,7 +17869,7 @@
                 periodLabel: 'مقرر معتمد (مستثنى AIC - فترة واحدة)',
                 trainerName: 'أ. ' + tr.name,
                 rawTrainerName: tr.name,
-                courseTitle: cData.courseTitle || `كورس ${tr.course} (6 أسابيع)`,
+                courseTitle: getConciseCourseTitle(cData.courseTitle || tr.course || 'مقرر عام'),
                 courseShort: tr.course || 'تخصص عام',
                 specialty: tr.course,
                 room: tr.room || 'القاعة التدريبية',
@@ -17664,7 +17888,7 @@
                     periodLabel: `الفترة ${idx + 1} (${tr.course || 'تخصص'})`,
                     trainerName: 'أ. ' + tr.name,
                     rawTrainerName: tr.name,
-                    courseTitle: cData.courseTitle || `كورس ${tr.course} (6 أسابيع)`,
+                    courseTitle: getConciseCourseTitle(cData.courseTitle || tr.course || 'مقرر عام'),
                     courseShort: tr.course || 'تخصص عام',
                     specialty: tr.course,
                     room: tr.room || 'القاعة التدريبية',
@@ -17690,7 +17914,7 @@
                     periodLabel: `الفترة الأولى (${tr1.course || 'تخصص'})`,
                     trainerName: 'أ. ' + tr1.name,
                     rawTrainerName: tr1.name,
-                    courseTitle: c1Data.courseTitle || `كورس ${tr1.course} (6 أسابيع)`,
+                    courseTitle: getConciseCourseTitle(c1Data.courseTitle || tr1.course || 'مقرر عام'),
                     courseShort: tr1.course || 'تخصص رئيسي',
                     specialty: tr1.course,
                     room: tr1.room || 'القاعة التدريبية',
@@ -17702,7 +17926,7 @@
                     periodLabel: `الفترة الثانية (${tr2.course || 'مساند'})`,
                     trainerName: 'أ. ' + tr2.name,
                     rawTrainerName: tr2.name,
-                    courseTitle: c2Data.courseTitle || `كورس ${tr2.course} (6 أسابيع)`,
+                    courseTitle: getConciseCourseTitle(c2Data.courseTitle || tr2.course || 'مقرر عام'),
                     courseShort: tr2.course || 'مساند',
                     specialty: tr2.course,
                     room: tr2.room || 'المعمل التدريبي',
@@ -17720,7 +17944,7 @@
             periodLabel: 'الفترة الأولى',
             trainerName: 'أ. ' + fallbackTr.name,
             rawTrainerName: fallbackTr.name,
-            courseTitle: lmsCourses[fbKey]?.courseTitle || 'كورس تدريبي ممتد (6 أسابيع)',
+            courseTitle: getConciseCourseTitle(lmsCourses[fbKey]?.courseTitle || fallbackTr.course || 'مقرر عام'),
             courseShort: fallbackTr.course || 'تخصص عام',
             specialty: fallbackTr.course || 'تخصص عام',
             room: fallbackTr.room || 'القاعة التدريبية',
@@ -17736,6 +17960,7 @@
             const isP2 = (pNum === 2);
             return {
                 ...c,
+                courseTitle: getConciseCourseTitle(c.courseTitle || c.specialty || c.courseShort),
                 period: pNum,
                 timing: c.timing || (isP2 ? '12:30 م - 04:00 م' : '08:00 ص - 12:00 م'),
                 timingPeriod: c.timingPeriod || (isP2 ? 'مسائية' : 'صباحية'),
@@ -18236,6 +18461,15 @@
         }
 
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(student.id || student.username) : (student.id || '');
+
+        // تحقق من اعتماد ونشر الشهادة إذا كان الطالب هو من يستعرضها بنفسه
+        if (currentUser && currentUser.role === 'student' && !optStudentId) {
+            if (!isCertificatePublishedForTrainee(currentUser.id || cleanId)) {
+                if (typeof showToast === 'function') showToast('وثيقة الشهادة قيد المراجعة والاعتماد من قبل إدارة المعهد', 'warning');
+                return;
+            }
+        }
+
         const binding = (typeof getTrainerAndCourseForTrainee === 'function') ? getTrainerAndCourseForTrainee(student) : { courseTitle: 'البرنامج التدريبي المعتمد', trainerName: 'المدرب المعتمد' };
 
         let gradeLabel = 'اجتياز معتمد بتفوق ✓';
@@ -18261,7 +18495,7 @@
         if (idEl) idEl.innerText = student.id || cleanId;
         if (groupEl) groupEl.innerText = student.group || 'معتمدة';
         if (compEl) compEl.innerText = student.company || 'المعهد';
-        if (courseEl) courseEl.innerText = binding.courseTitle || 'البرنامج التدريبي المعتمد';
+        if (courseEl) courseEl.innerText = getConciseCourseTitle(binding.courseTitle || 'البرنامج التدريبي المعتمد');
         if (trainerEl) trainerEl.innerText = binding.trainerName || 'المدرب المعتمد';
         if (gradeEl) gradeEl.innerText = gradeLabel;
 
@@ -18295,6 +18529,324 @@
         window.print();
     }
     window.printStudentCertificate = printStudentCertificate;
+
+    // ===================================================================
+    // CERTIFICATES MANAGEMENT HELPERS (إدارة واعتماد نشر الشهادات)
+    // ===================================================================
+    function getAdminPublishedCertificates() {
+        try {
+            return JSON.parse(localStorage.getItem('sys_published_certificates_v1')) || {};
+        } catch (e) {
+            return {};
+        }
+    }
+    function saveAdminPublishedCertificates(data) {
+        try {
+            localStorage.setItem('sys_published_certificates_v1', JSON.stringify(data || {}));
+        } catch (e) {
+            console.error('Failed to save published certificates', e);
+        }
+    }
+    function isCertificatePublishedForTrainee(traineeId) {
+        if (!traineeId) return false;
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
+        const pubs = getAdminPublishedCertificates();
+        return Boolean(pubs[cleanId] || pubs[traineeId]);
+    }
+    window.isCertificatePublishedForTrainee = isCertificatePublishedForTrainee;
+
+    function setCertificatePublishedForTrainee(traineeId, status) {
+        if (!traineeId) return;
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
+        const pubs = getAdminPublishedCertificates();
+        if (status) {
+            pubs[cleanId] = {
+                published: true,
+                publishedAt: new Date().toISOString(),
+                publishedBy: (currentUser && currentUser.name) || 'الإدارة والسوبر أدمن'
+            };
+            pubs[traineeId] = pubs[cleanId];
+        } else {
+            delete pubs[cleanId];
+            delete pubs[traineeId];
+        }
+        saveAdminPublishedCertificates(pubs);
+    }
+    window.setCertificatePublishedForTrainee = setCertificatePublishedForTrainee;
+
+    function toggleAdminCertificatePublish(traineeId, explicitState) {
+        const current = isCertificatePublishedForTrainee(traineeId);
+        const newState = (typeof explicitState === 'boolean') ? explicitState : !current;
+        setCertificatePublishedForTrainee(traineeId, newState);
+        if (typeof renderAdminCertificatesTab === 'function') {
+            renderAdminCertificatesTab();
+        }
+        if (newState) {
+            showToast('📢 تم اعتماد ونشر الشهادة للمتدرب بنجاح', 'success');
+        } else {
+            showToast('🔒 تم حجب الشهادة وسحب إتاحتها للمتدرب', 'info');
+        }
+    }
+    window.toggleAdminCertificatePublish = toggleAdminCertificatePublish;
+
+    function bulkPublishAdminCertificates(publishBool) {
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+        const courseFilter = document.getElementById('acCourseFilter')?.value || 'ALL';
+        const groupFilter = document.getElementById('acGroupFilter')?.value || 'ALL';
+        const searchVal = document.getElementById('acSearchInput')?.value?.trim().toLowerCase() || '';
+
+        let affectedCount = 0;
+        pool.forEach(t => {
+            if (typeof isLAGroup === 'function' && isLAGroup(t.group)) return;
+            const binding = (typeof getTrainerAndCourseForTrainee === 'function') ? getTrainerAndCourseForTrainee(t) : { courseTitle: 'عام' };
+            const conciseCourse = getConciseCourseTitle(binding.courseTitle);
+            if (courseFilter !== 'ALL' && conciseCourse !== courseFilter) return;
+            if (groupFilter !== 'ALL' && t.group !== groupFilter) return;
+            if (searchVal) {
+                const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : t.id;
+                const matchName = (t.name || '').toLowerCase().includes(searchVal);
+                const matchId = (cleanId || '').includes(searchVal);
+                if (!matchName && !matchId) return;
+            }
+
+            setCertificatePublishedForTrainee(t.id, publishBool);
+            affectedCount++;
+        });
+
+        if (typeof renderAdminCertificatesTab === 'function') {
+            renderAdminCertificatesTab();
+        }
+
+        if (publishBool) {
+            showToast(`📢 تم اعتماد ونشر الشهادات بنجاح لـ (${affectedCount}) متدرب!`, 'success');
+        } else {
+            showToast(`🔒 تم حجب الشهادات وسحب إتاحتها لـ (${affectedCount}) متدرب.`, 'info');
+        }
+    }
+    window.bulkPublishAdminCertificates = bulkPublishAdminCertificates;
+
+    function renderAdminCertificatesTab() {
+        const tableBody = document.getElementById('acTraineesTableBody');
+        const countBadge = document.getElementById('acTableCountBadge');
+        if (!tableBody) return;
+
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+        const courseFilterEl = document.getElementById('acCourseFilter');
+        const groupFilterEl = document.getElementById('acGroupFilter');
+        const statusFilterEl = document.getElementById('acStatusFilter');
+        const searchInputEl = document.getElementById('acSearchInput');
+
+        // Populate course filter dynamically if needed
+        if (courseFilterEl && courseFilterEl.options.length <= 3) {
+            const currentVal = courseFilterEl.value;
+            const coursesSet = new Set();
+            pool.forEach(t => {
+                const b = (typeof getTrainerAndCourseForTrainee === 'function') ? getTrainerAndCourseForTrainee(t) : null;
+                if (b && b.courseTitle) coursesSet.add(getConciseCourseTitle(b.courseTitle));
+            });
+            courseFilterEl.innerHTML = '<option value="ALL">كافة المقررات التدريبية</option>' + 
+                Array.from(coursesSet).sort().map(c => `<option value="${c}">${c}</option>`).join('');
+            if (currentVal && Array.from(courseFilterEl.options).some(o => o.value === currentVal)) {
+                courseFilterEl.value = currentVal;
+            }
+        }
+
+        // Populate group filter dynamically
+        if (groupFilterEl && groupFilterEl.options.length <= 1) {
+            const currentVal = groupFilterEl.value;
+            const groupsSet = new Set();
+            pool.forEach(t => {
+                if (t.group && !(typeof isLAGroup === 'function' && isLAGroup(t.group))) {
+                    groupsSet.add(t.group.trim());
+                }
+            });
+            groupFilterEl.innerHTML = '<option value="ALL">كافة المجموعات</option>' + 
+                Array.from(groupsSet).sort().map(g => `<option value="${g}">${g}</option>`).join('');
+            if (currentVal && Array.from(groupFilterEl.options).some(o => o.value === currentVal)) {
+                groupFilterEl.value = currentVal;
+            }
+        }
+
+        const courseVal = courseFilterEl?.value || 'ALL';
+        const groupVal = groupFilterEl?.value || 'ALL';
+        const statusVal = statusFilterEl?.value || 'ALL';
+        const searchVal = searchInputEl?.value?.trim().toLowerCase() || '';
+
+        let totalCount = 0;
+        let completedCount = 0;
+        let publishedCount = 0;
+        let pendingCount = 0;
+
+        let filtered = [];
+
+        pool.forEach(t => {
+            if (typeof isLAGroup === 'function' && isLAGroup(t.group)) return;
+            totalCount++;
+
+            const binding = (typeof getTrainerAndCourseForTrainee === 'function') ? getTrainerAndCourseForTrainee(t) : { courseTitle: 'عام', trainerName: 'المدرب' };
+            const conciseCourse = getConciseCourseTitle(binding.courseTitle);
+            const detailed = (typeof getStudentLmsDetailedProgress === 'function') ? getStudentLmsDetailedProgress(t.id) : { percentage: 0, isAllCompleted: false };
+            const isCompleted = Boolean(detailed.isAllCompleted || detailed.percentage >= 80);
+            const isPub = isCertificatePublishedForTrainee(t.id);
+
+            if (isCompleted) completedCount++;
+            if (isPub) publishedCount++;
+            if (isCompleted && !isPub) pendingCount++;
+
+            // Filtering
+            if (courseVal !== 'ALL' && conciseCourse !== courseVal) return;
+            if (groupVal !== 'ALL' && t.group !== groupVal) return;
+            if (statusVal === 'completed' && !isCompleted) return;
+            if (statusVal === 'published' && !isPub) return;
+            if (statusVal === 'pending' && (!isCompleted || isPub)) return;
+
+            if (searchVal) {
+                const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : t.id;
+                const matchName = (t.name || '').toLowerCase().includes(searchVal);
+                const matchId = (cleanId || '').includes(searchVal);
+                if (!matchName && !matchId) return;
+            }
+
+            filtered.push({
+                ...t,
+                conciseCourse,
+                trainerName: binding.trainerName,
+                percentage: detailed.percentage || 0,
+                isCompleted,
+                isPublished: isPub
+            });
+        });
+
+        // Update KPI counters
+        const statTotalEl = document.getElementById('acStatTotal');
+        const statCompletedEl = document.getElementById('acStatCompleted');
+        const statPublishedEl = document.getElementById('acStatPublished');
+        const statPendingEl = document.getElementById('acStatPending');
+
+        if (statTotalEl) statTotalEl.innerText = totalCount;
+        if (statCompletedEl) statCompletedEl.innerText = completedCount;
+        if (statPublishedEl) statPublishedEl.innerText = publishedCount;
+        if (statPendingEl) statPendingEl.innerText = pendingCount;
+        if (countBadge) countBadge.innerText = `عرض ${filtered.length} من إجمالي ${totalCount} متدرب`;
+
+        if (filtered.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="p-8 text-center text-slate-400 font-bold">
+                        <div class="text-3xl mb-2">🔍</div>
+                        لا توجد نتائج تطابق خيارات التصفية والبحث المحددة
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tableBody.innerHTML = filtered.map((t, idx) => {
+            const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : t.id;
+            return `
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <td class="p-3.5 font-bold font-mono text-slate-500">${idx + 1}</td>
+                    <td class="p-3.5">
+                        <div class="font-black text-slate-900">${t.name}</div>
+                        <div class="text-[11px] font-mono text-slate-500 font-bold">${cleanId}</div>
+                    </td>
+                    <td class="p-3.5">
+                        <span class="inline-block bg-slate-100 text-slate-800 font-bold px-2 py-0.5 rounded-lg border border-slate-200 text-[11px]">${t.group}</span>
+                        <div class="text-[10px] text-slate-400 font-bold mt-0.5">${t.company || 'المعهد'}</div>
+                    </td>
+                    <td class="p-3.5">
+                        <span class="inline-block bg-amber-50 text-amber-900 font-black px-2.5 py-0.5 rounded-lg border border-amber-300 text-xs">${t.conciseCourse}</span>
+                        <div class="text-[10.5px] text-indigo-900 font-bold mt-0.5">${t.trainerName}</div>
+                    </td>
+                    <td class="p-3.5 text-center">
+                        ${t.isCompleted ? `
+                            <span class="bg-emerald-50 text-emerald-800 border border-emerald-300 px-2.5 py-1 rounded-xl font-black text-[11px] inline-flex items-center gap-1 shadow-2xs">
+                                <span>✓</span><span>مكتمل (${t.percentage}%)</span>
+                            </span>
+                        ` : `
+                            <span class="bg-amber-50 text-amber-800 border border-amber-300 px-2.5 py-1 rounded-xl font-bold text-[11px] inline-flex items-center gap-1">
+                                <span>⏳</span><span>قيد الإنجاز (${t.percentage}%)</span>
+                            </span>
+                        `}
+                    </td>
+                    <td class="p-3.5 text-center">
+                        ${t.isPublished ? `
+                            <span class="bg-emerald-100 text-emerald-900 border border-emerald-400 px-3 py-1 rounded-full font-black text-xs inline-flex items-center gap-1 shadow-2xs">
+                                <span>📢</span><span>معتمدة ومنشورة</span>
+                            </span>
+                        ` : (t.isCompleted ? `
+                            <span class="bg-amber-100 text-amber-900 border border-amber-400 px-3 py-1 rounded-full font-black text-xs inline-flex items-center gap-1 shadow-2xs">
+                                <span>⏳</span><span>بانتظار الاعتماد</span>
+                            </span>
+                        ` : `
+                            <span class="bg-slate-100 text-slate-600 border border-slate-300 px-3 py-1 rounded-full font-bold text-xs inline-flex items-center gap-1">
+                                <span>🔒</span><span>محجوبة (لم يكتمل)</span>
+                            </span>
+                        `)}
+                    </td>
+                    <td class="p-3.5 text-center">
+                        <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                            ${t.isPublished ? `
+                                <button type="button" onclick="toggleAdminCertificatePublish('${t.id}', false)" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold px-2.5 py-1.5 rounded-xl text-[11px] transition cursor-pointer flex items-center gap-1" title="حجب الشهادة وسحبها عن المتدرب">
+                                    <span>🔒</span><span>حجب</span>
+                                </button>
+                            ` : `
+                                <button type="button" onclick="toggleAdminCertificatePublish('${t.id}', true)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-2.5 py-1.5 rounded-xl text-[11px] transition shadow-2xs cursor-pointer flex items-center gap-1" title="اعتماد ونشر الشهادة فوراً">
+                                    <span>📢</span><span>اعتماد ونشر</span>
+                                </button>
+                            `}
+                            <button type="button" onclick="openStudentCertificateModal('${t.id}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-bold px-2.5 py-1.5 rounded-xl text-[11px] transition cursor-pointer flex items-center gap-1 shadow-2xs" title="استعراض وطباعة وثيقة الشهادة الرسمية">
+                                <span>👁️</span><span>استعراض</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+    window.renderAdminCertificatesTab = renderAdminCertificatesTab;
+
+    // ===================================================================
+    // AUDIO PLAYBACK HELPERS (المشغل الصوتي الشامل للمقررات والتكليفات)
+    // ===================================================================
+    function isAudioFile(fileNameOrUrl) {
+        if (!fileNameOrUrl) return false;
+        return /\.(mp3|wav|ogg|m4a|aac|flac|webm)($|\?)/i.test(String(fileNameOrUrl)) || /^data:audio\//i.test(String(fileNameOrUrl));
+    }
+    window.isAudioFile = isAudioFile;
+
+    function openAudioPreviewModal(audioSrc, title, fileName) {
+        const modal = document.getElementById('audioPreviewModal');
+        const player = document.getElementById('audioPreviewPlayer');
+        const titleEl = document.getElementById('audioModalTitle');
+        const fileNameEl = document.getElementById('audioModalFileName');
+        const downloadBtn = document.getElementById('audioModalDownloadBtn');
+        if (!modal || !player) return;
+
+        if (titleEl) titleEl.innerText = title || 'المشغل الصوتي للمقرر';
+        if (fileNameEl) fileNameEl.innerText = fileName || title || 'ملف صوتي معتمد';
+        player.src = audioSrc || '';
+        player.load();
+        if (downloadBtn) {
+            downloadBtn.href = audioSrc || '#';
+            downloadBtn.download = fileName || 'audio-recording.mp3';
+        }
+        modal.classList.remove('hidden');
+        player.play().catch(() => {});
+    }
+    window.openAudioPreviewModal = openAudioPreviewModal;
+
+    function closeAudioPreviewModal() {
+        const modal = document.getElementById('audioPreviewModal');
+        const player = document.getElementById('audioPreviewPlayer');
+        if (player) {
+            player.pause();
+            player.currentTime = 0;
+            player.src = '';
+        }
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeAudioPreviewModal = closeAudioPreviewModal;
 
     // ===================================================================
     // STUDENT DASHBOARD RENDERER (واجهة المتدرب المستقلة)
@@ -18332,41 +18884,54 @@
                 const isP1 = (idx === 0 || c.period === 1);
                 const periodTime = c.timing || (isP1 ? '08:00 ص - 12:00 م' : '12:30 م - 04:00 م');
                 const periodDuration = c.durationHours || (isP1 ? '4 ساعات تدريبية' : '3.5 ساعات تدريبية');
-                const periodBadge = isP1 ? 'bg-blue-100 text-blue-900 border-blue-200' : 'bg-purple-100 text-purple-900 border-purple-200';
-                const timeTheme = isP1 ? 'bg-blue-50/80 text-blue-950 border-blue-200' : 'bg-purple-50/80 text-purple-950 border-purple-200';
+                const periodTitle = isP1 ? 'الفترة الأولى (صباحية 08:00 ص - 12:00 م)' : 'الفترة الثانية (مسائية 12:30 م - 04:00 م)';
+                
+                const themeCard = isP1 
+                    ? 'border-2 border-blue-400 bg-gradient-to-br from-blue-50/80 via-white to-blue-50/40 shadow-sm hover:shadow-md hover:border-blue-500'
+                    : 'border-2 border-purple-400 bg-gradient-to-br from-purple-50/80 via-white to-purple-50/40 shadow-sm hover:shadow-md hover:border-purple-500';
+                const badgeClass = isP1 
+                    ? 'bg-blue-600 text-white border-blue-700' 
+                    : 'bg-purple-600 text-white border-purple-700';
+                const icon = isP1 ? '📘' : '💻';
+                const titleColor = isP1 ? 'text-blue-950' : 'text-purple-950';
+                const btnClass = isP1
+                    ? 'bg-gradient-to-r from-blue-900 to-indigo-900 hover:from-blue-800 hover:to-indigo-800 text-amber-300'
+                    : 'bg-gradient-to-r from-purple-900 to-violet-900 hover:from-purple-800 hover:to-violet-800 text-amber-300';
 
                 return `
-                    <div class="p-4 rounded-2xl border ${isSelected ? 'border-amber-400 bg-amber-50/70 ring-2 ring-amber-300/60 shadow-sm' : 'border-slate-200 bg-slate-50 hover:bg-white'} transition space-y-3 text-right">
-                        <div class="flex items-center justify-between flex-wrap gap-1.5">
-                            <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full border ${periodBadge}">
-                                ${c.periodLabel || `الفترة ${idx + 1}`}
-                            </span>
-                            <span class="text-xs font-black text-slate-800 bg-white border border-slate-200 px-2.5 py-0.5 rounded-lg shadow-2xs">
-                                📍 ${c.room || 'القاعة التدريبية'}
-                            </span>
-                        </div>
-
-                        <div>
-                            <h4 class="font-black text-slate-900 text-sm md:text-base leading-snug">${c.courseTitle}</h4>
-                            <p class="text-xs text-slate-600 font-bold mt-1">المدرب المشرف: <b class="text-slate-900">${c.trainerName}</b></p>
-                        </div>
-
-                        <!-- شريط أوقات الدوام الرسمي المعتمد -->
-                        <div class="p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center justify-between flex-wrap gap-2 text-xs">
-                            <div class="flex items-center gap-1.5 font-extrabold text-slate-800">
-                                <span class="text-base">⏰</span>
-                                <span class="text-[11px] text-slate-500 font-bold">أوقات الدوام:</span>
-                                <span class="text-xs font-black text-slate-900">${periodTime}</span>
+                    <div class="${themeCard} rounded-3xl p-5 md:p-6 transition-all duration-300 flex flex-col justify-between space-y-4 text-right group ${isSelected ? 'ring-2 ring-amber-400' : ''}">
+                        <div class="space-y-3.5">
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black border ${badgeClass} shadow-2xs">
+                                    <span>${icon}</span>
+                                    <span>${c.periodLabel || (isP1 ? 'المقرر الأول' : 'المقرر الثاني')}</span>
+                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    ${isSelected ? '<span class="text-[10px] font-black bg-amber-400 text-slate-950 px-2 py-0.5 rounded-lg shadow-2xs">النشط حالياً</span>' : ''}
+                                    <span class="text-xs font-black text-slate-800 bg-white px-2.5 py-1 rounded-xl border border-slate-200 shadow-2xs">
+                                        📍 ${c.room || 'القاعة التدريبية'}
+                                    </span>
+                                </div>
                             </div>
-                            <span class="text-[10px] font-black px-2 py-0.5 rounded-md border ${timeTheme}">
-                                ${c.timingPeriod || (isP1 ? 'صباحية' : 'مسائية')} • ${periodDuration}
-                            </span>
+
+                            <div class="pt-0.5">
+                                <h4 class="text-base md:text-lg font-black ${titleColor} leading-tight">${c.courseTitle}</h4>
+                                <div class="flex items-center gap-2 text-xs font-bold text-slate-600 mt-2 flex-wrap">
+                                    <span class="bg-white/90 px-2.5 py-1 rounded-lg border border-slate-200">👨‍🏫 المدرب: <b class="text-slate-900">${c.trainerName}</b></span>
+                                    <span class="bg-white/90 px-2.5 py-1 rounded-lg border border-slate-200">⏰ ${periodTime}</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="flex items-center gap-2 pt-1">
-                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}'); switchTab('studentLms');" class="flex-1 ${isSelected ? 'gold-gradient-bg text-slate-950 font-black' : 'bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold'} text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
-                                <span>📚</span>
-                                <span>${isSelected ? 'المقرر النشط حالياً (عرض الواجبات)' : 'الانتقال لواجبات المقرر 👈'}</span>
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row items-center gap-2 pt-1">
+                            <button type="button" onclick="openStudentLmsForCourse('${c.lmsKey}')" class="w-full sm:flex-1 ${btnClass} font-black py-3 px-4 rounded-2xl text-xs md:text-sm transition duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-95">
+                                <span>دخول المقرر واستعراض المحتوى والواجبات</span>
+                                <span class="text-base">👈</span>
+                            </button>
+                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}'); switchTab('studentGrades');" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-800 font-bold px-3.5 py-3 rounded-2xl border border-slate-200 text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap" title="عرض كشف الدرجات والتقييم لهذا المقرر">
+                                <span>🎓</span>
+                                <span>عرض كشف الدرجات</span>
                             </button>
                         </div>
                     </div>
@@ -18452,7 +19017,7 @@
                         <span class="font-black text-sm text-red-900">إنذار نهائي قبل الفصل الأكاديمي (نسبة الحضور: ${combinedRate}%)</span>
                     </div>
                     <p class="text-xs text-red-800 font-medium leading-relaxed">
-                        أنت الآن في مرحلة حرجة جداً معرض فيها للفصل النهائي من التدريب والحرمان من المكافأة وشهادة الدبلوم. يجب عليك الانتظام التام دون أي غياب إضافي ومراجعة المرشد التدريبي فوراً.
+                        أنت الآن في مرحلة حرجة جداً معرض فيها للفصل النهائي من التدريب والحرمان من المكافأة والشهادة المعتمدة من المؤسسة العامة للتدريب التقني والمهني. يجب عليك الانتظام التام دون أي غياب إضافي ومراجعة المرشد التدريبي فوراً.
                     </p>
                 `;
             } else if (combinedRate <= 50) {
@@ -18562,16 +19127,26 @@
             sdLmsSubBreakdownEl.innerHTML = `الاختبارات: <b class="text-slate-800 font-mono">${lmsDetailed.completedQuizzes}/${lmsDetailed.totalQuizzes}</b> • الواجبات: <b class="text-slate-800 font-mono">${lmsDetailed.completedAssignments}/${lmsDetailed.totalAssignments}</b>`;
         }
 
+        const isCertPub = isCertificatePublishedForTrainee(currentUser.id);
         const sdLmsCertificateTriggerEl = document.getElementById('sdLmsCertificateTrigger');
         if (sdLmsCertificateTriggerEl) {
             if (lmsDetailed.isAllCompleted || lmsDetailed.percentage >= 80) {
                 sdLmsCertificateTriggerEl.className = 'pt-1';
-                sdLmsCertificateTriggerEl.innerHTML = `
-                    <button type="button" onclick="openStudentCertificateModal()" class="w-full bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black text-[11px] py-1.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
-                        <span>🎓</span>
-                        <span>استعراض شهادة الإتمام المعتمدة 🖨️</span>
-                    </button>
-                `;
+                if (isCertPub) {
+                    sdLmsCertificateTriggerEl.innerHTML = `
+                        <button type="button" onclick="openStudentCertificateModal()" class="w-full bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black text-[11px] py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer border border-amber-400/30">
+                            <span>🎓</span>
+                            <span>استعراض شهادة الإتمام المعتمدة 🖨️</span>
+                        </button>
+                    `;
+                } else {
+                    sdLmsCertificateTriggerEl.innerHTML = `
+                        <div class="w-full bg-amber-50 text-amber-900 border border-amber-200 text-[10.5px] font-bold py-1.5 px-2.5 rounded-xl text-center flex items-center justify-center gap-1.5 shadow-2xs">
+                            <span>⏳</span>
+                            <span>الشهادة بانتظار اعتماد ونشر الإدارة</span>
+                        </div>
+                    `;
+                }
             } else {
                 sdLmsCertificateTriggerEl.className = 'hidden';
                 sdLmsCertificateTriggerEl.innerHTML = '';
@@ -18594,16 +19169,24 @@
                                     <div class="flex items-center gap-2 flex-wrap">
                                         <span class="bg-emerald-500 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full">إنجاز أكاديمي 100%</span>
                                         <span class="text-xs text-emerald-200 font-bold">${binding.courseTitle}</span>
+                                        ${isCertPub ? '<span class="bg-amber-400 text-slate-950 text-xs font-black px-2 py-0.5 rounded-full shadow-2xs">معتمدة رسمياً ✓</span>' : '<span class="bg-amber-500/20 text-amber-300 border border-amber-400/30 text-xs font-bold px-2 py-0.5 rounded-full">بانتظار اعتماد الإدارة ⏳</span>'}
                                     </div>
                                     <h4 class="font-black text-base md:text-lg text-white">تهانينا يا ${currentUser.name}! أتممت متطلبات المقرر بنجاح</h4>
-                                    <p class="text-xs text-slate-300 leading-relaxed">لقد أنهيت جميع الاختبارات والتكليفات الأكاديمية بنجاح. أصبحت وثيقة وشهادة إتمام المقرر جاهزة للاستعراض والطباعة الرسمية.</p>
+                                    <p class="text-xs text-slate-300 leading-relaxed">${isCertPub ? 'لقد أنهيت جميع الاختبارات والتكليفات الأكاديمية بنجاح. تم اعتماد ونشر وثيقة وشهادة إتمام المقرر الرسمية وجاهزة للاستعراض والطباعة.' : 'لقد أنهيت جميع الاختبارات والتكليفات الأكاديمية بنجاح بنسبة 100%. وثيقة الشهادة قيد المراجعة والاعتماد الرسمي من قبل إدارة المعهد وسيتم إتاحتها فور نشرها.'}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2.5 w-full md:w-auto flex-wrap">
-                                <button type="button" onclick="openStudentCertificateModal()" class="w-full md:w-auto gold-gradient-bg text-slate-950 hover:brightness-105 font-black px-5 py-3 rounded-2xl text-xs transition cursor-pointer flex items-center justify-center gap-2 shadow-lg">
-                                    <span>🏆</span>
-                                    <span>استعراض وطباعة شهادة الإتمام 🖨️</span>
-                                </button>
+                                ${isCertPub ? `
+                                    <button type="button" onclick="openStudentCertificateModal()" class="w-full md:w-auto gold-gradient-bg text-slate-950 hover:brightness-105 font-black px-5 py-3 rounded-2xl text-xs transition cursor-pointer flex items-center justify-center gap-2 shadow-lg">
+                                        <span>🏆</span>
+                                        <span>استعراض وطباعة شهادة الإتمام 🖨️</span>
+                                    </button>
+                                ` : `
+                                    <div class="w-full md:w-auto bg-amber-500/20 text-amber-200 border border-amber-400/40 font-bold px-4 py-2.5 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-sm">
+                                        <span>⏳</span>
+                                        <span>الشهادة بانتظار اعتماد ونشر الإدارة</span>
+                                    </div>
+                                `}
                                 <button type="button" onclick="switchTab('studentLms')" class="w-full md:w-auto bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-3 rounded-2xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
                                     <span>📚</span>
                                     <span>مراجعة المحتوى الأكاديمي</span>
@@ -18970,17 +19553,32 @@
         const dContainer = document.getElementById('sdDocsContainer');
         if (dContainer) {
             const docList = (activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []);
-            dContainer.innerHTML = docList.length ? docList.map(d => `
+            dContainer.innerHTML = docList.length ? docList.map(d => {
+                const isAudio = isAudioFile(d.url || d.fileUrl || d.title || d.type || d.docKind);
+                const safeTitle = (d.title || '').replace(/'/g, "\\'");
+                const safeUrl = (d.url || d.fileUrl || '').replace(/'/g, "\\'");
+                return `
                 <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <div class="truncate">
-                        <h5 class="font-black text-xs md:text-sm text-slate-900 truncate">${d.title}</h5>
-                        <div class="text-[10px] text-slate-500 font-bold mt-0.5 truncate">${d.description || d.desc || 'مذكرة وتلخيص معتمد لهذا الأسبوع'}</div>
+                    <div class="flex items-center gap-3 truncate">
+                        <span class="text-xl shrink-0">${isAudio ? '🎧' : '📑'}</span>
+                        <div class="truncate">
+                            <h5 class="font-black text-xs md:text-sm text-slate-900 truncate">${d.title}</h5>
+                            <div class="text-[10px] text-slate-500 font-bold mt-0.5 truncate">${d.description || d.desc || (isAudio ? 'تسجيل وشرح صوتي معتمد' : 'مذكرة وتلخيص معتمد لهذا الأسبوع')}</div>
+                        </div>
                     </div>
-                    <button type="button" onclick="openReadDocModal('${d.id}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shrink-0 cursor-pointer">
-                        قراءة المذكرة
-                    </button>
+                    <div class="flex items-center gap-2 shrink-0">
+                        ${isAudio ? `
+                            <button type="button" onclick="openAudioPreviewModal('${safeUrl}', '${safeTitle}', '${safeTitle}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5 shadow-2xs">
+                                <span>▶️</span><span>استماع للتسجيل</span>
+                            </button>
+                        ` : ''}
+                        <button type="button" onclick="openReadDocModal('${d.id}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shrink-0 cursor-pointer">
+                            ${isAudio ? 'التفاصيل' : 'قراءة المذكرة'}
+                        </button>
+                    </div>
                 </div>
-            `).join('') : `
+            `;
+            }).join('') : `
                 <div class="saas-empty-card py-6 space-y-2">
                     <span class="text-2xl">📑</span>
                     <h6 class="font-black text-xs text-slate-700">لا توجد مذكرات أو ملفات نصية إضافية</h6>
@@ -19150,11 +19748,18 @@
                         ` : ''}
 
                         ${sub && sub.file ? `
-                            <div class="flex items-center justify-between bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl text-xs">
-                                <span class="font-bold text-emerald-950 truncate">ملفك المسلم: ${sub.file.name} (${sub.file.size})</span>
-                                <a href="${sub.file.data}" download="${sub.file.name}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded-lg text-[11px] shrink-0 transition">
-                                    تحميل الملف
-                                </a>
+                            <div class="flex items-center justify-between bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl text-xs flex-wrap gap-2">
+                                <span class="font-bold text-emerald-950 truncate">${isAudioFile(sub.file.name || sub.file.type) ? '🎵 ملفك الصوتي المسلم:' : '📎 ملفك المسلم:'} ${sub.file.name} (${sub.file.size})</span>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    ${isAudioFile(sub.file.name || sub.file.type) ? `
+                                        <button type="button" onclick="openAudioPreviewModal('${sub.file.data}', '${(a.title || 'تسليم الواجب').replace(/'/g, "\\'")}', '${(sub.file.name || 'تسجيل صوتي').replace(/'/g, "\\'")}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-3 py-1 rounded-lg text-[11px] transition cursor-pointer flex items-center gap-1 shadow-2xs">
+                                            <span>▶️</span><span>استماع</span>
+                                        </button>
+                                    ` : ''}
+                                    <a href="${sub.file.data}" download="${sub.file.name}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded-lg text-[11px] shrink-0 transition">
+                                        تحميل الملف
+                                    </a>
+                                </div>
                             </div>
                         ` : ''}
 
@@ -21215,10 +21820,27 @@
             document.getElementById('saFileSelectedPreview').classList.remove('hidden');
             document.getElementById('saSelectedFileName').innerText = file.name;
             document.getElementById('saSelectedFileSize').innerText = formatFileSize(file.size);
+            const audioPlayBtn = document.getElementById('saAudioPlayBtn');
+            if (audioPlayBtn) {
+                if (typeof isAudioFile === 'function' && isAudioFile(file.name)) {
+                    audioPlayBtn.classList.remove('hidden');
+                } else {
+                    audioPlayBtn.classList.add('hidden');
+                }
+            }
             showToast(`تم إرفاق الملف: ${file.name} بنجاح`, 'success');
         };
         reader.readAsDataURL(file);
     }
+
+    function previewCurrentSelectedAudio() {
+        if (currentAssignmentSelectedFile && currentAssignmentSelectedFile.data) {
+            if (typeof openAudioPreviewModal === 'function') {
+                openAudioPreviewModal(currentAssignmentSelectedFile.data, 'معاينة التسجيل الصوتي المرفق', currentAssignmentSelectedFile.name || 'تسجيل صوتي');
+            }
+        }
+    }
+    window.previewCurrentSelectedAudio = previewCurrentSelectedAudio;
 
     function formatFileSize(bytes) {
         if (!bytes) return '0 B';
@@ -21233,6 +21855,8 @@
         currentAssignmentSelectedFile = null;
         const input = document.getElementById('saFileInput');
         if (input) input.value = '';
+        const audioPlayBtn = document.getElementById('saAudioPlayBtn');
+        if (audioPlayBtn) audioPlayBtn.classList.add('hidden');
         document.getElementById('saFilePlaceholder').classList.remove('hidden');
         document.getElementById('saFileSelectedPreview').classList.add('hidden');
     }
@@ -21344,9 +21968,19 @@
             document.getElementById('saFileSelectedPreview').classList.remove('hidden');
             document.getElementById('saSelectedFileName').innerText = prev.file.name;
             document.getElementById('saSelectedFileSize').innerText = prev.file.size;
+            const audioPlayBtn = document.getElementById('saAudioPlayBtn');
+            if (audioPlayBtn) {
+                if (typeof isAudioFile === 'function' && isAudioFile(prev.file.name)) {
+                    audioPlayBtn.classList.remove('hidden');
+                } else {
+                    audioPlayBtn.classList.add('hidden');
+                }
+            }
         } else {
             document.getElementById('saFilePlaceholder').classList.remove('hidden');
             document.getElementById('saFileSelectedPreview').classList.add('hidden');
+            const audioPlayBtn = document.getElementById('saAudioPlayBtn');
+            if (audioPlayBtn) audioPlayBtn.classList.add('hidden');
         }
 
         const modal = document.getElementById('submitAssignmentModal');
@@ -21676,13 +22310,14 @@
             const d = new Date(saved + (saved.includes('T') ? '' : 'T00:00:00'));
             if (!isNaN(d.getTime())) return d;
         }
-        // Course starts next Sunday (2026-10-18)
+        // Fallback: Default academic semester start date (Sunday 2026-10-11)
+        const defaultDate = new Date('2026-10-11T00:00:00');
+        if (!isNaN(defaultDate.getTime())) return defaultDate;
         const now = new Date();
         const dow = now.getDay(); // 0 is Sunday
-        const daysToNextSun = (dow === 0) ? 7 : (7 - dow);
-        const nextSun = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysToNextSun);
-        nextSun.setHours(0, 0, 0, 0);
-        return nextSun;
+        const pastSun = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
+        pastSun.setHours(0, 0, 0, 0);
+        return pastSun;
     }
 
     function setAcademicCourseStartDate(newDateStr) {
@@ -22885,6 +23520,10 @@
                     const isGradedManually = !!(sub.gradedByTrainer && sub.score !== undefined && sub.score !== null && sub.score !== '');
                     const currentScoreVal = isGradedManually ? sub.score : '';
                     const inputId = `tas_grade_input_${idx}_${cleanNationalId(sub.studentId)}`;
+                    const isAudioSub = sub.file && ((typeof isAudioFile === 'function' && isAudioFile(sub.file.name)) || (sub.file.data && String(sub.file.data).startsWith('data:audio/')) || (sub.file.name && /\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i.test(sub.file.name)));
+                    const safeAssTitle = (selectedItem.title || 'تسليم الواجب').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const safeFileName = (sub.file?.name || 'تسجيل صوتي').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const safeStudentName = (sub.studentName || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                     return `
                     <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-2xs space-y-2.5">
                         <div class="flex items-center justify-between flex-wrap gap-2">
@@ -22936,19 +23575,36 @@
                         ` : ''}
 
                         ${sub.file ? `
-                            <div class="flex items-center justify-between bg-emerald-50 border border-emerald-200 p-3 rounded-xl mt-1 flex-wrap gap-2">
-                                <div class="truncate">
-                                    <div class="text-xs font-black text-emerald-950 truncate">📎 ملف الواجب المرفق: ${sub.file.name}</div>
-                                    <div class="text-[10px] text-emerald-700 font-mono">${sub.file.size} • يجب الاطلاع على الملف قبل رصد الدرجة يدوياً</div>
+                            <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl mt-1 space-y-2.5">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div class="truncate">
+                                        <div class="text-xs font-black text-emerald-950 truncate flex items-center gap-1.5">
+                                            <span>${isAudioSub ? '🎙️ التسجيل الصوتي المرفق:' : '📎 ملف الواجب المرفق:'}</span>
+                                            <span class="truncate">${sub.file.name}</span>
+                                        </div>
+                                        <div class="text-[10px] text-emerald-700 font-mono mt-0.5">${sub.file.size || ''} • يجب ${isAudioSub ? 'الاستماع للتسجيل' : 'الاطلاع على الملف'} قبل رصد الدرجة يدوياً</div>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
+                                        ${isAudioSub ? `
+                                            <button type="button" onclick="openAudioPreviewModal('${sub.file.data}', '${safeStudentName} — ${safeAssTitle}', '${safeFileName}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3.5 py-1.5 rounded-xl shadow-2xs transition flex items-center gap-1.5 cursor-pointer">
+                                                <span>▶️</span>
+                                                <span>المشغل المكبر</span>
+                                            </button>
+                                        ` : `
+                                            <a href="${sub.file.data}" target="_blank" rel="noopener noreferrer" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-xs transition">
+                                                👁️ الاطلاع على الملف
+                                            </a>
+                                        `}
+                                        <a href="${sub.file.data}" download="${sub.file.name}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-xs transition">
+                                            ⬇️ تحميل الملف
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-1.5 shrink-0">
-                                    <a href="${sub.file.data}" target="_blank" rel="noopener noreferrer" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-xs transition">
-                                        👁️ الاطلاع على الملف
-                                    </a>
-                                    <a href="${sub.file.data}" download="${sub.file.name}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-xs transition">
-                                        ⬇️ تحميل الملف
-                                    </a>
-                                </div>
+                                ${isAudioSub ? `
+                                    <div class="bg-white/90 p-2.5 rounded-xl border border-emerald-200/70 flex items-center gap-2 shadow-2xs">
+                                        <audio controls class="w-full h-8 outline-none" src="${sub.file.data}" preload="metadata"></audio>
+                                    </div>
+                                ` : ''}
                             </div>
                         ` : `
                             <div class="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
@@ -25501,6 +26157,11 @@ END $$;`;
 
         if (!foundDoc) {
             showToast('لم يتم العثور على المذكرة المطلوبة', 'warning');
+            return;
+        }
+
+        if (isAudioFile(foundDoc.url || foundDoc.fileUrl || foundDoc.title || foundDoc.docKind)) {
+            openAudioPreviewModal(foundDoc.url || foundDoc.fileUrl, foundDoc.title, foundDoc.title);
             return;
         }
 
@@ -30303,6 +30964,10 @@ END $$;`;
             `;
         }
 
+        const isAudioSubmission = targetSub?.file && ((typeof isAudioFile === 'function' && isAudioFile(targetSub.file.name)) || (targetSub.file.data && String(targetSub.file.data).startsWith('data:audio/')) || (targetSub.file.name && /\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i.test(targetSub.file.name)));
+        const safeAudioTitle = (targetAss?.title || 'تسليم الواجب الأسبوعي').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeAudioFileName = (targetSub?.file?.name || 'تسجيل صوتي').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
         bodyEl.innerHTML = `
             <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5 text-right">
                 <div class="flex items-center justify-between flex-wrap gap-2">
@@ -30332,19 +30997,36 @@ END $$;`;
                         </div>
                     ` : ''}
                     ${targetSub.file ? `
-                        <div class="flex items-center justify-between bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl flex-wrap gap-2">
-                            <div class="truncate">
-                                <div class="text-xs font-black text-emerald-950 truncate">📎 الملف المرفق: ${targetSub.file.name}</div>
-                                <div class="text-[10px] text-emerald-700 font-mono">${targetSub.file.size || ''} • اضغط للمعاينة أو التحميل</div>
+                        <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl space-y-2.5">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <div class="truncate">
+                                    <div class="text-xs font-black text-emerald-950 truncate flex items-center gap-1.5">
+                                        <span>${isAudioSubmission ? '🎙️ الملف الصوتي المرفق:' : '📎 الملف المرفق:'}</span>
+                                        <span class="truncate">${targetSub.file.name}</span>
+                                    </div>
+                                    <div class="text-[10px] text-emerald-700 font-mono mt-0.5">${targetSub.file.size || ''} • اضغط ${isAudioSubmission ? 'للاستماع أو التحميل' : 'للمعاينة أو التحميل'}</div>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                                    ${isAudioSubmission ? `
+                                        <button type="button" onclick="openAudioPreviewModal('${targetSub.file.data}', '${safeAudioTitle}', '${safeAudioFileName}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3.5 py-1.5 rounded-xl shadow-2xs transition flex items-center gap-1.5 cursor-pointer">
+                                            <span>▶️</span>
+                                            <span>المشغل المكبر</span>
+                                        </button>
+                                    ` : `
+                                        <a href="${targetSub.file.data}" target="_blank" rel="noopener noreferrer" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-xs transition">
+                                            👁️ معاينة الملف
+                                        </a>
+                                    `}
+                                    <a href="${targetSub.file.data}" download="${targetSub.file.name}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-xs transition">
+                                        ⬇️ تحميل الملف
+                                    </a>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <a href="${targetSub.file.data}" target="_blank" rel="noopener noreferrer" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-xs transition">
-                                    👁️ معاينة الملف
-                                </a>
-                                <a href="${targetSub.file.data}" download="${targetSub.file.name}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-xs transition">
-                                    ⬇️ تحميل الملف
-                                </a>
-                            </div>
+                            ${isAudioSubmission ? `
+                                <div class="bg-white/90 p-2.5 rounded-xl border border-emerald-200/70 flex items-center gap-2 shadow-2xs">
+                                    <audio controls class="w-full h-8 outline-none" src="${targetSub.file.data}" preload="metadata"></audio>
+                                </div>
+                            ` : ''}
                         </div>
                     ` : `
                         <div class="text-xs text-slate-600 bg-white border border-slate-200 p-3 rounded-xl">
@@ -33921,10 +34603,15 @@ END $$;`;
     }
 
     function openStudentLmsForCourse(courseKey) {
+        const curWeek = (typeof getCurrentAcademicWeekNum === 'function') ? getCurrentAcademicWeekNum() : 1;
+        activeStudentLmsWeek = curWeek;
         if (typeof switchStudentActiveCourse === 'function') {
-            switchStudentActiveCourse(courseKey);
+            switchStudentActiveCourse(courseKey, true);
         } else {
             activeStudentLmsCourse = courseKey;
+        }
+        if (typeof setStudentLmsWeek === 'function') {
+            setStudentLmsWeek(curWeek);
         }
         switchTab('studentLms');
     }
