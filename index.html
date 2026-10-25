@@ -5344,32 +5344,29 @@
                             </div>
 
                             <!-- ═════════════════════════════════════════════════
-                                 STEP 1: SUGGESTED VIDEO (فيديو تعليمي واحد واقعي مرتبط بالموضوع)
+                                 STEP 1: MANDATORY REAL LESSON VIDEO (إجباري: رابط فيديو فعلي مباشر)
                                  ═════════════════════════════════════════════════ -->
                             <div id="aiStepView-1" class="space-y-4">
                                 <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                                     <div class="flex items-center gap-2">
                                         <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-bold text-sm">01</span>
                                         <div>
-                                            <h4 class="font-black text-slate-900 text-sm">الفيديو التدريبي المقترح</h4>
-                                            <p class="text-[11px] text-slate-500 font-bold">فيديو تدريبي واحد واقعي ومباشر مرتبط بموضوع الدرس، يمكنك اعتماده أو تعديل الرابط:</p>
+                                            <h4 class="font-black text-slate-900 text-sm">الفيديو التدريبي للمحاضرة <span class="text-rose-600 text-xs font-bold">(إلزامي)</span></h4>
+                                            <p class="text-[11px] text-slate-500 font-bold">يجب معاينة نتائج البحث على يوتيوب، ونسخ رابط الفيديو الفعلي ولصقه أدناه لمتابعة الخطوات:</p>
                                         </div>
                                     </div>
                                     <span class="text-[11px] font-bold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-lg">الخطوة 1 من 4</span>
                                 </div>
 
-                                <!-- 1 Suggested Video Card Container -->
+                                <!-- Dynamic Video Card Container -->
                                 <div id="aiSuggestedVideosContainer" class="space-y-3">
                                     <!-- Dynamic Cards injected here -->
                                 </div>
 
-                                <!-- Custom Video Link Option -->
-                                <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                                    <label class="block text-xs font-bold text-slate-700">
-                                        <span>🔗</span>
-                                        <span>أو رابط فيديو مخصص:</span>
-                                    </label>
-                                    <input type="url" id="aiCustomVideoUrl" placeholder="https://www.youtube.com/watch?v=... أو رابط مباشر" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-violet-400 text-left dir-ltr">
+                                <!-- Validation Alert Message if URL is missing or still a search query -->
+                                <div id="aiVideoValidationMsg" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-bold flex items-center gap-2">
+                                    <span>⚠️</span>
+                                    <span>تنبيه: يجب إدخال رابط فيديو يوتيوب فعلي ومباشر (مثل: https://www.youtube.com/watch?v=...) قبل الانتقال للخطوة التالية.</span>
                                 </div>
                             </div>
 
@@ -29636,7 +29633,40 @@ END $$;`;
         }
     }
 
+    function validateAiStepOneVideoUrl(silent = false) {
+        const urlInput = document.getElementById('aiVideoUrl-0');
+        const alertBox = document.getElementById('aiVideoValidationMsg');
+        const nextBtn = document.getElementById('aiWizardNextBtn');
+        const val = (urlInput ? urlInput.value : '').trim();
+
+        const isDirectVideo = /(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/)|youtu\.be\/)[a-zA-Z0-9_-]{11}/i.test(val) || (val.startsWith('http') && !val.includes('results?') && !val.includes('search_query'));
+
+        if (!val || !isDirectVideo) {
+            if (!silent) {
+                if (alertBox) alertBox.classList.remove('hidden');
+                if (urlInput) {
+                    urlInput.classList.add('border-rose-500', 'bg-rose-50');
+                    urlInput.focus();
+                }
+                showToast('يرجى لصق رابط فيديو يوتيوب مباشر ومحدد (مثل: https://www.youtube.com/watch?v=...) قبل المتابعة', 'warning');
+            }
+            return false;
+        }
+
+        if (alertBox) alertBox.classList.add('hidden');
+        if (urlInput) {
+            urlInput.classList.remove('border-rose-500', 'bg-rose-50');
+            urlInput.classList.add('border-emerald-500');
+        }
+        return true;
+    }
+    window.validateAiStepOneVideoUrl = validateAiStepOneVideoUrl;
+
     function nextAiStep() {
+        if (currentAiStep === 1) {
+            const isValid = validateAiStepOneVideoUrl(false);
+            if (!isValid) return;
+        }
         if (currentAiStep === 3) {
             const assignDateInput = document.getElementById('aiAssignmentDueDate');
             if (assignDateInput && !assignDateInput.value) {
@@ -31446,42 +31476,66 @@ function buildDemoExecutiveReport(params) {
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // STEP 1: SUGGESTED VIDEO (فيديو تعليمي واحد واقعي مرتبط بالموضوع حصراً)
+        // STEP 1: SUGGESTED VIDEO & MANDATORY DIRECT VIDEO LINK
         // ─────────────────────────────────────────────────────────────────
         const videosContainer = document.getElementById('aiSuggestedVideosContainer');
         const rawVideos = Array.isArray(data.suggested_videos) && data.suggested_videos.length > 0 
             ? data.suggested_videos.slice(0, 1) 
             : [
-                { id: 1, title: `شرح تعليمي لـ ${data.lecture?.title || 'المحاضرة'}`, description: 'شرح تطبيقي وتدريب عملي على المهارات الأساسية والمفاهيم', duration: '12:00 دقيقة', youtube_url: resolveClientDirectYouTubeUrl('', data.lecture?.title, '', 0) }
+                { id: 1, title: `${data.lecture?.title || 'شرح الدرس'}`, description: 'شرح تطبيقي وتدريب عملي على المهارات الأساسية والمفاهيم', duration: '12:00 دقيقة', youtube_url: resolveClientDirectYouTubeUrl('', data.lecture?.title, '', 0) }
             ];
 
         if (videosContainer) {
             videosContainer.innerHTML = rawVideos.slice(0, 1).map((v, idx) => {
                 const isChecked = 'checked';
-                const ytQuery = v.search_query || v.title;
-                const ytDirectUrl = resolveClientDirectYouTubeUrl(v.youtube_url || v.url, v.title, ytQuery, 0);
+                const vTitle = v.title || data.lecture?.title || 'فيديو تدريبي للموضوع';
+                const ytQuery = v.search_query || vTitle;
+                const searchLink = `https://www.youtube.com/results?search_query=${encodeURIComponent(vTitle.replace(/^(?:محاضرة|درس|الوحدة)\s*[:\-]\s*/, '').trim() + ' شرح')}`;
+                
+                // If url already has a real watch ID, show it, otherwise start empty or clean
+                let currentUrl = (v.youtube_url || v.url || '').trim();
+                const hasValidVideoId = /(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/)|youtu\.be\/)[a-zA-Z0-9_-]{11}/i.test(currentUrl);
+                const displayDirectUrl = hasValidVideoId ? currentUrl : '';
+
                 return `
-                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs transition hover:border-violet-300">
-                        <div class="flex items-start gap-3 flex-1 min-w-0">
-                            <label class="flex items-center gap-2 cursor-pointer pt-0.5">
-                                <input type="radio" name="aiSelectedVideoRadio" value="0" ${isChecked} class="w-4 h-4 text-violet-600 focus:ring-violet-500 cursor-pointer">
-                                <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-bold text-xs shrink-0">🎥</span>
-                            </label>
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <input type="text" id="aiVideoTitle-0" value="${escapeHtml(v.title || 'فيديو تدريبي للموضوع')}" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-black text-slate-900 outline-none focus:border-violet-400">
-                                <p class="text-[11px] text-slate-500 font-bold">${escapeHtml(v.description || '')}</p>
-                                <div class="flex items-center gap-2 pt-0.5">
-                                    <span class="text-[10px] font-bold text-slate-500 shrink-0">🔗 الرابط المباشر:</span>
-                                    <input type="url" id="aiVideoUrl-0" value="${escapeHtml(ytDirectUrl)}" class="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-0.5 text-[11px] font-mono text-slate-700 outline-none focus:border-violet-400 text-left" dir="ltr">
+                    <div class="p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl flex flex-col gap-3.5 text-xs transition">
+                        <div class="flex items-start justify-between gap-3 flex-wrap">
+                            <div class="flex-1 min-w-[240px] space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-bold text-xs shrink-0">🎥</span>
+                                    <input type="text" id="aiVideoTitle-0" value="${escapeHtml(vTitle)}" class="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-black text-slate-900 outline-none focus:border-violet-400">
                                 </div>
+                                <p class="text-[11px] text-slate-500 font-bold pr-9">${escapeHtml(v.description || 'فيديو تدريبي ومورد مرئي مباشر يشرح محاور المحاضرة.')}</p>
                             </div>
+                            <span class="bg-violet-50 border border-violet-200 text-violet-800 px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0">⏱ ${escapeHtml(v.duration || '12 دقيقة')}</span>
                         </div>
-                        <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                            <span class="bg-violet-50 border border-violet-200 text-violet-800 px-2.5 py-1 rounded-lg text-[10px] font-bold">⏱ ${escapeHtml(v.duration || '12 دقيقة')}</span>
-                            <a href="${escapeHtml(ytDirectUrl)}" target="_blank" rel="noopener noreferrer" class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition">
+
+                        <!-- Step A: Open YouTube Search to Pick a Realistic Video -->
+                        <div class="bg-violet-50/70 border border-violet-200 p-3 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+                            <div class="space-y-0.5">
+                                <div class="font-black text-violet-950 text-xs flex items-center gap-1.5">
+                                    <span>🔍</span>
+                                    <span>الخطوة 1: ابحث عن الفيديو الأنسب وعاينه على يوتيوب:</span>
+                                </div>
+                                <p class="text-[10px] text-violet-700 font-bold">اضغط لمعاينة قائمة الفيديوهات واختيار الفيديو الأكثر ملاءمة للدرس:</p>
+                            </div>
+                            <a href="${escapeHtml(searchLink)}" target="_blank" rel="noopener noreferrer" class="bg-red-600 hover:bg-red-700 text-white font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-xs shrink-0">
                                 <span>▶️</span>
-                                <span>مشاهدة الفيديو المباشر ↗</span>
+                                <span>معاينة الفيديوهات على يوتيوب ↗</span>
                             </a>
+                        </div>
+
+                        <!-- Step B: Mandatory Direct Video URL Input -->
+                        <div class="bg-white border-2 border-violet-300 p-3.5 rounded-xl space-y-2">
+                            <div class="flex items-center justify-between flex-wrap gap-1">
+                                <label for="aiVideoUrl-0" class="font-black text-slate-900 text-xs flex items-center gap-1.5">
+                                    <span class="text-rose-600 font-black text-sm">*</span>
+                                    <span>الخطوة 2: الصق رابط الفيديو المباشر هنا (إجباري):</span>
+                                </label>
+                                <span class="text-[10px] text-rose-600 font-bold bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">مطلوب للمتابعة</span>
+                            </div>
+                            <input type="url" id="aiVideoUrl-0" value="${escapeHtml(displayDirectUrl)}" placeholder="https://www.youtube.com/watch?v=... أو https://youtu.be/..." class="w-full bg-slate-50 border border-slate-300 focus:bg-white focus:border-violet-600 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 outline-none transition text-left" dir="ltr" oninput="validateAiStepOneVideoUrl(true)">
+                            <p class="text-[10px] text-slate-500 font-bold">مثال صحيح: <span class="font-mono text-violet-800" dir="ltr">https://www.youtube.com/watch?v=dQw4w9WgXcQ</span></p>
                         </div>
                     </div>
                 `;
@@ -32143,18 +32197,28 @@ function buildDemoExecutiveReport(params) {
             // ═════════════════════════════════════════════════════════════════
             if (!activeWeek.videos) activeWeek.videos = [];
 
-            // Check which video radio is selected
-            const selectedRadio = document.querySelector('input[name="aiSelectedVideoRadio"]:checked');
-            const selectedIdx = selectedRadio ? parseInt(selectedRadio.value, 10) : 0;
-            const videoTitleEl = document.getElementById(`aiVideoTitle-${selectedIdx}`);
-            const videoUrlEl = document.getElementById(`aiVideoUrl-${selectedIdx}`);
+            // Check video URL from input
+            const videoTitleEl = document.getElementById(`aiVideoTitle-0`);
+            const videoUrlEl = document.getElementById(`aiVideoUrl-0`);
             const customVideoUrlEl = document.getElementById('aiCustomVideoUrl');
 
             const finalVideoTitle = (videoTitleEl ? videoTitleEl.value.trim() : '') || 'فيديو تعليمي تفاعلي';
-            const rawFinalVideoUrl = (customVideoUrlEl && customVideoUrlEl.value.trim()) 
-                ? customVideoUrlEl.value.trim() 
-                : ((videoUrlEl ? videoUrlEl.value.trim() : '') || cloudFileUrl || '');
-            const finalVideoUrl = resolveClientDirectYouTubeUrl(rawFinalVideoUrl, finalVideoTitle, finalVideoTitle, selectedIdx);
+            const enteredUrl = (videoUrlEl ? videoUrlEl.value.trim() : '') || (customVideoUrlEl ? customVideoUrlEl.value.trim() : '');
+            
+            // Validate that trainer entered a direct video url
+            const isDirectVideo = /(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/)|youtu\.be\/)[a-zA-Z0-9_-]{11}/i.test(enteredUrl) || (enteredUrl.startsWith('http') && !enteredUrl.includes('results?') && !enteredUrl.includes('search_query'));
+            
+            if (!enteredUrl || !isDirectVideo) {
+                goToAiStep(1);
+                validateAiStepOneVideoUrl(false);
+                if (finishBtn) {
+                    finishBtn.disabled = false;
+                    finishBtn.innerHTML = `<span>🚀</span><span>اعتماد وإنشاء المحتوى بالكامل</span>`;
+                }
+                return;
+            }
+
+            const finalVideoUrl = resolveClientDirectYouTubeUrl(enteredUrl, finalVideoTitle, finalVideoTitle, 0);
 
             const lecTitle = document.getElementById('aiLectureTitle')?.value.trim() || finalVideoTitle;
             const lecDuration = document.getElementById('aiLectureDuration')?.value.trim() || '15';
