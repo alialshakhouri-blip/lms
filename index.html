@@ -912,13 +912,13 @@
                         <span class="text-[9px] bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-full shadow-2xs">صلاحية الإدارة</span>
                     </button>
 
-                    <!-- Staff & Admin: Institution Files / ملفات المؤسسة والتصدير المعتمد -->
+                    <!-- Admin Only: Institution Files / ملفات المؤسسة والتصدير المعتمد (للإدارة والسوبر أدمن فقط) -->
                     <button onclick="switchTab('institutionFiles')" id="btn-institutionFiles" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-emerald-300/80 bg-emerald-50/60 text-slate-900 font-bold">
                         <div class="flex items-center gap-3">
                             <span class="text-base">🏛️</span>
                             <span class="text-xs font-black">ملفات المؤسسة</span>
                         </div>
-                        <span class="text-[9px] bg-emerald-600 text-white font-black px-2 py-0.5 rounded-full shadow-2xs">تصدير Excel</span>
+                        <span class="text-[9px] bg-emerald-600 text-white font-black px-2 py-0.5 rounded-full shadow-2xs">صلاحية الإدارة</span>
                     </button>
 
                     <!-- Student Only: 5 Unified Core Tabs + Virtual Class -->
@@ -1153,7 +1153,7 @@
                                 <span>🗓️</span>
                                 <span>التقويم الأسبوعي للمتابعة</span>
                             </button>
-                            <button type="button" onclick="switchTab('institutionFiles')" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-2xs cursor-pointer" title="الانتقال المباشر إلى ملفات المؤسسة وتصدير Excel">
+                            <button type="button" id="attendanceSheetInstFilesBtn" onclick="switchTab('institutionFiles')" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-2xs cursor-pointer" title="الانتقال المباشر إلى ملفات المؤسسة وتصدير Excel (للإدارة فقط)">
                                 <span>🏛️</span>
                                 <span>ملفات المؤسسة (تصدير Excel)</span>
                             </button>
@@ -7126,6 +7126,7 @@
         const btnAdminCertificates = document.getElementById('btn-adminCertificates');
         const btnInstitutionFiles = document.getElementById('btn-institutionFiles');
         const topInstitutionFilesBtn = document.getElementById('topInstitutionFilesBtn');
+        const attendanceSheetInstFilesBtn = document.getElementById('attendanceSheetInstFilesBtn');
 
         const topHeaderUploadButtons = document.getElementById('topHeaderUploadButtons');
         const topSyncBtn = document.getElementById('topSyncBtn');
@@ -7165,6 +7166,7 @@
             if (topSyncBtn) topSyncBtn.classList.add('hidden');
             if (topLiveSheetSettingsBtn) topLiveSheetSettingsBtn.classList.add('hidden');
             if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.add('hidden');
+            if (attendanceSheetInstFilesBtn) attendanceSheetInstFilesBtn.classList.add('hidden');
             if (tdAdminTrainerSelector) tdAdminTrainerSelector.classList.add('hidden');
             if (masterScheduleUploadBtnContainer) masterScheduleUploadBtnContainer.classList.add('hidden');
             if (reportsTrainerFilterContainer) reportsTrainerFilterContainer.classList.add('hidden');
@@ -7233,8 +7235,13 @@
             if (btnMasterSchedule) btnMasterSchedule.classList.remove('hidden');
             if (btnTrainerReports) btnTrainerReports.classList.remove('hidden');
             if (btnVirtualClass) btnVirtualClass.classList.remove('hidden');
-            if (btnInstitutionFiles) btnInstitutionFiles.classList.remove('hidden');
-            if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.remove('hidden');
+            
+            // ملفات المؤسسة وتصدير Excel محصورة فقط بالإدارة والسوبر أدمن (ممنوعة عن المدرب)
+            if (btnInstitutionFiles) btnInstitutionFiles.classList.add('hidden');
+            if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.add('hidden');
+            if (attendanceSheetInstFilesBtn) attendanceSheetInstFilesBtn.classList.add('hidden');
+            const instTab = document.getElementById('tab-institutionFiles');
+            if (instTab) instTab.classList.add('hidden');
 
             // إظهار زر مزامنة التحضير للمدرب وإخفاء زر إعدادات الرابط والإجراءات الإدارية
             if (topHeaderUploadButtons) topHeaderUploadButtons.classList.remove('hidden');
@@ -7261,6 +7268,8 @@
             if (btnAdminReports) btnAdminReports.classList.remove('hidden');
             if (btnAdminCertificates) btnAdminCertificates.classList.remove('hidden');
             if (btnInstitutionFiles) btnInstitutionFiles.classList.remove('hidden');
+            if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.remove('hidden');
+            if (attendanceSheetInstFilesBtn) attendanceSheetInstFilesBtn.classList.remove('hidden');
             if (btnVirtualClass) btnVirtualClass.classList.remove('hidden');
             if (btnArchive) btnArchive.classList.add('hidden');
             if (btnUsers) {
@@ -7363,7 +7372,7 @@
                     activeTrainerForDashboard = currentUser.trainerProfile;
                 }
 
-                const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'attendanceSheet', 'institutionFiles'];
+                const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'attendanceSheet'];
                 let candidateTab = savedTab;
                 if (candidateTab === 'trainerSubmissions') candidateTab = 'gradesSystem';
                 const targetTab = (candidateTab && allowedTrainerTabs.includes(candidateTab)) ? candidateTab : 'trainerDashboard';
@@ -7436,9 +7445,9 @@
                 return;
             }
         } else if (currentUser.role === 'trainer') {
-            const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'attendanceSheet', 'institutionFiles'];
+            const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'attendanceSheet'];
             if (!allowedTrainerTabs.includes(tab)) {
-                showToast('⛔ عذراً: هذه الشاشة غير مصرح بها للمدرب', 'error');
+                showToast('⛔ عذراً: هذه الشاشة مخصصة للإدارة والسوبر أدمن فقط', 'error');
                 return;
             }
         } else {
