@@ -739,7 +739,7 @@
                 </button>
 
                 <input type="file" id="excelAttendanceInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleAttendanceFileUpload(event)">
-                <input type="file" id="excelRegistrationInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleRegistrationFileUpload(event)">
+                <input type="file" id="excelRegistrationInput" accept=".xlsx, .xls, .csv" multiple class="hidden" onchange="handleRegistrationFileUpload(event)">
                 <input type="file" id="excelScheduleInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleScheduleFileUpload(event)">
                 <input type="file" id="archiveExcelInput" accept=".xlsx, .xls, .csv" multiple class="hidden" onchange="handleArchiveFileUpload(event)">
 
@@ -5027,7 +5027,7 @@
 
                 <!-- Filter & Action Controls Card -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end">
                         <div>
                             <label class="block text-xs font-black text-slate-700 mb-1.5 flex items-center gap-1.5">
                                 <span>🏢</span>
@@ -5050,8 +5050,23 @@
                         </div>
 
                         <div>
-                            <button type="button" id="btnExportInstitutionExcel" onclick="exportInstitutionExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer border border-emerald-500">
-                                <span class="text-base">📥</span>
+                            <label class="block text-xs font-black text-slate-700 mb-1.5 flex items-center gap-1.5">
+                                <span>📤</span>
+                                <span>استيراد ملفات المؤسسة:</span>
+                            </label>
+                            <button type="button" onclick="document.getElementById('excelRegistrationInput').click()" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-xs px-3 py-2.5 rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer border border-indigo-500" title="رفع ملف أو عدة ملفات إكسل للمؤسسة دفعة واحدة">
+                                <span class="text-base">📁</span>
+                                <span>رفع ملفات (متعدد)</span>
+                            </button>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1.5 flex items-center gap-1.5">
+                                <span>📥</span>
+                                <span>تصدير ملف المؤسسة:</span>
+                            </label>
+                            <button type="button" id="btnExportInstitutionExcel" onclick="exportInstitutionExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs px-3.5 py-2.5 rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer border border-emerald-500" title="تصدير ملف المؤسسة بصيغة Excel المعتمدة">
+                                <span class="text-base">📊</span>
                                 <span>تصدير Excel</span>
                             </button>
                         </div>
@@ -9602,43 +9617,147 @@
         return 'متدرب بدون اسم';
     }
 
-    // 2. معالجة وحفظ ملف تسجيل المؤسسات
-    function parseRegistrationWorkbook(workbook) {
+    // كشف واكتشاف صف رأس الجدول تلقائياً بمرونة تامة (حتى لو وُجدت صفوف عناوين مسبقة في ملف المؤسسة)
+    function getSheetRowsWithDynamicHeader(worksheet) {
+        if (!worksheet || !worksheet['!ref']) return [];
+
+        const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+        if (!rawData || rawData.length === 0) return [];
+
+        let headerRowIdx = 0;
+        let maxMatches = 0;
+        const headerKeywords = [
+            'هوية', 'الهوية', 'السجل', 'المدني', 'الاسم', 'المتدرب', 'الأول', 'الاول',
+            'الثاني', 'الثالث', 'الأخير', 'الاخير', 'العائلة', 'اللقب', 'القبيلة',
+            'ميلاد', 'الميلاد', 'النوع', 'الجنس', 'جنسية', 'الجنسية',
+            'مؤهل', 'المؤهل', 'بريد', 'البريد', 'جوال', 'الجوال',
+            'هاتف', 'شعبة', 'الشعبة', 'مجموعة', 'المجموعة', 'شركة', 'الشركة', 'منشأة',
+            'id', 'name', 'phone', 'email', 'dob', 'gender'
+        ];
+
+        for (let r = 0; r < Math.min(15, rawData.length); r++) {
+            const row = rawData[r];
+            if (!Array.isArray(row)) continue;
+            const rowText = row.map(c => String(c || '').trim().toLowerCase().replace(/\s+/g, ' ')).join(' ');
+            let matches = 0;
+            headerKeywords.forEach(kw => {
+                if (rowText.includes(kw)) matches++;
+            });
+            if (matches > maxMatches) {
+                maxMatches = matches;
+                headerRowIdx = r;
+            }
+        }
+
+        // إذا لم نجد صف رأس صريح، نعتمد الاستخراج الافتراضي لـ SheetJS
+        if (maxMatches < 1) {
+            return XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+        }
+
+        const headers = rawData[headerRowIdx].map(h => String(h || '').replace(/\u00a0/g, ' ').trim().replace(/\s+/g, ' '));
+        const resultRows = [];
+        for (let r = headerRowIdx + 1; r < rawData.length; r++) {
+            const row = rawData[r];
+            if (!row || !row.some(cell => String(cell || '').trim() !== '')) continue;
+            const obj = {};
+            for (let c = 0; c < headers.length; c++) {
+                const h = headers[c];
+                if (h) {
+                    obj[h] = row[c] !== undefined ? row[c] : '';
+                }
+            }
+            resultRows.push(obj);
+        }
+        return resultRows;
+    }
+
+    // 2. معالجة وحفظ ملف تسجيل وملفات المؤسسة بمرونة استثنائية
+    function parseRegistrationWorkbook(workbook, skipSave = false) {
         let updatedCount = 0;
         let newEntries = 0;
 
         workbook.SheetNames.forEach(sheetName => {
+            if (sheetName.startsWith('_')) return;
             const worksheet = workbook.Sheets[sheetName];
-            const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+            if (!worksheet) return;
+
+            const rows = getSheetRowsWithDynamicHeader(worksheet);
             if (!rows || rows.length === 0) return;
 
             rows.forEach(row => {
                 const r = {};
                 for (const k in row) {
                     if (Object.prototype.hasOwnProperty.call(row, k)) {
-                        r[String(k).trim().replace(/\s+/g, ' ')] = row[k];
+                        const cleanKey = String(k).replace(/\u00a0/g, ' ').trim().replace(/\s+/g, ' ');
+                        r[cleanKey] = row[k];
                     }
                 }
 
-                const rawId = r['رقم الهوية'] || r['الهوية'] || r['رقم السجل'] || r['السجل المدني'] || r['رقم الهوية الوطنية'] || r['رقم الاقامة'] || r['id'] || r['ID'];
+                const rawId = r['رقم الهوية'] || r['الهوية'] || r['رقم السجل'] || r['السجل المدني'] || r['رقم السجل المدني'] || r['رقم الهوية الوطنية'] || r['الهوية الوطنية'] || r['رقم الاقامة'] || r['رقم الإقامة'] || r['الاقامة'] || r['الإقامة'] || r['رقم الهوية / الإقامة'] || r['رقم الهوية/الإقامة'] || r['هوية المتدرب'] || r['السجل'] || r['رقم بطاقة الأحوال'] || r['بطاقة الأحوال'] || r['id'] || r['ID'] || r['National ID'] || r['NationalID'] || r['ID Number'];
                 const id = cleanNationalId(rawId);
-                if (!id || id.length !== 10) return;
+                if (!id || id.length < 8 || id.length > 12) return;
 
-                // دمج الأسماء
-                const name = extractFullName(r);
+                // استخراج الاسم وتجزئته بدقة
+                const p1 = String(r['الاسم الاول'] || r['الاسم الأول'] || r['first_name'] || '').trim();
+                const p2 = String(r['الاسم الثاني'] || r['اسم الاب'] || r['اسم الأب'] || r['second_name'] || '').trim();
+                const p3 = String(r['الاسم الثالث'] || r['اسم الجد'] || r['third_name'] || '').trim();
+                const p4 = String(r['الاسم الاخير'] || r['الاسم الأخير'] || r['اسم العائلة'] || r['اسم العائله'] || r['القبيلة'] || r['اللقب'] || r['last_name'] || '').trim();
 
-                // ضبط رقم الجوال (إضافة 0 إذا كان 9 أرقام)
-                const rawPhone = r['رقم الجوال'] || r['الجوال'] || r['رقم الهاتف'] || r['الهاتف'] || r['phone'] || r['Mobile'] || r['mobile'];
+                let name = extractFullName(r);
+                let finalP1 = p1;
+                let finalP2 = p2;
+                let finalP3 = p3;
+                let finalP4 = p4;
+
+                if ((!finalP1 || !finalP4) && name && name !== 'متدرب بدون اسم') {
+                    const splitParts = (typeof splitArabicName === 'function') ? splitArabicName(name) : { first: name, second: '', third: '', last: '' };
+                    if (!finalP1) finalP1 = splitParts.first;
+                    if (!finalP2) finalP2 = splitParts.second;
+                    if (!finalP3) finalP3 = splitParts.third;
+                    if (!finalP4) finalP4 = splitParts.last;
+                }
+                if ((!name || name === 'متدرب بدون اسم') && (finalP1 || finalP4)) {
+                    name = [finalP1, finalP2, finalP3, finalP4].filter(Boolean).join(' ');
+                }
+
+                // ضبط رقم الجوال
+                const rawPhone = r['رقم الجوال'] || r['الجوال'] || r['رقم الهاتف'] || r['الهاتف'] || r['جوال المتدرب'] || r['phone'] || r['Phone'] || r['Mobile'] || r['mobile'];
                 const phone = cleanPhone(rawPhone);
 
-                // ربط الهوية بالمؤهل والشركة وتاريخ الميلاد والنوع والجنسية
-                const qual = String(r['المؤهل'] || r['المؤهل العلمي'] || r['المؤهل الدراسي'] || r['المؤهل التعليمي'] || 'غير محدد').trim();
-                const email = String(r['البريد الالكتروني'] || r['البريد الإلكتروني'] || r['الإيميل'] || r['الايميل'] || r['email'] || '').trim();
-                const company = String(r['المؤسسة'] || r['الشركة'] || r['الجهة'] || r['جهة العمل'] || detectCompany(sheetName) || '').trim();
-                const group = String(r['المجموعة'] || r['الشعبة'] || '').trim();
-                const rawDob = r['تاريخ الميلاد'] || r['تاريخ ميلاد'] || r['الميلاد'] || r['تاريخ الميلاد (m/d/Y)'] || r['dob'] || r['DOB'] || r['birth_date'] || '';
-                const rawGender = r['النوع'] || r['الجنس'] || r['النوع (ذكر / انثى)'] || r['gender'] || '';
-                const rawNationality = r['الجنسية'] || r['جنسية'] || r['nationality'] || '';
+                // تاريخ الميلاد والنوع والجنسية والمؤهل والبريد
+                const rawDob = r['تاريخ الميلاد (m/d/Y)'] || r['تاريخ الميلاد'] || r['تاريخ ميلاد'] || r['الميلاد'] || r['تاريخ الميلاد(m/d/Y)'] || r['dob'] || r['DOB'] || r['birth_date'] || '';
+                const formattedDob = (typeof formatDobMdy === 'function') ? formatDobMdy(rawDob) : rawDob;
+
+                const rawGender = r['النوع (ذكر / انثى)'] || r['النوع'] || r['الجنس'] || r['gender'] || '';
+                const normGender = (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(rawGender, 'ذكر') : (rawGender || 'ذكر');
+
+                let rawNationality = String(r['الجنسية'] || r['جنسية'] || r['nationality'] || '').trim();
+                if (!rawNationality) {
+                    if (id.startsWith('1')) rawNationality = 'سعودي';
+                    else if (id.startsWith('2')) rawNationality = 'غير سعودي';
+                }
+
+                const qual = String(r['المؤهل'] || r['المؤهل العلمي'] || r['المؤهل الدراسي'] || r['المؤهل التعليمي'] || r['الدرجة العلمية'] || 'غير محدد').trim();
+                const email = String(r['البريد الالكتروني'] || r['البريد الإلكتروني'] || r['الإيميل'] || r['الايميل'] || r['البريد'] || r['email'] || '').trim();
+
+                // تحديد الشركة والشعبة بمرونة
+                const currentSelectedGroup = (document.getElementById('instGroupFilter')?.value || '').trim();
+                const currentSelectedCompany = (document.getElementById('instCompanyFilter')?.value || '').trim();
+
+                let group = String(r['المجموعة'] || r['الشعبة'] || r['اسم الشعبة'] || r['اسم المجموعة'] || '').trim();
+                if (!group && sheetName && !sheetName.toLowerCase().startsWith('sheet') && !sheetName.startsWith('ورقة') && !sheetName.startsWith('_')) {
+                    group = sheetName.trim();
+                }
+                if (!group && currentSelectedGroup) {
+                    group = currentSelectedGroup;
+                }
+                if (!group) group = 'عام';
+
+                let company = String(r['المؤسسة'] || r['الشركة'] || r['الجهة'] || r['جهة العمل'] || r['اسم المنشأة'] || r['المنشأة'] || detectCompany(sheetName) || '').trim();
+                if (!company && currentSelectedCompany && currentSelectedCompany !== 'ALL') {
+                    company = currentSelectedCompany;
+                }
+                if (!company) company = 'المؤسسة';
 
                 // حفظ في دليل الهواتف والبيانات الداخلي
                 phoneDirectory[id] = {
@@ -9646,17 +9765,17 @@
                     phone: phone || phoneDirectory[id]?.phone || '',
                     qual: (qual && qual !== 'غير محدد') ? qual : (phoneDirectory[id]?.qual || 'غير محدد'),
                     email: email || phoneDirectory[id]?.email || '',
-                    company: (company && company !== 'المؤسسة') ? company : (phoneDirectory[id]?.company || ''),
-                    group: group || phoneDirectory[id]?.group || '',
+                    company: (company && company !== 'المؤسسة') ? company : (phoneDirectory[id]?.company || 'المؤسسة'),
+                    group: group || phoneDirectory[id]?.group || 'عام',
                     room: phoneDirectory[id]?.room || '',
                     notes: phoneDirectory[id]?.notes || '',
-                    dob: rawDob || phoneDirectory[id]?.dob || '',
-                    gender: rawGender || phoneDirectory[id]?.gender || '',
-                    nationality: rawNationality || phoneDirectory[id]?.nationality || '',
-                    first_name: p1 || phoneDirectory[id]?.first_name || '',
-                    second_name: p2 || phoneDirectory[id]?.second_name || '',
-                    third_name: p3 || phoneDirectory[id]?.third_name || '',
-                    last_name: p4 || phoneDirectory[id]?.last_name || ''
+                    dob: formattedDob || phoneDirectory[id]?.dob || '',
+                    gender: normGender || phoneDirectory[id]?.gender || '',
+                    nationality: rawNationality || phoneDirectory[id]?.nationality || (id.startsWith('1') ? 'سعودي' : ''),
+                    first_name: finalP1 || phoneDirectory[id]?.first_name || '',
+                    second_name: finalP2 || phoneDirectory[id]?.second_name || '',
+                    third_name: finalP3 || phoneDirectory[id]?.third_name || '',
+                    last_name: finalP4 || phoneDirectory[id]?.last_name || ''
                 };
                 newEntries++;
 
@@ -9668,15 +9787,15 @@
                         if (phone) t.phone = phone;
                         if (qual && qual !== 'غير محدد') t.qual = qual;
                         if (email) t.email = email;
-                        if (company && (!t.company || t.company === 'عام')) t.company = company;
+                        if (company && (!t.company || t.company === 'عام' || t.company === 'المؤسسة')) t.company = company;
                         if (group && (!t.group || t.group === 'عام')) t.group = group;
-                        if (rawDob) t.dob = rawDob;
-                        if (rawGender) t.gender = rawGender;
+                        if (formattedDob) t.dob = formattedDob;
+                        if (normGender) t.gender = normGender;
                         if (rawNationality) t.nationality = rawNationality;
-                        if (p1) t.first_name = p1;
-                        if (p2) t.second_name = p2;
-                        if (p3) t.third_name = p3;
-                        if (p4) t.last_name = p4;
+                        if (finalP1) t.first_name = finalP1;
+                        if (finalP2) t.second_name = finalP2;
+                        if (finalP3) t.third_name = finalP3;
+                        if (finalP4) t.last_name = finalP4;
                         matched = true;
                         updatedCount++;
                     }
@@ -9695,6 +9814,13 @@
                         phone: phone || '',
                         email: email || '',
                         notes: '',
+                        dob: formattedDob || '',
+                        gender: normGender || '',
+                        nationality: rawNationality || (id.startsWith('1') ? 'سعودي' : ''),
+                        first_name: finalP1 || '',
+                        second_name: finalP2 || '',
+                        third_name: finalP3 || '',
+                        last_name: finalP4 || '',
                         rate: 100,
                         weeklyAttendance: [
                             [false, false, false, false],
@@ -9708,8 +9834,10 @@
             });
         });
 
-        // 3. الاحتفاظ بالبيانات في الذاكرة المحلية للمتصفح (localStorage)
-        saveData();
+        // الاحتفاظ بالبيانات في الذاكرة المحلية للمتصفح
+        if (!skipSave) {
+            saveData();
+        }
         return { updatedCount, newEntries };
     }
 
@@ -11232,31 +11360,76 @@
         event.target.value = '';
     }
 
-    function handleRegistrationFileUpload(event) {
+    async function handleRegistrationFileUpload(event) {
         if (currentUser?.role === 'trainer') {
             return showToast('⛔ عذراً: غير مصرح للمدرب برفع ملف تسجيل المؤسسات', 'error');
         }
-        const file = event.target.files[0];
-        if (!file) return;
+        const files = Array.from(event.target.files || []);
+        if (!files || files.length === 0) return;
 
-        showLoading('جاري معالجة ومطابقة ملف تسجيل المؤسسات...', file.name);
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const result = parseRegistrationWorkbook(workbook);
+        const isMulti = files.length > 1;
+        showLoading(
+            isMulti ? `جاري معالجة ومطابقة (${files.length}) ملفات مؤسسة...` : 'جاري معالجة ومطابقة ملف تسجيل المؤسسة...',
+            isMulti ? files.map(f => f.name).slice(0, 3).join('، ') + (files.length > 3 ? '...' : '') : files[0].name
+        );
 
-                hideLoading();
-                showToast(`تمت معالجة ملف التسجيل بنجاح! تم دمج الأسماء وضبط أرقام الجوالات وتحديث ${result.updatedCount} متدرب وحفظ ${result.newEntries} سجلاً محلياً.`, 'success');
-            } catch (err) {
-                hideLoading();
-                console.error(err);
-                showToast('حدث خطأ أثناء قراءة ملف التسجيل', 'error');
+        try {
+            let totalUpdated = 0;
+            let totalNew = 0;
+            let totalProcessedFiles = 0;
+            const failedFiles = [];
+
+            for (const file of files) {
+                try {
+                    let buffer;
+                    if (typeof file.arrayBuffer === 'function') {
+                        buffer = await file.arrayBuffer();
+                    } else {
+                        buffer = await new Promise((resolve, reject) => {
+                            const r = new FileReader();
+                            r.onload = () => resolve(r.result);
+                            r.onerror = reject;
+                            r.readAsArrayBuffer(file);
+                        });
+                    }
+
+                    const data = new Uint8Array(buffer);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const result = parseRegistrationWorkbook(workbook, true); // skip intermediate saveData
+                    totalUpdated += (result.updatedCount || 0);
+                    totalNew += (result.newEntries || 0);
+                    totalProcessedFiles++;
+                } catch (fileErr) {
+                    console.error(`Error processing file ${file.name}:`, fileErr);
+                    failedFiles.push(file.name);
+                }
             }
-        };
-        reader.readAsArrayBuffer(file);
-        event.target.value = '';
+
+            // حفظ نهائي موحد للبيانات
+            saveData();
+            hideLoading();
+
+            // تحديث شاشة ملفات المؤسسة تلقائياً إذا كانت مفتوحة
+            if (typeof renderInstitutionFilesTab === 'function') {
+                renderInstitutionFilesTab();
+            }
+
+            if (failedFiles.length === 0) {
+                if (isMulti) {
+                    showToast(`🎉 تم استيراد ومعالجة (${totalProcessedFiles}) ملفات بنجاح! تم تحديث ${totalUpdated} متدرب وإضافة ${totalNew} سجل جديد.`, 'success');
+                } else {
+                    showToast(`✅ تمت معالجة ملف التسجيل بنجاح! تم تحديث ${totalUpdated} متدرب وحفظ ${totalNew} سجلاً محلياً.`, 'success');
+                }
+            } else {
+                showToast(`⚠️ تم استيراد (${totalProcessedFiles}) ملف بنجاح، بينما تعذر قراءة (${failedFiles.length}) ملف: ${failedFiles.join(', ')}`, 'warning');
+            }
+        } catch (err) {
+            hideLoading();
+            console.error('Fatal registration upload error:', err);
+            showToast('حدث خطأ أثناء معالجة ملفات التسجيل: ' + (err.message || ''), 'error');
+        } finally {
+            event.target.value = '';
+        }
     }
 
     function onCompanyChange() {
