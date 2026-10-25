@@ -28897,11 +28897,11 @@ END $$;`;
         const customVidInput = document.getElementById('aiCustomVideoUrl');
         if (customVidInput) customVidInput.value = '';
 
-        // Restore saved server URL if any (ignoring legacy localhost:5005)
+        // Restore saved server URL if any (ignoring legacy or unreachable localhost endpoints)
         const savedUrl = localStorage.getItem('sys_ai_server_url');
         const serverInput = document.getElementById('aiServerUrl');
         if (serverInput) {
-            if (savedUrl && !savedUrl.includes('localhost:5005')) {
+            if (savedUrl && !savedUrl.includes('localhost') && !savedUrl.includes('127.0.0.1')) {
                 serverInput.value = savedUrl;
             } else {
                 serverInput.value = '/api/generate';
@@ -30799,6 +30799,100 @@ function buildDemoExecutiveReport(params) {
         };
     }
 
+    // ══════════════════════════════════════════════════════════════════════════════
+    //  CENTRALIZED AI GENERATION CLIENT (Cross-Origin Fallback & Resilient Fetch)
+    // ══════════════════════════════════════════════════════════════════════════════
+    const PROD_AI_API_ENDPOINT = 'https://attendance-app120.vercel.app/api/generate';
+
+    function resolveAiEndpointUrl(explicitUrl) {
+        let url = (explicitUrl || '').trim();
+        if (!url) {
+            const serverInput = document.getElementById('aiServerUrl');
+            url = (serverInput ? serverInput.value.trim() : '');
+        }
+        const isLocalEnv = (
+            !window.location.protocol ||
+            window.location.protocol === 'file:' ||
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname === ''
+        );
+        if (!url || url === '/api/generate') {
+            return isLocalEnv ? PROD_AI_API_ENDPOINT : '/api/generate';
+        }
+        if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/')) {
+            url = '/' + url;
+        }
+        if (url.startsWith('/') && isLocalEnv) {
+            return PROD_AI_API_ENDPOINT;
+        }
+        return url;
+    }
+
+    async function executeAiGenerationRequest(payload, preferredUrl, timeoutMs = 85000) {
+        const resolvedPrimary = resolveAiEndpointUrl(preferredUrl);
+        const candidateUrls = [resolvedPrimary];
+        if (resolvedPrimary !== PROD_AI_API_ENDPOINT) {
+            candidateUrls.push(PROD_AI_API_ENDPOINT);
+        }
+
+        let lastResult = null;
+        let lastError = null;
+
+        for (let i = 0; i < candidateUrls.length; i++) {
+            const currentUrl = candidateUrls[i];
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+                const response = await fetch(currentUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                const json = await response.json().catch(() => null);
+
+                if (response.ok && json && json.success && json.data) {
+                    return { success: true, data: json.data, raw: json, endpointUsed: currentUrl };
+                }
+
+                const errDetail = (json && (json.error || json.message)) || `HTTP ${response.status} (${response.statusText})`;
+                const safeErr = String(errDetail).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
+                lastResult = {
+                    success: false,
+                    error: `فشل استدعاء الذكاء الاصطناعي Groq [${json?.modelAttempted || 'openai/gpt-oss-120b'} - رمز ${response.status}]: ${safeErr}`,
+                    status: response.status,
+                    json
+                };
+
+                // If local endpoint returned 404 or 405, fallback to candidateUrls[i + 1] (production)
+                if ((response.status === 404 || response.status === 405) && i < candidateUrls.length - 1) {
+                    console.warn(`AI endpoint ${currentUrl} returned ${response.status}. Retrying via production endpoint...`);
+                    continue;
+                }
+                return lastResult;
+            } catch (netErr) {
+                lastError = netErr;
+                const safeMsg = String(netErr?.message || netErr).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
+                console.warn(`AI request to ${currentUrl} encountered error (${safeMsg}).`);
+                if (i < candidateUrls.length - 1) {
+                    console.info('Retrying via live production endpoint:', candidateUrls[i + 1]);
+                    continue;
+                }
+            }
+        }
+
+        const safeNetErr = String(lastError?.message || lastError || 'تعذر الاتصال بخدمة الذكاء الاصطناعي').replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
+        return {
+            success: false,
+            error: `تعذر الاتصال بخدمة الذكاء الاصطناعي: ${safeNetErr}`,
+            isNetworkError: true
+        };
+    }
+
     async function runAiGenerate() {
         const directTextInput = document.getElementById('aiDirectTextInput');
         const directText = directTextInput ? directTextInput.value.trim() : '';
@@ -30826,12 +30920,7 @@ function buildDemoExecutiveReport(params) {
             return;
         }
 
-        const serverUrlInput = document.getElementById('aiServerUrl');
-        let endpointUrl = (serverUrlInput ? serverUrlInput.value.trim() : '') || '/api/generate';
-
-        if (!endpointUrl.startsWith('http://') && !endpointUrl.startsWith('https://') && !endpointUrl.startsWith('/')) {
-            endpointUrl = '/' + endpointUrl;
-        }
+        const endpointUrl = resolveAiEndpointUrl();
 
         const genBtn = document.getElementById('aiGenerateBtn');
         const loadingState = document.getElementById('aiLoadingState');
@@ -30939,34 +31028,14 @@ function buildDemoExecutiveReport(params) {
             }
 
             let result = null;
-
             let apiErrorMessage = null;
-            // Call Groq Cloud AI API (openai/gpt-oss-120b) with timeout
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 45000);
 
-                const response = await fetch(endpointUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-
-                const json = await response.json().catch(() => null);
-                if (response.ok && json && json.success && json.data) {
-                    result = json;
-                } else {
-                    const errDetail = (json && (json.error || json.message)) || `HTTP ${response.status} (${response.statusText})`;
-                    const safeErr = String(errDetail).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
-                    apiErrorMessage = `فشل استدعاء الذكاء الاصطناعي Groq [${json?.modelAttempted || 'openai/gpt-oss-120b'} - رمز ${response.status}]: ${safeErr}`;
-                    console.error('Groq AI error response:', apiErrorMessage);
-                }
-            } catch (netErr) {
-                const safeNetErr = String(netErr?.message || netErr).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
-                apiErrorMessage = `تعذر الاتصال بخدمة الذكاء الاصطناعي: ${safeNetErr}`;
-                console.error('Cloud API network error:', safeNetErr);
+            // Call Groq Cloud AI API (openai/gpt-oss-120b) with resilient fallback
+            const aiCallResult = await executeAiGenerationRequest(payload, endpointUrl, 85000);
+            if (aiCallResult.success && aiCallResult.raw) {
+                result = aiCallResult.raw;
+            } else {
+                apiErrorMessage = aiCallResult.error || 'فشل استدعاء الذكاء الاصطناعي دون إرجاع بيانات صالحة.';
             }
 
             // Strict Policy: NEVER substitute Groq errors with silent local generation
@@ -32235,11 +32304,7 @@ function buildDemoExecutiveReport(params) {
         const targetLabel = targetLabels[target] || 'المحتوى';
         if (loadingMsg) loadingMsg.innerText = `جاري صياغة وتوليد ${targetLabel} عبر الذكاء الاصطناعي...`;
 
-        const serverUrlInput = document.getElementById('aiServerUrl');
-        let endpointUrl = (serverUrlInput ? serverUrlInput.value.trim() : '') || '/api/generate';
-        if (!endpointUrl.startsWith('http://') && !endpointUrl.startsWith('https://') && !endpointUrl.startsWith('/')) {
-            endpointUrl = '/' + endpointUrl;
-        }
+        const endpointUrl = resolveAiEndpointUrl();
 
         const payload = {
             action: target === 'quiz' ? 'generate_quiz' : (target === 'assignment' ? 'generate_assignment' : undefined),
@@ -32253,27 +32318,13 @@ function buildDemoExecutiveReport(params) {
         };
 
         let generatedData = null;
-
         let compApiError = null;
-        try {
-            const resp = await fetch(endpointUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const json = await resp.json().catch(() => null);
-            if (resp.ok && json && json.success && json.data) {
-                generatedData = json.data;
-            } else {
-                const errDetail = (json && (json.error || json.message)) || `HTTP ${resp.status} (${resp.statusText})`;
-                const safeErr = String(errDetail).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
-                compApiError = `فشل استدعاء الذكاء الاصطناعي Groq [رمز ${resp.status}]: ${safeErr}`;
-                console.error(`Component AI Groq error (Status ${resp.status}):`, safeErr);
-            }
-        } catch (fetchErr) {
-            const safeNetErr = String(fetchErr?.message || fetchErr).replace(/gsk_[a-zA-Z0-9_-]+/g, 'gsk_***');
-            compApiError = `تعذر الاتصال بخدمة الذكاء الاصطناعي: ${safeNetErr}`;
-            console.error('Network call to AI generate failed:', safeNetErr);
+
+        const aiCallResult = await executeAiGenerationRequest(payload, endpointUrl, 85000);
+        if (aiCallResult.success && aiCallResult.data) {
+            generatedData = aiCallResult.data;
+        } else {
+            compApiError = aiCallResult.error || 'فشل استدعاء الذكاء الاصطناعي دون إرجاع بيانات صالحة.';
         }
 
         if (loadingState) {
@@ -39418,30 +39469,21 @@ function buildDemoExecutiveReport(params) {
         }
 
         try {
-            const res = await fetch('/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'executive_report',
-                    recipient: 'سعادة الأستاذ المحترم / محمد كمال العواد (مدير التشغيل)',
-                    sender: 'إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك',
-                    weekLabel,
-                    stats,
-                    additionalNotes: notes
-                })
-            });
-
-            if (res.ok) {
-                const json = await res.json();
-                if (json && json.data) {
-                    executiveReportData = json.data;
-                    showToast('تم توليد التقرير الأسبوعي الذكي بنجاح ✨', 'success');
-                } else {
-                    generateDefaultExecutiveReport();
-                }
+            const payload = {
+                action: 'executive_report',
+                recipient: 'سعادة الأستاذ المحترم / محمد كمال العواد (مدير التشغيل)',
+                sender: 'إدارة معهد الذهب الأسود العالي للتدريب - فرع عنك',
+                weekLabel,
+                stats,
+                additionalNotes: notes
+            };
+            const aiCallResult = await executeAiGenerationRequest(payload, '/api/generate', 85000);
+            if (aiCallResult.success && aiCallResult.data) {
+                executiveReportData = aiCallResult.data;
+                showToast('تم توليد التقرير الأسبوعي الذكي بنجاح ✨', 'success');
             } else {
                 generateDefaultExecutiveReport();
-                showToast('تم إعداد مسودة التقرير الذكي استناداً إلى المؤشرات الحية', 'info');
+                showToast('تم إعداد مسودة التقرير استناداً إلى المؤشرات الحية للمعهد', 'info');
             }
         } catch (err) {
             console.warn('AI executive generation error:', err);
