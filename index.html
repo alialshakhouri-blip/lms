@@ -1213,10 +1213,7 @@
                             <span>منصة المحتوى الأكاديمي (Canvas LMS)</span>
                         </button>
 
-                        <a href="https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/edit?gid=405188505#gid=405188505" 
-                           target="_blank" 
-                           rel="noopener noreferrer" 
-                           class="gold-gradient-bg text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm hover:brightness-105 transition border border-amber-400 cursor-pointer" 
+                        <a href="https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/edit?gid=405188505#gid=405188505" target="_blank" rel="noopener noreferrer" onclick="openLiveAttendanceSheet(event)" class="trainer-live-sheet-link gold-gradient-bg text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm hover:brightness-105 transition border border-amber-400 cursor-pointer" 
                            title="الانتقال المباشر إلى كشف التحضير اليومي لتحضير طلاب الشعبة (Google Sheets)">
                             <span class="text-sm">📝</span>
                             <span>رابط التحضير اليومي للشعبة</span>
@@ -1361,10 +1358,7 @@
                             </button>
 
 
-                            <a href="https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/edit?gid=405188505#gid=405188505" 
-                               target="_blank" 
-                               rel="noopener noreferrer" 
-                               class="gold-gradient-bg text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs hover:brightness-105 transition border border-amber-400 cursor-pointer" 
+                            <a href="https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/edit?gid=405188505#gid=405188505" target="_blank" rel="noopener noreferrer" onclick="openLiveAttendanceSheet(event)" class="trainer-live-sheet-link gold-gradient-bg text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs hover:brightness-105 transition border border-amber-400 cursor-pointer" 
                                title="الانتقال إلى كشف التحضير اليومي لتحضير طلاب هذه الشعبة على قوقل شيت">
                                 <span class="text-sm">📝</span>
                                 <span>رابط التحضير اليومي للشعبة</span>
@@ -5093,7 +5087,7 @@
                                 <span>معاينة وتدقيق أعمدة ملف المؤسسة الـ (11)</span>
                             </h3>
                             <p class="text-[11px] text-slate-500 mt-0.5">
-                                الترتيب المعتمد: رقم الهوية، الاسم الأول، الثاني، الثالث، الأخير، تاريخ الميلاد (m/d/Y)، النوع، الجنسية، المؤهل، البريد، الجوال.
+                                الترتيب المعتمد: رقم الجوال، البريد الإلكتروني، المؤهل، الجنسية، النوع، تاريخ الميلاد (m/d/Y)، الاسم الأخير، الثالث، الثاني، الأول، رقم الهوية.
                             </p>
                         </div>
                         <div class="flex items-center gap-2">
@@ -5111,17 +5105,17 @@
                             <thead>
                                 <tr class="bg-slate-100 text-slate-700 font-black border-b border-slate-200 text-[11px] whitespace-nowrap">
                                     <th class="p-3 text-center w-10">#</th>
-                                    <th class="p-3 text-center">1. رقم الهوية</th>
-                                    <th class="p-3">2. الاسم الأول</th>
-                                    <th class="p-3">3. الاسم الثاني</th>
-                                    <th class="p-3">4. الاسم الثالث</th>
-                                    <th class="p-3">5. الاسم الأخير</th>
+                                    <th class="p-3 text-center">1. رقم الجوال</th>
+                                    <th class="p-3">2. البريد الإلكتروني</th>
+                                    <th class="p-3">3. المؤهل</th>
+                                    <th class="p-3 text-center">4. الجنسية</th>
+                                    <th class="p-3 text-center">5. النوع</th>
                                     <th class="p-3 text-center">6. تاريخ الميلاد (m/d/Y)</th>
-                                    <th class="p-3 text-center">7. النوع</th>
-                                    <th class="p-3 text-center">8. الجنسية</th>
-                                    <th class="p-3">9. المؤهل</th>
-                                    <th class="p-3">10. البريد الإلكتروني</th>
-                                    <th class="p-3 text-center">11. رقم الجوال</th>
+                                    <th class="p-3">7. الاسم الأخير</th>
+                                    <th class="p-3">8. الاسم الثالث</th>
+                                    <th class="p-3">9. الاسم الثاني</th>
+                                    <th class="p-3">10. الاسم الأول</th>
+                                    <th class="p-3 text-center">11. رقم الهوية</th>
                                     <th class="p-3 text-center">حالة التدقيق</th>
                                     <th class="p-3 text-center">إجراء</th>
                                 </tr>
@@ -8526,6 +8520,14 @@
         
         // Capacity pill in profile
         document.getElementById('tdTrainerCapacityPill').innerText = `عدد المقاعد: ${trainer.capacity} مقعد`;
+        
+        // Dynamically update attendance sheet links to current live sheet URL
+        try {
+            const currentLiveSheet = (typeof getLiveSheetUrl === 'function') ? getLiveSheetUrl() : PUBLIC_LIVE_SHEET_URL;
+            document.querySelectorAll('.trainer-live-sheet-link').forEach(link => {
+                if (link) link.href = currentLiveSheet;
+            });
+        } catch(e) {}
 
         const sel = document.getElementById('tdSelectTrainer');
         if (sel) {
@@ -9757,7 +9759,6 @@
                 if (!company && currentSelectedCompany && currentSelectedCompany !== 'ALL') {
                     company = currentSelectedCompany;
                 }
-                if (!company) company = 'المؤسسة';
 
                 // حفظ في دليل الهواتف والبيانات الداخلي
                 phoneDirectory[id] = {
@@ -9801,36 +9802,8 @@
                     }
                 });
 
-                // إذا لم يكن المتدرب موجوداً بعد في كشف الحضور، يُضاف لضمان الاحتفاظ بكافة بياناته
-                if (!matched) {
-                    trainees.push({
-                        id,
-                        name: (name && name !== 'متدرب بدون اسم') ? name : 'متدرب',
-                        originalName: name || 'متدرب',
-                        company: company || 'المؤسسة',
-                        group: group || 'عام',
-                        room: 'غير محدد',
-                        qual: qual || 'غير محدد',
-                        phone: phone || '',
-                        email: email || '',
-                        notes: '',
-                        dob: formattedDob || '',
-                        gender: normGender || '',
-                        nationality: rawNationality || (id.startsWith('1') ? 'سعودي' : ''),
-                        first_name: finalP1 || '',
-                        second_name: finalP2 || '',
-                        third_name: finalP3 || '',
-                        last_name: finalP4 || '',
-                        rate: 100,
-                        weeklyAttendance: [
-                            [false, false, false, false],
-                            [false, false, false, false],
-                            [false, false, false, false],
-                            [false, false, false, false],
-                            [false, false, false, false]
-                        ]
-                    });
-                }
+                // الاحتفاظ ببيانات التسجيل في دليل المؤسسة والهواتف دون تلويث كشف الحضور الفعلي
+                // المتدربون الفعليون يؤخذون حصراً من كشف الحضور اليومي لشيت Google Sheets المعتمد
             });
         });
 
@@ -9962,7 +9935,7 @@
                     id,
                     name: regInfo.name || rawName,
                     originalName: rawName,
-                    company: regInfo.company || company,
+                    company: (regInfo.company && regInfo.company !== 'المؤسسة' && regInfo.company !== 'عام') ? regInfo.company : company,
                     group,
                     room: regInfo.room || room || 'غير محدد',
                     qual: regInfo.qual || 'غير محدد',
@@ -10825,6 +10798,13 @@
         return url;
     }
 
+    function openLiveAttendanceSheet(e) {
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
+        const liveUrl = (typeof getLiveSheetUrl === 'function') ? getLiveSheetUrl() : PUBLIC_LIVE_SHEET_URL;
+        window.open(liveUrl, '_blank', 'noopener,noreferrer');
+    }
+    window.openLiveAttendanceSheet = openLiveAttendanceSheet;
+
     function openLiveSheetConfigModal() {
         const modal = document.getElementById('liveSheetConfigModal');
         const input = document.getElementById('modalLiveSheetUrlInput');
@@ -10952,6 +10932,7 @@
     const TRAINER_SYNC_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes (600,000 ms)
 
     function getTrainerSyncRemainingMs() {
+        if (currentUser?.role === 'superadmin' || currentUser?.role === 'admin') return 0;
         const trainerKey = currentUser?.id || currentUser?.username || activeTrainerForDashboard || 'trainer';
         const cooldownKey = `sys_trainer_last_attendance_sync_${trainerKey}`;
         const lastSync = parseInt(localStorage.getItem(cooldownKey) || '0', 10);
@@ -13618,6 +13599,13 @@
                 const vercelApiUrl = `/api/fetch-sheet?url=${encodeURIComponent(exportUrl)}&_t=${Date.now()}`;
                 const r = await fetch(vercelApiUrl, { cache: 'no-store' });
                 if (!r.ok) throw new Error(`Vercel API error ${r.status}`);
+                return await r.arrayBuffer();
+            },
+            // 1.1 بروكسي الإنتاج المباشر المعتمد (يعمل بكفاءة حتى عند الفتح المحلي أو عبر نطاقات أخرى)
+            async () => {
+                const prodApiUrl = `https://attendance-app120.vercel.app/api/fetch-sheet?url=${encodeURIComponent(exportUrl)}&_t=${Date.now()}`;
+                const r = await fetch(prodApiUrl, { cache: 'no-store' });
+                if (!r.ok) throw new Error(`Prod Vercel API error ${r.status}`);
                 return await r.arrayBuffer();
             },
             // 2. الجلب المباشر (يعمل في حال كان الرابط منشوراً للويب /pub?output=xlsx)
@@ -19960,37 +19948,27 @@
                 <tr class="${rowBg} transition border-b border-slate-100" id="instRow-${r.id}">
                     <td class="p-2.5 text-center font-bold text-slate-500">${r.idx + 1}</td>
                     
-                    <!-- 1. رقم الهوية -->
-                    <td class="p-2 text-center">
-                        <span class="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded-md text-xs select-all">${escapeHtml(r.id)}</span>
-                    </td>
-
-                    <!-- 2. الاسم الأول -->
-                    <td class="p-1.5">
-                        <input type="text" value="${escapeHtml(r.first)}" onchange="saveInstTraineeField('${r.id}', 'first', this.value)" placeholder="الاسم الأول" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
-                    </td>
-
-                    <!-- 3. الاسم الثاني -->
-                    <td class="p-1.5">
-                        <input type="text" value="${escapeHtml(r.second)}" onchange="saveInstTraineeField('${r.id}', 'second', this.value)" placeholder="اسم الأب" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
-                    </td>
-
-                    <!-- 4. الاسم الثالث -->
-                    <td class="p-1.5">
-                        <input type="text" value="${escapeHtml(r.third)}" onchange="saveInstTraineeField('${r.id}', 'third', this.value)" placeholder="اسم الجد" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
-                    </td>
-
-                    <!-- 5. الاسم الأخير -->
-                    <td class="p-1.5">
-                        <input type="text" value="${escapeHtml(r.last)}" onchange="saveInstTraineeField('${r.id}', 'last', this.value)" placeholder="اللقب / العائلة" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
-                    </td>
-
-                    <!-- 6. تاريخ الميلاد (m/d/Y) -->
+                    <!-- 1. رقم الجوال -->
                     <td class="p-1.5 text-center">
-                        <input type="text" value="${escapeHtml(r.dob)}" onchange="saveInstTraineeField('${r.id}', 'dob', this.value)" placeholder="m/d/Y مثل: 10/25/2000" class="w-28 text-center font-mono ${!r.dob ? 'border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'} border focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                        <input type="text" value="${escapeHtml(r.phone)}" onchange="saveInstTraineeField('${r.id}', 'phone', this.value)" placeholder="05xxxxxxxx" class="w-28 text-center font-mono ${!r.phone ? 'border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'} border focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
                     </td>
 
-                    <!-- 7. النوع -->
+                    <!-- 2. البريد الإلكتروني -->
+                    <td class="p-1.5">
+                        <input type="email" value="${escapeHtml(r.email)}" onchange="saveInstTraineeField('${r.id}', 'email', this.value)" placeholder="name@domain.com" class="w-36 font-mono ${!r.email ? 'border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'} border focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                    </td>
+
+                    <!-- 3. المؤهل -->
+                    <td class="p-1.5">
+                        <input type="text" value="${escapeHtml(r.qual)}" onchange="saveInstTraineeField('${r.id}', 'qual', this.value)" placeholder="المؤهل (ثانوي، دبلوم..)" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                    </td>
+
+                    <!-- 4. الجنسية -->
+                    <td class="p-1.5 text-center">
+                        <input type="text" value="${escapeHtml(r.nationality)}" onchange="saveInstTraineeField('${r.id}', 'nationality', this.value)" placeholder="الجنسية" class="w-20 text-center bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                    </td>
+
+                    <!-- 5. النوع -->
                     <td class="p-1.5 text-center">
                         <select onchange="saveInstTraineeField('${r.id}', 'gender', this.value)" class="bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
                             <option value="ذكر" ${r.gender === 'ذكر' ? 'selected' : ''}>ذكر</option>
@@ -19998,24 +19976,34 @@
                         </select>
                     </td>
 
-                    <!-- 8. الجنسية -->
+                    <!-- 6. تاريخ الميلاد (m/d/Y) -->
                     <td class="p-1.5 text-center">
-                        <input type="text" value="${escapeHtml(r.nationality)}" onchange="saveInstTraineeField('${r.id}', 'nationality', this.value)" placeholder="الجنسية" class="w-20 text-center bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                        <input type="text" value="${escapeHtml(r.dob)}" onchange="saveInstTraineeField('${r.id}', 'dob', this.value)" placeholder="m/d/Y مثل: 10/25/2000" class="w-28 text-center font-mono ${!r.dob ? 'border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'} border focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
                     </td>
 
-                    <!-- 9. المؤهل -->
+                    <!-- 7. الاسم الأخير -->
                     <td class="p-1.5">
-                        <input type="text" value="${escapeHtml(r.qual)}" onchange="saveInstTraineeField('${r.id}', 'qual', this.value)" placeholder="المؤهل (ثانوي، دبلوم..)" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                        <input type="text" value="${escapeHtml(r.last)}" onchange="saveInstTraineeField('${r.id}', 'last', this.value)" placeholder="اللقب / العائلة" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
                     </td>
 
-                    <!-- 10. البريد الإلكتروني -->
+                    <!-- 8. الاسم الثالث -->
                     <td class="p-1.5">
-                        <input type="email" value="${escapeHtml(r.email)}" onchange="saveInstTraineeField('${r.id}', 'email', this.value)" placeholder="name@domain.com" class="w-36 font-mono ${!r.email ? 'border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'} border focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                        <input type="text" value="${escapeHtml(r.third)}" onchange="saveInstTraineeField('${r.id}', 'third', this.value)" placeholder="اسم الجد" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
                     </td>
 
-                    <!-- 11. رقم الجوال -->
-                    <td class="p-1.5 text-center">
-                        <input type="text" value="${escapeHtml(r.phone)}" onchange="saveInstTraineeField('${r.id}', 'phone', this.value)" placeholder="05xxxxxxxx" class="w-28 text-center font-mono ${!r.phone ? 'border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'} border focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                    <!-- 9. الاسم الثاني -->
+                    <td class="p-1.5">
+                        <input type="text" value="${escapeHtml(r.second)}" onchange="saveInstTraineeField('${r.id}', 'second', this.value)" placeholder="اسم الأب" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                    </td>
+
+                    <!-- 10. الاسم الأول -->
+                    <td class="p-1.5">
+                        <input type="text" value="${escapeHtml(r.first)}" onchange="saveInstTraineeField('${r.id}', 'first', this.value)" placeholder="الاسم الأول" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                    </td>
+
+                    <!-- 11. رقم الهوية -->
+                    <td class="p-2 text-center">
+                        <span class="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded-md text-xs select-all">${escapeHtml(r.id)}</span>
                     </td>
 
                     <!-- حالة التدقيق -->
@@ -20275,17 +20263,17 @@
             }
 
             return {
-                'رقم الهوية': cleanId,
-                'الاسم الأول': first,
-                'الاسم الثاني': second,
-                'الاسم الثالث': third,
-                'الاسم الأخير': last,
-                'تاريخ الميلاد (m/d/Y)': formattedDob,
-                'النوع (ذكر / انثى)': normGender,
-                'الجنسية': nationality,
-                'المؤهل': qual,
+                'رقم الجوال': cleanPh,
                 'البريد الإلكتروني': email,
-                'رقم الجوال': cleanPh
+                'المؤهل': qual,
+                'الجنسية': nationality,
+                'النوع (ذكر / انثى)': normGender,
+                'تاريخ الميلاد (m/d/Y)': formattedDob,
+                'الاسم الأخير': last,
+                'الاسم الثالث': third,
+                'الاسم الثاني': second,
+                'الاسم الأول': first,
+                'رقم الهوية': cleanId
             };
         });
 
@@ -20295,56 +20283,59 @@
         }
 
         try {
-            // توليد الشيت مع الترتيب الحرفي للأعمدة
+            // توليد الشيت مع الترتيب المعكوس للأعمدة وفق طلب المؤسسة
             const ws = XLSX.utils.json_to_sheet(exportRows, {
                 header: [
-                    'رقم الهوية',
-                    'الاسم الأول',
-                    'الاسم الثاني',
-                    'الاسم الثالث',
-                    'الاسم الأخير',
-                    'تاريخ الميلاد (m/d/Y)',
-                    'النوع (ذكر / انثى)',
-                    'الجنسية',
-                    'المؤهل',
+                    'رقم الجوال',
                     'البريد الإلكتروني',
-                    'رقم الجوال'
+                    'المؤهل',
+                    'الجنسية',
+                    'النوع (ذكر / انثى)',
+                    'تاريخ الميلاد (m/d/Y)',
+                    'الاسم الأخير',
+                    'الاسم الثالث',
+                    'الاسم الثاني',
+                    'الاسم الأول',
+                    'رقم الهوية'
                 ]
             });
 
-            // ضبط خلايا رقم الهوية (العمود 0) ورقم الجوال (العمود 10) كنصوص صريحة للحفاظ التام على الصفر باليسار
+            // ضبط خلايا رقم الجوال (العمود 0) ورقم الهوية (العمود 10) كنصوص صريحة للحفاظ التام على الصفر باليسار
             if (ws['!ref']) {
                 const range = XLSX.utils.decode_range(ws['!ref']);
                 for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-                    const idRef = XLSX.utils.encode_cell({ c: 0, r: R });
-                    if (ws[idRef]) {
-                        ws[idRef].t = 's';
-                        ws[idRef].z = '@';
-                        ws[idRef].v = String(ws[idRef].v || '').trim();
-                    }
-                    const phRef = XLSX.utils.encode_cell({ c: 10, r: R });
+                    const phRef = XLSX.utils.encode_cell({ c: 0, r: R });
                     if (ws[phRef]) {
                         ws[phRef].t = 's';
                         ws[phRef].z = '@';
                         ws[phRef].v = String(ws[phRef].v || '').trim();
+                    }
+                    const idRef = XLSX.utils.encode_cell({ c: 10, r: R });
+                    if (ws[idRef]) {
+                        ws[idRef].t = 's';
+                        ws[idRef].z = '@';
+                        ws[idRef].v = String(ws[idRef].v || '').trim();
                     }
                 }
             }
 
             // عرض وتنسيق مناسب لأعمدة المؤسسة
             ws['!cols'] = [
-                { wch: 16 }, // رقم الهوية
-                { wch: 16 }, // الاسم الأول
-                { wch: 16 }, // الاسم الثاني
-                { wch: 16 }, // الاسم الثالث
-                { wch: 16 }, // الاسم الأخير
-                { wch: 22 }, // تاريخ الميلاد (m/d/Y)
-                { wch: 18 }, // النوع (ذكر / انثى)
-                { wch: 14 }, // الجنسية
-                { wch: 16 }, // المؤهل
+                { wch: 16 }, // رقم الجوال
                 { wch: 28 }, // البريد الإلكتروني
-                { wch: 16 }  // رقم الجوال
+                { wch: 16 }, // المؤهل
+                { wch: 14 }, // الجنسية
+                { wch: 18 }, // النوع (ذكر / انثى)
+                { wch: 22 }, // تاريخ الميلاد (m/d/Y)
+                { wch: 16 }, // الاسم الأخير
+                { wch: 16 }, // الاسم الثالث
+                { wch: 16 }, // الاسم الثاني
+                { wch: 16 }, // الاسم الأول
+                { wch: 16 }  // رقم الهوية
             ];
+
+            // تفعيل اتجاه الورقة من اليمين لليسار (RTL)
+            ws['!views'] = [{ RTL: true }];
 
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'ملف المؤسسة');
@@ -26056,6 +26047,24 @@
     }
     window.pullLmsCoursesFromSupabase = pullLmsCoursesFromSupabase;
 
+    // سجل تومبستون العناصر المحذوفة لمنع عودتها عند المزامنة السحابية
+    let deletedLmsItemIds = new Set();
+    try {
+        const savedDeleted = JSON.parse(localStorage.getItem('sys_lms_deleted_items_v1') || '[]');
+        if (Array.isArray(savedDeleted)) {
+            deletedLmsItemIds = new Set(savedDeleted.map(String));
+        }
+    } catch (e) {}
+
+    function registerLmsItemDeleted(idOrTitle) {
+        if (!idOrTitle) return;
+        deletedLmsItemIds.add(String(idOrTitle));
+        try {
+            localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
+        } catch (e) {}
+    }
+    window.registerLmsItemDeleted = registerLmsItemDeleted;
+
     function mergeCloudCoursesIntoLocal(cloudCourses) {
         if (!cloudCourses || typeof cloudCourses !== 'object') return;
         let localChanged = false;
@@ -26087,44 +26096,100 @@
                         // Deep merge per component: Quizzes, Assignments, Videos, Docs
                         const targetW = { ...cW, ...lW };
 
-                        // 1. Quizzes
+                        // 1. Quizzes (حظر إعادة العناصر المحذوفة)
                         const lQ = Array.isArray(lW.quizzes) ? lW.quizzes : [];
                         const cQ = Array.isArray(cW.quizzes) ? cW.quizzes : [];
                         const qMap = new Map();
-                        cQ.forEach(q => { if (q && (q.id || q.title)) qMap.set(String(q.id || q.title), q); });
-                        lQ.forEach(q => { if (q && (q.id || q.title)) qMap.set(String(q.id || q.title), q); });
+                        cQ.forEach(q => {
+                            if (q && (q.id || q.title)) {
+                                const k = String(q.id || q.title);
+                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title))) {
+                                    qMap.set(k, q);
+                                }
+                            }
+                        });
+                        lQ.forEach(q => {
+                            if (q && (q.id || q.title)) {
+                                const k = String(q.id || q.title);
+                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title))) {
+                                    qMap.set(k, q);
+                                }
+                            }
+                        });
                         targetW.quizzes = Array.from(qMap.values());
-                        if (targetW.quizzes.length > cQ.length) needsCloudSync = true;
+                        if (targetW.quizzes.length !== cQ.length) needsCloudSync = true;
                         if (targetW.quizzes.length !== lQ.length) localChanged = true;
 
-                        // 2. Assignments
+                        // 2. Assignments (حظر إعادة التكليفات المحذوفة)
                         const lA = Array.isArray(lW.assignments) ? lW.assignments : [];
                         const cA = Array.isArray(cW.assignments) ? cW.assignments : [];
                         const aMap = new Map();
-                        cA.forEach(a => { if (a && (a.id || a.title)) aMap.set(String(a.id || a.title), a); });
-                        lA.forEach(a => { if (a && (a.id || a.title)) aMap.set(String(a.id || a.title), a); });
+                        cA.forEach(a => {
+                            if (a && (a.id || a.title)) {
+                                const k = String(a.id || a.title);
+                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title))) {
+                                    aMap.set(k, a);
+                                }
+                            }
+                        });
+                        lA.forEach(a => {
+                            if (a && (a.id || a.title)) {
+                                const k = String(a.id || a.title);
+                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title))) {
+                                    aMap.set(k, a);
+                                }
+                            }
+                        });
                         targetW.assignments = Array.from(aMap.values());
-                        if (targetW.assignments.length > cA.length) needsCloudSync = true;
+                        if (targetW.assignments.length !== cA.length) needsCloudSync = true;
                         if (targetW.assignments.length !== lA.length) localChanged = true;
 
-                        // 3. Videos
+                        // 3. Videos (حظر إعادة المحاضرات المرئية المحذوفة)
                         const lV = Array.isArray(lW.videos) ? lW.videos : [];
                         const cV = Array.isArray(cW.videos) ? cW.videos : [];
                         const vMap = new Map();
-                        cV.forEach(v => { if (v && (v.id || v.title || v.url)) vMap.set(String(v.id || v.title || v.url), v); });
-                        lV.forEach(v => { if (v && (v.id || v.title || v.url)) vMap.set(String(v.id || v.title || v.url), v); });
+                        cV.forEach(v => {
+                            if (v && (v.id || v.title || v.url)) {
+                                const k = String(v.id || v.title || v.url);
+                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title))) {
+                                    vMap.set(k, v);
+                                }
+                            }
+                        });
+                        lV.forEach(v => {
+                            if (v && (v.id || v.title || v.url)) {
+                                const k = String(v.id || v.title || v.url);
+                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title))) {
+                                    vMap.set(k, v);
+                                }
+                            }
+                        });
                         targetW.videos = Array.from(vMap.values());
-                        if (targetW.videos.length > cV.length) needsCloudSync = true;
+                        if (targetW.videos.length !== cV.length) needsCloudSync = true;
                         if (targetW.videos.length !== lV.length) localChanged = true;
 
-                        // 4. Docs
+                        // 4. Docs (حظر إعادة المذكرات المحذوفة)
                         const lD = Array.isArray(lW.docs) ? lW.docs : [];
                         const cD = Array.isArray(cW.docs) ? cW.docs : [];
                         const dMap = new Map();
-                        cD.forEach(d => { if (d && (d.id || d.title)) dMap.set(String(d.id || d.title), d); });
-                        lD.forEach(d => { if (d && (d.id || d.title)) dMap.set(String(d.id || d.title), d); });
+                        cD.forEach(d => {
+                            if (d && (d.id || d.title)) {
+                                const k = String(d.id || d.title);
+                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title))) {
+                                    dMap.set(k, d);
+                                }
+                            }
+                        });
+                        lD.forEach(d => {
+                            if (d && (d.id || d.title)) {
+                                const k = String(d.id || d.title);
+                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title))) {
+                                    dMap.set(k, d);
+                                }
+                            }
+                        });
                         targetW.docs = Array.from(dMap.values());
-                        if (targetW.docs.length > cD.length) needsCloudSync = true;
+                        if (targetW.docs.length !== cD.length) needsCloudSync = true;
                         if (targetW.docs.length !== lD.length) localChanged = true;
 
                         mergedWeeks.push(targetW);
@@ -27738,11 +27803,18 @@ END $$;`;
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
-        if (activeWeek && activeWeek.videos) {
+        if (activeWeek && activeWeek.videos && activeWeek.videos[idx]) {
+            const v = activeWeek.videos[idx];
+            registerLmsItemDeleted(v.id);
+            registerLmsItemDeleted(v.title);
+            registerLmsItemDeleted(v.url);
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && v.id) {
+                supabaseClient.from('lectures').delete().eq('id', v.id).catch(() => {});
+            }
             activeWeek.videos.splice(idx, 1);
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف المحاضرة', 'info');
+            showToast('تم حذف المحاضرة نهائياً ولن تعود مجدداً ✓', 'info');
         }
     }
 
@@ -27858,6 +27930,16 @@ END $$;`;
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (!activeWeek) return;
 
+        const targetDoc = (activeWeek.docs && activeWeek.docs[idx]) || (activeWeek.documents && activeWeek.documents[idx]);
+        if (targetDoc) {
+            registerLmsItemDeleted(targetDoc.id);
+            registerLmsItemDeleted(targetDoc.title);
+            registerLmsItemDeleted(targetDoc.url);
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && targetDoc.id) {
+                supabaseClient.from('lectures').delete().eq('id', targetDoc.id).catch(() => {});
+            }
+        }
+
         if (activeWeek.docs && activeWeek.docs[idx]) {
             activeWeek.docs.splice(idx, 1);
         }
@@ -27866,7 +27948,7 @@ END $$;`;
         }
         persistLmsCourses();
         renderTrainerLms();
-        showToast('تم حذف مذكرة المراجعة', 'info');
+        showToast('تم حذف مذكرة المراجعة نهائياً ولن تعود مجدداً ✓', 'info');
     }
 
     function openReadDocModal(docId) {
@@ -28374,11 +28456,17 @@ END $$;`;
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
-        if (activeWeek && activeWeek.quizzes) {
+        if (activeWeek && activeWeek.quizzes && activeWeek.quizzes[idx]) {
+            const q = activeWeek.quizzes[idx];
+            registerLmsItemDeleted(q.id);
+            registerLmsItemDeleted(q.title);
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && q.id) {
+                supabaseClient.from('quizzes').delete().eq('id', q.id).catch(() => {});
+            }
             activeWeek.quizzes.splice(idx, 1);
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف الاختبار', 'info');
+            showToast('تم حذف الاختبار نهائياً ولن يعود مجدداً ✓', 'info');
         }
     }
 
@@ -28708,11 +28796,17 @@ END $$;`;
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
-        if (activeWeek && activeWeek.assignments) {
+        if (activeWeek && activeWeek.assignments && activeWeek.assignments[idx]) {
+            const a = activeWeek.assignments[idx];
+            registerLmsItemDeleted(a.id);
+            registerLmsItemDeleted(a.title);
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && a.id) {
+                supabaseClient.from('assignments').delete().eq('id', a.id).catch(() => {});
+            }
             activeWeek.assignments.splice(idx, 1);
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف الواجب', 'info');
+            showToast('تم حذف الواجب نهائياً ولن يعود مجدداً ✓', 'info');
         }
     }
 
