@@ -47,9 +47,9 @@ const LMS_PROMPT_TEMPLATE = `أنت خبير أكاديمي ومصمم مناه�
    - في جميع أسئلة الاختيار من متعدد (MCQ): يجب أن تكون الإجابة المحددة في حقل "correct_answer" مطابقة تماماً وبشكل حرفي لأحد الخيارات الأربعة المذكورة في مصفوفة "options"، وتكون هي الإجابة الصحيحة منطقياً وعلمياً دون أي تناقض.
    - في أسئلة الصح والخطأ: حدد "صح ✓" أو "خطأ ✗" بدقة متناهية مع تفسير منطقي صريح ومباشر لسبب الصحة أو الخطأ، ويجب أن تتطابق الإجابة الصحيحة مع مضمون العبارة.
    - في سؤال التوصيل والمطابقة (Matching): اربط كل مفهوم في "left" بتعريفه الدقيق الصحيح 100% في "right" من واقع الدرس الحالي.
-3. الفيديوهات التعليمية المقترحة:
-   - وفر 3 فيديوهات ذات عناوين دقيقة تركز حصراً على موضوع الدرس الحالي.
-   - لا تخترع معرفات فيديو عشوائية قد تكون غير صالحة. وفر روابط فيديو تعليمية حقيقية أو روابط بحث تعليمية صريحة على يوتيوب بصيغة: https://www.youtube.com/results?search_query=... متوافقة مع عنوان الفيديو.
+3. الفيديو التعليمي المقترح:
+   - وفر فيديو تعليمي واحد فقط واقعي ومباشر يركز حصراً وبشكل تام على موضوع الدرس الحالي.
+   - لا تخترع معرفات فيديو عشوائية قد تكون غير صالحة. وفر رابط بحث تعليمي صريح ومباشر على يوتيوب بصيغة: https://www.youtube.com/results?search_query=... متوافق حرفياً مع عنوان الفيديو والموضوع الحالي.
 4. مكونات التقييمات:
    - الواجب الأسبوعي: أسئلة تطبيقية محددة + تكليف نصي عملي يربط المهارة والمفهوم بالتطبيق الواقعي.
    - الاختبار الأسبوعي: يجب عليك توليد 10 أسئلة متكاملة ومستنبطة 100% من صلب النص والموضوع (6 أسئلة اختيار من متعدد MCQ + 3 أسئلة صح وخطأ + سؤال توصيل ومطابقة Matching واحد يحتوي على 4 أزواج متطابقة تماماً). لا تنقص عن 10 أسئلة إطلاقاً!
@@ -60,23 +60,9 @@ const LMS_PROMPT_TEMPLATE = `أنت خبير أكاديمي ومصمم مناه�
   "suggested_videos": [
     {
       "id": 1,
-      "title": "عنوان مقترح للفيديو التدريبي الأول (باللغة الإنجليزية أو العربية)",
-      "description": "شرح موجز لمحتوى الفيديو والمهارة أو القيمة التي يشرحها",
+      "title": "عنوان مقترح للفيديو التدريبي الواقعي المرتبط بالموضوع حصراً",
+      "description": "شرح موجز لمحتوى الفيديو والمهارة أو القيمة التي يشرحها في سياق الدرس الحالي",
       "duration": "10-15 دقيقة",
-      "youtube_url": "https://www.youtube.com/results?search_query=..."
-    },
-    {
-      "id": 2,
-      "title": "عنوان مقترح للفيديو التدريبي الثاني",
-      "description": "شرح تفصيلي للمفاهيم الأساسية والتطبيق الواقعي في بيئة العمل أو الحياة",
-      "duration": "8-12 دقيقة",
-      "youtube_url": "https://www.youtube.com/results?search_query=..."
-    },
-    {
-      "id": 3,
-      "title": "عنوان مقترح للفيديو التدريبي الثالث",
-      "description": "فيديو إثرائي مكمل للموضوع مع أمثلة واقعية",
-      "duration": "12-18 دقيقة",
       "youtube_url": "https://www.youtube.com/results?search_query=..."
     }
   ],
@@ -967,16 +953,14 @@ const CURATED_EDUCATIONAL_VIDEOS = [
 function resolveDirectEducationalVideos(contextText = '', title = '') {
   const cleanTitle = (title || 'الموضوع التدريبي').replace(/^(?:محاضرة|درس|الوحدة)\s*[:\-]\s*/, '').trim();
   const defaultVideos = [
-    { id: 1, title: `شرح تعليمي مرئي: ${cleanTitle}`, url: `https://www.youtube.com/results?search_query=${encodeURIComponent(cleanTitle + ' شرح تعليمي')}`, duration: '12:00 دقيقة' },
-    { id: 2, title: `تطبيقات وأمثلة عملية لـ ${cleanTitle}`, url: `https://www.youtube.com/results?search_query=${encodeURIComponent(cleanTitle + ' تطبيقات عملية وأمثلة')}`, duration: '10:15 دقيقة' },
-    { id: 3, title: `ملخص شامل وإرشادات في ${cleanTitle}`, url: `https://www.youtube.com/results?search_query=${encodeURIComponent(cleanTitle + ' ملخص شامل')}`, duration: '08:45 دقيقة' }
+    { id: 1, title: `شرح تعليمي مرئي: ${cleanTitle}`, url: `https://www.youtube.com/results?search_query=${encodeURIComponent(cleanTitle + ' شرح تعليمي')}`, duration: '12:00 دقيقة' }
   ];
 
   const hay = (contextText + ' ' + title).toLowerCase();
   const matched = CURATED_EDUCATIONAL_VIDEOS.find(c => c.keywords.some(k => hay.includes(k)));
-  const list = matched ? matched.videos : defaultVideos;
-  return list.map((v, i) => ({
-    id: i + 1,
+  const list = matched ? matched.videos.slice(0, 1) : defaultVideos;
+  return list.slice(0, 1).map((v, i) => ({
+    id: 1,
     title: v.title,
     description: `فيديو ومورد تعليمي يشرح المفاهيم والتطبيقات المرتبطة بـ ${cleanTitle}.`,
     duration: v.duration,
@@ -998,7 +982,7 @@ function ensureSpecificYouTubeVideos(data, contextTitle = '') {
   if (!Array.isArray(data.suggested_videos) || data.suggested_videos.length === 0) {
     data.suggested_videos = directVideos;
   } else {
-    data.suggested_videos = data.suggested_videos.slice(0, 3).map((v, i) => {
+    data.suggested_videos = data.suggested_videos.slice(0, 1).map((v, i) => {
       let url = (v.youtube_url || v.url || '').trim();
       const isSearchUrl = url.includes('results?') || url.includes('search_query=') || url.includes('/results');
       
@@ -1006,7 +990,7 @@ function ensureSpecificYouTubeVideos(data, contextTitle = '') {
         // Keep valid search query URLs intact
         return {
           ...v,
-          id: v.id || (i + 1),
+          id: 1,
           youtube_url: url
         };
       }
@@ -1018,11 +1002,11 @@ function ensureSpecificYouTubeVideos(data, contextTitle = '') {
       if (videoMatch && videoMatch[1] && !videoMatch[1].startsWith('0000') && !videoMatch[1].toLowerCase().includes('example') && !isKnownDead) {
         url = `https://www.youtube.com/watch?v=${videoMatch[1]}`;
       } else {
-        url = directVideos[i % directVideos.length].youtube_url;
+        url = directVideos[0]?.youtube_url || `https://www.youtube.com/results?search_query=${encodeURIComponent((contextTitle || data.lecture?.title || 'شرح الدرس') + ' تعليمي')}`;
       }
       return {
         ...v,
-        id: v.id || (i + 1),
+        id: 1,
         youtube_url: url
       };
     });
@@ -1892,6 +1876,7 @@ function buildDemoExecutiveReport(params) {
 // ══════════════════════════════════════════════════════════════════════════════
 async function handleDedicatedQuizGeneration(req, res, startTime) {
   const { courseName, weekTitle, weekTopic, textInput, lessonContent, questionsCount = 10 } = req.body || {};
+  const targetCount = Number(questionsCount) === 5 ? 5 : 10;
   
   const rawApiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || "";
   const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, "");
@@ -1932,13 +1917,94 @@ async function handleDedicatedQuizGeneration(req, res, startTime) {
   if (expandedCurriculum && expandedCurriculum.pillars) {
     curriculumInstruction = "\n\n## التوسيع الأكاديمي والتربوي الإلزامي للدرس (بناء تعليمي منضبط):\n" +
       "الموضوع الأصلي المدخل: \"" + expandedCurriculum.original_user_input + "\"\n" +
-      "يجب أن تنبثق جميع الأسئلة الـ 10 وسيناريوهاتها حصراً ومباشرة من المحاور الخمسة التالية:\n" +
+      `يجب أن تنبثق جميع الأسئلة الـ ${targetCount} وسيناريوهاتها حصراً ومباشرة من المحاور الخمسة التالية:\n` +
       expandedCurriculum.pillars.map((p, i) => `${i + 1}. ${p.title} (${p.concept || ''}): ${p.description}`).join("\n") + "\n\n" +
       "تحذير صارم: يُحظر حظراً باتاً صياغة أي أسئلة عامة أو معلبة. كل سؤال يجب أن يقيس موقفاً سلوكياً أو تطبيقياً محدداً من هذه المحاور.";
   }
 
+  const promptStructure = targetCount === 5
+    ? "3. تنوع وشمولية بنية الأسئلة (5 أسئلة متكاملة فقط):\n" +
+      "   - 3 أسئلة اختيار من متعدد (MCQ):\n" +
+      "     * لكل سؤال 4 خيارات منطقية ومتمايزة من صلب موضوع الدرس.\n" +
+      "     * يجب أن تطابق الإجابة المحددة في \"correct_answer\" حرفياً أحد الخيارات الأربعة الموجودة في \"options\".\n" +
+      "   - 2 أسئلة صح وخطأ (True/False):\n" +
+      "     * مصفوفة الخيارات \"options\" يجب أن تكون بالضبط وبحرفية: [\"صح\", \"خطأ\"].\n" +
+      "     * حقل الإجابة \"correct_answer\" يجب أن يكون إما \"صح\" أو \"خطأ\" بالضبط.\n" +
+      "     * كتابة تعليل علمي دقيق في \"explanation\" يوضح سبب الصحة أو الخطأ.\n" +
+      "4. التنسيق المطلوب: أعد فقط كائن JSON الصالح التالي دون أي نصوص تمهيدية أو كتل تعليق:\n" +
+      JSON.stringify({
+        title: "أسئلة إضافية للدرس: " + effectiveTopic,
+        duration_minutes: 10,
+        total_grade: 5,
+        questions: [
+          {
+            id: 1,
+            type: "mcq",
+            question: "نص السؤال الأول المستنبط من الدرس...",
+            options: ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
+            correct_answer: "خيار 1",
+            explanation: "شرح توضيحي لسبب صحة الإجابة..."
+          },
+          {
+            id: 4,
+            type: "true_false",
+            question: "نص العبارة الدقيقة المستنبطة من الدرس...",
+            options: ["صح", "خطأ"],
+            correct_answer: "صح",
+            explanation: "التعليل..."
+          }
+        ]
+      }, null, 2)
+    : "3. تنوع وشمولية بنية الأسئلة (10 أسئلة متكاملة):\n" +
+      "   - 6 أسئلة اختيار من متعدد (MCQ):\n" +
+      "     * لكل سؤال 4 خيارات منطقية ومتمايزة من صلب موضوع الدرس.\n" +
+      "     * يُمنع منعاً باتاً استخدام خيارات اصطناعية أو هزلية أو بدائل عامة.\n" +
+      "     * يجب أن تطابق الإجابة المحددة في \"correct_answer\" حرفياً أحد الخيارات الأربعة الموجودة في \"options\".\n" +
+      "   - 3 أسئلة صح وخطأ (True/False):\n" +
+      "     * مصفوفة الخيارات \"options\" يجب أن تكون بالضبط وبحرفية: [\"صح\", \"خطأ\"].\n" +
+      "     * حقل الإجابة \"correct_answer\" يجب أن يكون إما \"صح\" أو \"خطأ\" بالضبط.\n" +
+      "     * كتابة تعليل علمي دقيق في \"explanation\" يوضح سبب الصحة أو الخطأ.\n" +
+      "   - سؤال توصيل ومطابقة واحد (Matching):\n" +
+      "     * يحتوي على 4 أزواج مطابقة من صلب الدرس: مصفوفة \"pairs\" بها 4 كائنات، كل كائن به \"left\" و \"right\".\n" +
+      "4. التنسيق المطلوب: أعد فقط كائن JSON الصالح التالي دون أي نصوص تمهيدية أو كتل تعليق:\n" +
+      JSON.stringify({
+        title: "اختبار تقييم الدرس: " + effectiveTopic,
+        duration_minutes: 15,
+        total_grade: 10,
+        questions: [
+          {
+            id: 1,
+            type: "mcq",
+            question: "نص السؤال الأول...",
+            options: ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
+            correct_answer: "خيار 1",
+            explanation: "شرح توضيحي لسبب صحة الإجابة..."
+          },
+          {
+            id: 7,
+            type: "true_false",
+            question: "نص العبارة الأولى...",
+            options: ["صح", "خطأ"],
+            correct_answer: "صح",
+            explanation: "التعليل..."
+          },
+          {
+            id: 10,
+            type: "matching",
+            question: "🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم في القائمة (أ) بتعريفه الدقيق في القائمة (ب):",
+            pairs: [
+              { left: "المفهوم 1", right: "التعريف 1" },
+              { left: "المفهوم 2", right: "التعريف 2" },
+              { left: "المفهوم 3", right: "التعريف 3" },
+              { left: "المفهوم 4", right: "التعريف 4" }
+            ],
+            explanation: "تم توصيل كافة المفاهيم بتعريفاتها الصحيحة بدقة."
+          }
+        ]
+      }, null, 2);
+
   const promptText = "أنت رئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI).\n" +
-    "مهمتك: صياغة اختبار أسبوعي عالي الجودة والاحترافية مكون من 10 أسئلة مستنبطة 100% من صلب المادة العلمية والدرس المرفق أدناه، بصيغة JSON نقي فقط:\n\n" +
+    `مهمتك: صياغة أسئلة اختبار تقييمي عالي الجودة والاحترافية مكون من ${targetCount} أسئلة مستنبطة 100% من صلب المادة العلمية والدرس المرفق أدناه، بصيغة JSON نقي فقط:\n\n` +
     "## بيانات المقرر والدرس:\n" +
     "- المقرر التدريبي: " + effectiveCourse + "\n" +
     "- الأسبوع / الوحدة: " + effectiveWeek + "\n" +
@@ -1949,57 +2015,11 @@ async function handleDedicatedQuizGeneration(req, res, startTime) {
     "## معايير الجودة الأكاديمية الصارمة:\n" +
     "1. الالتزام بالموضوع بنسبة 100%: تُبنى جميع الأسئلة حصراً من صلب المادة العلمية ومفاهيمها أعلاه. يُمنع منعاً باتاً استدعاء مواضيع السلامة الصناعية (PPE/SOP) أو إجراءات المصانع والورش إذا لم تكن واردة في النص المرفق صراحة.\n" +
     "2. حظر الأسئلة المعلبة: يُحظر صياغة أسئلة عامة تصلح لأي درس بدون سيناريو واقعي. كل سؤال يجب أن يختبر مفهوماً أو موقفاً حقيقياً ومحدداً.\n" +
-    "3. تنوع وشمولية بنية الأسئلة (10 أسئلة متكاملة):\n" +
-    "   - 6 أسئلة اختيار من متعدد (MCQ):\n" +
-    "     * لكل سؤال 4 خيارات منطقية ومتمايزة من صلب موضوع الدرس.\n" +
-    "     * يُمنع منعاً باتاً استخدام خيارات اصطناعية أو هزلية أو بدائل عامة.\n" +
-    "     * يجب أن تطابق الإجابة المحددة في \"correct_answer\" حرفياً أحد الخيارات الأربعة الموجودة في \"options\".\n" +
-    "   - 3 أسئلة صح وخطأ (True/False):\n" +
-    "     * مصفوفة الخيارات \"options\" يجب أن تكون بالضبط وبحرفية: [\"صح\", \"خطأ\"].\n" +
-    "     * حقل الإجابة \"correct_answer\" يجب أن يكون إما \"صح\" أو \"خطأ\" بالضبط.\n" +
-    "     * كتابة تعليل علمي دقيق في \"explanation\" يوضح سبب الصحة أو الخطأ.\n" +
-    "   - سؤال توصيل ومطابقة واحد (Matching):\n" +
-    "     * يحتوي على 4 أزواج مطابقة من صلب الدرس: مصفوفة \"pairs\" بها 4 كائنات، كل كائن به \"left\" و \"right\".\n" +
-    "4. التنسيق المطلوب: أعد فقط كائن JSON الصالح التالي دون أي نصوص تمهيدية أو كتل تعليق:\n" +
-    JSON.stringify({
-      title: "اختبار تقييم الدرس: " + effectiveTopic,
-      duration_minutes: 15,
-      total_grade: 10,
-      questions: [
-        {
-          id: 1,
-          type: "mcq",
-          question: "نص السؤال الأول...",
-          options: ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
-          correct_answer: "خيار 1",
-          explanation: "شرح توضيحي لسبب صحة الإجابة..."
-        },
-        {
-          id: 7,
-          type: "true_false",
-          question: "نص العبارة الأولى...",
-          options: ["صح", "خطأ"],
-          correct_answer: "صح",
-          explanation: "التعليل..."
-        },
-        {
-          id: 10,
-          type: "matching",
-          question: "🔗 سؤال التوصيل والمطابقة: صِل كل مفهوم في القائمة (أ) بتعريفه الدقيق في القائمة (ب):",
-          pairs: [
-            { left: "المفهوم 1", right: "التعريف 1" },
-            { left: "المفهوم 2", right: "التعريف 2" },
-            { left: "المفهوم 3", right: "التعريف 3" },
-            { left: "المفهوم 4", right: "التعريف 4" }
-          ],
-          explanation: "تم توصيل كافة المفاهيم بتعريفاتها الصحيحة بدقة."
-        }
-      ]
-    }, null, 2);
+    promptStructure;
 
   const groqCall = await callGroqChatCompletion({
     prompt: promptText,
-    systemPrompt: "أنت رئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI). صغ اختباراً مكوناً من 10 أسئلة مستنبطة 100% من نص الدرس المرفق بصيغة JSON نقي فقط.",
+    systemPrompt: `أنت رئيس لجنة الاختبارات والتقييم في معهد الذهب الأسود للتدريب (BGTI). صغ اختباراً مكوناً من ${targetCount} أسئلة مستنبطة 100% من نص الدرس المرفق بصيغة JSON نقي فقط.`,
     apiKey,
     model: AI_CONFIG.primaryModel,
     temperature: 0.25

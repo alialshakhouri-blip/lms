@@ -5344,21 +5344,21 @@
                             </div>
 
                             <!-- ═════════════════════════════════════════════════
-                                 STEP 1: SUGGESTED VIDEOS (3 فيديوهات يختار منها)
+                                 STEP 1: SUGGESTED VIDEO (فيديو تعليمي واحد واقعي مرتبط بالموضوع)
                                  ═════════════════════════════════════════════════ -->
                             <div id="aiStepView-1" class="space-y-4">
                                 <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                                     <div class="flex items-center gap-2">
                                         <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-bold text-sm">01</span>
                                         <div>
-                                            <h4 class="font-black text-slate-900 text-sm">الفيديوهات التعليمية المقترحة</h4>
-                                            <p class="text-[11px] text-slate-500 font-bold">يقترح الذكاء الاصطناعي 3 فيديوهات ذات صلة بمحتوى ملفك، اختر ما يناسبك منها أو ضع رابطك المفضل:</p>
+                                            <h4 class="font-black text-slate-900 text-sm">الفيديو التدريبي المقترح</h4>
+                                            <p class="text-[11px] text-slate-500 font-bold">فيديو تدريبي واحد واقعي ومباشر مرتبط بموضوع الدرس، يمكنك اعتماده أو تعديل الرابط:</p>
                                         </div>
                                     </div>
                                     <span class="text-[11px] font-bold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-lg">الخطوة 1 من 4</span>
                                 </div>
 
-                                <!-- 3 Suggested Videos Cards Container -->
+                                <!-- 1 Suggested Video Card Container -->
                                 <div id="aiSuggestedVideosContainer" class="space-y-3">
                                     <!-- Dynamic Cards injected here -->
                                 </div>
@@ -28348,7 +28348,7 @@ END $$;`;
         renderQuizBuilderQuestions();
     }
 
-    function addFiveAiQuestionsToQuizBuilder() {
+    async function addFiveAiQuestionsToQuizBuilder() {
         const courseKey = typeof getActiveTrainerCourseKey === 'function' ? getActiveTrainerCourseKey() : 'اللحام';
         const courseData = (typeof lmsCourses !== 'undefined' && lmsCourses[courseKey]) ? lmsCourses[courseKey] : ((typeof lmsCourses !== 'undefined' && lmsCourses['اللحام']) || {});
         const activeWeek = (typeof getActiveTrainerLmsWeekObj === 'function')
@@ -28362,11 +28362,49 @@ END $$;`;
         const docsSummary = (activeWeek?.docs || activeWeek?.documents || []).map(d => `${d.title || ''}: ${d.desc || ''}`).join('\n');
         const contextText = [topic, lectureSummary, docsSummary].filter(Boolean).join('\n');
 
+        const addBtn = document.getElementById('aiQuizBuilderAddQuestionsBtn') || (event && event.currentTarget);
+        const originalBtnHtml = addBtn ? addBtn.innerHTML : '';
+        if (addBtn && addBtn.innerHTML) {
+            addBtn.disabled = true;
+            addBtn.innerHTML = `
+                <svg class="animate-spin h-3.5 w-3.5 text-violet-700 shrink-0 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span>جاري توليد 5 أسئلة بالذكاء الاصطناعي...</span>
+            `;
+        }
+
         let generatedQuestions = [];
-        if (typeof buildSmartLmsContentFromText === 'function') {
-            const smartRes = buildSmartLmsContentFromText(contextText || topic, 'quiz_questions.txt', courseTitle, topic);
-            if (smartRes?.quiz?.questions && Array.isArray(smartRes.quiz.questions)) {
-                generatedQuestions = smartRes.quiz.questions.slice(0, 5);
+        try {
+            const payload = {
+                action: 'generate_quiz',
+                questionsCount: 5,
+                courseName: courseTitle,
+                weekTitle: topic,
+                weekTopic: topic,
+                lessonContent: contextText || topic
+            };
+
+            const result = await executeAiGenerationRequest(payload, '/api/generate', 80000);
+            const fetched = result?.data?.quiz?.questions || result?.data?.questions || result?.quiz?.questions || [];
+            if (Array.isArray(fetched) && fetched.length > 0) {
+                generatedQuestions = fetched.slice(0, 5);
+            } else {
+                throw new Error('لم يتم استلام أسئلة صالحة');
+            }
+        } catch (err) {
+            console.warn('Groq AI call failed for quiz builder +5 questions, using smart grounded generator:', err);
+            if (typeof buildSmartLmsContentFromText === 'function') {
+                const smartRes = buildSmartLmsContentFromText(contextText || topic, 'quiz_questions.txt', courseTitle, topic);
+                if (smartRes?.quiz?.questions && Array.isArray(smartRes.quiz.questions)) {
+                    generatedQuestions = smartRes.quiz.questions.slice(0, 5);
+                }
+            }
+        } finally {
+            if (addBtn && addBtn.innerHTML) {
+                addBtn.disabled = false;
+                addBtn.innerHTML = originalBtnHtml;
             }
         }
 
@@ -31317,11 +31355,13 @@ function buildDemoExecutiveReport(params) {
     function resolveClientDirectYouTubeUrl(rawUrl, title, query, index = 0) {
         const trimmed = (rawUrl || '').trim();
         const isSearchUrl = trimmed.includes('results?') || trimmed.includes('search_query=') || trimmed.includes('/results');
-        if (!isSearchUrl) {
-            const m = trimmed.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
-            if (m && m[1] && !m[1].startsWith('0000') && !m[1].toLowerCase().includes('example') && !KNOWN_DEAD_YOUTUBE_IDS.has(m[1].toLowerCase())) {
-                return `https://www.youtube.com/watch?v=${m[1]}`;
-            }
+        if (isSearchUrl) {
+            return trimmed;
+        }
+
+        const m = trimmed.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+        if (m && m[1] && !m[1].startsWith('0000') && !m[1].toLowerCase().includes('example') && !KNOWN_DEAD_YOUTUBE_IDS.has(m[1].toLowerCase())) {
+            return `https://www.youtube.com/watch?v=${m[1]}`;
         }
 
         const safeIdx = Math.max(0, Math.min(2, typeof index === 'number' ? index : 0));
@@ -31353,11 +31393,6 @@ function buildDemoExecutiveReport(params) {
                 'https://www.youtube.com/watch?v=XpcCUtYzwy0', // Centrifugal Pump Basics
                 'https://www.youtube.com/watch?v=pMtqDWUpJds', // Workshop Tools & Inspection
                 'https://www.youtube.com/watch?v=1pMHayXqoMY'  // Machine Calibration
-            ],
-            general: [
-                'https://www.youtube.com/watch?v=pMtqDWUpJds', // Industrial Workshop Basics
-                'https://www.youtube.com/watch?v=yJhSlH8AvHs', // PPE Safety Training
-                'https://www.youtube.com/watch?v=Cu3R5it4cQs'  // Tech Basics
             ]
         };
 
@@ -31376,7 +31411,10 @@ function buildDemoExecutiveReport(params) {
         if (txt.includes('صيان') || txt.includes('mainten') || txt.includes('ميكان') || txt.includes('mechanic') || txt.includes('فحص') || txt.includes('مضخ') || txt.includes('pump') || txt.includes('ورش')) {
             return catalogs.mechanic[safeIdx];
         }
-        return catalogs.general[safeIdx];
+        
+        // Directly search topic on YouTube instead of dumping unrelated generic welding/industrial videos
+        const subject = (title || query || 'الدرس التعليمي').replace(/^(?:محاضرة|درس|الوحدة)\s*[:\-]\s*/, '').trim();
+        return `https://www.youtube.com/results?search_query=${encodeURIComponent(subject + ' شرح تعليمي')}`;
     }
 
     function populateAiPreview(result) {
@@ -31408,35 +31446,33 @@ function buildDemoExecutiveReport(params) {
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // STEP 1: SUGGESTED VIDEOS (3 فيديوهات مباشرة ومحددة يختار منها)
+        // STEP 1: SUGGESTED VIDEO (فيديو تعليمي واحد واقعي مرتبط بالموضوع حصراً)
         // ─────────────────────────────────────────────────────────────────
         const videosContainer = document.getElementById('aiSuggestedVideosContainer');
         const rawVideos = Array.isArray(data.suggested_videos) && data.suggested_videos.length > 0 
-            ? data.suggested_videos 
+            ? data.suggested_videos.slice(0, 1) 
             : [
-                { id: 1, title: `شرح تطبيقي لـ ${data.lecture?.title || 'المحاضرة'}`, description: 'شرح تطبيقي وتدريب عملي على المهارات الأساسية والمصطلحات', duration: '12:00 دقيقة', youtube_url: resolveClientDirectYouTubeUrl('', data.lecture?.title, '', 0) },
-                { id: 2, title: `إجراءات ومعايير السلامة المهنية المعتمدة`, description: 'استعراض لإجراءات التشغيل القياسية (SOP) واشتراطات السلامة والجودة', duration: '10:00 دقيقة', youtube_url: resolveClientDirectYouTubeUrl('', 'safety', '', 1) },
-                { id: 3, title: `المصطلحات الفنية والمحادثة التقنية في بيئة العمل`, description: 'فيديو إثرائي للمصطلحات التخصصية والنطق السليم في بيئة العمل', duration: '15:00 دقيقة', youtube_url: resolveClientDirectYouTubeUrl('', 'english', '', 2) }
+                { id: 1, title: `شرح تعليمي لـ ${data.lecture?.title || 'المحاضرة'}`, description: 'شرح تطبيقي وتدريب عملي على المهارات الأساسية والمفاهيم', duration: '12:00 دقيقة', youtube_url: resolveClientDirectYouTubeUrl('', data.lecture?.title, '', 0) }
             ];
 
         if (videosContainer) {
-            videosContainer.innerHTML = rawVideos.slice(0, 3).map((v, idx) => {
-                const isChecked = idx === 0 ? 'checked' : '';
+            videosContainer.innerHTML = rawVideos.slice(0, 1).map((v, idx) => {
+                const isChecked = 'checked';
                 const ytQuery = v.search_query || v.title;
-                const ytDirectUrl = resolveClientDirectYouTubeUrl(v.youtube_url || v.url, v.title, ytQuery, idx);
+                const ytDirectUrl = resolveClientDirectYouTubeUrl(v.youtube_url || v.url, v.title, ytQuery, 0);
                 return `
                     <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs transition hover:border-violet-300">
                         <div class="flex items-start gap-3 flex-1 min-w-0">
                             <label class="flex items-center gap-2 cursor-pointer pt-0.5">
-                                <input type="radio" name="aiSelectedVideoRadio" value="${idx}" ${isChecked} class="w-4 h-4 text-violet-600 focus:ring-violet-500 cursor-pointer">
+                                <input type="radio" name="aiSelectedVideoRadio" value="0" ${isChecked} class="w-4 h-4 text-violet-600 focus:ring-violet-500 cursor-pointer">
                                 <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-bold text-xs shrink-0">🎥</span>
                             </label>
                             <div class="space-y-1.5 flex-1 min-w-0">
-                                <input type="text" id="aiVideoTitle-${idx}" value="${escapeHtml(v.title || `فيديو تدريبي ${idx + 1}`)}" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-black text-slate-900 outline-none focus:border-violet-400">
+                                <input type="text" id="aiVideoTitle-0" value="${escapeHtml(v.title || 'فيديو تدريبي للموضوع')}" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-black text-slate-900 outline-none focus:border-violet-400">
                                 <p class="text-[11px] text-slate-500 font-bold">${escapeHtml(v.description || '')}</p>
                                 <div class="flex items-center gap-2 pt-0.5">
                                     <span class="text-[10px] font-bold text-slate-500 shrink-0">🔗 الرابط المباشر:</span>
-                                    <input type="url" id="aiVideoUrl-${idx}" value="${escapeHtml(ytDirectUrl)}" class="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-0.5 text-[11px] font-mono text-slate-700 outline-none focus:border-violet-400 text-left" dir="ltr">
+                                    <input type="url" id="aiVideoUrl-0" value="${escapeHtml(ytDirectUrl)}" class="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-0.5 text-[11px] font-mono text-slate-700 outline-none focus:border-violet-400 text-left" dir="ltr">
                                 </div>
                             </div>
                         </div>
@@ -31909,7 +31945,7 @@ function buildDemoExecutiveReport(params) {
     }
     window.renderAiQuizQuestionsInModal = renderAiQuizQuestionsInModal;
 
-    function addFiveQuestionsToAiQuizModal() {
+    async function addFiveQuestionsToAiQuizModal() {
         if (!currentAiGeneratedData) {
             currentAiGeneratedData = {};
         }
@@ -31920,73 +31956,126 @@ function buildDemoExecutiveReport(params) {
             currentAiGeneratedData.quiz.questions = [];
         }
 
-        const topic = (currentAiGeneratedData.lecture && currentAiGeneratedData.lecture.title) || 'المحتوى التدريبي';
-
-        const newQBatch = [
-            {
-                type: 'mcq',
-                question: `ما هو المعيار التشغيلي المعتمد لضمان دقة العمل وتفادي الأخطاء في ${topic}؟`,
-                options: [
-                    'تطبيق تعليمات التشغيل المعتمدة والتأكد من مطابقة المواصفات',
-                    'العمل السريع دون الرجوع لكتيبات الصيانة',
-                    'تجاوز مراحل المعايرة الفنية للأجهزة',
-                    'إلغاء فحص الجودة المسبق'
-                ],
-                correct_answer: 'تطبيق تعليمات التشغيل المعتمدة والتأكد من مطابقة المواصفات',
-                explanation: 'الالتزام بتعليمات التشغيل القياسية يضمن جودة التنفيذ وسلامة العمليات.'
-            },
-            {
-                type: 'mcq',
-                question: `أي من الأدوات التالية تمثل خط الدفاع المباشر لحماية الفني في موقع العمل؟`,
-                options: [
-                    'Personal Protective Equipment (PPE)',
-                    'Administrative Work Schedules',
-                    'Periodic Cost Auditing',
-                    'Standard Procurement Forms'
-                ],
-                correct_answer: 'Personal Protective Equipment (PPE)',
-                explanation: 'مهمات الوقاية الشخصية (PPE) هي خط الدفاع المباشر لحماية الفني.'
-            },
-            {
-                type: 'mcq',
-                question: `ما الهدف من إجراء التقييم الميداني المستمر للمخاطر (Risk Assessment) في المنشأة؟`,
-                options: [
-                    'رصد المخاطر المحتملة وتحديد الإجراءات الوقائية للحد منها',
-                    'زيادة الأعباء الإدارية على الفرق الفنية',
-                    'تأجيل خطط الإخلاء في حالات الطوارئ',
-                    'إيقاف خطوط الإنتاج بصورة دائمة'
-                ],
-                correct_answer: 'رصد المخاطر المحتملة وتحديد الإجراءات الوقائية للحد منها',
-                explanation: 'تقييم المخاطر يهدف لتوفير بيئة عمل آمنة ومستقرة.'
-            },
-            {
-                type: 'true_false',
-                question: `عبارة: التواصل المهني الدقيق واستخدام المصطلحات الفنية المعتمدة يقلل من احتمالية وقوع الأخطاء الميدانية.`,
-                options: ['صح ✓', 'خطأ ✗'],
-                correct_answer: 'صح ✓',
-                explanation: 'صواب؛ توحيد المصطلحات يضمن الفهم المشترك والدقيق بين أعضاء الفريق الفني.'
-            },
-            {
-                type: 'true_false',
-                question: `عبارة: تقتصر مسؤولية السلامة المهنية على مشرفي الأمن والسلامة فقط دون حاجة لالتزام المتدربين.`,
-                options: ['صح ✓', 'خطأ ✗'],
-                correct_answer: 'خطأ ✗',
-                explanation: 'خطأ؛ السلامة المهنية مسؤولية فردية وجماعية مشتركة تلزم جميع العاملين والمتدربين.'
-            }
-        ];
-
-        newQBatch.forEach(q => {
-            currentAiGeneratedData.quiz.questions.push(q);
-        });
-
-        renderAiQuizQuestionsInModal();
-
-        const qList = document.getElementById('aiQuizQuestionsList');
-        if (qList) {
-            qList.scrollTop = qList.scrollHeight;
+        const addBtn = document.getElementById('aiModalAddQuestionsBtn');
+        const originalBtnHtml = addBtn ? addBtn.innerHTML : '';
+        if (addBtn) {
+            addBtn.disabled = true;
+            addBtn.innerHTML = `
+                <svg class="animate-spin h-3.5 w-3.5 text-violet-700 shrink-0 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span>جاري توليد 5 أسئلة بالذكاء الاصطناعي...</span>
+            `;
         }
 
-        showToast(`✨ تم إضافة 5 أسئلة جديدة بنجاح بالذكاء الاصطناعي (الإجمالي: ${currentAiGeneratedData.quiz.questions.length} أسئلة)`, 'success');
+        const topic = (currentAiGeneratedData.lecture && currentAiGeneratedData.lecture.title) || document.getElementById('aiLectureTitle')?.value || 'المحتوى التدريبي';
+        const courseKey = typeof getActiveTrainerCourseKey === 'function' ? getActiveTrainerCourseKey() : 'المقرر التدريبي';
+        const lectureSummary = (currentAiGeneratedData.lecture && currentAiGeneratedData.lecture.summary) || document.getElementById('aiLectureSummary')?.value || '';
+
+        try {
+            const payload = {
+                action: 'generate_quiz',
+                questionsCount: 5,
+                courseName: courseKey,
+                weekTitle: topic,
+                weekTopic: topic,
+                lessonContent: lectureSummary || topic
+            };
+
+            const result = await executeAiGenerationRequest(payload, '/api/generate', 80000);
+            const fetchedQuestions = result?.data?.quiz?.questions || result?.data?.questions || result?.quiz?.questions || [];
+
+            if (Array.isArray(fetchedQuestions) && fetchedQuestions.length > 0) {
+                fetchedQuestions.slice(0, 5).forEach(q => {
+                    currentAiGeneratedData.quiz.questions.push(q);
+                });
+                renderAiQuizQuestionsInModal();
+                const qList = document.getElementById('aiQuizQuestionsList');
+                if (qList) {
+                    qList.scrollTop = qList.scrollHeight;
+                }
+                showToast(`✨ تم توليد وإضافة 5 أسئلة بنجاح بالذكاء الاصطناعي (الإجمالي: ${currentAiGeneratedData.quiz.questions.length} أسئلة)`, 'success');
+            } else {
+                throw new Error('لم ترجع خدمة الذكاء الاصطناعي أسئلة صالحة');
+            }
+        } catch (err) {
+            console.error('Failed to generate 5 AI quiz questions:', err);
+            // Fallback smart generation grounded strictly on topic
+            const fallbackSmart = typeof buildSmartLmsContentFromText === 'function' 
+                ? buildSmartLmsContentFromText(lectureSummary || topic, 'quiz_questions.txt', courseKey, topic)
+                : null;
+            const fallbackQuestions = (fallbackSmart?.quiz?.questions && Array.isArray(fallbackSmart.quiz.questions))
+                ? fallbackSmart.quiz.questions.slice(0, 5)
+                : [
+                    {
+                        type: 'mcq',
+                        question: `ما هو المنطلق الأساسي لتطبيق مهارات "${topic}" في بيئة العمل وفق المعايير المهنية؟`,
+                        options: [
+                            `اتباع التسلسل المنهجي المعتمد لـ ${topic} والتحقق من جودة المخرجات`,
+                            `تخطي مراحل الفحص الأولي لتسريع الإنجاز`,
+                            `الاعتماد على الاجتهاد الشخصي دون الرجوع للأدلة الفنية`,
+                            `إلغاء إجراءات التوثيق والمطابقة الدورية`
+                        ],
+                        correct_answer: `اتباع التسلسل المنهجي المعتمد لـ ${topic} والتحقق من جودة المخرجات`,
+                        explanation: `الالتزام بالمعايير والخطوات الإجرائية يضمن أعلى مستويات الدقة والجودة.`
+                    },
+                    {
+                        type: 'mcq',
+                        question: `أي من الإجراءات التالية يمثل التطبيق الأمثل لمعايير الدقة والسلامة في ${topic}؟`,
+                        options: [
+                            `فحص الأدوات والمعايرة المسبقة قبل بدء التنفيذ الفعلي`,
+                            `البدء المباشر في العمل دون معايرة فنية`,
+                            `إهمال متطلبات المراجعة وضمان الجودة`,
+                            `العمل بشكل منفرد دون التنسيق مع الفريق`
+                        ],
+                        correct_answer: `فحص الأدوات والمعايرة المسبقة قبل بدء التنفيذ الفعلي`,
+                        explanation: `الفحص المسبق والمعايرة ركيزة أساسية لضمان سلامة التنفيذ والنتائج.`
+                    },
+                    {
+                        type: 'mcq',
+                        question: `ما هو الهدف الرئيسي من إتقان مفاهيم وتقنيات ${topic} في بيئة التدريب؟`,
+                        options: [
+                            `تطوير الكفاءة العملية والقدرة على حل المشكلات المهنية بكفاءة`,
+                            `زيادة احتمالية حدوث الأخطاء والمخالفات التشغيلية`,
+                            `إلغاء الحاجة للتدريب المستمر ومواكبة التحديثات`,
+                            `الاستغناء عن معايير القياس وضبط الجودة`
+                        ],
+                        correct_answer: `تطوير الكفاءة العملية والقدرة على حل المشكلات المهنية بكفاءة`,
+                        explanation: `إتقان المهارات يعزز الكفاءة ويرفع الجاهزية الميدانية للمتدرب.`
+                    },
+                    {
+                        type: 'true_false',
+                        question: `عبارة: يعد الفهم العميق لأسس ومبادئ "${topic}" متطلباً جوهرياً لتحقيق نتائج مطابقة للمواصفات القياسية.`,
+                        options: ['صح ✓', 'خطأ ✗'],
+                        correct_answer: 'صح ✓',
+                        explanation: 'صحيح؛ الفهم النظري والعملي الرصين هو الأساس لنجاح التطبيق الميداني.'
+                    },
+                    {
+                        type: 'true_false',
+                        question: `عبارة: يمكن الاستغناء عن معايير الجودة والضوابط الإجرائية عند تنفيذ مهام "${topic}" في الحالات الطارئة.`,
+                        options: ['صح ✓', 'خطأ ✗'],
+                        correct_answer: 'خطأ ✗',
+                        explanation: 'خطأ؛ معايير الجودة والسلامة ملزمة ولا يجوز تجاوزها تحت أي ظرف.'
+                    }
+                ];
+
+            fallbackQuestions.forEach(q => currentAiGeneratedData.quiz.questions.push(q));
+            renderAiQuizQuestionsInModal();
+            const qList = document.getElementById('aiQuizQuestionsList');
+            if (qList) {
+                qList.scrollTop = qList.scrollHeight;
+            }
+            showToast(`⚠️ تعذر الاتصال بـ Groq، تم توليد 5 أسئلة ذكية مرتبطة بالموضوع (الإجمالي: ${currentAiGeneratedData.quiz.questions.length})`, 'warning');
+        } finally {
+            if (addBtn) {
+                addBtn.disabled = false;
+                addBtn.innerHTML = originalBtnHtml || `
+                    <span>✨</span>
+                    <span>+ إضافة 5 أسئلة بالذكاء الاصطناعي</span>
+                `;
+            }
+        }
     }
     window.addFiveQuestionsToAiQuizModal = addFiveQuestionsToAiQuizModal;
 
