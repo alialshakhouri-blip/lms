@@ -6908,6 +6908,55 @@
     };
     let laVacancies = JSON.parse(localStorage.getItem('sys_la_vacancies_v9')) || INITIAL_LA_VACANCIES;
 
+    // دمج وضمان تواجد متدربي دليل الهواتف والتسجيل في قاعدة بيانات المتدربين الأساسية
+    function ensureTraineesConsistencyWithDirectory() {
+        if (typeof phoneDirectory === 'undefined' || !phoneDirectory) return 0;
+        const existingIds = new Set(trainees.map(t => (typeof cleanNationalId === 'function' ? cleanNationalId(t.id) : String(t.id || '')).trim()));
+        let addedCount = 0;
+        Object.keys(phoneDirectory).forEach(id => {
+            const cleanId = (typeof cleanNationalId === 'function' ? cleanNationalId(id) : String(id || '')).trim();
+            if (cleanId && !existingIds.has(cleanId)) {
+                const p = phoneDirectory[id] || {};
+                const grp = (p.group && p.group !== 'عام') ? p.group : '';
+                const comp = (p.company && p.company !== 'المؤسسة' && p.company !== 'عام') ? p.company : (grp && typeof detectCompany === 'function' ? detectCompany(grp) : 'المؤسسة');
+                trainees.push({
+                    id: cleanId,
+                    name: p.name || `متدرب (${cleanId})`,
+                    originalName: p.name || '',
+                    company: comp,
+                    group: grp || 'عام',
+                    room: p.room || 'غير محدد',
+                    qual: p.qual || 'غير محدد',
+                    phone: p.phone || '',
+                    email: p.email || '',
+                    notes: p.notes || '',
+                    rate: 0,
+                    weeklyAttendedSessions: 0,
+                    weeklyRate: 0,
+                    weeklyAttendance: [
+                        [false, false, false, false],
+                        [false, false, false, false],
+                        [false, false, false, false],
+                        [false, false, false, false],
+                        [false, false, false, false]
+                    ],
+                    dob: p.dob || '',
+                    gender: p.gender || 'ذكر',
+                    nationality: p.nationality || (cleanId.startsWith('1') ? 'سعودي' : 'غير سعودي'),
+                    first_name: p.first_name || '',
+                    second_name: p.second_name || '',
+                    third_name: p.third_name || '',
+                    last_name: p.last_name || ''
+                });
+                existingIds.add(cleanId);
+                addedCount++;
+            }
+        });
+        return addedCount;
+    }
+    window.ensureTraineesConsistencyWithDirectory = ensureTraineesConsistencyWithDirectory;
+    ensureTraineesConsistencyWithDirectory();
+
     let activeTrainerForDashboard = scheduleData[0].name;
     let activeSelectedGroupInTrainerDashboard = '';
 
@@ -9781,10 +9830,11 @@
                 };
                 newEntries++;
 
-                // مطابقة وتحديث متدربي كشف الحضور إن وجدوا
+                // مطابقة وتحديث متدربي قاعدة البيانات الأساسية
                 let matched = false;
                 trainees.forEach(t => {
-                    if (t.id === id) {
+                    const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+                    if (cid === id || t.id === id) {
                         if (name && name !== 'متدرب بدون اسم') t.name = name;
                         if (phone) t.phone = phone;
                         if (qual && qual !== 'غير محدد') t.qual = qual;
@@ -9803,8 +9853,38 @@
                     }
                 });
 
-                // الاحتفاظ ببيانات التسجيل في دليل المؤسسة والهواتف دون تلويث كشف الحضور الفعلي
-                // المتدربون الفعليون يؤخذون حصراً من كشف الحضور اليومي لشيت Google Sheets المعتمد
+                // إضافة أي متدرب جديد مسجل في الملف إلى قاعدة بيانات المتدربين الأساسية مباشرة
+                if (!matched) {
+                    trainees.push({
+                        id,
+                        name: (name && name !== 'متدرب بدون اسم') ? name : `متدرب (${id})`,
+                        originalName: name || '',
+                        company: (company && company !== 'المؤسسة' && company !== 'عام') ? company : (detectCompany(group) || 'المؤسسة'),
+                        group: group || 'عام',
+                        room: 'غير محدد',
+                        qual: qual || 'غير محدد',
+                        phone: phone || '',
+                        email: email || '',
+                        notes: '',
+                        rate: 0,
+                        weeklyAttendedSessions: 0,
+                        weeklyRate: 0,
+                        weeklyAttendance: [
+                            [false, false, false, false],
+                            [false, false, false, false],
+                            [false, false, false, false],
+                            [false, false, false, false],
+                            [false, false, false, false]
+                        ],
+                        dob: formattedDob || '',
+                        gender: normGender || 'ذكر',
+                        nationality: rawNationality || (id.startsWith('1') ? 'سعودي' : 'غير سعودي'),
+                        first_name: finalP1 || '',
+                        second_name: finalP2 || '',
+                        third_name: finalP3 || '',
+                        last_name: finalP4 || ''
+                    });
+                }
             });
         });
 
@@ -10879,7 +10959,50 @@
                 }
             }
 
-            trainees = result.allTrainees;
+            // الدمج الذكي مع قاعدة البيانات الأساسية للمتدربين:
+            // لا يتم مسح أو تصفير المتدربين المسجلين في النظام.
+            // 1. تحديث الحضور ونسبه وغيابه، وتحديث الشعبة والقاعة لمن وردوا في كشف الحضور اليومي
+            // 2. إضافة أي متدرب جديد ظهر في الشيت
+            // 3. الاحتفاظ بالمتدربين المسجلين في النظام حتى وإن لم يتضمنهم كشف هذا الأسبوع
+            const sheetTraineesMap = new Map();
+            result.allTrainees.forEach(st => {
+                const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(st.id) : String(st.id || '').trim();
+                sheetTraineesMap.set(cid, st);
+            });
+
+            const existingIds = new Set();
+            let updatedAttendanceCount = 0;
+            let addedFromSheetCount = 0;
+
+            trainees.forEach(t => {
+                const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+                existingIds.add(cid);
+                const st = sheetTraineesMap.get(cid);
+                if (st) {
+                    t.group = st.group || t.group;
+                    t.room = st.room || t.room;
+                    t.rate = st.rate;
+                    t.weeklyAttendedSessions = st.weeklyAttendedSessions;
+                    t.weeklyRate = st.weeklyRate;
+                    t.weeklyAttendance = st.weeklyAttendance;
+                    if (st.originalName) t.originalName = st.originalName;
+                    if (!t.company || t.company === 'عام' || t.company === 'المؤسسة') {
+                        t.company = st.company || t.company;
+                    }
+                    updatedAttendanceCount++;
+                }
+            });
+
+            // إضافة المتدربين الجدد الذين ظهروا في شيت الحضور
+            result.allTrainees.forEach(st => {
+                const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(st.id) : String(st.id || '').trim();
+                if (!existingIds.has(cid)) {
+                    trainees.push(st);
+                    existingIds.add(cid);
+                    addedFromSheetCount++;
+                }
+            });
+
             if (result.detectedDates && result.detectedDates.length === 5) {
                 weekDates = result.detectedDates;
                 localStorage.setItem('sys_week_dates', JSON.stringify(weekDates));
@@ -10915,7 +11038,9 @@
             if (typeof renderTrainerDashboard === 'function' && !document.getElementById('tab-trainerDashboard')?.classList.contains('hidden')) {
                 renderTrainerDashboard();
             }
-            if (!isSilent) showToast(`✅ تم تحديث التحضير المباشر واحتساب نسب الحضور آلياً! تم استيراد ${trainees.length} متدرب.`, 'success');
+            if (!isSilent) {
+                showToast(`✅ تم تحديث التحضير المباشر: مطابقة وتحديث (${updatedAttendanceCount}) متدرب وإضافة (${addedFromSheetCount})، مع الاحتفاظ بكامل قاعدة البيانات (${trainees.length} متدرب مسجل).`, 'success');
+            }
         } catch(e) {
             console.error(e);
             if (!isSilent) showToast('حدث خطأ أثناء معالجة بيانات شيت الحضور: ' + e.message, 'error');
@@ -11314,7 +11439,40 @@
                     return showToast('الملف المرفوع لا يحتوي على أعمدة الحضور المعتمدة', 'error');
                 }
 
-                trainees = result.allTrainees;
+                // الدمج الذكي مع قاعدة البيانات الأساسية للمتدربين
+                const sheetTraineesMap = new Map();
+                result.allTrainees.forEach(st => {
+                    const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(st.id) : String(st.id || '').trim();
+                    sheetTraineesMap.set(cid, st);
+                });
+
+                const existingIds = new Set();
+                trainees.forEach(t => {
+                    const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+                    existingIds.add(cid);
+                    const st = sheetTraineesMap.get(cid);
+                    if (st) {
+                        t.group = st.group || t.group;
+                        t.room = st.room || t.room;
+                        t.rate = st.rate;
+                        t.weeklyAttendedSessions = st.weeklyAttendedSessions;
+                        t.weeklyRate = st.weeklyRate;
+                        t.weeklyAttendance = st.weeklyAttendance;
+                        if (st.originalName) t.originalName = st.originalName;
+                        if (!t.company || t.company === 'عام' || t.company === 'المؤسسة') {
+                            t.company = st.company || t.company;
+                        }
+                    }
+                });
+
+                result.allTrainees.forEach(st => {
+                    const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(st.id) : String(st.id || '').trim();
+                    if (!existingIds.has(cid)) {
+                        trainees.push(st);
+                        existingIds.add(cid);
+                    }
+                });
+
                 if (result.detectedDates && result.detectedDates.length === 5) {
                     weekDates = result.detectedDates;
                     localStorage.setItem('sys_week_dates', JSON.stringify(weekDates));
@@ -11331,7 +11489,7 @@
                     renderTrainerDashboard();
                 }
                 hideLoading();
-                showToast(`✅ تم استيراد ${trainees.length} متدرب وتحديث نسب وحالات الحضور تلقائياً بنجاح!`, 'success');
+                showToast(`✅ تم تحديث كشف الحضور: مطابقة (${result.allTrainees.length}) متدرب مع الاحتفاظ بإجمالي (${trainees.length}) متدرب مسجل في النظام.`, 'success');
             } catch (err) {
                 hideLoading();
                 console.error(err);
@@ -19682,6 +19840,9 @@
 
     // تهيئة وعرض شاشة ملفات المؤسسة
     function renderInstitutionFilesTab() {
+        if (typeof ensureTraineesConsistencyWithDirectory === 'function') {
+            ensureTraineesConsistencyWithDirectory();
+        }
         const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : [];
         const compFilterEl = document.getElementById('instCompanyFilter');
         if (!compFilterEl) return;
@@ -20200,6 +20361,10 @@
 
         if (!selectedGroup) {
             return showToast('⚠️ يرجى اختيار المجموعة / الشعبة أولاً لتصدير ملف المؤسسة', 'warning');
+        }
+
+        if (typeof ensureTraineesConsistencyWithDirectory === 'function') {
+            ensureTraineesConsistencyWithDirectory();
         }
 
         const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : [];
@@ -26704,12 +26869,36 @@
 
             let hasChanges = false;
 
-            // Merge Trainees (كشف المتدربين والحضور والغياب)
+            // Merge Trainees (كشف المتدربين والحضور والغياب) - دمج تراكمي آمن
             if (cloudTrainees && Array.isArray(cloudTrainees) && cloudTrainees.length > 0) {
-                if (!trainees || trainees.length === 0 || cloudTrainees.length >= trainees.length) {
-                    trainees = cloudTrainees;
+                const existingMap = new Map();
+                trainees.forEach(t => {
+                    const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+                    existingMap.set(cid, t);
+                });
+
+                cloudTrainees.forEach(ct => {
+                    const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(ct.id) : String(ct.id || '').trim();
+                    if (!existingMap.has(cid)) {
+                        trainees.push(ct);
+                        existingMap.set(cid, ct);
+                        hasChanges = true;
+                    } else {
+                        const local = existingMap.get(cid);
+                        if (ct.dob && !local.dob) local.dob = ct.dob;
+                        if (ct.gender && !local.gender) local.gender = ct.gender;
+                        if (ct.nationality && !local.nationality) local.nationality = ct.nationality;
+                        if (ct.first_name && !local.first_name) local.first_name = ct.first_name;
+                        if (ct.phone && !local.phone) local.phone = ct.phone;
+                        if (ct.email && !local.email) local.email = ct.email;
+                        if (ct.qual && !local.qual) local.qual = ct.qual;
+                        if ((!local.group || local.group === 'عام') && ct.group) local.group = ct.group;
+                        if ((!local.company || local.company === 'عام' || local.company === 'المؤسسة') && ct.company) local.company = ct.company;
+                    }
+                });
+
+                if (hasChanges) {
                     localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
-                    hasChanges = true;
                 }
             } else if (trainees && trainees.length > 0 && isSupabaseConnected && supabaseClient) {
                 if (typeof syncCoreDataToCloud === 'function') syncCoreDataToCloud();
