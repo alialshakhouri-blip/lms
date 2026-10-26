@@ -3337,12 +3337,7 @@
                 <!-- Live Virtual Classroom Alert Banner for Trainees (المحاضرة المباشرة عن بعد) -->
                 <div id="sdVirtualClassBanner" class="hidden"></div>
 
-                <!-- 2. Compact 7-Day Weekly Calendar Strip (التقويم الأسبوعي المصغر بصف أفقي واحد) -->
-                <div id="sdCompactWeeklyCalendarCard" class="bg-white border border-slate-200 rounded-3xl p-4 md:p-5 shadow-sm space-y-3">
-                    <!-- Populated dynamically via renderCompactWeeklyCalendar() -->
-                </div>
-
-                <!-- ==================== DUAL COURSE OVERVIEW (المادتان التدريبيتان المقررتان - نظام الفترتين) ==================== -->
+                <!-- ==================== DUAL COURSE OVERVIEW (المقررات التدريبية المعتمدة تظهر أولاً للمتدرب) ==================== -->
                 <div id="sdDualCourseSection" class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <div class="flex items-center gap-2.5">
@@ -3362,6 +3357,9 @@
                         <!-- Populated dynamically -->
                     </div>
                 </div>
+
+                <!-- 2. Compact 7-Day Weekly Calendar Strip (تمت إزالته وإخفاؤه تماماً من واجهة المتدرب) -->
+                <div id="sdCompactWeeklyCalendarCard" class="hidden"></div>
 
                 <!-- Stats Grid (نسبة الحضور + حضور الأسبوع نظام 10 حصص + الإنجاز الأكاديمي) -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -3712,12 +3710,12 @@
                     </span>
                 </div>
 
-                <!-- 4 Content Modules: Structured Collapsible Accordions for Mobile & Desktop -->
+                <!-- 4 Content Modules: Permanent Open Cards (قائمة مباشرة غير منسدلة) -->
                 <div class="space-y-4">
                     
-                    <!-- Accordion 1: Video Lectures & Presentations -->
+                    <!-- Area 1: Video Lectures & Presentations -->
                     <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-                        <button type="button" onclick="toggleStudentLmsSection('sdSecVideosWrapper')" class="w-full flex items-center justify-between p-4 md:p-5 bg-slate-50/70 hover:bg-slate-100/80 transition cursor-pointer text-right">
+                        <div class="w-full flex items-center justify-between p-4 md:p-5 bg-slate-50/70 border-b border-slate-100 text-right">
                             <div class="flex items-center gap-3">
                                 <span class="text-2xl">🎥</span>
                                 <div>
@@ -3727,17 +3725,16 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="text-[10px] font-black bg-blue-50 text-blue-900 px-2.5 py-0.5 rounded-full border border-blue-200" id="sdVideosCountBadge">شروحات مرئية</span>
-                                <span class="text-slate-400 font-mono text-xs" id="sdSecVideosWrapper_icon">▲</span>
                             </div>
-                        </button>
-                        <div id="sdSecVideosWrapper" class="p-4 md:p-6 border-t border-slate-100 space-y-3">
+                        </div>
+                        <div id="sdSecVideosWrapper" class="p-4 md:p-6 space-y-3">
                             <div class="space-y-3" id="sdVideosContainer"></div>
                         </div>
                     </div>
 
-                    <!-- Accordion 2: Study Notes -->
+                    <!-- Area 2: Study Notes -->
                     <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-                        <button type="button" onclick="toggleStudentLmsSection('sdSecDocsWrapper')" class="w-full flex items-center justify-between p-4 md:p-5 bg-slate-50/70 hover:bg-slate-100/80 transition cursor-pointer text-right">
+                        <div class="w-full flex items-center justify-between p-4 md:p-5 bg-slate-50/70 border-b border-slate-100 text-right">
                             <div class="flex items-center gap-3">
                                 <span class="text-2xl">📑</span>
                                 <div>
@@ -3747,17 +3744,16 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="text-[10px] font-black bg-purple-50 text-purple-900 px-2.5 py-0.5 rounded-full border border-purple-200" id="sdDocsCountBadge">مذكرات</span>
-                                <span class="text-slate-400 font-mono text-xs" id="sdSecDocsWrapper_icon">▲</span>
                             </div>
-                        </button>
-                        <div id="sdSecDocsWrapper" class="p-4 md:p-6 border-t border-slate-100 space-y-3">
+                        </div>
+                        <div id="sdSecDocsWrapper" class="p-4 md:p-6 space-y-3">
                             <div class="space-y-3" id="sdDocsContainer"></div>
                         </div>
                     </div>
 
-                    <!-- Accordion 3: Interactive Quizzes -->
+                    <!-- Area 3: Interactive Quizzes -->
                     <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-                        <button type="button" onclick="toggleStudentLmsSection('sdSecQuizzesWrapper')" class="w-full flex items-center justify-between p-4 md:p-5 bg-slate-50/70 hover:bg-slate-100/80 transition cursor-pointer text-right">
+                        <div class="w-full flex items-center justify-between p-4 md:p-5 bg-slate-50/70 border-b border-slate-100 text-right">
                             <div class="flex items-center gap-3">
                                 <span class="text-2xl">🏁</span>
                                 <div>
@@ -3767,17 +3763,16 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="text-[10px] font-black bg-emerald-50 text-emerald-900 px-2.5 py-0.5 rounded-full border border-emerald-200" id="sdQuizzesCountBadge">اختبارات</span>
-                                <span class="text-slate-400 font-mono text-xs" id="sdSecQuizzesWrapper_icon">▲</span>
                             </div>
-                        </button>
-                        <div id="sdSecQuizzesWrapper" class="p-4 md:p-6 border-t border-slate-100 space-y-3">
+                        </div>
+                        <div id="sdSecQuizzesWrapper" class="p-4 md:p-6 space-y-3">
                             <div class="space-y-3" id="sdQuizzesContainer"></div>
                         </div>
                     </div>
 
-                    <!-- Accordion 4: Weekly Assignments -->
+                    <!-- Area 4: Weekly Assignments -->
                     <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-                        <button type="button" onclick="toggleStudentLmsSection('sdSecAssignmentsWrapper')" class="w-full flex items-center justify-between p-4 md:p-5 bg-slate-50/70 hover:bg-slate-100/80 transition cursor-pointer text-right">
+                        <div class="w-full flex items-center justify-between p-4 md:p-5 bg-slate-50/70 border-b border-slate-100 text-right">
                             <div class="flex items-center gap-3">
                                 <span class="text-2xl">📝</span>
                                 <div>
@@ -3787,10 +3782,9 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="text-[10px] font-black bg-amber-50 text-amber-900 px-2.5 py-0.5 rounded-full border border-amber-200" id="sdAssignmentsCountBadge">واجبات</span>
-                                <span class="text-slate-400 font-mono text-xs" id="sdSecAssignmentsWrapper_icon">▲</span>
                             </div>
-                        </button>
-                        <div id="sdSecAssignmentsWrapper" class="p-4 md:p-6 border-t border-slate-100 space-y-3">
+                        </div>
+                        <div id="sdSecAssignmentsWrapper" class="p-4 md:p-6 space-y-3">
                             <div class="space-y-3" id="sdAssignmentsContainer"></div>
                         </div>
                     </div>
@@ -5243,17 +5237,8 @@
                         <!-- ==================== WIZARD STEPS CONTAINER ==================== -->
                         <div id="aiWizardContainer" class="hidden space-y-4">
 
-                            <!-- Success Banner -->
-                            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center justify-between gap-3">
-                                <div class="flex items-center gap-2.5">
-                                    <span class="text-xl shrink-0">🎉</span>
-                                    <div>
-                                        <p class="font-black text-emerald-900 text-xs">تم تحليل الملف وتوليد المقترحات بنجاح!</p>
-                                        <p class="text-[10px] text-emerald-700 font-bold" id="aiSuccessStats">تم تحليل الملف خلال ثوانٍ</p>
-                                    </div>
-                                </div>
-                                <span class="text-[10px] font-bold text-violet-800 bg-violet-100 px-2.5 py-1 rounded-xl">مراحل التوليد</span>
-                            </div>
+                            <!-- Success Stats Anchor (hidden from UI) -->
+                            <span id="aiSuccessStats" class="hidden"></span>
 
                             <!-- ═════════════════════════════════════════════════
                                  STEP 1: MANDATORY REAL LESSON VIDEO (إجباري: رابط فيديو فعلي مباشر)
@@ -5264,7 +5249,7 @@
                                         <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-bold text-sm">01</span>
                                         <div>
                                             <h4 class="font-black text-slate-900 text-sm">الفيديو التدريبي للمحاضرة <span class="text-rose-600 text-xs font-bold">(إلزامي)</span></h4>
-                                            <p class="text-[11px] text-slate-500 font-bold">يجب معاينة نتائج البحث على يوتيوب، ونسخ رابط الفيديو الفعلي ولصقه أدناه لمتابعة الخطوات:</p>
+                                            
                                         </div>
                                     </div>
                                     <span class="text-[11px] font-bold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-lg">الخطوة 1 من 4</span>
@@ -5358,7 +5343,7 @@
                                         <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-sm">03</span>
                                         <div>
                                             <h4 class="font-black text-slate-900 text-sm">الواجبات والتكاليف الأسبوعية</h4>
-                                            <p class="text-[11px] text-slate-500 font-bold">حدد نمط الواجب للمتدربين: اختيار من متعدد أو كتابة نصية مقالية:</p>
+                                            
                                         </div>
                                     </div>
                                     <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg">الخطوة 3 من 4</span>
@@ -19257,6 +19242,14 @@
     window.openStudentLmsToWeek = openStudentLmsToWeek;
 
     function openStudentCertificateModal(optStudentId) {
+        // قفل شهادة إتمام المقرر وعدم إعطاء صلاحية للمتدربين حالياً بناءً على التوجيهات
+        if (currentUser && currentUser.role === 'student') {
+            if (typeof showToast === 'function') {
+                showToast('🔒 وثيقة شهادة إتمام المقرر مقفلة حالياً وغير متاحة للمتدربين', 'warning');
+            }
+            return;
+        }
+
         let student = null;
         if (optStudentId) {
             student = (typeof resolveTraineeInfoById === 'function') ? resolveTraineeInfoById(optStudentId) : { id: optStudentId, name: `متدرب (${optStudentId})`, group: 'معتمدة' };
@@ -20763,30 +20756,11 @@
             sdLmsSubBreakdownEl.innerHTML = `الاختبارات: <b class="text-slate-800 font-mono">${lmsDetailed.completedQuizzes}/${lmsDetailed.totalQuizzes}</b> • الواجبات: <b class="text-slate-800 font-mono">${lmsDetailed.completedAssignments}/${lmsDetailed.totalAssignments}</b>`;
         }
 
-        const isCertPub = isCertificatePublishedForTrainee(currentUser.id);
+        // الشهادة مقفلة حالياً ولا تظهر للمتدرب
         const sdLmsCertificateTriggerEl = document.getElementById('sdLmsCertificateTrigger');
         if (sdLmsCertificateTriggerEl) {
-            if (lmsDetailed.isAllCompleted || lmsDetailed.percentage >= 80) {
-                sdLmsCertificateTriggerEl.className = 'pt-1';
-                if (isCertPub) {
-                    sdLmsCertificateTriggerEl.innerHTML = `
-                        <button type="button" onclick="openStudentCertificateModal()" class="w-full bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black text-[11px] py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer border border-amber-400/30">
-                            <span>🎓</span>
-                            <span>استعراض شهادة الإتمام المعتمدة 🖨️</span>
-                        </button>
-                    `;
-                } else {
-                    sdLmsCertificateTriggerEl.innerHTML = `
-                        <div class="w-full bg-amber-50 text-amber-900 border border-amber-200 text-[10.5px] font-bold py-1.5 px-2.5 rounded-xl text-center flex items-center justify-center gap-1.5 shadow-2xs">
-                            <span>⏳</span>
-                            <span>الشهادة بانتظار اعتماد ونشر الإدارة</span>
-                        </div>
-                    `;
-                }
-            } else {
-                sdLmsCertificateTriggerEl.className = 'hidden';
-                sdLmsCertificateTriggerEl.innerHTML = '';
-            }
+            sdLmsCertificateTriggerEl.className = 'hidden';
+            sdLmsCertificateTriggerEl.innerHTML = '';
         }
 
         // تم إزالة بطاقة المهمة التالية الموصى بها بالكامل من الصفحة الرئيسية بناءً على التوجيهات
@@ -38502,79 +38476,147 @@ function buildDemoExecutiveReport(params) {
             return;
         }
 
-        container.innerHTML = tasks.map(t => {
-            const isQuiz = t.type === 'quiz';
-            const typeBadge = isQuiz 
-                ? '<span class="text-[10px] font-black bg-purple-50 text-purple-900 border border-purple-200 px-2 py-0.5 rounded-md">🏁 اختبار موقوت</span>'
-                : '<span class="text-[10px] font-black bg-blue-50 text-blue-900 border border-blue-200 px-2 py-0.5 rounded-md">📝 واجب أسبوعي</span>';
-            
-            let statusBadge = '';
-            let actionBtn = '';
+        // تجميع المهام داخل بطاقات مخصصة لكل أسبوع وقائمة منسدلة قابلة للطي والفتح
+        const tasksByWeek = {};
+        for (let w = 1; w <= 6; w++) {
+            tasksByWeek[w] = [];
+        }
+        tasks.forEach(t => {
+            const w = t.weekNum || 1;
+            if (!tasksByWeek[w]) tasksByWeek[w] = [];
+            tasksByWeek[w].push(t);
+        });
 
-            if (isQuiz) {
-                if (t.isDone) {
-                    statusBadge = `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300">✅ تم التسليم بنجاح</span>`;
-                    actionBtn = `
-                        <button type="button" onclick="switchStudentActiveCourse('${t.courseKey}'); openTakeQuizModal('${t.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer">
-                            إعادة الاختبار ⚡
-                        </button>
-                    `;
-                } else {
-                    statusBadge = `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-300">⏳ مطلوب تسليمه</span>`;
-                    actionBtn = `
-                        <button type="button" onclick="switchStudentActiveCourse('${t.courseKey}'); openTakeQuizModal('${t.id}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black px-4 py-2 rounded-xl text-xs transition cursor-pointer shadow-xs">
-                            بدء الاختبار 🏁
-                        </button>
-                    `;
-                }
-            } else {
-                if (t.isDone) {
-                    statusBadge = `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300">✅ تم التسليم بنجاح</span>`;
-                    actionBtn = `
-                        <button type="button" onclick="switchStudentActiveCourse('${t.courseKey}'); openSubmitAssignmentModal('${t.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer">
-                            معاينة التسليم 👁️
-                        </button>
-                    `;
-                } else {
-                    statusBadge = `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-300">⏳ مطلوب تسليمه</span>`;
-                    actionBtn = `
-                        <button type="button" onclick="switchStudentActiveCourse('${t.courseKey}'); openSubmitAssignmentModal('${t.id}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black px-4 py-2 rounded-xl text-xs transition cursor-pointer shadow-xs">
-                            حل وتسليم الواجب ✍️
-                        </button>
-                    `;
-                }
-            }
+        const weeksWithTasks = Object.keys(tasksByWeek).map(Number).sort((a,b) => a - b).filter(w => {
+            if (filterWeekVal !== 'ALL') return String(w) === String(filterWeekVal);
+            return tasksByWeek[w].length > 0;
+        });
 
-            return `
-                <div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition hover:border-[#0F2942]/30">
-                    <div class="space-y-2 flex-1">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-xs font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200">
-                                ${t.courseName}
-                            </span>
-                            <span class="text-xs font-bold text-slate-600">
-                                ${t.weekTitle}
-                            </span>
-                            ${typeBadge}
-                            ${statusBadge}
+        container.innerHTML = weeksWithTasks.map(w => {
+            const wTasks = tasksByWeek[w] || [];
+            const wTitle = ARABIC_ORDINAL_WEEKS[w] || `الأسبوع ${w}`;
+            const wTotal = wTasks.length;
+            const wCompleted = wTasks.filter(t => t.isDone).length;
+            const wPending = wTotal - wCompleted;
+            const isAllDone = wTotal > 0 && wPending === 0;
+
+            const tasksListHtml = wTasks.map(t => {
+                const isQuiz = t.type === 'quiz';
+                const typeBadge = isQuiz 
+                    ? '<span class="text-[10px] font-black bg-purple-50 text-purple-900 border border-purple-200 px-2 py-0.5 rounded-md">🏁 اختبار موقوت</span>'
+                    : '<span class="text-[10px] font-black bg-blue-50 text-blue-900 border border-blue-200 px-2 py-0.5 rounded-md">📝 واجب أسبوعي</span>';
+                
+                let statusBadge = '';
+                let actionBtn = '';
+
+                if (isQuiz) {
+                    if (t.isDone) {
+                        statusBadge = `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300">✅ تم التسليم بنجاح</span>`;
+                        actionBtn = `
+                            <button type="button" onclick="switchStudentActiveCourse('${t.courseKey}'); openTakeQuizModal('${t.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer">
+                                إعادة الاختبار ⚡
+                            </button>
+                        `;
+                    } else {
+                        statusBadge = `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-300">⏳ مطلوب تسليمه</span>`;
+                        actionBtn = `
+                            <button type="button" onclick="switchStudentActiveCourse('${t.courseKey}'); openTakeQuizModal('${t.id}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black px-4 py-2 rounded-xl text-xs transition cursor-pointer shadow-xs">
+                                بدء الاختبار 🏁
+                            </button>
+                        `;
+                    }
+                } else {
+                    if (t.isDone) {
+                        statusBadge = `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300">✅ تم التسليم بنجاح</span>`;
+                        actionBtn = `
+                            <button type="button" onclick="switchStudentActiveCourse('${t.courseKey}'); openSubmitAssignmentModal('${t.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer">
+                                معاينة التسليم 👁️
+                            </button>
+                        `;
+                    } else {
+                        statusBadge = `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-300">⏳ مطلوب تسليمه</span>`;
+                        actionBtn = `
+                            <button type="button" onclick="switchStudentActiveCourse('${t.courseKey}'); openSubmitAssignmentModal('${t.id}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black px-4 py-2 rounded-xl text-xs transition cursor-pointer shadow-xs">
+                                حل وتسليم الواجب ✍️
+                            </button>
+                        `;
+                    }
+                }
+
+                return `
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition hover:border-[#0F2942]/30">
+                        <div class="space-y-2 flex-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-xs font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200">
+                                    ${t.courseName}
+                                </span>
+                                ${typeBadge}
+                                ${statusBadge}
+                            </div>
+                            <h4 class="font-black text-sm md:text-base text-slate-900">${t.title}</h4>
+                            <div class="flex items-center gap-2.5 text-xs text-slate-500 font-bold flex-wrap pt-0.5">
+                                <span>👨‍🏫 المدرب: <b class="text-slate-800">${t.trainerName}</b></span>
+                                <span>•</span>
+                                <span>الدرجة: <b class="text-[#0F2942] font-mono">${t.points} درجات</b></span>
+                                ${isQuiz ? `<span>•</span><span>الوقت: <b class="text-slate-800">${t.duration} دقائق</b></span>` : ''}
+                                <span>•</span>
+                                <span class="text-amber-800 font-mono">📅 الاستحقاق: ${t.dueDate}</span>
+                            </div>
                         </div>
-                        <h4 class="font-black text-sm md:text-base text-slate-900">${t.title}</h4>
-                        <div class="flex items-center gap-2.5 text-xs text-slate-500 font-bold flex-wrap pt-0.5">
-                            <span>👨‍🏫 المدرب: <b class="text-slate-800">${t.trainerName}</b></span>
-                            <span>•</span>
-                            <span>الدرجة: <b class="text-[#0F2942] font-mono">${t.points} درجات</b></span>
-                            ${isQuiz ? `<span>•</span><span>الوقت: <b class="text-slate-800">${t.duration} دقائق</b></span>` : ''}
-                            <span>•</span>
-                            <span class="text-amber-800 font-mono">📅 الاستحقاق: ${t.dueDate}</span>
+                        <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                            ${actionBtn}
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-                        ${actionBtn}
+                `;
+            }).join('');
+
+            return `
+                <div class="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden transition hover:border-[#0F2942]/30">
+                    <button type="button" onclick="toggleStudentTasksWeek(${w})" class="w-full flex items-center justify-between p-4 md:p-5 bg-gradient-to-r from-slate-50 to-white hover:bg-slate-100/70 transition cursor-pointer text-right">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl ${isAllDone ? 'bg-emerald-100 text-emerald-900' : 'bg-[#0F2942]/10 text-[#0F2942]'} flex items-center justify-center font-black text-sm shrink-0">
+                                W0${w}
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-black text-slate-900 text-sm md:text-base">${wTitle}</h4>
+                                    ${isAllDone ? '<span class="text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">مكتمل بالكامل ✓</span>' : ''}
+                                </div>
+                                <div class="text-[11px] font-bold text-slate-500 mt-0.5">
+                                    <span>إجمالي المهام: <b>${wTotal}</b></span>
+                                    <span>•</span>
+                                    <span class="text-emerald-700">مكتمل: <b>${wCompleted}</b></span>
+                                    ${wPending > 0 ? `<span>•</span><span class="text-amber-700 font-bold">مطلوب: <b>${wPending}</b></span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-xl">مهام الأسبوع</span>
+                            <span id="stWeekToggleIcon-${w}" class="text-slate-400 font-mono text-xs font-black">▼</span>
+                        </div>
+                    </button>
+                    <div id="stWeekTasksWrapper-${w}" class="p-4 md:p-5 border-t border-slate-100 space-y-3 bg-[#F8F9FA]/40">
+                        ${tasksListHtml}
                     </div>
                 </div>
             `;
         }).join('');
     }
+    function toggleStudentTasksWeek(weekNum) {
+        const wrapper = document.getElementById(`stWeekTasksWrapper-${weekNum}`);
+        const icon = document.getElementById(`stWeekToggleIcon-${weekNum}`);
+        if (!wrapper) return;
+        const isHidden = wrapper.classList.contains('hidden');
+        if (isHidden) {
+            wrapper.classList.remove('hidden');
+            if (icon) icon.innerText = '▲';
+        } else {
+            wrapper.classList.add('hidden');
+            if (icon) icon.innerText = '▼';
+        }
+    }
+    window.toggleStudentTasksWeek = toggleStudentTasksWeek;
+
     window.renderStudentTasksPage = renderStudentTasksPage;
 
     // ===================================================================
@@ -39052,8 +39094,8 @@ function buildDemoExecutiveReport(params) {
                                         <div>
                                             <div class="font-black text-xs text-slate-900">${wk}</div>
                                             <div class="text-[10px] font-bold text-slate-500 mt-0.5 flex items-center gap-2">
-                                                <span>👥 ${count > 0 ? count + ' متدرب' : 'سجل أسبوعي'}</span>
-                                                ${count > 0 ? `<span>•</span><span class="${avgRate >= 90 ? 'text-emerald-700' : 'text-amber-700'}">نسبة الحضور: ${avgRate}%</span>` : ''}
+                                                ${(currentUser?.role !== 'student') ? `<span>👥 ${count > 0 ? count + ' متدرب' : 'سجل أسبوعي'}</span><span>•</span>` : ''}
+                                                ${count > 0 ? `<span class="${avgRate >= 90 ? 'text-emerald-700' : 'text-amber-700'}">نسبة الحضور: ${avgRate}%</span>` : ''}
                                             </div>
                                         </div>
                                     </div>
