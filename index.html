@@ -643,6 +643,12 @@
             </button>
         </form>
 
+        <div class="pt-2 text-center">
+            <button type="button" onclick="openStudentPasswordRecoveryModal()" class="text-xs text-amber-300/90 hover:text-amber-200 transition font-bold cursor-pointer inline-flex items-center gap-1.5 py-1 px-3 rounded-xl hover:bg-white/5 border border-white/5" title="طلب استعادة كلمة المرور وإعادتها لآخر 4 أرقام من الهوية">
+                <span>🔑</span>
+                <span>نسيت كلمة المرور؟ طلب استعادة الحساب من الإدارة</span>
+            </button>
+        </div>
 
         <div class="text-center text-[11px] opacity-60 font-medium text-slate-400">
             معهد الذهب الأسود للتدريب - فرع عنك • بوابة المتدربين © 2026
@@ -779,6 +785,40 @@
                     <span>حفظ كلمة المرور وتأمين الحساب 🚀</span>
                 </button>
                 <button type="button" onclick="closeMandatoryPasswordModal()" id="mndCancelBtn" class="hidden px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition cursor-pointer">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Student Password Recovery Request (طلب استعادة كلمة المرور للمتدرب) -->
+<div id="studentPasswordRecoveryModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
+    <div class="glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-4 border border-amber-400/50 animate-pop-in text-white text-right relative">
+        <button type="button" onclick="closeStudentPasswordRecoveryModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white text-sm bg-white/10 hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer transition">✕</button>
+        <div class="text-center space-y-2">
+            <div class="w-14 h-14 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl shadow-lg">
+                🔑
+            </div>
+            <h3 class="text-lg font-black text-amber-400">طلب استعادة كلمة المرور للمتدرب</h3>
+            <p class="text-xs text-slate-300">أدخل رقم هويتك الوطنية المسجل في المعهد، وسيتم إرسال طلب فوري لإدارة التدريب (سوبر أدمن) لإعادة ضبط كلمة المرور إلى آخر 4 أرقام من هويتك.</p>
+        </div>
+
+        <form onsubmit="handleStudentPasswordRecoverySubmit(event)" class="space-y-3.5 pt-1">
+            <div>
+                <label class="block text-xs font-bold mb-1 opacity-90">رقم الهوية الوطنية / السجل المدني (10 أرقام):</label>
+                <input type="text" id="recoveryNationalIdInput" required maxlength="10" placeholder="أدخل رقم الهوية (10 أرقام)..." class="w-full bg-slate-900/60 border border-slate-700 focus:border-amber-400 rounded-xl p-3 text-xs text-white font-bold outline-none font-mono">
+            </div>
+
+            <div class="bg-amber-500/15 border border-amber-400/30 p-3 rounded-2xl text-[11px] text-amber-200 leading-relaxed font-bold">
+                ℹ️ عند موافقة إدارة المعهد (سوبر أدمن) على طلبك، ستعود كلمة المرور تلقائياً إلى <b>آخر 4 أرقام من هويتك الوطنية</b>، وسيُطلب منك تعيين كلمة مرور جديدة عند أول تسجيل دخول.
+            </div>
+
+            <div class="flex gap-2 pt-1">
+                <button type="submit" class="flex-1 gold-gradient-bg text-slate-950 font-black py-3 rounded-xl text-xs transition shadow-lg hover:brightness-105 active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
+                    <span>إرسال طلب الاستعادة للإدارة 🚀</span>
+                </button>
+                <button type="button" onclick="closeStudentPasswordRecoveryModal()" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition cursor-pointer">
                     إلغاء
                 </button>
             </div>
@@ -1000,9 +1040,12 @@
                     </button>
 
                     <!-- Admin Only: User Management (Super Admin ONLY) -->
-                    <button onclick="switchTab('users')" id="btn-users" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive border border-amber-200/60 bg-amber-50/40 text-amber-900">
-                        <span class="text-base">👑</span>
-                        <span class="text-xs">إدارة الحسابات والصلاحيات</span>
+                    <button onclick="switchTab('users')" id="btn-users" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-amber-200/60 bg-amber-50/40 text-amber-900">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">👑</span>
+                            <span class="text-xs">إدارة الحسابات والصلاحيات</span>
+                        </div>
+                        <span id="navUsersPendingBadge" class="hidden text-[10px] bg-rose-500 text-white font-black px-1.5 py-0.5 rounded-full shadow-xs animate-pulse">0</span>
                     </button>
 
                     <!-- Admin Only: Timesheet / Salary Absence -->
@@ -1997,6 +2040,80 @@
                                 </thead>
                                 <tbody id="usersListTable" class="divide-y divide-slate-100 text-slate-800"></tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Super Admin Only: Trainee Password Reset & Recovery System -->
+                <div class="mt-6 border-t-2 border-amber-300/60 pt-6 space-y-4">
+                    <div class="bg-gradient-to-r from-amber-50 via-white to-white border border-amber-300 p-4 rounded-2xl flex items-center justify-between flex-wrap gap-2 shadow-xs">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🔑</span>
+                            <div>
+                                <h3 class="font-black text-slate-900 text-sm md:text-base flex items-center gap-2">
+                                    <span>إدارة وتصفير كلمات مرور المتدربين (استعادة الحسابات)</span>
+                                    <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-xs">خاص بالسوبر أدمن فقط</span>
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-0.5">يمكنك البحث برقم هوية المتدرب لتصفير كلمة مروره فوراً إلى (آخر 4 أرقام من الهوية)، أو الموافقة على طلبات الاستعادة المعلقة</p>
+                            </div>
+                        </div>
+                        <span id="saTraineePwdBadge" class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1 rounded-full border border-slate-200">
+                            الكلمة الافتراضية: آخر 4 أرقام من الهوية
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                        <!-- 1. أداة تصفير كلمة المرور المباشرة برقم الهوية -->
+                        <div class="lg:col-span-5 bg-white border border-slate-200 p-5 rounded-3xl space-y-4 shadow-sm">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                                <h4 class="font-black text-slate-900 text-xs md:text-sm flex items-center gap-2">
+                                    <span>⚡</span>
+                                    <span>تصفير فوري لكلمة مرور متدرب</span>
+                                </h4>
+                                <span class="text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-md">برقم الهوية</span>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">رقم بطاقة الهوية الوطنية للمتدرب:</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="saTraineeIdInput" placeholder="أدخل رقم الهوية (10 أرقام)" maxlength="10" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-mono font-bold outline-none focus:border-amber-500" onkeydown="if(event.key==='Enter'){event.preventDefault();searchTraineeForPasswordReset();}">
+                                        <button type="button" onclick="searchTraineeForPasswordReset()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer shrink-0 flex items-center gap-1 shadow-xs">
+                                            <span>🔍</span>
+                                            <span>بحث</span>
+                                        </button>
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 mt-1">عند التصفير ستعود كلمة المرور إلى آخر 4 أرقام من رقم الهوية تلقائياً.</p>
+                                </div>
+
+                                <!-- Trainee Details & Reset Action Box -->
+                                <div id="saTraineeResetResultBox" class="hidden border border-slate-200 bg-slate-50/70 rounded-2xl p-4 space-y-3">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. جدول طلبات استعادة كلمة المرور المعلقة -->
+                        <div class="lg:col-span-7 bg-white border border-slate-200 p-5 rounded-3xl space-y-3 shadow-sm flex flex-col">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 flex-wrap gap-2">
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-black text-slate-900 text-xs md:text-sm flex items-center gap-2">
+                                        <span>📥</span>
+                                        <span>طلبات استعادة كلمة المرور الواردة من المتدربين</span>
+                                    </h4>
+                                    <span id="saPendingRequestsCountBadge" class="text-[10px] bg-amber-100 text-amber-900 font-black px-2 py-0.5 rounded-full border border-amber-300">0 طلبات</span>
+                                </div>
+                                <button type="button" onclick="renderTraineePasswordResetRequests()" class="text-xs text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer">
+                                    <span>🔄</span>
+                                    <span>تحديث</span>
+                                </button>
+                            </div>
+
+                            <div class="flex-1 overflow-x-auto min-h-[160px]">
+                                <div id="saPendingRequestsContainer" class="space-y-2">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -7347,8 +7464,12 @@
             if (btnVirtualClass) btnVirtualClass.classList.remove('hidden');
             if (btnArchive) btnArchive.classList.add('hidden');
             if (btnUsers) {
-                if (currentUser.role === 'superadmin') btnUsers.classList.remove('hidden');
-                else btnUsers.classList.add('hidden');
+                if (currentUser.role === 'superadmin') {
+                    btnUsers.classList.remove('hidden');
+                    if (typeof updateSuperAdminPasswordRequestsBadge === 'function') updateSuperAdminPasswordRequestsBadge();
+                } else {
+                    btnUsers.classList.add('hidden');
+                }
             }
 
             if (topHeaderUploadButtons) topHeaderUploadButtons.classList.remove('hidden');
@@ -7652,6 +7773,7 @@
             } else if (tab === 'users') {
                 renderUsersList();
                 onRoleChangeInCreateUser(document.getElementById('newUserRole')?.value || 'trainer');
+                if (typeof renderTraineePasswordResetRequests === 'function') renderTraineePasswordResetRequests();
             } else if (tab === 'timesheet') {
                 if (typeof updateCycleDatesFromPreset === 'function') updateCycleDatesFromPreset();
                 if (typeof recalculateTimesheetData === 'function') recalculateTimesheetData();
@@ -8491,6 +8613,345 @@
             if (typeof renderStudentDashboard === 'function') renderStudentDashboard();
         }
     }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  STUDENT PASSWORD RECOVERY & SUPER ADMIN RESET SYSTEM (استعادة كلمات المرور)
+    // ══════════════════════════════════════════════════════════════════════════
+    let studentPasswordResetRequests = [];
+    try {
+        const savedReqs = JSON.parse(localStorage.getItem('sys_student_pwd_requests_v1') || '[]');
+        if (Array.isArray(savedReqs)) studentPasswordResetRequests = savedReqs;
+    } catch(e) {}
+    window.studentPasswordResetRequests = studentPasswordResetRequests;
+
+    function openStudentPasswordRecoveryModal() {
+        const modal = document.getElementById('studentPasswordRecoveryModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            const inp = document.getElementById('recoveryNationalIdInput');
+            if (inp) {
+                inp.value = '';
+                setTimeout(() => inp.focus(), 100);
+            }
+        }
+    }
+    window.openStudentPasswordRecoveryModal = openStudentPasswordRecoveryModal;
+
+    function closeStudentPasswordRecoveryModal() {
+        const modal = document.getElementById('studentPasswordRecoveryModal');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeStudentPasswordRecoveryModal = closeStudentPasswordRecoveryModal;
+
+    function handleStudentPasswordRecoverySubmit(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const inp = document.getElementById('recoveryNationalIdInput');
+        const rawVal = inp ? inp.value.trim() : '';
+        const cleanId = cleanNationalId(rawVal);
+
+        if (!cleanId || cleanId.length !== 10) {
+            showToast('⚠️ يرجى إدخال رقم هوية وطنية صحيح مكوّن من 10 أرقام.', 'warning');
+            if (inp) inp.focus();
+            return;
+        }
+
+        const traineePool = (trainees && trainees.length > 0) ? trainees : SAMPLE_TRAINEES;
+        const trainee = traineePool.find(t => cleanNationalId(t.id) === cleanId || t.id === rawVal);
+
+        if (!trainee) {
+            showToast(`⚠️ لم يتم العثور على أي متدرب مسجل برقم الهوية (${cleanId}). يرجى مراجعة إدارة المعهد.`, 'error');
+            return;
+        }
+
+        const existingPending = studentPasswordResetRequests.find(r => r && r.status === 'pending' && cleanNationalId(r.traineeId) === cleanId);
+        if (existingPending) {
+            showToast(`ℹ️ يوجد طلب استعادة معلق بالفعل لهذا الحساب يا ${trainee.name}، بانتظار اعتماد السوبر أدمن.`, 'info');
+            closeStudentPasswordRecoveryModal();
+            return;
+        }
+
+        const last4 = cleanId.slice(-4);
+        const nowIso = new Date().toISOString();
+        const newReq = {
+            id: 'pwd_req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            traineeId: cleanId,
+            traineeName: trainee.name,
+            group: trainee.group || 'غير محدد',
+            company: trainee.company || 'معهد الذهب الأسود',
+            last4: last4,
+            requestedAt: nowIso,
+            status: 'pending'
+        };
+
+        studentPasswordResetRequests.unshift(newReq);
+        try {
+            localStorage.setItem('sys_student_pwd_requests_v1', JSON.stringify(studentPasswordResetRequests));
+        } catch(e) {}
+
+        if (window.supabaseClient) {
+            try {
+                window.supabaseClient.from('app_sync_state').upsert([
+                    { key: 'sys_student_pwd_requests_v1', data: studentPasswordResetRequests, updated_at: nowIso }
+                ], { onConflict: 'key' }).catch(() => {});
+            } catch(err) {}
+        }
+
+        closeStudentPasswordRecoveryModal();
+        showToast(`🎉 تم إرسال طلب استعادة كلمة المرور بنجاح يا ${trainee.name}! سيقوم السوبر أدمن بمراجعة الطلب وتصفير كلمة مرورك لآخر 4 أرقام (${last4}).`, 'success');
+        updateSuperAdminPasswordRequestsBadge();
+    }
+    window.handleStudentPasswordRecoverySubmit = handleStudentPasswordRecoverySubmit;
+
+    function searchTraineeForPasswordReset() {
+        const inp = document.getElementById('saTraineeIdInput');
+        const rawVal = inp ? inp.value.trim() : '';
+        const cleanId = cleanNationalId(rawVal);
+        const box = document.getElementById('saTraineeResetResultBox');
+        if (!box) return;
+
+        if (!cleanId) {
+            showToast('يرجى إدخال رقم الهوية الوطنية للمتدرب للبحث', 'warning');
+            if (inp) inp.focus();
+            return;
+        }
+
+        const traineePool = (trainees && trainees.length > 0) ? trainees : SAMPLE_TRAINEES;
+        const trainee = traineePool.find(t => cleanNationalId(t.id) === cleanId || t.id === rawVal);
+
+        if (!trainee) {
+            box.classList.remove('hidden');
+            box.innerHTML = `
+                <div class="p-4 text-center text-rose-700 bg-rose-50 border border-rose-200 rounded-2xl text-xs space-y-1">
+                    <span class="text-2xl">⚠️</span>
+                    <p class="font-bold">لم يتم العثور على أي متدرب مسجل برقم الهوية: (${cleanId})</p>
+                    <p class="text-[10px] text-slate-500">تأكد من صحة رقم الهوية أو تحقق من كشف أسماء المتدربين.</p>
+                </div>
+            `;
+            showToast(`لم يتم العثور على متدرب برقم الهوية: (${cleanId})`, 'error');
+            return;
+        }
+
+        const last4 = cleanId.length >= 4 ? cleanId.slice(-4) : cleanId;
+        const savedCred = studentCreds[cleanId];
+        const isCustom = savedCred && savedCred.password && savedCred.password !== last4;
+        const safeName = escapeHtml(trainee.name);
+
+        box.classList.remove('hidden');
+        box.innerHTML = `
+            <div class="space-y-3.5 animate-pop-in">
+                <div class="flex items-start justify-between gap-2 border-b border-slate-200 pb-2.5">
+                    <div>
+                        <h5 class="font-black text-slate-900 text-sm">${safeName}</h5>
+                        <div class="text-[11px] text-slate-500 font-mono mt-0.5">الهوية: <b class="text-slate-800">${cleanId}</b> • الشعبة: <b class="text-slate-800">${trainee.group || 'غير محدد'}</b></div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">الشركة الراعية: ${trainee.company || 'معهد الذهب الأسود'}</div>
+                    </div>
+                    ${isCustom 
+                        ? `<span class="text-[10px] bg-rose-50 text-rose-700 border border-rose-200 font-bold px-2 py-0.5 rounded-md shrink-0">🔒 معدلة من المتدرب</span>`
+                        : `<span class="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2 py-0.5 rounded-md shrink-0">🔑 بالوضع الافتراضي</span>`
+                    }
+                </div>
+
+                <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 text-xs space-y-1.5 text-center">
+                    <div class="text-slate-700 font-bold text-xs">كلمة المرور بعد التصفير ستكون تلقائياً:</div>
+                    <div class="font-mono font-black text-amber-800 text-lg tracking-widest bg-white border border-amber-300 py-1.5 px-4 rounded-xl inline-block shadow-2xs">
+                        ${last4}
+                    </div>
+                    <div class="text-[10px] text-slate-500">وهي آخر 4 أرقام من الهوية الوطنية للمتدرب</div>
+                </div>
+
+                <button type="button" onclick="executeSuperAdminPasswordReset('${cleanId}', '${safeName}')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black py-3 rounded-2xl text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer">
+                    <span>⚡</span>
+                    <span>تأكيد إعادة ضبط كلمة المرور إلى (${last4})</span>
+                </button>
+            </div>
+        `;
+    }
+    window.searchTraineeForPasswordReset = searchTraineeForPasswordReset;
+
+    function executeSuperAdminPasswordReset(cleanId, traineeName) {
+        if (!cleanId) return;
+        cleanId = cleanNationalId(cleanId);
+        if (currentUser?.role !== 'superadmin') {
+            alert('عذراً: هذه الميزة محصورة فقط لحساب السوبر أدمن.');
+            return;
+        }
+
+        const last4 = cleanId.length >= 4 ? cleanId.slice(-4) : cleanId;
+        if (!confirm(`تأكيد إعادة ضبط كلمة المرور:\n\nهل أنت متأكد من تصفير كلمة مرور المتدرب (${traineeName}) برقم الهوية (${cleanId})؟\n\nستصبح كلمة المرور الجديدة: (${last4}) وهي آخر 4 أرقام من هويته، وسيُطلب منه تعيين كلمة مرور خاصة عند أول دخول.`)) {
+            return;
+        }
+
+        const nowIso = new Date().toISOString();
+        studentCreds[cleanId] = {
+            password: last4,
+            changedAt: nowIso,
+            mustChangePassword: true,
+            resetBy: 'superadmin',
+            resetAt: nowIso
+        };
+
+        try {
+            localStorage.setItem('sys_student_creds_v1', JSON.stringify(studentCreds));
+        } catch(e) {}
+
+        let reqUpdated = false;
+        if (Array.isArray(studentPasswordResetRequests)) {
+            studentPasswordResetRequests.forEach(r => {
+                if (r && cleanNationalId(r.traineeId) === cleanId && r.status === 'pending') {
+                    r.status = 'approved';
+                    r.approvedAt = nowIso;
+                    r.approvedBy = currentUser?.name || 'سوبر أدمن';
+                    reqUpdated = true;
+                }
+            });
+            if (reqUpdated) {
+                try {
+                    localStorage.setItem('sys_student_pwd_requests_v1', JSON.stringify(studentPasswordResetRequests));
+                } catch(e) {}
+            }
+        }
+
+        if (window.supabaseClient) {
+            try {
+                window.supabaseClient.from('app_sync_state').upsert([
+                    { key: 'sys_student_creds_v1', data: studentCreds, updated_at: nowIso },
+                    { key: 'sys_student_pwd_requests_v1', data: studentPasswordResetRequests, updated_at: nowIso }
+                ], { onConflict: 'key' }).catch(err => console.warn('Supabase sync warning:', err));
+            } catch(err) {}
+        }
+
+        showToast(`🎉 تم بنجاح تصفير كلمة مرور المتدرب (${traineeName}) إلى آخر 4 أرقام: (${last4})!`, 'success');
+        searchTraineeForPasswordReset();
+        renderTraineePasswordResetRequests();
+        updateSuperAdminPasswordRequestsBadge();
+    }
+    window.executeSuperAdminPasswordReset = executeSuperAdminPasswordReset;
+
+    function renderTraineePasswordResetRequests() {
+        const container = document.getElementById('saPendingRequestsContainer');
+        const countBadge = document.getElementById('saPendingRequestsCountBadge');
+        if (!container) return;
+
+        const pending = (Array.isArray(studentPasswordResetRequests) ? studentPasswordResetRequests : [])
+            .filter(r => r && r.status === 'pending');
+
+        if (countBadge) {
+            countBadge.innerText = `${pending.length} طلبات`;
+        }
+
+        updateSuperAdminPasswordRequestsBadge();
+
+        if (pending.length === 0) {
+            container.innerHTML = `
+                <div class="p-6 text-center text-slate-400 space-y-1.5 bg-slate-50/70 rounded-2xl border border-dashed border-slate-200">
+                    <span class="text-2xl">✨</span>
+                    <p class="text-xs font-bold text-slate-700">لا توجد طلبات استعادة معلقة حالياً</p>
+                    <p class="text-[11px] text-slate-500">عند قيام أي متدرب بطلب استعادة كلمة المرور ستظهر طلباته هنا للاعتماد الفوري.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = pending.map(req => {
+            const timeAgo = req.requestedAt ? new Date(req.requestedAt).toLocaleString('ar-SA') : 'الآن';
+            const safeName = escapeHtml(req.traineeName);
+            const safeId = escapeHtml(req.traineeId);
+            const safeGroup = escapeHtml(req.group || 'غير محدد');
+            const last4 = req.last4 || safeId.slice(-4);
+
+            return `
+                <div class="p-3.5 bg-slate-50 hover:bg-amber-50/30 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-black text-xs md:text-sm text-slate-900">${safeName}</span>
+                            <span class="text-[10px] font-mono bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-700 font-bold">${safeId}</span>
+                            <span class="text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-md">${safeGroup}</span>
+                        </div>
+                        <div class="text-[10px] text-slate-500 flex items-center gap-2 flex-wrap">
+                            <span>🕒 وقت الطلب: ${timeAgo}</span>
+                            <span>•</span>
+                            <span>الكلمة بعد الموافقة: <b class="font-mono text-amber-800 font-black">${last4}</b></span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                        <button type="button" onclick="approveStudentPasswordResetRequest('${req.id}')" class="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs" title="الموافقة وإعادة تعيين كلمة المرور إلى آخر 4 أرقام">
+                            <span>✓</span>
+                            <span>موافقة وتصفير (${last4})</span>
+                        </button>
+                        <button type="button" onclick="rejectStudentPasswordResetRequest('${req.id}')" class="bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-700 border border-rose-200 font-bold text-xs px-3 py-2 rounded-xl transition cursor-pointer" title="رفض الطلب">
+                            <span>✕</span>
+                            <span>رفض</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    window.renderTraineePasswordResetRequests = renderTraineePasswordResetRequests;
+
+    function approveStudentPasswordResetRequest(reqId) {
+        if (!reqId) return;
+        const req = studentPasswordResetRequests.find(r => r && r.id === reqId);
+        if (!req) {
+            showToast('لم يتم العثور على الطلب المحدد', 'warning');
+            return;
+        }
+        executeSuperAdminPasswordReset(req.traineeId, req.traineeName);
+    }
+    window.approveStudentPasswordResetRequest = approveStudentPasswordResetRequest;
+
+    function rejectStudentPasswordResetRequest(reqId) {
+        if (!reqId) return;
+        if (currentUser?.role !== 'superadmin') {
+            alert('عذراً: هذه الميزة محصورة فقط لحساب السوبر أدمن.');
+            return;
+        }
+        const req = studentPasswordResetRequests.find(r => r && r.id === reqId);
+        if (!req) return;
+
+        if (!confirm(`هل أنت متأكد من رفض طلب استعادة كلمة المرور للمتدرب (${req.traineeName})؟`)) {
+            return;
+        }
+
+        const nowIso = new Date().toISOString();
+        req.status = 'rejected';
+        req.rejectedAt = nowIso;
+        req.rejectedBy = currentUser?.name || 'سوبر أدمن';
+
+        try {
+            localStorage.setItem('sys_student_pwd_requests_v1', JSON.stringify(studentPasswordResetRequests));
+        } catch(e) {}
+
+        if (window.supabaseClient) {
+            try {
+                window.supabaseClient.from('app_sync_state').upsert([
+                    { key: 'sys_student_pwd_requests_v1', data: studentPasswordResetRequests, updated_at: nowIso }
+                ], { onConflict: 'key' }).catch(() => {});
+            } catch(err) {}
+        }
+
+        showToast(`تم رفض طلب استعادة كلمة المرور للمتدرب (${req.traineeName}).`, 'info');
+        renderTraineePasswordResetRequests();
+        updateSuperAdminPasswordRequestsBadge();
+    }
+    window.rejectStudentPasswordResetRequest = rejectStudentPasswordResetRequest;
+
+    function updateSuperAdminPasswordRequestsBadge() {
+        const badge = document.getElementById('navUsersPendingBadge');
+        if (!badge) return;
+        const isSuper = currentUser && currentUser.role === 'superadmin';
+        const pendingCount = (Array.isArray(studentPasswordResetRequests) ? studentPasswordResetRequests : [])
+            .filter(r => r && r.status === 'pending').length;
+
+        if (isSuper && pendingCount > 0) {
+            badge.innerText = String(pendingCount);
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+    window.updateSuperAdminPasswordRequestsBadge = updateSuperAdminPasswordRequestsBadge;
 
     function logout() {
         const modal = document.getElementById('mandatoryPasswordModal');
@@ -27800,6 +28261,38 @@
                 }
             }
 
+            // Merge Student Password Reset Requests
+            const cloudPwdRequests = stateMap['sys_student_pwd_requests_v1'] || null;
+            if (cloudPwdRequests && Array.isArray(cloudPwdRequests)) {
+                let reqChanged = false;
+                const reqMap = new Map();
+                (Array.isArray(studentPasswordResetRequests) ? studentPasswordResetRequests : []).forEach(r => {
+                    if (r && (r.id || r.traineeId)) reqMap.set(r.id || r.traineeId, r);
+                });
+                cloudPwdRequests.forEach(r => {
+                    if (!r || !(r.id || r.traineeId)) return;
+                    const key = r.id || r.traineeId;
+                    if (!reqMap.has(key)) {
+                        reqMap.set(key, r);
+                        reqChanged = true;
+                    } else {
+                        const localR = reqMap.get(key);
+                        if (r.status !== localR.status && (r.status === 'approved' || r.status === 'rejected')) {
+                            reqMap.set(key, r);
+                            reqChanged = true;
+                        }
+                    }
+                });
+                if (reqChanged) {
+                    studentPasswordResetRequests = Array.from(reqMap.values());
+                    try {
+                        localStorage.setItem('sys_student_pwd_requests_v1', JSON.stringify(studentPasswordResetRequests));
+                    } catch(e) {}
+                    if (typeof renderTraineePasswordResetRequests === 'function') renderTraineePasswordResetRequests();
+                    if (typeof updateSuperAdminPasswordRequestsBadge === 'function') updateSuperAdminPasswordRequestsBadge();
+                }
+            }
+
             // Merge Vacancies
             if (cloudVacancies && typeof cloudVacancies === 'object') {
                 laVacancies = cloudVacancies;
@@ -28148,6 +28641,9 @@
                 }
                 if (typeof studentCreds !== 'undefined' && studentCreds && Object.keys(studentCreds).length > 0) {
                     upsertRows.push({ key: 'sys_student_creds_v1', data: studentCreds, updated_at: new Date().toISOString() });
+                }
+                if (typeof studentPasswordResetRequests !== 'undefined' && Array.isArray(studentPasswordResetRequests) && studentPasswordResetRequests.length > 0) {
+                    upsertRows.push({ key: 'sys_student_pwd_requests_v1', data: studentPasswordResetRequests, updated_at: new Date().toISOString() });
                 }
                 if (typeof laVacancies !== 'undefined' && laVacancies && Object.keys(laVacancies).length > 0) {
                     upsertRows.push({ key: 'sys_la_vacancies_v9', data: laVacancies, updated_at: new Date().toISOString() });
