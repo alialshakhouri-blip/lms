@@ -6746,6 +6746,11 @@
 
 <!-- ==================== SCRIPT LOGIC ==================== -->
 <script>
+    var supabaseClient = null;
+    var isSupabaseConnected = false;
+    window.supabaseClient = null;
+    window.isSupabaseConnected = false;
+
     function escapeHtml(str) {
         if (str === null || str === undefined) return '';
         return String(str)
@@ -18938,7 +18943,7 @@
         try {
             localStorage.setItem('sys_lms_cleared_weeks_v2', JSON.stringify(lmsClearedWeeks));
         } catch(e) {}
-        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected) {
+        if (window.supabaseClient && window.isSupabaseConnected) {
             try {
                 supabaseClient.from('app_sync_state').upsert([{
                     key: 'lms_cleared_weeks_v2',
@@ -18956,7 +18961,7 @@
         try {
             localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
         } catch (e) {}
-        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected) {
+        if (window.supabaseClient && window.isSupabaseConnected) {
             try {
                 supabaseClient.from('app_sync_state').upsert([{
                     key: 'lms_deleted_items_v1',
@@ -18974,7 +18979,7 @@
         try {
             localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
         } catch (e) {}
-        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected) {
+        if (window.supabaseClient && window.isSupabaseConnected) {
             try {
                 supabaseClient.from('app_sync_state').upsert([{
                     key: 'lms_deleted_items_v1',
@@ -19090,10 +19095,6 @@
                         w.quizzes = [];
                         w.assignments = [];
                     }
-                });
-            }
-        }
-    }
                 });
             }
         }
@@ -26672,8 +26673,8 @@
     // ══════════════════════════════════════════════════════════════════════════
     //  SUPABASE CLOUD INTEGRATION & REALTIME STORAGE (LMS & DATABASE)
     // ══════════════════════════════════════════════════════════════════════════
-    let supabaseClient = null;
-    let isSupabaseConnected = false;
+    supabaseClient = window.supabaseClient || null;
+    isSupabaseConnected = window.isSupabaseConnected || false;
     let supabaseCloudConfig = { url: '', anonKey: '' };
 
     let _cloudPeriodicSyncTimer = null;
