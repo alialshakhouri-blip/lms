@@ -23947,7 +23947,7 @@
     // ===================================================================
     // TRAINER DEDICATED LMS ENGINE & COURSE MANAGEMENT (STRICT TRAINER LOCK & GROUP FILTERING)
     // ===================================================================
-    let activeTrainerLmsWeek = 1;
+    let activeTrainerLmsWeek = parseInt(sessionStorage.getItem('sys_active_trainer_lms_week') || localStorage.getItem('sys_active_trainer_lms_week') || '1', 10) || 1;
     let activeTrainerLmsCourse = null;
     let activeTrainerLmsGroupFilter = 'ALL'; // 'ALL' or specific group name
 
@@ -24525,7 +24525,7 @@
             weekTabs.innerHTML = (courseData.weeks || []).map(w => {
                 const wNum = w.week || w.weekNum || 1;
                 const tabTitle = ARABIC_ORDINAL_WEEKS[wNum] || `الأسبوع ${wNum}`;
-                const isActive = (wNum === activeTrainerLmsWeek);
+                const isActive = (parseInt(wNum, 10) === parseInt(activeTrainerLmsWeek, 10));
 
                 const vCount = (w.videos || []).length;
                 const dCount = ((w.docs && w.docs.length) ? w.docs : (w.documents || [])).length;
@@ -24569,7 +24569,7 @@
             `}).join('');
         }
 
-        const activeWeek = (courseData.weeks || []).find(w => (w.week || w.weekNum) === activeTrainerLmsWeek) || (courseData.weeks || [])[0];
+        const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (!activeWeek) return;
 
         const currentTrainerWeekNum = activeWeek.week || activeWeek.weekNum || 1;
@@ -24904,7 +24904,11 @@
         if (evt && evt.currentTarget) {
             triggerLmsRipple(evt.currentTarget, evt);
         }
-        activeTrainerLmsWeek = weekNum;
+        activeTrainerLmsWeek = parseInt(weekNum, 10) || 1;
+        try {
+            sessionStorage.setItem('sys_active_trainer_lms_week', String(activeTrainerLmsWeek));
+            localStorage.setItem('sys_active_trainer_lms_week', String(activeTrainerLmsWeek));
+        } catch (e) {}
         renderTrainerLms();
 
         const workspace = document.getElementById('tlSelectedWeekWorkspace');
@@ -25637,8 +25641,12 @@
 
     // Safe week finder for LMS data structures
     function getActiveTrainerLmsWeekObj(courseData) {
-        if (!courseData || !courseData.weeks || !courseData.weeks.length) return null;
-        return courseData.weeks.find(w => (w.week || w.weekNum) === activeTrainerLmsWeek) || courseData.weeks[0];
+        if (!courseData || !Array.isArray(courseData.weeks) || !courseData.weeks.length) return null;
+        const target = parseInt(activeTrainerLmsWeek, 10) || 1;
+        const found = courseData.weeks.find(w => w && (parseInt(w.week, 10) === target || parseInt(w.weekNum, 10) === target));
+        if (found) return found;
+        if (courseData.weeks[target - 1]) return courseData.weeks[target - 1];
+        return courseData.weeks[0];
     }
 
     // ===================================================================
@@ -27898,17 +27906,20 @@ END $$;`;
             if (vId) registerLmsItemDeleted(vId);
             if (vTitle) registerLmsItemDeleted(vTitle);
             if (vUrl) registerLmsItemDeleted(vUrl);
+            if (v.lectureFile?.id) registerLmsItemDeleted(v.lectureFile.id);
+            if (v.lectureFile?.name) registerLmsItemDeleted(v.lectureFile.name);
 
             // الحذف المباشر الفوري من الأسبوع النشط
             activeWeek.videos.splice(idx, 1);
 
             // حذف من كافة المفاتيح البديلة للمقرر
             const aliases = getActiveTrainerCourseAliases(courseKey);
-            const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
+            const wNum = parseInt(activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1, 10) || 1;
             aliases.forEach(k => {
                 const c = lmsCourses[k];
                 if (c && Array.isArray(c.weeks)) {
-                    const w = c.weeks.find(x => String(x.week || x.weekNum) === String(wNum));
+                    let w = c.weeks.find(x => x && (parseInt(x.week, 10) === wNum || parseInt(x.weekNum, 10) === wNum));
+                    if (!w && c.weeks[wNum - 1]) w = c.weeks[wNum - 1];
                     if (w && Array.isArray(w.videos)) {
                         w.videos = w.videos.filter(item => {
                             if (!item) return false;
@@ -27926,9 +27937,18 @@ END $$;`;
             }
 
             persistLmsCoursesLocalOnly();
+            try {
+                sessionStorage.setItem('sys_active_trainer_lms_week', String(wNum));
+                localStorage.setItem('sys_active_trainer_lms_week', String(wNum));
+                sessionStorage.setItem('sys_active_tab_v1', 'trainerLms');
+                localStorage.setItem('sys_active_tab_v1', 'trainerLms');
+            } catch(e) {}
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف المحاضرة نهائياً ولن تعود مجدداً ✓', 'success');
+            showToast('تم حذف المحاضرة بنجاح ✓ جاري تحديث الصفحة...', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 200);
         }
     }
 
@@ -28059,11 +28079,12 @@ END $$;`;
 
             // حذف من كافة المفاتيح البديلة للمقرر
             const aliases = getActiveTrainerCourseAliases(courseKey);
-            const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
+            const wNum = parseInt(activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1, 10) || 1;
             aliases.forEach(k => {
                 const c = lmsCourses[k];
                 if (c && Array.isArray(c.weeks)) {
-                    const w = c.weeks.find(x => String(x.week || x.weekNum) === String(wNum));
+                    let w = c.weeks.find(x => x && (parseInt(x.week, 10) === wNum || parseInt(x.weekNum, 10) === wNum));
+                    if (!w && c.weeks[wNum - 1]) w = c.weeks[wNum - 1];
                     if (w) {
                         if (Array.isArray(w.docs)) {
                             w.docs = w.docs.filter(item => {
@@ -28093,9 +28114,18 @@ END $$;`;
         }
 
         persistLmsCoursesLocalOnly();
+        try {
+            sessionStorage.setItem('sys_active_trainer_lms_week', String(activeTrainerLmsWeek));
+            localStorage.setItem('sys_active_trainer_lms_week', String(activeTrainerLmsWeek));
+            sessionStorage.setItem('sys_active_tab_v1', 'trainerLms');
+            localStorage.setItem('sys_active_tab_v1', 'trainerLms');
+        } catch(e) {}
         persistLmsCourses();
         renderTrainerLms();
-        showToast('تم حذف المذكرة نهائياً ولن تعود مجدداً ✓', 'success');
+        showToast('تم حذف المذكرة بنجاح ✓ جاري تحديث الصفحة...', 'success');
+        setTimeout(() => {
+            window.location.reload();
+        }, 200);
     }
 
     function openReadDocModal(docId) {
@@ -28653,11 +28683,12 @@ END $$;`;
 
             // حذف من كافة المفاتيح البديلة للمقرر
             const aliases = getActiveTrainerCourseAliases(courseKey);
-            const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
+            const wNum = parseInt(activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1, 10) || 1;
             aliases.forEach(k => {
                 const c = lmsCourses[k];
                 if (c && Array.isArray(c.weeks)) {
-                    const w = c.weeks.find(x => String(x.week || x.weekNum) === String(wNum));
+                    let w = c.weeks.find(x => x && (parseInt(x.week, 10) === wNum || parseInt(x.weekNum, 10) === wNum));
+                    if (!w && c.weeks[wNum - 1]) w = c.weeks[wNum - 1];
                     if (w && Array.isArray(w.quizzes)) {
                         w.quizzes = w.quizzes.filter(item => {
                             if (!item) return false;
@@ -28673,9 +28704,18 @@ END $$;`;
                 supabaseClient.from('quizzes').delete().eq('id', qId).catch(() => {});
             }
             persistLmsCoursesLocalOnly();
+            try {
+                sessionStorage.setItem('sys_active_trainer_lms_week', String(wNum));
+                localStorage.setItem('sys_active_trainer_lms_week', String(wNum));
+                sessionStorage.setItem('sys_active_tab_v1', 'trainerLms');
+                localStorage.setItem('sys_active_tab_v1', 'trainerLms');
+            } catch(e) {}
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف الاختبار نهائياً ولن يعود مجدداً ✓', 'success');
+            showToast('تم حذف الاختبار نهائياً ولن يعود مجدداً ✓ جاري تحديث الصفحة...', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 200);
         }
     }
 
@@ -29017,11 +29057,12 @@ END $$;`;
 
             // حذف من كافة المفاتيح البديلة للمقرر
             const aliases = getActiveTrainerCourseAliases(courseKey);
-            const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
+            const wNum = parseInt(activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1, 10) || 1;
             aliases.forEach(k => {
                 const c = lmsCourses[k];
                 if (c && Array.isArray(c.weeks)) {
-                    const w = c.weeks.find(x => String(x.week || x.weekNum) === String(wNum));
+                    let w = c.weeks.find(x => x && (parseInt(x.week, 10) === wNum || parseInt(x.weekNum, 10) === wNum));
+                    if (!w && c.weeks[wNum - 1]) w = c.weeks[wNum - 1];
                     if (w && Array.isArray(w.assignments)) {
                         w.assignments = w.assignments.filter(item => {
                             if (!item) return false;
@@ -29037,65 +29078,86 @@ END $$;`;
                 supabaseClient.from('assignments').delete().eq('id', aId).catch(() => {});
             }
             persistLmsCoursesLocalOnly();
+            try {
+                sessionStorage.setItem('sys_active_trainer_lms_week', String(wNum));
+                localStorage.setItem('sys_active_trainer_lms_week', String(wNum));
+                sessionStorage.setItem('sys_active_tab_v1', 'trainerLms');
+                localStorage.setItem('sys_active_tab_v1', 'trainerLms');
+            } catch(e) {}
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف الواجب نهائياً ولن يعود مجدداً ✓', 'success');
+            showToast('تم حذف الواجب نهائياً ولن يعود مجدداً ✓ جاري تحديث الصفحة...', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 200);
         }
     }
 
-    // دالة شاملة لمسح وتفريغ كافة محتويات الأسبوع النشط دفعة واحدة
+    // دالة شاملة لمسح وتفريغ كافة محتويات الأسبوع النشط دفعة واحدة لكافة الأقسام والمجموعات
     function clearCurrentWeekContent() {
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
-        const wNum = activeWeek ? (activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1) : (activeTrainerLmsWeek || 1);
+        const wNum = parseInt(activeWeek ? (activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1) : (activeTrainerLmsWeek || 1), 10) || 1;
 
-        const totalItems = ((activeWeek?.videos?.length || 0) + 
-                            ((activeWeek?.docs?.length || activeWeek?.documents?.length) || 0) + 
-                            (activeWeek?.quizzes?.length || 0) + 
-                            (activeWeek?.assignments?.length || 0));
+        const vItems = Array.isArray(activeWeek?.videos) ? activeWeek.videos : [];
+        const dItems = [...(Array.isArray(activeWeek?.docs) ? activeWeek.docs : []), ...(Array.isArray(activeWeek?.documents) ? activeWeek.documents : [])];
+        const qItems = Array.isArray(activeWeek?.quizzes) ? activeWeek.quizzes : [];
+        const aItems = Array.isArray(activeWeek?.assignments) ? activeWeek.assignments : [];
+
+        const totalItems = vItems.length + dItems.length + qItems.length + aItems.length;
 
         if (totalItems === 0) {
-            showToast('الأسبوع النشط فارغ بالفعل ولا يحتوي على أي عناصر.', 'info');
+            showToast(`الأسبوع (${wNum}) فارغ بالفعل ولا يحتوي على أي عناصر تعليمية.`, 'info');
             return;
         }
 
-        if (!confirm(`تحذير: هل أنت متأكد من مسح كافة محتويات الأسبوع (${wNum})؟\nسيتم حذف جميع المحاضرات والمذكرات والاختبارات والواجبات لهذا الأسبوع نهائياً.`)) {
+        if (!confirm(`تحذير: هل أنت متأكد من مسح كافة محتويات الأسبوع (${wNum})؟\nسيتم حذف جميع المحاضرات، المذكرات، الاختبارات، والواجبات لهذا الأسبوع نهائياً ولجميع الأقسام.`)) {
             return;
         }
 
+        // 1. تسجيل وحذف جميع عناصر المحاضرات المرئية
+        vItems.forEach(v => {
+            if (v?.id) registerLmsItemDeleted(v.id);
+            if (v?.title) registerLmsItemDeleted(v.title);
+            if (v?.url) registerLmsItemDeleted(v.url);
+            if (v?.lectureFile?.id) registerLmsItemDeleted(v.lectureFile.id);
+            if (v?.lectureFile?.name) registerLmsItemDeleted(v.lectureFile.name);
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && v?.id) {
+                supabaseClient.from('lectures').delete().eq('id', v.id).catch(() => {});
+            }
+        });
+
+        // 2. تسجيل وحذف جميع عناصر المذكرات الدراسية
+        dItems.forEach(d => {
+            if (d?.id) registerLmsItemDeleted(d.id);
+            if (d?.title) registerLmsItemDeleted(d.title);
+            if (d?.url) registerLmsItemDeleted(d.url);
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && d?.id) {
+                supabaseClient.from('lectures').delete().eq('id', d.id).catch(() => {});
+            }
+        });
+
+        // 3. تسجيل وحذف جميع الاختبارات لجميع الأقسام
+        qItems.forEach(q => {
+            if (q?.id) registerLmsItemDeleted(q.id);
+            if (q?.title) registerLmsItemDeleted(q.title);
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && q?.id) {
+                supabaseClient.from('quizzes').delete().eq('id', q.id).catch(() => {});
+            }
+        });
+
+        // 4. تسجيل وحذف جميع الواجبات لجميع الأقسام
+        aItems.forEach(a => {
+            if (a?.id) registerLmsItemDeleted(a.id);
+            if (a?.title) registerLmsItemDeleted(a.title);
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && a?.id) {
+                supabaseClient.from('assignments').delete().eq('id', a.id).catch(() => {});
+            }
+        });
+
+        // تفريغ محتويات الأسبوع النشط بالكامل لكافة الأقسام
         if (activeWeek) {
-            (activeWeek.videos || []).forEach(v => {
-                if (v?.id) registerLmsItemDeleted(v.id);
-                if (v?.title) registerLmsItemDeleted(v.title);
-                if (v?.url) registerLmsItemDeleted(v.url);
-                if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && v?.id) {
-                    supabaseClient.from('lectures').delete().eq('id', v.id).catch(() => {});
-                }
-            });
-            const dList = (activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []);
-            dList.forEach(d => {
-                if (d?.id) registerLmsItemDeleted(d.id);
-                if (d?.title) registerLmsItemDeleted(d.title);
-                if (d?.url) registerLmsItemDeleted(d.url);
-                if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && d?.id) {
-                    supabaseClient.from('lectures').delete().eq('id', d.id).catch(() => {});
-                }
-            });
-            (activeWeek.quizzes || []).forEach(q => {
-                if (q?.id) registerLmsItemDeleted(q.id);
-                if (q?.title) registerLmsItemDeleted(q.title);
-                if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && q?.id) {
-                    supabaseClient.from('quizzes').delete().eq('id', q.id).catch(() => {});
-                }
-            });
-            (activeWeek.assignments || []).forEach(a => {
-                if (a?.id) registerLmsItemDeleted(a.id);
-                if (a?.title) registerLmsItemDeleted(a.title);
-                if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && a?.id) {
-                    supabaseClient.from('assignments').delete().eq('id', a.id).catch(() => {});
-                }
-            });
             activeWeek.videos = [];
             activeWeek.docs = [];
             activeWeek.documents = [];
@@ -29103,12 +29165,33 @@ END $$;`;
             activeWeek.assignments = [];
         }
 
+        // تفريغ محتويات الأسبوع من كافة المقررات والمفاتيح البديلة المرتبطة بالمدرب
         const aliases = getActiveTrainerCourseAliases(courseKey);
         aliases.forEach(k => {
             const c = lmsCourses[k];
             if (c && Array.isArray(c.weeks)) {
-                const w = c.weeks.find(x => String(x.week || x.weekNum) === String(wNum));
+                let w = c.weeks.find(x => x && (parseInt(x.week, 10) === wNum || parseInt(x.weekNum, 10) === wNum));
+                if (!w && c.weeks[wNum - 1]) w = c.weeks[wNum - 1];
                 if (w) {
+                    (Array.isArray(w.videos) ? w.videos : []).forEach(v => {
+                        if (v?.id) registerLmsItemDeleted(v.id);
+                        if (v?.title) registerLmsItemDeleted(v.title);
+                        if (v?.url) registerLmsItemDeleted(v.url);
+                    });
+                    const extraDocs = [...(Array.isArray(w.docs) ? w.docs : []), ...(Array.isArray(w.documents) ? w.documents : [])];
+                    extraDocs.forEach(d => {
+                        if (d?.id) registerLmsItemDeleted(d.id);
+                        if (d?.title) registerLmsItemDeleted(d.title);
+                        if (d?.url) registerLmsItemDeleted(d.url);
+                    });
+                    (Array.isArray(w.quizzes) ? w.quizzes : []).forEach(q => {
+                        if (q?.id) registerLmsItemDeleted(q.id);
+                        if (q?.title) registerLmsItemDeleted(q.title);
+                    });
+                    (Array.isArray(w.assignments) ? w.assignments : []).forEach(a => {
+                        if (a?.id) registerLmsItemDeleted(a.id);
+                        if (a?.title) registerLmsItemDeleted(a.title);
+                    });
                     w.videos = [];
                     w.docs = [];
                     w.documents = [];
@@ -29118,10 +29201,26 @@ END $$;`;
             }
         });
 
+        // حفظ فوري محلي
         persistLmsCoursesLocalOnly();
+
+        // تثبيت الأسبوع والشاشة قبل التحديث
+        try {
+            sessionStorage.setItem('sys_active_trainer_lms_week', String(wNum));
+            localStorage.setItem('sys_active_trainer_lms_week', String(wNum));
+            sessionStorage.setItem('sys_active_tab_v1', 'trainerLms');
+            localStorage.setItem('sys_active_tab_v1', 'trainerLms');
+        } catch(e) {}
+
+        // مزامنة السحابة
         persistLmsCourses();
         renderTrainerLms();
-        showToast(`تم مسح وتفريغ كامل محتويات الأسبوع (${wNum}) نهائياً بنجاح ✓`, 'success');
+        showToast(`تم مسح وتفريغ كامل محتويات الأسبوع (${wNum}) لجميع الأقسام بنجاح ✓ جاري تحديث الصفحة...`, 'success');
+
+        // تحديث الصفحة تلقائياً بعد الحذف مباشرة
+        setTimeout(() => {
+            window.location.reload();
+        }, 200);
     }
     window.clearCurrentWeekContent = clearCurrentWeekContent;
 
