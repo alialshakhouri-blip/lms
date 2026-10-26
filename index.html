@@ -512,6 +512,30 @@
     </div>
 </div>
 
+<script>
+    // صمام أمان لإخفاء شاشة التحميل فوراً وعدم التعليق أبداً
+    (function() {
+        var dismissed = false;
+        function dismissSplash() {
+            if (dismissed) return;
+            dismissed = true;
+            var el = document.getElementById('appInitialSplashLoader');
+            if (el) {
+                el.style.opacity = '0';
+                setTimeout(function() {
+                    try {
+                        el.classList.add('hidden');
+                        el.style.display = 'none';
+                    } catch(e) {}
+                }, 150);
+            }
+        }
+        window.dismissInitialSplash = dismissSplash;
+        // صمام أمان زمني أقصاه 800 ميلي ثانية لإخفاء شاشة التحميل تحت أي ظرف
+        setTimeout(dismissSplash, 800);
+    })();
+</script>
+
 
 <!-- ==================== TOAST NOTIFICATION ==================== -->
 <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[99999] transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none" style="z-index: 99999;">
@@ -7351,10 +7375,14 @@
     }
 
     function applyUserRolePermissions() {
-        const splash = document.getElementById('appInitialSplashLoader');
-        if (splash) {
-            splash.style.opacity = '0';
-            setTimeout(() => { splash.classList.add('hidden'); }, 200);
+        if (typeof window.dismissInitialSplash === 'function') {
+            window.dismissInitialSplash();
+        } else {
+            const splash = document.getElementById('appInitialSplashLoader');
+            if (splash) {
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.classList.add('hidden'); splash.style.display = 'none'; }, 150);
+            }
         }
 
         const dashboardView = document.getElementById('dashboardView');
@@ -13071,10 +13099,7 @@
 
     // تصفير شامل لجميع درجات واختبارات وواجبات المتدربين بالكامل للبدء بالرصد من جديد
     function resetAllTraineeGrades(confirmFirst = true) {
-        if (confirmFirst && !confirm('⚠️ تأكيد هام جداً:
-
-هل أنت متأكد من تصفير كافة درجات واختبارات وواجبات المتدربين بالكامل؟
-سيتم مسح جميع المحاولات والتسليمات وكشوف الدرجات لجميع المتدربين للبدء برصد جديد من الصفر.')) {
+        if (confirmFirst && !confirm('⚠️ تأكيد هام جداً:\n\nهل أنت متأكد من تصفير كافة درجات واختبارات وواجبات المتدربين بالكامل؟\nسيتم مسح جميع المحاولات والتسليمات وكشوف الدرجات لجميع المتدربين للبدء برصد جديد من الصفر.')) {
             return false;
         }
         try {
@@ -13136,14 +13161,18 @@
                 renderTrainerDashboard();
             }
 
-            showToast('✓ تم تصفير كافة درجات واختبارات وواجبات المتدربين بنجاح للبدء بالرصد من جديد', 'success');
+            if (confirmFirst && typeof showToast === 'function') {
+                showToast('✓ تم تصفير كافة درجات واختبارات وواجبات المتدربين بنجاح للبدء بالرصد من جديد', 'success');
+            }
             return true;
         } catch (e) {
             console.error('resetAllTraineeGrades error:', e);
-            showToast('حدث خطأ أثناء تصفير الدرجات', 'error');
+            if (confirmFirst && typeof showToast === 'function') {
+                showToast('حدث خطأ أثناء تصفير الدرجات', 'error');
+            }
             return false;
         } finally {
-            if (confirmFirst) {
+            if (confirmFirst && typeof executePostDeletionReload === 'function') {
                 executePostDeletionReload('gradesSystem');
             }
         }
@@ -41677,6 +41706,12 @@ function buildDemoExecutiveReport(params) {
             }
         } catch (initErr) {
             console.error('Safe initialization caught error:', initErr);
+            if (typeof applyUserRolePermissions === 'function') {
+                try { applyUserRolePermissions(); } catch(e) {}
+            }
+            if (typeof window.dismissInitialSplash === 'function') {
+                try { window.dismissInitialSplash(); } catch(e) {}
+            }
         }
     }
 
