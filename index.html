@@ -6555,6 +6555,12 @@
                                     👁️
                                 </button>
                             </div>
+                            <div class="pt-1.5 flex items-center justify-between">
+                                <button type="button" onclick="closeMyProfileModal(); openChangeMyPasswordModal();" class="text-[11px] font-black text-amber-700 hover:text-amber-900 hover:underline flex items-center gap-1 cursor-pointer">
+                                    <span>🔑</span>
+                                    <span>أو اضغط هنا لتعيين وتأكيد كلمة المرور في نافذة مخصصة</span>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="flex items-center gap-2 pt-2">
@@ -6915,10 +6921,13 @@
     ];
 
     let users = JSON.parse(localStorage.getItem('sys_users_v9')) || INITIAL_USERS;
-    // دمج الحسابات الافتراضية لكافة المدربين لضمان إمكانية دخول الجميع
+    // دمج الحسابات الافتراضية لكافة المدربين مع الحفاظ التام على كلمات المرور المحدثة وعدم استرجاع الافتراضية
     INITIAL_USERS.forEach(initU => {
-        if (!users.some(u => u.username.toLowerCase() === initU.username.toLowerCase())) {
+        const existing = users.find(u => u.username.toLowerCase() === initU.username.toLowerCase());
+        if (!existing) {
             users.push(initU);
+        } else {
+            if (!existing.trainerProfile && initU.trainerProfile) existing.trainerProfile = initU.trainerProfile;
         }
     });
     let currentUser = JSON.parse(localStorage.getItem('sys_current_user_v9')) || null;
@@ -7889,10 +7898,63 @@
 
         currentUser.name = newName;
         if (newPhone) currentUser.phone = cleanPhone(newPhone);
-        if (newPass) currentUser.password = newPass;
         currentUser.avatar = tempProfileAvatarBase64 !== null ? tempProfileAvatarBase64 : (currentUser.avatar || '');
 
-        const userIdx = users.findIndex(u => u.id === currentUser.id);
+        const nowIso = new Date().toISOString();
+
+        if (newPass) {
+            if (newPass.length < 3) {
+                showToast('⚠️ يجب ألا تقل كلمة المرور عن 3 خانات', 'error');
+                return;
+            }
+            currentUser.password = newPass;
+            currentUser.passwordChanged = true;
+            currentUser.passwordChangedAt = nowIso;
+            currentUser.mustChangePassword = false;
+
+            if (currentUser.role === 'student') {
+                const cleanId = cleanNationalId(currentUser.id) || currentUser.cleanId;
+                studentCreds[cleanId] = {
+                    password: newPass,
+                    changedAt: nowIso,
+                    mustChangePassword: false
+                };
+                localStorage.setItem('sys_student_creds_v1', JSON.stringify(studentCreds));
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                    try {
+                        supabaseClient.from('app_sync_state').upsert([
+                            { key: 'sys_student_creds_v1', data: studentCreds, updated_at: nowIso }
+                        ], { onConflict: 'key' }).then(() => {}).catch(() => {});
+                    } catch(e) {}
+                }
+            } else {
+                const userIdx = users.findIndex(u => 
+                    (currentUser.id && u.id === currentUser.id) ||
+                    (currentUser.username && u.username && u.username.toLowerCase() === currentUser.username.toLowerCase()) ||
+                    (currentUser.trainerProfile && u.trainerProfile && u.trainerProfile.trim() === currentUser.trainerProfile.trim())
+                );
+                if (userIdx >= 0) {
+                    users[userIdx].password = newPass;
+                    users[userIdx].passwordChanged = true;
+                    users[userIdx].passwordChangedAt = nowIso;
+                    users[userIdx].mustChangePassword = false;
+                }
+                localStorage.setItem('sys_users_v9', JSON.stringify(users));
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                    try {
+                        supabaseClient.from('app_sync_state').upsert([
+                            { key: 'sys_users_v9', data: users, updated_at: nowIso }
+                        ], { onConflict: 'key' }).then(() => {}).catch(() => {});
+                    } catch(e) {}
+                }
+            }
+        }
+
+        const userIdx = users.findIndex(u => 
+            (currentUser.id && u.id === currentUser.id) ||
+            (currentUser.username && u.username && u.username.toLowerCase() === currentUser.username.toLowerCase()) ||
+            (currentUser.trainerProfile && u.trainerProfile && u.trainerProfile.trim() === currentUser.trainerProfile.trim())
+        );
         if (userIdx >= 0) {
             users[userIdx] = { ...users[userIdx], ...currentUser };
         }
@@ -7905,7 +7967,7 @@
         }
 
         closeMyProfileModal();
-        showToast('✅ تم حفظ وتحديث ملفك الشخصي والصورة بنجاح!', 'success');
+        showToast('✅ تم حفظ وتحديث ملفك الشخصي وكلمة المرور بنجاح!', 'success');
     }
 
     // ===================================================================
@@ -8067,19 +8129,144 @@
             return;
         }
 
-        // 1. الدخول الافتراضي الأوفلاين 100% للأدمن والسوبر أدمن: admin / superadmin (123 أو 123456)
+        const effectivePortal = portalMode || activeLoginPortal || (window.location.hash.includes('staff') ? 'staff' : 'student');
         const cleanU = u.trim().toLowerCase();
-        if ((cleanU === 'admin' || cleanU === 'superadmin' || cleanU === 'مدير' || cleanU === 'مشرف' || u.trim() === 'المدير العام') && (p === '123456' || p === '123')) {
+        const cleanId = cleanNationalId(u);
+
+        // ═════════════════════════════════════════════════════════════
+        // PORTAL 1: STUDENT LOGIN PORTAL (#student)
+        // ═════════════════════════════════════════════════════════════
+        if (effectivePortal === 'student') {
+            // التحقق إذا كان المستخدم يحاول إدخال حساب مدرب أو إدارة في بوابة المتدرب
+            const isStaffAttempt = users.some(user => {
+                const matchUser = user.username.toLowerCase() === cleanU;
+                const matchName = user.name && user.name.replace(/^أ\.\s*/, '').trim().toLowerCase() === cleanU;
+                const matchProfile = user.trainerProfile && user.trainerProfile.trim().toLowerCase() === cleanU;
+                return (matchUser || matchName || matchProfile || cleanU === 'admin' || cleanU === 'superadmin' || cleanU === 'مدير' || cleanU === 'مشرف');
+            });
+            if (isStaffAttempt) {
+                shakeLoginCard();
+                showToast('⚠️ هذه البوابة مخصصة لدخول المتدربين فقط! يرجى الدخول من بوابة الكادر التدريبي والإداري.', 'warning');
+                setTimeout(() => switchLoginPortal('staff'), 1200);
+                return;
+            }
+
+            // التحقق من حسابات المتدربين فقط
+            const traineePool = (trainees && trainees.length > 0) ? trainees : SAMPLE_TRAINEES;
+            const studentMatch = traineePool.find(t => cleanNationalId(t.id) === cleanId || t.id === u);
+
+            if (studentMatch) {
+                const studentCleanId = cleanNationalId(studentMatch.id);
+                const defaultPassword = studentCleanId.slice(-4);
+                const savedCred = studentCreds[studentCleanId];
+
+                let authSuccess = false;
+                let needsPasswordChange = false;
+
+                if (savedCred && savedCred.password) {
+                    if (p === savedCred.password) {
+                        authSuccess = true;
+                        needsPasswordChange = savedCred.mustChangePassword === true;
+                    } else if (p === defaultPassword) {
+                        showToast('⚠️ لقد تم تغيير كلمة المرور سابقاً لهذا الحساب. يرجى إدخال كلمة المرور السرية الخاصة بك.', 'warning');
+                        shakeLoginCard();
+                        return;
+                    }
+                } else {
+                    if (p === defaultPassword) {
+                        authSuccess = true;
+                        needsPasswordChange = true;
+                    }
+                }
+
+                if (authSuccess) {
+                    const binding = getTrainerAndCourseForTrainee(studentMatch);
+                    currentUser = {
+                        id: studentMatch.id,
+                        cleanId: studentCleanId,
+                        username: studentMatch.id,
+                        name: studentMatch.name,
+                        role: 'student',
+                        group: studentMatch.group,
+                        company: studentMatch.company || 'معهد الذهب الأسود',
+                        room: studentMatch.room || binding.room,
+                        phone: studentMatch.phone || '',
+                        qual: studentMatch.qual || 'دبلوم تقني',
+                        trainerName: binding.trainerName,
+                        courseTitle: binding.courseTitle,
+                        lmsKey: binding.lmsKey,
+                        weeklyAttendance: studentMatch.weeklyAttendance,
+                        rate: studentMatch.rate,
+                        archiveRate: studentMatch.archiveRate,
+                        combinedRate: studentMatch.combinedRate,
+                        weeklyAttendedSessions: studentMatch.weeklyAttendedSessions,
+                        mustChangePassword: needsPasswordChange
+                    };
+
+                    saveData();
+                    applyUserRolePermissions();
+
+                    if (needsPasswordChange) {
+                        openMandatoryPasswordModal();
+                        showToast(`أهلاً بك يا ${studentMatch.name}! يرجى تعيين كلمة مرور جديدة لحماية حسابك الأكاديمي.`, 'info');
+                    } else {
+                        showToast(`مرحباً بك في بوابتك الأكاديمية يا ${studentMatch.name}!`, 'success');
+                    }
+                    return;
+                }
+            }
+
+            shakeLoginCard();
+            if (cleanId && cleanId.length === 10) {
+                showToast('رقم الهوية أو كلمة المرور غير صحيحة. (كلمة المرور الافتراضية هي آخر 4 أرقام من الهوية)', 'error');
+            } else {
+                showToast('رقم الهوية الوطنية أو كلمة المرور غير صحيحة', 'error');
+            }
+            return;
+        }
+
+        // ═════════════════════════════════════════════════════════════
+        // PORTAL 2: STAFF LOGIN PORTAL (#staff)
+        // ═════════════════════════════════════════════════════════════
+        // إذا حاول متدرب إدخال رقم هويته في بوابة الكادر
+        if (cleanId && cleanId.length === 10) {
+            const traineePool = (trainees && trainees.length > 0) ? trainees : SAMPLE_TRAINEES;
+            const isStudentAttempt = traineePool.some(t => cleanNationalId(t.id) === cleanId || t.id === u);
+            if (isStudentAttempt) {
+                shakeLoginCard();
+                showToast('⚠️ هذه البوابة مخصصة للكادر التدريبي والإداري! للدخول كمتدرب يرجى الانتقال لبوابة المتدربين.', 'warning');
+                setTimeout(() => switchLoginPortal('student'), 1200);
+                return;
+            }
+        }
+
+        // 1. الدخول لحسابات الإدارة والسوبر أدمن
+        if (cleanU === 'admin' || cleanU === 'superadmin' || cleanU === 'مدير' || cleanU === 'مشرف' || u.trim() === 'المدير العام') {
             const isSuper = (cleanU === 'superadmin' || cleanU === 'مدير' || u.trim() === 'المدير العام');
             let matchedUser = users.find(x => x.username.toLowerCase() === (isSuper ? 'superadmin' : 'admin'));
             if (!matchedUser) {
                 if (isSuper) {
-                    matchedUser = { id: 'usr-1', username: 'superadmin', password: p, name: 'المدير العام', role: 'superadmin', createdAt: '2026/10/01' };
+                    matchedUser = { id: 'usr-1', username: 'superadmin', password: '123', name: 'المدير العام', role: 'superadmin', createdAt: '2026/10/01' };
                 } else {
-                    matchedUser = { id: 'usr-admin-default', username: 'admin', password: p, name: 'مشرف الحضور واللوجستيات (أدمن)', role: 'admin', createdAt: '2026/10/01' };
+                    matchedUser = { id: 'usr-admin-default', username: 'admin', password: '123', name: 'مشرف الحضور واللوجستيات (أدمن)', role: 'admin', createdAt: '2026/10/01' };
                 }
                 users.push(matchedUser);
             }
+
+            const expectedPass = matchedUser.password || '123';
+            let passOk = false;
+            if (matchedUser.passwordChanged) {
+                passOk = (p === matchedUser.password);
+            } else {
+                passOk = (p === expectedPass || p === '123');
+            }
+
+            if (!passOk) {
+                shakeLoginCard();
+                showToast('❌ كلمة المرور غير صحيحة لحساب الإدارة', 'error');
+                return;
+            }
+
             currentUser = matchedUser;
             saveData();
             applyUserRolePermissions();
@@ -8087,15 +8274,31 @@
             return;
         }
 
-        // 2. التحقق من حسابات الكادر الإداري والمدربين
+        // 2. التحقق الدقيق من حسابات المدربين والكادر
         const staffMatch = users.find(user => {
             const matchUser = user.username.toLowerCase() === cleanU;
             const matchName = user.name && user.name.replace(/^أ\.\s*/, '').trim().toLowerCase() === cleanU;
             const matchProfile = user.trainerProfile && user.trainerProfile.trim().toLowerCase() === cleanU;
-            const passOk = (user.password === p || p === '123' || p === '123456');
-            return (matchUser || matchName || matchProfile) && passOk;
+            return (matchUser || matchName || matchProfile);
         });
+
         if (staffMatch) {
+            const expectedPass = staffMatch.password || '123';
+            // تدقيق صارم: إذا كان المدرب قد غير كلمة المرور، تُقبل فقط كلمته الجديدة حصراً
+            // وإذا لم يكن قد غيرها بعد، تُقبل فقط '123' الافتراضية وتطالبه فوراً بالتغيير
+            let passOk = false;
+            if (staffMatch.passwordChanged) {
+                passOk = (p === staffMatch.password);
+            } else {
+                passOk = (p === expectedPass || p === '123');
+            }
+
+            if (!passOk) {
+                shakeLoginCard();
+                showToast('❌ كلمة المرور غير صحيحة، يرجى إعادة المحاولة', 'error');
+                return;
+            }
+
             currentUser = staffMatch;
             let trainerNeedsPasswordChange = false;
             if (staffMatch.role === 'trainer') {
@@ -8106,14 +8309,16 @@
                 const matchedKey = findCourseKeyForTrainer(trainerName);
                 if (matchedKey) activeTrainerLmsCourse = matchedKey;
 
-                // التحقق من تسجيل دخول المدرب بكلمة المرور الافتراضية
-                if (p === '123' || staffMatch.password === '123' || staffMatch.mustChangePassword) {
+                // التحقق من أن المدرب لم يغير كلمته بعد
+                if (!staffMatch.passwordChanged && (p === '123' || staffMatch.password === '123' || staffMatch.mustChangePassword)) {
                     trainerNeedsPasswordChange = true;
                     staffMatch.mustChangePassword = true;
                 }
             }
+
             saveData();
             applyUserRolePermissions();
+
             if (trainerNeedsPasswordChange) {
                 openTrainerChangePasswordModal(false);
                 showToast(`مرحباً بك يا ${staffMatch.name}! يُرجى تعيين كلمة مرور جديدة وخاصة بك لتأمين حسابك كمدرب.`, 'info');
@@ -8123,83 +8328,9 @@
             return;
         }
 
-        // 3. التحقق من تسجيل دخول المتدربين (Student Auth & Verification)
-        const cleanId = cleanNationalId(u);
-        const traineePool = (trainees && trainees.length > 0) ? trainees : SAMPLE_TRAINEES;
-        const studentMatch = traineePool.find(t => cleanNationalId(t.id) === cleanId || t.id === u);
-
-        if (studentMatch) {
-            const studentCleanId = cleanNationalId(studentMatch.id);
-            const defaultPassword = studentCleanId.slice(-4);
-            const savedCred = studentCreds[studentCleanId];
-
-            let authSuccess = false;
-            let needsPasswordChange = false;
-
-            if (savedCred && savedCred.password) {
-                // المتدرب غير كلمة مروره سابقاً
-                if (p === savedCred.password) {
-                    authSuccess = true;
-                    needsPasswordChange = savedCred.mustChangePassword === true;
-                } else if (p === defaultPassword) {
-                    showToast('⚠️ لقد تم تغيير كلمة المرور سابقاً لهذا الحساب. يرجى إدخال كلمة المرور السرية الخاصة بك.', 'warning');
-                    shakeLoginCard();
-                    return;
-                }
-            } else {
-                // أول دخول للمتدرب بكلمة المرور الافتراضية (آخر 4 أرقام)
-                if (p === defaultPassword) {
-                    authSuccess = true;
-                    needsPasswordChange = true;
-                }
-            }
-
-            if (authSuccess) {
-                // جلب بيانات الكورس والمدرب المرتبطين بالمجموعة
-                const binding = getTrainerAndCourseForTrainee(studentMatch);
-
-                currentUser = {
-                    id: studentMatch.id,
-                    cleanId: studentCleanId,
-                    username: studentMatch.id,
-                    name: studentMatch.name,
-                    role: 'student',
-                    group: studentMatch.group,
-                    company: studentMatch.company || 'معهد الذهب الأسود',
-                    room: studentMatch.room || binding.room,
-                    phone: studentMatch.phone || '',
-                    qual: studentMatch.qual || 'دبلوم تقني',
-                    trainerName: binding.trainerName,
-                    courseTitle: binding.courseTitle,
-                    lmsKey: binding.lmsKey,
-                    weeklyAttendance: studentMatch.weeklyAttendance,
-                    rate: studentMatch.rate,
-                    archiveRate: studentMatch.archiveRate,
-                    combinedRate: studentMatch.combinedRate,
-                    weeklyAttendedSessions: studentMatch.weeklyAttendedSessions,
-                    mustChangePassword: needsPasswordChange
-                };
-
-                saveData();
-                applyUserRolePermissions();
-
-                if (needsPasswordChange) {
-                    openMandatoryPasswordModal();
-                    showToast(`أهلاً بك يا ${studentMatch.name}! يرجى تعيين كلمة مرور جديدة لحماية حسابك الأكاديمي.`, 'info');
-                } else {
-                    showToast(`مرحباً بك في بوابتك الأكاديمية يا ${studentMatch.name}!`, 'success');
-                }
-                return;
-            }
-        }
-
-        // إذا فشل تسجيل الدخول
+        // إذا فشل تسجيل الدخول للكادر
         shakeLoginCard();
-        if (cleanId && cleanId.length === 10) {
-            showToast('رقم الهوية أو كلمة المرور غير صحيحة. (كلمة المرور الافتراضية هي آخر 4 أرقام من الهوية)', 'error');
-        } else {
-            showToast('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
-        }
+        showToast('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
     }
 
     function shakeLoginCard() {
@@ -8227,6 +8358,16 @@
         document.getElementById('mndConfirmPassword').value = '';
         if (modal) modal.classList.remove('hidden');
     }
+
+    function openChangeMyPasswordModal() {
+        if (!currentUser) return;
+        if (currentUser.role === 'student') {
+            openMandatoryPasswordModal();
+        } else {
+            openTrainerChangePasswordModal(false);
+        }
+    }
+    window.openChangeMyPasswordModal = openChangeMyPasswordModal;
 
     function openTrainerChangePasswordModal(isMandatory = false) {
         if (!currentUser || currentUser.role !== 'trainer') return;
@@ -8290,37 +8431,62 @@
             return;
         }
 
-        if (currentUser.role === 'trainer') {
-            const userInDb = users.find(u => u.id === currentUser.id || u.username.toLowerCase() === currentUser.username.toLowerCase());
+        const nowIso = new Date().toISOString();
+
+        if (currentUser.role === 'trainer' || currentUser.role === 'admin' || currentUser.role === 'superadmin') {
+            const userInDb = users.find(u => 
+                (currentUser.id && u.id === currentUser.id) || 
+                (currentUser.username && u.username && u.username.toLowerCase() === currentUser.username.toLowerCase()) ||
+                (currentUser.trainerProfile && u.trainerProfile && u.trainerProfile.trim() === currentUser.trainerProfile.trim())
+            );
             if (userInDb) {
                 userInDb.password = p1;
                 userInDb.mustChangePassword = false;
                 userInDb.passwordChanged = true;
-                userInDb.passwordChangedAt = new Date().toISOString();
+                userInDb.passwordChangedAt = nowIso;
             }
             currentUser.password = p1;
             currentUser.mustChangePassword = false;
             currentUser.passwordChanged = true;
+            currentUser.passwordChangedAt = nowIso;
 
             localStorage.setItem('sys_users_v9', JSON.stringify(users));
             localStorage.setItem('sys_current_user_v9', JSON.stringify(currentUser));
+
+            // المزامنة الفورية مع السحابة لمنع أي مسح أو إعادة للكود الافتراضي
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    supabaseClient.from('app_sync_state').upsert([
+                        { key: 'sys_users_v9', data: users, updated_at: nowIso }
+                    ], { onConflict: 'key' }).then(() => {}).catch(err => console.warn('User pass sync error:', err));
+                } catch(e) {}
+            }
             if (typeof syncCoreDataToCloud === 'function') syncCoreDataToCloud();
 
             const modal = document.getElementById('mandatoryPasswordModal');
             if (modal) modal.classList.add('hidden');
 
-            showToast('🎉 تم حفظ وتحديث كلمة مرور حساب المدرب بنجاح!', 'success');
+            showToast('🎉 تم حفظ وتحديث كلمة المرور بنجاح!', 'success');
             return;
         }
 
         if (currentUser.role === 'student') {
-            const cleanId = cleanNationalId(currentUser.id);
+            const cleanId = cleanNationalId(currentUser.id) || currentUser.cleanId;
             studentCreds[cleanId] = {
                 password: p1,
-                changedAt: new Date().toISOString(),
+                changedAt: nowIso,
                 mustChangePassword: false
             };
             localStorage.setItem('sys_student_creds_v1', JSON.stringify(studentCreds));
+
+            // المزامنة الفورية مع السحابة
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    supabaseClient.from('app_sync_state').upsert([
+                        { key: 'sys_student_creds_v1', data: studentCreds, updated_at: nowIso }
+                    ], { onConflict: 'key' }).then(() => {}).catch(err => console.warn('Student creds sync error:', err));
+                } catch(e) {}
+            }
             if (typeof syncCoreDataToCloud === 'function') syncCoreDataToCloud();
 
             currentUser.mustChangePassword = false;
@@ -8330,7 +8496,7 @@
             if (modal) modal.classList.add('hidden');
 
             showToast(`🎉 تم حفظ وتأمين كلمة المرور بنجاح! تم تفعيل حسابك بالكامل.`, 'success');
-            renderStudentDashboard();
+            if (typeof renderStudentDashboard === 'function') renderStudentDashboard();
         }
     }
 
@@ -8340,6 +8506,12 @@
         const wasStudent = currentUser && currentUser.role === 'student';
         currentUser = null;
         localStorage.removeItem('sys_current_user_v9');
+        const stP = document.getElementById('studentLoginPassword');
+        if (stP) stP.value = '';
+        const sfP = document.getElementById('staffLoginPassword');
+        if (sfP) sfP.value = '';
+        const mnP = document.getElementById('loginPassword');
+        if (mnP) mnP.value = '';
         try {
             localStorage.removeItem('sys_active_tab_v1');
             sessionStorage.removeItem('sys_active_tab_v1');
@@ -27509,15 +27681,24 @@
                 localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
             }
 
-            // Merge Users
+            // Merge Users with timestamp protection (حماية كلمة المرور المحلية من المسح بالقديم السحابي)
             if (cloudUsers && Array.isArray(cloudUsers) && cloudUsers.length > 0) {
                 let usersChanged = false;
+                let needCloudPush = false;
                 cloudUsers.forEach(cu => {
                     const existing = users.find(u => u.username.toLowerCase() === cu.username.toLowerCase());
                     if (existing) {
-                        if (cu.password && cu.password !== existing.password) {
+                        const localTime = new Date(existing.passwordChangedAt || 0).getTime();
+                        const cloudTime = new Date(cu.passwordChangedAt || 0).getTime();
+
+                        // تحديث كلمة المرور فقط إذا كانت السحابية أحدث زمنياً بشكل مؤكد
+                        if (cloudTime > localTime && cu.password) {
                             existing.password = cu.password;
+                            existing.passwordChanged = !!cu.passwordChanged;
+                            existing.passwordChangedAt = cu.passwordChangedAt;
                             usersChanged = true;
+                        } else if (localTime > cloudTime || (existing.passwordChanged && !cu.passwordChanged)) {
+                            needCloudPush = true;
                         }
                     } else {
                         users.push(cu);
@@ -27527,12 +27708,36 @@
                 if (usersChanged) {
                     localStorage.setItem('sys_users_v9', JSON.stringify(users));
                 }
+                if (needCloudPush && typeof syncCoreDataToCloud === 'function') {
+                    syncCoreDataToCloud();
+                }
             }
 
-            // Merge Student Creds
-            if (cloudCreds && typeof cloudCreds === 'object' && Object.keys(cloudCreds).length > 0) {
-                studentCreds = { ...studentCreds, ...cloudCreds };
-                localStorage.setItem('sys_student_creds_v1', JSON.stringify(studentCreds));
+            // Merge Student Creds with timestamp protection
+            if (cloudCreds && typeof cloudCreds === 'object') {
+                let credsChanged = false;
+                let needCredsPush = false;
+                for (const [stId, cCred] of Object.entries(cloudCreds)) {
+                    if (!studentCreds[stId]) {
+                        studentCreds[stId] = cCred;
+                        credsChanged = true;
+                    } else {
+                        const lTime = new Date(studentCreds[stId].changedAt || 0).getTime();
+                        const cTime = new Date(cCred.changedAt || 0).getTime();
+                        if (cTime > lTime) {
+                            studentCreds[stId] = cCred;
+                            credsChanged = true;
+                        } else if (lTime > cTime) {
+                            needCredsPush = true;
+                        }
+                    }
+                }
+                if (credsChanged) {
+                    localStorage.setItem('sys_student_creds_v1', JSON.stringify(studentCreds));
+                }
+                if (needCredsPush && typeof syncCoreDataToCloud === 'function') {
+                    syncCoreDataToCloud();
+                }
             }
 
             // Merge Vacancies
