@@ -424,6 +424,33 @@
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col antialiased">
 
+<!-- ==================== APP INITIAL SPLASH LOADER (علامة التحميل الاحترافية عند Refresh) ==================== -->
+<div id="appInitialSplashLoader" class="fixed inset-0 z-[999999] flex flex-col items-center justify-center bg-slate-950 text-white select-none transition-opacity duration-300">
+    <div class="absolute -top-32 -right-32 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+
+    <div class="relative flex flex-col items-center space-y-6 max-w-sm px-6 text-center animate-pop-in z-10">
+        <div class="relative flex items-center justify-center">
+            <div class="absolute -inset-4 bg-gradient-to-r from-amber-500/20 via-amber-400/40 to-amber-600/20 rounded-full blur-xl animate-pulse"></div>
+            <div class="w-24 h-24 rounded-3xl bg-white/95 p-3.5 shadow-2xl border border-amber-400/50 backdrop-blur-md flex items-center justify-center relative z-10">
+                <img src="logo.png" alt="شعار المعهد" class="h-full w-full object-contain" onerror="this.onerror=null; this.src='logo.jpg'">
+            </div>
+        </div>
+        
+        <div class="space-y-3">
+            <div class="flex items-center justify-center gap-2.5">
+                <div class="w-5 h-5 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
+                <h3 class="text-base font-black text-white tracking-wide">المنصة التدريبية المعتمدة</h3>
+            </div>
+            <div class="inline-block bg-amber-400 text-slate-950 text-[11px] font-black px-3.5 py-1 rounded-full shadow-sm">
+                معهد الذهب الأسود للتدريب - فرع عنك
+            </div>
+            <p id="appSplashLoadingText" class="text-xs text-slate-400 font-bold">جاري تحميل النظام الأكاديمي والتحقق من الجلسة...</p>
+        </div>
+    </div>
+</div>
+
+
 <!-- ==================== TOAST NOTIFICATION ==================== -->
 <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[99999] transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none" style="z-index: 99999;">
     <div id="toastContent" class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold border border-amber-500/40 gold-glow">
@@ -473,45 +500,40 @@
     </div>
 </div>
 
-<!-- ======================================================== -->
-<!-- ==================== 1. LOGIN VIEW ==================== -->
-<!-- ======================================================== -->
-<div id="loginView" class="min-h-screen bg-slate-950 bg-gradient-to-br from-slate-950 via-slate-900 to-black flex flex-col justify-center items-center p-4 relative overflow-hidden transition-colors duration-500">
-    
-    <!-- Interactive Stars Canvas Background -->
-    <canvas id="starsCanvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
-
-    <!-- Ambient Glowing Orbs -->
+<!-- =================================================================== -->
+<!-- ==================== 1. STUDENT LOGIN PORTAL (بوابة المتدربين المستقلة) ==================== -->
+<!-- =================================================================== -->
+<div id="studentLoginView" class="hidden min-h-screen bg-slate-950 bg-gradient-to-br from-slate-950 via-slate-900 to-black flex flex-col justify-center items-center p-4 relative overflow-hidden transition-colors duration-500">
+    <canvas id="studentStarsCanvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
     <div class="absolute -top-32 -right-32 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
     <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
 
-    <!-- Theme Toggle Switcher (Dark / Light Mode) in Top Corner -->
+    <!-- Theme Toggle Switcher -->
     <div class="absolute top-5 left-5 z-20">
-        <button id="loginThemeToggleBtn" type="button" onclick="toggleLoginTheme()" class="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 shadow-lg text-xs font-bold transition active:scale-95 cursor-pointer">
+        <button type="button" onclick="toggleLoginTheme()" class="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 shadow-lg text-xs font-bold transition active:scale-95 cursor-pointer text-white">
             ☀️ <span class="text-xs font-bold text-amber-300">الوضع النهاري</span>
         </button>
     </div>
 
-    <!-- Dedicated Trainee Login Card -->
-    <div id="studentLoginCard" class="glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 relative z-10 animate-pop-in">
-        <!-- Login Header with White Logo -->
+    <!-- Dedicated Student Portal Card -->
+    <div id="studentPortalCard" class="glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 relative z-10 animate-pop-in">
         <div class="text-center space-y-2">
             <div class="inline-block p-2.5 bg-white/95 rounded-2xl shadow-md border border-amber-400/30 backdrop-blur-md">
                 <img src="logo.png" alt="شعار معهد الذهب الأسود" class="h-14 md:h-16 w-auto object-contain mx-auto" onerror="this.onerror=null; this.src='logo.jpg'">
             </div>
             <div>
-                <h2 class="text-xl font-black tracking-tight text-white" id="studentLoginHeading">بوابة المتدربين الإلكترونية</h2>
+                <h2 class="text-xl font-black tracking-tight text-white">بوابة المتدربين المعتمدين</h2>
                 <div class="inline-block bg-amber-400 text-slate-950 text-[11px] font-black px-3 py-0.5 rounded-full mt-1.5 shadow-sm">
                     معهد الذهب الأسود للتدريب - فرع عنك
                 </div>
-                <p class="text-xs text-slate-300 opacity-80 font-bold mt-1">المنصة الأكاديمية • الحضور، المحاضرات، والتقييمات</p>
+                <p class="text-xs text-slate-300 opacity-80 font-bold mt-1">المنصة الأكاديمية • كشوف الحضور، المحاضرات، حل الواجبات، والاختبارات</p>
             </div>
         </div>
 
-        <!-- Student Login Form -->
+        <!-- Student Form -->
         <form onsubmit="handleStudentLogin(event)" class="space-y-3.5 pt-1">
             <div class="space-y-1 text-right">
-                <label class="block text-xs font-bold opacity-90 text-white">رقم الهوية الوطنية / الرقم التدريبي:</label>
+                <label class="block text-xs font-bold opacity-90 text-white">رقم الهوية الوطنية / السجل التدريبي:</label>
                 <div class="relative">
                     <input type="text" id="studentLoginUsername" required placeholder="أدخل رقم الهوية (10 أرقام)" class="w-full bg-slate-900/40 border border-slate-700/60 focus:border-amber-400 focus:bg-slate-900/70 rounded-xl p-3 text-xs text-white font-bold outline-none transition font-mono pr-9">
                     <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm opacity-60">🆔</span>
@@ -535,39 +557,57 @@
             </button>
         </form>
 
-        <!-- Portal Switcher Link to Staff -->
-        <div class="pt-2 border-t border-white/10">
-            <button type="button" onclick="switchLoginPortal('staff')" class="w-full py-2.5 px-3 rounded-2xl bg-white/5 hover:bg-white/10 text-amber-300 hover:text-amber-200 border border-amber-400/20 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+        <!-- Direct Share Link Button for Trainees -->
+        <div class="pt-2 border-t border-white/10 space-y-2">
+            <button type="button" onclick="copyStudentLoginLink()" class="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-[11px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer" title="نسخ رابط مباشر خاص بالمتدربين لإرساله عبر الواتساب">
+                <span>📋</span>
+                <span>نسخ رابط بوابة المتدربين المباشر (#student)</span>
+            </button>
+
+            <!-- Switch to Staff Portal -->
+            <button type="button" onclick="switchLoginPortal('staff')" class="w-full py-2.5 px-3 rounded-2xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 hover:text-amber-200 border border-amber-400/30 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
                 <span>🔐</span>
-                <span>الانتقال إلى بوابة الإدارة والمدربين ⬅</span>
+                <span>الانتقال إلى بوابة الكادر التعليمي والإداري (المدربين والإدارة) ⬅</span>
             </button>
         </div>
 
         <div class="text-center text-[11px] opacity-60 font-medium text-slate-400">
-            معهد الذهب الأسود للتدريب - فرع عنك • جميع الحقوق محفوظة © 2026
+            معهد الذهب الأسود للتدريب - فرع عنك • بوابة المتدربين © 2026
         </div>
     </div>
+</div>
 
-    <!-- Dedicated Staff / Admin Login Card (Initially Hidden) -->
-    <div id="staffLoginCard" class="hidden glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 relative z-10 animate-pop-in">
-        <!-- Login Header with White Logo -->
+<!-- =================================================================== -->
+<!-- ==================== 2. STAFF LOGIN PORTAL (بوابة الكادر التعليمي والإداري) ==================== -->
+<!-- =================================================================== -->
+<div id="staffLoginView" class="hidden min-h-screen bg-slate-950 bg-gradient-to-br from-slate-950 via-slate-900 to-black flex flex-col justify-center items-center p-4 relative overflow-hidden transition-colors duration-500">
+    <canvas id="staffStarsCanvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+    <div class="absolute -top-32 -right-32 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+
+    <!-- Theme Toggle Switcher -->
+    <div class="absolute top-5 left-5 z-20">
+        <button type="button" onclick="toggleLoginTheme()" class="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 shadow-lg text-xs font-bold transition active:scale-95 cursor-pointer text-white">
+            ☀️ <span class="text-xs font-bold text-amber-300">الوضع النهاري</span>
+        </button>
+    </div>
+
+    <!-- Dedicated Staff / Admin / Trainer Portal Card -->
+    <div id="staffPortalCard" class="glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 relative z-10 animate-pop-in">
         <div class="text-center space-y-2">
             <div class="inline-block p-2.5 bg-white/95 rounded-2xl shadow-md border border-amber-400/30 backdrop-blur-md">
                 <img src="logo.png" alt="شعار معهد الذهب الأسود" class="h-14 md:h-16 w-auto object-contain mx-auto" onerror="this.onerror=null; this.src='logo.jpg'">
             </div>
             <div>
-                <h2 class="text-xl font-black tracking-tight text-white" id="staffLoginHeading">بوابة الإدارة والكادر التدريبي</h2>
+                <h2 class="text-xl font-black tracking-tight text-white">بوابة الكادر التعليمي والإداري</h2>
                 <div class="inline-block bg-amber-400 text-slate-950 text-[11px] font-black px-3 py-0.5 rounded-full mt-1.5 shadow-sm">
                     معهد الذهب الأسود للتدريب - فرع عنك
                 </div>
-                <p class="text-xs text-slate-300 opacity-80 font-bold mt-1">لوحة الإشراف • إدارة المقررات، رصد الحضور، والدرجات</p>
+                <p class="text-xs text-slate-300 opacity-80 font-bold mt-1">لوحة الإشراف الموحدة • المدربين، الإدارة، والسوبر أدمن</p>
             </div>
         </div>
 
-
-
-
-        <!-- Staff Login Form -->
+        <!-- Staff Form -->
         <form onsubmit="handleStaffLogin(event)" class="space-y-3.5 pt-1">
             <div class="space-y-1 text-right">
                 <label class="block text-xs font-bold opacity-90 text-white">اسم المستخدم (Username):</label>
@@ -594,30 +634,39 @@
             </button>
         </form>
 
-        <!-- Portal Switcher Link to Student -->
-        <div class="pt-2 border-t border-white/10">
-            <button type="button" onclick="switchLoginPortal('student')" class="w-full py-2.5 px-3 rounded-2xl bg-white/5 hover:bg-white/10 text-amber-300 hover:text-amber-200 border border-amber-400/20 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+        <!-- Direct Share Link Button for Staff -->
+        <div class="pt-2 border-t border-white/10 space-y-2">
+            <button type="button" onclick="copyStaffLoginLink()" class="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-[11px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer" title="نسخ رابط مباشر خاص بالمدربين والإدارة">
+                <span>📋</span>
+                <span>نسخ رابط بوابة الكادر المباشر (#staff)</span>
+            </button>
+
+            <!-- Switch to Student Portal -->
+            <button type="button" onclick="switchLoginPortal('student')" class="w-full py-2.5 px-3 rounded-2xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 hover:text-amber-200 border border-amber-400/30 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
                 <span>👨‍🎓</span>
                 <span>الانتقال إلى بوابة المتدربين ⬅</span>
             </button>
         </div>
 
         <div class="text-center text-[11px] opacity-60 font-medium text-slate-400">
-            معهد الذهب الأسود للتدريب - فرع عنك • جميع الحقوق محفوظة © 2026
+            معهد الذهب الأسود للتدريب - فرع عنك • بوابة الكادر التعليمي والإداري © 2026
         </div>
     </div>
-
-    <!-- Hidden compatibility elements to support legacy code references -->
-    <div id="loginCard" class="hidden"></div>
-    <input type="hidden" id="loginUsername" value="">
-    <input type="hidden" id="loginPassword" value="">
-    <div id="loginPortalSelector" class="hidden"></div>
-    <div id="tabBtnTrainee" class="hidden"></div>
-    <div id="tabBtnStaff" class="hidden"></div>
-    <div id="loginStudentHelpNotice" class="hidden"></div>
-    <div id="loginHintText" class="hidden"></div>
-
 </div>
+
+<!-- Compatibility elements to ensure existing legacy references never encounter null -->
+<div id="loginView" class="hidden"></div>
+<div id="studentLoginCard" class="hidden"></div>
+<div id="staffLoginCard" class="hidden"></div>
+<div id="starsCanvas" class="hidden"></div>
+<div id="loginThemeToggleBtn" class="hidden"></div>
+<input type="hidden" id="loginUsername" value="">
+<input type="hidden" id="loginPassword" value="">
+<div id="loginPortalSelector" class="hidden"></div>
+<div id="tabBtnTrainee" class="hidden"></div>
+<div id="tabBtnStaff" class="hidden"></div>
+<div id="loginStudentHelpNotice" class="hidden"></div>
+<div id="loginHintText" class="hidden"></div>
 
 <!-- Mandatory Password Change Modal for Students & Trainers (Top Level z-[9999]) -->
 <div id="mandatoryPasswordModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
@@ -7226,19 +7275,24 @@
     }
 
     function applyUserRolePermissions() {
-        const loginView = document.getElementById('loginView');
+        const splash = document.getElementById('appInitialSplashLoader');
+        if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => { splash.classList.add('hidden'); }, 200);
+        }
+
         const dashboardView = document.getElementById('dashboardView');
 
         if (!currentUser) {
-            loginView.classList.remove('hidden');
-            dashboardView.classList.add('hidden');
+            if (dashboardView) dashboardView.classList.add('hidden');
+            renderLoginPortals();
             applyLoginTheme(currentLoginTheme);
             startStarsAnimation();
             return;
         }
 
-        loginView.classList.add('hidden');
-        dashboardView.classList.remove('hidden');
+        hideAllLoginViews();
+        if (dashboardView) dashboardView.classList.remove('hidden');
 
         const roleTitles = {
             superadmin: 'المدير العام',
@@ -7527,35 +7581,33 @@
     function applyLoginTheme(theme) {
         currentLoginTheme = theme;
         localStorage.setItem('sys_login_theme', theme);
-        const loginView = document.getElementById('loginView');
-        const stuCard = document.getElementById('studentLoginCard');
-        const staffCard = document.getElementById('staffLoginCard');
+        const stuView = document.getElementById('studentLoginView');
+        const staffView = document.getElementById('staffLoginView');
+        const stuCard = document.getElementById('studentPortalCard') || document.getElementById('studentLoginCard');
+        const staffCard = document.getElementById('staffPortalCard') || document.getElementById('staffLoginCard');
         const themeBtn = document.getElementById('loginThemeToggleBtn');
 
-        if (!loginView) return;
+        const darkClass = 'min-h-screen bg-slate-950 bg-gradient-to-br from-slate-950 via-slate-900 to-black flex flex-col justify-center items-center p-4 relative overflow-hidden transition-colors duration-500';
+        const lightClass = 'min-h-screen bg-gradient-to-br from-slate-100 via-amber-50/40 to-slate-200 flex flex-col justify-center items-center p-4 relative overflow-hidden transition-colors duration-500';
 
-        if (theme === 'light') {
-            loginView.className = 'min-h-screen bg-gradient-to-br from-slate-100 via-amber-50/40 to-slate-200 flex flex-col justify-center items-center p-4 relative overflow-hidden transition-colors duration-500';
-            if (stuCard) {
-                const isHidden = stuCard.classList.contains('hidden');
-                stuCard.className = (isHidden ? 'hidden ' : '') + 'glass-card-light p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 relative z-10 animate-pop-in';
-            }
-            if (staffCard) {
-                const isHidden = staffCard.classList.contains('hidden');
-                staffCard.className = (isHidden ? 'hidden ' : '') + 'glass-card-light p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 relative z-10 animate-pop-in';
-            }
-            if (themeBtn) themeBtn.innerHTML = '🌙 <span class="text-xs font-bold text-slate-700">الوضع الليلي</span>';
-        } else {
-            loginView.className = 'min-h-screen bg-slate-950 bg-gradient-to-br from-slate-950 via-slate-900 to-black flex flex-col justify-center items-center p-4 relative overflow-hidden transition-colors duration-500';
-            if (stuCard) {
-                const isHidden = stuCard.classList.contains('hidden');
-                stuCard.className = (isHidden ? 'hidden ' : '') + 'glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 relative z-10 animate-pop-in';
-            }
-            if (staffCard) {
-                const isHidden = staffCard.classList.contains('hidden');
-                staffCard.className = (isHidden ? 'hidden ' : '') + 'glass-card-dark p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 relative z-10 animate-pop-in';
-            }
-            if (themeBtn) themeBtn.innerHTML = '☀️ <span class="text-xs font-bold text-amber-300">الوضع النهاري</span>';
+        if (stuView) {
+            const isHidden = stuView.classList.contains('hidden');
+            stuView.className = (isHidden ? 'hidden ' : '') + (theme === 'light' ? lightClass : darkClass);
+        }
+        if (staffView) {
+            const isHidden = staffView.classList.contains('hidden');
+            staffView.className = (isHidden ? 'hidden ' : '') + (theme === 'light' ? lightClass : darkClass);
+        }
+
+        if (stuCard) {
+            stuCard.className = (theme === 'light' ? 'glass-card-light' : 'glass-card-dark') + ' p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 relative z-10 animate-pop-in';
+        }
+        if (staffCard) {
+            staffCard.className = (theme === 'light' ? 'glass-card-light' : 'glass-card-dark') + ' p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 relative z-10 animate-pop-in';
+        }
+
+        if (themeBtn) {
+            themeBtn.innerHTML = theme === 'light' ? '🌙 <span class="text-xs font-bold text-slate-700">الوضع الليلي</span>' : '☀️ <span class="text-xs font-bold text-amber-300">الوضع النهاري</span>';
         }
     }
 
@@ -7755,19 +7807,118 @@
     // ===================================================================
     // MANUAL LOCAL LOGIN & LOGOUT
     // ===================================================================
-    function switchLoginPortal(mode) {
-        activeLoginPortal = mode;
-        const stuCard = document.getElementById('studentLoginCard');
-        const staffCard = document.getElementById('staffLoginCard');
-        if (mode === 'student') {
-            if (stuCard) stuCard.classList.remove('hidden');
-            if (staffCard) staffCard.classList.add('hidden');
+    function getActiveLoginPortal() {
+        const hash = (window.location.hash || '').toLowerCase();
+        const params = new URLSearchParams(window.location.search);
+        const pParam = (params.get('portal') || '').toLowerCase();
+
+        if (hash === '#student' || hash === '#trainee' || hash === '#student-portal' || hash === '#studentlogin' || pParam === 'student' || pParam === 'trainee') {
+            return 'student';
+        }
+        if (hash === '#staff' || hash === '#admin' || hash === '#trainer' || hash === '#staff-portal' || hash === '#stafflogin' || pParam === 'staff' || pParam === 'admin' || pParam === 'trainer') {
+            return 'staff';
+        }
+        return localStorage.getItem('sys_active_login_portal') || 'student';
+    }
+    window.getActiveLoginPortal = getActiveLoginPortal;
+
+    function renderLoginPortals() {
+        const portal = activeLoginPortal || getActiveLoginPortal();
+        const studentView = document.getElementById('studentLoginView');
+        const staffView = document.getElementById('staffLoginView');
+        const legacyLoginView = document.getElementById('loginView');
+        if (legacyLoginView) legacyLoginView.classList.add('hidden');
+
+        if (portal === 'staff') {
+            if (studentView) {
+                studentView.classList.add('hidden');
+                studentView.style.display = 'none';
+            }
+            if (staffView) {
+                staffView.classList.remove('hidden');
+                staffView.style.display = 'flex';
+            }
         } else {
-            if (staffCard) staffCard.classList.remove('hidden');
-            if (stuCard) stuCard.classList.add('hidden');
+            if (staffView) {
+                staffView.classList.add('hidden');
+                staffView.style.display = 'none';
+            }
+            if (studentView) {
+                studentView.classList.remove('hidden');
+                studentView.style.display = 'flex';
+            }
         }
     }
+    window.renderLoginPortals = renderLoginPortals;
+
+    function hideAllLoginViews() {
+        const studentView = document.getElementById('studentLoginView');
+        const staffView = document.getElementById('staffLoginView');
+        const legacyLoginView = document.getElementById('loginView');
+        if (studentView) {
+            studentView.classList.add('hidden');
+            studentView.style.display = 'none';
+        }
+        if (staffView) {
+            staffView.classList.add('hidden');
+            staffView.style.display = 'none';
+        }
+        if (legacyLoginView) {
+            legacyLoginView.classList.add('hidden');
+            legacyLoginView.style.display = 'none';
+        }
+    }
+    window.hideAllLoginViews = hideAllLoginViews;
+
+    function switchLoginPortal(mode) {
+        activeLoginPortal = mode;
+        localStorage.setItem('sys_active_login_portal', mode);
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', '#' + mode);
+        }
+        renderLoginPortals();
+        showToast(mode === 'student' ? 'مرحباً بك في بوابة المتدربين المعتمدين' : 'مرحباً بك في بوابة الكادر التعليمي والإداري', 'info');
+    }
     window.switchLoginPortal = switchLoginPortal;
+
+    function copyStudentLoginLink() {
+        const origin = (window.location.origin && window.location.origin !== 'null') ? window.location.origin : '';
+        const path = window.location.pathname || '';
+        const directUrl = `${origin}${path}#student`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(directUrl).then(() => {
+                showToast('✓ تم نسخ رابط بوابة تسجيل دخول المتدربين المباشر بنجاح!', 'success');
+            }).catch(() => {
+                prompt('رابط بوابة المتدربين المباشر:', directUrl);
+            });
+        } else {
+            prompt('رابط بوابة المتدربين المباشر:', directUrl);
+        }
+    }
+    window.copyStudentLoginLink = copyStudentLoginLink;
+
+    function copyStaffLoginLink() {
+        const origin = (window.location.origin && window.location.origin !== 'null') ? window.location.origin : '';
+        const path = window.location.pathname || '';
+        const directUrl = `${origin}${path}#staff`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(directUrl).then(() => {
+                showToast('✓ تم نسخ رابط بوابة الكادر التدريبي والإداري المباشر بنجاح!', 'success');
+            }).catch(() => {
+                prompt('رابط بوابة الكادر المباشر:', directUrl);
+            });
+        } else {
+            prompt('رابط بوابة الكادر المباشر:', directUrl);
+        }
+    }
+    window.copyStaffLoginLink = copyStaffLoginLink;
+
+    window.addEventListener('hashchange', () => {
+        if (!currentUser) {
+            activeLoginPortal = getActiveLoginPortal();
+            renderLoginPortals();
+        }
+    });
 
     function handleStudentLogin(e) {
         if (e) e.preventDefault();
@@ -7948,7 +8099,7 @@
     }
 
     function shakeLoginCard() {
-        const card = (activeLoginPortal === 'staff') ? document.getElementById('staffLoginCard') : document.getElementById('studentLoginCard');
+        const card = (activeLoginPortal === 'staff') ? (document.getElementById('staffPortalCard') || document.getElementById('staffLoginCard')) : (document.getElementById('studentPortalCard') || document.getElementById('studentLoginCard'));
         if (card) {
             card.classList.remove('animate-shake');
             void card.offsetWidth;
@@ -8082,13 +8233,17 @@
     function logout() {
         const modal = document.getElementById('mandatoryPasswordModal');
         if (modal) modal.classList.add('hidden');
+        const wasStudent = currentUser && currentUser.role === 'student';
         currentUser = null;
         localStorage.removeItem('sys_current_user_v9');
         try {
             localStorage.removeItem('sys_active_tab_v1');
             sessionStorage.removeItem('sys_active_tab_v1');
-            if (window.location.hash) {
-                history.replaceState(null, '', window.location.pathname);
+            const targetPortal = wasStudent ? 'student' : 'staff';
+            activeLoginPortal = targetPortal;
+            localStorage.setItem('sys_active_login_portal', targetPortal);
+            if (window.history && window.history.replaceState) {
+                history.replaceState(null, '', '#' + targetPortal);
             }
         } catch (tabCleanErr) {}
         saveData();
@@ -18384,6 +18539,80 @@
     if (INITIAL_LMS_COURSES["ناجي محمد"]) INITIAL_LMS_COURSES["إنشاءات"] = INITIAL_LMS_COURSES["ناجي محمد"];
     if (INITIAL_LMS_COURSES["إمام يعقوب"]) INITIAL_LMS_COURSES["الحاسب الالي"] = INITIAL_LMS_COURSES["إمام يعقوب"];
 
+    // سجل تومبستون العناصر والأسابيع المحذوفة لمنع عودتها نهائياً عند المزامنة أو التحميل
+    let deletedLmsItemIds = new Set();
+    try {
+        const savedDeleted = JSON.parse(localStorage.getItem('sys_lms_deleted_items_v1') || '[]');
+        if (Array.isArray(savedDeleted)) {
+            deletedLmsItemIds = new Set(savedDeleted.map(String));
+        }
+    } catch (e) {}
+
+    let lmsClearedWeeks = {};
+    try {
+        const savedCleared = JSON.parse(localStorage.getItem('sys_lms_cleared_weeks_v2') || '{}');
+        if (savedCleared && typeof savedCleared === 'object') {
+            lmsClearedWeeks = savedCleared;
+        }
+    } catch(e) {}
+
+    function isLmsWeekCleared(courseKey, wNum) {
+        if (!wNum) return false;
+        const num = parseInt(wNum, 10);
+        if (lmsClearedWeeks[`week_${num}`] === true) return true;
+        if (lmsClearedWeeks[`all_w${num}`] === true) return true;
+        if (courseKey && lmsClearedWeeks[`${courseKey}_w${num}`] === true) return true;
+        return false;
+    }
+    window.isLmsWeekCleared = isLmsWeekCleared;
+
+    function markLmsWeekCleared(wNum, courseKey) {
+        if (!wNum) return;
+        const num = parseInt(wNum, 10);
+        lmsClearedWeeks[`week_${num}`] = true;
+        lmsClearedWeeks[`all_w${num}`] = true;
+        if (courseKey) lmsClearedWeeks[`${courseKey}_w${num}`] = true;
+        if (typeof lmsCourses !== 'undefined') {
+            for (const k in lmsCourses) {
+                lmsClearedWeeks[`${k}_w${num}`] = true;
+            }
+        }
+        try {
+            localStorage.setItem('sys_lms_cleared_weeks_v2', JSON.stringify(lmsClearedWeeks));
+        } catch(e) {}
+    }
+    window.markLmsWeekCleared = markLmsWeekCleared;
+
+    function unmarkLmsWeekCleared(wNum, courseKey) {
+        if (!wNum) return;
+        const num = parseInt(wNum, 10);
+        delete lmsClearedWeeks[`week_${num}`];
+        delete lmsClearedWeeks[`all_w${num}`];
+        if (courseKey) delete lmsClearedWeeks[`${courseKey}_w${num}`];
+        try {
+            localStorage.setItem('sys_lms_cleared_weeks_v2', JSON.stringify(lmsClearedWeeks));
+        } catch(e) {}
+    }
+    window.unmarkLmsWeekCleared = unmarkLmsWeekCleared;
+
+    function registerLmsItemDeleted(idOrTitle) {
+        if (!idOrTitle) return;
+        deletedLmsItemIds.add(String(idOrTitle));
+        try {
+            localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
+        } catch (e) {}
+        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected) {
+            try {
+                supabaseClient.from('app_sync_state').upsert([{
+                    key: 'lms_deleted_items_v1',
+                    data: Array.from(deletedLmsItemIds),
+                    updated_at: new Date().toISOString()
+                }], { onConflict: 'key' }).catch(() => {});
+            } catch (err) {}
+        }
+    }
+    window.registerLmsItemDeleted = registerLmsItemDeleted;
+
     let lmsCourses = JSON.parse(localStorage.getItem('sys_lms_courses_v2')) || JSON.parse(localStorage.getItem('sys_lms_courses_v1')) || {};
     for (let k in INITIAL_LMS_COURSES) {
         if (!lmsCourses[k] && INITIAL_LMS_COURSES[k]) {
@@ -18427,6 +18656,56 @@
     for (let k in lmsCourses) {
         if (!OFFICIAL_COURSE_KEYS.has(k)) {
             delete lmsCourses[k];
+        }
+    }
+
+    // تصفية فورية عند الإقلاع لأية أسابيع مفرغة أو عناصر محذوفة نهائياً
+    if (typeof isLmsWeekCleared === 'function') {
+        for (let k in lmsCourses) {
+            const c = lmsCourses[k];
+            if (c && c.weeks) {
+                c.weeks.forEach(w => {
+                    const wNum = w.week || w.weekNum || 1;
+                    if (isLmsWeekCleared(k, wNum)) {
+                        w.videos = [];
+                        w.docs = [];
+                        w.documents = [];
+                        w.quizzes = [];
+                        w.assignments = [];
+                    } else {
+                        if (Array.isArray(w.videos)) {
+                            w.videos = w.videos.filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)) && !deletedLmsItemIds.has(String(v.url)));
+                        }
+                        if (Array.isArray(w.docs)) {
+                            w.docs = w.docs.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)) && !deletedLmsItemIds.has(String(d.url)));
+                        }
+                        if (Array.isArray(w.documents)) {
+                            w.documents = w.documents.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)) && !deletedLmsItemIds.has(String(d.url)));
+                        }
+                        if (Array.isArray(w.quizzes)) {
+                            w.quizzes = w.quizzes.filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
+                        }
+                        if (Array.isArray(w.assignments)) {
+                            w.assignments = w.assignments.filter(a => a && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
+                        }
+                    }
+                });
+            }
+        }
+        for (let k in INITIAL_LMS_COURSES) {
+            const c = INITIAL_LMS_COURSES[k];
+            if (c && c.weeks) {
+                c.weeks.forEach(w => {
+                    const wNum = w.week || w.weekNum || 1;
+                    if (isLmsWeekCleared(k, wNum)) {
+                        w.videos = [];
+                        w.docs = [];
+                        w.documents = [];
+                        w.quizzes = [];
+                        w.assignments = [];
+                    }
+                });
+            }
         }
     }
 
@@ -21308,9 +21587,12 @@
         if (weekTopicEl) weekTopicEl.innerText = currentActiveTopic;
 
         // 1. المحاضرات والشروحات المرئية والملفات (فيديو / PowerPoint / PDF / روابط)
+        const isStudentWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(activeStudentLmsCourse, currentActiveWeekNum) || isLmsWeekCleared(null, currentActiveWeekNum));
+        const studentVideosList = isStudentWeekCleared ? [] : (activeWeek.videos || []).filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)) && !deletedLmsItemIds.has(String(v.url)));
+
         const vContainer = document.getElementById('sdVideosContainer');
         if (vContainer) {
-            vContainer.innerHTML = (activeWeek.videos || []).length ? (activeWeek.videos || []).map((v, vIdx) => {
+            vContainer.innerHTML = studentVideosList.length ? studentVideosList.map((v, vIdx) => {
                 const rawUrl = (v.embedUrl || v.url || '').trim();
                 const hasVideoPlayer = rawUrl && (v.materialType !== 'link' || rawUrl.includes('youtube.com') || rawUrl.includes('youtu.be'));
                 const embedUrl = hasVideoPlayer ? toYouTubeEmbedUrl(rawUrl) : '';
@@ -21386,7 +21668,8 @@
         // 2. المذكرات والملخصات الدراسية النصية
         const dContainer = document.getElementById('sdDocsContainer');
         if (dContainer) {
-            const docList = (activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []);
+            const rawStuDocs = isStudentWeekCleared ? [] : ((activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []));
+            const docList = rawStuDocs.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)) && !deletedLmsItemIds.has(String(d.url)));
             dContainer.innerHTML = docList.length ? docList.map(d => {
                 const isAudio = isAudioFile(d.url || d.fileUrl || d.title || d.type || d.docKind);
                 const safeTitle = (d.title || '').replace(/'/g, "\\'");
@@ -21425,7 +21708,9 @@
         const qContainer = document.getElementById('sdQuizzesContainer');
         if (qContainer) {
             const studentGroup = (currentUser.group || '').trim();
-            const visibleQuizzes = (activeWeek.quizzes || []).filter(q => {
+            const rawStuQuizzes = isStudentWeekCleared ? [] : (activeWeek.quizzes || []);
+            const visibleQuizzes = rawStuQuizzes.filter(q => {
+                if (!q || deletedLmsItemIds.has(String(q.id)) || deletedLmsItemIds.has(String(q.title))) return false;
                 if (!q.targetGroup || q.targetGroup === 'ALL') return true;
                 return isGroupMatch(q.targetGroup, studentGroup) ||
                        (studentGroup && studentGroup.toLowerCase().includes(q.targetGroup.toLowerCase())) ||
@@ -21531,7 +21816,9 @@
         const aContainer = document.getElementById('sdAssignmentsContainer');
         if (aContainer) {
             const studentGroup = (currentUser.group || '').trim();
-            const visibleAssignments = (activeWeek.assignments || []).filter(a => {
+            const rawStuAssignments = isStudentWeekCleared ? [] : (activeWeek.assignments || []);
+            const visibleAssignments = rawStuAssignments.filter(a => {
+                if (!a || deletedLmsItemIds.has(String(a.id)) || deletedLmsItemIds.has(String(a.title))) return false;
                 if (!a.targetGroup || a.targetGroup === 'ALL') return true;
                 return isGroupMatch(a.targetGroup, studentGroup) ||
                        (studentGroup && studentGroup.toLowerCase().includes(a.targetGroup.toLowerCase())) ||
@@ -24625,13 +24912,22 @@
         const activeWeekTopicEl = document.getElementById('tlActiveWeekTopic');
         if (activeWeekTopicEl) activeWeekTopicEl.innerText = currentTrainerTopic;
 
-        const weekDocsList = (activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []);
-        const vLen = (activeWeek.videos || []).length;
+        const isTrainerWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(courseKey, currentTrainerWeekNum) || isLmsWeekCleared(null, currentTrainerWeekNum));
+
+        const rawTrainerDocs = isTrainerWeekCleared ? [] : ((activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []));
+        const weekDocsList = rawTrainerDocs.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)) && !deletedLmsItemIds.has(String(d.url)));
+
+        const rawTrainerVideos = isTrainerWeekCleared ? [] : (activeWeek.videos || []);
+        const weekVideosList = rawTrainerVideos.filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)) && !deletedLmsItemIds.has(String(v.url)));
+
+        const rawTrainerQuizzes = isTrainerWeekCleared ? [] : (activeWeek.quizzes || []);
+        const allQuizzesWithIdx = rawTrainerQuizzes.filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title))).map((q, idx) => ({ q, idx }));
+
+        const rawTrainerAssignments = isTrainerWeekCleared ? [] : (activeWeek.assignments || []);
+        const allAssignmentsWithIdx = rawTrainerAssignments.filter(a => a && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title))).map((a, idx) => ({ a, idx }));
+
+        const vLen = weekVideosList.length;
         const dLen = weekDocsList.length;
-
-        const allQuizzesWithIdx = (activeWeek.quizzes || []).map((q, idx) => ({ q, idx }));
-        const allAssignmentsWithIdx = (activeWeek.assignments || []).map((a, idx) => ({ a, idx }));
-
         const qLen = allQuizzesWithIdx.length;
         const aLen = allAssignmentsWithIdx.length;
 
@@ -24657,7 +24953,7 @@
         // 1. Area 1: Video & Multi-format Lectures (دعم رابط فيديو + ملف باوربوينت + ملف PDF + روابط خارجية للمحاضرة)
         const vCont = document.getElementById('tlVideosContainer');
         if (vCont) {
-            vCont.innerHTML = vLen ? (activeWeek.videos || []).map((v, idx) => {
+            vCont.innerHTML = vLen ? weekVideosList.map((v, idx) => {
                 const rawUrl = (v.embedUrl || v.url || '').trim();
                 const hasVideoPlayer = rawUrl && (v.materialType !== 'link' || rawUrl.includes('youtube.com') || rawUrl.includes('youtu.be'));
                 const embedUrl = hasVideoPlayer ? toYouTubeEmbedUrl(rawUrl) : '';
@@ -26133,33 +26429,7 @@
         });
     }
 
-    // سجل تومبستون العناصر المحذوفة لمنع عودتها نهائياً عند المزامنة السحابية
-    let deletedLmsItemIds = new Set();
-    try {
-        const savedDeleted = JSON.parse(localStorage.getItem('sys_lms_deleted_items_v1') || '[]');
-        if (Array.isArray(savedDeleted)) {
-            deletedLmsItemIds = new Set(savedDeleted.map(String));
-        }
-    } catch (e) {}
-
-    function registerLmsItemDeleted(idOrTitle) {
-        if (!idOrTitle) return;
-        deletedLmsItemIds.add(String(idOrTitle));
-        try {
-            localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
-        } catch (e) {}
-        // رفع تومبستون الحذف للسحابة فوراً عبر Supabase
-        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected) {
-            try {
-                supabaseClient.from('app_sync_state').upsert([{
-                    key: 'lms_deleted_items_v1',
-                    data: Array.from(deletedLmsItemIds),
-                    updated_at: new Date().toISOString()
-                }], { onConflict: 'key' }).catch(() => {});
-            } catch (err) {}
-        }
-    }
-    window.registerLmsItemDeleted = registerLmsItemDeleted;
+    // (تم تقديم تعريف تومبستون الحذف وتفريغ الأسابيع إلى أعلى الملف لضمان الحماية المبكرة عند الإقلاع)
 
     // دالة محورية لجلب كافة المفاتيح البديلة للمقرر والمدرب لضمان الحذف الشامل
     function getActiveTrainerCourseAliases(courseKey) {
@@ -26267,6 +26537,21 @@
                 for (let i = 0; i < maxWeeks; i++) {
                     const lW = localWeeks[i];
                     const cW = cloudWeeks[i];
+                    const wNum = i + 1;
+
+                    if ((typeof isLmsWeekCleared === 'function') && isLmsWeekCleared(key, wNum)) {
+                        mergedWeeks.push({
+                            weekNum: wNum,
+                            week: wNum,
+                            title: `الأسبوع ${wNum}`,
+                            videos: [],
+                            docs: [],
+                            documents: [],
+                            quizzes: [],
+                            assignments: []
+                        });
+                        continue;
+                    }
 
                     if (!lW && cW) {
                         mergedWeeks.push(JSON.parse(JSON.stringify(cW)));
@@ -27857,6 +28142,8 @@ END $$;`;
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (!activeWeek) return;
+        const wNum = parseInt(activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1, 10);
+        if (typeof unmarkLmsWeekCleared === 'function') unmarkLmsWeekCleared(wNum, courseKey);
 
         const title = document.getElementById('lmsVideoTitle').value.trim();
         const url = document.getElementById('lmsVideoUrl').value.trim();
@@ -28055,6 +28342,8 @@ END $$;`;
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (!activeWeek) return;
+        const wNum = parseInt(activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1, 10);
+        if (typeof unmarkLmsWeekCleared === 'function') unmarkLmsWeekCleared(wNum, courseKey);
 
         const title = document.getElementById('lmsDocTitle').value.trim();
         const desc = document.getElementById('lmsDocDesc').value.trim();
@@ -28654,6 +28943,8 @@ END $$;`;
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (!activeWeek) return;
+        const wNum = parseInt(activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1, 10);
+        if (typeof unmarkLmsWeekCleared === 'function') unmarkLmsWeekCleared(wNum, courseKey);
 
         const title = document.getElementById('lmsQuizTitle').value.trim();
         const dateInputVal = document.getElementById('lmsQuizDueDateInput')?.value;
@@ -29045,6 +29336,8 @@ END $$;`;
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (!activeWeek) return;
+        const wNum = parseInt(activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1, 10);
+        if (typeof unmarkLmsWeekCleared === 'function') unmarkLmsWeekCleared(wNum, courseKey);
 
         const title = document.getElementById('lmsAssignmentTitle').value.trim();
         const dueDate = document.getElementById('lmsAssignmentDueDate')?.value.trim();
@@ -29190,19 +29483,16 @@ END $$;`;
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         const wNum = parseInt(activeWeek ? (activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1) : (activeTrainerLmsWeek || 1), 10) || 1;
 
-        // تحديد المقررات والأقسام المستهدفة بالتفريغ:
-        // لضمان سريان الحذف لجميع الأقسام كما طلب المستخدم
+        // تحديد المقررات والأقسام المستهدفة بالتفريغ لضمان سريان الحذف لجميع الأقسام الأربعة
         const targetCourseKeys = new Set();
         if (courseKey) targetCourseKeys.add(courseKey);
         const aliases = getActiveTrainerCourseAliases(courseKey);
         aliases.forEach(k => targetCourseKeys.add(k));
 
-        // شمول كافة الأقسام والمقررات في النظام
         for (const k in lmsCourses) {
             targetCourseKeys.add(k);
         }
 
-        // حساب إجمالي العناصر الموجودة في هذا الأسبوع عبر كافة الأقسام والمقررات
         let totalItems = 0;
         targetCourseKeys.forEach(k => {
             const c = lmsCourses[k];
@@ -29224,11 +29514,33 @@ END $$;`;
             return;
         }
 
-        if (!confirm(`تحذير: هل أنت متأكد من مسح كافة محتويات الأسبوع (${wNum})؟\nسيتم حذف جميع المحاضرات، المذكرات، الاختبارات، والواجبات لهذا الأسبوع نهائياً ولجميع الأقسام (${totalItems} عنصر).`)) {
+        if (!confirm(`تحذير: هل أنت متأكد من مسح كافة محتويات الأسبوع (${wNum})؟\nسيتم حذف جميع الأقسام الأربعة (المحاضرات، المذكرات، الاختبارات، والواجبات) لهذا الأسبوع نهائياً ولجميع الأقسام دون رجعة (${totalItems} عنصر).`)) {
             return;
         }
 
         try {
+            // 1. تسجيل تومبستون حظر دائم للأسبوع المفرغ
+            markLmsWeekCleared(wNum, courseKey);
+
+            // 2. تفريغ الذاكرة الأولية المبدئية INITIAL_LMS_COURSES إن وجدت
+            if (typeof INITIAL_LMS_COURSES !== 'undefined') {
+                for (const k in INITIAL_LMS_COURSES) {
+                    const c = INITIAL_LMS_COURSES[k];
+                    if (c && Array.isArray(c.weeks)) {
+                        let w = c.weeks.find(x => x && (parseInt(x.week, 10) === wNum || parseInt(x.weekNum, 10) === wNum));
+                        if (!w && c.weeks[wNum - 1]) w = c.weeks[wNum - 1];
+                        if (w) {
+                            w.videos = [];
+                            w.docs = [];
+                            w.documents = [];
+                            w.quizzes = [];
+                            w.assignments = [];
+                        }
+                    }
+                }
+            }
+
+            // 3. تفريغ كافة الأقسام الأربعة في كل المقررات وحذفها سحابياً
             targetCourseKeys.forEach(k => {
                 const c = lmsCourses[k];
                 if (c && Array.isArray(c.weeks)) {
@@ -29287,7 +29599,7 @@ END $$;`;
 
             persistLmsCoursesLocalOnly();
             persistLmsCourses();
-            showToast(`تم مسح وتفريغ كامل محتويات الأسبوع (${wNum}) لجميع الأقسام بنجاح ✓ جاري تحديث الصفحة...`, 'success');
+            showToast(`تم مسح وتفريغ كامل محتويات الأسبوع (${wNum}) لجميع الأقسام الأربعة بنجاح ✓ جاري تحديث الصفحة...`, 'success');
         } catch (clearErr) {
             console.error('Error in clearCurrentWeekContent:', clearErr);
         } finally {
@@ -32453,6 +32765,8 @@ function buildDemoExecutiveReport(params) {
             if (!activeWeek) {
                 throw new Error('تعذر العثور على الأسبوع الدراسي النشط لإضافة المحتوى');
             }
+            const currentAiWeekNum = parseInt(activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1, 10);
+            if (typeof unmarkLmsWeekCleared === 'function') unmarkLmsWeekCleared(currentAiWeekNum, courseKey);
 
             const cloudFileUrl = (currentAiGeneratedData && currentAiGeneratedData.file_url) ? currentAiGeneratedData.file_url : '';
             const isPpt = selectedAiFile && selectedAiFile.name.toLowerCase().endsWith('.pptx');
@@ -33222,9 +33536,18 @@ function buildDemoExecutiveReport(params) {
     // ضمان احتواء كل أسبوع في المقرر على الأركان المؤتمتة (الواجب الأسبوعي + الاختبار الأسبوعي + السلوك والمواظبة)
     function ensureLmsCourseWeeklyPillars(courseData) {
         if (!courseData || !Array.isArray(courseData.weeks)) return;
+        const cKey = courseData.courseKey || courseData.courseTitle;
         let modified = false;
         courseData.weeks.forEach(w => {
             const wNum = w.week || w.weekNum || 1;
+            if ((typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cKey, wNum) || isLmsWeekCleared(null, wNum))) {
+                w.videos = [];
+                w.docs = [];
+                w.documents = [];
+                w.quizzes = [];
+                w.assignments = [];
+                return;
+            }
             if (!Array.isArray(w.assignments)) w.assignments = [];
             if (!Array.isArray(w.quizzes)) w.quizzes = [];
 
@@ -36218,9 +36541,10 @@ function buildDemoExecutiveReport(params) {
                             if (!cData) return;
                             ensureLmsCourseWeeklyPillars(cData);
                             const cWeek = (cData.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === wNum) || {};
-                            const cAssList = (cWeek.assignments || []).filter(a => a.assignmentCategory !== 'group');
+                            const isCalWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cCourse.lmsKey, wNum) || isLmsWeekCleared(null, wNum));
+                            const cAssList = isCalWeekCleared ? [] : (cWeek.assignments || []).filter(a => a && a.assignmentCategory !== 'group' && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
                             const cWeeklyAss = cAssList[0] || null;
-                            const cWeekQuizzes = cWeek.quizzes || [];
+                            const cWeekQuizzes = isCalWeekCleared ? [] : (cWeek.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
                             const cWkdQuiz = cWeekQuizzes.find(q => q.quizCategory !== 'optional') || cWeekQuizzes[0] || null;
 
                             const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, cData, wNum);
@@ -36421,9 +36745,10 @@ function buildDemoExecutiveReport(params) {
                             if (!cData) return;
                             ensureLmsCourseWeeklyPillars(cData);
                             const cWeek = (cData.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === wNum) || {};
-                            const cAssList = (cWeek.assignments || []).filter(a => a.assignmentCategory !== 'group');
+                            const isCalWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cCourse.lmsKey, wNum) || isLmsWeekCleared(null, wNum));
+                            const cAssList = isCalWeekCleared ? [] : (cWeek.assignments || []).filter(a => a && a.assignmentCategory !== 'group' && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
                             const cWeeklyAss = cAssList[0] || null;
-                            const cWeekQuizzes = cWeek.quizzes || [];
+                            const cWeekQuizzes = isCalWeekCleared ? [] : (cWeek.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
                             const cWkdQuiz = cWeekQuizzes.find(q => q.quizCategory !== 'optional') || cWeekQuizzes[0] || null;
 
                             const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, cData, wNum);
