@@ -17,6 +17,62 @@
         if (typeof pdfjsLib !== 'undefined') {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         }
+
+        // إظهار وإخفاء كلمة المرور الفوري والشامل
+        window.togglePasswordVisibility = function(inputId, btnEl) {
+            if (window.event) {
+                try {
+                    window.event.preventDefault();
+                    window.event.stopPropagation();
+                } catch(e) {}
+            }
+            var input = null;
+            if (typeof inputId === 'string') {
+                input = document.getElementById(inputId);
+            } else if (inputId && inputId.tagName) {
+                input = inputId;
+            }
+            if (!input && btnEl) {
+                var container = btnEl.closest('.relative') || btnEl.parentElement;
+                if (container) input = container.querySelector('input');
+            }
+            if (!input) return;
+
+            var curType = (input.getAttribute('type') || input.type || 'password').toLowerCase();
+            var isPass = (curType === 'password');
+            var targetType = isPass ? 'text' : 'password';
+
+            try { input.type = targetType; } catch(e) {}
+            try { input.setAttribute('type', targetType); } catch(e) {}
+
+            var btn = btnEl || (window.event ? (window.event.currentTarget || window.event.target) : null);
+            if (btn && btn.tagName !== 'BUTTON') {
+                btn = btn.closest('button') || btn;
+            }
+            if (btn) {
+                btn.innerHTML = isPass ? '🙈' : '👁️';
+                btn.title = isPass ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور';
+                btn.setAttribute('aria-label', isPass ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور');
+            }
+        };
+
+        // تفويض النقر العام على علامة العين لكلمات المرور
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('button');
+            if (!btn) return;
+            var onclickAttr = btn.getAttribute('onclick') || '';
+            if (onclickAttr.indexOf('togglePasswordVisibility') !== -1) {
+                var container = btn.closest('.relative') || btn.parentElement;
+                if (container) {
+                    var input = container.querySelector('input');
+                    if (input) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.togglePasswordVisibility(input, btn);
+                    }
+                }
+            }
+        }, true);
     </script>
     <!-- Supabase JS Client للمزامنة السحابية الدائمة والتخزين السحابي للملفات -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -25,6 +81,12 @@
     <!-- خط المراعي Almarai -->
     <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
+        /* Disable default Microsoft Edge password reveal icon to avoid double eye icons */
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+        }
+
         body, button, input, select, textarea, span, h1, h2, h3, h4, p, div, table, th, td, label, code, pre {
             font-family: 'Almarai', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
         }
@@ -3769,7 +3831,6 @@
                                 <span class="text-2xl">🎥</span>
                                 <div>
                                     <h5 class="text-slate-900 font-black text-sm md:text-base">المحاضرات والشروحات المرئية</h5>
-                                    <p class="text-[11px] text-slate-500 font-bold">فيديو • PowerPoint • ملفات المحاضرة</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
@@ -3788,7 +3849,6 @@
                                 <span class="text-2xl">📑</span>
                                 <div>
                                     <h5 class="text-slate-900 font-black text-sm md:text-base">المذكرات والملخصات الدراسية</h5>
-                                    <p class="text-[11px] text-slate-500 font-bold">ملخصات نصية وشروحات معتمدة للقراءة</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
@@ -3807,7 +3867,6 @@
                                 <span class="text-2xl">🏁</span>
                                 <div>
                                     <h5 class="text-slate-900 font-black text-sm md:text-base">الاختبارات التفاعلية الموقوتة</h5>
-                                    <p class="text-[11px] text-slate-500 font-bold">اختبارات أسبوعية بمحاولات موقوتة (10 درجات)</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
@@ -3826,7 +3885,6 @@
                                 <span class="text-2xl">📝</span>
                                 <div>
                                     <h5 class="text-slate-900 font-black text-sm md:text-base">الواجبات والتكليفات الأسبوعية</h5>
-                                    <p class="text-[11px] text-slate-500 font-bold">تسليم التكليفات وإرفاق الحلول (10 درجات)</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
@@ -3896,15 +3954,29 @@
 
                 <!-- 2. Primary Focus: The "Weeks" (Course Modules) as Large Prominent Clickable Cards -->
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between px-1">
+                    <div class="flex items-center justify-between px-1 flex-wrap gap-3">
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-5 rounded-full bg-[#0F2942]"></span>
                             <h4 class="font-black text-slate-900 text-sm md:text-base">الوحدات الدراسية الأسبوعية</h4>
                             <span class="text-[11px] text-slate-500 font-bold hidden sm:inline">— اختر الأسبوع لعرض وإدارة محتواه التعليمي</span>
                         </div>
-                        <span class="text-[11px] font-bold text-[#0F2942] bg-white border border-slate-200 px-3 py-1 rounded-lg shadow-2xs">
-                            6 أسابيع دراسية
-                        </span>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl text-xs font-bold">
+                                <label class="text-slate-600">📅 بداية الكورس:</label>
+                                <input type="date" id="tlCourseStartDateInput" class="bg-white text-slate-900 rounded-lg px-2 py-0.5 text-xs font-mono font-bold border border-slate-300 outline-none cursor-pointer">
+                            </div>
+                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl text-xs font-bold">
+                                <label class="text-slate-600">نهاية الكورس:</label>
+                                <input type="date" id="tlCourseEndDateInput" class="bg-white text-slate-900 rounded-lg px-2 py-0.5 text-xs font-mono font-bold border border-slate-300 outline-none cursor-pointer">
+                            </div>
+                            <button type="button" onclick="applyCourseDateRangeAndGenerateWeeks('tlCourseStartDateInput', 'tlCourseEndDateInput')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer whitespace-nowrap border border-amber-400/30" title="اعتماد الفترة الزمنية وتوليد الأسابيع">
+                                <span>⚡</span>
+                                <span>توليد الأسابيع حسب التواريخ</span>
+                            </button>
+                            <span class="text-[11px] font-bold text-[#0F2942] bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs" id="tlCourseWeeksCountBadge">
+                                6 أسابيع دراسية
+                            </span>
+                        </div>
                     </div>
 
                     <!-- Prominent 6-Week Module Cards Grid -->
@@ -4107,6 +4179,10 @@
                             <button type="button" onclick="publishAllTrainerFinalGrades(false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0">
                                 <span>🔒</span>
                                 <span>إخفاء الكل</span>
+                            </button>
+                            <button type="button" onclick="resetAllTraineeGrades(true)" class="bg-rose-600 hover:bg-rose-700 text-white font-black px-3 py-2 rounded-xl text-xs transition shadow-xs cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0" title="تصفير كافة درجات واختبارات وواجبات المتدربين بالكامل للبدء برصد جديد">
+                                <span>🗑️</span>
+                                <span>تصفير كافة الدرجات للرصد من جديد</span>
                             </button>
                         </div>
                     </div>
@@ -12993,19 +13069,56 @@
         openQuickNoteModal(tId, tName);
     }
 
-        // تصفير سجلات الواجبات والاختبارات لجميع المتدربين (بدء دورة تدريبية جديدة)
-    function resetAllTraineeAcademicSubmissions(confirmFirst = true) {
-        if (confirmFirst && !confirm('⚠️ هل أنت متأكد من تصفير كافة سجلات الواجبات والاختبارات لجميع المتدربين للبدء بدورة جديدة؟')) {
-            return;
+    // تصفير شامل لجميع درجات واختبارات وواجبات المتدربين بالكامل للبدء بالرصد من جديد
+    function resetAllTraineeGrades(confirmFirst = true) {
+        if (confirmFirst && !confirm('⚠️ تأكيد هام جداً:
+
+هل أنت متأكد من تصفير كافة درجات واختبارات وواجبات المتدربين بالكامل؟
+سيتم مسح جميع المحاولات والتسليمات وكشوف الدرجات لجميع المتدربين للبدء برصد جديد من الصفر.')) {
+            return false;
         }
         try {
             studentQuizSubmissions = {};
             studentAssignmentSubmissions = {};
             traineeGradebooks = {};
-            localStorage.removeItem('sys_student_quiz_submissions_v1');
-            localStorage.removeItem('sys_student_assignment_submissions_v1');
-            localStorage.removeItem('sys_trainee_gradebooks_v1');
+
+            localStorage.setItem('sys_student_quiz_submissions_v1', '{}');
+            localStorage.setItem('sys_student_assignment_submissions_v1', '{}');
+            localStorage.setItem('sys_trainee_gradebooks_v1', '{}');
+            const resetIso = new Date().toISOString();
+            localStorage.setItem('sys_grades_reset_timestamp', resetIso);
             localStorage.setItem('sys_academic_reset_v3', 'true');
+            localStorage.setItem('sys_grades_reset_v4_applied', 'true');
+
+            // Reset scores on memory trainees
+            if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+                trainees.forEach(t => {
+                    if (t.grades) t.grades = {};
+                    if (t.scores) t.scores = {};
+                    delete t.examScore;
+                    delete t.quizScore;
+                });
+                try {
+                    localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+                } catch(e) {}
+            }
+
+            // Sync zeroed state to Supabase
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    supabaseClient.from('app_state').upsert([
+                        { key: 'sys_student_quiz_submissions_v1', data: {}, updated_at: resetIso },
+                        { key: 'sys_student_assignment_submissions_v1', data: {}, updated_at: resetIso },
+                        { key: 'sys_trainee_gradebooks_v1', data: {}, updated_at: resetIso },
+                        { key: 'sys_grades_reset_timestamp', data: resetIso, updated_at: resetIso }
+                    ], { onConflict: 'key' }).then(() => {}).catch(err => console.warn('Supabase state reset warning:', err));
+
+                    supabaseClient.from('student_quiz_submissions').delete().neq('id', '___empty___').then(() => {}).catch(() => {});
+                    supabaseClient.from('student_assignment_submissions').delete().neq('id', '___empty___').then(() => {}).catch(() => {});
+                } catch(err) {
+                    console.warn('Supabase cloud reset warning:', err);
+                }
+            }
 
             if (typeof renderGradesSystemTab === 'function' && !document.getElementById('tab-gradesSystem')?.classList.contains('hidden')) {
                 renderGradesSystemTab();
@@ -13013,17 +13126,30 @@
             if (typeof renderSubmissionsCalendarPage === 'function' && !document.getElementById('tab-submissionsCalendar')?.classList.contains('hidden')) {
                 renderSubmissionsCalendarPage();
             }
+            if (typeof renderTrainerLms === 'function' && !document.getElementById('tab-trainerLms')?.classList.contains('hidden')) {
+                renderTrainerLms();
+            }
             if (typeof renderStudentDashboard === 'function' && !document.getElementById('tab-studentDashboard')?.classList.contains('hidden')) {
                 renderStudentDashboard();
             }
-            showToast('✅ تم تصفير كافة سجلات الواجبات والاختبارات بنجاح ✓ جاري تحديث الصفحة...', 'success');
+            if (typeof renderTrainerDashboard === 'function' && !document.getElementById('tab-trainerDashboard')?.classList.contains('hidden')) {
+                renderTrainerDashboard();
+            }
+
+            showToast('✓ تم تصفير كافة درجات واختبارات وواجبات المتدربين بنجاح للبدء بالرصد من جديد', 'success');
+            return true;
         } catch (e) {
-            console.error('resetAllTraineeAcademicSubmissions error:', e);
+            console.error('resetAllTraineeGrades error:', e);
+            showToast('حدث خطأ أثناء تصفير الدرجات', 'error');
+            return false;
         } finally {
-            executePostDeletionReload('gradesSystem');
+            if (confirmFirst) {
+                executePostDeletionReload('gradesSystem');
+            }
         }
     }
-    window.resetAllTraineeAcademicSubmissions = resetAllTraineeAcademicSubmissions;
+    window.resetAllTraineeGrades = resetAllTraineeGrades;
+    window.resetAllTraineeAcademicSubmissions = resetAllTraineeGrades;
 
     function clearAllData() {
         if (currentUser?.role !== 'superadmin') return alert('هذه العملية متاحة لسوبر أدمن فقط');
@@ -24333,7 +24459,32 @@
         3: 'الأسبوع الثالث',
         4: 'الأسبوع الرابع',
         5: 'الأسبوع الخامس',
-        6: 'الأسبوع السادس'
+        6: 'الأسبوع السادس',
+        7: 'الأسبوع السابع',
+        8: 'الأسبوع الثامن',
+        9: 'الأسبوع التاسع',
+        10: 'الأسبوع العاشر',
+        11: 'الأسبوع الحادي عشر',
+        12: 'الأسبوع الثاني عشر',
+        13: 'الأسبوع الثالث عشر',
+        14: 'الأسبوع الرابع عشر',
+        15: 'الأسبوع الخامس عشر',
+        16: 'الأسبوع السادس عشر'
+    };
+
+    const DEFAULT_LMS_THEME = {
+        name: 'navy',
+        border: 'border-slate-300',
+        hoverBorder: 'hover:border-[#0F2942]',
+        bg: 'bg-slate-50/40 hover:bg-slate-100/60',
+        activeBg: 'bg-gradient-to-br from-[#0F2942] to-[#1E3A8A]',
+        activeBorder: 'border-[#0F2942]',
+        activeShadow: 'shadow-xl shadow-blue-900/30 ring-2 ring-blue-400/50',
+        badgeBg: 'bg-slate-100 text-slate-700 border border-slate-200',
+        activeBadge: 'bg-white/20 text-white border border-white/30',
+        dot: 'bg-slate-400',
+        titleColor: 'text-slate-900',
+        accent: '#0F2942'
     };
 
     const LMS_WEEK_THEMES = {
@@ -24434,14 +24585,34 @@
             const d = new Date(saved + (saved.includes('T') ? '' : 'T00:00:00'));
             if (!isNaN(d.getTime())) return d;
         }
-        // Fallback: Default academic semester start date (Sunday 2026-10-11)
         const defaultDate = new Date('2026-10-11T00:00:00');
-        if (!isNaN(defaultDate.getTime())) return defaultDate;
-        const now = new Date();
-        const dow = now.getDay(); // 0 is Sunday
-        const pastSun = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
-        pastSun.setHours(0, 0, 0, 0);
-        return pastSun;
+        return defaultDate;
+    }
+
+    function getAcademicCourseEndDate() {
+        const saved = localStorage.getItem('sys_academic_course_end_date');
+        if (saved) {
+            const d = new Date(saved + (saved.includes('T') ? '' : 'T00:00:00'));
+            if (!isNaN(d.getTime())) return d;
+        }
+        const start = getAcademicCourseStartDate();
+        const totalWeeks = getAcademicCourseTotalWeeks();
+        const end = new Date(start);
+        end.setDate(start.getDate() + (totalWeeks - 1) * 7 + 4); // Thursday of last week
+        return end;
+    }
+
+    function getAcademicCourseTotalWeeks() {
+        const saved = parseInt(localStorage.getItem('sys_academic_course_total_weeks'), 10);
+        if (!isNaN(saved) && saved >= 1 && saved <= 16) return saved;
+        return 6;
+    }
+
+    function getAcademicCourseWeeksList() {
+        const total = getAcademicCourseTotalWeeks();
+        const arr = [];
+        for (let i = 1; i <= total; i++) arr.push(i);
+        return arr;
     }
 
     function setAcademicCourseStartDate(newDateStr) {
@@ -24452,13 +24623,22 @@
             return false;
         }
         localStorage.setItem('sys_academic_course_start_date', newDateStr);
-        showToast(`✓ تم تحديث موعد بداية الدورة إلى (${formatGregorianDayMonthArabic(d)} ${d.getFullYear()}) وإعادة حساب الـ 6 أسابيع ميلادياً بنجاح`, 'success');
+        const curEnd = getAcademicCourseEndDate();
+        if (curEnd < d) {
+            const newEnd = new Date(d);
+            newEnd.setDate(d.getDate() + 39);
+            localStorage.setItem('sys_academic_course_end_date', formatDateToYMD(newEnd));
+        }
+        showToast(`✓ تم تحديث موعد بداية الدورة إلى (${formatGregorianDayMonthArabic(d)} ${d.getFullYear()})`, 'success');
         
         if (typeof renderSubmissionsCalendarPage === 'function' && !document.getElementById('tab-submissionsCalendar')?.classList.contains('hidden')) {
             renderSubmissionsCalendarPage();
         }
         if (typeof renderGradesSystemTab === 'function' && !document.getElementById('tab-gradesSystem')?.classList.contains('hidden')) {
             renderGradesSystemTab();
+        }
+        if (typeof renderTrainerLms === 'function' && !document.getElementById('tab-trainerLms')?.classList.contains('hidden')) {
+            renderTrainerLms();
         }
         if (typeof renderTrainerSubmissionsCalendar === 'function') {
             renderTrainerSubmissionsCalendar();
@@ -24469,6 +24649,130 @@
         return true;
     }
 
+    function applyCourseDateRangeAndGenerateWeeks(startInputId, endInputId) {
+        const sInput = (startInputId ? document.getElementById(startInputId) : null) || 
+                       document.getElementById('courseStartDateInput') || 
+                       document.getElementById('tlCourseStartDateInput');
+        const eInput = (endInputId ? document.getElementById(endInputId) : null) || 
+                       document.getElementById('courseEndDateInput') || 
+                       document.getElementById('tlCourseEndDateInput');
+
+        const sVal = sInput?.value?.trim();
+        const eVal = eInput?.value?.trim();
+
+        if (!sVal) {
+            showToast('يرجى تحديد تاريخ بداية الدورة', 'warning');
+            return false;
+        }
+        if (!eVal) {
+            showToast('يرجى تحديد تاريخ نهاية الدورة', 'warning');
+            return false;
+        }
+
+        const start = new Date(sVal + 'T00:00:00');
+        const end = new Date(eVal + 'T23:59:59');
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            showToast('تاريخ بداية أو نهاية الدورة غير صالح', 'error');
+            return false;
+        }
+
+        if (end < start) {
+            showToast('⚠️ تاريخ نهاية الدورة لا يمكن أن يكون قبل تاريخ بدايتها!', 'error');
+            return false;
+        }
+
+        const diffMs = end.getTime() - start.getTime();
+        const diffDays = Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)) + 1);
+        const totalWeeks = Math.max(1, Math.min(16, Math.ceil(diffDays / 7)));
+
+        localStorage.setItem('sys_academic_course_start_date', sVal);
+        localStorage.setItem('sys_academic_course_end_date', eVal);
+        localStorage.setItem('sys_academic_course_total_weeks', String(totalWeeks));
+
+        // Generate / Update Weeks in all courses in lmsCourses
+        if (typeof lmsCourses !== 'undefined' && lmsCourses) {
+            for (const cKey in lmsCourses) {
+                const course = lmsCourses[cKey];
+                if (!course) continue;
+                if (!Array.isArray(course.weeks)) course.weeks = [];
+
+                for (let w = 1; w <= totalWeeks; w++) {
+                    let wkObj = course.weeks.find(x => (x.week || x.weekNum || 1) === w);
+                    if (!wkObj) {
+                        wkObj = {
+                            week: w,
+                            weekNum: w,
+                            title: `الوحدة التدريبية ${w}`,
+                            topic: `موضوع وتطبيقات الأسبوع ${w}`,
+                            videos: [],
+                            docs: [],
+                            documents: [],
+                            quizzes: [],
+                            assignments: []
+                        };
+                        course.weeks.push(wkObj);
+                    }
+                    wkObj.week = w;
+                    wkObj.weekNum = w;
+                    if (!wkObj.title) wkObj.title = `الوحدة التدريبية ${w}`;
+                    if (!wkObj.topic) wkObj.topic = `موضوع وتطبيقات الأسبوع ${w}`;
+                }
+
+                if (course.weeks.length > totalWeeks) {
+                    course.weeks = course.weeks.filter(x => (x.week || x.weekNum || 1) <= totalWeeks);
+                }
+                course.weeks.sort((a, b) => (a.week || a.weekNum || 1) - (b.week || b.weekNum || 1));
+
+                if (typeof ensureLmsCourseWeeklyPillars === 'function') {
+                    ensureLmsCourseWeeklyPillars(course);
+                }
+            }
+            try {
+                localStorage.setItem('sys_lms_courses_v2', JSON.stringify(lmsCourses));
+            } catch(e) {}
+        }
+
+        // Sync to Supabase app_state
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            try {
+                supabaseClient.from('app_state').upsert([
+                    { key: 'sys_academic_course_start_date', data: sVal, updated_at: new Date().toISOString() },
+                    { key: 'sys_academic_course_end_date', data: eVal, updated_at: new Date().toISOString() },
+                    { key: 'sys_academic_course_total_weeks', data: totalWeeks, updated_at: new Date().toISOString() },
+                    { key: 'sys_lms_courses_v2', data: lmsCourses, updated_at: new Date().toISOString() }
+                ], { onConflict: 'key' }).then(() => {}).catch(() => {});
+            } catch(e) {}
+        }
+
+        // Refresh views
+        if (typeof renderSubmissionsCalendarPage === 'function' && !document.getElementById('tab-submissionsCalendar')?.classList.contains('hidden')) {
+            renderSubmissionsCalendarPage();
+        }
+        if (typeof renderTrainerLms === 'function' && !document.getElementById('tab-trainerLms')?.classList.contains('hidden')) {
+            renderTrainerLms();
+        }
+        if (typeof renderGradesSystemTab === 'function' && !document.getElementById('tab-gradesSystem')?.classList.contains('hidden')) {
+            renderGradesSystemTab();
+        }
+        if (typeof renderTrainerSubmissionsCalendar === 'function') {
+            renderTrainerSubmissionsCalendar();
+        }
+        if (typeof renderStudentSubmissionsCalendar === 'function') {
+            renderStudentSubmissionsCalendar();
+        }
+        if (typeof renderStudentDashboard === 'function' && !document.getElementById('tab-studentDashboard')?.classList.contains('hidden')) {
+            renderStudentDashboard();
+        }
+
+        showToast(`✓ تم اعتماد فترة الدورة من (${formatGregorianDayMonthArabic(start)}) إلى (${formatGregorianDayMonthArabic(end)}) وتوليد ${totalWeeks} أسابيع تدريبية بنجاح!`, 'success');
+        return true;
+    }
+    window.applyCourseDateRangeAndGenerateWeeks = applyCourseDateRangeAndGenerateWeeks;
+    window.getAcademicCourseEndDate = getAcademicCourseEndDate;
+    window.getAcademicCourseTotalWeeks = getAcademicCourseTotalWeeks;
+    window.getAcademicCourseWeeksList = getAcademicCourseWeeksList;
+
     function getCurrentAcademicWeekNum() {
         const start = getAcademicCourseStartDate();
         const now = new Date();
@@ -24477,7 +24781,8 @@
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         if (diffDays < 0) return 1;
         const weekIndex = Math.floor(diffDays / 7) + 1;
-        return Math.min(6, Math.max(1, weekIndex));
+        const maxW = (typeof getAcademicCourseTotalWeeks === 'function') ? getAcademicCourseTotalWeeks() : 6;
+        return Math.min(maxW, Math.max(1, weekIndex));
     }
 
     function formatDateToYMD(d) {
@@ -24515,7 +24820,8 @@
 
     function getAcademicWeekDateRange(weekNum) {
         const parsedW = parseInt(weekNum, 10);
-        const w = (!isNaN(parsedW) && parsedW >= 1 && parsedW <= 6) ? parsedW : 1;
+        const maxW = (typeof getAcademicCourseTotalWeeks === 'function') ? getAcademicCourseTotalWeeks() : 6;
+        const w = (!isNaN(parsedW) && parsedW >= 1 && parsedW <= maxW) ? parsedW : 1;
         const start = getAcademicCourseStartDate();
         const weekStart = new Date(start);
         weekStart.setDate(start.getDate() + (w - 1) * 7);
@@ -24845,6 +25151,19 @@
         const sel = document.getElementById('tlCourseSelector');
         if (sel) {
             sel.innerHTML = `<option value="${courseKey}" selected>${courseData.courseTitle || courseKey}</option>`;
+        }
+
+        const tlStartInput = document.getElementById('tlCourseStartDateInput');
+        if (tlStartInput && (!tlStartInput.value || document.activeElement !== tlStartInput)) {
+            tlStartInput.value = formatDateToYMD(getAcademicCourseStartDate());
+        }
+        const tlEndInput = document.getElementById('tlCourseEndDateInput');
+        if (tlEndInput && (!tlEndInput.value || document.activeElement !== tlEndInput)) {
+            tlEndInput.value = formatDateToYMD(getAcademicCourseEndDate());
+        }
+        const tlCountBadge = document.getElementById('tlCourseWeeksCountBadge');
+        if (tlCountBadge) {
+            tlCountBadge.innerText = `${getAcademicCourseTotalWeeks()} أسابيع دراسية`;
         }
 
         // 1. Primary Focus: Prominent Clickable Week Cards (Weeks 1 to 6) - Clean without silly icons
@@ -27193,9 +27512,16 @@
                 localStorage.setItem('sys_la_vacancies_v9', JSON.stringify(laVacancies));
             }
 
+            // Check if there was a full grades reset epoch
+            const resetEpochStr = localStorage.getItem('sys_grades_reset_timestamp') || (stateMap && stateMap['sys_grades_reset_timestamp']);
+            const resetEpochTime = resetEpochStr ? new Date(resetEpochStr).getTime() : 0;
+
             // Merge Quizzes
             if (quizSubs && typeof quizSubs === 'object') {
                 for (const [k, qSub] of Object.entries(quizSubs)) {
+                    if (resetEpochTime > 0 && new Date(qSub.submittedAt || 0).getTime() <= resetEpochTime) {
+                        continue;
+                    }
                     if (!studentQuizSubmissions[k]) {
                         studentQuizSubmissions[k] = qSub;
                         hasChanges = true;
@@ -27218,6 +27544,9 @@
             // Merge Assignments
             if (assSubs && typeof assSubs === 'object') {
                 for (const [k, aSub] of Object.entries(assSubs)) {
+                    if (resetEpochTime > 0 && new Date(aSub.submittedAt || 0).getTime() <= resetEpochTime) {
+                        continue;
+                    }
                     if (!studentAssignmentSubmissions[k]) {
                         studentAssignmentSubmissions[k] = aSub;
                         hasChanges = true;
@@ -27240,6 +27569,9 @@
             // Merge Gradebooks
             if (gbs && typeof gbs === 'object') {
                 for (const [tId, cGb] of Object.entries(gbs)) {
+                    if (resetEpochTime > 0 && new Date(cGb.updatedAt || 0).getTime() <= resetEpochTime) {
+                        continue;
+                    }
                     if (!traineeGradebooks[tId]) {
                         traineeGradebooks[tId] = cGb;
                         hasChanges = true;
@@ -33612,9 +33944,10 @@ function buildDemoExecutiveReport(params) {
 
     function getOrInitTraineeGradebook(traineeId) {
         const cleanId = cleanNationalId(traineeId) || String(traineeId);
+        const totalW = (typeof getAcademicCourseTotalWeeks === 'function') ? getAcademicCourseTotalWeeks() : 6;
         if (!traineeGradebooks[cleanId]) {
             const weeksObj = {};
-            for (let w = 1; w <= 6; w++) {
+            for (let w = 1; w <= totalW; w++) {
                 weeksObj[w] = {
                     weeklyAssignment: null,
                     optionalQuiz: null,
@@ -33634,7 +33967,7 @@ function buildDemoExecutiveReport(params) {
             };
         } else {
             if (!traineeGradebooks[cleanId].weeks) traineeGradebooks[cleanId].weeks = {};
-            for (let w = 1; w <= 6; w++) {
+            for (let w = 1; w <= totalW; w++) {
                 if (!traineeGradebooks[cleanId].weeks[w]) {
                     traineeGradebooks[cleanId].weeks[w] = {
                         weeklyAssignment: null,
@@ -33849,10 +34182,11 @@ function buildDemoExecutiveReport(params) {
     // درجة الرسوب المعتمدة: 49% فأقل تراكمي (لم يجتز) • 50% فأعلى (اجتاز بنجاح)
     function calculateGradebookSummary(gb) {
         let totalRaw = 0;
-        let maxPossible = 180; // مجموع الأسابيع الستة كاملة (6 × 30 درجة = 180 درجة)
+        const totalW = (typeof getAcademicCourseTotalWeeks === 'function') ? getAcademicCourseTotalWeeks() : 6;
+        let maxPossible = totalW * 30; // مجموع الأسابيع التدريبية كاملة (30 درجة لكل أسبوع)
         const weekTotals = {};
 
-        for (let w = 1; w <= 6; w++) {
+        for (let w = 1; w <= totalW; w++) {
             const row = (gb && gb.weeks && gb.weeks[w]) ? gb.weeks[w] : {};
             const ass = (row.weeklyAssignment !== null && row.weeklyAssignment !== undefined)
                 ? parseFloat(row.weeklyAssignment)
@@ -36338,8 +36672,12 @@ function buildDemoExecutiveReport(params) {
         const isStudent = (currentUser?.role === 'student');
         const startDate = getAcademicCourseStartDate();
         const startYmd = formatDateToYMD(startDate);
+        const endDate = (typeof getAcademicCourseEndDate === 'function') ? getAcademicCourseEndDate() : new Date();
+        const endYmd = formatDateToYMD(endDate);
+        const totalWeeks = (typeof getAcademicCourseTotalWeeks === 'function') ? getAcademicCourseTotalWeeks() : 6;
+        const weeksList = (typeof getAcademicCourseWeeksList === 'function') ? getAcademicCourseWeeksList() : [1, 2, 3, 4, 5, 6];
         const rangeW1 = getAcademicWeekDateRange(1);
-        const rangeW6 = getAcademicWeekDateRange(6);
+        const rangeW6 = getAcademicWeekDateRange(totalWeeks);
 
         // Update top header badges and text
         const titleEl = document.getElementById('calPageHeaderTitle');
@@ -36444,11 +36782,21 @@ function buildDemoExecutiveReport(params) {
                             </button>
                         </div>
 
-                        <!-- Start Date Input (Trainer/Supervisor) -->
+                        <!-- Course Date Range & Dynamic Weeks (Trainer/Supervisor/Admin) -->
                         ${(!isStudent) ? `
-                            <div class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold shrink-0">
-                                <label class="text-slate-600 font-black">انطلاق الدورة:</label>
-                                <input type="date" value="${startYmd}" onchange="setAcademicCourseStartDate(this.value)" class="bg-white text-slate-900 rounded-lg px-2 py-0.5 text-xs font-mono font-bold border border-slate-300 outline-none cursor-pointer">
+                            <div class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 p-1.5 px-3 rounded-2xl border border-slate-200 text-xs font-bold shrink-0 flex-wrap">
+                                <div class="flex items-center gap-1.5">
+                                    <label for="courseStartDateInput" class="text-slate-700 font-black whitespace-nowrap">📅 بداية الكورس:</label>
+                                    <input type="date" id="courseStartDateInput" value="${startYmd}" class="bg-white text-slate-900 rounded-lg px-2 py-1 text-xs font-mono font-bold border border-slate-300 outline-none cursor-pointer shadow-2xs">
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <label for="courseEndDateInput" class="text-slate-700 font-black whitespace-nowrap">نهاية الكورس:</label>
+                                    <input type="date" id="courseEndDateInput" value="${endYmd}" class="bg-white text-slate-900 rounded-lg px-2 py-1 text-xs font-mono font-bold border border-slate-300 outline-none cursor-pointer shadow-2xs">
+                                </div>
+                                <button type="button" onclick="applyCourseDateRangeAndGenerateWeeks('courseStartDateInput', 'courseEndDateInput')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer whitespace-nowrap border border-amber-400/40" title="اعتماد الفترة الزمنية للدورة وتوليد الأسابيع">
+                                    <span>⚡</span>
+                                    <span>توليد الأسابيع حسب التواريخ</span>
+                                </button>
                             </div>
                         ` : ''}
                     </div>
@@ -36460,9 +36808,9 @@ function buildDemoExecutiveReport(params) {
                     <div class="flex items-center gap-1.5 overflow-x-auto pb-1 shrink-0 max-w-full">
                         <span class="text-xs font-bold text-slate-400 pl-1 shrink-0">عرض الأسبوع:</span>
                         <button type="button" onclick="setSubmissionsCalendarPageFilter('ALL')" class="px-3 py-1 rounded-xl font-black transition cursor-pointer border shrink-0 ${activeCalendarPageWeekFilter === 'ALL' ? 'bg-[#0F2942] text-amber-300 border-[#0F2942]' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">
-                            الكل (6 أسابيع)
+                            الكل (${totalWeeks} أسابيع)
                         </button>
-                        ${[1, 2, 3, 4, 5, 6].map(w => `
+                        ${weeksList.map(w => `
                             <button type="button" onclick="setSubmissionsCalendarPageFilter('${w}')" class="px-3 py-1 rounded-xl font-black transition cursor-pointer border shrink-0 ${activeCalendarPageWeekFilter === String(w) ? 'bg-[#0F2942] text-amber-300 border-[#0F2942]' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">
                                 الأسبوع ${w}
                             </button>
@@ -36486,7 +36834,7 @@ function buildDemoExecutiveReport(params) {
         // VIEW 1: MONTH / FULL 6-WEEK GRID (التقويم الشهري والشبكي الحقيقي)
         // =========================================================
         if (currentMode === 'month') {
-            const weeksToShow = (activeCalendarPageWeekFilter === 'ALL') ? [1, 2, 3, 4, 5, 6] : [parseInt(activeCalendarPageWeekFilter, 10)];
+            const weeksToShow = (activeCalendarPageWeekFilter === 'ALL') ? weeksList : [parseInt(activeCalendarPageWeekFilter, 10)];
 
             const dayHeaders = [
                 { name: 'الأحد', short: 'أحد', isWeekend: false },
@@ -41304,6 +41652,15 @@ function buildDemoExecutiveReport(params) {
             // 2.5 مزامنة مجدولة هادئة لكشف الحضور المباشر (كل ساعة بين 8:30 ص و 4:30 م وتستأنف غداً 8:30 ص)
             if (typeof initScheduledAttendanceSync === 'function') {
                 initScheduledAttendanceSync();
+            }
+
+            // تصفير درجات واختبارات المتدربين للبدء برصد جديد من الصفر
+            if (localStorage.getItem('sys_grades_reset_v4_applied') !== 'true') {
+                try {
+                    if (typeof resetAllTraineeGrades === 'function') {
+                        resetAllTraineeGrades(false);
+                    }
+                } catch(e) {}
             }
 
             // 3. تهيئة الواجهات الأساسية
