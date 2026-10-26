@@ -3982,6 +3982,10 @@
                                 <span>✨</span>
                                 <span>توليد محتوى الأسبوع آلياً (PPTX / PDF)</span>
                             </button>
+                            <button type="button" id="tlWeekClearBtn" onclick="clearCurrentWeekContent()" title="مسح وتفريغ محتويات هذا الأسبوع بالكامل" class="lms-action-btn bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-black text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition active:scale-95">
+                                <span>🗑️</span>
+                                <span>مسح محتوى الأسبوع</span>
+                            </button>
                             <div class="flex items-center gap-2 flex-wrap text-xs font-bold text-slate-700 bg-[#F8F9FA] border border-slate-200 px-3.5 py-2 rounded-xl" id="tlWeekStatsBadge">
                                 --
                             </div>
@@ -24520,6 +24524,11 @@
             if (isTrainerLmsStudentDemoActive) weekAiBtn.classList.add('hidden');
             else weekAiBtn.classList.remove('hidden');
         }
+        const weekClearBtn = document.getElementById('tlWeekClearBtn');
+        if (weekClearBtn) {
+            if (isTrainerLmsStudentDemoActive) weekClearBtn.classList.add('hidden');
+            else weekClearBtn.classList.remove('hidden');
+        }
 
         const addBtnIds = ['tlAddVideoBtn', 'tlAddDocBtn', 'tlAddQuizBtn', 'tlAddAssignmentBtn'];
         addBtnIds.forEach(bId => {
@@ -24571,6 +24580,11 @@
         if (weekAiBtn) {
             if (isTrainerLmsStudentDemoActive) weekAiBtn.classList.add('hidden');
             else weekAiBtn.classList.remove('hidden');
+        }
+        const weekClearBtn = document.getElementById('tlWeekClearBtn');
+        if (weekClearBtn) {
+            if (isTrainerLmsStudentDemoActive) weekClearBtn.classList.add('hidden');
+            else weekClearBtn.classList.remove('hidden');
         }
         ['tlAddVideoBtn', 'tlAddDocBtn', 'tlAddQuizBtn', 'tlAddAssignmentBtn'].forEach(bId => {
             const b = document.getElementById(bId);
@@ -26175,10 +26189,80 @@
         });
     }
 
+    // سجل تومبستون العناصر المحذوفة لمنع عودتها نهائياً عند المزامنة السحابية
+    let deletedLmsItemIds = new Set();
+    try {
+        const savedDeleted = JSON.parse(localStorage.getItem('sys_lms_deleted_items_v1') || '[]');
+        if (Array.isArray(savedDeleted)) {
+            deletedLmsItemIds = new Set(savedDeleted.map(String));
+        }
+    } catch (e) {}
+
+    function registerLmsItemDeleted(idOrTitle) {
+        if (!idOrTitle) return;
+        deletedLmsItemIds.add(String(idOrTitle));
+        try {
+            localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
+        } catch (e) {}
+        // رفع تومبستون الحذف للسحابة فوراً عبر Supabase
+        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected) {
+            try {
+                supabaseClient.from('app_sync_state').upsert([{
+                    key: 'lms_deleted_items_v1',
+                    data: Array.from(deletedLmsItemIds),
+                    updated_at: new Date().toISOString()
+                }], { onConflict: 'key' }).catch(() => {});
+            } catch (err) {}
+        }
+    }
+    window.registerLmsItemDeleted = registerLmsItemDeleted;
+
+    // دالة محورية لجلب كافة المفاتيح البديلة للمقرر والمدرب لضمان الحذف الشامل
+    function getActiveTrainerCourseAliases(courseKey) {
+        const keys = new Set();
+        if (courseKey) keys.add(courseKey);
+        const activeKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null;
+        if (activeKey) keys.add(activeKey);
+
+        const currentCourse = (courseKey && lmsCourses[courseKey]) || (activeKey && lmsCourses[activeKey]);
+        const trName = currentCourse?.trainer || currentCourse?.trainerName || (currentUser?.trainerProfile || currentUser?.name || '');
+        const cleanTr = String(trName).replace(/^أ\.\s*/, '').trim();
+
+        if (cleanTr) {
+            keys.add(cleanTr);
+            if (lmsCourses[cleanTr]) keys.add(cleanTr);
+            for (const k in lmsCourses) {
+                const c = lmsCourses[k];
+                if (c) {
+                    const cTr = String(c.trainer || c.trainerName || '').replace(/^أ\.\s*/, '').trim();
+                    if (cTr && (cTr === cleanTr || cTr.includes(cleanTr) || cleanTr.includes(cTr))) {
+                        keys.add(k);
+                    }
+                }
+            }
+        }
+        return Array.from(keys).filter(k => lmsCourses[k]);
+    }
+    window.getActiveTrainerCourseAliases = getActiveTrainerCourseAliases;
+
     async function pullLmsCoursesFromSupabase() {
         try {
-            // First try direct client
+            // First pull cloud tombstones (deleted items)
             if (supabaseClient && isSupabaseConnected) {
+                try {
+                    const { data: delData } = await supabaseClient
+                        .from('app_sync_state')
+                        .select('data')
+                        .eq('key', 'lms_deleted_items_v1')
+                        .maybeSingle();
+                    if (delData && Array.isArray(delData.data)) {
+                        delData.data.forEach(id => deletedLmsItemIds.add(String(id)));
+                        localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
+                    }
+                } catch (delErr) {
+                    console.warn('Failed to pull cloud tombstones:', delErr);
+                }
+
                 const { data, error } = await supabaseClient
                     .from('lms_courses')
                     .select('*')
@@ -26205,6 +26289,10 @@
             const res = await fetch('/api/lms-sync');
             if (res.ok) {
                 const json = await res.json();
+                if (Array.isArray(json.deletedItemIds) && json.deletedItemIds.length > 0) {
+                    json.deletedItemIds.forEach(id => deletedLmsItemIds.add(String(id)));
+                    localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
+                }
                 if (json.success && json.courses && Object.keys(json.courses).length > 0) {
                     mergeCloudCoursesIntoLocal(json.courses);
                 }
@@ -26214,24 +26302,6 @@
         }
     }
     window.pullLmsCoursesFromSupabase = pullLmsCoursesFromSupabase;
-
-    // سجل تومبستون العناصر المحذوفة لمنع عودتها عند المزامنة السحابية
-    let deletedLmsItemIds = new Set();
-    try {
-        const savedDeleted = JSON.parse(localStorage.getItem('sys_lms_deleted_items_v1') || '[]');
-        if (Array.isArray(savedDeleted)) {
-            deletedLmsItemIds = new Set(savedDeleted.map(String));
-        }
-    } catch (e) {}
-
-    function registerLmsItemDeleted(idOrTitle) {
-        if (!idOrTitle) return;
-        deletedLmsItemIds.add(String(idOrTitle));
-        try {
-            localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
-        } catch (e) {}
-    }
-    window.registerLmsItemDeleted = registerLmsItemDeleted;
 
     function mergeCloudCoursesIntoLocal(cloudCourses) {
         if (!cloudCourses || typeof cloudCourses !== 'object') return;
@@ -26419,7 +26489,11 @@
             await fetch('/api/lms-sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ courseKey, courseData: cData })
+                body: JSON.stringify({ 
+                    courseKey, 
+                    courseData: cData,
+                    deletedItemIds: (typeof deletedLmsItemIds !== 'undefined') ? Array.from(deletedLmsItemIds) : []
+                })
             });
             console.log(`☁️ تم مزامنة كورس [${courseKey}] عبر API Vercel/Supabase.`);
         } catch (apiErr) {
@@ -26545,7 +26619,10 @@
             await fetch('/api/lms-sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ allCourses: lmsCourses })
+                body: JSON.stringify({ 
+                    allCourses: lmsCourses,
+                    deletedItemIds: (typeof deletedLmsItemIds !== 'undefined') ? Array.from(deletedLmsItemIds) : []
+                })
             });
             console.log(`☁️ تم مزامنة كافة المقررات عبر API Vercel/Supabase.`);
         } catch (apiErr) {
@@ -26637,10 +26714,12 @@
 
     function persistLmsCourses() {
         persistLmsCoursesLocalOnly();
+        // مزامنة كافة المفاتيح المرتبطة بالمدرب لضمان عدم بقاء نسخ قديمة بالسحابة
         const activeKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null;
-        if (activeKey) {
-            syncLmsCourseToSupabase(activeKey);
-        }
+        const aliases = (typeof getActiveTrainerCourseAliases === 'function') ? getActiveTrainerCourseAliases(activeKey) : [activeKey].filter(Boolean);
+        aliases.forEach(k => {
+            if (k) syncLmsCourseToSupabase(k);
+        });
         if (typeof syncAllLmsCoursesToSupabase === 'function') {
             syncAllLmsCoursesToSupabase();
         }
@@ -27991,22 +28070,44 @@ END $$;`;
     }
 
     function deleteLmsVideo(idx) {
-        if (!confirm('هل أنت متأكد من حذف هذه المحاضرة المرئية؟')) return;
+        if (!confirm('هل أنت متأكد من حذف هذه المحاضرة المرئية نهائياً من المقرر؟')) return;
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (activeWeek && activeWeek.videos && activeWeek.videos[idx]) {
             const v = activeWeek.videos[idx];
-            registerLmsItemDeleted(v.id);
-            registerLmsItemDeleted(v.title);
-            registerLmsItemDeleted(v.url);
-            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && v.id) {
-                supabaseClient.from('lectures').delete().eq('id', v.id).catch(() => {});
+            const vId = v.id;
+            const vTitle = v.title;
+            const vUrl = v.url;
+            registerLmsItemDeleted(vId);
+            registerLmsItemDeleted(vTitle);
+            registerLmsItemDeleted(vUrl);
+
+            // حذف من كافة المفاتيح البديلة للمقرر
+            const aliases = getActiveTrainerCourseAliases(courseKey);
+            const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
+            aliases.forEach(k => {
+                const c = lmsCourses[k];
+                if (c && c.weeks) {
+                    const w = c.weeks.find(x => (x.week || x.weekNum) === wNum);
+                    if (w && Array.isArray(w.videos)) {
+                        w.videos = w.videos.filter(item => {
+                            if (!item) return false;
+                            if (vId && item.id === vId) return false;
+                            if (vTitle && item.title === vTitle) return false;
+                            return true;
+                        });
+                    }
+                }
+            });
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected) {
+                if (vId) supabaseClient.from('lectures').delete().eq('id', vId).catch(() => {});
             }
-            activeWeek.videos.splice(idx, 1);
+
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف المحاضرة نهائياً ولن تعود مجدداً ✓', 'info');
+            showToast('تم حذف المحاضرة نهائياً من كافة السجلات ولن تعود مجدداً ✓', 'success');
         }
     }
 
@@ -28116,7 +28217,7 @@ END $$;`;
     }
 
     function deleteLmsDoc(idx) {
-        if (!confirm('هل أنت متأكد من حذف هذه المذكرة؟')) return;
+        if (!confirm('هل أنت متأكد من حذف هذه المذكرة التدريبية نهائياً؟')) return;
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
@@ -28124,23 +28225,49 @@ END $$;`;
 
         const targetDoc = (activeWeek.docs && activeWeek.docs[idx]) || (activeWeek.documents && activeWeek.documents[idx]);
         if (targetDoc) {
-            registerLmsItemDeleted(targetDoc.id);
-            registerLmsItemDeleted(targetDoc.title);
-            registerLmsItemDeleted(targetDoc.url);
-            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && targetDoc.id) {
-                supabaseClient.from('lectures').delete().eq('id', targetDoc.id).catch(() => {});
+            const dId = targetDoc.id;
+            const dTitle = targetDoc.title;
+            const dUrl = targetDoc.url;
+            registerLmsItemDeleted(dId);
+            registerLmsItemDeleted(dTitle);
+            registerLmsItemDeleted(dUrl);
+
+            // حذف من كافة المفاتيح البديلة للمقرر
+            const aliases = getActiveTrainerCourseAliases(courseKey);
+            const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
+            aliases.forEach(k => {
+                const c = lmsCourses[k];
+                if (c && c.weeks) {
+                    const w = c.weeks.find(x => (x.week || x.weekNum) === wNum);
+                    if (w) {
+                        if (Array.isArray(w.docs)) {
+                            w.docs = w.docs.filter(item => {
+                                if (!item) return false;
+                                if (dId && item.id === dId) return false;
+                                if (dTitle && item.title === dTitle) return false;
+                                return true;
+                            });
+                        }
+                        if (Array.isArray(w.documents)) {
+                            w.documents = w.documents.filter(item => {
+                                if (!item) return false;
+                                if (dId && item.id === dId) return false;
+                                if (dTitle && item.title === dTitle) return false;
+                                return true;
+                            });
+                        }
+                    }
+                }
+            });
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && dId) {
+                supabaseClient.from('lectures').delete().eq('id', dId).catch(() => {});
             }
         }
 
-        if (activeWeek.docs && activeWeek.docs[idx]) {
-            activeWeek.docs.splice(idx, 1);
-        }
-        if (activeWeek.documents && activeWeek.documents[idx]) {
-            activeWeek.documents.splice(idx, 1);
-        }
         persistLmsCourses();
         renderTrainerLms();
-        showToast('تم حذف مذكرة المراجعة نهائياً ولن تعود مجدداً ✓', 'info');
+        showToast('تم حذف المذكرة نهائياً من كافة السجلات ولن تعود مجدداً ✓', 'success');
     }
 
     function openReadDocModal(docId) {
@@ -28682,21 +28809,41 @@ END $$;`;
     }
 
     function deleteLmsQuiz(idx) {
-        if (!confirm('هل أنت متأكد من حذف هذا الاختبار؟')) return;
+        if (!confirm('هل أنت متأكد من حذف هذا الاختبار نهائياً؟')) return;
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (activeWeek && activeWeek.quizzes && activeWeek.quizzes[idx]) {
             const q = activeWeek.quizzes[idx];
-            registerLmsItemDeleted(q.id);
-            registerLmsItemDeleted(q.title);
-            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && q.id) {
-                supabaseClient.from('quizzes').delete().eq('id', q.id).catch(() => {});
+            const qId = q.id;
+            const qTitle = q.title;
+            registerLmsItemDeleted(qId);
+            registerLmsItemDeleted(qTitle);
+
+            // حذف من كافة المفاتيح البديلة للمقرر
+            const aliases = getActiveTrainerCourseAliases(courseKey);
+            const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
+            aliases.forEach(k => {
+                const c = lmsCourses[k];
+                if (c && c.weeks) {
+                    const w = c.weeks.find(x => (x.week || x.weekNum) === wNum);
+                    if (w && Array.isArray(w.quizzes)) {
+                        w.quizzes = w.quizzes.filter(item => {
+                            if (!item) return false;
+                            if (qId && item.id === qId) return false;
+                            if (qTitle && item.title === qTitle) return false;
+                            return true;
+                        });
+                    }
+                }
+            });
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && qId) {
+                supabaseClient.from('quizzes').delete().eq('id', qId).catch(() => {});
             }
-            activeWeek.quizzes.splice(idx, 1);
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف الاختبار نهائياً ولن يعود مجدداً ✓', 'info');
+            showToast('تم حذف الاختبار نهائياً من كافة السجلات ولن يعود مجدداً ✓', 'success');
         }
     }
 
@@ -29022,23 +29169,115 @@ END $$;`;
     }
 
     function deleteLmsAssignment(idx) {
-        if (!confirm('هل أنت متأكد من حذف هذا الواجب؟')) return;
+        if (!confirm('هل أنت متأكد من حذف هذا الواجب نهائياً؟')) return;
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         if (activeWeek && activeWeek.assignments && activeWeek.assignments[idx]) {
             const a = activeWeek.assignments[idx];
-            registerLmsItemDeleted(a.id);
-            registerLmsItemDeleted(a.title);
-            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && a.id) {
-                supabaseClient.from('assignments').delete().eq('id', a.id).catch(() => {});
+            const aId = a.id;
+            const aTitle = a.title;
+            registerLmsItemDeleted(aId);
+            registerLmsItemDeleted(aTitle);
+
+            // حذف من كافة المفاتيح البديلة للمقرر
+            const aliases = getActiveTrainerCourseAliases(courseKey);
+            const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
+            aliases.forEach(k => {
+                const c = lmsCourses[k];
+                if (c && c.weeks) {
+                    const w = c.weeks.find(x => (x.week || x.weekNum) === wNum);
+                    if (w && Array.isArray(w.assignments)) {
+                        w.assignments = w.assignments.filter(item => {
+                            if (!item) return false;
+                            if (aId && item.id === aId) return false;
+                            if (aTitle && item.title === aTitle) return false;
+                            return true;
+                        });
+                    }
+                }
+            });
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && aId) {
+                supabaseClient.from('assignments').delete().eq('id', aId).catch(() => {});
             }
-            activeWeek.assignments.splice(idx, 1);
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف الواجب نهائياً ولن يعود مجدداً ✓', 'info');
+            showToast('تم حذف الواجب نهائياً من كافة السجلات ولن يعود مجدداً ✓', 'success');
         }
     }
+
+    // دالة شاملة لمسح وتفريغ كافة محتويات الأسبوع النشط دفعة واحدة
+    function clearCurrentWeekContent() {
+        const courseKey = getActiveTrainerCourseKey();
+        const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
+        const activeWeek = getActiveTrainerLmsWeekObj(courseData);
+        const wNum = activeWeek ? (activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1) : (activeTrainerLmsWeek || 1);
+
+        const totalItems = ((activeWeek?.videos?.length || 0) + 
+                            ((activeWeek?.docs?.length || activeWeek?.documents?.length) || 0) + 
+                            (activeWeek?.quizzes?.length || 0) + 
+                            (activeWeek?.assignments?.length || 0));
+
+        if (totalItems === 0) {
+            showToast('الأسبوع النشط فارغ بالفعل ولا يحتوي على أي عناصر.', 'info');
+            return;
+        }
+
+        if (!confirm(`تحذير: هل أنت متأكد من مسح كافة محتويات الأسبوع (${wNum})؟\nسيتم حذف جميع المحاضرات والمذكرات والاختبارات والواجبات لهذا الأسبوع نهائياً.`)) {
+            return;
+        }
+
+        const aliases = getActiveTrainerCourseAliases(courseKey);
+        aliases.forEach(k => {
+            const c = lmsCourses[k];
+            if (c && c.weeks) {
+                const w = c.weeks.find(x => (x.week || x.weekNum) === wNum);
+                if (w) {
+                    (w.videos || []).forEach(v => {
+                        if (v?.id) registerLmsItemDeleted(v.id);
+                        if (v?.title) registerLmsItemDeleted(v.title);
+                        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && v?.id) {
+                            supabaseClient.from('lectures').delete().eq('id', v.id).catch(() => {});
+                        }
+                    });
+                    const dList = (w.docs && w.docs.length) ? w.docs : (w.documents || []);
+                    dList.forEach(d => {
+                        if (d?.id) registerLmsItemDeleted(d.id);
+                        if (d?.title) registerLmsItemDeleted(d.title);
+                        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && d?.id) {
+                            supabaseClient.from('lectures').delete().eq('id', d.id).catch(() => {});
+                        }
+                    });
+                    (w.quizzes || []).forEach(q => {
+                        if (q?.id) registerLmsItemDeleted(q.id);
+                        if (q?.title) registerLmsItemDeleted(q.title);
+                        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && q?.id) {
+                            supabaseClient.from('quizzes').delete().eq('id', q.id).catch(() => {});
+                        }
+                    });
+                    (w.assignments || []).forEach(a => {
+                        if (a?.id) registerLmsItemDeleted(a.id);
+                        if (a?.title) registerLmsItemDeleted(a.title);
+                        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && a?.id) {
+                            supabaseClient.from('assignments').delete().eq('id', a.id).catch(() => {});
+                        }
+                    });
+
+                    w.videos = [];
+                    w.docs = [];
+                    w.documents = [];
+                    w.quizzes = [];
+                    w.assignments = [];
+                }
+            }
+        });
+
+        persistLmsCourses();
+        renderTrainerLms();
+        showToast(`تم مسح وتفريغ كامل محتويات الأسبوع (${wNum}) نهائياً بنجاح ✓`, 'success');
+    }
+    window.clearCurrentWeekContent = clearCurrentWeekContent;
 
     function closeLmsSubModal(modalId) {
         const modal = document.getElementById(modalId);

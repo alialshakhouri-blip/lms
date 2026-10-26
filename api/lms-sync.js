@@ -68,10 +68,25 @@ export default async function handler(req, res) {
         };
       }
 
+      // Also retrieve globally registered deleted item IDs (tombstones) from app_sync_state
+      let deletedItemIds = [];
+      try {
+        const delRes = await fetch(`${supabaseUrl}/rest/v1/app_sync_state?key=eq.lms_deleted_items_v1&select=*`, { headers });
+        if (delRes.ok) {
+          const delRows = await delRes.json();
+          if (delRows && delRows[0] && Array.isArray(delRows[0].data)) {
+            deletedItemIds = delRows[0].data;
+          }
+        }
+      } catch (delErr) {
+        console.warn('Failed to fetch deleted items from cloud:', delErr);
+      }
+
       return res.status(200).json({
         success: true,
         count: rows.length,
-        courses: coursesMap
+        courses: coursesMap,
+        deletedItemIds
       });
 
     } catch (err) {
@@ -83,7 +98,27 @@ export default async function handler(req, res) {
   // ─── POST: Upsert LMS Course(s) to Supabase ──────────────────────────────
   if (req.method === 'POST') {
     try {
-      const { courseKey, courseData, allCourses } = req.body || {};
+      const { courseKey, courseData, allCourses, deletedItemIds } = req.body || {};
+
+      // If client sent deleted item IDs to persist in cloud tombstone
+      if (Array.isArray(deletedItemIds) && deletedItemIds.length > 0) {
+        try {
+          await fetch(`${supabaseUrl}/rest/v1/app_sync_state?on_conflict=key`, {
+            method: 'POST',
+            headers: {
+              ...headers,
+              'Prefer': 'resolution=merge-duplicates,return=minimal'
+            },
+            body: JSON.stringify([{
+              key: 'lms_deleted_items_v1',
+              data: deletedItemIds,
+              updated_at: new Date().toISOString()
+            }])
+          });
+        } catch (delSaveErr) {
+          console.warn('Failed to save deleted items to app_sync_state:', delSaveErr);
+        }
+      }
 
       const rowsToUpsert = [];
 
