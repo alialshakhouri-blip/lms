@@ -18883,9 +18883,23 @@
         }
     } catch(e) {}
 
-    function isLmsWeekCleared(courseKey, wNum) {
+    function isLmsWeekCleared(courseKey, wNum, weekObj) {
         if (!wNum) return false;
         const num = parseInt(wNum, 10);
+
+        // إذا كان كائن الأسبوع متوفراً ويحتوي بالفعل على أي محتوى، فهو غير محذوف حتماً
+        if (weekObj) {
+            const hasItems = (Array.isArray(weekObj.videos) && weekObj.videos.length > 0) ||
+                             (Array.isArray(weekObj.docs) && weekObj.docs.length > 0) ||
+                             (Array.isArray(weekObj.documents) && weekObj.documents.length > 0) ||
+                             (Array.isArray(weekObj.quizzes) && weekObj.quizzes.length > 0) ||
+                             (Array.isArray(weekObj.assignments) && weekObj.assignments.length > 0);
+            if (hasItems) {
+                unmarkLmsWeekCleared(num, courseKey);
+                return false;
+            }
+        }
+
         if (lmsClearedWeeks[`week_${num}`] === true) return true;
         if (lmsClearedWeeks[`all_w${num}`] === true) return true;
         if (courseKey && lmsClearedWeeks[`${courseKey}_w${num}`] === true) return true;
@@ -18916,9 +18930,23 @@
         delete lmsClearedWeeks[`week_${num}`];
         delete lmsClearedWeeks[`all_w${num}`];
         if (courseKey) delete lmsClearedWeeks[`${courseKey}_w${num}`];
+        for (const k in lmsClearedWeeks) {
+            if (k === `week_${num}` || k === `all_w${num}` || k.endsWith(`_w${num}`) || k.includes(`w${num}`)) {
+                delete lmsClearedWeeks[k];
+            }
+        }
         try {
             localStorage.setItem('sys_lms_cleared_weeks_v2', JSON.stringify(lmsClearedWeeks));
         } catch(e) {}
+        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected) {
+            try {
+                supabaseClient.from('app_sync_state').upsert([{
+                    key: 'lms_cleared_weeks_v2',
+                    data: lmsClearedWeeks,
+                    updated_at: new Date().toISOString()
+                }], { onConflict: 'key' }).catch(() => {});
+            } catch (err) {}
+        }
     }
     window.unmarkLmsWeekCleared = unmarkLmsWeekCleared;
 
@@ -18939,6 +18967,24 @@
         }
     }
     window.registerLmsItemDeleted = registerLmsItemDeleted;
+
+    function unregisterLmsItemDeleted(idOrTitle) {
+        if (!idOrTitle) return;
+        deletedLmsItemIds.delete(String(idOrTitle));
+        try {
+            localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
+        } catch (e) {}
+        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected) {
+            try {
+                supabaseClient.from('app_sync_state').upsert([{
+                    key: 'lms_deleted_items_v1',
+                    data: Array.from(deletedLmsItemIds),
+                    updated_at: new Date().toISOString()
+                }], { onConflict: 'key' }).catch(() => {});
+            } catch (err) {}
+        }
+    }
+    window.unregisterLmsItemDeleted = unregisterLmsItemDeleted;
 
     let lmsCourses = JSON.parse(localStorage.getItem('sys_lms_courses_v2')) || JSON.parse(localStorage.getItem('sys_lms_courses_v1')) || {};
     for (let k in INITIAL_LMS_COURSES) {
@@ -18986,35 +19032,41 @@
         }
     }
 
-    // تصفية فورية عند الإقلاع لأية أسابيع مفرغة أو عناصر محذوفة نهائياً
+    // تصفية فورية عند الإقلاع لأية أسابيع مفرغة مع صون وحماية المحتوى المضاف جديداً
     if (typeof isLmsWeekCleared === 'function') {
         for (let k in lmsCourses) {
             const c = lmsCourses[k];
             if (c && c.weeks) {
                 c.weeks.forEach(w => {
                     const wNum = w.week || w.weekNum || 1;
-                    if (isLmsWeekCleared(k, wNum)) {
+                    const wHasItems = (Array.isArray(w.videos) && w.videos.length > 0) ||
+                                      (Array.isArray(w.docs) && w.docs.length > 0) ||
+                                      (Array.isArray(w.documents) && w.documents.length > 0) ||
+                                      (Array.isArray(w.quizzes) && w.quizzes.length > 0) ||
+                                      (Array.isArray(w.assignments) && w.assignments.length > 0);
+                    if (wHasItems) {
+                        unmarkLmsWeekCleared(wNum, k);
+                        if (Array.isArray(w.videos)) {
+                            w.videos = w.videos.filter(v => v && !deletedLmsItemIds.has(String(v.id)));
+                        }
+                        if (Array.isArray(w.docs)) {
+                            w.docs = w.docs.filter(d => d && !deletedLmsItemIds.has(String(d.id)));
+                        }
+                        if (Array.isArray(w.documents)) {
+                            w.documents = w.documents.filter(d => d && !deletedLmsItemIds.has(String(d.id)));
+                        }
+                        if (Array.isArray(w.quizzes)) {
+                            w.quizzes = w.quizzes.filter(q => q && !deletedLmsItemIds.has(String(q.id)));
+                        }
+                        if (Array.isArray(w.assignments)) {
+                            w.assignments = w.assignments.filter(a => a && !deletedLmsItemIds.has(String(a.id)));
+                        }
+                    } else if (isLmsWeekCleared(k, wNum, w)) {
                         w.videos = [];
                         w.docs = [];
                         w.documents = [];
                         w.quizzes = [];
                         w.assignments = [];
-                    } else {
-                        if (Array.isArray(w.videos)) {
-                            w.videos = w.videos.filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)) && !deletedLmsItemIds.has(String(v.url)));
-                        }
-                        if (Array.isArray(w.docs)) {
-                            w.docs = w.docs.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)) && !deletedLmsItemIds.has(String(d.url)));
-                        }
-                        if (Array.isArray(w.documents)) {
-                            w.documents = w.documents.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)) && !deletedLmsItemIds.has(String(d.url)));
-                        }
-                        if (Array.isArray(w.quizzes)) {
-                            w.quizzes = w.quizzes.filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
-                        }
-                        if (Array.isArray(w.assignments)) {
-                            w.assignments = w.assignments.filter(a => a && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
-                        }
                     }
                 });
             }
@@ -19024,13 +19076,24 @@
             if (c && c.weeks) {
                 c.weeks.forEach(w => {
                     const wNum = w.week || w.weekNum || 1;
-                    if (isLmsWeekCleared(k, wNum)) {
+                    const wHasItems = (Array.isArray(w.videos) && w.videos.length > 0) ||
+                                      (Array.isArray(w.docs) && w.docs.length > 0) ||
+                                      (Array.isArray(w.documents) && w.documents.length > 0) ||
+                                      (Array.isArray(w.quizzes) && w.quizzes.length > 0) ||
+                                      (Array.isArray(w.assignments) && w.assignments.length > 0);
+                    if (wHasItems) {
+                        unmarkLmsWeekCleared(wNum, k);
+                    } else if (isLmsWeekCleared(k, wNum, w)) {
                         w.videos = [];
                         w.docs = [];
                         w.documents = [];
                         w.quizzes = [];
                         w.assignments = [];
                     }
+                });
+            }
+        }
+    }
                 });
             }
         }
@@ -21914,8 +21977,8 @@
         if (weekTopicEl) weekTopicEl.innerText = currentActiveTopic;
 
         // 1. المحاضرات والشروحات المرئية والملفات (فيديو / PowerPoint / PDF / روابط)
-        const isStudentWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(activeStudentLmsCourse, currentActiveWeekNum) || isLmsWeekCleared(null, currentActiveWeekNum));
-        const studentVideosList = isStudentWeekCleared ? [] : (activeWeek.videos || []).filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)) && !deletedLmsItemIds.has(String(v.url)));
+        const isStudentWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(activeStudentLmsCourse, currentActiveWeekNum, activeWeek) || isLmsWeekCleared(null, currentActiveWeekNum, activeWeek));
+        const studentVideosList = isStudentWeekCleared ? [] : (activeWeek.videos || []).filter(v => v && !deletedLmsItemIds.has(String(v.id)));
 
         const vContainer = document.getElementById('sdVideosContainer');
         if (vContainer) {
@@ -21996,7 +22059,7 @@
         const dContainer = document.getElementById('sdDocsContainer');
         if (dContainer) {
             const rawStuDocs = isStudentWeekCleared ? [] : ((activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []));
-            const docList = rawStuDocs.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)) && !deletedLmsItemIds.has(String(d.url)));
+            const docList = rawStuDocs.filter(d => d && !deletedLmsItemIds.has(String(d.id)));
             dContainer.innerHTML = docList.length ? docList.map(d => {
                 const isAudio = isAudioFile(d.url || d.fileUrl || d.title || d.type || d.docKind);
                 const safeTitle = (d.title || '').replace(/'/g, "\\'");
@@ -22037,7 +22100,7 @@
             const studentGroup = (currentUser.group || '').trim();
             const rawStuQuizzes = isStudentWeekCleared ? [] : (activeWeek.quizzes || []);
             const visibleQuizzes = rawStuQuizzes.filter(q => {
-                if (!q || deletedLmsItemIds.has(String(q.id)) || deletedLmsItemIds.has(String(q.title))) return false;
+                if (!q || deletedLmsItemIds.has(String(q.id))) return false;
                 if (!q.targetGroup || q.targetGroup === 'ALL') return true;
                 return isGroupMatch(q.targetGroup, studentGroup) ||
                        (studentGroup && studentGroup.toLowerCase().includes(q.targetGroup.toLowerCase())) ||
@@ -22145,7 +22208,7 @@
             const studentGroup = (currentUser.group || '').trim();
             const rawStuAssignments = isStudentWeekCleared ? [] : (activeWeek.assignments || []);
             const visibleAssignments = rawStuAssignments.filter(a => {
-                if (!a || deletedLmsItemIds.has(String(a.id)) || deletedLmsItemIds.has(String(a.title))) return false;
+                if (!a || deletedLmsItemIds.has(String(a.id))) return false;
                 if (!a.targetGroup || a.targetGroup === 'ALL') return true;
                 return isGroupMatch(a.targetGroup, studentGroup) ||
                        (studentGroup && studentGroup.toLowerCase().includes(a.targetGroup.toLowerCase())) ||
@@ -25432,19 +25495,19 @@
         const activeWeekTopicEl = document.getElementById('tlActiveWeekTopic');
         if (activeWeekTopicEl) activeWeekTopicEl.innerText = currentTrainerTopic;
 
-        const isTrainerWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(courseKey, currentTrainerWeekNum) || isLmsWeekCleared(null, currentTrainerWeekNum));
+        const isTrainerWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(courseKey, currentTrainerWeekNum, activeWeek) || isLmsWeekCleared(null, currentTrainerWeekNum, activeWeek));
 
         const rawTrainerDocs = isTrainerWeekCleared ? [] : ((activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []));
-        const weekDocsList = rawTrainerDocs.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)) && !deletedLmsItemIds.has(String(d.url)));
+        const weekDocsList = rawTrainerDocs.filter(d => d && !deletedLmsItemIds.has(String(d.id)));
 
         const rawTrainerVideos = isTrainerWeekCleared ? [] : (activeWeek.videos || []);
-        const weekVideosList = rawTrainerVideos.filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)) && !deletedLmsItemIds.has(String(v.url)));
+        const weekVideosList = rawTrainerVideos.filter(v => v && !deletedLmsItemIds.has(String(v.id)));
 
         const rawTrainerQuizzes = isTrainerWeekCleared ? [] : (activeWeek.quizzes || []);
-        const allQuizzesWithIdx = rawTrainerQuizzes.filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title))).map((q, idx) => ({ q, idx }));
+        const allQuizzesWithIdx = rawTrainerQuizzes.filter(q => q && !deletedLmsItemIds.has(String(q.id))).map((q, idx) => ({ q, idx }));
 
         const rawTrainerAssignments = isTrainerWeekCleared ? [] : (activeWeek.assignments || []);
-        const allAssignmentsWithIdx = rawTrainerAssignments.filter(a => a && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title))).map((a, idx) => ({ a, idx }));
+        const allAssignmentsWithIdx = rawTrainerAssignments.filter(a => a && !deletedLmsItemIds.has(String(a.id))).map((a, idx) => ({ a, idx }));
 
         const vLen = weekVideosList.length;
         const dLen = weekDocsList.length;
@@ -27058,8 +27121,17 @@
                     const lW = localWeeks[i];
                     const cW = cloudWeeks[i];
                     const wNum = i + 1;
+                    const localHasItems = lW && (
+                        (Array.isArray(lW.videos) && lW.videos.length > 0) ||
+                        (Array.isArray(lW.docs) && lW.docs.length > 0) ||
+                        (Array.isArray(lW.documents) && lW.documents.length > 0) ||
+                        (Array.isArray(lW.quizzes) && lW.quizzes.length > 0) ||
+                        (Array.isArray(lW.assignments) && lW.assignments.length > 0)
+                    );
 
-                    if ((typeof isLmsWeekCleared === 'function') && isLmsWeekCleared(key, wNum)) {
+                    if (localHasItems) {
+                        unmarkLmsWeekCleared(wNum, key);
+                    } else if ((typeof isLmsWeekCleared === 'function') && isLmsWeekCleared(key, wNum, lW)) {
                         mergedWeeks.push({
                             weekNum: wNum,
                             week: wNum,
@@ -28762,6 +28834,10 @@ END $$;`;
                 notes: notes
             };
             editingVideoIndex = -1;
+            if (oldVid.id) unregisterLmsItemDeleted(oldVid.id);
+            if (title) unregisterLmsItemDeleted(title);
+            if (url) unregisterLmsItemDeleted(url);
+            unmarkLmsWeekCleared(wNum, courseKey);
             persistLmsCourses();
             closeLmsSubModal('lmsVideoModal');
             renderTrainerLms();
@@ -28781,6 +28857,10 @@ END $$;`;
             notes: notes
         });
 
+        unregisterLmsItemDeleted(lectureId);
+        if (title) unregisterLmsItemDeleted(title);
+        if (url) unregisterLmsItemDeleted(url);
+        unmarkLmsWeekCleared(wNum, courseKey);
         persistLmsCourses();
         closeLmsSubModal('lmsVideoModal');
         renderTrainerLms();
@@ -28939,6 +29019,10 @@ END $$;`;
                 activeWeek.documents[editingDocIndex] = activeWeek.docs[editingDocIndex];
             }
             editingDocIndex = -1;
+            unregisterLmsItemDeleted(oldId);
+            if (title) unregisterLmsItemDeleted(title);
+            if (url) unregisterLmsItemDeleted(url);
+            unmarkLmsWeekCleared(wNum, courseKey);
             persistLmsCourses();
             closeLmsSubModal('lmsDocModal');
             renderTrainerLms();
@@ -28958,6 +29042,10 @@ END $$;`;
 
         activeWeek.docs.push(newDoc);
         if (activeWeek.documents) activeWeek.documents.push(newDoc);
+        unregisterLmsItemDeleted(newDoc.id);
+        if (title) unregisterLmsItemDeleted(title);
+        if (url) unregisterLmsItemDeleted(url);
+        unmarkLmsWeekCleared(wNum, courseKey);
         persistLmsCourses();
         closeLmsSubModal('lmsDocModal');
         renderTrainerLms();
@@ -29586,6 +29674,9 @@ END $$;`;
             showToast('تم حفظ ونشر الاختبار التفاعلي بنجاح', 'success');
         }
 
+        unregisterLmsItemDeleted(quizData.id);
+        if (title) unregisterLmsItemDeleted(title);
+        unmarkLmsWeekCleared(wNum, courseKey);
         persistLmsCourses();
         closeLmsSubModal('lmsQuizModal');
         renderTrainerLms();
@@ -29973,6 +30064,9 @@ END $$;`;
             showToast('تم حفظ ونشر الواجب بنجاح ✓', 'success');
         }
 
+        unregisterLmsItemDeleted(assignmentData.id);
+        if (title) unregisterLmsItemDeleted(title);
+        unmarkLmsWeekCleared(wNum, courseKey);
         persistLmsCourses();
         closeLmsSubModal('lmsAssignmentModal');
         renderTrainerLms();
@@ -33557,8 +33651,9 @@ function buildDemoExecutiveReport(params) {
                 };
             });
 
+            const newAiQuizId = 'q-' + Date.now();
             activeWeek.quizzes.push({
-                id: 'q-' + Date.now(),
+                id: newAiQuizId,
                 title: qTitle,
                 quizDate: resolvedQuizDueDate,
                 dueDate: resolvedQuizDueDate,
@@ -33571,6 +33666,21 @@ function buildDemoExecutiveReport(params) {
                 gradingMode: 'system_auto',
                 questions: quizQuestionsFormatted
             });
+
+            // تطهير تومبستونات الحذف لجميع عناصر المحتوى المولد وضمان إلغاء حظر الأسبوع
+            unmarkLmsWeekCleared(currentAiWeekNum, courseKey);
+            unregisterLmsItemDeleted(newAiQuizId);
+            if (qTitle) unregisterLmsItemDeleted(qTitle);
+            if (aTitle) unregisterLmsItemDeleted(aTitle);
+            if (glossTitle) unregisterLmsItemDeleted(glossTitle);
+            if (lecTitle) unregisterLmsItemDeleted(lecTitle);
+            if (finalVideoUrl) unregisterLmsItemDeleted(finalVideoUrl);
+            const lastVid = activeWeek.videos[activeWeek.videos.length - 1];
+            if (lastVid?.id) unregisterLmsItemDeleted(lastVid.id);
+            const lastDoc = activeWeek.docs[activeWeek.docs.length - 1];
+            if (lastDoc?.id) unregisterLmsItemDeleted(lastDoc.id);
+            const lastAss = activeWeek.assignments[activeWeek.assignments.length - 1];
+            if (lastAss?.id) unregisterLmsItemDeleted(lastAss.id);
 
             // Persist to storage (Local)
             persistLmsCourses();
@@ -34106,7 +34216,14 @@ function buildDemoExecutiveReport(params) {
         let modified = false;
         courseData.weeks.forEach(w => {
             const wNum = w.week || w.weekNum || 1;
-            if ((typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cKey, wNum) || isLmsWeekCleared(null, wNum))) {
+            const hasExistingItems = (Array.isArray(w.videos) && w.videos.length > 0) ||
+                                     (Array.isArray(w.docs) && w.docs.length > 0) ||
+                                     (Array.isArray(w.documents) && w.documents.length > 0) ||
+                                     (Array.isArray(w.quizzes) && w.quizzes.length > 0) ||
+                                     (Array.isArray(w.assignments) && w.assignments.length > 0);
+            if (hasExistingItems) {
+                if (typeof unmarkLmsWeekCleared === 'function') unmarkLmsWeekCleared(wNum, cKey);
+            } else if ((typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cKey, wNum, w) || isLmsWeekCleared(null, wNum, w))) {
                 w.videos = [];
                 w.docs = [];
                 w.documents = [];
@@ -37123,7 +37240,7 @@ function buildDemoExecutiveReport(params) {
                             if (!cData) return;
                             ensureLmsCourseWeeklyPillars(cData);
                             const cWeek = (cData.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === wNum) || {};
-                            const isCalWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cCourse.lmsKey, wNum) || isLmsWeekCleared(null, wNum));
+                            const isCalWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cCourse.lmsKey, wNum, cWeek) || isLmsWeekCleared(null, wNum, cWeek));
                             const cAssList = isCalWeekCleared ? [] : (cWeek.assignments || []).filter(a => a && a.assignmentCategory !== 'group' && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
                             const cWeeklyAss = cAssList[0] || null;
                             const cWeekQuizzes = isCalWeekCleared ? [] : (cWeek.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
@@ -37327,7 +37444,7 @@ function buildDemoExecutiveReport(params) {
                             if (!cData) return;
                             ensureLmsCourseWeeklyPillars(cData);
                             const cWeek = (cData.weeks || []).find(wk => (wk.week || wk.weekNum || 1) === wNum) || {};
-                            const isCalWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cCourse.lmsKey, wNum) || isLmsWeekCleared(null, wNum));
+                            const isCalWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cCourse.lmsKey, wNum, cWeek) || isLmsWeekCleared(null, wNum, cWeek));
                             const cAssList = isCalWeekCleared ? [] : (cWeek.assignments || []).filter(a => a && a.assignmentCategory !== 'group' && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
                             const cWeeklyAss = cAssList[0] || null;
                             const cWeekQuizzes = isCalWeekCleared ? [] : (cWeek.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
