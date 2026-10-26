@@ -1003,8 +1003,7 @@
                     <span class="font-bold">الفرع:</span>
                     <span class="font-extrabold text-amber-800">فرع عنك</span>
                 </div>
-                <div id="sidebarTotalTraineesContainer" class="flex items-center justify-between text-[11px] text-slate-500">
-                    <span class="font-bold">المتدربين المسجلين:</span>
+                <div id="sidebarTotalTraineesContainer" class="hidden">
                     <span class="font-mono font-extrabold text-slate-800" id="sidebarTotalTrainees">0 متدرب</span>
                 </div>
                 <button onclick="logout()" class="w-full mt-2 bg-white hover:bg-red-50 text-red-600 border border-slate-200 hover:border-red-200 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
@@ -1203,12 +1202,6 @@
                     </div>
 
                     <div class="flex items-center gap-2 flex-wrap">
-                        <!-- 🔑 Change Password Button -->
-                        <button type="button" onclick="openTrainerChangePasswordModal()" class="bg-slate-900 hover:bg-black text-amber-300 font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition border border-amber-400/40 cursor-pointer shadow-xs" title="تغيير كلمة المرور وتأمين حساب المدرب">
-                            <span class="text-xs">🔑</span>
-                            <span>تغيير كلمة المرور</span>
-                        </button>
-
                         <button type="button" onclick="openTrainerLmsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm transition border border-emerald-500 cursor-pointer" title="إدارة المحتوى الأكاديمي للكورس (Canvas LMS): اختبارات، مقاطع فيديو، ملفات، وواجبات">
                             <span>منصة المحتوى الأكاديمي (Canvas LMS)</span>
                         </button>
@@ -2995,7 +2988,6 @@
                             <div>
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <h2 class="text-xl md:text-2xl font-black text-white">القاعة الافتراضية والدراسة عن بعد</h2>
-                                    <span class="bg-blue-600 text-white text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-2xs">Zoom & Google Meet</span>
                                     <span id="vcHeaderActiveBadge" class="bg-slate-800 text-slate-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-slate-700">جاري التحقق...</span>
                                 </div>
                                 <p class="text-xs md:text-sm text-slate-300 font-medium pt-1">
@@ -3833,20 +3825,9 @@
                                 <span class="text-xs font-mono font-black tracking-widest text-sky-300">LMS</span>
                             </div>
                             <div class="min-w-0">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-[#0F2942] border border-slate-200 whitespace-nowrap">
-                                        بوابة إدارة المقرر الأكاديمي
-                                    </span>
-                                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md whitespace-nowrap">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        <span>مرتبط حصرياً بجدول ومجموعات المدرب</span>
-                                    </span>
-                                </div>
                                 <h3 class="font-black text-slate-900 text-base md:text-lg tracking-tight mt-0.5 truncate" id="tlCurrentCourseDisplay">المقرر الأكاديمي</h3>
                                 <div class="flex items-center gap-2.5 flex-wrap text-xs text-slate-600 pt-0.5">
                                     <span class="font-bold text-[#0F2942] whitespace-nowrap" id="tlCurrentTrainerDisplay">المدرب: --</span>
-                                    <span class="text-slate-300 hidden sm:inline">|</span>
-                                    <span class="text-slate-500 whitespace-nowrap">المنهج التدريبي المعتمد (6 وحدات أسبوعية)</span>
                                 </div>
                             </div>
                         </div>
@@ -3862,81 +3843,10 @@
                                 <span>رجوع</span>
                             </button>
 
-                            <button type="button" onclick="switchTab('gradesSystem')" class="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition shadow-2xs whitespace-nowrap shrink-0" title="فتح نظام الدرجات والتسليمات">
-                                <span>🎓</span>
-                                <span>نظام الدرجات</span>
-                            </button>
-
-                            <button type="button" onclick="switchTab('submissionsCalendar')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition shadow-2xs whitespace-nowrap shrink-0" title="فتح تقويم المهام والتسليمات">
-                                <span>📅</span>
-                                <span>التقويم الأكاديمي</span>
-                            </button>
-
-                            <!-- 👁️ Student Preview Demo / Screen Share Button -->
                             <button type="button" id="btnTrainerLmsStudentDemo" onclick="toggleTrainerLmsStudentDemo()" class="bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs transition active:scale-95 cursor-pointer border border-sky-400 shrink-0 whitespace-nowrap" title="معاينة كمتدرب ومشاركة الشاشة">
                                 <span class="text-xs">👁️</span>
                                 <span id="btnTrainerLmsStudentDemoLabel">معاينة كمتدرب (ديمو)</span>
                             </button>
-
-                            <!-- Dark Mode Toggle Button -->
-                            <button type="button" id="lmsDarkModeToggleBtn" onclick="toggleAppDarkMode()" class="dark-mode-toggle-btn lms-action-btn bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold px-2.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs whitespace-nowrap shrink-0" title="تبديل الوضع الليلي / النهاري">
-                                <span id="lmsDarkModeIcon">🌙</span>
-                                <span id="lmsDarkModeLabel" class="hidden sm:inline">الوضع الليلي</span>
-                            </button>
-
-                            <!-- ☁️ Supabase Cloud Sync Badge (Hidden per user request) -->
-                            <div onclick="openSupabaseCloudModal()" class="supabase-cloud-badge hidden !hidden flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 whitespace-nowrap shrink-0 transition cursor-pointer" style="display:none !important;" title="حالة المزامنة السحابية الدائمة (Supabase) - اضغط للإعداد والمزامنة">
-                                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                                <span>وضع التخزين المحلي</span>
-                            </div>
-
-                            <!-- ✨ AI Auto-Generate Button -->
-                            <button type="button" id="tlTopAiBtn" onclick="openAiGenerateModal()" class="lms-action-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap shrink-0 border border-violet-300 text-violet-900 bg-violet-50 hover:bg-violet-100 transition" title="توليد محتوى الأسبوع آلياً عبر الذكاء الاصطناعي">
-                                <span>✨</span>
-                                <span>توليد بالذكاء الاصطناعي</span>
-                            </button>
-
-                            <!-- Sleek 'Create' Dropdown Button -->
-                            <div class="relative shrink-0" id="tlCreateDropdownWrapper">
-                                <button type="button" onclick="toggleTrainerLmsCreateDropdown(event)" class="lms-action-btn lms-navy-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap">
-                                    <span>+ إنشاء محتوى جديد</span>
-                                    <span class="text-[9px] opacity-80">▼</span>
-                                </button>
-                                <!-- Floating Create Dropdown Menu -->
-                                <div id="tlCreateDropdownMenu" class="hidden absolute left-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-40 text-right">
-                                    <div class="px-3.5 py-1.5 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                                        إضافة إلى الأسبوع الحالي
-                                    </div>
-                                    <button type="button" onclick="closeTrainerLmsCreateDropdown(); openAddVideoModal();" class="w-full px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#0F2942] flex items-center justify-between transition cursor-pointer">
-                                        <div>
-                                            <div class="font-black text-slate-800">محاضرة مرئية</div>
-                                            <div class="text-[10px] text-slate-400">عامة لكافة مجموعات المقرر</div>
-                                        </div>
-                                        <span class="text-[10px] font-mono font-bold text-slate-400">01</span>
-                                    </button>
-                                    <button type="button" onclick="closeTrainerLmsCreateDropdown(); openAddDocModal();" class="w-full px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#0F2942] flex items-center justify-between transition cursor-pointer">
-                                        <div>
-                                            <div class="font-black text-slate-800">مذكرة دراسية نصية</div>
-                                            <div class="text-[10px] text-slate-400">عامة لكافة مجموعات المقرر</div>
-                                        </div>
-                                        <span class="text-[10px] font-mono font-bold text-slate-400">02</span>
-                                    </button>
-                                    <button type="button" onclick="closeTrainerLmsCreateDropdown(); openAddQuizModal();" class="w-full px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#0F2942] flex items-center justify-between transition cursor-pointer">
-                                        <div>
-                                            <div class="font-black text-slate-800">اختبار تفاعلي</div>
-                                            <div class="text-[10px] text-slate-400">للكل أو لمجموعة محددة</div>
-                                        </div>
-                                        <span class="text-[10px] font-mono font-bold text-slate-400">03</span>
-                                    </button>
-                                    <button type="button" onclick="closeTrainerLmsCreateDropdown(); openAddAssignmentModal();" class="w-full px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#0F2942] flex items-center justify-between transition cursor-pointer">
-                                        <div>
-                                            <div class="font-black text-slate-800">واجب وتكليف أسبوعي</div>
-                                            <div class="text-[10px] text-slate-400">للكل أو لمجموعة محددة</div>
-                                        </div>
-                                        <span class="text-[10px] font-mono font-bold text-slate-400">04</span>
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -3972,7 +3882,6 @@
                             <div>
                                 <div class="flex items-center gap-2">
                                     <h4 class="font-black text-base md:text-lg text-[#0F2942]" id="tlActiveWeekTitle">الأسبوع الأول</h4>
-                                    <span class="text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200 px-2.5 py-0.5 rounded-full">الوحدة النشطة</span>
                                 </div>
                                 <p class="text-xs text-slate-500 font-bold mt-0.5" id="tlActiveWeekTopic">موضوع الوحدة الأسبوعية</p>
                             </div>
@@ -4008,7 +3917,6 @@
                                                 <h5 class="font-black text-sm text-slate-900">المحاضرات والشروحات المرئية</h5>
                                                 <span id="tlVideosCountBadge" class="text-[10px] font-mono font-bold bg-slate-100 text-slate-800 border border-slate-300 px-2 py-0.5 rounded-full">0</span>
                                             </div>
-                                            <p class="text-[11px] text-slate-500 font-bold">المنهج العام لجميع مجموعات المقرر</p>
                                         </div>
                                     </div>
                                     <button type="button" id="tlAddVideoBtn" onclick="openAddVideoModal()" class="lms-action-btn bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/35 transition active:scale-95 border-0">
@@ -11253,12 +11161,7 @@
             const nextSyncMin = Math.max(0, Math.ceil((60 * 60 * 1000 - status.timeSinceLastSync) / (60 * 1000)));
             const lastTimeStr = status.lastSync ? new Date(status.lastSync).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : 'لم يتم بعد';
             statusText = `🟢 المزامنة نشطة (كل ساعة): آخر تحديث ${lastTimeStr} — التحديث القادم بعد قرابة ${nextSyncMin} دقيقة (تتوقف 4:30 م).`;
-            badgeHtml = `
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs" title="المزامنة التلقائية نشطة كل ساعة حتى 4:30 م">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>مزامنة كل ساعة (8:30 ص - 4:30 م)</span>
-                </span>
-            `;
+            badgeHtml = ``;
         } else {
             statusText = `⏸️ المزامنة التلقائية متوقفة حالياً (خارج أوقات العمل). تستأنف تلقائياً غداً الساعة 8:30 صباحاً.`;
             badgeHtml = `
@@ -21343,10 +21246,7 @@
                 <button type="button" onclick="setStudentLmsWeek(${wNum})" class="lms-week-card rounded-2xl p-2.5 sm:p-3 text-right flex flex-col justify-between gap-1.5 cursor-pointer transition-all duration-300 border-2 ${
                     isActive ? `${theme.activeBg} ${theme.activeBorder} ${theme.activeShadow} text-white` : `${theme.bg} ${theme.border} ${theme.hoverBorder}`
                 }">
-                    <div class="flex items-center justify-between w-full">
-                        <span class="text-[9px] md:text-[10px] font-mono font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md ${
-                            isActive ? theme.activeBadge : theme.badgeBg
-                        }">MODULE 0${wNum}</span>
+                    <div class="flex items-center justify-end w-full">
                         ${statusBadge}
                     </div>
                     <span class="font-black text-xs md:text-sm ${isActive ? 'text-white' : theme.titleColor}">${tabTitle}</span>
@@ -24643,12 +24543,7 @@
                 <button type="button" onclick="setTrainerLmsWeek(${wNum}, event)" class="lms-week-card rounded-2xl p-2.5 sm:p-3 md:p-3.5 text-right flex flex-col justify-between gap-2 cursor-pointer transition-all duration-300 border-2 ${
                     isActive ? `${theme.activeBg} ${theme.activeBorder} ${theme.activeShadow} text-white` : `${theme.bg} ${theme.border} ${theme.hoverBorder}`
                 }">
-                    <div class="flex items-center justify-between w-full">
-                        <span class="text-[9px] md:text-[10px] font-mono font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md ${
-                            isActive ? theme.activeBadge : theme.badgeBg
-                        }">
-                            MODULE 0${wNum}
-                        </span>
+                    <div class="flex items-center justify-end w-full">
                         <span class="w-2.5 h-2.5 rounded-full ${
                             isActive ? 'bg-amber-300 ring-2 ring-white/60' : (totalCount > 0 ? theme.dot : 'bg-slate-300')
                         }"></span>
@@ -26331,104 +26226,25 @@
                         mergedWeeks.push(lW);
                         needsCloudSync = true;
                     } else {
-                        // Deep merge per component: Quizzes, Assignments, Videos, Docs
+                        // المحتوى المحلي هو المرجع المعتمد عند التعديل أو الحذف، مع تصفية أي عناصر محذوفة
                         const targetW = { ...cW, ...lW };
 
-                        // 1. Quizzes (حظر إعادة العناصر المحذوفة)
+                        // 1. Quizzes
                         const lQ = Array.isArray(lW.quizzes) ? lW.quizzes : [];
-                        const cQ = Array.isArray(cW.quizzes) ? cW.quizzes : [];
-                        const qMap = new Map();
-                        cQ.forEach(q => {
-                            if (q && (q.id || q.title)) {
-                                const k = String(q.id || q.title);
-                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title))) {
-                                    qMap.set(k, q);
-                                }
-                            }
-                        });
-                        lQ.forEach(q => {
-                            if (q && (q.id || q.title)) {
-                                const k = String(q.id || q.title);
-                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title))) {
-                                    qMap.set(k, q);
-                                }
-                            }
-                        });
-                        targetW.quizzes = Array.from(qMap.values());
-                        if (targetW.quizzes.length !== cQ.length) needsCloudSync = true;
-                        if (targetW.quizzes.length !== lQ.length) localChanged = true;
+                        targetW.quizzes = lQ.filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
 
-                        // 2. Assignments (حظر إعادة التكليفات المحذوفة)
+                        // 2. Assignments
                         const lA = Array.isArray(lW.assignments) ? lW.assignments : [];
-                        const cA = Array.isArray(cW.assignments) ? cW.assignments : [];
-                        const aMap = new Map();
-                        cA.forEach(a => {
-                            if (a && (a.id || a.title)) {
-                                const k = String(a.id || a.title);
-                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title))) {
-                                    aMap.set(k, a);
-                                }
-                            }
-                        });
-                        lA.forEach(a => {
-                            if (a && (a.id || a.title)) {
-                                const k = String(a.id || a.title);
-                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title))) {
-                                    aMap.set(k, a);
-                                }
-                            }
-                        });
-                        targetW.assignments = Array.from(aMap.values());
-                        if (targetW.assignments.length !== cA.length) needsCloudSync = true;
-                        if (targetW.assignments.length !== lA.length) localChanged = true;
+                        targetW.assignments = lA.filter(a => a && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
 
-                        // 3. Videos (حظر إعادة المحاضرات المرئية المحذوفة)
+                        // 3. Videos
                         const lV = Array.isArray(lW.videos) ? lW.videos : [];
-                        const cV = Array.isArray(cW.videos) ? cW.videos : [];
-                        const vMap = new Map();
-                        cV.forEach(v => {
-                            if (v && (v.id || v.title || v.url)) {
-                                const k = String(v.id || v.title || v.url);
-                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title))) {
-                                    vMap.set(k, v);
-                                }
-                            }
-                        });
-                        lV.forEach(v => {
-                            if (v && (v.id || v.title || v.url)) {
-                                const k = String(v.id || v.title || v.url);
-                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title))) {
-                                    vMap.set(k, v);
-                                }
-                            }
-                        });
-                        targetW.videos = Array.from(vMap.values());
-                        if (targetW.videos.length !== cV.length) needsCloudSync = true;
-                        if (targetW.videos.length !== lV.length) localChanged = true;
+                        targetW.videos = lV.filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)) && !deletedLmsItemIds.has(String(v.url)));
 
-                        // 4. Docs (حظر إعادة المذكرات المحذوفة)
-                        const lD = Array.isArray(lW.docs) ? lW.docs : [];
-                        const cD = Array.isArray(cW.docs) ? cW.docs : [];
-                        const dMap = new Map();
-                        cD.forEach(d => {
-                            if (d && (d.id || d.title)) {
-                                const k = String(d.id || d.title);
-                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title))) {
-                                    dMap.set(k, d);
-                                }
-                            }
-                        });
-                        lD.forEach(d => {
-                            if (d && (d.id || d.title)) {
-                                const k = String(d.id || d.title);
-                                if (!deletedLmsItemIds.has(k) && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title))) {
-                                    dMap.set(k, d);
-                                }
-                            }
-                        });
-                        targetW.docs = Array.from(dMap.values());
-                        if (targetW.docs.length !== cD.length) needsCloudSync = true;
-                        if (targetW.docs.length !== lD.length) localChanged = true;
+                        // 4. Docs
+                        const lD = (Array.isArray(lW.docs) && lW.docs.length) ? lW.docs : (Array.isArray(lW.documents) ? lW.documents : []);
+                        targetW.docs = lD.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)) && !deletedLmsItemIds.has(String(d.url)));
+                        targetW.documents = targetW.docs;
 
                         mergedWeeks.push(targetW);
                     }
@@ -28074,40 +27890,45 @@ END $$;`;
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
-        if (activeWeek && activeWeek.videos && activeWeek.videos[idx]) {
+        if (activeWeek && Array.isArray(activeWeek.videos) && activeWeek.videos[idx]) {
             const v = activeWeek.videos[idx];
             const vId = v.id;
             const vTitle = v.title;
             const vUrl = v.url;
-            registerLmsItemDeleted(vId);
-            registerLmsItemDeleted(vTitle);
-            registerLmsItemDeleted(vUrl);
+            if (vId) registerLmsItemDeleted(vId);
+            if (vTitle) registerLmsItemDeleted(vTitle);
+            if (vUrl) registerLmsItemDeleted(vUrl);
+
+            // الحذف المباشر الفوري من الأسبوع النشط
+            activeWeek.videos.splice(idx, 1);
 
             // حذف من كافة المفاتيح البديلة للمقرر
             const aliases = getActiveTrainerCourseAliases(courseKey);
             const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
             aliases.forEach(k => {
                 const c = lmsCourses[k];
-                if (c && c.weeks) {
-                    const w = c.weeks.find(x => (x.week || x.weekNum) === wNum);
+                if (c && Array.isArray(c.weeks)) {
+                    const w = c.weeks.find(x => String(x.week || x.weekNum) === String(wNum));
                     if (w && Array.isArray(w.videos)) {
                         w.videos = w.videos.filter(item => {
                             if (!item) return false;
                             if (vId && item.id === vId) return false;
                             if (vTitle && item.title === vTitle) return false;
+                            if (vUrl && item.url === vUrl) return false;
                             return true;
                         });
                     }
                 }
             });
 
-            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected) {
-                if (vId) supabaseClient.from('lectures').delete().eq('id', vId).catch(() => {});
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && vId) {
+                supabaseClient.from('lectures').delete().eq('id', vId).catch(() => {});
             }
 
+            persistLmsCoursesLocalOnly();
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف المحاضرة نهائياً من كافة السجلات ولن تعود مجدداً ✓', 'success');
+            showToast('تم حذف المحاضرة نهائياً ولن تعود مجدداً ✓', 'success');
         }
     }
 
@@ -28228,23 +28049,28 @@ END $$;`;
             const dId = targetDoc.id;
             const dTitle = targetDoc.title;
             const dUrl = targetDoc.url;
-            registerLmsItemDeleted(dId);
-            registerLmsItemDeleted(dTitle);
-            registerLmsItemDeleted(dUrl);
+            if (dId) registerLmsItemDeleted(dId);
+            if (dTitle) registerLmsItemDeleted(dTitle);
+            if (dUrl) registerLmsItemDeleted(dUrl);
+
+            // الحذف المباشر الفوري من الأسبوع النشط
+            if (Array.isArray(activeWeek.docs) && activeWeek.docs[idx]) activeWeek.docs.splice(idx, 1);
+            if (Array.isArray(activeWeek.documents) && activeWeek.documents[idx]) activeWeek.documents.splice(idx, 1);
 
             // حذف من كافة المفاتيح البديلة للمقرر
             const aliases = getActiveTrainerCourseAliases(courseKey);
             const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
             aliases.forEach(k => {
                 const c = lmsCourses[k];
-                if (c && c.weeks) {
-                    const w = c.weeks.find(x => (x.week || x.weekNum) === wNum);
+                if (c && Array.isArray(c.weeks)) {
+                    const w = c.weeks.find(x => String(x.week || x.weekNum) === String(wNum));
                     if (w) {
                         if (Array.isArray(w.docs)) {
                             w.docs = w.docs.filter(item => {
                                 if (!item) return false;
                                 if (dId && item.id === dId) return false;
                                 if (dTitle && item.title === dTitle) return false;
+                                if (dUrl && item.url === dUrl) return false;
                                 return true;
                             });
                         }
@@ -28253,6 +28079,7 @@ END $$;`;
                                 if (!item) return false;
                                 if (dId && item.id === dId) return false;
                                 if (dTitle && item.title === dTitle) return false;
+                                if (dUrl && item.url === dUrl) return false;
                                 return true;
                             });
                         }
@@ -28265,9 +28092,10 @@ END $$;`;
             }
         }
 
+        persistLmsCoursesLocalOnly();
         persistLmsCourses();
         renderTrainerLms();
-        showToast('تم حذف المذكرة نهائياً من كافة السجلات ولن تعود مجدداً ✓', 'success');
+        showToast('تم حذف المذكرة نهائياً ولن تعود مجدداً ✓', 'success');
     }
 
     function openReadDocModal(docId) {
@@ -28813,20 +28641,23 @@ END $$;`;
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
-        if (activeWeek && activeWeek.quizzes && activeWeek.quizzes[idx]) {
+        if (activeWeek && Array.isArray(activeWeek.quizzes) && activeWeek.quizzes[idx]) {
             const q = activeWeek.quizzes[idx];
             const qId = q.id;
             const qTitle = q.title;
-            registerLmsItemDeleted(qId);
-            registerLmsItemDeleted(qTitle);
+            if (qId) registerLmsItemDeleted(qId);
+            if (qTitle) registerLmsItemDeleted(qTitle);
+
+            // الحذف المباشر الفوري من الأسبوع النشط
+            activeWeek.quizzes.splice(idx, 1);
 
             // حذف من كافة المفاتيح البديلة للمقرر
             const aliases = getActiveTrainerCourseAliases(courseKey);
             const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
             aliases.forEach(k => {
                 const c = lmsCourses[k];
-                if (c && c.weeks) {
-                    const w = c.weeks.find(x => (x.week || x.weekNum) === wNum);
+                if (c && Array.isArray(c.weeks)) {
+                    const w = c.weeks.find(x => String(x.week || x.weekNum) === String(wNum));
                     if (w && Array.isArray(w.quizzes)) {
                         w.quizzes = w.quizzes.filter(item => {
                             if (!item) return false;
@@ -28841,9 +28672,10 @@ END $$;`;
             if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && qId) {
                 supabaseClient.from('quizzes').delete().eq('id', qId).catch(() => {});
             }
+            persistLmsCoursesLocalOnly();
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف الاختبار نهائياً من كافة السجلات ولن يعود مجدداً ✓', 'success');
+            showToast('تم حذف الاختبار نهائياً ولن يعود مجدداً ✓', 'success');
         }
     }
 
@@ -29173,20 +29005,23 @@ END $$;`;
         const courseKey = getActiveTrainerCourseKey();
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
-        if (activeWeek && activeWeek.assignments && activeWeek.assignments[idx]) {
+        if (activeWeek && Array.isArray(activeWeek.assignments) && activeWeek.assignments[idx]) {
             const a = activeWeek.assignments[idx];
             const aId = a.id;
             const aTitle = a.title;
-            registerLmsItemDeleted(aId);
-            registerLmsItemDeleted(aTitle);
+            if (aId) registerLmsItemDeleted(aId);
+            if (aTitle) registerLmsItemDeleted(aTitle);
+
+            // الحذف المباشر الفوري من الأسبوع النشط
+            activeWeek.assignments.splice(idx, 1);
 
             // حذف من كافة المفاتيح البديلة للمقرر
             const aliases = getActiveTrainerCourseAliases(courseKey);
             const wNum = activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1;
             aliases.forEach(k => {
                 const c = lmsCourses[k];
-                if (c && c.weeks) {
-                    const w = c.weeks.find(x => (x.week || x.weekNum) === wNum);
+                if (c && Array.isArray(c.weeks)) {
+                    const w = c.weeks.find(x => String(x.week || x.weekNum) === String(wNum));
                     if (w && Array.isArray(w.assignments)) {
                         w.assignments = w.assignments.filter(item => {
                             if (!item) return false;
@@ -29201,9 +29036,10 @@ END $$;`;
             if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && aId) {
                 supabaseClient.from('assignments').delete().eq('id', aId).catch(() => {});
             }
+            persistLmsCoursesLocalOnly();
             persistLmsCourses();
             renderTrainerLms();
-            showToast('تم حذف الواجب نهائياً من كافة السجلات ولن يعود مجدداً ✓', 'success');
+            showToast('تم حذف الواجب نهائياً ولن يعود مجدداً ✓', 'success');
         }
     }
 
@@ -29228,42 +29064,51 @@ END $$;`;
             return;
         }
 
+        if (activeWeek) {
+            (activeWeek.videos || []).forEach(v => {
+                if (v?.id) registerLmsItemDeleted(v.id);
+                if (v?.title) registerLmsItemDeleted(v.title);
+                if (v?.url) registerLmsItemDeleted(v.url);
+                if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && v?.id) {
+                    supabaseClient.from('lectures').delete().eq('id', v.id).catch(() => {});
+                }
+            });
+            const dList = (activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []);
+            dList.forEach(d => {
+                if (d?.id) registerLmsItemDeleted(d.id);
+                if (d?.title) registerLmsItemDeleted(d.title);
+                if (d?.url) registerLmsItemDeleted(d.url);
+                if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && d?.id) {
+                    supabaseClient.from('lectures').delete().eq('id', d.id).catch(() => {});
+                }
+            });
+            (activeWeek.quizzes || []).forEach(q => {
+                if (q?.id) registerLmsItemDeleted(q.id);
+                if (q?.title) registerLmsItemDeleted(q.title);
+                if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && q?.id) {
+                    supabaseClient.from('quizzes').delete().eq('id', q.id).catch(() => {});
+                }
+            });
+            (activeWeek.assignments || []).forEach(a => {
+                if (a?.id) registerLmsItemDeleted(a.id);
+                if (a?.title) registerLmsItemDeleted(a.title);
+                if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && a?.id) {
+                    supabaseClient.from('assignments').delete().eq('id', a.id).catch(() => {});
+                }
+            });
+            activeWeek.videos = [];
+            activeWeek.docs = [];
+            activeWeek.documents = [];
+            activeWeek.quizzes = [];
+            activeWeek.assignments = [];
+        }
+
         const aliases = getActiveTrainerCourseAliases(courseKey);
         aliases.forEach(k => {
             const c = lmsCourses[k];
-            if (c && c.weeks) {
-                const w = c.weeks.find(x => (x.week || x.weekNum) === wNum);
+            if (c && Array.isArray(c.weeks)) {
+                const w = c.weeks.find(x => String(x.week || x.weekNum) === String(wNum));
                 if (w) {
-                    (w.videos || []).forEach(v => {
-                        if (v?.id) registerLmsItemDeleted(v.id);
-                        if (v?.title) registerLmsItemDeleted(v.title);
-                        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && v?.id) {
-                            supabaseClient.from('lectures').delete().eq('id', v.id).catch(() => {});
-                        }
-                    });
-                    const dList = (w.docs && w.docs.length) ? w.docs : (w.documents || []);
-                    dList.forEach(d => {
-                        if (d?.id) registerLmsItemDeleted(d.id);
-                        if (d?.title) registerLmsItemDeleted(d.title);
-                        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && d?.id) {
-                            supabaseClient.from('lectures').delete().eq('id', d.id).catch(() => {});
-                        }
-                    });
-                    (w.quizzes || []).forEach(q => {
-                        if (q?.id) registerLmsItemDeleted(q.id);
-                        if (q?.title) registerLmsItemDeleted(q.title);
-                        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && q?.id) {
-                            supabaseClient.from('quizzes').delete().eq('id', q.id).catch(() => {});
-                        }
-                    });
-                    (w.assignments || []).forEach(a => {
-                        if (a?.id) registerLmsItemDeleted(a.id);
-                        if (a?.title) registerLmsItemDeleted(a.title);
-                        if (typeof supabaseClient !== 'undefined' && supabaseClient && isSupabaseConnected && a?.id) {
-                            supabaseClient.from('assignments').delete().eq('id', a.id).catch(() => {});
-                        }
-                    });
-
                     w.videos = [];
                     w.docs = [];
                     w.documents = [];
@@ -29273,6 +29118,7 @@ END $$;`;
             }
         });
 
+        persistLmsCoursesLocalOnly();
         persistLmsCourses();
         renderTrainerLms();
         showToast(`تم مسح وتفريغ كامل محتويات الأسبوع (${wNum}) نهائياً بنجاح ✓`, 'success');
@@ -33250,48 +33096,9 @@ function buildDemoExecutiveReport(params) {
                 }
             });
 
-            // التأكد من وجود واجب أسبوعي واحد على الأقل
-            if (w.assignments.length === 0) {
-                w.assignments.push({
-                    id: `a-w${wNum}-${(courseData.trainer || 'c').replace(/\s+/g, '')}`,
-                    title: `الواجب الأسبوعي التطبيقي - الأسبوع ${wNum}`,
-                    dueDate: 'الخميس 11:59 م',
-                    points: 10,
-                    targetGroup: 'ALL',
-                    assignmentCategory: 'weekly',
-                    gradingMode: 'system_auto',
-                    instructions: `تكليف وتطبيق عملي حول ${w.topic || 'موضوع الأسبوع'}.`,
-                    questions: [
-                        {
-                            id: `aq-w${wNum}-1`,
-                            text: `سؤال الواجب 1: ما هو الإجراء المعتمد لتنفيذ تطبيقات ${w.topic || 'الأسبوع'}؟`,
-                            options: [
-                                'تطبيق معايير السلامة والجودة والخطوات المعتمدة',
-                                'البدء دون مراجعة إرشادات المدرب',
-                                'تجاوز خطوات الفحص والتحقق الأولي',
-                                'العمل دون ارتداء معدات الوقاية الشخصية'
-                            ],
-                            correctIndex: 0
-                        },
-                        {
-                            id: `aq-w${wNum}-2`,
-                            text: `سؤال الواجب 2: كيف يتم التحقق من صحة النتائج الفنية للتكليف قبل الاعتماد؟`,
-                            options: [
-                                'التسليم المباشر دون فحص أو مراجعة',
-                                'فحص القياسات والمطابقة للمواصفات الفنية المطلوبة',
-                                'تجاهل الملاحظات الفنية المسجلة',
-                                'الاعتماد على التقدير التقريبي غير الدقيق'
-                            ],
-                            correctIndex: 1
-                        }
-                    ]
-                });
-                modified = true;
-            }
-
-            // إزالة أي اختبارات اختيارية قديمة وضمان اختبار أسبوعي واحد
+            // تنظيم الاختبارات والواجبات الموجودة فقط دون إجبار أو إعادة توليد أي محتوى محذوف
             const prevQzLen = w.quizzes.length;
-            w.quizzes = w.quizzes.filter(q => q.quizCategory !== 'optional' && !q.title?.includes('اختياري'));
+            w.quizzes = w.quizzes.filter(q => q && q.quizCategory !== 'optional' && !q.title?.includes('اختياري'));
             if (w.quizzes.length !== prevQzLen) modified = true;
 
             w.quizzes.forEach((q) => {
@@ -33302,25 +33109,6 @@ function buildDemoExecutiveReport(params) {
                 }
                 q.gradingMode = 'system_auto';
             });
-
-            if (w.quizzes.length === 0) {
-                w.quizzes.push({
-                    id: `q-w${wNum}-${(courseData.trainer || 'c').replace(/\s+/g, '')}`,
-                    title: `الاختبار الأسبوعي - الأسبوع ${wNum}`,
-                    quizDate: 'الخميس 11:59 م',
-                    timeMinutes: 10,
-                    totalPoints: 10,
-                    maxAttempts: 2,
-                    targetGroup: 'ALL',
-                    quizCategory: 'weekend',
-                    gradingMode: 'system_auto',
-                    questions: [
-                        { id: `qw${wNum}_1`, text: `سؤال الاختبار 1: ما هو المفهوم الأساسي في ${w.topic || 'وحدة الأسبوع'}؟`, options: ['التطبيق القياسي الصحيح', 'الخيار الخاطئ 1', 'الخيار الخاطئ 2', 'الخيار الخاطئ 3'], correctIndex: 0, points: 5 },
-                        { id: `qw${wNum}_2`, text: `سؤال الاختبار 2: كيف يتم التعامل مع متطلبات السلامة في هذا المجال؟`, options: ['اتباع التعليمات الوقائية بدقة', 'إهمال المعايير', 'العمل دون تدريب', 'تجاهل المشرف'], correctIndex: 0, points: 5 }
-                    ]
-                });
-                modified = true;
-            }
         });
 
         if (modified) {
