@@ -1060,7 +1060,17 @@
             
             <!-- Left: Mobile Menu Toggle & Brand -->
             <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 border border-slate-200 transition">
+                <button type="button" id="topSidebarToggleBtn" onclick="toggleSidebar()" class="p-2 md:px-3 md:py-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center gap-1.5 shadow-2xs" title="فتح / إغلاق القائمة">
+
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+
+                    </svg>
+
+                    <span class="text-xs font-black hidden sm:inline" id="topSidebarToggleLabel">القائمة</span>
+
+                </button>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
@@ -1167,242 +1177,388 @@
     <!-- ==================== BODY WITH SIDEBAR LAYOUT ==================== -->
     <div class="flex-1 flex overflow-hidden">
         
-        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 lg:hidden hidden"></div>
+        <div id="sidebarOverlay" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden transition-opacity duration-300"></div>
 
-        <!-- ==================== SIDEBAR MENU (منيو جانبي) ==================== -->
-        <aside id="sidebarMenu" class="w-72 bg-white border-l border-slate-200 shadow-sm flex flex-col justify-between fixed lg:static top-0 bottom-0 right-0 z-50 max-lg:hidden lg:flex transition-transform duration-300 ease-in-out">
+
+
+        <!-- Edge Hover Trigger & Protruding Tab (شريط تحسس حافة الشاشة لفتح المنيو بالماوس أو الضغط) -->
+
+        <div id="sidebarEdgeTriggerZone" class="fixed right-0 top-0 bottom-0 w-8 z-40 flex items-center justify-end pointer-events-auto group" style="touch-action: manipulation;">
+
+            <button type="button" id="sidebarEdgeTab" onclick="toggleSidebar(true)" 
+
+                class="bg-[#0F2942] text-amber-300 hover:bg-[#1E3A8A] dark:bg-amber-400 dark:text-slate-950 font-black text-xs py-3.5 px-2 rounded-l-2xl shadow-2xl border-y border-l border-amber-400/60 flex flex-col items-center gap-1.5 cursor-pointer select-none transition-all duration-300 transform translate-x-3 group-hover:translate-x-0 hover:scale-105 active:scale-95" 
+
+                title="فتح القائمة (اضغط هنا أو مرر الماوس)">
+
+                <span class="text-xs transition-transform duration-200 group-hover:-translate-x-1">⬅️</span>
+
+                <span class="text-[11px] font-black tracking-widest" style="writing-mode: vertical-rl; text-orientation: mixed;">القائمة</span>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- ==================== SIDEBAR MENU (منيو جانبي قابل للطي بالكامل) ==================== -->
+
+        <aside id="sidebarMenu" class="w-72 bg-white dark:bg-[#0F172A] border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col justify-between fixed top-0 bottom-0 right-0 z-50 transition-transform duration-300 ease-in-out translate-x-full">
+
             
-            <div class="p-4 space-y-5 overflow-y-auto">
+
+            <div class="p-4 space-y-4 overflow-y-auto">
+
                 
-                <div class="flex items-center justify-between lg:hidden border-b pb-3">
-                    <span class="font-extrabold text-sm text-slate-900">القائمة الرئيسية</span>
-                    <button onclick="toggleSidebar()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+
+                <!-- Sidebar Header with Close Arrow -->
+
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+
+                    <span class="font-black text-sm text-slate-900 dark:text-white">القائمة</span>
+
+                    <button type="button" onclick="toggleSidebar(false)" class="p-1 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition text-xs font-bold flex items-center gap-1 cursor-pointer" title="إخفاء القائمة">
+
+                        <span>إغلاق</span>
+
+                        <span class="text-sm">➡️</span>
+
+                    </button>
+
                 </div>
+
+
 
                 <!-- Current Role Box -->
-                <div onclick="openMyProfileModal()" title="اضغط لتعديل ملفك الشخصي والصورة الشخصية" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 p-3 rounded-2xl flex items-center gap-3 cursor-pointer transition">
+
+                <div onclick="openMyProfileModal()" title="اضغط لتعديل ملفك الشخصي والصورة الشخصية" class="bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl flex items-center gap-3 cursor-pointer transition">
+
                     <div class="w-10 h-10 rounded-xl gold-gradient-bg flex items-center justify-center text-lg text-slate-950 font-black shadow-xs overflow-hidden p-0.5" id="sidebarAvatar">
+
                         <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+
                             <path d="M6 36C6 27 12 25 18 25C24 25 30 27 30 36Z" fill="#1e293b"/>
+
                             <path d="M13 36L17 26.5L19 26.5L23 36L21 36L18 28.5L15 36Z" fill="#f59e0b"/>
+
                             <polygon points="17,27.5 19,27.5 18.5,36 17.5,36" fill="#ffffff"/>
+
                             <rect x="16" y="21" width="4" height="5" fill="#f6c8a4"/>
+
                             <ellipse cx="18" cy="18" rx="5.5" ry="6.5" fill="#fcd8b8"/>
+
                             <circle cx="16" cy="16.5" r="0.75" fill="#1e293b"/>
+
                             <circle cx="20" cy="16.5" r="0.75" fill="#1e293b"/>
+
                             <path d="M15.5 15.2Q16.5 14.7 17.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
+
                             <path d="M18.5 15.2Q19.5 14.7 20.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
+
                             <path d="M16 20Q18 21.5 20 20Q19 22.5 18 22.5Q17 22.5 16 20Z" fill="#1e293b"/>
+
                             <path d="M10 14C8 20 9 27 11 32C12 30 13 26 14 23C13 19 12 16 12.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
+
                             <path d="M26 14C28 20 27 27 25 32C24 30 23 26 22 23C23 19 24 16 23.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
+
                             <path d="M12.5 13.5C12.5 8 15 6 18 6C21 6 23.5 8 23.5 13.5C23.5 16 22 19 21.5 20C21 18 21 15 21 14C21 11.5 20 10.5 18 10.5C16 10.5 15 11.5 15 14C15 15 15 18 14.5 20C14 19 12.5 16 12.5 13.5Z" fill="#ffffff"/>
+
                             <path d="M16 6.8Q18 5.8 20 6.8" stroke="#e2e8f0" stroke-width="0.8" fill="none"/>
+
                             <ellipse cx="18" cy="9.5" rx="6.5" ry="2" stroke="#0f172a" stroke-width="1.6" fill="none"/>
+
                             <ellipse cx="18" cy="10.5" rx="6.2" ry="1.8" stroke="#334155" stroke-width="1.1" fill="none"/>
+
                         </svg>
+
                     </div>
+
                     <div>
-                        <div class="text-xs font-extrabold text-slate-900" id="sidebarUserName">المدير العام</div>
-                        <div class="text-[11px] font-bold text-amber-700" id="sidebarUserRole">المدير العام • فرع عنك</div>
+
+                        <div class="text-xs font-extrabold text-slate-900 dark:text-white" id="sidebarUserName">المدير العام</div>
+
+                        <div class="text-[11px] font-bold text-amber-700 dark:text-amber-400" id="sidebarUserRole">المدير العام</div>
+
                     </div>
+
                 </div>
 
-                <!-- Navigation Links List -->
-                <nav class="space-y-1.5">
-                    <div class="text-[10px] font-bold text-slate-400 px-3 py-1">الأقسام والوظائف:</div>
+
+
+                <!-- Navigation Links List (بدون أيقونات وبدون أقواس وكلمات مختصرة) -->
+
+                <nav class="space-y-1">
+
+                    <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 px-3 py-1">القائمة:</div>
+
                     
-                    <!-- Link 1: Attendance Dashboard (Admin/SuperAdmin) -->
-                    <button onclick="switchTab('attendance')" id="btn-attendance" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-active">
-                        <span class="text-base">📋</span>
-                        <span class="text-xs">شاشة الحضور والمتابعة</span>
+
+                    <!-- Link 1: Attendance Dashboard -->
+
+                    <button onclick="switchTab('attendance')" id="btn-attendance" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-active cursor-pointer">
+
+                        <span class="text-xs font-bold">التحضير</span>
+
                     </button>
 
-                    <!-- 1. لوحة تحكم المدرب -->
-                    <button onclick="switchTab('trainerDashboard')" id="btn-trainerDashboard" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive">
-                        <span class="text-base">👨‍🏫</span>
-                        <span class="text-xs">لوحة تحكم المدرب</span>
+
+
+                    <!-- Link 2: Trainer Dashboard -->
+
+                    <button onclick="switchTab('trainerDashboard')" id="btn-trainerDashboard" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">لوحة المدرب</span>
+
                     </button>
 
-                    <!-- 2. نظام التعليم الأكاديمي (LMS) -->
-                    <button onclick="switchTab('trainerLms')" id="btn-trainerLms" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive border border-emerald-200/60 bg-emerald-50/40 text-emerald-950 font-bold">
-                        <span class="text-base">📚</span>
-                        <span class="text-xs">نظام التعليم الأكاديمي (LMS)</span>
+
+
+                    <!-- Link 3: LMS Academic System -->
+
+                    <button onclick="switchTab('trainerLms')" id="btn-trainerLms" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">المحتوى الأكاديمي</span>
+
                     </button>
 
-                    <!-- 2.5 نظام الدرجات والتسليمات الأسبوعي الموحد (Grades & Submissions System) -->
-                    <button onclick="openGradesSystemWeeksHub(); switchTab('gradesSystem');" id="btn-gradesSystem" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive border border-amber-200/70 bg-amber-50/50 text-slate-900 font-bold">
-                        <span class="text-base">🎓</span>
-                        <span class="text-xs">نظام الدرجات والتسليمات</span>
+
+
+                    <!-- Link 4: Grades & Submissions -->
+
+                    <button onclick="openGradesSystemWeeksHub(); switchTab('gradesSystem');" id="btn-gradesSystem" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">الدرجات</span>
+
                     </button>
 
-                    <!-- تقويم التسليمات والمهام الأكاديمية (المدرب والمشرفين) -->
-                    <button onclick="switchTab('submissionsCalendar')" id="btn-submissionsCalendar" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive border border-indigo-200/60 bg-indigo-50/40 text-indigo-950 font-bold">
-                        <span class="text-base">📅</span>
-                        <span class="text-xs">تقويم التسليمات والمهام الأكاديمية</span>
+
+
+                    <!-- Link 5: Submissions Calendar -->
+
+                    <button onclick="switchTab('submissionsCalendar')" id="btn-submissionsCalendar" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">تقويم التسليمات</span>
+
                     </button>
 
-                    <!-- 3. سجل بلاغات التأخير والملاحظات -->
-                    <button onclick="switchTab('trainerReports')" id="btn-trainerReports" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive">
-                        <span class="text-base">📝</span>
-                        <span class="text-xs">سجل بلاغات التأخير والملاحظات</span>
+
+
+                    <!-- Link 6: Trainer Reports / Delays -->
+
+                    <button onclick="switchTab('trainerReports')" id="btn-trainerReports" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">بلاغات التأخير</span>
+
                     </button>
 
-                    <!-- خيار المدرب: القاعة الافتراضية والدراسة عن بعد (Zoom / Meet) -->
-                    <button onclick="switchTab('virtualClass')" id="btn-virtualClass" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">📹</span>
-                            <span class="text-xs">القاعة الافتراضية (Zoom / Meet)</span>
-                        </div>
-                        <span class="text-[9px] bg-blue-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-2xs">عن بعد</span>
+
+
+                    <!-- Link 7: Virtual Class -->
+
+                    <button onclick="switchTab('virtualClass')" id="btn-virtualClass" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">القاعة الافتراضية</span>
+
                     </button>
 
-                    <!-- Admin Only: Settings & Google Sheets -->
-                    <button onclick="switchTab('settings')" id="btn-settings" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive">
-                        <span class="text-base">⚙️</span>
-                        <span class="text-xs">مزامنة Google Sheets والملفات</span>
+
+
+                    <!-- Link 8: Settings & Sync -->
+
+                    <button onclick="switchTab('settings')" id="btn-settings" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">الإعدادات والمزامنة</span>
+
                     </button>
 
-                    <!-- Admin Only: User Management (Super Admin ONLY) -->
-                    <button onclick="switchTab('users')" id="btn-users" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-amber-200/60 bg-amber-50/40 text-amber-900">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">👑</span>
-                            <span class="text-xs">إدارة الحسابات والصلاحيات</span>
-                        </div>
-                        <span id="navUsersPendingBadge" class="hidden text-[10px] bg-rose-500 text-white font-black px-1.5 py-0.5 rounded-full shadow-xs animate-pulse">0</span>
+
+
+                    <!-- Link 9: User Management -->
+
+                    <button onclick="switchTab('users')" id="btn-users" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center justify-between nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">إدارة الحسابات</span>
+
+                        <span id="navUsersPendingBadge" class="hidden text-[10px] bg-rose-500 text-white font-black px-1.5 py-0.5 rounded-full shadow-xs">0</span>
+
                     </button>
 
-                    <!-- Admin Only: Timesheet / Salary Absence -->
-                    <button onclick="switchTab('timesheet')" id="btn-timesheet" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-green-200/60 bg-green-50/40" title="الرواتب والتايم شيت">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <span class="text-base">💰</span>
-                            <span class="text-xs font-bold text-green-900 truncate">الرواتب والتايم شيت</span>
-                        </div>
-                        <span class="text-[9px] text-amber-800 bg-amber-100 border border-amber-300 font-black px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap shadow-2xs">
-                           
-                        </span>
+
+
+                    <!-- Link 10: Timesheet / Salaries -->
+
+                    <button onclick="switchTab('timesheet')" id="btn-timesheet" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer" title="الرواتب">
+
+                        <span class="text-xs font-bold">الرواتب</span>
+
                     </button>
 
-                    <!-- Admin & Superadmin: Reports Center (مركز إصدار التقارير الإدارية والتحليلية) -->
-                    <button onclick="switchTab('adminReports')" id="btn-adminReports" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-blue-300/80 bg-blue-50/60 text-slate-900 font-bold">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">📊</span>
-                            <span class="text-xs font-black">مركز إصدار التقارير الإدارية</span>
-                        </div>
-                        <span class="text-[9px] bg-[#0F2942] text-amber-300 font-black px-2 py-0.5 rounded-full shadow-2xs">معتمد ومخصص</span>
+
+
+                    <!-- Link 11: Admin Reports -->
+
+                    <button onclick="switchTab('adminReports')" id="btn-adminReports" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">التقارير</span>
+
                     </button>
 
-                    <!-- Admin & Superadmin: Course Completion Certificates Center (إدارة واعتماد نشر شهادات إتمام المقررات) -->
-                    <button onclick="switchTab('adminCertificates')" id="btn-adminCertificates" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-amber-300/80 bg-amber-50/60 text-slate-900 font-bold">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">🎓</span>
-                            <span class="text-xs font-black">اعتماد ونشر شهادات إتمام المقررات</span>
-                        </div>
-                        <span class="text-[9px] bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-full shadow-2xs">صلاحية الإدارة</span>
+
+
+                    <!-- Link 12: Admin Certificates -->
+
+                    <button onclick="switchTab('adminCertificates')" id="btn-adminCertificates" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">الشهادات</span>
+
                     </button>
 
-                    <!-- Admin Only: Institution Files / ملفات المؤسسة والتصدير المعتمد (للإدارة والسوبر أدمن فقط) -->
-                    <button onclick="switchTab('institutionFiles')" id="btn-institutionFiles" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-emerald-300/80 bg-emerald-50/60 text-slate-900 font-bold">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">🏛️</span>
-                            <span class="text-xs font-black">ملفات المؤسسة</span>
-                        </div>
-                        <span class="text-[9px] bg-emerald-600 text-white font-black px-2 py-0.5 rounded-full shadow-2xs">صلاحية الإدارة</span>
+
+
+                    <!-- Link 13: Institution Files -->
+
+                    <button onclick="switchTab('institutionFiles')" id="btn-institutionFiles" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">ملفات المؤسسة</span>
+
                     </button>
 
-                    <!-- Student Only: 5 Unified Core Tabs + Virtual Class -->
-                    <button onclick="switchTab('studentDashboard')" id="btn-studentDashboard" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive">
-                        <span class="text-base">🏠</span>
-                        <span class="text-xs font-bold">الرئيسية (لوحة التحكم)</span>
+
+
+                    <!-- Link 14: Dedicated Attendance Sheet -->
+
+                    <button onclick="switchTab('attendanceSheet')" id="btn-attendanceSheet" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">كشف الحضور</span>
+
                     </button>
 
-                    <!-- Student Courses: مقرراتك التدريبية -->
-                    <button onclick="switchTab('studentCourses')" id="btn-studentCourses" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-purple-200/70 bg-purple-50/50 text-purple-950 font-bold">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">📚</span>
-                            <span class="text-xs font-bold">مقرراتك التدريبية</span>
-                        </div>
-                        <span class="text-[9px] bg-purple-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-2xs">المقررات</span>
+
+
+                    <!-- Link 15: Master Schedule -->
+
+                    <button onclick="switchTab('masterSchedule')" id="btn-masterSchedule" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">الجدول الدراسي</span>
+
                     </button>
 
-                    <!-- Student Tasks: المهام والتسليمات الأكاديمية -->
-                    <button onclick="switchTab('studentTasks')" id="btn-studentTasks" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-blue-200/70 bg-blue-50/50 text-blue-950 font-bold">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">📝</span>
-                            <span class="text-xs font-bold">المهام والتسليمات</span>
-                        </div>
-                        <span class="text-[9px] bg-blue-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-2xs">اختبارات وواجبات</span>
+
+
+                    <!-- Trainee Link: Dashboard -->
+
+                    <button onclick="switchTab('studentDashboard')" id="btn-studentDashboard" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">الرئيسية</span>
+
                     </button>
 
-                    <!-- Student Calendar: تقويم التسليمات والمهام الأكاديمية -->
-                    <button onclick="switchTab('submissionsCalendar')" id="btn-studentSubmissionsCalendar" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive border border-indigo-200/60 bg-indigo-50/40 text-indigo-950 font-bold">
-                        <span class="text-base">📅</span>
-                        <span class="text-xs font-bold">تقويم التسليمات والمهام</span>
+
+
+                    <!-- Trainee Link: Courses -->
+
+                    <button onclick="switchTab('studentCourses')" id="btn-studentCourses" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">المقررات</span>
+
                     </button>
 
-                    <!-- Student Account: حسابي والملف الأكاديمي والحضور -->
-                    <button onclick="switchTab('studentAccount')" id="btn-studentAccount" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-amber-200/70 bg-amber-50/50 text-slate-900 font-bold">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">👤</span>
-                            <span class="text-xs font-bold">حسابي والملف الأكاديمي</span>
-                        </div>
-                        <span class="text-[9px] bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-full shadow-2xs">الحضور والدرجات</span>
+
+
+                    <!-- Trainee Link: Tasks -->
+
+                    <button onclick="switchTab('studentTasks')" id="btn-studentTasks" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">المهام</span>
+
                     </button>
 
-                    <!-- Dedicated Attendance Sheet: كشف الحضور العام والغياب (مباشر + أرشيف + تقويم) -->
-                    <button onclick="switchTab('attendanceSheet')" id="btn-attendanceSheet" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive border border-amber-300/80 bg-amber-50/60 text-slate-900 font-bold">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">📋</span>
-                            <span class="text-xs font-bold">كشف الحضور العام</span>
-                        </div>
-                        <span class="text-[9px] bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-full shadow-2xs">مباشر وأرشيف</span>
+
+
+                    <!-- Trainee Link: Calendar -->
+
+                    <button onclick="switchTab('submissionsCalendar')" id="btn-studentSubmissionsCalendar" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">التقويم</span>
+
                     </button>
 
-                    <!-- Student Only: Dedicated Student LMS Courses -->
-                    <button onclick="switchTab('studentLms')" id="btn-studentLms" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive border border-emerald-200/60 bg-emerald-50/40 text-emerald-950 font-bold hidden">
-                        <span class="text-base">💻</span>
-                        <span class="text-xs">المحتوى الأكاديمي والكورسات (LMS)</span>
+
+
+                    <!-- Trainee Link: Account -->
+
+                    <button onclick="switchTab('studentAccount')" id="btn-studentAccount" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">حسابي</span>
+
                     </button>
 
-                    <!-- Student Only: Dedicated Student Grades & Transcript -->
-                    <button onclick="switchTab('studentGrades')" id="btn-studentGrades" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive border border-amber-200/70 bg-amber-50/50 text-slate-900 font-bold hidden">
-                        <span class="text-base">🎓</span>
-                        <span class="text-xs font-bold">الدرجات وكشف التقييم</span>
+
+
+                    <!-- Trainee Link: Student LMS -->
+
+                    <button onclick="switchTab('studentLms')" id="btn-studentLms" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer hidden">
+
+                        <span class="text-xs font-bold">المحتوى الأكاديمي</span>
+
                     </button>
 
-                    <!-- Student Only: خيار المتدرب للمحاضرة المباشرة والقاعة الافتراضية عن بعد -->
-                    <button onclick="switchTab('studentVirtualClass')" id="btn-studentVirtualClass" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center justify-between nav-item-inactive">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">📹</span>
-                            <span class="text-xs">المحاضرة المباشرة (عن بعد)</span>
-                        </div>
-                        <span class="text-[9px] bg-blue-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-2xs">Zoom/Meet</span>
+
+
+                    <!-- Trainee Link: Student Grades -->
+
+                    <button onclick="switchTab('studentGrades')" id="btn-studentGrades" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer hidden">
+
+                        <span class="text-xs font-bold">الدرجات</span>
+
                     </button>
 
-                    <!-- Last Option: الجدول الدراسي العام (فرع عنك) -->
-                    <button onclick="switchTab('masterSchedule')" id="btn-masterSchedule" class="w-full text-right px-4 py-3 rounded-xl transition flex items-center gap-3 nav-item-inactive">
-                        <span class="text-base">📅</span>
-                        <span class="text-xs">الجدول الدراسي العام (فرع عنك)</span>
+
+
+                    <!-- Trainee Link: Student Virtual Class -->
+
+                    <button onclick="switchTab('studentVirtualClass')" id="btn-studentVirtualClass" class="w-full text-right px-4 py-2.5 rounded-xl transition flex items-center nav-item-inactive cursor-pointer">
+
+                        <span class="text-xs font-bold">المحاضرة المباشرة</span>
+
                     </button>
+
                 </nav>
+
             </div>
 
-            <div class="p-4 border-t border-slate-200 bg-slate-50 space-y-2">
+
+
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 space-y-2">
+
                 <div class="flex items-center justify-between text-[11px] text-slate-500">
+
                     <span class="font-bold">الفرع:</span>
-                    <span class="font-extrabold text-amber-800">فرع عنك</span>
+
+                    <span class="font-extrabold text-amber-800 dark:text-amber-400">فرع عنك</span>
+
                 </div>
+
                 <div id="sidebarTotalTraineesContainer" class="hidden">
-                    <span class="font-mono font-extrabold text-slate-800" id="sidebarTotalTrainees">0 متدرب</span>
+
+                    <span class="font-mono font-extrabold text-slate-800 dark:text-slate-200" id="sidebarTotalTrainees">0 متدرب</span>
+
                 </div>
-                <button type="button" onclick="toggleAppDarkMode()" id="sidebarDarkModeToggleBtn" class="dark-mode-toggle-btn w-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span id="sidebarDarkModeIcon">🌙</span>
+
+                <button type="button" onclick="toggleAppDarkMode()" id="sidebarDarkModeToggleBtn" class="dark-mode-toggle-btn w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center cursor-pointer">
+
                     <span id="sidebarDarkModeLabel">الوضع الليلي</span>
+
                 </button>
-                <button onclick="logout()" class="w-full mt-2 bg-white hover:bg-red-50 text-red-600 border border-slate-200 hover:border-red-200 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+
+                <button onclick="logout()" class="w-full mt-2 bg-white hover:bg-red-50 dark:bg-slate-900 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 border border-slate-200 dark:border-slate-700 hover:border-red-200 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center cursor-pointer">
+
                     <span>تسجيل الخروج</span>
-                    <span>🚪</span>
+
                 </button>
+
             </div>
+
         </aside>
 
         <!-- ==================== MAIN CONTENT AREA ==================== -->
@@ -7086,6 +7242,67 @@
     window.supabaseClient = null;
     window.isSupabaseConnected = false;
 
+    // دالة فتح وإغلاق القائمة الجانبية (شاملة لجميع الشاشات)
+    function toggleSidebar(forceOpen) {
+        const sidebar = document.getElementById('sidebarMenu');
+        const overlay = document.getElementById('sidebarOverlay');
+        const edgeZone = document.getElementById('sidebarEdgeTriggerZone');
+        const edgeTab = document.getElementById('sidebarEdgeTab');
+        if (!sidebar) return;
+
+        let shouldOpen;
+        if (typeof forceOpen === 'boolean') {
+            shouldOpen = forceOpen;
+        } else {
+            shouldOpen = sidebar.classList.contains('translate-x-full') || sidebar.classList.contains('max-lg:hidden');
+        }
+
+        if (shouldOpen) {
+            sidebar.classList.remove('translate-x-full', 'max-lg:hidden');
+            sidebar.classList.add('translate-x-0');
+            if (overlay) overlay.classList.remove('hidden');
+            if (edgeZone) edgeZone.classList.add('hidden');
+            try { sessionStorage.setItem('sys_sidebar_open', 'true'); } catch(e) {}
+        } else {
+            sidebar.classList.add('translate-x-full');
+            sidebar.classList.remove('translate-x-0');
+            if (overlay) overlay.classList.add('hidden');
+            if (edgeZone) edgeZone.classList.remove('hidden');
+            if (edgeTab) {
+                edgeTab.classList.add('translate-x-3');
+                edgeTab.classList.remove('translate-x-0', 'ring-2', 'ring-amber-400/60');
+            }
+            try { sessionStorage.setItem('sys_sidebar_open', 'false'); } catch(e) {}
+        }
+    }
+    window.toggleSidebar = toggleSidebar;
+
+    // تحسس اقتراب مؤشر الفأرة من حافة الشاشة اليمنى لإبراز زر القائمة تلقائياً
+    document.addEventListener('mousemove', function(e) {
+        const edgeTab = document.getElementById('sidebarEdgeTab');
+        const sidebar = document.getElementById('sidebarMenu');
+        if (!edgeTab || !sidebar) return;
+        if (!sidebar.classList.contains('translate-x-full')) return;
+        const distFromRight = window.innerWidth - e.clientX;
+        if (distFromRight <= 40) {
+            edgeTab.classList.remove('translate-x-3');
+            edgeTab.classList.add('translate-x-0', 'ring-2', 'ring-amber-400/60');
+        } else if (distFromRight > 70) {
+            edgeTab.classList.add('translate-x-3');
+            edgeTab.classList.remove('translate-x-0', 'ring-2', 'ring-amber-400/60');
+        }
+    });
+
+    // إغلاق القائمة عند الضغط على زر Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const sidebar = document.getElementById('sidebarMenu');
+            if (sidebar && !sidebar.classList.contains('translate-x-full')) {
+                toggleSidebar(false);
+            }
+        }
+    });
+
     function escapeHtml(str) {
         if (str === null || str === undefined) return '';
         return String(str)
@@ -7422,21 +7639,6 @@
         document.getElementById('fallbackModal').classList.add('hidden');
     }
 
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebarMenu');
-        const overlay = document.getElementById('sidebarOverlay');
-        if (!sidebar) return;
-        const isHidden = sidebar.classList.contains('max-lg:hidden');
-        
-        if (isHidden) {
-            sidebar.classList.remove('max-lg:hidden');
-            if (overlay) overlay.classList.remove('hidden');
-        } else {
-            sidebar.classList.add('max-lg:hidden');
-            if (overlay) overlay.classList.add('hidden');
-        }
-    }
-
     function syncAttendanceDirectToSupabase(traineeList = trainees) {
         if (typeof supabaseClient === 'undefined' || !supabaseClient || !isSupabaseConnected || !Array.isArray(traineeList) || traineeList.length === 0) return;
         try {
@@ -7753,8 +7955,8 @@
 
         const roleTitles = {
             superadmin: 'المدير العام',
-            admin: 'مشرف نظام (أدمن) 🛡️',
-            trainer: 'مدرب معتمد 👨‍🏫'
+            admin: 'مشرف نظام',
+            trainer: 'مدرب معتمد'
         };
         const roleIcons = {
             superadmin: GHUTRA_AVATAR_SVG,
@@ -8020,11 +8222,8 @@
             console.error('Error rendering tab content:', tabErr);
         }
 
-        const sidebar = document.getElementById('sidebarMenu');
-        const overlay = document.getElementById('sidebarOverlay');
-        if (window.innerWidth < 1024 && sidebar) {
-            sidebar.classList.add('max-lg:hidden');
-            if (overlay) overlay.classList.add('hidden');
+        if (typeof toggleSidebar === 'function') {
+            toggleSidebar(false);
         }
     }
 
