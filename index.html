@@ -332,6 +332,21 @@
         header button, #sidebarMenu button, .dark-mode-toggle-btn {
             transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
         }
+
+        /* Professional Header Glassmorphism & Animations */
+        .header-glass {
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+        @keyframes goldSheenAnim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .gold-sheen-anim {
+            background-size: 200% 200%;
+            animation: goldSheenAnim 5s ease infinite;
+        }
         header button:hover, #sidebarMenu button:hover, .dark-mode-toggle-btn:hover {
             transform: translateY(-1.5px);
         }
@@ -1054,42 +1069,43 @@
 <!-- ============================================================= -->
 <div id="dashboardView" class="flex-1 flex flex-col min-h-screen hidden">
     
-    <!-- ==================== WHITE TOP HEADER ==================== -->
-    <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
-        <div class="px-4 md:px-6 py-2.5 flex justify-between items-center gap-4">
+    <!-- ==================== PROFESSIONAL ANIMATED TOP HEADER ==================== -->
+    <header class="header-glass sticky top-0 z-40 bg-white/92 dark:bg-[#0B0F19]/92 border-b border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_25px_rgba(0,0,0,0.45)] transition-all duration-300">
+        <div class="px-4 md:px-6 py-2.5 flex justify-between items-center gap-3 md:gap-4">
             
-            <!-- Left: Mobile Menu Toggle & Brand -->
+            <!-- Left: Menu Toggle & Brand -->
             <div class="flex items-center gap-3">
-                <button type="button" id="topSidebarToggleBtn" onclick="toggleSidebar()" class="p-2 md:px-3 md:py-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center gap-1.5 shadow-2xs" title="فتح / إغلاق القائمة">
-
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-
-                    </svg>
-
+                <!-- Interactive Menu Button with Animated Bars -->
+                <button type="button" id="topSidebarToggleBtn" onclick="toggleSidebar()" class="group relative px-3 py-2 rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100/90 hover:bg-slate-200/90 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center gap-2 shadow-2xs hover:shadow-xs" title="فتح / إغلاق القائمة">
+                    <div class="w-4 h-3.5 flex flex-col justify-between py-0.5">
+                        <span class="w-full h-0.5 bg-slate-700 dark:bg-slate-200 rounded-full transition-transform duration-200 group-hover:scale-x-90"></span>
+                        <span class="w-3/4 h-0.5 bg-amber-500 rounded-full transition-all duration-200 group-hover:w-full"></span>
+                        <span class="w-full h-0.5 bg-slate-700 dark:bg-slate-200 rounded-full transition-transform duration-200 group-hover:scale-x-90"></span>
+                    </div>
                     <span class="text-xs font-black hidden sm:inline" id="topSidebarToggleLabel">القائمة</span>
-
-                </button>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
                 </button>
 
-                <!-- Clean White Logo -->
-                <div class="bg-white p-0.5 rounded-xl flex items-center">
-                    <img src="logo.png" alt="شعار معهد الذهب الأسود" class="h-10 md:h-11 w-auto object-contain" onerror="this.onerror=null; this.src='logo.jpg'">
+                <!-- Modern Logo Card with Subtle Hover Tilt -->
+                <div class="relative group p-1 rounded-xl bg-white/90 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 shadow-2xs transition-all duration-300 hover:shadow-md hover:scale-102">
+                    <img src="logo.png" alt="شعار معهد الذهب الأسود" class="h-9 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:rotate-1" onerror="this.onerror=null; this.src='logo.jpg'">
                 </div>
 
-                <div class="hidden sm:block border-r border-slate-200 pr-3">
+                <!-- Brand Typography & Live Branch Badge -->
+                <div class="hidden sm:flex flex-col justify-center pr-3 border-r border-slate-200 dark:border-slate-800">
                     <div class="flex items-center gap-2">
-                        <h1 class="text-sm md:text-base font-extrabold text-slate-900 leading-tight">
-                            معهد الذهب الأسود - فرع عنك
+                        <h1 class="text-xs md:text-sm font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+                            معهد الذهب الأسود
                         </h1>
-                        <span class="bg-amber-100 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-md border border-amber-300">
-                            فرع عنك
+                        <!-- Pulsing Live Branch Badge -->
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-900 border border-amber-300/80 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-500/40 shadow-2xs transition-transform duration-200 hover:scale-105">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                            <span>فرع عنك</span>
                         </span>
                     </div>
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wide mt-0.5">نظام إدارة الحضور والتدريب</span>
                     <span id="headerSyncStatus" class="hidden"></span>
                 </div>
             </div>
@@ -1097,39 +1113,43 @@
             <!-- Right: Quick Top Actions & User Badge -->
             <div class="flex items-center gap-2 md:gap-3">
 
-                <!-- Global Easy Back Button (يظهر دائماً لسهولة العودة للشاشة السابقة) -->
-                <button type="button" id="globalBackBtn" onclick="goBackTab()" class="hidden bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-3.5 py-2 rounded-xl text-xs items-center gap-1.5 transition shadow-xs cursor-pointer" title="العودة للشاشة السابقة">
-                    <span>⬅️</span>
+                <!-- Global Easy Back Button -->
+                <button type="button" id="globalBackBtn" onclick="goBackTab()" class="hidden group bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-3.5 py-2 rounded-xl text-xs items-center gap-1.5 transition-all duration-200 hover:-translate-x-1 hover:shadow-md active:scale-95 cursor-pointer" title="العودة للشاشة السابقة">
+                    <span class="text-sm inline-block transition-transform duration-200 group-hover:-translate-x-0.5">⬅️</span>
                     <span id="globalBackBtnLabel">رجوع</span>
                 </button>
                 
                 <div id="topHeaderUploadButtons" class="flex items-center gap-2">
                     <span id="autoSyncScheduleBadge" class="hidden xl:inline-flex"></span>
                     
-                    <!-- ☁️ Global Supabase Cloud Sync Badge (Hidden from visible UI per user request) -->
-                    <div onclick="openSupabaseCloudModal()" class="supabase-cloud-badge hidden !hidden flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 whitespace-nowrap shrink-0 transition cursor-pointer" style="display:none !important;" title="حالة المزامنة السحابية (Supabase) - اضغط للإعداد والمزامنة">
+                    <!-- Global Supabase Cloud Sync Badge -->
+                    <div onclick="openSupabaseCloudModal()" class="supabase-cloud-badge hidden !hidden flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 whitespace-nowrap shrink-0 transition cursor-pointer" style="display:none !important;" title="حالة المزامنة السحابية">
                         <span class="w-2 h-2 rounded-full bg-slate-400"></span>
                         <span>وضع التخزين المحلي</span>
                     </div>
 
-                    <button id="topSyncBtn" onclick="syncLiveAttendanceFromGoogleSheets()" class="gold-gradient-bg text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm hover:brightness-105 cursor-pointer" title="مزامنة التحضير المباشر من Google Sheets">
-                        <span class="text-sm">🔄</span>
+                    <!-- Sync Attendance Button with Animated Hover Rotation & Glow -->
+                    <button id="topSyncBtn" onclick="syncLiveAttendanceFromGoogleSheets()" class="group relative gold-gradient-bg gold-sheen-anim text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(245,158,11,0.4)] active:scale-95 cursor-pointer" title="مزامنة التحضير المباشر من Google Sheets">
+                        <span class="text-sm inline-block transition-transform duration-500 group-hover:rotate-180">🔄</span>
                         <span id="topSyncBtnLabel">مزامنة التحضير</span>
                     </button>
-                    <button id="topLiveSheetSettingsBtn" onclick="openLiveSheetConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold p-2 rounded-xl text-xs transition border border-slate-200 cursor-pointer" title="إعداد / تغيير رابط Google Sheets للتحضير المباشر">
-                        ⚙️
+
+                    <!-- Google Sheets Settings Button with Gear Rotation -->
+                    <button id="topLiveSheetSettingsBtn" onclick="openLiveSheetConfigModal()" class="group bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold p-2 rounded-xl text-xs transition-all duration-200 hover:-translate-y-0.5 border border-slate-200 dark:border-slate-700 cursor-pointer shadow-2xs hover:shadow-xs" title="إعداد / تغيير رابط Google Sheets للتحضير المباشر">
+                        <span class="inline-block transition-transform duration-300 group-hover:rotate-45">⚙️</span>
                     </button>
-                    <!-- Quick Direct Button: ملفات المؤسسة وتصدير Excel -->
-                    <button id="topInstitutionFilesBtn" onclick="switchTab('institutionFiles')" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer border border-emerald-500" title="ملفات المؤسسة وتصدير Excel المعتمد">
-                        <span class="text-sm">🏛️</span>
+
+                    <!-- Institution Files Button with Emerald Glow -->
+                    <button id="topInstitutionFilesBtn" onclick="switchTab('institutionFiles')" class="group bg-emerald-600 hover:bg-emerald-700 text-white font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(16,185,129,0.35)] active:scale-95 cursor-pointer border border-emerald-500 shadow-2xs" title="ملفات المؤسسة وتصدير Excel المعتمد">
+                        <span class="text-sm inline-block transition-transform duration-200 group-hover:scale-110">🏛️</span>
                         <span>ملفات المؤسسة</span>
-                        <span class="text-[9px] bg-emerald-800 text-emerald-100 font-bold px-1.5 py-0.5 rounded-full shadow-2xs hidden sm:inline">تصدير Excel</span>
+                        <span class="text-[9px] bg-emerald-800 text-emerald-100 font-bold px-1.5 py-0.5 rounded-full hidden sm:inline">تصدير Excel</span>
                     </button>
                 </div>
 
-                <!-- Dark Mode Toggle Button between Header Buttons -->
-                <button type="button" id="topDarkModeToggleBtn" onclick="toggleAppDarkMode()" class="dark-mode-toggle-btn bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs border border-slate-200 flex items-center gap-1.5 cursor-pointer shadow-2xs" title="تبديل الوضع الليلي / النهاري">
-                    <span id="topDarkModeIcon">🌙</span>
+                <!-- Dark Mode Toggle Button with Micro-Animation -->
+                <button type="button" id="topDarkModeToggleBtn" onclick="toggleAppDarkMode()" class="dark-mode-toggle-btn group bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs" title="تبديل الوضع الليلي / النهاري">
+                    <span id="topDarkModeIcon" class="inline-block transition-transform duration-300 group-hover:rotate-12 group-hover:scale-115">🌙</span>
                     <span id="topDarkModeLabel" class="hidden sm:inline">الوضع الليلي</span>
                 </button>
 
@@ -1138,40 +1158,48 @@
                 <input type="file" id="excelScheduleInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleScheduleFileUpload(event)">
                 <input type="file" id="archiveExcelInput" accept=".xlsx, .xls, .csv" multiple class="hidden" onchange="handleArchiveFileUpload(event)">
 
-                <!-- User Profile Pill -->
-                <div class="bg-slate-50 border border-slate-200 pl-3 pr-2 py-1.5 rounded-2xl flex items-center gap-2">
-                    <div onclick="openMyProfileModal()" title="تعديل ملفك الشخصي والصورة الشخصية" class="w-8 h-8 rounded-full gold-gradient-bg flex items-center justify-center text-slate-950 font-black text-xs shadow-xs cursor-pointer hover:ring-2 hover:ring-amber-400 transition overflow-hidden p-0.5" id="userAvatar">
-                        <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 36C6 27 12 25 18 25C24 25 30 27 30 36Z" fill="#1e293b"/>
-                            <path d="M13 36L17 26.5L19 26.5L23 36L21 36L18 28.5L15 36Z" fill="#f59e0b"/>
-                            <polygon points="17,27.5 19,27.5 18.5,36 17.5,36" fill="#ffffff"/>
-                            <rect x="16" y="21" width="4" height="5" fill="#f6c8a4"/>
-                            <ellipse cx="18" cy="18" rx="5.5" ry="6.5" fill="#fcd8b8"/>
-                            <circle cx="16" cy="16.5" r="0.75" fill="#1e293b"/>
-                            <circle cx="20" cy="16.5" r="0.75" fill="#1e293b"/>
-                            <path d="M15.5 15.2Q16.5 14.7 17.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
-                            <path d="M18.5 15.2Q19.5 14.7 20.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
-                            <path d="M16 20Q18 21.5 20 20Q19 22.5 18 22.5Q17 22.5 16 20Z" fill="#1e293b"/>
-                            <path d="M10 14C8 20 9 27 11 32C12 30 13 26 14 23C13 19 12 16 12.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
-                            <path d="M26 14C28 20 27 27 25 32C24 30 23 26 22 23C23 19 24 16 23.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
-                            <path d="M12.5 13.5C12.5 8 15 6 18 6C21 6 23.5 8 23.5 13.5C23.5 16 22 19 21.5 20C21 18 21 15 21 14C21 11.5 20 10.5 18 10.5C16 10.5 15 11.5 15 14C15 15 15 18 14.5 20C14 19 12.5 16 12.5 13.5Z" fill="#ffffff"/>
-                            <path d="M16 6.8Q18 5.8 20 6.8" stroke="#e2e8f0" stroke-width="0.8" fill="none"/>
-                            <ellipse cx="18" cy="9.5" rx="6.5" ry="2" stroke="#0f172a" stroke-width="1.6" fill="none"/>
-                            <ellipse cx="18" cy="10.5" rx="6.2" ry="1.8" stroke="#334155" stroke-width="1.1" fill="none"/>
+                <!-- Elevated User Profile Pill -->
+                <div class="bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80 pl-3 pr-2 py-1 rounded-2xl flex items-center gap-2.5 transition-all duration-200 hover:border-amber-400/60 dark:hover:border-amber-400/60 shadow-2xs hover:shadow-xs">
+                    <div onclick="openMyProfileModal()" title="تعديل ملفك الشخصي والصورة الشخصية" class="relative group cursor-pointer">
+                        <div class="w-8 h-8 rounded-full gold-gradient-bg flex items-center justify-center text-slate-950 font-black text-xs shadow-xs overflow-hidden p-0.5 ring-2 ring-amber-400/50 group-hover:ring-amber-400 transition-all duration-200 group-hover:scale-105" id="userAvatar">
+                            <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 36C6 27 12 25 18 25C24 25 30 27 30 36Z" fill="#1e293b"/>
+                                <path d="M13 36L17 26.5L19 26.5L23 36L21 36L18 28.5L15 36Z" fill="#f59e0b"/>
+                                <polygon points="17,27.5 19,27.5 18.5,36 17.5,36" fill="#ffffff"/>
+                                <rect x="16" y="21" width="4" height="5" fill="#f6c8a4"/>
+                                <ellipse cx="18" cy="18" rx="5.5" ry="6.5" fill="#fcd8b8"/>
+                                <circle cx="16" cy="16.5" r="0.75" fill="#1e293b"/>
+                                <circle cx="20" cy="16.5" r="0.75" fill="#1e293b"/>
+                                <path d="M15.5 15.2Q16.5 14.7 17.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
+                                <path d="M18.5 15.2Q19.5 14.7 20.5 15.2" stroke="#1e293b" stroke-width="0.6" stroke-linecap="round"/>
+                                <path d="M16 20Q18 21.5 20 20Q19 22.5 18 22.5Q17 22.5 16 20Z" fill="#1e293b"/>
+                                <path d="M10 14C8 20 9 27 11 32C12 30 13 26 14 23C13 19 12 16 12.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
+                                <path d="M26 14C28 20 27 27 25 32C24 30 23 26 22 23C23 19 24 16 23.5 13.5Z" fill="#ffffff" filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.15))"/>
+                                <path d="M12.5 13.5C12.5 8 15 6 18 6C21 6 23.5 8 23.5 13.5C23.5 16 22 19 21.5 20C21 18 21 15 21 14C21 11.5 20 10.5 18 10.5C16 10.5 15 11.5 15 14C15 15 15 18 14.5 20C14 19 12.5 16 12.5 13.5Z" fill="#ffffff"/>
+                                <path d="M16 6.8Q18 5.8 20 6.8" stroke="#e2e8f0" stroke-width="0.8" fill="none"/>
+                                <ellipse cx="18" cy="9.5" rx="6.5" ry="2" stroke="#0f172a" stroke-width="1.6" fill="none"/>
+                                <ellipse cx="18" cy="10.5" rx="6.2" ry="1.8" stroke="#334155" stroke-width="1.1" fill="none"/>
+                            </svg>
+                        </div>
+                        <!-- Status indicator dot -->
+                        <span class="absolute -bottom-0.5 -left-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full shadow-2xs"></span>
+                    </div>
+                    <div onclick="openMyProfileModal()" title="تعديل ملفك الشخصي والصورة الشخصية" class="hidden md:block text-right cursor-pointer hover:opacity-85 transition">
+                        <div class="text-xs font-black text-slate-900 dark:text-white leading-tight" id="currentUserName">المدير العام</div>
+                        <div class="text-[10px] font-bold text-amber-700 dark:text-amber-400" id="currentUserRoleTitle">المدير العام</div>
+                    </div>
+                    <button onclick="logout()" title="تسجيل الخروج" class="mr-1 text-slate-400 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 text-xs px-2 py-1.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-slate-700 hover:border-rose-200 dark:hover:border-rose-800 transition-all duration-200 font-bold flex items-center gap-1 cursor-pointer active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                         </svg>
-                    </div>
-                    <div onclick="openMyProfileModal()" title="تعديل ملفك الشخصي والصورة الشخصية" class="hidden md:block text-right cursor-pointer hover:opacity-80 transition">
-                        <div class="text-xs font-black text-slate-900 leading-tight" id="currentUserName">المدير العام</div>
-                        <div class="text-[10px] font-bold text-amber-700" id="currentUserRoleTitle">المدير العام (سوبر أدمن)</div>
-                    </div>
-                    <button onclick="logout()" title="تسجيل الخروج" class="mr-1 text-slate-500 hover:text-red-600 text-xs px-2 py-1 rounded-xl hover:bg-red-50 border border-slate-200 hover:border-red-200 transition font-bold flex items-center gap-1 cursor-pointer">
-                        <span>🚪</span>
-                        <span class="text-[11px] hidden xl:inline">خروج</span>
+                        <span class="text-[10px] hidden xl:inline font-bold">خروج</span>
                     </button>
                 </div>
 
             </div>
         </div>
+        <!-- Delicate Accent Line at the bottom of header -->
+        <div class="h-[1.5px] w-full bg-gradient-to-r from-amber-400/40 via-sky-400/30 to-emerald-400/40"></div>
     </header>
 
     <!-- ==================== BODY WITH SIDEBAR LAYOUT ==================== -->
