@@ -3362,26 +3362,61 @@
                     </div>
 
                     <!-- Quick Contact & Action Buttons -->
-                    <div class="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
-                        <button type="button" id="tpQuickCopyPhoneBtn" onclick="copyModalPhone()" class="bg-white hover:bg-amber-50 text-slate-800 font-bold p-2.5 rounded-xl text-xs transition border border-slate-200 flex items-center justify-center gap-1.5 shadow-2xs">
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+                        <button type="button" id="tpQuickCopyPhoneBtn" onclick="copyModalPhone()" class="bg-white hover:bg-amber-50 text-slate-800 font-bold p-2.5 rounded-xl text-xs transition border border-slate-200 flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
                             <span>📲</span>
                             <span>نسخ الجوال</span>
                         </button>
-                        <a id="tpWhatsappBtn" href="#" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs">
+                        <a id="tpWhatsappBtn" href="#" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
                             <span>💬</span>
                             <span>مراسلة واتساب</span>
                         </a>
-                        <button type="button" onclick="openReportFromProfile()" class="bg-slate-900 hover:bg-black text-amber-300 font-bold p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs">
-                            <span>📝</span>
-                            <span>تسجيل بلاغ</span>
-                        </button>
-                        <button type="button" onclick="closeTraineeProfileModal(); navigateToInstitutionFilesFromProfile();" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer" title="الانتقال المباشر لبيانات المتدرب وشعبته في ملفات المؤسسة">
+                        <button type="button" onclick="closeTraineeProfileModal(); navigateToInstitutionFilesFromProfile();" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer" title="الانتقال المباشر لبيانات المتدرب وشعبته في ملفات المؤسسة">
                             <span>🏛️</span>
                             <span>كشف المؤسسة</span>
                         </button>
+                        <button type="button" onclick="openReportFromProfile()" class="bg-slate-900 hover:bg-black text-amber-300 font-bold p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer" title="تسجيل بلاغ سريع عبر نافذة منبثقة (بوب اب)">
+                            <span>⚡</span>
+                            <span>بلاغ سريع (نافذة)</span>
+                        </button>
+                        <button type="button" onclick="openReportPageForCurrentProfile()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer border border-indigo-500 active:scale-95" title="فتح صفحة البلاغات والتقارير المخصصة كاملة (وليس بوب اب)">
+                            <span>📄</span>
+                            <span>صفحة البلاغات (كاملة)</span>
+                        </button>
                     </div>
 
-                    <!-- ==================== TRAINEE ACADEMIC GRADEBOOK & FINAL GRADE PUBLISHING ==================== -->
+                    <!-- ==================== 1. TRAINEE WEEKLY SESSIONS & ATTENDANCE RECORD (أولولية المتابعة للإداري) ==================== -->
+                    <div id="tpWeeklySessionsSection" class="p-4 rounded-2xl border-2 border-amber-400/40 bg-amber-50/20 space-y-3">
+                        <div class="flex items-center justify-between border-b border-amber-200 pb-2 flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">📅</span>
+                                <h4 class="text-xs md:text-sm font-black text-slate-900">سجل حصص الأسبوع والمتابعة والتحضير</h4>
+                                <span class="text-[10px] font-black bg-amber-400/30 text-amber-950 px-2.5 py-0.5 rounded-full border border-amber-400/50">أولوية المتابعة الإدارية ⭐</span>
+                            </div>
+                            <span id="tpAttendanceSummary" class="text-xs font-black text-amber-900 font-mono"></span>
+                        </div>
+                        <div id="tpAttendanceGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs"></div>
+                    </div>
+
+                    <!-- Trainee Cumulative Archive Attendance Section (3-4 Months) -->
+                    <div id="tpArchiveSection" class="hidden p-3.5 rounded-2xl border border-indigo-200 bg-indigo-50/50 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-indigo-950 flex items-center gap-1.5">
+                                <span>📊</span>
+                                <span>نسبة الحضور التراكمية المعتمدة (الأرشيف):</span>
+                            </span>
+                            <span id="tpArchiveRateBadge" class="text-xs font-black px-3 py-0.5 rounded-full bg-indigo-600 text-white font-mono">0%</span>
+                        </div>
+                        <div class="w-full bg-indigo-200/60 rounded-full h-2 overflow-hidden">
+                            <div id="tpArchiveProgressBar" class="bg-indigo-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div class="text-[11px] text-indigo-900 font-bold flex items-center justify-between">
+                            <span id="tpArchiveDetails">الفترات المحضورة: 0 من 0 فترة</span>
+                            <span id="tpArchiveStatusBadge" class="text-[10px] px-2 py-0.5 rounded-lg font-black bg-white border border-indigo-200 text-indigo-800">ملتزم</span>
+                        </div>
+                    </div>
+
+                    <!-- ==================== 2. TRAINEE ACADEMIC GRADEBOOK & FINAL GRADE PUBLISHING ==================== -->
                     <div id="tpGradebookSection" class="p-4 rounded-2xl border-2 border-[#0F2942]/20 bg-slate-50/90 space-y-3.5">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
                             <div>
@@ -3447,14 +3482,43 @@
                         </div>
                     </div>
 
-                    <!-- Editable Data Form -->
-                    <div class="space-y-3">
+                    <!-- ==================== 3. TRAINEE INCIDENT REPORTS & NOTES (سجل البلاغات مباشرة بعد سجل الدرجات) ==================== -->
+                    <div id="tpIncidentReportsSection" class="p-4 rounded-2xl border border-slate-200 bg-slate-50/80 space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-lg">📝</span>
+                                <div>
+                                    <h4 class="text-xs md:text-sm font-black text-slate-900">سجل بلاغات وملاحظات هذا المتدرب</h4>
+                                    <span id="tpReportsCount" class="text-[10px] font-black bg-slate-200 text-slate-800 px-2.5 py-0.5 rounded-full inline-block mt-0.5">0 بلاغ</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Actions: Quick Popup vs Dedicated Full Page (خيار إضافي يفتح صفحة وليس بوب اب) -->
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button type="button" onclick="openReportFromProfile()" class="bg-slate-900 hover:bg-black text-amber-300 font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="تسجيل بلاغ سريع عبر نافذة منبثقة">
+                                    <span>⚡</span>
+                                    <span>تسجيل سريع (نافذة)</span>
+                                </button>
+                                
+                                <button type="button" onclick="openReportPageForCurrentProfile()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-3.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer border border-indigo-500 active:scale-95" title="خيار إضافي: فتح صفحة البلاغات والتقارير الكاملة لهذا المتدرب (صفحة مخصصة وليس بوب اب)">
+                                    <span>📄</span>
+                                    <span>فتح في صفحة البلاغات (كاملة)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Reports list container -->
+                        <div id="tpReportsList" class="space-y-1.5 max-h-48 overflow-y-auto"></div>
+                    </div>
+
+                    <!-- ==================== 4. EDITABLE BASIC DATA FORM (البيانات الأساسية والشخصية) ==================== -->
+                    <div class="space-y-3 border-t border-slate-200 pt-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-1">
                             <h4 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
                                 <span>✏️</span>
-                                <span>البيانات الأساسية القابلة للتعديل:</span>
+                                <span>البيانات الأساسية والشخصية القابلة للتعديل:</span>
                             </h4>
-                            <span class="text-[10px] text-slate-400 font-bold">تُحفظ قبل أو بعد رفع ملف الحضور أو المؤسسة</span>
+                            <span class="text-[10px] text-slate-400 font-bold">تُحفظ وتُزامن فوراً مع كشف المؤسسة والتحضير</span>
                         </div>
 
                         <input type="hidden" id="tpOriginalId">
@@ -3475,7 +3539,7 @@
                                 <label class="block text-xs font-bold text-slate-700 mb-1">رقم الجوال (05xxxxxxxx):</label>
                                 <div class="flex gap-1.5">
                                     <input type="tel" id="tpInputPhone" placeholder="05xxxxxxxx" class="flex-1 border border-slate-200 rounded-xl p-2.5 text-xs bg-slate-50 font-bold text-slate-800 outline-none focus:border-amber-500 font-mono">
-                                    <button type="button" id="tpCopyPhoneBtn" onclick="copyModalPhone()" title="نسخ رقم الجوال فردياً" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-xl text-xs font-bold border border-slate-300 transition">📋</button>
+                                    <button type="button" id="tpCopyPhoneBtn" onclick="copyModalPhone()" title="نسخ رقم الجوال فردياً" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-xl text-xs font-bold border border-slate-300 transition cursor-pointer">📋</button>
                                 </div>
                             </div>
 
@@ -3522,42 +3586,6 @@
                             <label class="block text-xs font-bold text-slate-700 mb-1">ملاحظات وسجل المتدرب:</label>
                             <textarea id="tpInputNotes" rows="2" placeholder="ملاحظات إدارية، تواصل، أعذار، أو تفاصيل خاصة بالمتدرب..." class="w-full border border-slate-200 rounded-xl p-2.5 text-xs bg-slate-50 font-bold text-slate-800 outline-none focus:border-amber-500"></textarea>
                         </div>
-                    </div>
-
-                    <!-- Trainee Weekly Attendance Matrix -->
-                    <div class="space-y-2 border-t border-slate-100 pt-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-black text-slate-800">📊 سجل حصص الأسبوع:</span>
-                            <span id="tpAttendanceSummary" class="text-[11px] font-bold text-amber-800"></span>
-                        </div>
-                        <div id="tpAttendanceGrid" class="grid grid-cols-5 gap-1.5 text-center text-xs"></div>
-                    </div>
-
-                    <!-- Trainee Cumulative Archive Attendance Section (3-4 Months) -->
-                    <div id="tpArchiveSection" class="hidden p-3.5 rounded-2xl border border-indigo-200 bg-indigo-50/50 space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-black text-indigo-950 flex items-center gap-1.5">
-                                <span>📊</span>
-                                <span>نسبة الحضور التراكمية المعتمدة:</span>
-                            </span>
-                            <span id="tpArchiveRateBadge" class="text-xs font-black px-3 py-0.5 rounded-full bg-indigo-600 text-white font-mono">0%</span>
-                        </div>
-                        <div class="w-full bg-indigo-200/60 rounded-full h-2 overflow-hidden">
-                            <div id="tpArchiveProgressBar" class="bg-indigo-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                        <div class="text-[11px] text-indigo-900 font-bold flex items-center justify-between">
-                            <span id="tpArchiveDetails">الفترات المحضورة: 0 من 0 فترة</span>
-                            <span id="tpArchiveStatusBadge" class="text-[10px] px-2 py-0.5 rounded-lg font-black bg-white border border-indigo-200 text-indigo-800">ملتزم</span>
-                        </div>
-                    </div>
-
-                    <!-- Trainee Incident Reports History -->
-                    <div class="space-y-2 border-t border-slate-100 pt-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-black text-slate-800">📝 سجل بلاغات وملاحظات هذا المتدرب:</span>
-                            <span id="tpReportsCount" class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full font-bold">0 بلاغ</span>
-                        </div>
-                        <div id="tpReportsList" class="space-y-1.5 max-h-36 overflow-y-auto"></div>
                     </div>
 
                     <!-- Modal Actions -->
@@ -15331,7 +15359,8 @@ ${details}
         if (currentUser?.role === 'trainer') {
             availableGroups = getGroupsForTrainer(currentUser);
         } else {
-            const traineeGroups = trainees.map(t => {
+            const allTraineesPool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []));
+            const traineeGroups = allTraineesPool.map(t => {
                 const g = t.group || '';
                 if ((/samsung/i.test(g) || /سامسونج/.test(g)) && (g.includes('101') || g.includes('102'))) {
                     return 'سامسونج 101 & 102';
@@ -15385,7 +15414,8 @@ ${details}
             return;
         }
 
-        let pool = trainees.filter(t => !isLAGroup(t.group) && isGroupMatch(groupName, t.group));
+        const allTraineesPool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []));
+        let pool = allTraineesPool.filter(t => !isLAGroup(t.group) && isGroupMatch(groupName, t.group));
 
         if (currentUser?.role === 'trainer') {
             const myTrainees = getTraineesForTrainer(currentUser);
@@ -15426,7 +15456,9 @@ ${details}
     function onReportTraineeSelectChange(traineeId) {
         const searchInput = document.getElementById('reportIdSearchInput');
         const badge = document.getElementById('reportSearchMatchBadge');
-        const t = trainees.find(x => x.id === traineeId);
+        const allPool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []));
+        const cleanTId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
+        const t = allPool.find(x => x.id === traineeId || (typeof cleanNationalId === 'function' && cleanNationalId(x.id) === cleanTId));
         if (t) {
             if (searchInput) searchInput.value = t.id;
             if (badge) {
@@ -15448,7 +15480,8 @@ ${details}
             return;
         }
 
-        let pool = trainees.filter(t => !isLAGroup(t.group));
+        const allPool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []));
+        let pool = allPool.filter(t => !isLAGroup(t.group));
         if (currentUser?.role === 'trainer') {
             pool = getTraineesForTrainer(currentUser);
         }
@@ -15482,7 +15515,9 @@ ${details}
 
     function selectTraineeInReportForm(traineeId) {
         if (!traineeId) return;
-        const t = trainees.find(x => x.id === traineeId);
+        const allPool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []));
+        const cleanTId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
+        const t = allPool.find(x => x.id === traineeId || (typeof cleanNationalId === 'function' && cleanNationalId(x.id) === cleanTId));
         if (!t) return;
 
         const searchInput = document.getElementById('reportIdSearchInput');
@@ -16097,7 +16132,82 @@ ${details}
         copySingleEmail(email, name);
     }
 
-    function openReportFromProfile() {
+        // فتح صفحة البلاغات والتقارير المخصصة كاملة للمتدرب (صفحة كاملة وليس بوب اب)
+    function openReportPageForCurrentProfile() {
+        const tId = document.getElementById('tpInputId')?.value.trim() || document.getElementById('tpOriginalId')?.value.trim() || '';
+        const tName = document.getElementById('tpInputName')?.value.trim() || '';
+        const tGroup = document.getElementById('tpInputGroup')?.value.trim() || '';
+        closeTraineeProfileModal();
+
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tId) : tId;
+
+        // الانتقال لصفحة بلاغات وتقارير المتدربين الكاملة
+        switchTab('trainerReports');
+
+        setTimeout(() => {
+            // 1. تعبئة حقل البحث بالهوية أو الاسم
+            const searchInput = document.getElementById('reportIdSearchInput');
+            if (searchInput) {
+                searchInput.value = cleanId || tId || tName;
+                if (typeof onReportSearchInput === 'function') {
+                    onReportSearchInput(searchInput.value);
+                }
+            }
+
+            // 2. تحديد الشعبة والمتدرب في القوائم المنسدلة
+            if (tGroup && typeof populateReportGroupOptions === 'function') {
+                populateReportGroupOptions(tGroup, cleanId || tId);
+            }
+
+            // 3. فلترة جدول البلاغات السابقة في الصفحة
+            const tableSearchInput = document.getElementById('searchReportTableInput');
+            if (tableSearchInput) {
+                tableSearchInput.value = cleanId || tId || tName;
+                if (typeof filterReportsTable === 'function') {
+                    filterReportsTable();
+                }
+            }
+
+            // 4. تمرير الصفحة إلى قسم تسجيل البلاغات
+            const repSec = document.getElementById('tab-trainerReports');
+            if (repSec) {
+                repSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            showToast(`📄 تم الانتقال إلى صفحة البلاغات الكاملة للمتدرب: ${tName || cleanId}`, 'info');
+        }, 150);
+    }
+    window.openReportPageForCurrentProfile = openReportPageForCurrentProfile;
+
+    function openReportPageForTrainee(traineeId) {
+        if (!traineeId) return;
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
+        const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : []);
+        const t = pool.find(x => cleanNationalId(x.id) === cleanId || x.id === traineeId) || (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[cleanId] || phoneDirectory[traineeId]) : null);
+
+        closeTraineeProfileModal();
+        switchTab('trainerReports');
+
+        setTimeout(() => {
+            const searchInput = document.getElementById('reportIdSearchInput');
+            if (searchInput) {
+                searchInput.value = cleanId;
+                if (typeof onReportSearchInput === 'function') onReportSearchInput(cleanId);
+            }
+            if (t && t.group && typeof populateReportGroupOptions === 'function') {
+                populateReportGroupOptions(t.group, cleanId);
+            }
+            const tableSearchInput = document.getElementById('searchReportTableInput');
+            if (tableSearchInput) {
+                tableSearchInput.value = cleanId;
+                if (typeof filterReportsTable === 'function') filterReportsTable();
+            }
+            document.getElementById('tab-trainerReports')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            showToast(`📄 تم فتح صفحة البلاغات للمتدرب: ${t?.name || cleanId}`, 'info');
+        }, 150);
+    }
+    window.openReportPageForTrainee = openReportPageForTrainee;
+
+function openReportFromProfile() {
         const tId = document.getElementById('tpInputId').value.trim();
         const tName = document.getElementById('tpInputName').value.trim();
         closeTraineeProfileModal();
