@@ -2142,7 +2142,7 @@
                                 <span>🗓️</span>
                                 <span>التقويم الأسبوعي للمتابعة</span>
                             </button>
-                            <button type="button" id="attendanceSheetInstFilesBtn" onclick="switchTab('institutionFiles')" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-2xs cursor-pointer" title="الانتقال المباشر إلى ملفات المؤسسة وتصدير Excel (للإدارة فقط)">
+                            <button type="button" id="attendanceSheetInstFilesBtn" onclick="navigateToInstitutionFilesFromAttendance()" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-2xs cursor-pointer" title="الانتقال المباشر إلى ملفات المؤسسة وتصدير Excel (للإدارة فقط)">
                                 <span>🏛️</span>
                                 <span>ملفات المؤسسة (تصدير Excel)</span>
                             </button>
@@ -3375,6 +3375,10 @@
                             <span>📝</span>
                             <span>تسجيل بلاغ</span>
                         </button>
+                        <button type="button" onclick="closeTraineeProfileModal(); navigateToInstitutionFilesFromProfile();" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer" title="الانتقال المباشر لبيانات المتدرب وشعبته في ملفات المؤسسة">
+                            <span>🏛️</span>
+                            <span>كشف المؤسسة</span>
+                        </button>
                     </div>
 
                     <!-- ==================== TRAINEE ACADEMIC GRADEBOOK & FINAL GRADE PUBLISHING ==================== -->
@@ -3493,6 +3497,24 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">المؤهل الدراسي / العلمي:</label>
                                 <input type="text" id="tpInputQual" placeholder="مثال: دبلوم، بكالوريوس، ثانوي" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs bg-slate-50 font-bold text-slate-800 outline-none focus:border-amber-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ الميلاد (m/d/Y):</label>
+                                <input type="text" id="tpInputDob" placeholder="m/d/Y مثل 10/25/2000" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs bg-slate-50 font-bold text-slate-800 outline-none focus:border-amber-500 font-mono" title="صيغة تاريخ الميلاد المعتمدة للمؤسسة m/d/Y">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">النوع (ذكر / انثى):</label>
+                                <select id="tpInputGender" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs bg-slate-50 font-bold text-slate-800 outline-none focus:border-amber-500">
+                                    <option value="ذكر">ذكر</option>
+                                    <option value="انثى">انثى</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">الجنسية:</label>
+                                <input type="text" id="tpInputNationality" placeholder="سعودي" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs bg-slate-50 font-bold text-slate-800 outline-none focus:border-amber-500">
                             </div>
                         </div>
 
@@ -6050,6 +6072,12 @@
                             <p class="text-xs md:text-sm text-emerald-100/80 mt-1">
                                 توليد ملفات إكسل الرسمية للشعب التدريبية متضمنة تقسيم الاسم الرباعي وتنسيق الهوية وتاريخ الميلاد بدقة تامة.
                             </p>
+                            <div class="mt-2.5 flex items-center gap-2 flex-wrap">
+                                <button type="button" onclick="switchTab('attendance')" class="bg-white/15 hover:bg-white/25 active:scale-95 text-white border border-white/25 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer backdrop-blur-xs shadow-2xs">
+                                    <span>📋</span>
+                                    <span>الانتقال المباشر لجدول التحضير والمتابعة</span>
+                                </button>
+                            </div>
                         </div>
                         
                         <!-- Quick Counters Badges -->
@@ -8805,12 +8833,10 @@ ${details}
             if (btnTrainerReports) btnTrainerReports.classList.remove('hidden');
             if (btnVirtualClass) btnVirtualClass.classList.remove('hidden');
             
-            // ملفات المؤسسة وتصدير Excel محصورة فقط بالإدارة والسوبر أدمن (ممنوعة عن المدرب)
-            if (btnInstitutionFiles) btnInstitutionFiles.classList.add('hidden');
-            if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.add('hidden');
-            if (attendanceSheetInstFilesBtn) attendanceSheetInstFilesBtn.classList.add('hidden');
-            const instTab = document.getElementById('tab-institutionFiles');
-            if (instTab) instTab.classList.add('hidden');
+            // ملفات المؤسسة وتصدير Excel متاحة للمدرب والإدارة والسوبر أدمن ومربوطة بجدول التحضير
+            if (btnInstitutionFiles) btnInstitutionFiles.classList.remove('hidden');
+            if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.remove('hidden');
+            if (attendanceSheetInstFilesBtn) attendanceSheetInstFilesBtn.classList.remove('hidden');
 
             // إظهار زر مزامنة التحضير للمدرب وإخفاء زر إعدادات الرابط والإجراءات الإدارية
             if (topHeaderUploadButtons) topHeaderUploadButtons.classList.remove('hidden');
@@ -8976,7 +9002,7 @@ ${details}
                     activeTrainerForDashboard = currentUser.trainerProfile;
                 }
 
-                const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'attendanceSheet'];
+                const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'attendanceSheet', 'institutionFiles'];
                 let candidateTab = savedTab;
                 if (candidateTab === 'trainerSubmissions') candidateTab = 'gradesSystem';
                 const targetTab = (candidateTab && allowedTrainerTabs.includes(candidateTab)) ? candidateTab : 'trainerDashboard';
@@ -9049,7 +9075,7 @@ ${details}
                 return;
             }
         } else if (currentUser.role === 'trainer') {
-            const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'attendanceSheet'];
+            const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'attendanceSheet', 'institutionFiles'];
             if (!allowedTrainerTabs.includes(tab)) {
                 showToast('⛔ عذراً: هذه الشاشة مخصصة للإدارة والسوبر أدمن فقط', 'error');
                 return;
@@ -9167,7 +9193,9 @@ ${details}
             } else if (tab === 'adminCertificates') {
                 if (typeof renderAdminCertificatesTab === 'function') renderAdminCertificatesTab();
             } else if (tab === 'institutionFiles') {
-                if (typeof renderInstitutionFilesTab === 'function') renderInstitutionFilesTab();
+                const attGrp = document.getElementById('groupFilter')?.value || (typeof activeSelectedGroupInTrainerDashboard !== 'undefined' ? activeSelectedGroupInTrainerDashboard : '');
+                const attComp = document.getElementById('companyFilter')?.value || 'ALL';
+                if (typeof renderInstitutionFilesTab === 'function') renderInstitutionFilesTab(attGrp, attComp);
             } else if (tab === 'supportTickets') {
                 if (typeof renderSupportTicketsHub === 'function') renderSupportTicketsHub();
             } else if (tab === 'masterSchedule') {
@@ -15724,7 +15752,10 @@ ${details}
 
     // ==================== ملف المتدرب وبياناته الشخصية (TRAINEE PROFILE) ====================
     function openTraineeProfileModal(traineeId) {
-        const trainee = trainees.find(t => t.id === traineeId) || phoneDirectory[traineeId];
+        if (!traineeId) return;
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
+        const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []));
+        const trainee = pool.find(t => (cleanNationalId(t.id) === cleanId || t.id === traineeId || String(t.id).trim() === cleanId)) || (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[traineeId] || phoneDirectory[cleanId]) : null);
         if (!trainee) return showToast('لم يتم العثور على بيانات المتدرب', 'error');
 
         const isSuperAdmin = currentUser?.role === 'superadmin';
@@ -15777,6 +15808,19 @@ ${details}
         document.getElementById('tpInputRoom').value = tObj.room;
         document.getElementById('tpInputQual').value = tObj.qual;
         document.getElementById('tpInputNotes').value = tObj.notes;
+
+        const cleanTId = (typeof cleanNationalId === 'function') ? cleanNationalId(tObj.id) : String(tObj.id || '').trim();
+        const pDirRec = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[tObj.id] || phoneDirectory[cleanTId] || {}) : {});
+        const valDob = trainee.dob || pDirRec.dob || '';
+        const valGen = (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(trainee.gender || pDirRec.gender || '', 'ذكر') : (trainee.gender || pDirRec.gender || 'ذكر');
+        const valNat = trainee.nationality || pDirRec.nationality || (cleanTId.startsWith('1') ? 'سعودي' : 'غير سعودي');
+
+        const elDob = document.getElementById('tpInputDob');
+        if (elDob) elDob.value = valDob;
+        const elGen = document.getElementById('tpInputGender');
+        if (elGen) elGen.value = valGen;
+        const elNat = document.getElementById('tpInputNationality');
+        if (elNat) elNat.value = valNat;
 
         const dayChecks = tObj.weeklyAttendance ? tObj.weeklyAttendance[activeDayIndex] : [false, false, false, false];
         const st = calculateStatus(dayChecks);
@@ -15960,8 +16004,28 @@ ${details}
             trainees.push(t);
         }
 
-        // حفظ في دليل الهواتف والبيانات الدائم (phoneDirectory) لضمان ثباتها عند أي رفع
+        const rawDob = document.getElementById('tpInputDob')?.value.trim() || '';
+        const rawGen = document.getElementById('tpInputGender')?.value || 'ذكر';
+        const rawNat = document.getElementById('tpInputNationality')?.value.trim() || (newId.startsWith('1') ? 'سعودي' : 'غير سعودي');
+        const formattedDob = (typeof formatDobMdy === 'function') ? formatDobMdy(rawDob) : rawDob;
+        const normGen = (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(rawGen, 'ذكر') : rawGen;
+
+        const nameParts = (typeof splitArabicName === 'function') ? splitArabicName(name) : { first: name, second: '', third: '', last: '' };
+
+        if (t) {
+            t.dob = formattedDob;
+            t.gender = normGen;
+            t.nationality = rawNat;
+            t.first_name = nameParts.first;
+            t.second_name = nameParts.second;
+            t.third_name = nameParts.third;
+            t.last_name = nameParts.last;
+        }
+
+        // حفظ في دليل الهواتف والبيانات الدائم (phoneDirectory) مع دمج البيانات وعدم إتلاف بيانات المؤسسة ومنار
+        const prevDirRec = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[origId] || phoneDirectory[newId] || {}) : {});
         phoneDirectory[newId] = {
+            ...prevDirRec,
             name,
             phone,
             email,
@@ -15969,8 +16033,24 @@ ${details}
             group: group || 'عام',
             room: room || 'غير محدد',
             qual: qual || 'غير محدد',
-            notes
+            dob: formattedDob,
+            gender: normGen,
+            nationality: rawNat,
+            first_name: nameParts.first,
+            second_name: nameParts.second,
+            third_name: nameParts.third,
+            last_name: nameParts.last,
+            notes,
+            institutionApproved: (typeof t.institutionApproved !== 'undefined') ? t.institutionApproved : (prevDirRec.institutionApproved || false),
+            institutionApprovalDate: t.institutionApprovalDate || prevDirRec.institutionApprovalDate || null,
+            institutionApprovalGroup: t.institutionApprovalGroup || prevDirRec.institutionApprovalGroup || '',
+            manarCertificateIssued: (typeof t.manarCertificateIssued !== 'undefined') ? t.manarCertificateIssued : (prevDirRec.manarCertificateIssued || false),
+            manarCertificateDate: t.manarCertificateDate || prevDirRec.manarCertificateDate || null
         };
+
+        if (typeof renderInstTraineesTable === 'function') {
+            try { renderInstTraineesTable(); } catch(e) {}
+        }
 
         if (typeof saveTraineeGradebookFromProfile === 'function') {
             saveTraineeGradebookFromProfile(true);
@@ -23231,74 +23311,191 @@ ${details}
     }
     window.normalizeGenderValue = normalizeGenderValue;
 
-    // تهيئة وعرض شاشة ملفات المؤسسة
-    function renderInstitutionFilesTab() {
+        // ===================================================================
+    // UNIFIED TRAINEES POOL & NAVIGATION HELPERS (الربط المباشر مع التحضير وملفات المتدربين)
+    // ===================================================================
+    function getUnifiedTraineesPool() {
+        const map = new Map();
+
+        // 1. المتدربون من نموذج العينة (SAMPLE_TRAINEES) كقاعدة أساسية
+        if (typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) {
+            SAMPLE_TRAINEES.forEach(st => {
+                const cId = (typeof cleanNationalId === 'function') ? cleanNationalId(st.id) : String(st.id || '').trim();
+                if (cId) {
+                    map.set(cId, { ...st, id: cId });
+                }
+            });
+        }
+
+        // 2. دمج وتحديث من مصفوفة المتدربين الأساسية (trainees)
+        if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+            trainees.forEach(t => {
+                const cId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+                if (cId) {
+                    const existing = map.get(cId) || {};
+                    map.set(cId, { ...existing, ...t, id: cId });
+                }
+            });
+        }
+
+        // 3. دمج وتحديث من دليل الهواتف والبيانات الشخصية (phoneDirectory)
+        if (typeof phoneDirectory !== 'undefined' && phoneDirectory) {
+            Object.keys(phoneDirectory).forEach(rawId => {
+                const cId = (typeof cleanNationalId === 'function') ? cleanNationalId(rawId) : String(rawId || '').trim();
+                const p = phoneDirectory[rawId] || {};
+                if (cId) {
+                    const existing = map.get(cId) || {};
+                    const grp = (p.group && p.group !== 'عام') ? p.group : (existing.group || p.group || 'عام');
+                    const comp = (p.company && p.company !== 'عام' && p.company !== 'المؤسسة') ? p.company : (existing.company || p.company || 'المؤسسة');
+
+                    map.set(cId, {
+                        ...existing,
+                        id: cId,
+                        name: existing.name || p.name || `متدرب (${cId})`,
+                        phone: p.phone || existing.phone || '',
+                        email: p.email || existing.email || '',
+                        company: comp,
+                        group: grp,
+                        room: p.room || existing.room || 'غير محدد',
+                        qual: p.qual || existing.qual || 'غير محدد',
+                        dob: p.dob || existing.dob || '',
+                        gender: (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(p.gender || existing.gender || '', 'ذكر') : (p.gender || existing.gender || 'ذكر'),
+                        nationality: p.nationality || existing.nationality || (cId.startsWith('1') ? 'سعودي' : 'غير سعودي'),
+                        first_name: p.first_name || existing.first_name || '',
+                        second_name: p.second_name || existing.second_name || '',
+                        third_name: p.third_name || existing.third_name || '',
+                        last_name: p.last_name || existing.last_name || '',
+                        institutionApproved: (typeof p.institutionApproved !== 'undefined') ? p.institutionApproved : (existing.institutionApproved || false),
+                        institutionApprovalDate: p.institutionApprovalDate || existing.institutionApprovalDate || null,
+                        institutionApprovalGroup: p.institutionApprovalGroup || existing.institutionApprovalGroup || '',
+                        manarCertificateIssued: (typeof p.manarCertificateIssued !== 'undefined') ? p.manarCertificateIssued : (existing.manarCertificateIssued || false),
+                        manarCertificateDate: p.manarCertificateDate || existing.manarCertificateDate || null
+                    });
+                }
+            });
+        }
+
+        return Array.from(map.values());
+    }
+    window.getUnifiedTraineesPool = getUnifiedTraineesPool;
+
+    // التنقل المباشر من جدول التحضير إلى ملفات المؤسسة مع نقل الشعبة والشركة المحددة
+    function navigateToInstitutionFilesFromAttendance() {
+        const curGrp = document.getElementById('groupFilter')?.value || '';
+        const curComp = document.getElementById('companyFilter')?.value || 'ALL';
+        switchTab('institutionFiles');
+        if (typeof renderInstitutionFilesTab === 'function') {
+            renderInstitutionFilesTab(curGrp, curComp);
+        }
+    }
+    window.navigateToInstitutionFilesFromAttendance = navigateToInstitutionFilesFromAttendance;
+
+    // التنقل المباشر من ملف المتدرب إلى ملفات المؤسسة
+    function navigateToInstitutionFilesFromProfile() {
+        const grp = document.getElementById('tpInputGroup')?.value || '';
+        const comp = document.getElementById('tpInputCompany')?.value || 'ALL';
+        switchTab('institutionFiles');
+        if (typeof renderInstitutionFilesTab === 'function') {
+            renderInstitutionFilesTab(grp, comp);
+        }
+    }
+    window.navigateToInstitutionFilesFromProfile = navigateToInstitutionFilesFromProfile;
+
+    // تهيئة وعرض شاشة ملفات المؤسسة مع الربط التلقائي ببيانات التحضير والملفات
+    function renderInstitutionFilesTab(presetGroup, presetComp) {
         if (typeof ensureTraineesConsistencyWithDirectory === 'function') {
             ensureTraineesConsistencyWithDirectory();
         }
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        const pool = getUnifiedTraineesPool();
         const compFilterEl = document.getElementById('instCompanyFilter');
-        if (!compFilterEl) return;
+        const grpFilterEl = document.getElementById('instGroupFilter');
+        if (!compFilterEl || !grpFilterEl) return;
 
         // استخراج الشركات الفريدة ديناميكياً
-        const currentCompVal = compFilterEl.value || 'ALL';
+        let currentCompVal = (presetComp && presetComp !== 'ALL') ? presetComp : (compFilterEl.value || 'ALL');
         const companiesSet = new Set();
         pool.forEach(t => {
             const c = (t.company || '').trim();
             if (c && c !== 'عام' && c !== 'المؤسسة') companiesSet.add(c);
         });
-        if (typeof phoneDirectory !== 'undefined' && phoneDirectory) {
-            Object.values(phoneDirectory).forEach(p => {
-                const c = (p.company || '').trim();
-                if (c && c !== 'عام' && c !== 'المؤسسة') companiesSet.add(c);
-            });
-        }
 
         const sortedCompanies = Array.from(companiesSet).sort();
-        let compOptions = '<option value="ALL">جميع الشركات</option>';
+        let compOptions = '<option value="ALL">جميع الشركات والمؤسسات</option>';
         sortedCompanies.forEach(c => {
             compOptions += `<option value="${c}">${c}</option>`;
         });
         compFilterEl.innerHTML = compOptions;
         if (currentCompVal && Array.from(compFilterEl.options).some(o => o.value === currentCompVal)) {
             compFilterEl.value = currentCompVal;
+        } else {
+            compFilterEl.value = 'ALL';
         }
 
-        populateInstGroupFilter();
+        populateInstGroupFilter(presetGroup);
         renderInstTraineesTable();
     }
     window.renderInstitutionFilesTab = renderInstitutionFilesTab;
 
-    // تعبئة قائمة المجموعات بناءً على الشركة المختارة
-    function populateInstGroupFilter() {
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+    // تعبئة قائمة المجموعات والشعب بناءً على الشركة المختارة مع الربط الفوري بالتحضير
+    function populateInstGroupFilter(presetGroup) {
+        const pool = getUnifiedTraineesPool();
         const compFilterEl = document.getElementById('instCompanyFilter');
         const grpFilterEl = document.getElementById('instGroupFilter');
         if (!grpFilterEl) return;
 
         const selectedCompany = compFilterEl ? compFilterEl.value : 'ALL';
-        const currentGrpVal = grpFilterEl.value || '';
+        let currentGrpVal = (typeof presetGroup !== 'undefined' && presetGroup !== null && presetGroup !== '') 
+            ? presetGroup 
+            : (grpFilterEl.value || '');
+
+        // إذا لم تكن هناك شعبة محددة مسبقاً، نفحص الشعبة المختارة حالياً في لوحة التحضير
+        if (!currentGrpVal || currentGrpVal === '') {
+            const attGrp = document.getElementById('groupFilter')?.value;
+            if (attGrp && attGrp !== 'ALL') {
+                currentGrpVal = attGrp;
+            } else if (typeof activeSelectedGroupInTrainerDashboard !== 'undefined' && activeSelectedGroupInTrainerDashboard) {
+                currentGrpVal = activeSelectedGroupInTrainerDashboard;
+            } else {
+                currentGrpVal = 'ALL';
+            }
+        }
 
         const groupsSet = new Set();
         pool.forEach(t => {
             if (selectedCompany !== 'ALL' && t.company !== selectedCompany) return;
             const grp = (t.group || '').trim();
-            if (grp) {
+            if (grp && grp !== 'عام') {
                 groupsSet.add(grp);
             }
         });
 
+        // استخراج الشعب من جدول الحصص الأسبوعي scheduleData
+        if (typeof scheduleData !== 'undefined' && Array.isArray(scheduleData)) {
+            scheduleData.forEach(tr => {
+                if (Array.isArray(tr.slots)) {
+                    tr.slots.forEach(s => {
+                        const g = (s.group || '').trim();
+                        if (g && !(typeof isLAGroup === 'function' && isLAGroup(g))) {
+                            groupsSet.add(g);
+                        }
+                    });
+                }
+            });
+        }
+
         const sortedGroups = Array.from(groupsSet).sort();
-        let grpOptions = '<option value="">-- اختر المجموعة --</option>';
+        let grpOptions = '<option value="ALL">جميع المجموعات والشعب (عرض شامل)</option>';
         sortedGroups.forEach(g => {
             grpOptions += `<option value="${g}">${g}</option>`;
         });
         grpFilterEl.innerHTML = grpOptions;
 
-        if (currentGrpVal && sortedGroups.includes(currentGrpVal)) {
+        if (currentGrpVal && (currentGrpVal === 'ALL' || sortedGroups.includes(currentGrpVal))) {
             grpFilterEl.value = currentGrpVal;
-        } else if (sortedGroups.length === 1) {
-            grpFilterEl.value = sortedGroups[0];
+        } else if (sortedGroups.length > 0) {
+            grpFilterEl.value = (currentGrpVal === 'ALL' || !sortedGroups.includes(currentGrpVal)) ? 'ALL' : currentGrpVal;
+        } else {
+            grpFilterEl.value = 'ALL';
         }
     }
     window.populateInstGroupFilter = populateInstGroupFilter;
@@ -23314,7 +23511,7 @@ ${details}
     }
     window.onInstGroupChange = onInstGroupChange;
 
-        // ===================================================================
+    // ===================================================================
     // INSTITUTION TVTC & MANAR CERTIFICATES ENGINE (إدارة اعتماد المؤسسة وشهادات منار)
     // ===================================================================
     let excludedInstTraineeIds = new Set();
@@ -23334,11 +23531,18 @@ ${details}
 
     function toggleAllInstTraineesSelection(selectAll) {
         const grpFilterEl = document.getElementById('instGroupFilter');
-        const selectedGroup = grpFilterEl ? grpFilterEl.value : '';
-        if (!selectedGroup) return;
+        const selectedGroup = grpFilterEl ? grpFilterEl.value : 'ALL';
+        const compFilterEl = document.getElementById('instCompanyFilter');
+        const selectedCompany = compFilterEl ? compFilterEl.value : 'ALL';
 
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
-        const groupTrainees = pool.filter(t => t.group && t.group.trim() === selectedGroup.trim());
+        const pool = getUnifiedTraineesPool();
+        let groupTrainees = pool;
+        if (selectedGroup && selectedGroup !== 'ALL') {
+            groupTrainees = pool.filter(t => t.group && (t.group.trim() === selectedGroup.trim() || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group))));
+        }
+        if (selectedCompany !== 'ALL') {
+            groupTrainees = groupTrainees.filter(t => t.company === selectedCompany);
+        }
 
         if (selectAll) {
             excludedInstTraineeIds.clear();
@@ -23371,27 +23575,48 @@ ${details}
     function toggleManarCertificate(traineeId) {
         if (!traineeId) return;
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
-        const t = pool.find(x => cleanNationalId(x.id) === cleanId || x.id === traineeId) || (typeof phoneDirectory !== 'undefined' ? phoneDirectory[cleanId] : null);
+        const pool = getUnifiedTraineesPool();
+        const t = pool.find(x => cleanNationalId(x.id) === cleanId || x.id === traineeId) || (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[cleanId] || phoneDirectory[traineeId]) : null);
         if (!t) return showToast('لم يتم العثور على المتدرب', 'error');
 
         t.manarCertificateIssued = !t.manarCertificateIssued;
         t.manarCertificateDate = t.manarCertificateIssued ? new Date().toISOString() : null;
 
-        const mainT = pool.find(x => cleanNationalId(x.id) === cleanId || x.id === traineeId);
-        if (mainT) {
-            mainT.manarCertificateIssued = t.manarCertificateIssued;
-            mainT.manarCertificateDate = t.manarCertificateDate;
+        if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+            const mainT = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === traineeId);
+            if (mainT) {
+                mainT.manarCertificateIssued = t.manarCertificateIssued;
+                mainT.manarCertificateDate = t.manarCertificateDate;
+            } else {
+                trainees.push({
+                    ...t,
+                    id: cleanId,
+                    manarCertificateIssued: t.manarCertificateIssued,
+                    manarCertificateDate: t.manarCertificateDate
+                });
+            }
         }
-        if (typeof phoneDirectory !== 'undefined' && phoneDirectory[cleanId]) {
+        if (typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) {
+            const st = SAMPLE_TRAINEES.find(x => cleanNationalId(x.id) === cleanId || x.id === traineeId);
+            if (st) {
+                st.manarCertificateIssued = t.manarCertificateIssued;
+                st.manarCertificateDate = t.manarCertificateDate;
+            }
+        }
+        if (typeof phoneDirectory !== 'undefined') {
+            if (!phoneDirectory[cleanId]) phoneDirectory[cleanId] = { ...(phoneDirectory[traineeId] || {}) };
             phoneDirectory[cleanId].manarCertificateIssued = t.manarCertificateIssued;
             phoneDirectory[cleanId].manarCertificateDate = t.manarCertificateDate;
+            if (phoneDirectory[traineeId]) {
+                phoneDirectory[traineeId].manarCertificateIssued = t.manarCertificateIssued;
+                phoneDirectory[traineeId].manarCertificateDate = t.manarCertificateDate;
+            }
         }
 
-        localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
-        if (typeof phoneDirectory !== 'undefined') {
-            localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
-        }
+        try {
+            if (typeof trainees !== 'undefined') localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+            if (typeof phoneDirectory !== 'undefined') localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
+        } catch(e) {}
 
         renderInstTraineesTable();
         
@@ -23414,7 +23639,7 @@ ${details}
             return;
         }
 
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        const pool = getUnifiedTraineesPool();
         const matches = pool.filter(t => {
             const id = String(t.id || '');
             const name = String(t.name || '').toLowerCase();
@@ -23428,7 +23653,7 @@ ${details}
         }
 
         resultsContainer.innerHTML = matches.map(t => {
-            const isIssued = t.manarCertificateIssued;
+            const isIssued = Boolean(t.manarCertificateIssued || (typeof phoneDirectory !== 'undefined' && (phoneDirectory[t.id]?.manarCertificateIssued || phoneDirectory[cleanNationalId(t.id)]?.manarCertificateIssued)));
             return `
                 <div onclick="selectManarSearchResult('${t.id}')" class="p-2.5 hover:bg-slate-50 cursor-pointer flex items-center justify-between text-xs transition">
                     <div>
@@ -23462,7 +23687,7 @@ ${details}
         }
 
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(val) : val;
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        const pool = getUnifiedTraineesPool();
         const t = pool.find(x => cleanNationalId(x.id) === cleanId || x.name.toLowerCase().includes(val.toLowerCase()) || x.id === val);
         
         if (!t) {
@@ -23503,26 +23728,36 @@ ${details}
         }
 
         const nowIso = new Date().toISOString();
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        const pool = getUnifiedTraineesPool();
         
         currentExportedTraineesForApproval.forEach(expT => {
-            const t = pool.find(x => x.id === expT.id);
-            if (t) {
-                t.institutionApproved = true;
-                t.institutionApprovalDate = nowIso;
-                t.institutionApprovalGroup = currentExportGroupForApproval;
+            const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(expT.id) : String(expT.id || '').trim();
+            if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+                const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === expT.id);
+                if (t) {
+                    t.institutionApproved = true;
+                    t.institutionApprovalDate = nowIso;
+                    t.institutionApprovalGroup = currentExportGroupForApproval;
+                }
             }
-            if (typeof phoneDirectory !== 'undefined' && phoneDirectory[expT.id]) {
-                phoneDirectory[expT.id].institutionApproved = true;
-                phoneDirectory[expT.id].institutionApprovalDate = nowIso;
-                phoneDirectory[expT.id].institutionApprovalGroup = currentExportGroupForApproval;
+            if (typeof phoneDirectory !== 'undefined') {
+                if (phoneDirectory[expT.id]) {
+                    phoneDirectory[expT.id].institutionApproved = true;
+                    phoneDirectory[expT.id].institutionApprovalDate = nowIso;
+                    phoneDirectory[expT.id].institutionApprovalGroup = currentExportGroupForApproval;
+                }
+                if (phoneDirectory[cleanId]) {
+                    phoneDirectory[cleanId].institutionApproved = true;
+                    phoneDirectory[cleanId].institutionApprovalDate = nowIso;
+                    phoneDirectory[cleanId].institutionApprovalGroup = currentExportGroupForApproval;
+                }
             }
         });
 
-        localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
-        if (typeof phoneDirectory !== 'undefined') {
-            localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
-        }
+        try {
+            if (typeof trainees !== 'undefined') localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+            if (typeof phoneDirectory !== 'undefined') localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
+        } catch(e) {}
 
         closeInstitutionApprovalModal();
         renderInstTraineesTable();
@@ -23532,30 +23767,37 @@ ${details}
 
     function simulateFourWeeksCompletedForCurrentGroup() {
         const grpFilterEl = document.getElementById('instGroupFilter');
-        const selectedGroup = grpFilterEl ? grpFilterEl.value : '';
-        if (!selectedGroup) {
-            return showToast('يرجى اختيار المجموعة أولاً', 'warning');
-        }
+        const selectedGroup = grpFilterEl ? grpFilterEl.value : 'ALL';
         
         const pastDate = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString();
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        const pool = getUnifiedTraineesPool();
         let count = 0;
         pool.forEach(t => {
-            if (t.group && t.group.trim() === selectedGroup.trim()) {
+            if (selectedGroup === 'ALL' || (t.group && t.group.trim() === selectedGroup.trim())) {
                 t.institutionApproved = true;
                 t.institutionApprovalDate = pastDate;
-                t.institutionApprovalGroup = selectedGroup;
+                t.institutionApprovalGroup = t.group || selectedGroup;
                 count++;
             }
         });
 
-        localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+        if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+            trainees.forEach(t => {
+                if (selectedGroup === 'ALL' || (t.group && t.group.trim() === selectedGroup.trim())) {
+                    t.institutionApproved = true;
+                    t.institutionApprovalDate = pastDate;
+                    t.institutionApprovalGroup = t.group || selectedGroup;
+                }
+            });
+            try { localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees)); } catch(e) {}
+        }
+
         renderInstTraineesTable();
-        showToast(`⚡ تم محاكاة اكتمال الـ 4 أسابيع لـ (${count}) متدرب في الشعبة (${selectedGroup})! تظهر الآن أزرار "يمكن إصدار شهادة منار 🎓".`, 'success');
+        showToast(`⚡ تم محاكاة اكتمال الـ 4 أسابيع لـ (${count}) متدرب! تظهر الآن أزرار "يمكن إصدار شهادة منار 🎓".`, 'success');
     }
     window.simulateFourWeeksCompletedForCurrentGroup = simulateFourWeeksCompletedForCurrentGroup;
 
-    // عرض جدول متدربي الشعبة وتدقيق الحقول
+    // عرض جدول متدربي الشعبة وتدقيق الحقول مع الربط الشامل بالتحضير والملفات
     function renderInstTraineesTable() {
         const tableBody = document.getElementById('instTraineesTableBody');
         const emptyState = document.getElementById('instEmptyState');
@@ -23576,7 +23818,7 @@ ${details}
 
         if (!tableBody) return;
 
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        const pool = getUnifiedTraineesPool();
         
         // حساب إجمالي الشعب المكتملة وإجمالي شهادات منار على مستوى النظام بالكامل
         const completedGroupsSet = new Set();
@@ -23586,7 +23828,7 @@ ${details}
             if (s.approved && s.weeksCompleted && t.group) {
                 completedGroupsSet.add(t.group.trim());
             }
-            if (t.manarCertificateIssued || (typeof phoneDirectory !== 'undefined' && phoneDirectory[t.id]?.manarCertificateIssued)) {
+            if (t.manarCertificateIssued || (typeof phoneDirectory !== 'undefined' && (phoneDirectory[t.id]?.manarCertificateIssued || phoneDirectory[cleanNationalId(t.id)]?.manarCertificateIssued))) {
                 globalManarCount++;
             }
         });
@@ -23594,34 +23836,22 @@ ${details}
         if (statManarIssued) statManarIssued.innerText = globalManarCount;
 
         const selectedCompany = compFilterEl ? compFilterEl.value : 'ALL';
-        const selectedGroup = grpFilterEl ? grpFilterEl.value : '';
+        const rawGroup = grpFilterEl ? grpFilterEl.value : 'ALL';
+        const selectedGroup = (!rawGroup || rawGroup === '') ? 'ALL' : rawGroup;
         const filterStatus = statusFilterEl ? statusFilterEl.value : 'ALL';
         const filterManar = manarFilterEl ? manarFilterEl.value : 'ALL';
 
-        if (!selectedGroup) {
-            if (emptyState) emptyState.classList.remove('hidden');
-            tableBody.innerHTML = '';
-            if (statTotal) statTotal.innerText = '0';
-            if (statReady) statReady.innerText = '0';
-            if (statReview) statReview.innerText = '0';
-            if (alertBanner) {
-                alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-slate-50 border-slate-200 text-slate-700';
-            }
-            if (alertIcon) alertIcon.innerText = 'ℹ️';
-            if (alertText) alertText.innerText = 'يرجى تحديد الشركة والمجموعة لعرض متدربي الشعبة وتدقيق بياناتهم وإدارة الاستبعاد والتصدير.';
-            if (alertAction) alertAction.classList.add('hidden');
-            if (selectAllCheckbox) selectAllCheckbox.checked = true;
-            return;
+        let groupTrainees = pool;
+        if (selectedGroup !== 'ALL') {
+            groupTrainees = pool.filter(t => t.group && (t.group.trim() === selectedGroup.trim() || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group))));
         }
-
-        let groupTrainees = pool.filter(t => t.group && t.group.trim() === selectedGroup.trim());
         if (selectedCompany !== 'ALL') {
             groupTrainees = groupTrainees.filter(t => t.company === selectedCompany);
         }
 
         if (groupTrainees.length === 0) {
             if (emptyState) emptyState.classList.add('hidden');
-            tableBody.innerHTML = `<tr><td colspan="16" class="p-8 text-center text-slate-500 font-bold bg-white">⚠️ لا يوجد أي متدرب مسجل في هذه المجموعة (${escapeHtml(selectedGroup)}).</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="17" class="p-8 text-center text-slate-500 font-bold bg-white">⚠️ لا يوجد أي متدرب مسجل في هذه المجموعة (${escapeHtml(selectedGroup === 'ALL' ? 'الكل' : selectedGroup)}).</td></tr>`;
             if (statTotal) statTotal.innerText = '0';
             if (statReady) statReady.innerText = '0';
             if (statReview) statReview.innerText = '0';
@@ -23629,7 +23859,7 @@ ${details}
                 alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-amber-50 border-amber-200 text-amber-900';
             }
             if (alertIcon) alertIcon.innerText = '⚠️';
-            if (alertText) alertText.innerText = `لم يتم العثور على أي متدرب مسجل بالشعبة (${escapeHtml(selectedGroup)}). تأكد من صحة اختيار الشركة والمجموعة.`;
+            if (alertText) alertText.innerText = `لم يتم العثور على أي متدرب مسجل بالشعبة (${escapeHtml(selectedGroup === 'ALL' ? 'الكل' : selectedGroup)}). تأكد من صحة اختيار الشركة والمجموعة.`;
             if (alertAction) alertAction.classList.add('hidden');
             return;
         }
@@ -23643,7 +23873,7 @@ ${details}
         // إعداد بيانات السجلات والتحقق من الاكتمال ونسب الحضور وحالة منار
         const processedRows = groupTrainees.map((t, idx) => {
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
-            const pDir = (typeof phoneDirectory !== 'undefined' && phoneDirectory[t.id]) ? phoneDirectory[t.id] : {};
+            const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[t.id] || phoneDirectory[cleanId] || {}) : {});
 
             let first = pDir.first_name || t.first_name || '';
             let second = pDir.second_name || t.second_name || '';
@@ -23652,7 +23882,7 @@ ${details}
 
             if (!first && !last) {
                 const fullName = pDir.name || t.name || '';
-                const parts = splitArabicName(fullName);
+                const parts = (typeof splitArabicName === 'function') ? splitArabicName(fullName) : { first: fullName, second: '', third: '', last: '' };
                 first = parts.first;
                 second = parts.second;
                 third = parts.third;
@@ -23660,9 +23890,9 @@ ${details}
             }
 
             const rawDob = pDir.dob || t.dob || '';
-            const formattedDob = formatDobMdy(rawDob);
+            const formattedDob = (typeof formatDobMdy === 'function') ? formatDobMdy(rawDob) : rawDob;
             const rawGender = pDir.gender || t.gender || '';
-            const normGender = normalizeGenderValue(rawGender, 'ذكر');
+            const normGender = (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(rawGender, 'ذكر') : (rawGender || 'ذكر');
 
             let nationality = pDir.nationality || t.nationality || '';
             if (!nationality) {
@@ -23672,16 +23902,16 @@ ${details}
             }
 
             let qual = pDir.qual || t.qual || '';
-            if (qual === 'غير محدد') qual = 'ثانوي';
+            if (!qual || qual === 'غير محدد') qual = 'ثانوي';
 
             const email = pDir.email || t.email || '';
             let rawPhone = pDir.phone || t.phone || '';
             const cleanPh = (typeof cleanPhone === 'function') ? cleanPhone(rawPhone) : String(rawPhone || '').trim();
 
-            const isIdValid = cleanId && cleanId.length === 10;
+            const isIdValid = Boolean(cleanId && cleanId.length === 10);
             const isNameValid = Boolean(first && last);
             const isDobValid = Boolean(formattedDob && formattedDob.includes('/'));
-            const isGenderValid = normGender === 'ذكر' || normGender === 'انثى';
+            const isGenderValid = Boolean(normGender === 'ذكر' || normGender === 'انثى');
             const isNationalityValid = Boolean(nationality);
             const isQualValid = Boolean(qual && qual !== 'غير محدد');
             const isPhoneValid = Boolean(cleanPh && cleanPh.length >= 10);
@@ -23695,11 +23925,33 @@ ${details}
                 reviewCount++;
             }
 
-            // نسبة الحضور المعتمدة في النظام
-            const attRate = (typeof t.attendanceRate !== 'undefined') ? t.attendanceRate : ((typeof t.combinedRate !== 'undefined') ? t.combinedRate : ((typeof t.rate !== 'undefined') ? t.rate : ((typeof archiveData !== 'undefined' && archiveData[cleanId]) ? archiveData[cleanId].attendanceRate : 100)));
+            // نسبة الحضور المعتمدة في النظام محسوبة مباشرة وبدقة تامة
+            let attRate = 100;
+            if (typeof t.attendanceRate !== 'undefined' && t.attendanceRate !== null) {
+                attRate = t.attendanceRate;
+            } else if (typeof t.combinedRate !== 'undefined' && t.combinedRate !== null) {
+                attRate = t.combinedRate;
+            } else if (typeof archiveData !== 'undefined' && (archiveData[cleanId] || archiveData[t.id]) && typeof (archiveData[cleanId] || archiveData[t.id]).attendanceRate !== 'undefined') {
+                attRate = (archiveData[cleanId] || archiveData[t.id]).attendanceRate;
+            } else if (typeof t.weeklyRate !== 'undefined' && t.weeklyRate !== null) {
+                attRate = t.weeklyRate;
+            } else if (typeof t.rate !== 'undefined' && t.rate !== null) {
+                attRate = t.rate;
+            } else if (t.weeklyAttendance && Array.isArray(t.weeklyAttendance)) {
+                let attended = 0, total = 0;
+                t.weeklyAttendance.forEach(dayChecks => {
+                    if (Array.isArray(dayChecks)) {
+                        total += 2;
+                        const st = (typeof calculateStatus === 'function') ? calculateStatus(dayChecks, t) : null;
+                        if (st && st.type === 'present') attended += 2;
+                        else if (st && st.count >= 1) attended += 1;
+                    }
+                });
+                if (total > 0) attRate = Math.round((attended / total) * 100);
+            }
 
             // حالة الاستبعاد اليدوي قبل التصدير
-            const isExcluded = excludedInstTraineeIds.has(t.id);
+            const isExcluded = excludedInstTraineeIds.has(t.id) || excludedInstTraineeIds.has(cleanId);
             if (!isExcluded) includedInExportCount++;
 
             // حالة الاعتماد والـ 4 أسابيع ومنصة منار
@@ -23710,6 +23962,9 @@ ${details}
             return {
                 idx,
                 id: cleanId,
+                originalId: t.id,
+                name: t.name || pDir.name || `${first} ${last}`,
+                group: t.group || pDir.group || '—',
                 first,
                 second,
                 third,
@@ -23757,15 +24012,20 @@ ${details}
             const excludedCount = groupTrainees.length - includedInExportCount;
             const excludedMsg = excludedCount > 0 ? ` <span class="bg-amber-200/80 text-amber-950 px-2 py-0.5 rounded-full font-black text-[11px]">تم استبعاد (${excludedCount}) متدرب يدوياً من التصدير</span>` : '';
 
-            if (reviewCount > 0) {
+            if (selectedGroup === 'ALL') {
+                alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-slate-900 text-white shadow-sm flex-wrap';
+                if (alertIcon) alertIcon.innerText = '🌐';
+                if (alertText) alertText.innerHTML = `<span><b>عرض شامل لجميع الشعب:</b> معروض جميع متدربي المؤسسة (${groupTrainees.length} متدرب). بيانات المتدربين مربوطة بالتحضير وملفات المتدربين.${excludedMsg}</span>`;
+                if (alertAction) alertAction.classList.add('hidden');
+            } else if (reviewCount > 0) {
                 alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-amber-50 border-amber-300 text-amber-900 shadow-xs flex-wrap';
                 if (alertIcon) alertIcon.innerText = '⚠️';
-                if (alertText) alertText.innerHTML = `<span><b>تنبيه التدقيق والمراجعة:</b> يوجد <b>(${reviewCount})</b> سجل بحاجة استكمال بيانات قبل التصدير.${excludedMsg}</span>`;
+                if (alertText) alertText.innerHTML = `<span><b>تنبيه التدقيق والمراجعة لشعبة (${escapeHtml(selectedGroup)}):</b> يوجد <b>(${reviewCount})</b> سجل بحاجة استكمال بيانات قبل التصدير.${excludedMsg}</span>`;
                 if (alertAction) alertAction.classList.remove('hidden');
             } else {
                 alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-emerald-50 border-emerald-300 text-emerald-900 shadow-xs flex-wrap';
                 if (alertIcon) alertIcon.innerText = '✅';
-                if (alertText) alertText.innerHTML = `<span><b>جاهز للاعتماد والتصدير:</b> جميع بيانات المتدربين في هذه الشعبة مكتملة ومطابقة لضوابط المؤسسة (${includedInExportCount} مشمولين بالتصدير).${excludedMsg}</span>`;
+                if (alertText) alertText.innerHTML = `<span><b>جاهز للاعتماد والتصدير لشعبة (${escapeHtml(selectedGroup)}):</b> جميع بيانات المتدربين مكتملة ومطابقة لضوابط المؤسسة (${includedInExportCount} مشمولين بالتصدير).${excludedMsg}</span>`;
                 if (alertAction) alertAction.classList.add('hidden');
             }
         }
@@ -23788,7 +24048,7 @@ ${details}
         }
 
         if (displayRows.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="16" class="p-8 text-center text-slate-500 font-bold bg-white">لا توجد سجلات مطابقة لخيارات الفلترة المحددة.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="17" class="p-8 text-center text-slate-500 font-bold bg-white">لا توجد سجلات مطابقة لخيارات الفلترة المحددة.</td></tr>`;
             return;
         }
 
@@ -23861,12 +24121,19 @@ ${details}
                         <input type="text" value="${escapeHtml(r.first)}" onchange="saveInstTraineeField('${r.id}', 'first', this.value)" placeholder="الاسم الأول" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
                     </td>
 
-                    <!-- 11. رقم الهوية -->
-                    <td class="p-2 text-center">
-                        <span class="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded-md text-xs select-all">${escapeHtml(r.id)}</span>
+                    <!-- 11. رقم الهوية والشعبة (مربوط بالملف الشخصي) -->
+                    <td class="p-2 text-center whitespace-nowrap">
+                        <div class="flex flex-col items-center gap-0.5">
+                            <a href="javascript:void(0)" onclick="openTraineeProfileModal('${r.id}')" class="font-mono font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-md text-xs select-all cursor-pointer transition shadow-2xs" title="انقر لفتح ملف المتدرب الكامل وسجل درجاته">
+                                ${escapeHtml(r.id)} 👤
+                            </a>
+                            <span class="text-[9px] font-black text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded mt-0.5" title="الشعبة التدريبية: ${escapeHtml(r.group)}">
+                                ${escapeHtml(r.group)}
+                            </span>
+                        </div>
                     </td>
 
-                    <!-- نسبة الحضور المعتمدة -->
+                    <!-- نسبة الحضور المعتمدة في التحضير -->
                     <td class="p-2 text-center whitespace-nowrap">
                         <div class="inline-flex flex-col items-center">
                             <span class="font-mono font-black text-xs px-2.5 py-0.5 rounded-full ${r.attendanceRate >= 90 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : (r.attendanceRate >= 75 ? 'bg-blue-100 text-blue-800 border border-blue-200' : (r.attendanceRate >= 50 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-rose-100 text-rose-800 border border-rose-200'))}">
@@ -23909,11 +24176,17 @@ ${details}
                         </span>
                     </td>
 
-                    <!-- إجراء -->
+                    <!-- إجراءات: حفظ سريع وفتح ملف المتدرب -->
                     <td class="p-2 text-center whitespace-nowrap">
-                        <button type="button" onclick="confirmInstRowSaved('${r.id}')" title="تأكيد حفظ بيانات المتدرب" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition border border-emerald-200 active:scale-95 cursor-pointer">
-                            💾 حفظ
-                        </button>
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button type="button" onclick="confirmInstRowSaved('${r.id}')" title="تأكيد حفظ بيانات المتدرب" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition border border-emerald-200 active:scale-95 cursor-pointer">
+                                💾 حفظ
+                            </button>
+                            <button type="button" onclick="openTraineeProfileModal('${r.id}')" title="فتح ملف المتدرب الكامل وسجل درجاته وحضوره" class="px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs transition border border-blue-200 active:scale-95 cursor-pointer flex items-center gap-1">
+                                <span>👤</span>
+                                <span>الملف</span>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -23921,62 +24194,69 @@ ${details}
     }
     window.renderInstTraineesTable = renderInstTraineesTable;
 
-    // حفظ تعديل أي حقل من حقول المتدرب مباشرة في الذاكرة
+    // حفظ تعديل أي حقل من حقول المتدرب مباشرة في الذاكرة ومزامنة دليل الهواتف
     function saveInstTraineeField(id, field, value) {
         if (!id || !field) return;
 
-        if (typeof trainees === 'undefined' || !Array.isArray(trainees)) return;
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(id) : String(id).trim();
 
         if (typeof phoneDirectory === 'undefined') window.phoneDirectory = {};
-        if (!phoneDirectory[id]) {
-            phoneDirectory[id] = { id: cleanId };
+        if (!phoneDirectory[id] && !phoneDirectory[cleanId]) {
+            phoneDirectory[cleanId] = { id: cleanId };
         }
+        const activeDir = phoneDirectory[id] || phoneDirectory[cleanId];
 
         const val = String(value || '').trim();
 
         if (field === 'dob') {
-            const formatted = formatDobMdy(val);
-            phoneDirectory[id].dob = formatted;
-            const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
-            if (t) t.dob = formatted;
+            const formatted = (typeof formatDobMdy === 'function') ? formatDobMdy(val) : val;
+            activeDir.dob = formatted;
+            if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+                const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
+                if (t) t.dob = formatted;
+            }
         } else if (field === 'gender') {
-            const norm = normalizeGenderValue(val, 'ذكر');
-            phoneDirectory[id].gender = norm;
-            const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
-            if (t) t.gender = norm;
+            const norm = (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(val, 'ذكر') : val;
+            activeDir.gender = norm;
+            if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+                const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
+                if (t) t.gender = norm;
+            }
         } else if (field === 'phone') {
             const clPh = (typeof cleanPhone === 'function') ? cleanPhone(val) : val;
-            phoneDirectory[id].phone = clPh;
-            const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
-            if (t) t.phone = clPh;
+            activeDir.phone = clPh;
+            if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+                const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
+                if (t) t.phone = clPh;
+            }
         } else {
-            phoneDirectory[id][field] = val;
-            const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
-            if (t) t[field] = val;
+            activeDir[field] = val;
+            if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+                const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
+                if (t) t[field] = val;
+            }
         }
 
         if (['first', 'second', 'third', 'last'].includes(field)) {
-            const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
-            const p1 = phoneDirectory[id].first_name || (t && t.first_name) || '';
-            const p2 = phoneDirectory[id].second_name || (t && t.second_name) || '';
-            const p3 = phoneDirectory[id].third_name || (t && t.third_name) || '';
-            const p4 = phoneDirectory[id].last_name || (t && t.last_name) || '';
+            const t = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id) : null;
+            const p1 = activeDir.first_name || (t && t.first_name) || '';
+            const p2 = activeDir.second_name || (t && t.second_name) || '';
+            const p3 = activeDir.third_name || (t && t.third_name) || '';
+            const p4 = activeDir.last_name || (t && t.last_name) || '';
             const newFullName = [p1, p2, p3, p4].filter(Boolean).join(' ');
             if (newFullName) {
-                phoneDirectory[id].name = newFullName;
+                activeDir.name = newFullName;
                 if (t) t.name = newFullName;
             }
         }
 
         try {
-            localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
-            localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+            if (typeof phoneDirectory !== 'undefined') localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
+            if (typeof trainees !== 'undefined') localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
         } catch (e) {
             console.warn('localStorage save warning:', e);
         }
 
-        // تحديث إحصائيات الاكتمال والشريط التنبيهي دون إفقاد المتدرب تركيز الحقل
         updateInstQuickStats();
     }
     window.saveInstTraineeField = saveInstTraineeField;
@@ -24000,11 +24280,14 @@ ${details}
         const alertAction = document.getElementById('instAlertAction');
 
         const selectedCompany = compFilterEl ? compFilterEl.value : 'ALL';
-        const selectedGroup = grpFilterEl ? grpFilterEl.value : '';
-        if (!selectedGroup) return;
+        const rawGroup = grpFilterEl ? grpFilterEl.value : 'ALL';
+        const selectedGroup = (!rawGroup || rawGroup === '') ? 'ALL' : rawGroup;
 
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
-        let groupTrainees = pool.filter(t => t.group && t.group.trim() === selectedGroup.trim());
+        const pool = getUnifiedTraineesPool();
+        let groupTrainees = pool;
+        if (selectedGroup !== 'ALL') {
+            groupTrainees = pool.filter(t => t.group && (t.group.trim() === selectedGroup.trim() || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group))));
+        }
         if (selectedCompany !== 'ALL') {
             groupTrainees = groupTrainees.filter(t => t.company === selectedCompany);
         }
@@ -24014,18 +24297,18 @@ ${details}
 
         groupTrainees.forEach(t => {
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
-            const pDir = (typeof phoneDirectory !== 'undefined' && phoneDirectory[t.id]) ? phoneDirectory[t.id] : {};
+            const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[t.id] || phoneDirectory[cleanId] || {}) : {});
 
             let first = pDir.first_name || t.first_name || '';
             let last = pDir.last_name || t.last_name || '';
             if (!first && !last) {
-                const parts = splitArabicName(pDir.name || t.name || '');
+                const parts = (typeof splitArabicName === 'function') ? splitArabicName(pDir.name || t.name || '') : { first: '', last: '' };
                 first = parts.first;
                 last = parts.last;
             }
 
-            const formattedDob = formatDobMdy(pDir.dob || t.dob || '');
-            const normGender = normalizeGenderValue(pDir.gender || t.gender || '', 'ذكر');
+            const formattedDob = (typeof formatDobMdy === 'function') ? formatDobMdy(pDir.dob || t.dob || '') : (pDir.dob || t.dob || '');
+            const normGender = (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(pDir.gender || t.gender || '', 'ذكر') : (pDir.gender || t.gender || 'ذكر');
             const nationality = pDir.nationality || t.nationality || (cleanId.startsWith('1') ? 'سعودي' : 'غير سعودي');
             const qual = pDir.qual || t.qual || '';
             const email = pDir.email || t.email || '';
@@ -24051,7 +24334,12 @@ ${details}
         if (statReview) statReview.innerText = reviewCount;
 
         if (alertBanner) {
-            if (reviewCount > 0) {
+            if (selectedGroup === 'ALL') {
+                alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-slate-900 text-white shadow-sm flex-wrap';
+                if (alertIcon) alertIcon.innerText = '🌐';
+                if (alertText) alertText.innerHTML = `<span><b>عرض شامل لجميع الشعب:</b> معروض جميع متدربي المؤسسة (${groupTrainees.length} متدرب). بيانات المتدربين مربوطة بالتحضير وملفات المتدربين.</span>`;
+                if (alertAction) alertAction.classList.add('hidden');
+            } else if (reviewCount > 0) {
                 alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-amber-50 border-amber-300 text-amber-900 shadow-xs';
                 if (alertIcon) alertIcon.innerText = '⚠️';
                 if (alertText) alertText.innerHTML = `<span><b>تنبيه التدقيق والمراجعة:</b> يوجد <b>(${reviewCount})</b> متدرب بحاجة استكمال بيانات قبل التصدير.</span>`;
@@ -24067,7 +24355,7 @@ ${details}
     window.updateInstQuickStats = updateInstQuickStats;
 
     function scrollToFirstIncompleteInstRow() {
-        const incRow = document.querySelector('#instTraineesTableBody tr.bg-amber-50\/30');
+        const incRow = document.querySelector('#instTraineesTableBody tr.bg-amber-50\\/30');
         if (incRow) {
             incRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
             incRow.classList.add('ring-2', 'ring-amber-500');
@@ -24083,18 +24371,18 @@ ${details}
         const compFilterEl = document.getElementById('instCompanyFilter');
         const grpFilterEl = document.getElementById('instGroupFilter');
         const selectedCompany = compFilterEl ? compFilterEl.value : 'ALL';
-        const selectedGroup = grpFilterEl ? grpFilterEl.value : '';
-
-        if (!selectedGroup) {
-            return showToast('⚠️ يرجى اختيار المجموعة / الشعبة أولاً لتصدير ملف المؤسسة', 'warning');
-        }
+        const rawGroup = grpFilterEl ? grpFilterEl.value : 'ALL';
+        const selectedGroup = (!rawGroup || rawGroup === '') ? 'ALL' : rawGroup;
 
         if (typeof ensureTraineesConsistencyWithDirectory === 'function') {
             ensureTraineesConsistencyWithDirectory();
         }
 
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
-        let groupTrainees = pool.filter(t => t.group && t.group.trim() === selectedGroup.trim());
+        const pool = getUnifiedTraineesPool();
+        let groupTrainees = pool;
+        if (selectedGroup !== 'ALL') {
+            groupTrainees = pool.filter(t => t.group && (t.group.trim() === selectedGroup.trim() || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group))));
+        }
         if (selectedCompany !== 'ALL') {
             groupTrainees = groupTrainees.filter(t => t.company === selectedCompany);
         }
@@ -24104,7 +24392,7 @@ ${details}
         }
 
         // استبعاد المتدربين المحددين يدوياً للاستبعاد
-        const exportableTrainees = groupTrainees.filter(t => !excludedInstTraineeIds.has(t.id));
+        const exportableTrainees = groupTrainees.filter(t => !excludedInstTraineeIds.has(t.id) && !excludedInstTraineeIds.has(cleanNationalId(t.id)));
         if (exportableTrainees.length === 0) {
             return showToast('⚠️ تم استبعاد جميع المتدربين من التصدير يدوياً. يرجى إبقاء متدرب واحد على الأقل.', 'warning');
         }
@@ -24117,7 +24405,7 @@ ${details}
         let incompleteCount = 0;
         const exportRows = exportableTrainees.map(t => {
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
-            const pDir = (typeof phoneDirectory !== 'undefined' && phoneDirectory[t.id]) ? phoneDirectory[t.id] : {};
+            const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[t.id] || phoneDirectory[cleanId] || {}) : {});
 
             let first = pDir.first_name || t.first_name || '';
             let second = pDir.second_name || t.second_name || '';
@@ -24126,7 +24414,7 @@ ${details}
 
             if (!first && !last) {
                 const fullName = pDir.name || t.name || '';
-                const parts = splitArabicName(fullName);
+                const parts = (typeof splitArabicName === 'function') ? splitArabicName(fullName) : { first: fullName, second: '', third: '', last: '' };
                 first = parts.first;
                 second = parts.second;
                 third = parts.third;
@@ -24134,9 +24422,9 @@ ${details}
             }
 
             const rawDob = pDir.dob || t.dob || '';
-            const formattedDob = formatDobMdy(rawDob);
+            const formattedDob = (typeof formatDobMdy === 'function') ? formatDobMdy(rawDob) : rawDob;
             const rawGender = pDir.gender || t.gender || '';
-            const normGender = normalizeGenderValue(rawGender, 'ذكر');
+            const normGender = (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(rawGender, 'ذكر') : (rawGender || 'ذكر');
 
             let nationality = pDir.nationality || t.nationality || '';
             if (!nationality) {
@@ -24146,7 +24434,7 @@ ${details}
             }
 
             let qual = pDir.qual || t.qual || '';
-            if (qual === 'غير محدد') qual = 'ثانوي';
+            if (!qual || qual === 'غير محدد') qual = 'ثانوي';
 
             const email = pDir.email || t.email || '';
             let rawPhone = pDir.phone || t.phone || '';
@@ -24239,7 +24527,7 @@ ${details}
             XLSX.utils.book_append_sheet(wb, ws, 'ملف المؤسسة');
 
             const safeComp = (selectedCompany && selectedCompany !== 'ALL') ? `_${selectedCompany.replace(/[\s\/\:*?"<>|]+/g, '_')}` : '';
-            const safeGrp = selectedGroup.replace(/[\s\/\:*?"<>|]+/g, '_');
+            const safeGrp = (selectedGroup && selectedGroup !== 'ALL') ? selectedGroup.replace(/[\s\/\:*?"<>|]+/g, '_') : 'كافة_الشعب';
             const nowStr = new Date().toISOString().slice(0, 10);
             const fileName = `ملف_المؤسسة${safeComp}_${safeGrp}_${nowStr}.xlsx`;
 
@@ -24247,7 +24535,8 @@ ${details}
             showToast(`✅ تم تصدير ملف المؤسسة المعتمد لـ (${exportableTrainees.length}) متدرب بنجاح!`, 'success');
 
             // فتح نافذة تأكيد الاعتماد واحتساب الـ 4 أسابيع تلقائياً
-            openInstitutionApprovalConfirmationModal(selectedGroup, exportableTrainees);
+            const approvalGroupName = (selectedGroup && selectedGroup !== 'ALL') ? selectedGroup : 'كافة الشعب المشمولة';
+            openInstitutionApprovalConfirmationModal(approvalGroupName, exportableTrainees);
 
         } catch (exportErr) {
             console.error('Institution file export error:', exportErr);
