@@ -3284,6 +3284,8 @@
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <h3 class="font-black text-slate-900 text-base" id="tpModalName">ملف المتدرب</h3>
                                     <span id="tpStatusBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-800 border-emerald-300">حاضر</span>
+                                    <span id="tpInstitutionBadge" class="hidden text-[10px] font-black px-2.5 py-0.5 rounded-full border bg-emerald-100 text-emerald-900 border-emerald-300">🏛️ معتمد بالمؤسسة</span>
+                                    <span id="tpManarBadge" class="hidden text-[10px] font-black px-2.5 py-0.5 rounded-full border bg-amber-100 text-amber-900 border-amber-300">🎓 حاصل على شهادة منار</span>
                                 </div>
                                 <div class="flex items-center gap-2 text-xs text-slate-500 font-bold mt-0.5 flex-wrap">
                                     <span>الهوية: <span class="font-mono text-slate-800 font-extrabold" id="tpModalIdDisplay">1234567890</span></span>
@@ -4577,6 +4579,8 @@
                                 <h3 class="font-black text-slate-900 text-lg md:text-xl" id="saStudentName">اسم المتدرب</h3>
                                 <span class="bg-slate-900 text-amber-300 text-xs font-black px-2.5 py-0.5 rounded-full border border-slate-800" id="saStudentGroup">المجموعة</span>
                                 <span class="bg-amber-100 text-amber-900 text-xs font-black px-2.5 py-0.5 rounded-full border border-amber-300" id="saStudentCompany">الشركة</span>
+                                <span id="saStudentInstitutionBadge" class="hidden bg-emerald-100 text-emerald-900 text-xs font-black px-2.5 py-0.5 rounded-full border border-emerald-300">🏛️ معتمد بالمؤسسة (TVTC)</span>
+                                <span id="saStudentManarBadge" class="hidden bg-amber-100 text-amber-900 text-xs font-black px-2.5 py-0.5 rounded-full border border-amber-300">🎓 حاصل على شهادة معتمدة من منصة منار</span>
                             </div>
                             <div class="flex items-center gap-2 text-xs text-slate-500 font-medium flex-wrap pt-0.5">
                                 <span>الهوية الوطنية: <b class="font-mono text-slate-900 font-black bg-slate-100 px-1.5 py-0.5 rounded" id="saStudentId">--</b></span>
@@ -5952,6 +5956,14 @@
                                 <span class="block text-[10px] text-amber-200 font-bold">بحاجة مراجعة</span>
                                 <span id="instStatReview" class="text-lg font-black text-amber-300">0</span>
                             </div>
+                            <div class="bg-white/10 backdrop-blur-xs border border-white/15 px-3 py-2 rounded-2xl text-center min-w-[85px]" title="عدد المجموعات التي أكملت فترة الـ 4 أسابيع بعد الاعتماد الرسمي">
+                                <span class="block text-[10px] text-amber-300 font-bold">شعب أتمت الدورة</span>
+                                <span id="instStatCompletedGroups" class="text-lg font-black text-amber-300">0</span>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-xs border border-white/15 px-3 py-2 rounded-2xl text-center min-w-[85px]" title="إجمالي شهادات منصة منار المسجلة والصادرة">
+                                <span class="block text-[10px] text-emerald-300 font-bold">شهادات منار</span>
+                                <span id="instStatManarIssued" class="text-lg font-black text-emerald-300">0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -6009,9 +6021,47 @@
                             <span class="text-base" id="instAlertIcon">ℹ️</span>
                             <span id="instAlertText">يرجى تحديد الشركة والمجموعة لعرض متدربي الشعبة وتدقيق بياناتهم قبل التصدير.</span>
                         </div>
-                        <div id="instAlertAction" class="hidden">
+                        <div id="instAlertAction" class="flex items-center gap-2">
                             <button type="button" onclick="scrollToFirstIncompleteInstRow()" class="text-[11px] underline font-black text-amber-800 hover:text-amber-950">الانتقال للحقول الناقصة ↓</button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ==================== MANAR CERTIFICATES MANAGEMENT & REGISTRATION BAR ==================== -->
+                <div class="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center font-black text-sm">
+                                🎓
+                            </div>
+                            <div>
+                                <h3 class="text-xs md:text-sm font-black text-slate-900">إدارة وتسجيل شهادات منصة منار (الاعتماد والإصدار)</h3>
+                                <p class="text-[11px] text-slate-500">ابحث برقم الهوية أو الاسم لتسجيل إصدار الشهادة أو فرز الحالات الصادرة</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-bold text-slate-500">فلترة شهادات منار:</span>
+                            <select id="manarCertFilter" onchange="renderInstTraineesTable()" class="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer">
+                                <option value="ALL">جميع المتدربين</option>
+                                <option value="ISSUED">تم إصدار الشهادة من منار ✅</option>
+                                <option value="NOT_ISSUED">لم تصدر الشهادة بعد ⏳</option>
+                                <option value="ELIGIBLE">مؤهل للإصدار (أتم 4 أسابيع) 🎯</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Quick Search & Register Input -->
+                    <div class="relative flex flex-col sm:flex-row gap-2">
+                        <div class="relative flex-1">
+                            <input type="text" id="manarQuickSearchInput" oninput="handleManarQuickSearch(this.value)" placeholder="أدخل رقم الهوية (10 أرقام) أو اكتب أول حروف من اسم المتدرب..." class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 rounded-xl p-2.5 pl-8 text-xs font-bold text-slate-800 outline-none">
+                            <span class="absolute left-2.5 top-2.5 text-slate-400 text-sm">🔍</span>
+                            <!-- Live Autocomplete Dropdown -->
+                            <div id="manarSearchResults" class="hidden absolute top-full left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-xl z-50 divide-y divide-slate-100"></div>
+                        </div>
+                        <button type="button" onclick="registerManarCertificateFromInput()" class="bg-slate-900 hover:bg-black text-amber-300 font-black px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm cursor-pointer whitespace-nowrap">
+                            <span>تسجيل إصدار شهادة منار</span>
+                            <span>🎓</span>
+                        </button>
                     </div>
                 </div>
 
@@ -6041,7 +6091,10 @@
                         <table class="w-full text-right border-collapse text-xs">
                             <thead>
                                 <tr class="bg-slate-100 text-slate-700 font-black border-b border-slate-200 text-[11px] whitespace-nowrap">
-                                    <th class="p-3 text-center w-10">#</th>
+                                    <th class="p-3 text-center w-10">
+                                        <input type="checkbox" id="instSelectAllCheckbox" checked onchange="toggleAllInstTraineesSelection(this.checked)" class="w-4 h-4 accent-emerald-600 rounded cursor-pointer" title="تحديد / استبعاد الكل من ملف التصدير">
+                                    </th>
+                                    <th class="p-3 text-center w-8">#</th>
                                     <th class="p-3 text-center">1. رقم الجوال</th>
                                     <th class="p-3">2. البريد الإلكتروني</th>
                                     <th class="p-3">3. المؤهل</th>
@@ -6053,6 +6106,8 @@
                                     <th class="p-3">9. الاسم الثاني</th>
                                     <th class="p-3">10. الاسم الأول</th>
                                     <th class="p-3 text-center">11. رقم الهوية</th>
+                                    <th class="p-3 text-center">نسبة الحضور</th>
+                                    <th class="p-3 text-center">شهادة منار</th>
                                     <th class="p-3 text-center">حالة التدقيق</th>
                                     <th class="p-3 text-center">إجراء</th>
                                 </tr>
@@ -6074,7 +6129,41 @@
                 </div>
             </div>
 
-            <!-- ==================== TRAINER CANVAS LMS MODAL (Legacy Compatibility) ==================== -->
+            <!-- ==================== INSTITUTION APPROVAL CONFIRMATION MODAL ==================== -->
+    <div id="instApprovalModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-xs z-[70] flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-center animate-pop-in">
+            <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mx-auto border border-emerald-300">
+                🏛️
+            </div>
+            <div class="space-y-1">
+                <h3 class="text-base font-black text-slate-900">تم تصدير ملف المؤسسة بنجاح!</h3>
+                <p class="text-xs text-slate-500">
+                    هل تم اعتماد هذا الكشف رسمياً في المؤسسة العامة للتدريب التقني والمهني للمجموعة: <b id="iamGroupName" class="text-emerald-700">--</b>؟
+                </p>
+                <div class="text-[11px] font-bold text-slate-600 mt-1">
+                    عدد المتدربين المشمولين في التصدير: <span id="iamTraineesCount" class="font-black text-slate-900">0</span> متدرب
+                </div>
+            </div>
+            <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 text-right leading-relaxed font-bold">
+                ℹ️ عند الضغط على <b>"نعم، تم الاعتماد الرسمي"</b>:
+                <ul class="list-disc list-inside mt-1 space-y-0.5 font-medium text-amber-950">
+                    <li>يتم توثيق حالة <b>"معتمد في المؤسسة"</b> في ملف المتدرب تلقائياً.</li>
+                    <li>يبدأ احتساب فترة الدورة التدريبية (4 أسابيع).</li>
+                    <li>عند انتهاء الـ 4 أسابيع، ستتاح إمكانية إصدار شهادة منصة منار فوراً.</li>
+                </ul>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button type="button" onclick="confirmInstitutionApprovalNow()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl text-xs shadow-md transition active:scale-95 cursor-pointer">
+                    ✅ نعم، تم الاعتماد الرسمي
+                </button>
+                <button type="button" onclick="closeInstitutionApprovalModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition cursor-pointer">
+                    تصدير فقط (لاحقاً)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TRAINER CANVAS LMS MODAL (Legacy Compatibility) ==================== -->
             <div id="trainerLmsModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 md:p-6 overflow-y-auto">
                 <div class="bg-white rounded-3xl max-w-4xl w-full p-5 md:p-7 space-y-5 shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -15447,6 +15536,28 @@ ${details}
             statusBadge.innerText = st.label;
         }
 
+        // عرض شارات الاعتماد بالمؤسسة وشهادة منار في ملف المتدرب
+        const tpInstBadge = document.getElementById('tpInstitutionBadge');
+        if (tpInstBadge) {
+            const isApproved = Boolean(trainee.institutionApproved || (typeof phoneDirectory !== 'undefined' && phoneDirectory[traineeId]?.institutionApproved));
+            if (isApproved) {
+                tpInstBadge.classList.remove('hidden');
+                tpInstBadge.title = `معتمد في المؤسسة (شعبة: ${trainee.institutionApprovalGroup || trainee.group || '—'})`;
+            } else {
+                tpInstBadge.classList.add('hidden');
+            }
+        }
+
+        const tpManarBadge = document.getElementById('tpManarBadge');
+        if (tpManarBadge) {
+            const isManar = Boolean(trainee.manarCertificateIssued || (typeof phoneDirectory !== 'undefined' && phoneDirectory[traineeId]?.manarCertificateIssued));
+            if (isManar) {
+                tpManarBadge.classList.remove('hidden');
+            } else {
+                tpManarBadge.classList.add('hidden');
+            }
+        }
+
         const waBtn = document.getElementById('tpWhatsappBtn');
         if (waBtn) {
             if (tObj.phone) {
@@ -22875,7 +22986,7 @@ ${details}
         if (typeof ensureTraineesConsistencyWithDirectory === 'function') {
             ensureTraineesConsistencyWithDirectory();
         }
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : [];
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
         const compFilterEl = document.getElementById('instCompanyFilter');
         if (!compFilterEl) return;
 
@@ -22910,7 +23021,7 @@ ${details}
 
     // تعبئة قائمة المجموعات بناءً على الشركة المختارة
     function populateInstGroupFilter() {
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : [];
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
         const compFilterEl = document.getElementById('instCompanyFilter');
         const grpFilterEl = document.getElementById('instGroupFilter');
         if (!grpFilterEl) return;
@@ -22953,6 +23064,247 @@ ${details}
     }
     window.onInstGroupChange = onInstGroupChange;
 
+        // ===================================================================
+    // INSTITUTION TVTC & MANAR CERTIFICATES ENGINE (إدارة اعتماد المؤسسة وشهادات منار)
+    // ===================================================================
+    let excludedInstTraineeIds = new Set();
+    let currentExportGroupForApproval = '';
+    let currentExportedTraineesForApproval = [];
+
+    function toggleInstTraineeExclusion(traineeId, isExcluded) {
+        if (!traineeId) return;
+        if (isExcluded) {
+            excludedInstTraineeIds.add(traineeId);
+        } else {
+            excludedInstTraineeIds.delete(traineeId);
+        }
+        renderInstTraineesTable();
+    }
+    window.toggleInstTraineeExclusion = toggleInstTraineeExclusion;
+
+    function toggleAllInstTraineesSelection(selectAll) {
+        const grpFilterEl = document.getElementById('instGroupFilter');
+        const selectedGroup = grpFilterEl ? grpFilterEl.value : '';
+        if (!selectedGroup) return;
+
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        const groupTrainees = pool.filter(t => t.group && t.group.trim() === selectedGroup.trim());
+
+        if (selectAll) {
+            excludedInstTraineeIds.clear();
+        } else {
+            groupTrainees.forEach(t => excludedInstTraineeIds.add(t.id));
+        }
+        renderInstTraineesTable();
+    }
+    window.toggleAllInstTraineesSelection = toggleAllInstTraineesSelection;
+
+    function getInstitutionApprovalStatus(trainee) {
+        if (!trainee || !trainee.institutionApproved || !trainee.institutionApprovalDate) {
+            return { approved: false, weeksCompleted: false, daysRemaining: 28, elapsedDays: 0 };
+        }
+        const approvalTime = new Date(trainee.institutionApprovalDate).getTime();
+        const now = Date.now();
+        const elapsedDays = Math.max(0, Math.floor((now - approvalTime) / (1000 * 60 * 60 * 24)));
+        const daysRemaining = Math.max(0, 28 - elapsedDays);
+        const weeksCompleted = elapsedDays >= 28;
+        return {
+            approved: true,
+            approvalDate: trainee.institutionApprovalDate,
+            elapsedDays,
+            daysRemaining,
+            weeksCompleted
+        };
+    }
+    window.getInstitutionApprovalStatus = getInstitutionApprovalStatus;
+
+    function toggleManarCertificate(traineeId) {
+        if (!traineeId) return;
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        const t = pool.find(x => cleanNationalId(x.id) === cleanId || x.id === traineeId) || (typeof phoneDirectory !== 'undefined' ? phoneDirectory[cleanId] : null);
+        if (!t) return showToast('لم يتم العثور على المتدرب', 'error');
+
+        t.manarCertificateIssued = !t.manarCertificateIssued;
+        t.manarCertificateDate = t.manarCertificateIssued ? new Date().toISOString() : null;
+
+        const mainT = pool.find(x => cleanNationalId(x.id) === cleanId || x.id === traineeId);
+        if (mainT) {
+            mainT.manarCertificateIssued = t.manarCertificateIssued;
+            mainT.manarCertificateDate = t.manarCertificateDate;
+        }
+        if (typeof phoneDirectory !== 'undefined' && phoneDirectory[cleanId]) {
+            phoneDirectory[cleanId].manarCertificateIssued = t.manarCertificateIssued;
+            phoneDirectory[cleanId].manarCertificateDate = t.manarCertificateDate;
+        }
+
+        localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+        if (typeof phoneDirectory !== 'undefined') {
+            localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
+        }
+
+        renderInstTraineesTable();
+        
+        if (t.manarCertificateIssued) {
+            showToast(`🎉 تم تسجيل إصدار شهادة منصة منار للمتدرب (${t.name || cleanId}) بنجاح!`, 'success');
+        } else {
+            showToast(`ℹ️ تم إلغاء تسجيل إصدار شهادة منار للمتدرب (${t.name || cleanId}).`, 'info');
+        }
+    }
+    window.toggleManarCertificate = toggleManarCertificate;
+
+    function handleManarQuickSearch(query) {
+        const resultsContainer = document.getElementById('manarSearchResults');
+        if (!resultsContainer) return;
+
+        const q = String(query || '').trim().toLowerCase();
+        if (!q || q.length < 2) {
+            resultsContainer.classList.add('hidden');
+            resultsContainer.innerHTML = '';
+            return;
+        }
+
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        const matches = pool.filter(t => {
+            const id = String(t.id || '');
+            const name = String(t.name || '').toLowerCase();
+            return id.includes(q) || name.includes(q);
+        }).slice(0, 8);
+
+        if (matches.length === 0) {
+            resultsContainer.innerHTML = `<div class="p-3 text-center text-xs text-slate-400 font-bold">لا يوجد متدرب مطابق</div>`;
+            resultsContainer.classList.remove('hidden');
+            return;
+        }
+
+        resultsContainer.innerHTML = matches.map(t => {
+            const isIssued = t.manarCertificateIssued;
+            return `
+                <div onclick="selectManarSearchResult('${t.id}')" class="p-2.5 hover:bg-slate-50 cursor-pointer flex items-center justify-between text-xs transition">
+                    <div>
+                        <span class="font-black text-slate-900 block">${t.name || t.id}</span>
+                        <span class="text-[10px] text-slate-500 font-mono">الهوية: ${t.id} • الشعبة: ${t.group || '—'}</span>
+                    </div>
+                    <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${isIssued ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}">
+                        ${isIssued ? 'الشهادة صادرة ✅' : 'لم تصدر ⏳'}
+                    </span>
+                </div>
+            `;
+        }).join('');
+
+        resultsContainer.classList.remove('hidden');
+    }
+    window.handleManarQuickSearch = handleManarQuickSearch;
+
+    function selectManarSearchResult(traineeId) {
+        const input = document.getElementById('manarQuickSearchInput');
+        if (input) input.value = traineeId;
+        const resultsContainer = document.getElementById('manarSearchResults');
+        if (resultsContainer) resultsContainer.classList.add('hidden');
+    }
+    window.selectManarSearchResult = selectManarSearchResult;
+
+    function registerManarCertificateFromInput() {
+        const input = document.getElementById('manarQuickSearchInput');
+        const val = input ? input.value.trim() : '';
+        if (!val) {
+            return showToast('⚠️ يرجى إدخال رقم الهوية أو اختيار متدرب أولاً', 'warning');
+        }
+
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(val) : val;
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        const t = pool.find(x => cleanNationalId(x.id) === cleanId || x.name.toLowerCase().includes(val.toLowerCase()) || x.id === val);
+        
+        if (!t) {
+            return showToast('❌ لم يتم العثور على أي متدرب مطابق لرقم الهوية أو الاسم المدخل', 'error');
+        }
+
+        toggleManarCertificate(t.id);
+        if (input) input.value = '';
+        const resultsContainer = document.getElementById('manarSearchResults');
+        if (resultsContainer) resultsContainer.classList.add('hidden');
+    }
+    window.registerManarCertificateFromInput = registerManarCertificateFromInput;
+
+    function openInstitutionApprovalConfirmationModal(groupName, exportedTrainees) {
+        currentExportGroupForApproval = groupName;
+        currentExportedTraineesForApproval = exportedTrainees || [];
+        
+        const modal = document.getElementById('instApprovalModal');
+        const grpNameEl = document.getElementById('iamGroupName');
+        const countEl = document.getElementById('iamTraineesCount');
+        
+        if (grpNameEl) grpNameEl.innerText = groupName;
+        if (countEl) countEl.innerText = currentExportedTraineesForApproval.length;
+        if (modal) modal.classList.remove('hidden');
+    }
+    window.openInstitutionApprovalConfirmationModal = openInstitutionApprovalConfirmationModal;
+
+    function closeInstitutionApprovalModal() {
+        const modal = document.getElementById('instApprovalModal');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeInstitutionApprovalModal = closeInstitutionApprovalModal;
+
+    function confirmInstitutionApprovalNow() {
+        if (!currentExportGroupForApproval || currentExportedTraineesForApproval.length === 0) {
+            closeInstitutionApprovalModal();
+            return;
+        }
+
+        const nowIso = new Date().toISOString();
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        
+        currentExportedTraineesForApproval.forEach(expT => {
+            const t = pool.find(x => x.id === expT.id);
+            if (t) {
+                t.institutionApproved = true;
+                t.institutionApprovalDate = nowIso;
+                t.institutionApprovalGroup = currentExportGroupForApproval;
+            }
+            if (typeof phoneDirectory !== 'undefined' && phoneDirectory[expT.id]) {
+                phoneDirectory[expT.id].institutionApproved = true;
+                phoneDirectory[expT.id].institutionApprovalDate = nowIso;
+                phoneDirectory[expT.id].institutionApprovalGroup = currentExportGroupForApproval;
+            }
+        });
+
+        localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+        if (typeof phoneDirectory !== 'undefined') {
+            localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
+        }
+
+        closeInstitutionApprovalModal();
+        renderInstTraineesTable();
+        showToast(`🏛️ تم توثيق اعتماد الشعبة (${currentExportGroupForApproval}) في المؤسسة، وبدء احتساب الـ 4 أسابيع!`, 'success');
+    }
+    window.confirmInstitutionApprovalNow = confirmInstitutionApprovalNow;
+
+    function simulateFourWeeksCompletedForCurrentGroup() {
+        const grpFilterEl = document.getElementById('instGroupFilter');
+        const selectedGroup = grpFilterEl ? grpFilterEl.value : '';
+        if (!selectedGroup) {
+            return showToast('يرجى اختيار المجموعة أولاً', 'warning');
+        }
+        
+        const pastDate = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString();
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        let count = 0;
+        pool.forEach(t => {
+            if (t.group && t.group.trim() === selectedGroup.trim()) {
+                t.institutionApproved = true;
+                t.institutionApprovalDate = pastDate;
+                t.institutionApprovalGroup = selectedGroup;
+                count++;
+            }
+        });
+
+        localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+        renderInstTraineesTable();
+        showToast(`⚡ تم محاكاة اكتمال الـ 4 أسابيع لـ (${count}) متدرب في الشعبة (${selectedGroup})! تظهر الآن أزرار "يمكن إصدار شهادة منار 🎓".`, 'success');
+    }
+    window.simulateFourWeeksCompletedForCurrentGroup = simulateFourWeeksCompletedForCurrentGroup;
+
     // عرض جدول متدربي الشعبة وتدقيق الحقول
     function renderInstTraineesTable() {
         const tableBody = document.getElementById('instTraineesTableBody');
@@ -22960,19 +23312,41 @@ ${details}
         const statTotal = document.getElementById('instStatTotal');
         const statReady = document.getElementById('instStatReady');
         const statReview = document.getElementById('instStatReview');
+        const statCompletedGroups = document.getElementById('instStatCompletedGroups');
+        const statManarIssued = document.getElementById('instStatManarIssued');
         const alertBanner = document.getElementById('instAlertBanner');
         const alertIcon = document.getElementById('instAlertIcon');
         const alertText = document.getElementById('instAlertText');
         const alertAction = document.getElementById('instAlertAction');
         const statusFilterEl = document.getElementById('instStatusFilter');
+        const manarFilterEl = document.getElementById('manarCertFilter');
         const compFilterEl = document.getElementById('instCompanyFilter');
         const grpFilterEl = document.getElementById('instGroupFilter');
+        const selectAllCheckbox = document.getElementById('instSelectAllCheckbox');
 
         if (!tableBody) return;
+
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+        
+        // حساب إجمالي الشعب المكتملة وإجمالي شهادات منار على مستوى النظام بالكامل
+        const completedGroupsSet = new Set();
+        let globalManarCount = 0;
+        pool.forEach(t => {
+            const s = getInstitutionApprovalStatus(t);
+            if (s.approved && s.weeksCompleted && t.group) {
+                completedGroupsSet.add(t.group.trim());
+            }
+            if (t.manarCertificateIssued || (typeof phoneDirectory !== 'undefined' && phoneDirectory[t.id]?.manarCertificateIssued)) {
+                globalManarCount++;
+            }
+        });
+        if (statCompletedGroups) statCompletedGroups.innerText = completedGroupsSet.size;
+        if (statManarIssued) statManarIssued.innerText = globalManarCount;
 
         const selectedCompany = compFilterEl ? compFilterEl.value : 'ALL';
         const selectedGroup = grpFilterEl ? grpFilterEl.value : '';
         const filterStatus = statusFilterEl ? statusFilterEl.value : 'ALL';
+        const filterManar = manarFilterEl ? manarFilterEl.value : 'ALL';
 
         if (!selectedGroup) {
             if (emptyState) emptyState.classList.remove('hidden');
@@ -22984,12 +23358,12 @@ ${details}
                 alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-slate-50 border-slate-200 text-slate-700';
             }
             if (alertIcon) alertIcon.innerText = 'ℹ️';
-            if (alertText) alertText.innerText = 'يرجى تحديد الشركة والمجموعة لعرض متدربي الشعبة وتدقيق بياناتهم قبل التصدير.';
+            if (alertText) alertText.innerText = 'يرجى تحديد الشركة والمجموعة لعرض متدربي الشعبة وتدقيق بياناتهم وإدارة الاستبعاد والتصدير.';
             if (alertAction) alertAction.classList.add('hidden');
+            if (selectAllCheckbox) selectAllCheckbox.checked = true;
             return;
         }
 
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : [];
         let groupTrainees = pool.filter(t => t.group && t.group.trim() === selectedGroup.trim());
         if (selectedCompany !== 'ALL') {
             groupTrainees = groupTrainees.filter(t => t.company === selectedCompany);
@@ -22997,7 +23371,7 @@ ${details}
 
         if (groupTrainees.length === 0) {
             if (emptyState) emptyState.classList.add('hidden');
-            tableBody.innerHTML = `<tr><td colspan="14" class="p-8 text-center text-slate-500 font-bold bg-white">⚠️ لا يوجد أي متدرب مسجل في هذه المجموعة (${escapeHtml(selectedGroup)}).</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="16" class="p-8 text-center text-slate-500 font-bold bg-white">⚠️ لا يوجد أي متدرب مسجل في هذه المجموعة (${escapeHtml(selectedGroup)}).</td></tr>`;
             if (statTotal) statTotal.innerText = '0';
             if (statReady) statReady.innerText = '0';
             if (statReview) statReview.innerText = '0';
@@ -23014,8 +23388,9 @@ ${details}
 
         let readyCount = 0;
         let reviewCount = 0;
+        let includedInExportCount = 0;
 
-        // إعداد بيانات السجلات والتحقق من الاكتمال
+        // إعداد بيانات السجلات والتحقق من الاكتمال ونسب الحضور وحالة منار
         const processedRows = groupTrainees.map((t, idx) => {
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
             const pDir = (typeof phoneDirectory !== 'undefined' && phoneDirectory[t.id]) ? phoneDirectory[t.id] : {};
@@ -23070,6 +23445,18 @@ ${details}
                 reviewCount++;
             }
 
+            // نسبة الحضور المعتمدة في النظام
+            const attRate = (typeof t.attendanceRate !== 'undefined') ? t.attendanceRate : ((typeof t.combinedRate !== 'undefined') ? t.combinedRate : ((typeof t.rate !== 'undefined') ? t.rate : ((typeof archiveData !== 'undefined' && archiveData[cleanId]) ? archiveData[cleanId].attendanceRate : 100)));
+
+            // حالة الاستبعاد اليدوي قبل التصدير
+            const isExcluded = excludedInstTraineeIds.has(t.id);
+            if (!isExcluded) includedInExportCount++;
+
+            // حالة الاعتماد والـ 4 أسابيع ومنصة منار
+            const appStatus = getInstitutionApprovalStatus(t);
+            const isManarIssued = Boolean(t.manarCertificateIssued || pDir.manarCertificateIssued);
+            const canIssueManar = Boolean(appStatus.approved && appStatus.weeksCompleted);
+
             return {
                 idx,
                 id: cleanId,
@@ -23084,6 +23471,11 @@ ${details}
                 email,
                 phone: cleanPh,
                 isComplete,
+                attendanceRate: attRate,
+                isExcluded,
+                appStatus,
+                isManarIssued,
+                canIssueManar,
                 missingList: [
                     !isIdValid && 'رقم الهوية',
                     !isNameValid && 'الاسم الأول/الأخير',
@@ -23102,22 +23494,33 @@ ${details}
         if (statReady) statReady.innerText = readyCount;
         if (statReview) statReview.innerText = reviewCount;
 
+        // تحديث حالة اختيار الكل (Select All Checkbox)
+        if (selectAllCheckbox) {
+            const allExcluded = groupTrainees.every(x => excludedInstTraineeIds.has(x.id));
+            const someExcluded = groupTrainees.some(x => excludedInstTraineeIds.has(x.id));
+            selectAllCheckbox.checked = !allExcluded && groupTrainees.length > 0;
+            selectAllCheckbox.indeterminate = someExcluded && !allExcluded;
+        }
+
         // تحديث شريط التنبيه
         if (alertBanner) {
+            const excludedCount = groupTrainees.length - includedInExportCount;
+            const excludedMsg = excludedCount > 0 ? ` <span class="bg-amber-200/80 text-amber-950 px-2 py-0.5 rounded-full font-black text-[11px]">تم استبعاد (${excludedCount}) متدرب يدوياً من التصدير</span>` : '';
+
             if (reviewCount > 0) {
-                alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-amber-50 border-amber-300 text-amber-900 shadow-xs';
+                alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-amber-50 border-amber-300 text-amber-900 shadow-xs flex-wrap';
                 if (alertIcon) alertIcon.innerText = '⚠️';
-                if (alertText) alertText.innerHTML = `<span><b>تنبيه التدقيق والمراجعة:</b> يوجد <b>(${reviewCount})</b> سجل متدرب بحاجة استكمال بيانات (مثل تاريخ الميلاد أو البريد أو الجوال). يرجى مراجعتها وتعديلها مباشرة في الجدول أدناه قبل التصدير.</span>`;
+                if (alertText) alertText.innerHTML = `<span><b>تنبيه التدقيق والمراجعة:</b> يوجد <b>(${reviewCount})</b> سجل بحاجة استكمال بيانات قبل التصدير.${excludedMsg}</span>`;
                 if (alertAction) alertAction.classList.remove('hidden');
             } else {
-                alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-emerald-50 border-emerald-300 text-emerald-900 shadow-xs';
+                alertBanner.className = 'p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-emerald-50 border-emerald-300 text-emerald-900 shadow-xs flex-wrap';
                 if (alertIcon) alertIcon.innerText = '✅';
-                if (alertText) alertText.innerHTML = `<span><b>ممتاز وجاهز للاعتماد:</b> جميع بيانات المتدربين في هذه الشعبة مكتملة تماماً <b>(${readyCount} متدرب)</b> ومطابقة لضوابط ملفات المؤسسة. يمكنك تصدير الملف الآن.</span>`;
+                if (alertText) alertText.innerHTML = `<span><b>جاهز للاعتماد والتصدير:</b> جميع بيانات المتدربين في هذه الشعبة مكتملة ومطابقة لضوابط المؤسسة (${includedInExportCount} مشمولين بالتصدير).${excludedMsg}</span>`;
                 if (alertAction) alertAction.classList.add('hidden');
             }
         }
 
-        // فلترة العرض
+        // فلترة العرض بحسب حالة التدقيق
         let displayRows = processedRows;
         if (filterStatus === 'REVIEW') {
             displayRows = processedRows.filter(r => !r.isComplete);
@@ -23125,18 +23528,35 @@ ${details}
             displayRows = processedRows.filter(r => r.isComplete);
         }
 
+        // فلترة العرض بحسب حالة شهادة منار
+        if (filterManar === 'ISSUED') {
+            displayRows = displayRows.filter(r => r.isManarIssued);
+        } else if (filterManar === 'NOT_ISSUED') {
+            displayRows = displayRows.filter(r => !r.isManarIssued);
+        } else if (filterManar === 'ELIGIBLE') {
+            displayRows = displayRows.filter(r => r.canIssueManar && !r.isManarIssued);
+        }
+
         if (displayRows.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="14" class="p-8 text-center text-slate-500 font-bold bg-white">لا توجد سجلات مطابقة لفلتر الحالة المحدد (${filterStatus === 'REVIEW' ? 'بحاجة استكمال' : 'مكتمل'}).</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="16" class="p-8 text-center text-slate-500 font-bold bg-white">لا توجد سجلات مطابقة لخيارات الفلترة المحددة.</td></tr>`;
             return;
         }
 
         tableBody.innerHTML = displayRows.map(r => {
-            const rowBg = r.isComplete ? 'hover:bg-slate-50/80' : 'bg-amber-50/30 hover:bg-amber-50/60';
+            const rowBg = r.isExcluded 
+                ? 'bg-slate-100/70 opacity-60 hover:opacity-100' 
+                : (r.isComplete ? 'hover:bg-slate-50/80' : 'bg-amber-50/30 hover:bg-amber-50/60');
             const missingTip = r.missingList.length > 0 ? `بحاجة: ${r.missingList.join('، ')}` : 'سجل مكتمل';
 
             return `
                 <tr class="${rowBg} transition border-b border-slate-100" id="instRow-${r.id}">
-                    <td class="p-2.5 text-center font-bold text-slate-500">${r.idx + 1}</td>
+                    <!-- اختيار وتضمين / استبعاد من التصدير -->
+                    <td class="p-2.5 text-center w-10">
+                        <input type="checkbox" id="instCheck-${r.id}" ${r.isExcluded ? '' : 'checked'} onchange="toggleInstTraineeExclusion('${r.id}', !this.checked)" class="w-4 h-4 accent-emerald-600 rounded cursor-pointer" title="${r.isExcluded ? 'المتدرب مستبعد حالياً من ملف التصدير - انقر للتضمين' : 'المتدرب مشمول في ملف التصدير - انقر للاستبعاد'}">
+                    </td>
+
+                    <!-- # الرقم التسلسلي -->
+                    <td class="p-2.5 text-center font-bold ${r.isExcluded ? 'text-slate-400 line-through' : 'text-slate-500'}">${r.idx + 1}</td>
                     
                     <!-- 1. رقم الجوال -->
                     <td class="p-1.5 text-center">
@@ -23196,6 +23616,41 @@ ${details}
                         <span class="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded-md text-xs select-all">${escapeHtml(r.id)}</span>
                     </td>
 
+                    <!-- نسبة الحضور المعتمدة -->
+                    <td class="p-2 text-center whitespace-nowrap">
+                        <div class="inline-flex flex-col items-center">
+                            <span class="font-mono font-black text-xs px-2.5 py-0.5 rounded-full ${r.attendanceRate >= 90 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : (r.attendanceRate >= 75 ? 'bg-blue-100 text-blue-800 border border-blue-200' : (r.attendanceRate >= 50 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-rose-100 text-rose-800 border border-rose-200'))}">
+                                ${r.attendanceRate}%
+                            </span>
+                            ${r.attendanceRate < 75 ? `<span class="text-[9px] text-rose-600 font-extrabold mt-0.5">حضور ضعيف</span>` : ''}
+                            ${r.isExcluded ? `<span class="text-[9px] text-amber-700 font-extrabold bg-amber-100 px-1 rounded mt-0.5">مستبعد</span>` : ''}
+                        </div>
+                    </td>
+
+                    <!-- شهادة منصة منار -->
+                    <td class="p-2 text-center whitespace-nowrap">
+                        ${r.isManarIssued ? `
+                            <div class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 px-2.5 py-1 rounded-xl text-[11px] font-black shadow-2xs">
+                                <span>✅ تم إصدار الشهادة</span>
+                                <button type="button" onclick="toggleManarCertificate('${r.id}')" title="إلغاء أو تعديل حالة الشهادة" class="text-slate-400 hover:text-rose-600 text-[10px] ml-0.5 cursor-pointer">✕</button>
+                            </div>
+                        ` : (r.canIssueManar ? `
+                            <button type="button" onclick="toggleManarCertificate('${r.id}')" class="group inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black px-2.5 py-1 rounded-xl text-[11px] shadow-sm hover:shadow transition active:scale-95 cursor-pointer" title="أتمت الدورة 4 أسابيع رسمياً - اضغط على 'يمكن' لتسجيل إصدار الشهادة فوراً">
+                                <span>🎓</span>
+                                <span class="underline decoration-white/60 group-hover:decoration-white font-black">يمكن</span>
+                                <span>إصدار شهادة من منصة منار</span>
+                            </button>
+                        ` : (r.appStatus.approved ? `
+                            <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-lg text-[10px] font-bold" title="معتمد في المؤسسة - متبقي ${r.appStatus.daysRemaining} يوم لاكتمال الـ 4 أسابيع">
+                                <span>⏳ متبقي ${r.appStatus.daysRemaining} يوم</span>
+                            </span>
+                        ` : `
+                            <button type="button" onclick="toggleManarCertificate('${r.id}')" class="text-slate-500 hover:text-emerald-700 hover:bg-slate-100 px-2 py-0.5 rounded text-[10px] font-bold border border-dashed border-slate-300 transition cursor-pointer" title="تسجيل إصدار يدوي فوري">
+                                + تسجيل منار
+                            </button>
+                        `))}
+                    </td>
+
                     <!-- حالة التدقيق -->
                     <td class="p-2 text-center whitespace-nowrap">
                         <span title="${escapeHtml(missingTip)}" class="px-2.5 py-1 rounded-full text-[10px] font-black cursor-help inline-flex items-center gap-1 ${r.isComplete ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
@@ -23218,52 +23673,41 @@ ${details}
 
     // حفظ تعديل أي حقل من حقول المتدرب مباشرة في الذاكرة
     function saveInstTraineeField(id, field, value) {
-        if (!id) return;
-        const valStr = String(value || '').trim();
+        if (!id || !field) return;
 
-        if (typeof phoneDirectory === 'undefined') phoneDirectory = {};
-        if (!phoneDirectory[id]) phoneDirectory[id] = {};
+        if (typeof trainees === 'undefined' || !Array.isArray(trainees)) return;
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(id) : String(id).trim();
 
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : [];
-        const t = pool.find(item => item.id === id);
-
-        if (field === 'first') {
-            phoneDirectory[id].first_name = valStr;
-            if (t) t.first_name = valStr;
-        } else if (field === 'second') {
-            phoneDirectory[id].second_name = valStr;
-            if (t) t.second_name = valStr;
-        } else if (field === 'third') {
-            phoneDirectory[id].third_name = valStr;
-            if (t) t.third_name = valStr;
-        } else if (field === 'last') {
-            phoneDirectory[id].last_name = valStr;
-            if (t) t.last_name = valStr;
-        } else if (field === 'dob') {
-            const formatted = formatDobMdy(valStr);
-            phoneDirectory[id].dob = formatted || valStr;
-            if (t) t.dob = formatted || valStr;
-        } else if (field === 'gender') {
-            const norm = normalizeGenderValue(valStr, 'ذكر');
-            phoneDirectory[id].gender = norm;
-            if (t) t.gender = norm;
-        } else if (field === 'nationality') {
-            phoneDirectory[id].nationality = valStr;
-            if (t) t.nationality = valStr;
-        } else if (field === 'qual') {
-            phoneDirectory[id].qual = valStr;
-            if (t) t.qual = valStr;
-        } else if (field === 'email') {
-            phoneDirectory[id].email = valStr;
-            if (t) t.email = valStr;
-        } else if (field === 'phone') {
-            const cleanP = (typeof cleanPhone === 'function') ? cleanPhone(valStr) : valStr;
-            phoneDirectory[id].phone = cleanP;
-            if (t) t.phone = cleanP;
+        if (typeof phoneDirectory === 'undefined') window.phoneDirectory = {};
+        if (!phoneDirectory[id]) {
+            phoneDirectory[id] = { id: cleanId };
         }
 
-        // تحديث الاسم الكامل المدمج إذا عُدلت أجزاء الاسم
+        const val = String(value || '').trim();
+
+        if (field === 'dob') {
+            const formatted = formatDobMdy(val);
+            phoneDirectory[id].dob = formatted;
+            const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
+            if (t) t.dob = formatted;
+        } else if (field === 'gender') {
+            const norm = normalizeGenderValue(val, 'ذكر');
+            phoneDirectory[id].gender = norm;
+            const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
+            if (t) t.gender = norm;
+        } else if (field === 'phone') {
+            const clPh = (typeof cleanPhone === 'function') ? cleanPhone(val) : val;
+            phoneDirectory[id].phone = clPh;
+            const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
+            if (t) t.phone = clPh;
+        } else {
+            phoneDirectory[id][field] = val;
+            const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
+            if (t) t[field] = val;
+        }
+
         if (['first', 'second', 'third', 'last'].includes(field)) {
+            const t = trainees.find(x => cleanNationalId(x.id) === cleanId || x.id === id);
             const p1 = phoneDirectory[id].first_name || (t && t.first_name) || '';
             const p2 = phoneDirectory[id].second_name || (t && t.second_name) || '';
             const p3 = phoneDirectory[id].third_name || (t && t.third_name) || '';
@@ -23309,7 +23753,7 @@ ${details}
         const selectedGroup = grpFilterEl ? grpFilterEl.value : '';
         if (!selectedGroup) return;
 
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : [];
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
         let groupTrainees = pool.filter(t => t.group && t.group.trim() === selectedGroup.trim());
         if (selectedCompany !== 'ALL') {
             groupTrainees = groupTrainees.filter(t => t.company === selectedCompany);
@@ -23399,7 +23843,7 @@ ${details}
             ensureTraineesConsistencyWithDirectory();
         }
 
-        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : [];
+        const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
         let groupTrainees = pool.filter(t => t.group && t.group.trim() === selectedGroup.trim());
         if (selectedCompany !== 'ALL') {
             groupTrainees = groupTrainees.filter(t => t.company === selectedCompany);
@@ -23409,13 +23853,19 @@ ${details}
             return showToast('⚠️ لا يوجد متدربون مسجلون في هذه الشعبة لتصديرهم', 'warning');
         }
 
+        // استبعاد المتدربين المحددين يدوياً للاستبعاد
+        const exportableTrainees = groupTrainees.filter(t => !excludedInstTraineeIds.has(t.id));
+        if (exportableTrainees.length === 0) {
+            return showToast('⚠️ تم استبعاد جميع المتدربين من التصدير يدوياً. يرجى إبقاء متدرب واحد على الأقل.', 'warning');
+        }
+
         if (typeof XLSX === 'undefined') {
             return showToast('❌ مكتبة تصدير الإكسل غير محملة في المتصفح', 'error');
         }
 
-        // بناء صفوف التصدير بالأعمدة الـ 11 بالترتيب الحرفي الدقيق
+        // بناء صفوف التصدير بالأعمدة الـ 11 بالترتيب الحرفي الدقيق دون تعديل لوجك الأعمدة
         let incompleteCount = 0;
-        const exportRows = groupTrainees.map(t => {
+        const exportRows = exportableTrainees.map(t => {
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
             const pDir = (typeof phoneDirectory !== 'undefined' && phoneDirectory[t.id]) ? phoneDirectory[t.id] : {};
 
@@ -23472,7 +23922,11 @@ ${details}
         });
 
         if (incompleteCount > 0) {
-            const proceed = confirm(`⚠️ تنبيه التحقق والمراجعة:\n\nيوجد (${incompleteCount}) متدرب ببيانات غير مكتملة (مثل تاريخ الميلاد أو الجوال أو البريد).\n\nهل ترغب بالاستمرار وتصدير ملف المؤسسة بصيغة Excel الآن؟`);
+            const proceed = confirm(`⚠️ تنبيه التحقق والمراجعة:
+
+يوجد (${incompleteCount}) متدرب ببيانات غير مكتملة (مثل تاريخ الميلاد أو الجوال أو البريد).
+
+هل ترغب بالاستمرار وتصدير ملف المؤسسة المعتمد الآن؟`);
             if (!proceed) return;
         }
 
@@ -23534,13 +23988,17 @@ ${details}
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'ملف المؤسسة');
 
-            const safeComp = (selectedCompany && selectedCompany !== 'ALL') ? `_${selectedCompany.replace(/[\s\/\\:*?"<>|]+/g, '_')}` : '';
-            const safeGrp = selectedGroup.replace(/[\s\/\\:*?"<>|]+/g, '_');
+            const safeComp = (selectedCompany && selectedCompany !== 'ALL') ? `_${selectedCompany.replace(/[\s\/\:*?"<>|]+/g, '_')}` : '';
+            const safeGrp = selectedGroup.replace(/[\s\/\:*?"<>|]+/g, '_');
             const nowStr = new Date().toISOString().slice(0, 10);
             const fileName = `ملف_المؤسسة${safeComp}_${safeGrp}_${nowStr}.xlsx`;
 
             XLSX.writeFile(wb, fileName);
-            showToast(`✅ تم تصدير ملف المؤسسة المعتمد لـ (${groupTrainees.length}) متدرب بنجاح!`, 'success');
+            showToast(`✅ تم تصدير ملف المؤسسة المعتمد لـ (${exportableTrainees.length}) متدرب بنجاح!`, 'success');
+
+            // فتح نافذة تأكيد الاعتماد واحتساب الـ 4 أسابيع تلقائياً
+            openInstitutionApprovalConfirmationModal(selectedGroup, exportableTrainees);
+
         } catch (exportErr) {
             console.error('Institution file export error:', exportErr);
             showToast('❌ حدث خطأ أثناء إنشاء وتصدير ملف الإكسل', 'error');
@@ -42386,6 +42844,21 @@ function buildDemoExecutiveReport(params) {
         if (compEl) compEl.innerText = currentUser.company || 'الشركة الراعية';
         if (idEl) idEl.innerText = currentUser.id || '--';
         if (roomEl) roomEl.innerText = currentUser.room || 'القاعة التدريبية';
+
+        // عرض بادجات المؤسسة ومنار في حساب المتدرب
+        const saInstBadge = document.getElementById('saStudentInstitutionBadge');
+        if (saInstBadge) {
+            const isApproved = Boolean(currentUser.institutionApproved || (typeof studentMatch !== 'undefined' && studentMatch?.institutionApproved));
+            if (isApproved) saInstBadge.classList.remove('hidden');
+            else saInstBadge.classList.add('hidden');
+        }
+
+        const saManarBadge = document.getElementById('saStudentManarBadge');
+        if (saManarBadge) {
+            const isManar = Boolean(currentUser.manarCertificateIssued || (typeof studentMatch !== 'undefined' && studentMatch?.manarCertificateIssued));
+            if (isManar) saManarBadge.classList.remove('hidden');
+            else saManarBadge.classList.add('hidden');
+        }
 
         const allCourses = (typeof getAllCoursesForTrainee === 'function') ? getAllCoursesForTrainee(currentUser) : [];
         if (coursesTextEl) {
