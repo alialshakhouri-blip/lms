@@ -1375,9 +1375,9 @@
                     </svg>
                 </button>
 
-                <!-- Modern Logo Card -->
-                <div class="relative group p-1 rounded-xl bg-white/10 border border-white/15 shadow-2xs transition-all duration-300 hover:shadow-md hover:scale-102 backdrop-blur-xs">
-                    <img src="logo.png" alt="شعار معهد الذهب الأسود" class="h-9 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:rotate-1" onerror="this.onerror=null; this.src='logo.jpg'">
+                <!-- Modern Logo Card with High Contrast Badge for Black Header -->
+                <div class="relative group p-1 px-2.5 rounded-xl bg-white shadow-sm border border-slate-200/80 transition-all duration-300 hover:shadow-md hover:scale-102 flex items-center justify-center">
+                    <img src="logo.png" alt="شعار معهد الذهب الأسود" class="h-8 md:h-9 w-auto object-contain transition-transform duration-300 group-hover:rotate-1" onerror="this.onerror=null; this.src='logo.svg'">
                 </div>
 
                 <!-- Brand Typography & Live Branch Badge -->
@@ -1883,6 +1883,144 @@
                                 📋 تقرير الواتساب
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ==================== EXECUTIVE GROUP ANALYTICS & VISUAL CHARTS ==================== -->
+                <div id="executiveAnalyticsCard" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-6 shadow-sm transition-all">
+                    
+                    <!-- Card Header -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 dark:text-amber-400 shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-sm md:text-base font-black text-slate-900 dark:text-white">التحليلات البيانية ومقارنة المجموعات</h3>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">مباشر</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">تحليل مرئي تفاعلي لنسب الحضور والغياب والمقارنة الإحصائية بين الشعب لليوم المحدد</p>
+                            </div>
+                        </div>
+
+                        <!-- Sort & Filter Pills -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">ترتيب الشعب:</span>
+                            <button type="button" id="sortBtn_rate_desc" onclick="setGroupAnalyticsSort('rate_desc')" class="group-sort-pill px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-900 text-amber-400 dark:bg-amber-400 dark:text-slate-950 transition-all cursor-pointer shadow-2xs">الأعلى حضوراً</button>
+                            <button type="button" id="sortBtn_rate_asc" onclick="setGroupAnalyticsSort('rate_asc')" class="group-sort-pill px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all cursor-pointer">الأكثر غياباً</button>
+                            <button type="button" id="sortBtn_count_desc" onclick="setGroupAnalyticsSort('count_desc')" class="group-sort-pill px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all cursor-pointer">الأكبر عدداً</button>
+                            <button type="button" id="sortBtn_name_asc" onclick="setGroupAnalyticsSort('name_asc')" class="group-sort-pill px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all cursor-pointer">أبجدي</button>
+                        </div>
+                    </div>
+
+                    <!-- Content Grid: Pie Chart (5 cols) + Group Breakdown (7 cols) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-5 items-stretch">
+                        
+                        <!-- Left: Donut / Pie Chart (5 Cols) -->
+                        <div class="lg:col-span-5 bg-slate-50/80 dark:bg-slate-950/50 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    <span>مخطط توزيع نسب الحضور العام</span>
+                                </h4>
+                                <span id="donutTraineesCountBadge" class="text-[11px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/40">0 متدرب</span>
+                            </div>
+
+                            <!-- Donut SVG with animated strokes and center metric -->
+                            <div class="relative flex items-center justify-center py-2">
+                                <svg class="w-48 h-48 -rotate-90 transform" viewBox="0 0 180 180">
+                                    <!-- Background Track Circle -->
+                                    <circle cx="90" cy="90" r="70" stroke="currentColor" stroke-width="22" fill="none" class="text-slate-200 dark:text-slate-800/90" />
+                                    <!-- Present Slice (Emerald) -->
+                                    <circle id="donutPresentSegment" cx="90" cy="90" r="70" stroke="#10b981" stroke-width="22" fill="none"
+                                        stroke-dasharray="0 440" stroke-dashoffset="0" class="donut-segment transition-all duration-700 ease-out" />
+                                    <!-- Violator Slice (Amber) -->
+                                    <circle id="donutViolatorSegment" cx="90" cy="90" r="70" stroke="#f59e0b" stroke-width="22" fill="none"
+                                        stroke-dasharray="0 440" stroke-dashoffset="0" class="donut-segment transition-all duration-700 ease-out" />
+                                    <!-- Absent Slice (Rose) -->
+                                    <circle id="donutAbsentSegment" cx="90" cy="90" r="70" stroke="#ef4444" stroke-width="22" fill="none"
+                                        stroke-dasharray="0 440" stroke-dashoffset="0" class="donut-segment transition-all duration-700 ease-out" />
+                                </svg>
+                                
+                                <!-- Center KPI Metric -->
+                                <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none select-none">
+                                    <span id="donutCenterPct" class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">0%</span>
+                                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-0.5">نسبة الحضور</span>
+                                    <span id="donutCenterCount" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">حاضر 0 من 0</span>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Legend Breakdown -->
+                            <div class="space-y-2 pt-3 border-t border-slate-200/80 dark:border-slate-800">
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-3 h-3 rounded-md bg-emerald-500 shrink-0"></span>
+                                        <span class="font-bold text-slate-700 dark:text-slate-300">حاضر كامل (2 صح+)</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span id="legendPresentCount" class="font-black text-slate-900 dark:text-white">0 متدرب</span>
+                                        <span id="legendPresentPct" class="text-[11px] font-bold text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/40">0%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-3 h-3 rounded-md bg-amber-500 shrink-0"></span>
+                                        <span class="font-bold text-slate-700 dark:text-slate-300">مخالف الحضور (صح واحدة)</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span id="legendViolatorCount" class="font-black text-slate-900 dark:text-white">0 متدرب</span>
+                                        <span id="legendViolatorPct" class="text-[11px] font-bold text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800/40">0%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-3 h-3 rounded-md bg-rose-500 shrink-0"></span>
+                                        <span class="font-bold text-slate-700 dark:text-slate-300">غائب بالكامل (0 صح)</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span id="legendAbsentCount" class="font-black text-slate-900 dark:text-white">0 متدرب</span>
+                                        <span id="legendAbsentPct" class="text-[11px] font-bold text-rose-700 bg-rose-50 dark:text-rose-300 dark:bg-rose-950/60 px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-800/40">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Group Performance Breakdown (7 Cols) -->
+                        <div class="lg:col-span-7 flex flex-col justify-between space-y-3">
+                            
+                            <!-- Quick Comparative Highlights -->
+                            <div class="grid grid-cols-3 gap-2.5">
+                                <div class="bg-slate-50/80 dark:bg-slate-950/50 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 text-center">
+                                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 block">أعلى شعبة التزاماً</span>
+                                    <span id="analyticsTopGroup" class="text-xs font-black text-emerald-600 dark:text-emerald-400 mt-1 block truncate">—</span>
+                                </div>
+                                <div class="bg-slate-50/80 dark:bg-slate-950/50 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 text-center">
+                                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 block">أكثر شعبة غياباً</span>
+                                    <span id="analyticsLowestGroup" class="text-xs font-black text-rose-600 dark:text-rose-400 mt-1 block truncate">—</span>
+                                </div>
+                                <div class="bg-slate-50/80 dark:bg-slate-950/50 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 text-center">
+                                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 block">إجمالي الشعب</span>
+                                    <span id="analyticsGroupsCount" class="text-xs font-black text-amber-600 dark:text-amber-400 mt-1 block">0 شعبة</span>
+                                </div>
+                            </div>
+
+                            <!-- Scrollable Groups Performance List -->
+                            <div class="bg-slate-50/80 dark:bg-slate-950/50 rounded-2xl p-3 md:p-3.5 border border-slate-200/80 dark:border-slate-800 flex-1 flex flex-col">
+                                <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200/70 dark:border-slate-800/80 text-[11px] font-black text-slate-700 dark:text-slate-300">
+                                    <span>مقارنة نسب الحضور لكل مجموعة / شعبة</span>
+                                    <span class="text-[10px] text-slate-400 font-medium">اضغط لتصفية الجدول</span>
+                                </div>
+                                <div id="analyticsGroupsList" class="space-y-2.5 overflow-y-auto max-h-[260px] pr-0.5">
+                                    <!-- Dynamic Group Rows Injected by JS -->
+                                </div>
+                            </div>
+
+                        </div>
+
                     </div>
                 </div>
 
@@ -13979,6 +14117,238 @@ ${details}
         `).join('');
     }
 
+    // ===================================================================
+    // EXECUTIVE GROUP ANALYTICS & PIE / DONUT CHARTS (لوحة التحليلات البيانية للإدارة)
+    // ===================================================================
+    let currentGroupSortMode = 'rate_desc';
+
+    function setGroupAnalyticsSort(mode) {
+        currentGroupSortMode = mode;
+        const sortModes = ['rate_desc', 'rate_asc', 'count_desc', 'name_asc'];
+        sortModes.forEach(m => {
+            const btn = document.getElementById('sortBtn_' + m);
+            if (btn) {
+                if (m === mode) {
+                    btn.className = 'group-sort-pill px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-900 text-amber-400 dark:bg-amber-400 dark:text-slate-950 transition-all cursor-pointer shadow-2xs scale-102';
+                } else {
+                    btn.className = 'group-sort-pill px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all cursor-pointer';
+                }
+            }
+        });
+        renderExecutiveAnalytics();
+    }
+    window.setGroupAnalyticsSort = setGroupAnalyticsSort;
+
+    function filterTableByGroup(groupName) {
+        const groupSelect = document.getElementById('groupFilter');
+        if (groupSelect) {
+            let found = false;
+            for (let i = 0; i < groupSelect.options.length; i++) {
+                if (groupSelect.options[i].value === groupName) {
+                    groupSelect.selectedIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                // Check if partial group match
+                for (let i = 0; i < groupSelect.options.length; i++) {
+                    if (groupSelect.options[i].value.includes(groupName) || groupName.includes(groupSelect.options[i].value)) {
+                        groupSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            renderApp();
+            const listEl = document.getElementById('attendanceList');
+            if (listEl) {
+                listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+    window.filterTableByGroup = filterTableByGroup;
+
+    let lastRenderedFilteredTrainees = [];
+
+    function renderExecutiveAnalytics(customTrainees) {
+        const card = document.getElementById('executiveAnalyticsCard');
+        if (!card) return;
+
+        if (customTrainees) {
+            lastRenderedFilteredTrainees = customTrainees;
+        }
+        const list = lastRenderedFilteredTrainees.length > 0 ? lastRenderedFilteredTrainees : trainees;
+
+        const dayIdx = (typeof activeDayIndex !== 'undefined') ? activeDayIndex : 0;
+
+        let totalPresent = 0, totalViolators = 0, totalAbsent = 0;
+        const groupsMap = {};
+
+        list.forEach(t => {
+            const grp = (t.group && t.group.trim()) ? t.group.trim() : 'عام';
+            if (!groupsMap[grp]) {
+                groupsMap[grp] = { name: grp, total: 0, present: 0, violator: 0, absent: 0 };
+            }
+            const dayChecks = t.weeklyAttendance ? t.weeklyAttendance[dayIdx] : [false, false, false, false];
+            const st = calculateStatus(dayChecks, t);
+
+            groupsMap[grp].total++;
+            if (st.type === 'present') {
+                groupsMap[grp].present++;
+                totalPresent++;
+            } else if (st.type === 'violator') {
+                groupsMap[grp].violator++;
+                totalViolators++;
+            } else {
+                groupsMap[grp].absent++;
+                totalAbsent++;
+            }
+        });
+
+        const totalCount = list.length;
+        const presentPct = totalCount > 0 ? Math.round((totalPresent / totalCount) * 100) : 0;
+        const violatorPct = totalCount > 0 ? Math.round((totalViolators / totalCount) * 100) : 0;
+        const absentPct = totalCount > 0 ? Math.max(0, 100 - presentPct - violatorPct) : 0;
+
+        // SVG Donut Calculations (radius = 70, circumference = 2 * PI * 70 ≈ 439.82)
+        const C = 439.82;
+        const presentLen = totalCount > 0 ? (presentPct / 100) * C : 0;
+        const violatorLen = totalCount > 0 ? (violatorPct / 100) * C : 0;
+        const absentLen = totalCount > 0 ? (absentPct / 100) * C : 0;
+
+        const donutPresent = document.getElementById('donutPresentSegment');
+        const donutViolator = document.getElementById('donutViolatorSegment');
+        const donutAbsent = document.getElementById('donutAbsentSegment');
+
+        if (donutPresent) {
+            donutPresent.setAttribute('stroke-dasharray', `${presentLen} ${C}`);
+            donutPresent.setAttribute('stroke-dashoffset', '0');
+        }
+        if (donutViolator) {
+            donutViolator.setAttribute('stroke-dasharray', `${violatorLen} ${C}`);
+            donutViolator.setAttribute('stroke-dashoffset', `${-presentLen}`);
+        }
+        if (donutAbsent) {
+            donutAbsent.setAttribute('stroke-dasharray', `${absentLen} ${C}`);
+            donutAbsent.setAttribute('stroke-dashoffset', `${-(presentLen + violatorLen)}`);
+        }
+
+        // Center Metric
+        const centerPctEl = document.getElementById('donutCenterPct');
+        const centerCountEl = document.getElementById('donutCenterCount');
+        const badgeCountEl = document.getElementById('donutTraineesCountBadge');
+        if (centerPctEl) centerPctEl.innerText = `${presentPct}%`;
+        if (centerCountEl) centerCountEl.innerText = `حاضر ${totalPresent} من ${totalCount}`;
+        if (badgeCountEl) badgeCountEl.innerText = `${totalCount} متدرب`;
+
+        // Legend Breakdown
+        const legPresCount = document.getElementById('legendPresentCount');
+        const legPresPct = document.getElementById('legendPresentPct');
+        const legViolCount = document.getElementById('legendViolatorCount');
+        const legViolPct = document.getElementById('legendViolatorPct');
+        const legAbsCount = document.getElementById('legendAbsentCount');
+        const legAbsPct = document.getElementById('legendAbsentPct');
+
+        if (legPresCount) legPresCount.innerText = `${totalPresent} متدرب`;
+        if (legPresPct) legPresPct.innerText = `${presentPct}%`;
+        if (legViolCount) legViolCount.innerText = `${totalViolators} متدرب`;
+        if (legViolPct) legViolPct.innerText = `${violatorPct}%`;
+        if (legAbsCount) legAbsCount.innerText = `${totalAbsent} متدرب`;
+        if (legAbsPct) legAbsPct.innerText = `${absentPct}%`;
+
+        // Process and Sort Groups
+        let groupsArr = Object.values(groupsMap).map(g => {
+            const rate = g.total > 0 ? Math.round((g.present / g.total) * 100) : 0;
+            const violatorRate = g.total > 0 ? Math.round((g.violator / g.total) * 100) : 0;
+            const absentRate = g.total > 0 ? Math.max(0, 100 - rate - violatorRate) : 0;
+            return {
+                ...g,
+                rate,
+                violatorRate,
+                absentRate
+            };
+        });
+
+        if (currentGroupSortMode === 'rate_desc') {
+            groupsArr.sort((a, b) => b.rate - a.rate);
+        } else if (currentGroupSortMode === 'rate_asc') {
+            groupsArr.sort((a, b) => a.rate - b.rate);
+        } else if (currentGroupSortMode === 'count_desc') {
+            groupsArr.sort((a, b) => b.total - a.total);
+        } else if (currentGroupSortMode === 'name_asc') {
+            groupsArr.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+        }
+
+        // Summary Highlights
+        const topGrpEl = document.getElementById('analyticsTopGroup');
+        const lowGrpEl = document.getElementById('analyticsLowestGroup');
+        const countGrpEl = document.getElementById('analyticsGroupsCount');
+
+        if (groupsArr.length > 0) {
+            const topGroup = [...groupsArr].sort((a, b) => b.rate - a.rate)[0];
+            const lowestGroup = [...groupsArr].sort((a, b) => a.rate - b.rate)[0];
+            if (topGrpEl) topGrpEl.innerText = `${topGroup.name} (${topGroup.rate}%)`;
+            if (lowGrpEl) lowGrpEl.innerText = `${lowestGroup.name} (${lowestGroup.rate}%)`;
+            if (countGrpEl) countGrpEl.innerText = `${groupsArr.length} شعبة نشطة`;
+        } else {
+            if (topGrpEl) topGrpEl.innerText = '—';
+            if (lowGrpEl) lowGrpEl.innerText = '—';
+            if (countGrpEl) countGrpEl.innerText = '0 شعبة';
+        }
+
+        // Render Group Rows
+        const listContainer = document.getElementById('analyticsGroupsList');
+        if (listContainer) {
+            if (groupsArr.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="p-6 text-center text-xs text-slate-400 font-bold">
+                        لا توجد شعب أو مجموعات تدريبية مطابقة في هذه الفلترة.
+                    </div>
+                `;
+            } else {
+                listContainer.innerHTML = groupsArr.map(g => {
+                    let badgeClass = 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-300 dark:bg-emerald-950/60 dark:border-emerald-800/50';
+                    let badgeText = 'ممتاز';
+                    if (g.rate < 75) {
+                        badgeClass = 'text-rose-700 bg-rose-50 border-rose-200 dark:text-rose-300 dark:bg-rose-950/60 dark:border-rose-800/50';
+                        badgeText = 'تنبيه';
+                    } else if (g.rate < 85) {
+                        badgeClass = 'text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-300 dark:bg-amber-950/60 dark:border-amber-800/50';
+                        badgeText = 'متوسط';
+                    }
+
+                    return `
+                        <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800/90 space-y-1.5 transition hover:shadow-xs">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-black text-slate-900 dark:text-white">${g.name}</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-bold">${g.total} متدرب</span>
+                                </div>
+                                <span class="text-[11px] font-black px-2 py-0.5 rounded-full border ${badgeClass}">
+                                    ${g.rate}% ${badgeText}
+                                </span>
+                            </div>
+                            <!-- Stacked Progress Bar -->
+                            <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
+                                <div style="width: ${g.rate}%" class="bg-emerald-500 h-full transition-all duration-500" title="حاضر ${g.rate}% (${g.present})"></div>
+                                <div style="width: ${g.violatorRate}%" class="bg-amber-500 h-full transition-all duration-500" title="مخالف ${g.violatorRate}% (${g.violator})"></div>
+                                <div style="width: ${g.absentRate}%" class="bg-rose-500 h-full transition-all duration-500" title="غائب ${g.absentRate}% (${g.absent})"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                                <span>حاضر: <b class="text-emerald-600 dark:text-emerald-400 font-bold">${g.present}</b> • مخالف: <b class="text-amber-600 dark:text-amber-400 font-bold">${g.violator}</b> • غائب: <b class="text-rose-600 dark:text-rose-400 font-bold">${g.absent}</b></span>
+                                <button type="button" onclick="filterTableByGroup('${g.name}')" class="text-amber-600 dark:text-amber-400 font-bold hover:underline cursor-pointer flex items-center gap-0.5" title="تصفية جدول المتدربين لهذه الشعبة">
+                                    <span>فلترة الجدول</span>
+                                    <span>⬅</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+    }
+    window.renderExecutiveAnalytics = renderExecutiveAnalytics;
+
     function renderApp() {
         const sideTotalEl = document.getElementById('sidebarTotalTrainees');
         if (sideTotalEl) sideTotalEl.innerText = `${trainees.length} متدرب`;
@@ -14078,6 +14448,15 @@ ${details}
 
         document.getElementById('statAbsent').innerText = absent;
         document.getElementById('statAbsentPct').innerText = total > 0 ? `${Math.round((absent / total) * 100)}%` : '0%';
+
+        // Render Executive Analytics Charts & Group Performance
+        try {
+            if (typeof renderExecutiveAnalytics === 'function') {
+                renderExecutiveAnalytics(filteredTrainees);
+            }
+        } catch(e) {
+            console.error('Error in renderExecutiveAnalytics:', e);
+        }
 
         // Render Attendance List
         const listEl = document.getElementById('attendanceList');
