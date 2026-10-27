@@ -1075,15 +1075,8 @@
             
             <!-- Left: Menu Toggle & Brand -->
             <div class="flex items-center gap-3">
-                <!-- Interactive Menu Button with Animated Bars -->
-                <button type="button" id="topSidebarToggleBtn" onclick="toggleSidebar()" class="group relative px-3 py-2 rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100/90 hover:bg-slate-200/90 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 border border-slate-200/90 dark:border-slate-700/80 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center gap-2 shadow-2xs hover:shadow-xs" title="فتح / إغلاق القائمة">
-                    <div class="w-4 h-3.5 flex flex-col justify-between py-0.5">
-                        <span class="w-full h-0.5 bg-slate-700 dark:bg-slate-200 rounded-full transition-transform duration-200 group-hover:scale-x-90"></span>
-                        <span class="w-3/4 h-0.5 bg-amber-500 rounded-full transition-all duration-200 group-hover:w-full"></span>
-                        <span class="w-full h-0.5 bg-slate-700 dark:bg-slate-200 rounded-full transition-transform duration-200 group-hover:scale-x-90"></span>
-                    </div>
-                    <span class="text-xs font-black hidden sm:inline" id="topSidebarToggleLabel">القائمة</span>
-                </button>
+                <!-- Hidden Top Menu Button Placeholder (Menu is opened via edge tab / gesture) -->
+                <button type="button" id="topSidebarToggleBtn" onclick="toggleSidebar()" class="hidden"></button>
 
                 <!-- Modern Logo Card with Subtle Hover Tilt -->
                 <div class="relative group p-1 rounded-xl bg-white/90 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 shadow-2xs transition-all duration-300 hover:shadow-md hover:scale-102">
@@ -1855,15 +1848,17 @@
 
                 <!-- Trainer Weekly Timetable (8 Hours) -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3">
-                    <div class="flex items-center justify-between border-b pb-3">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xl">📅</span>
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-lg font-black border border-amber-500/20">
+                                📅
+                            </div>
                             <div>
-                                <h4 class="font-extrabold text-slate-900 text-sm">جدول الحصص الأسبوعي للمدرب (8 فترات)</h4>
-                                <p class="text-[11px] text-slate-400">اضغط على أي شعبة/مجموعة لمعاينة طلابها وحضورها فوراً</p>
+                                <h4 class="font-black text-slate-900 dark:text-white text-sm">جدول الحصص الأسبوعي للمدرب (8 فترات)</h4>
+                                <p class="text-[11px] text-slate-400">مرر الماوس على أي شعبة لمشاهدة توهجها وبياناتها، واضغط عليها لتنسدل قائمة الطلاب وسجل الحضور</p>
                             </div>
                         </div>
-                        <span class="text-[11px] bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-bold" id="tdSlotsCount">8 فترات</span>
+                        <span class="text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-full font-bold border border-slate-200 dark:border-slate-700" id="tdSlotsCount">8 فترات</span>
                     </div>
 
                     <!-- Timetable Grid -->
@@ -1887,21 +1882,26 @@
                     </div>
                 </div>
 
-                <!-- Trainer's Groups Overview Cards -->
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
-                            <span>👥</span>
-                            <span>الشعب والمجموعات التدريبية للمدرب:</span>
-                        </h4>
-                        <span class="text-xs text-slate-500 font-bold" id="tdGroupsTotalCount">0 مجموعة</span>
-                    </div>
-
-                    <div id="tdGroupsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5"></div>
+                <!-- Trainer's Groups Overview Cards (Hidden from interface per request - data embedded directly into timetable) -->
+                <div id="tdGroupsOverviewSection" class="hidden">
+                    <span id="tdGroupsTotalCount">0 مجموعة</span>
+                    <div id="tdGroupsGrid"></div>
                 </div>
 
-                <!-- Active Selected Group Trainees Table -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
+                <!-- Active Selected Group Trainees Dropdown Drawer (ينسدل عند النقر على أي شعبة في الجدول) -->
+                <div id="tdTraineesDrawerContainer" class="hidden transition-all duration-300 ease-in-out animate-pop-in">
+                    <div class="bg-white dark:bg-[#111C2D] border-2 border-amber-400/60 rounded-3xl p-5 md:p-6 shadow-2xl space-y-4 relative">
+                        <!-- Drawer Top Bar with Close Button -->
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                            <div class="flex items-center gap-2.5">
+                                <span class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs px-3 py-1 rounded-xl shadow-xs" id="tdDrawerGroupBadge">الشعبة المختارة</span>
+                                <h4 class="font-black text-slate-900 dark:text-white text-sm md:text-base">سجل حضور وبيانات المتدربين</h4>
+                            </div>
+                            <button type="button" onclick="closeTrainerGroupDrawer()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs" title="إخفاء سجل الحضور">
+                                <span>إخفاء</span>
+                                <span class="text-sm font-black">✕</span>
+                            </button>
+                        </div>
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-3">
                         <div class="flex items-center gap-2.5">
                             <span class="text-xl">📋</span>
@@ -1983,6 +1983,7 @@
                         </table>
                     </div>
                 </div>
+            </div> <!-- End of #tdTraineesDrawerContainer -->
 
             </div>
 
@@ -9898,12 +9899,12 @@
             activeGroupBadge.innerText = 'مكتمل لليوم ✓';
         }
 
-        // Render Timetable Grid
+        // Render Timetable Grid with Glowing Hover Cards and Dropdown Triggers
         const timetableBody = document.getElementById('tdTimetableBody');
         timetableBody.innerHTML = trainer.rows.map((row, rowIdx) => {
             return `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-2.5 font-extrabold bg-slate-50 border border-slate-200 text-slate-700">
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                    <td class="p-2.5 font-black bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
                         ${trainer.rows.length > 1 ? `الفترة (${rowIdx + 1})` : 'الجدول الرئيسي'}
                     </td>
                     ${row.map((cell, colIdx) => {
@@ -9912,27 +9913,73 @@
 
                         if (groups.length === 0) {
                             return `
-                                <td class="p-2.5 border border-slate-200 text-slate-300 ${isCurrentHour ? 'bg-amber-50/80 font-black' : ''}">
+                                <td class="p-2.5 border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 ${isCurrentHour ? 'bg-amber-50/80 dark:bg-amber-950/30 font-black' : ''}">
                                     -
                                 </td>
                             `;
                         }
 
                         return `
-                            <td class="p-2 border border-slate-200 ${isCurrentHour ? 'bg-amber-100/70 border-amber-400 font-black' : ''}">
-                                <div class="flex flex-col gap-1 items-center justify-center">
+                            <td class="p-2 border border-slate-200 dark:border-slate-800 ${isCurrentHour ? 'bg-amber-100/70 dark:bg-amber-950/50 border-amber-400 font-black' : ''}">
+                                <div class="flex flex-wrap gap-1.5 items-center justify-center">
                                     ${groups.map(g => {
                                         const isLA = isLAGroup(g);
+                                        const isSelected = (activeSelectedGroupInTrainerDashboard === g || isGroupMatch(g, activeSelectedGroupInTrainerDashboard)) && isTrainerGroupDrawerOpen;
+                                        
+                                        // Calculate group statistics for hover card
+                                        const groupTrainees = trainees.filter(t => isGroupMatch(g, t.group) || t.group === g);
+                                        let grpPresent = 0, grpViolators = 0, grpAbsent = 0;
+                                        groupTrainees.forEach(t => {
+                                            const checks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIndex] : [false, false, false, false];
+                                            const st = calculateStatus(checks);
+                                            if (st.type === 'present') grpPresent++;
+                                            else if (st.type === 'violator') grpViolators++;
+                                            else grpAbsent++;
+                                        });
+                                        const grpTotal = isLA ? 0 : groupTrainees.length;
+                                        const grpRate = grpTotal > 0 ? Math.round((grpPresent / grpTotal) * 100) : 0;
+
                                         return `
-                                            <button 
-                                                onclick="selectGroupInTrainerDashboard('${g.replace(/'/g, "\\'")}')" 
-                                                class="px-2 py-1 rounded-lg text-[11px] font-extrabold transition shadow-xs ${
-                                                    activeSelectedGroupInTrainerDashboard === g || isGroupMatch(g, activeSelectedGroupInTrainerDashboard)
-                                                    ? 'bg-slate-900 text-amber-300 ring-2 ring-amber-400' 
-                                                    : (isLA ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300' : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200')
-                                                }">
-                                                ${g}
-                                            </button>
+                                            <div class="relative group/slot inline-block">
+                                                <button 
+                                                    type="button"
+                                                    onclick="toggleGroupInTrainerDashboard('${g.replace(/'/g, "\\'")}')" 
+                                                    class="group/btn relative px-3 py-1.5 rounded-xl text-xs font-black transition-all duration-300 cursor-pointer shadow-xs hover:-translate-y-0.5 hover:scale-105 ${
+                                                        isSelected 
+                                                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black ring-4 ring-amber-400/50 shadow-[0_0_22px_rgba(245,158,11,0.6)] scale-102' 
+                                                        : (isLA 
+                                                            ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:border-amber-400 hover:ring-2 hover:ring-amber-400/70 hover:shadow-[0_0_16px_rgba(245,158,11,0.4)]' 
+                                                            : 'bg-amber-50/90 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-950/70 text-amber-950 dark:text-amber-300 border border-amber-300/80 dark:border-amber-500/40 hover:border-amber-400 hover:ring-2 hover:ring-amber-400 hover:shadow-[0_0_18px_rgba(245,158,11,0.45)]')
+                                                    }"
+                                                    title="اضغط لمعاينة طلاب شعبة ${g} وسجل حضورهم">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="tracking-tight">${g}</span>
+                                                        <span class="text-[9px] px-1.5 py-0.2 rounded-full font-mono ${isSelected ? 'bg-slate-950/30 text-slate-950' : 'bg-amber-200/60 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200'}">
+                                                            ${isLA ? 'LA' : `${grpTotal} طلاب`}
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                                
+                                                <!-- Glowing Hover Card (تتوهج وتظهر ملخص الشعبة) -->
+                                                <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover/slot:flex flex-col gap-1.5 p-3 rounded-2xl bg-slate-950/95 text-white text-right z-50 shadow-2xl border border-amber-400/60 backdrop-blur-md min-w-[200px] pointer-events-none animate-pop-in">
+                                                    <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                                                        <span class="font-black text-amber-400 text-xs">${g}</span>
+                                                        <span class="text-[10px] text-slate-400 font-bold">${isLA ? 'شعبة مستثناة LA' : `${grpTotal} متدرب`}</span>
+                                                    </div>
+                                                    <div class="grid grid-cols-3 gap-1 text-[10px] text-center font-bold">
+                                                        <span class="text-emerald-400 bg-emerald-950/60 px-1 py-0.5 rounded border border-emerald-500/30">حاضر: ${grpPresent}</span>
+                                                        <span class="text-amber-400 bg-amber-950/60 px-1 py-0.5 rounded border border-amber-500/30">مخالف: ${grpViolators}</span>
+                                                        <span class="text-rose-400 bg-rose-950/60 px-1 py-0.5 rounded border border-rose-500/30">غائب: ${grpAbsent}</span>
+                                                    </div>
+                                                    <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1">
+                                                        <span>نسبة حضور اليوم:</span>
+                                                        <span class="text-amber-300 font-mono font-black">${grpRate}%</span>
+                                                    </div>
+                                                    <div class="text-[9.5px] text-sky-300 font-bold pt-1 text-center border-t border-slate-800/80">
+                                                        اضغط هنا لتنسدل قائمة الطلاب وسجل الحضور ⬇️
+                                                    </div>
+                                                </div>
+                                            </div>
                                         `;
                                     }).join('')}
                                 </div>
@@ -10115,10 +10162,40 @@
         updateTrainerSyncButtonCooldownUI();
     }
 
-    function selectGroupInTrainerDashboard(groupName) {
-        activeSelectedGroupInTrainerDashboard = groupName;
+    let isTrainerGroupDrawerOpen = false;
+
+    function toggleGroupInTrainerDashboard(groupName) {
+        if (activeSelectedGroupInTrainerDashboard === groupName && isTrainerGroupDrawerOpen) {
+            closeTrainerGroupDrawer();
+        } else {
+            activeSelectedGroupInTrainerDashboard = groupName;
+            isTrainerGroupDrawerOpen = true;
+            renderTrainerDashboard();
+            const drawer = document.getElementById('tdTraineesDrawerContainer');
+            const badge = document.getElementById('tdDrawerGroupBadge');
+            if (badge) badge.innerText = `الشعبة: ${groupName}`;
+            if (drawer) {
+                drawer.classList.remove('hidden');
+                setTimeout(() => {
+                    drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+        }
+    }
+    window.toggleGroupInTrainerDashboard = toggleGroupInTrainerDashboard;
+
+    function closeTrainerGroupDrawer() {
+        isTrainerGroupDrawerOpen = false;
+        const drawer = document.getElementById('tdTraineesDrawerContainer');
+        if (drawer) drawer.classList.add('hidden');
         renderTrainerDashboard();
     }
+    window.closeTrainerGroupDrawer = closeTrainerGroupDrawer;
+
+    function selectGroupInTrainerDashboard(groupName) {
+        toggleGroupInTrainerDashboard(groupName);
+    }
+    window.selectGroupInTrainerDashboard = selectGroupInTrainerDashboard;
 
     function extractTrainerDistinctGroups(trainer) {
         const trainerGroups = [];
