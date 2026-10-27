@@ -1566,15 +1566,15 @@
                 <nav class="space-y-1">
                     <div class="text-[10px] font-black px-3 py-1 uppercase tracking-wider sidebar-nav-label">الأقسام والخدمات:</div>
 
-                    <!-- Link 1: Attendance Dashboard -->
-                    <button onclick="switchTab('attendance')" id="btn-attendance" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-active cursor-pointer">
+                    <!-- Link 1: Admin Attendance Dashboard (لوحة التحكم الخاصة بالإداري) -->
+                    <button onclick="switchTab('attendance')" id="btn-attendance" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-active cursor-pointer" title="لوحة التحكم الإدارية وسجل الحضور">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <rect x="3" y="3" width="7" height="7" rx="2"/>
                             <rect x="14" y="3" width="7" height="7" rx="2"/>
                             <rect x="14" y="14" width="7" height="7" rx="2"/>
                             <rect x="3" y="14" width="7" height="7" rx="2"/>
                         </svg>
-                        <span class="text-xs font-bold">التحضير</span>
+                        <span class="text-xs font-bold" id="sidebarAttendanceLabel">لوحة التحكم</span>
                     </button>
 
                     <!-- Link 2: Trainer Dashboard -->
@@ -1646,6 +1646,17 @@
                             <span class="text-xs font-bold">إدارة الحسابات</span>
                         </div>
                         <span id="navUsersPendingBadge" class="hidden text-[10px] bg-purple-600 text-white font-black px-2 py-0.5 rounded-full shadow-xs">0</span>
+                    </button>
+
+                    <!-- Super Admin Link: Support Requests Hub (طلبات الدعم الفني والمساعدة) -->
+                    <button onclick="switchTab('supportTickets')" id="btn-supportTickets" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center justify-between nav-item-inactive cursor-pointer hidden" title="إدارة ومعالجة طلبات الدعم الفني والمساعدة">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            <span class="text-xs font-bold">طلبات الدعم</span>
+                        </div>
+                        <span id="sidebarSupportBadge" class="hidden text-[10px] font-black bg-rose-600 text-white px-2 py-0.5 rounded-full shadow-xs">0</span>
                     </button>
 
                     <!-- Link 10: Timesheet / Salaries -->
@@ -1813,6 +1824,55 @@
             <!-- ==================== TAB 1: ATTENDANCE DASHBOARD ==================== -->
             <div id="tab-attendance" class="hidden space-y-4">
                 
+                <!-- 1. Admin Quick Trainee Profile Access by National ID (خانة إدخال رقم الهوية لاستعراض ملف المتدرب في البداية) -->
+                <div class="bg-gradient-to-r from-slate-900 via-[#0F2942] to-slate-950 text-white rounded-3xl p-4 md:p-5 shadow-lg border border-amber-400/40 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl gold-gradient-bg text-slate-950 flex items-center justify-center text-xl font-black shadow-sm shrink-0">
+                                👤
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-sm md:text-base font-black text-amber-400">استعراض والبحث في ملف المتدرب الأكاديمي</h3>
+                                    <span class="bg-amber-400/20 text-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-400/30">لوحة التحكم الإدارية</span>
+                                </div>
+                                <p class="text-[11px] text-slate-300 font-bold mt-0.5">أدخل رقم الهوية الوطنية (10 أرقام) أو اسم المتدرب للاستعراض الفوري لملف المتدرب الشامل وسجل الحضور والدرجات</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-300">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-emerald-300 font-black">قاعدة بيانات المتدربين متصلة</span>
+                        </div>
+                    </div>
+
+                    <!-- Input Row with Action Buttons and Autocomplete Suggestions -->
+                    <div class="relative">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                            <div class="relative flex-1">
+                                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none">🔍</span>
+                                <input type="text" id="adminQuickTraineeIdInput" 
+                                       oninput="handleAdminQuickTraineeInput(this.value)" 
+                                       onkeydown="if(event.key==='Enter'){openAdminSearchedTraineeProfile();}" 
+                                       placeholder="أدخل رقم الهوية الوطنية (10 أرقام) أو اسم المتدرب... ثم اضغط Enter أو استعراض الملف" 
+                                       class="w-full bg-white text-slate-900 placeholder-slate-400 font-black text-xs md:text-sm pr-10 pl-24 py-3 rounded-2xl border-2 border-amber-400/60 focus:border-amber-400 outline-none shadow-inner transition">
+                                <button type="button" onclick="clearAdminQuickTraineeInput()" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-bold text-xs px-2.5 py-1 bg-slate-100 rounded-lg transition cursor-pointer">
+                                    مسح
+                                </button>
+                            </div>
+
+                            <button type="button" onclick="openAdminSearchedTraineeProfile()" class="gold-gradient-bg text-slate-950 hover:brightness-105 font-black px-5 py-3 rounded-2xl text-xs md:text-sm transition flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer shrink-0">
+                                <span>👤</span>
+                                <span>استعراض ملف المتدرب</span>
+                                <span class="font-mono text-[11px] bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded-md">Enter ↵</span>
+                            </button>
+                        </div>
+
+                        <!-- Live Dropdown Suggestions for fast 1-click opening -->
+                        <div id="adminQuickTraineeSuggestions" class="hidden absolute top-full right-0 left-0 mt-1.5 bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden max-h-60 overflow-y-auto divide-y divide-slate-100">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Executive Statistics Cards -->
                 <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-3">
                     
@@ -7717,6 +7777,121 @@
                 </div>
             </div>
 
+            <!-- ==================== TAB: SUPPORT TICKETS & HELP CENTER (مركز الدعم الفني والمساعدة - طلبات الدعم) ==================== -->
+            <div id="tab-supportTickets" class="hidden space-y-6">
+                <!-- Top Header Card -->
+                <div class="bg-gradient-to-r from-slate-900 via-[#0F2942] to-slate-950 text-white p-6 md:p-8 rounded-3xl shadow-lg border border-amber-400/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl gold-gradient-bg flex items-center justify-center text-2xl text-slate-950 font-black shadow-md">
+                                🛟
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h3 class="text-xl md:text-2xl font-black text-amber-400">مركز الدعم الفني والمساعدة - طلبات الدعم</h3>
+                                    <span class="bg-amber-400/20 text-amber-300 text-xs font-black px-2.5 py-0.5 rounded-full border border-amber-400/30">خاص بالسوبر أدمن والإدارة</span>
+                                </div>
+                                <p class="text-xs text-slate-300 mt-1">متابعة ومعالجة كافة طلبات واستفسارات ومشاكل الدعم الفني الواردة من المتدربين والمدربين والإداريين</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button type="button" onclick="openTechnicalSupportModal()" class="gold-gradient-bg text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm hover:brightness-105 transition cursor-pointer active:scale-95">
+                            <span>➕</span>
+                            <span>إنشاء طلب دعم فني</span>
+                        </button>
+                        <button type="button" onclick="renderSupportTicketsHub()" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
+                            <span>🔄</span>
+                            <span>تحديث</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Statistics Overview -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                    <div class="bg-white border border-slate-200 border-r-4 border-r-[#0F2942] rounded-2xl p-4 shadow-sm">
+                        <span class="text-xs text-slate-500 font-bold block">إجمالي طلبات الدعم</span>
+                        <div class="flex items-baseline justify-between mt-1.5">
+                            <span class="text-2xl md:text-3xl font-black text-slate-900" id="supportStatTotal">0</span>
+                            <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">تذكرة</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 border-r-4 border-r-amber-500 rounded-2xl p-4 shadow-sm">
+                        <span class="text-xs text-amber-800 font-bold block">طلبات جديدة / قيد الانتظار</span>
+                        <div class="flex items-baseline justify-between mt-1.5">
+                            <span class="text-2xl md:text-3xl font-black text-amber-600" id="supportStatPending">0</span>
+                            <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">تحتاج معالجة ⏳</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 border-r-4 border-r-blue-500 rounded-2xl p-4 shadow-sm">
+                        <span class="text-xs text-blue-800 font-bold block">قيد المتابعة والعمل</span>
+                        <div class="flex items-baseline justify-between mt-1.5">
+                            <span class="text-2xl md:text-3xl font-black text-blue-600" id="supportStatInProgress">0</span>
+                            <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">جاري الحل 🔄</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 border-r-4 border-r-emerald-500 rounded-2xl p-4 shadow-sm">
+                        <span class="text-xs text-emerald-800 font-bold block">تم الحل والإنجاز</span>
+                        <div class="flex items-baseline justify-between mt-1.5">
+                            <span class="text-2xl md:text-3xl font-black text-emerald-600" id="supportStatResolved">0</span>
+                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">مكتملة ✓</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Controls & Search -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-black text-slate-700 mb-1">🔍 بحث فوري في التذاكر:</label>
+                            <input type="text" id="supportSearchInput" oninput="filterSupportTickets()" placeholder="ابحث برقم التذكرة، اسم مقدم الطلب، الهوية، الجوال، الموضوع..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1">حالة الطلب:</label>
+                            <select id="supportFilterStatus" onchange="filterSupportTickets()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-500">
+                                <option value="ALL">جميع الحالات</option>
+                                <option value="pending">قيد الانتظار (جديدة)</option>
+                                <option value="in_progress">قيد المعالجة والمتابعة</option>
+                                <option value="resolved">تم الحل بنجاح</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1">مستوى الأولوية:</label>
+                            <select id="supportFilterPriority" onchange="filterSupportTickets()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-500">
+                                <option value="ALL">جميع الأولويات</option>
+                                <option value="عاجل">🚨 عاجل جداً</option>
+                                <option value="هام">⚠️ هام</option>
+                                <option value="عادي">ℹ️ عادي</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tickets List Container -->
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">📋</span>
+                            <h4 class="font-black text-xs md:text-sm">سجل تذاكر واستفسارات الدعم الفني</h4>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-300">
+                            <span>العدد المعروض:</span>
+                            <span id="supportTicketsCountBadge" class="font-black text-amber-400 bg-slate-800 px-2 py-0.5 rounded-lg">0 تذكرة</span>
+                        </div>
+                    </div>
+
+                    <div id="supportTicketsContainer" class="divide-y divide-slate-100 p-2 md:p-4 space-y-3">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -7979,6 +8154,10 @@
                 status: 'pending'
             });
             localStorage.setItem('sys_support_tickets_v1', JSON.stringify(tickets));
+            if (typeof updateSupportTicketsBadge === 'function') updateSupportTicketsBadge();
+            if (typeof renderSupportTicketsHub === 'function' && typeof currentActiveTabId !== 'undefined' && currentActiveTabId === 'supportTickets') {
+                renderSupportTicketsHub();
+            }
         } catch(e) {}
 
         // البريد الإلكتروني للمسؤول (مشفر ومحمي داخل الكود دون أي ظهور بالواجهة)
@@ -8607,6 +8786,8 @@ ${details}
             if (btnArchive) btnArchive.classList.add('hidden');
             if (btnAdminReports) btnAdminReports.classList.add('hidden');
             if (btnAdminCertificates) btnAdminCertificates.classList.add('hidden');
+            const btnSuppTrainer = document.getElementById('btn-supportTickets');
+            if (btnSuppTrainer) btnSuppTrainer.classList.add('hidden');
 
             // إخفاء حاويات الصفحات غير المصرح بها
             ['attendance', 'settings', 'timesheet', 'users', 'archive', 'studentDashboard', 'studentLms', 'studentGrades', 'studentVirtualClass', 'adminReports', 'adminCertificates'].forEach(tabId => {
@@ -8667,6 +8848,23 @@ ${details}
                 } else {
                     btnUsers.classList.add('hidden');
                 }
+            }
+
+            // مركز الدعم الفني والمساعدة للسوبر أدمن تحت خانة طلبات الدعم
+            const btnSupportTickets = document.getElementById('btn-supportTickets');
+            if (btnSupportTickets) {
+                if (currentUser.role === 'superadmin' || currentUser.role === 'admin') {
+                    btnSupportTickets.classList.remove('hidden');
+                    if (typeof updateSupportTicketsBadge === 'function') updateSupportTicketsBadge();
+                } else {
+                    btnSupportTickets.classList.add('hidden');
+                }
+            }
+
+            // لوحة التحكم الخاصة بالإداري (تسمية زر القائمة الجانبية: لوحة التحكم)
+            const sidebarAttLabel = document.getElementById('sidebarAttendanceLabel');
+            if (sidebarAttLabel) {
+                sidebarAttLabel.innerText = (currentUser.role === 'trainer') ? 'التحضير' : 'لوحة التحكم';
             }
 
             if (topHeaderUploadButtons) topHeaderUploadButtons.classList.remove('hidden');
@@ -8884,7 +9082,7 @@ ${details}
             }
         } catch (tabSaveErr) {}
 
-        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentTasks', 'studentLms', 'studentGrades', 'submissionsCalendar', 'studentAccount', 'virtualClass', 'studentVirtualClass', 'attendanceSheet', 'adminReports', 'adminCertificates', 'institutionFiles'];
+        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentTasks', 'studentLms', 'studentGrades', 'submissionsCalendar', 'studentAccount', 'virtualClass', 'studentVirtualClass', 'attendanceSheet', 'adminReports', 'adminCertificates', 'institutionFiles', 'supportTickets'];
         tabs.forEach(t => {
             const el = document.getElementById(`tab-${t}`);
             const btn = document.getElementById(`btn-${t}`);
@@ -8970,6 +9168,8 @@ ${details}
                 if (typeof renderAdminCertificatesTab === 'function') renderAdminCertificatesTab();
             } else if (tab === 'institutionFiles') {
                 if (typeof renderInstitutionFilesTab === 'function') renderInstitutionFilesTab();
+            } else if (tab === 'supportTickets') {
+                if (typeof renderSupportTicketsHub === 'function') renderSupportTicketsHub();
             } else if (tab === 'masterSchedule') {
                 renderMasterSchedule();
             } else if (tab === 'users') {
@@ -45579,6 +45779,384 @@ function buildDemoExecutiveReport(params) {
             }
         }
     }
+
+    // =========================================================================
+    // ─── ADMIN DASHBOARD: QUICK TRAINEE PROFILE ACCESS BY NATIONAL ID ────────
+    // =========================================================================
+
+    function handleAdminQuickTraineeInput(val) {
+        const q = (val || '').trim().toLowerCase();
+        const sugBox = document.getElementById('adminQuickTraineeSuggestions');
+        if (!sugBox) return;
+
+        if (q.length < 2) {
+            sugBox.classList.add('hidden');
+            sugBox.innerHTML = '';
+            return;
+        }
+
+        const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) 
+            ? trainees 
+            : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+
+        const matches = pool.filter(t => {
+            const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id || '') : (t.id || '');
+            const name = (t.name || '').toLowerCase();
+            const idStr = (t.id || '').toLowerCase();
+            return cleanId.includes(q) || idStr.includes(q) || name.includes(q);
+        }).slice(0, 6);
+
+        if (matches.length === 0) {
+            sugBox.innerHTML = `
+                <div class="p-3 text-center text-xs font-bold text-slate-400">
+                    لا توجد نتائج مطابقة لـ "${q}"
+                </div>
+            `;
+            sugBox.classList.remove('hidden');
+            return;
+        }
+
+        sugBox.innerHTML = matches.map(t => `
+            <div onclick="selectAdminQuickTrainee('${t.id}')" class="p-3 hover:bg-amber-50 cursor-pointer flex items-center justify-between gap-3 transition">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-sm font-black text-[#0F2942]">👤</span>
+                    <div>
+                        <div class="text-xs font-black text-slate-900">${t.name}</div>
+                        <div class="text-[11px] font-mono font-bold text-slate-500">هوية: ${t.id} | شعبة: ${t.group || '—'}</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-lg">${t.company || 'معهد الذهب الأسود'}</span>
+                    <span class="text-xs text-amber-600 font-black">استعراض الملف ⬅️</span>
+                </div>
+            </div>
+        `).join('');
+        sugBox.classList.remove('hidden');
+    }
+    window.handleAdminQuickTraineeInput = handleAdminQuickTraineeInput;
+
+    function selectAdminQuickTrainee(traineeId) {
+        const sugBox = document.getElementById('adminQuickTraineeSuggestions');
+        if (sugBox) sugBox.classList.add('hidden');
+        const input = document.getElementById('adminQuickTraineeIdInput');
+        if (input) input.value = traineeId;
+        if (typeof openTraineeProfileModal === 'function') {
+            openTraineeProfileModal(traineeId);
+        }
+    }
+    window.selectAdminQuickTrainee = selectAdminQuickTrainee;
+
+    function clearAdminQuickTraineeInput() {
+        const input = document.getElementById('adminQuickTraineeIdInput');
+        if (input) input.value = '';
+        const sugBox = document.getElementById('adminQuickTraineeSuggestions');
+        if (sugBox) {
+            sugBox.classList.add('hidden');
+            sugBox.innerHTML = '';
+        }
+    }
+    window.clearAdminQuickTraineeInput = clearAdminQuickTraineeInput;
+
+    function openAdminSearchedTraineeProfile() {
+        const input = document.getElementById('adminQuickTraineeIdInput');
+        const q = (input?.value || '').trim();
+        if (!q) {
+            return showToast('يرجى إدخال رقم الهوية الوطنية أو اسم المتدرب أولاً', 'info');
+        }
+
+        const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) 
+            ? trainees 
+            : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+
+        const found = pool.find(t => {
+            const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id || '') : (t.id || '');
+            const qClean = (typeof cleanNationalId === 'function') ? cleanNationalId(q) : q;
+            if (qClean && cleanId === qClean) return true;
+            if (t.id && t.id.trim() === q) return true;
+            if (t.name && t.name.toLowerCase().includes(q.toLowerCase())) return true;
+            return false;
+        });
+
+        const sugBox = document.getElementById('adminQuickTraineeSuggestions');
+        if (sugBox) sugBox.classList.add('hidden');
+
+        if (found) {
+            showToast(`تم فتح ملف المتدرب: ${found.name}`, 'success');
+            if (typeof openTraineeProfileModal === 'function') {
+                openTraineeProfileModal(found.id);
+            }
+        } else {
+            showToast(`لم يتم العثور على متدرب برقم الهوية أو الاسم المدخل: ${q}`, 'warning');
+        }
+    }
+    window.openAdminSearchedTraineeProfile = openAdminSearchedTraineeProfile;
+
+    // =========================================================================
+    // ─── SUPER ADMIN SUPPORT REQUESTS HUB (مركز الدعم الفني والمساعدة) ───────
+    // =========================================================================
+
+    function getSupportTicketsList() {
+        let tickets = [];
+        try {
+            const raw = localStorage.getItem('sys_support_tickets_v1');
+            if (raw) tickets = JSON.parse(raw);
+        } catch(e) {}
+
+        if (!Array.isArray(tickets) || tickets.length === 0) {
+            // Seed initial realistic support tickets for Super Admin
+            tickets = [
+                {
+                    id: 'TK-108421',
+                    name: 'محمد علي الشمري',
+                    userId: '1087654321',
+                    phone: '0501234567',
+                    role: 'متدرب',
+                    category: 'مشكلة تقنية / بوابة المتدرب',
+                    subject: 'تعذر الدخول لبوابة التدريب والمحاضرة المباشرة',
+                    details: 'تظهر لي رسالة خطأ عند محاولة فتح رابط قاعة المحاضرة المباشرة عبر الجوال، أرجو إعادة ضبط الحساب وتأكيد الرابط.',
+                    priority: 'عاجل',
+                    date: '2026-10-27 10:15 ص',
+                    status: 'pending'
+                },
+                {
+                    id: 'TK-108395',
+                    name: 'أ. شرف الدين',
+                    userId: 'trainer_sharaf',
+                    phone: '0559876543',
+                    role: 'مدرب',
+                    category: 'الجداول التدريبية والمواعيد',
+                    subject: 'طلب تعديل قاعة اختبار مادة اللغة الإنجليزية',
+                    details: 'نظراً لأعمال صيانة التكييف في القاعة 4، نرجو نقل اختبار يوم الأربعاء القادم إلى القاعة 8 وتأكيد الحجز في الجدول العام.',
+                    priority: 'عادي',
+                    date: '2026-10-27 09:30 ص',
+                    status: 'in_progress'
+                },
+                {
+                    id: 'TK-108210',
+                    name: 'عبدالله محمد القحطاني',
+                    userId: '1098765432',
+                    phone: '0541122334',
+                    role: 'متدرب',
+                    category: 'منصة منار',
+                    subject: 'استفسار عن اعتماد شهادة إتمام دورة السلامة',
+                    details: 'أنهيت متطلبات الدورة وساعات الحضور المعتمدة، هل تم اعتماد الشهادة على منصة منار لاستخراجها وطباعتها؟',
+                    priority: 'عادي',
+                    date: '2026-10-26 02:45 م',
+                    status: 'resolved'
+                },
+                {
+                    id: 'TK-108102',
+                    name: 'سعود فهد الدوسري',
+                    userId: '1076543210',
+                    phone: '0567788990',
+                    role: 'متدرب',
+                    category: 'استفسار عن الحضور والغياب',
+                    subject: 'تقديم عذر طبي رسمي لغياب يوم الاثنين',
+                    details: 'مرفق تقرير إجازة مرضية من مستشفى الملك فهد لغياب يوم الاثنين الفترة الأولى والثانية، أرجو تعديل سجل الحضور وقبول العذر.',
+                    priority: 'هام',
+                    date: '2026-10-26 11:20 ص',
+                    status: 'pending'
+                }
+            ];
+            try {
+                localStorage.setItem('sys_support_tickets_v1', JSON.stringify(tickets));
+            } catch(e) {}
+        }
+        return tickets;
+    }
+    window.getSupportTicketsList = getSupportTicketsList;
+
+    function saveSupportTicketsList(tickets) {
+        try {
+            localStorage.setItem('sys_support_tickets_v1', JSON.stringify(tickets));
+        } catch(e) {}
+        updateSupportTicketsBadge();
+    }
+    window.saveSupportTicketsList = saveSupportTicketsList;
+
+    function updateSupportTicketsBadge() {
+        const tickets = getSupportTicketsList();
+        const pendingCount = tickets.filter(t => t.status === 'pending').length;
+        const badge = document.getElementById('sidebarSupportBadge');
+        if (badge) {
+            badge.innerText = pendingCount;
+            if (pendingCount > 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+    }
+    window.updateSupportTicketsBadge = updateSupportTicketsBadge;
+
+    function renderSupportTicketsHub() {
+        const tickets = getSupportTicketsList();
+
+        // Update KPIs
+        const total = tickets.length;
+        const pending = tickets.filter(t => t.status === 'pending').length;
+        const inProgress = tickets.filter(t => t.status === 'in_progress').length;
+        const resolved = tickets.filter(t => t.status === 'resolved').length;
+
+        const elTotal = document.getElementById('supportStatTotal');
+        const elPending = document.getElementById('supportStatPending');
+        const elInProgress = document.getElementById('supportStatInProgress');
+        const elResolved = document.getElementById('supportStatResolved');
+
+        if (elTotal) elTotal.innerText = total;
+        if (elPending) elPending.innerText = pending;
+        if (elInProgress) elInProgress.innerText = inProgress;
+        if (elResolved) elResolved.innerText = resolved;
+
+        updateSupportTicketsBadge();
+        filterSupportTickets();
+    }
+    window.renderSupportTicketsHub = renderSupportTicketsHub;
+
+    function filterSupportTickets() {
+        const q = (document.getElementById('supportSearchInput')?.value || '').trim().toLowerCase();
+        const fStatus = document.getElementById('supportFilterStatus')?.value || 'ALL';
+        const fPriority = document.getElementById('supportFilterPriority')?.value || 'ALL';
+
+        let list = getSupportTicketsList();
+
+        if (fStatus !== 'ALL') {
+            list = list.filter(t => t.status === fStatus);
+        }
+        if (fPriority !== 'ALL') {
+            list = list.filter(t => t.priority === fPriority);
+        }
+        if (q) {
+            list = list.filter(t => {
+                const s = `${t.id} ${t.name} ${t.userId} ${t.phone} ${t.subject} ${t.details} ${t.category}`.toLowerCase();
+                return s.includes(q);
+            });
+        }
+
+        const badge = document.getElementById('supportTicketsCountBadge');
+        if (badge) badge.innerText = `${list.length} تذكرة`;
+
+        const container = document.getElementById('supportTicketsContainer');
+        if (!container) return;
+
+        if (list.length === 0) {
+            container.innerHTML = `
+                <div class="py-12 text-center text-slate-400 font-bold space-y-2">
+                    <span class="text-4xl block">📭</span>
+                    <span class="text-xs">لا توجد طلبات دعم فني مطابقة للفلاتر المحددة</span>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = list.map(t => {
+            const statusConfig = {
+                pending: { label: 'قيد الانتظار ⏳', bg: 'bg-amber-100 text-amber-900 border-amber-300' },
+                in_progress: { label: 'قيد المعالجة 🔄', bg: 'bg-blue-100 text-blue-900 border-blue-300' },
+                resolved: { label: 'تم الحل بنجاح ✓', bg: 'bg-emerald-100 text-emerald-900 border-emerald-300' }
+            }[t.status] || { label: t.status, bg: 'bg-slate-100 text-slate-800' };
+
+            const prioConfig = {
+                'عاجل': 'bg-rose-100 text-rose-800 border-rose-300',
+                'هام': 'bg-amber-100 text-amber-800 border-amber-300',
+                'عادي': 'bg-slate-100 text-slate-700 border-slate-300'
+            }[t.priority] || 'bg-slate-100 text-slate-700';
+
+            const phoneClean = (t.phone || '').replace(/[^0-9]/g, '');
+            const waPhone = phoneClean.startsWith('05') ? '966' + phoneClean.slice(1) : phoneClean;
+            const waLink = waPhone ? `https://wa.me/${waPhone}?text=${encodeURIComponent('السلام عليكم ورحمة الله، بخصوص تذكرة الدعم الفني رقم ' + t.id + ' بمعهد الذهب الأسود للتدريب:')}` : null;
+
+            return `
+                <div class="p-4 md:p-5 rounded-2xl border border-slate-200 bg-white hover:border-[#0F2942]/30 transition shadow-2xs space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100">
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <span class="font-mono font-black text-xs md:text-sm bg-[#0F2942] text-amber-300 px-2.5 py-1 rounded-xl shadow-2xs">${t.id}</span>
+                            <span class="text-xs font-black text-slate-900">${t.name}</span>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">${t.role || 'مستخدم'}</span>
+                            <span class="text-[10px] font-mono text-slate-400">${t.date || ''}</span>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-[10px] font-black px-2.5 py-1 rounded-full border ${prioConfig}">
+                                ${t.priority || 'عادي'}
+                            </span>
+                            <span class="text-[10px] font-black px-2.5 py-1 rounded-full border ${statusConfig.bg}">
+                                ${statusConfig.label}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs font-bold text-slate-600 bg-slate-50/70 p-2.5 rounded-xl border border-slate-100">
+                        <div>رقم الهوية: <span class="font-mono text-slate-900">${t.userId || 'غير مسجل'}</span></div>
+                        <div>الجوال: <span class="font-mono text-slate-900">${t.phone || 'غير مسجل'}</span></div>
+                        <div>التصنيف: <span class="text-indigo-900 font-black">${t.category || 'عام'}</span></div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="text-xs font-black text-[#0F2942] flex items-center gap-1.5">
+                            <span>📌</span>
+                            <span>الموضوع: ${t.subject || t.category}</span>
+                        </div>
+                        <div class="text-xs text-slate-700 font-bold leading-relaxed bg-amber-50/30 p-3 rounded-xl border border-amber-200/50">
+                            ${t.details || ''}
+                        </div>
+                    </div>
+
+                    <!-- Actions Bar -->
+                    <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-100">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[11px] font-black text-slate-500">تحديث الحالة:</span>
+                            <button type="button" onclick="updateSupportTicketStatus('${t.id}', 'pending')" class="px-2.5 py-1 rounded-lg text-[10px] font-black border ${t.status === 'pending' ? 'bg-amber-500 text-white border-amber-600' : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'} transition cursor-pointer">
+                                ⏳ معلق
+                            </button>
+                            <button type="button" onclick="updateSupportTicketStatus('${t.id}', 'in_progress')" class="px-2.5 py-1 rounded-lg text-[10px] font-black border ${t.status === 'in_progress' ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'} transition cursor-pointer">
+                                🔄 قيد المعالجة
+                            </button>
+                            <button type="button" onclick="updateSupportTicketStatus('${t.id}', 'resolved')" class="px-2.5 py-1 rounded-lg text-[10px] font-black border ${t.status === 'resolved' ? 'bg-emerald-600 text-white border-emerald-700' : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'} transition cursor-pointer">
+                                ✓ تم الحل
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            ${waLink ? `
+                                <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-2xs transition">
+                                    <span>💬</span>
+                                    <span>واتساب</span>
+                                </a>
+                            ` : ''}
+                            <button type="button" onclick="deleteSupportTicket('${t.id}')" class="text-rose-500 hover:text-rose-700 hover:bg-rose-50 text-[11px] font-bold px-2.5 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer" title="حذف التذكرة">
+                                🗑️ حذف
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    window.filterSupportTickets = filterSupportTickets;
+
+    function updateSupportTicketStatus(ticketId, newStatus) {
+        let tickets = getSupportTicketsList();
+        const t = tickets.find(x => x.id === ticketId);
+        if (!t) return;
+
+        t.status = newStatus;
+        saveSupportTicketsList(tickets);
+        renderSupportTicketsHub();
+        const label = newStatus === 'resolved' ? 'تم الحل بنجاح' : (newStatus === 'in_progress' ? 'قيد المعالجة' : 'قيد الانتظار');
+        showToast(`تم تحديث تذكرة الدعم (${ticketId}) إلى: ${label}`, 'success');
+    }
+    window.updateSupportTicketStatus = updateSupportTicketStatus;
+
+    function deleteSupportTicket(ticketId) {
+        if (!confirm(`هل أنت متأكد من حذف تذكرة الدعم (${ticketId})؟`)) return;
+        let tickets = getSupportTicketsList();
+        tickets = tickets.filter(x => x.id !== ticketId);
+        saveSupportTicketsList(tickets);
+        renderSupportTicketsHub();
+        showToast(`تم حذف تذكرة الدعم (${ticketId}) بنجاح`, 'info');
+    }
+    window.deleteSupportTicket = deleteSupportTicket;
 
     // تشغيل النظام فور جاهزية المستند
     if (document.readyState === 'loading') {
