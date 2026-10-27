@@ -1924,11 +1924,17 @@
                             <span class="text-xs">⚡</span>
                         </div>
                         <div class="grid grid-cols-2 gap-1.5">
-                            <button onclick="copyViolatorPhones('all')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold p-1.5 rounded-lg text-[10px] text-center border border-slate-700 transition" title="نسخ أرقام المخالفين والغائبين">
-                                📲 نسخ المخالفين
+                            <button onclick="copyViolatorPhones('violator')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold p-1.5 rounded-lg text-[10px] text-center border border-slate-700 transition" title="نسخ أرقام المخالفين (حضور فترة واحدة فقط)">
+                                ⚠️ نسخ المخالفين
                             </button>
                             <button onclick="copyViolatorPhones('absent')" class="bg-slate-800 hover:bg-slate-700 text-red-300 font-bold p-1.5 rounded-lg text-[10px] text-center border border-slate-700 transition" title="نسخ أرقام الغائبين بالكامل">
                                 🚫 نسخ الغائبين
+                            </button>
+                            <button onclick="copyViolatorPhones('all')" class="bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold p-1.5 rounded-lg text-[10px] text-center border border-slate-700 transition" title="نسخ أرقام المخالفين والغائبين معاً">
+                                📲 مخالفين + غائبين
+                            </button>
+                            <button onclick="copyViolatorPhones('registered_reports')" class="bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold p-1.5 rounded-lg text-[10px] text-center border border-slate-700 transition" title="نسخ أرقام المتدربين المسجل لهم بلاغات ومخالفات في النظام">
+                                📄 بلاغات النظام
                             </button>
                             <button onclick="copySelectedGroupPhones()" class="bg-amber-950/80 hover:bg-amber-900 text-amber-300 font-bold p-1.5 rounded-lg text-[10px] text-center border border-amber-600/50 transition" title="نسخ جميع أرقام جوال الشعبة المحددة">
                                 👥 جوالات الشعبة
@@ -6261,17 +6267,18 @@
                                         <input type="checkbox" id="instSelectAllCheckbox" checked onchange="toggleAllInstTraineesSelection(this.checked)" class="w-4 h-4 accent-emerald-600 rounded cursor-pointer" title="تحديد / استبعاد الكل من ملف التصدير">
                                     </th>
                                     <th class="p-3 text-center w-8">#</th>
-                                    <th class="p-3 text-center">1. رقم الجوال</th>
-                                    <th class="p-3">2. البريد الإلكتروني</th>
-                                    <th class="p-3">3. المؤهل</th>
-                                    <th class="p-3 text-center">4. الجنسية</th>
-                                    <th class="p-3 text-center">5. النوع</th>
-                                    <th class="p-3 text-center">6. تاريخ الميلاد (m/d/Y)</th>
-                                    <th class="p-3">7. الاسم الأخير</th>
-                                    <th class="p-3">8. الاسم الثالث</th>
-                                    <th class="p-3">9. الاسم الثاني</th>
-                                    <th class="p-3">10. الاسم الأول</th>
-                                    <th class="p-3 text-center">11. رقم الهوية</th>
+                                    <th class="p-3 text-center">رقم الهوية والشعبة</th>
+                                    <th class="p-3">اسم المتدرب الرباعي</th>
+                                    <th class="p-3">الاسم الأول</th>
+                                    <th class="p-3">الاسم الثاني</th>
+                                    <th class="p-3">الاسم الثالث</th>
+                                    <th class="p-3">الاسم الأخير</th>
+                                    <th class="p-3 text-center">رقم الجوال</th>
+                                    <th class="p-3">البريد الإلكتروني</th>
+                                    <th class="p-3">المؤهل</th>
+                                    <th class="p-3 text-center">الجنسية</th>
+                                    <th class="p-3 text-center">النوع</th>
+                                    <th class="p-3 text-center">تاريخ الميلاد (m/d/Y)</th>
                                     <th class="p-3 text-center">نسبة الحضور</th>
                                     <th class="p-3 text-center">شهادة منار</th>
                                     <th class="p-3 text-center">حالة التدقيق</th>
@@ -8521,10 +8528,13 @@ ${details}
         if (typeof phoneDirectory === 'undefined' || !phoneDirectory) return 0;
         const existingIds = new Set(trainees.map(t => (typeof cleanNationalId === 'function' ? cleanNationalId(t.id) : String(t.id || '')).trim()));
         let addedCount = 0;
+        let updatedCount = 0;
         Object.keys(phoneDirectory).forEach(id => {
             const cleanId = (typeof cleanNationalId === 'function' ? cleanNationalId(id) : String(id || '')).trim();
-            if (cleanId && !existingIds.has(cleanId)) {
-                const p = phoneDirectory[id] || {};
+            if (!cleanId) return;
+            const p = phoneDirectory[id] || {};
+
+            if (!existingIds.has(cleanId)) {
                 const grp = (p.group && p.group !== 'عام') ? p.group : '';
                 const comp = (p.company && p.company !== 'المؤسسة' && p.company !== 'عام') ? p.company : (grp && typeof detectCompany === 'function' ? detectCompany(grp) : 'المؤسسة');
                 trainees.push({
@@ -8554,13 +8564,62 @@ ${details}
                     first_name: p.first_name || '',
                     second_name: p.second_name || '',
                     third_name: p.third_name || '',
-                    last_name: p.last_name || ''
+                    last_name: p.last_name || '',
+                    manarCertificateIssued: Boolean(p.manarCertificateIssued),
+                    manarCertificateDate: p.manarCertificateDate || null,
+                    institutionApproved: Boolean(p.institutionApproved),
+                    institutionApprovalDate: p.institutionApprovalDate || null,
+                    institutionApprovalGroup: p.institutionApprovalGroup || ''
                 });
                 existingIds.add(cleanId);
                 addedCount++;
+            } else {
+                // تحديث المتدرب الموجود مسبقاً دون مسح درجاته أو تحضيره (تحديث حقول البيانات فقط)
+                const existing = trainees.find(t => (typeof cleanNationalId === 'function' ? cleanNationalId(t.id) : String(t.id || '')).trim() === cleanId);
+                if (existing) {
+                    let changed = false;
+                    const cleanPPhone = (typeof cleanPhone === 'function' && p.phone) ? cleanPhone(p.phone) : (p.phone || '');
+                    if (cleanPPhone && existing.phone !== cleanPPhone) {
+                        existing.phone = cleanPPhone;
+                        changed = true;
+                    }
+                    if (p.email && !existing.email) { existing.email = p.email; changed = true; }
+                    if (p.qual && (!existing.qual || existing.qual === 'غير محدد')) { existing.qual = p.qual; changed = true; }
+                    if (p.dob && !existing.dob) { existing.dob = p.dob; changed = true; }
+                    if (p.gender && !existing.gender) { existing.gender = p.gender; changed = true; }
+                    if (p.nationality && !existing.nationality) { existing.nationality = p.nationality; changed = true; }
+                    if (p.first_name && !existing.first_name) { existing.first_name = p.first_name; changed = true; }
+                    if (p.second_name && !existing.second_name) { existing.second_name = p.second_name; changed = true; }
+                    if (p.third_name && !existing.third_name) { existing.third_name = p.third_name; changed = true; }
+                    if (p.last_name && !existing.last_name) { existing.last_name = p.last_name; changed = true; }
+                    if (p.manarCertificateIssued && !existing.manarCertificateIssued) {
+                        existing.manarCertificateIssued = true;
+                        existing.manarCertificateDate = p.manarCertificateDate || existing.manarCertificateDate;
+                        changed = true;
+                    }
+                    if (p.institutionApproved && !existing.institutionApproved) {
+                        existing.institutionApproved = true;
+                        existing.institutionApprovalDate = p.institutionApprovalDate || existing.institutionApprovalDate;
+                        existing.institutionApprovalGroup = p.institutionApprovalGroup || existing.institutionApprovalGroup;
+                        changed = true;
+                    }
+                    if (p.name && (!existing.name || existing.name.startsWith('متدرب ('))) {
+                        existing.name = p.name;
+                        changed = true;
+                    }
+                    if (p.group && p.group !== 'عام' && (!existing.group || existing.group === 'عام')) {
+                        existing.group = p.group;
+                        changed = true;
+                    }
+                    if (p.company && p.company !== 'المؤسسة' && p.company !== 'عام' && (!existing.company || existing.company === 'عام' || existing.company === 'المؤسسة')) {
+                        existing.company = p.company;
+                        changed = true;
+                    }
+                    if (changed) updatedCount++;
+                }
             }
         });
-        return addedCount;
+        return addedCount + updatedCount;
     }
     window.ensureTraineesConsistencyWithDirectory = ensureTraineesConsistencyWithDirectory;
     ensureTraineesConsistencyWithDirectory();
@@ -12429,9 +12488,20 @@ ${details}
     // ===================================================================
     // ATTENDANCE & REGISTRATION PARSERS
     // ===================================================================
+    function convertArabicToAsciiDigits(str) {
+        if (!str && str !== 0) return '';
+        const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+        let res = String(str);
+        for (let i = 0; i < 10; i++) {
+            res = res.replace(new RegExp(arabicDigits[i], 'g'), String(i));
+        }
+        return res;
+    }
+    window.convertArabicToAsciiDigits = convertArabicToAsciiDigits;
+
     function cleanNationalId(raw) {
         if (!raw && raw !== 0) return '';
-        let str = String(raw).trim();
+        let str = convertArabicToAsciiDigits(raw).trim();
         if (str.toLowerCase().includes('e')) {
             const num = Number(str);
             if (!isNaN(num)) str = Math.round(num).toString();
@@ -12441,18 +12511,20 @@ ${details}
 
     function cleanPhone(raw) {
         if (!raw && raw !== 0) return '';
-        let str = String(raw).trim();
+        let str = convertArabicToAsciiDigits(raw).trim();
         if (str.toLowerCase().includes('e')) {
             const num = Number(str);
             if (!isNaN(num)) str = Math.round(num).toString();
         }
         str = str.split('.')[0].replace(/\D/g, '');
-        // إزالة المفتاح الدولي 966 إن وجد
-        if (str.startsWith('966')) {
+        // إزالة المفتاح الدولي 00966 أو 966 إن وجد
+        if (str.startsWith('00966')) {
+            str = str.substring(5);
+        } else if (str.startsWith('966')) {
             str = str.substring(3);
         }
         // إضافة 0 في بداية الرقم المكون من 9 أرقام ليصبح بصيغة 05XXXXXXXX
-        if (str.length === 9) {
+        if (str.length === 9 && str.startsWith('5')) {
             str = '0' + str;
         }
         return str;
@@ -15216,41 +15288,141 @@ ${details}
         showToast('تم حفظ رقم الجوال بنجاح!', 'success');
     }
 
-    function copyViolatorPhones(mode = 'all') {
-        const selectedCompany = document.getElementById('companyFilter').value;
-        const selectedGroup = document.getElementById('groupFilter').value;
+    function copyTextWithFallback(text) {
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).catch(() => legacyCopyText(text));
+        } else {
+            legacyCopyText(text);
+        }
+    }
+    function legacyCopyText(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try { document.execCommand('copy'); } catch(e){}
+        document.body.removeChild(ta);
+    }
+    window.copyTextWithFallback = copyTextWithFallback;
 
-        const filtered = trainees.filter(t => {
+    function copyViolatorPhones(mode = 'all') {
+        if (typeof ensureTraineesConsistencyWithDirectory === 'function') {
+            ensureTraineesConsistencyWithDirectory();
+        }
+
+        const selectedCompany = document.getElementById('companyFilter')?.value || 'ALL';
+        const selectedGroup = document.getElementById('groupFilter')?.value || 'ALL';
+
+        // استخدام التجمع الشامل للمتدربين
+        const pool = (typeof getUnifiedTraineesPool === 'function') 
+            ? getUnifiedTraineesPool() 
+            : ((typeof trainees !== 'undefined' && trainees.length > 0) ? trainees : SAMPLE_TRAINEES);
+
+        // إذا كان النمط هو نسخ أرقام أصحاب البلاغات والمخالفات المرصودة في سجل البلاغات والتقارير
+        if (mode === 'registered_reports') {
+            const reportedIds = new Set((reports || []).map(r => (typeof cleanNationalId === 'function' ? cleanNationalId(r.traineeId) : String(r.traineeId || '')).trim()));
+            const targetPhones = [];
+            let missingCount = 0;
+
+            pool.forEach(t => {
+                const cId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+                if (!reportedIds.has(cId) && !reportedIds.has(String(t.id || '').trim())) return;
+
+                const matchesComp = selectedCompany === 'ALL' || t.company === selectedCompany;
+                const matchesGrp = selectedGroup === 'ALL' || t.group === selectedGroup || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group));
+                if (!matchesComp || !matchesGrp) return;
+
+                const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[cId] || phoneDirectory[t.id] || {}) : {});
+                const rawPh = t.phone || pDir.phone || '';
+                const cleanPh = (typeof cleanPhone === 'function') ? cleanPhone(rawPh) : String(rawPh || '').trim();
+
+                if (cleanPh && cleanPh.length >= 9) {
+                    targetPhones.push(cleanPh);
+                    if (!t.phone) t.phone = cleanPh;
+                } else {
+                    missingCount++;
+                }
+            });
+
+            const uniquePhones = [...new Set(targetPhones)];
+            if (uniquePhones.length === 0) {
+                return showToast(`لا توجد أرقام جوال مسجلة لأصحاب البلاغات في شعبة (${selectedGroup === 'ALL' ? 'الكل' : selectedGroup})`, 'warning');
+            }
+
+            copyTextWithFallback(uniquePhones.join('\n'));
+            let msg = `✅ تم نسخ (${uniquePhones.length}) رقم جوال لأصحاب البلاغات المسجلة بنجاح!`;
+            if (missingCount > 0) {
+                msg += `\n(تنبيه: هناك ${missingCount} مخالف مسجل بدون رقم جوال).`;
+            }
+            showToast(msg, 'success');
+            return;
+        }
+
+        // فلترة المتدربين بحسب الشعبة والشركة ومطابقة الحضور
+        const filtered = pool.filter(t => {
             const matchesComp = selectedCompany === 'ALL' || t.company === selectedCompany;
-            const matchesGroup = selectedGroup === 'ALL' || t.group === selectedGroup;
+            const matchesGroup = selectedGroup === 'ALL' || t.group === selectedGroup || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group));
             return matchesComp && matchesGroup;
         });
 
         const targetPhones = [];
         let missingPhoneCount = 0;
+        let matchedCount = 0;
 
         filtered.forEach(t => {
             const dayChecks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIndex] : [false, false, false, false];
-            const st = calculateStatus(dayChecks);
+            const st = (typeof calculateStatus === 'function') ? calculateStatus(dayChecks, t) : { type: 'absent' };
 
-            const isTarget = mode === 'absent' ? st.type === 'absent' : (st.type === 'violator' || st.type === 'absent');
+            let isTarget = false;
+            if (mode === 'violator') {
+                // مخالف فقط (حضر فترة واحدة وتغيب عن الثانية)
+                isTarget = (st.type === 'violator');
+            } else if (mode === 'absent') {
+                // غائب بالكامل عن الفترتين
+                isTarget = (st.type === 'absent');
+            } else {
+                // الكل: مخالفين وغائبين
+                isTarget = (st.type === 'violator' || st.type === 'absent');
+            }
+
             if (isTarget) {
-                if (t.phone) targetPhones.push(t.phone);
-                else missingPhoneCount++;
+                matchedCount++;
+                const cId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+                const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[cId] || phoneDirectory[t.id] || {}) : {});
+                const rawPh = t.phone || pDir.phone || '';
+                const cleanPh = (typeof cleanPhone === 'function') ? cleanPhone(rawPh) : String(rawPh || '').trim();
+
+                if (cleanPh && cleanPh.length >= 9) {
+                    targetPhones.push(cleanPh);
+                    if (!t.phone) t.phone = cleanPh; // مزامنة الرقم مع المتدرب
+                } else {
+                    missingPhoneCount++;
+                }
             }
         });
 
-        if (targetPhones.length === 0) {
-            return alert(`لا توجد أرقام جوال مسجلة للمتدربين ${mode === 'absent' ? 'الغائبين' : 'المخالفين والغائبين'} لهذا اليوم.`);
+        const uniquePhones = [...new Set(targetPhones)];
+        const labelMode = mode === 'violator' ? 'المخالفين (حضور فترة واحدة)' : (mode === 'absent' ? 'الغائبين بالكامل' : 'المخالفين والغائبين');
+
+        if (uniquePhones.length === 0) {
+            if (matchedCount === 0) {
+                return showToast(`لا يوجد أي متدرب من فئة (${labelMode}) لهذا اليوم في شعبة (${selectedGroup === 'ALL' ? 'الكل' : selectedGroup}).`, 'info');
+            } else {
+                return alert(`يوجد (${matchedCount}) متدرب من فئة (${labelMode}) لكن لا توجد أرقام جوال مسجلة لهم.\nيرجى فتح ملف المؤسسة أو استيراد ملف التسجيل لتحديث أرقامهم.`);
+            }
         }
 
-        navigator.clipboard.writeText(targetPhones.join('\n')).then(() => {
-            let msg = `تم نسخ ${targetPhones.length} رقم جوال إلى الحافظة بنجاح!`;
-            if (missingPhoneCount > 0) {
-                msg += `\n(تنبيه: هناك ${missingPhoneCount} متدرب بدون رقم جوال، يرجى رفع ملف تسجيل المؤسسة لمطابقة أرقامهم).`;
-            }
-            alert(msg);
-        });
+        copyTextWithFallback(uniquePhones.join('\n'));
+        let msg = `✅ تم نسخ ${uniquePhones.length} رقم جوال لـ (${labelMode}) بنجاح!`;
+        if (missingPhoneCount > 0) {
+            msg += `\n(تنبيه: هناك ${missingPhoneCount} متدرب مسجل بدون رقم جوال).`;
+        }
+        showToast(msg, 'success');
+        try { if (typeof saveData === 'function') saveData(); } catch(e){}
     }
 
     function copyAttendanceReport() {
@@ -23990,13 +24162,15 @@ function openReportFromProfile() {
             let third = pDir.third_name || t.third_name || '';
             let last = pDir.last_name || t.last_name || '';
 
-            if (!first && !last) {
+            if (!first || !last) {
                 const fullName = pDir.name || t.name || '';
-                const parts = (typeof splitArabicName === 'function') ? splitArabicName(fullName) : { first: fullName, second: '', third: '', last: '' };
-                first = parts.first;
-                second = parts.second;
-                third = parts.third;
-                last = parts.last;
+                if (fullName) {
+                    const parts = (typeof splitArabicName === 'function') ? splitArabicName(fullName) : { first: fullName, second: '', third: '', last: '' };
+                    if (!first) first = parts.first;
+                    if (!second) second = parts.second;
+                    if (!third) third = parts.third;
+                    if (!last) last = parts.last;
+                }
             }
 
             const rawDob = pDir.dob || t.dob || '';
@@ -24177,7 +24351,45 @@ function openReportFromProfile() {
 
                     <!-- # الرقم التسلسلي -->
                     <td class="p-2.5 text-center font-bold ${r.isExcluded ? 'text-slate-400 line-through' : 'text-slate-500'}">${r.idx + 1}</td>
-                    
+
+                    <!-- رقم الهوية والشعبة (مربوط بالملف الشخصي) -->
+                    <td class="p-2 text-center whitespace-nowrap">
+                        <div class="flex flex-col items-center gap-0.5">
+                            <a href="javascript:void(0)" onclick="openTraineeProfileModal('${r.id}')" class="font-mono font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-md text-xs select-all cursor-pointer transition shadow-2xs" title="انقر لفتح ملف المتدرب الكامل وسجل درجاته">
+                                ${escapeHtml(r.id)} 👤
+                            </a>
+                            <span class="text-[9px] font-black text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded mt-0.5" title="الشعبة التدريبية: ${escapeHtml(r.group)}">
+                                ${escapeHtml(r.group)}
+                            </span>
+                        </div>
+                    </td>
+
+                    <!-- اسم المتدرب الرباعي الكامل والمنشأة -->
+                    <td class="p-2 whitespace-nowrap">
+                        <div class="font-bold text-slate-900 text-xs">${escapeHtml(r.name || `${r.first} ${r.last}`)}</div>
+                        <div class="text-[10px] text-slate-400 font-normal">${escapeHtml(r.group || 'عام')}</div>
+                    </td>
+
+                    <!-- 10. الاسم الأول -->
+                    <td class="p-1.5">
+                        <input type="text" value="${escapeHtml(r.first)}" onchange="saveInstTraineeField('${r.id}', 'first', this.value)" placeholder="الاسم الأول" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                    </td>
+
+                    <!-- 9. الاسم الثاني -->
+                    <td class="p-1.5">
+                        <input type="text" value="${escapeHtml(r.second)}" onchange="saveInstTraineeField('${r.id}', 'second', this.value)" placeholder="اسم الأب" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                    </td>
+
+                    <!-- 8. الاسم الثالث -->
+                    <td class="p-1.5">
+                        <input type="text" value="${escapeHtml(r.third)}" onchange="saveInstTraineeField('${r.id}', 'third', this.value)" placeholder="اسم الجد" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                    </td>
+
+                    <!-- 7. الاسم الأخير -->
+                    <td class="p-1.5">
+                        <input type="text" value="${escapeHtml(r.last)}" onchange="saveInstTraineeField('${r.id}', 'last', this.value)" placeholder="اللقب / العائلة" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
+                    </td>
+
                     <!-- 1. رقم الجوال -->
                     <td class="p-1.5 text-center">
                         <input type="text" value="${escapeHtml(r.phone)}" onchange="saveInstTraineeField('${r.id}', 'phone', this.value)" placeholder="05xxxxxxxx" class="w-28 text-center font-mono ${!r.phone ? 'border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'} border focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
@@ -24209,38 +24421,6 @@ function openReportFromProfile() {
                     <!-- 6. تاريخ الميلاد (m/d/Y) -->
                     <td class="p-1.5 text-center">
                         <input type="text" value="${escapeHtml(r.dob)}" onchange="saveInstTraineeField('${r.id}', 'dob', this.value)" placeholder="m/d/Y مثل: 10/25/2000" class="w-28 text-center font-mono ${!r.dob ? 'border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'} border focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
-                    </td>
-
-                    <!-- 7. الاسم الأخير -->
-                    <td class="p-1.5">
-                        <input type="text" value="${escapeHtml(r.last)}" onchange="saveInstTraineeField('${r.id}', 'last', this.value)" placeholder="اللقب / العائلة" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
-                    </td>
-
-                    <!-- 8. الاسم الثالث -->
-                    <td class="p-1.5">
-                        <input type="text" value="${escapeHtml(r.third)}" onchange="saveInstTraineeField('${r.id}', 'third', this.value)" placeholder="اسم الجد" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
-                    </td>
-
-                    <!-- 9. الاسم الثاني -->
-                    <td class="p-1.5">
-                        <input type="text" value="${escapeHtml(r.second)}" onchange="saveInstTraineeField('${r.id}', 'second', this.value)" placeholder="اسم الأب" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
-                    </td>
-
-                    <!-- 10. الاسم الأول -->
-                    <td class="p-1.5">
-                        <input type="text" value="${escapeHtml(r.first)}" onchange="saveInstTraineeField('${r.id}', 'first', this.value)" placeholder="الاسم الأول" class="w-24 bg-white border border-slate-200 focus:border-emerald-600 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none">
-                    </td>
-
-                    <!-- 11. رقم الهوية والشعبة (مربوط بالملف الشخصي) -->
-                    <td class="p-2 text-center whitespace-nowrap">
-                        <div class="flex flex-col items-center gap-0.5">
-                            <a href="javascript:void(0)" onclick="openTraineeProfileModal('${r.id}')" class="font-mono font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-md text-xs select-all cursor-pointer transition shadow-2xs" title="انقر لفتح ملف المتدرب الكامل وسجل درجاته">
-                                ${escapeHtml(r.id)} 👤
-                            </a>
-                            <span class="text-[9px] font-black text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded mt-0.5" title="الشعبة التدريبية: ${escapeHtml(r.group)}">
-                                ${escapeHtml(r.group)}
-                            </span>
-                        </div>
                     </td>
 
                     <!-- نسبة الحضور المعتمدة في التحضير -->
@@ -24363,8 +24543,10 @@ function openReportFromProfile() {
         try {
             if (typeof phoneDirectory !== 'undefined') localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
             if (typeof trainees !== 'undefined') localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+            if (typeof saveData === 'function') saveData();
+            if (typeof syncCoreDataToCloud === 'function') syncCoreDataToCloud();
         } catch (e) {
-            console.warn('localStorage save warning:', e);
+            console.warn('Persistence warning:', e);
         }
 
         updateInstQuickStats();
@@ -24522,13 +24704,15 @@ function openReportFromProfile() {
             let third = pDir.third_name || t.third_name || '';
             let last = pDir.last_name || t.last_name || '';
 
-            if (!first && !last) {
+            if (!first || !last) {
                 const fullName = pDir.name || t.name || '';
-                const parts = (typeof splitArabicName === 'function') ? splitArabicName(fullName) : { first: fullName, second: '', third: '', last: '' };
-                first = parts.first;
-                second = parts.second;
-                third = parts.third;
-                last = parts.last;
+                if (fullName) {
+                    const parts = (typeof splitArabicName === 'function') ? splitArabicName(fullName) : { first: fullName, second: '', third: '', last: '' };
+                    if (!first) first = parts.first;
+                    if (!second) second = parts.second;
+                    if (!third) third = parts.third;
+                    if (!last) last = parts.last;
+                }
             }
 
             const rawDob = pDir.dob || t.dob || '';
@@ -31737,13 +31921,14 @@ function openReportFromProfile() {
                         try {
                             const studentRows = trainees.map(t => {
                                 const cleanId = String(t.id).replace(/\D/g, '') || String(t.id);
+                                const pDirRec = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[cleanId] || phoneDirectory[t.id] || {}) : {});
                                 return {
                                     national_id: cleanId,
                                     name: t.name,
                                     group_name: t.group || '',
                                     company: t.company || 'معهد الذهب الأسود',
                                     room: t.room || '',
-                                    phone: t.phone || '',
+                                    phone: t.phone || pDirRec.phone || '',
                                     qualification: t.qual || 'دبلوم تقني',
                                     attendance_rate: typeof t.rate === 'number' ? t.rate : 100.0,
                                     archive_rate: typeof t.archiveRate === 'number' ? t.archiveRate : 100.0,
