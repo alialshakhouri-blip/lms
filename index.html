@@ -1912,12 +1912,12 @@
                         </div>
 
                         <div id="tdGroupCopyButtons" class="flex gap-2 flex-wrap items-center">
-                            <button type="button" onclick="switchTab('trainerSubmissions')" class="bg-indigo-700 hover:bg-indigo-800 text-white font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer" title="متابعة تسليمات المتدربين والواجبات المنجزة وتصحيحها">
+                            <button type="button" onclick="if(activeSelectedGroupInTrainerDashboard){activeSubmissionsPageGroupFilter=activeSelectedGroupInTrainerDashboard;} switchTab('trainerSubmissions')" class="bg-indigo-700 hover:bg-indigo-800 text-white font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer" title="متابعة تسليمات المتدربين والواجبات المنجزة وتصحيحها">
                                 <span>📝</span>
                                 <span>تسليمات المتدربين</span>
                             </button>
 
-                            <button type="button" onclick="switchTab('gradesSystem')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer" title="الانتقال إلى نظام الدرجات والتقييم الأسبوعي">
+                            <button type="button" onclick="if(activeSelectedGroupInTrainerDashboard){activeGradesSystemGroupFilter=activeSelectedGroupInTrainerDashboard;} switchTab('gradesSystem')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer" title="الانتقال إلى نظام الدرجات والتقييم الأسبوعي">
                                 <span>🎓</span>
                                 <span>نظام الدرجات والتقييم</span>
                             </button>
@@ -1947,6 +1947,9 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Concise Group Analytics & Performance Summary Card (تحليل بيانات عدد الحضور والغياب والتسليمات للشعبة المحددة) -->
+                    <div id="tdGroupAnalyticsStrip" class="transition-all duration-300"></div>
 
                     <!-- Search by National ID to View Trainee Profile & Gradebook -->
                     <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
@@ -10169,6 +10172,7 @@
             closeTrainerGroupDrawer();
         } else {
             activeSelectedGroupInTrainerDashboard = groupName;
+            activeTraineeListFilter = 'ALL';
             isTrainerGroupDrawerOpen = true;
             renderTrainerDashboard();
             const drawer = document.getElementById('tdTraineesDrawerContainer');
@@ -10186,6 +10190,7 @@
 
     function closeTrainerGroupDrawer() {
         isTrainerGroupDrawerOpen = false;
+        activeTraineeListFilter = 'ALL';
         const drawer = document.getElementById('tdTraineesDrawerContainer');
         if (drawer) drawer.classList.add('hidden');
         renderTrainerDashboard();
@@ -10250,6 +10255,363 @@
         openTraineeProfileModal(found.id);
     }
 
+    let activeTraineeListFilter = 'ALL'; // 'ALL', 'present', 'violator', 'absent', 'pending_tasks', 'at_risk'
+
+    function setTraineeListFilter(filter) {
+        activeTraineeListFilter = (activeTraineeListFilter === filter) ? 'ALL' : filter;
+        renderTraineesOfSelectedGroup();
+    }
+    window.setTraineeListFilter = setTraineeListFilter;
+
+    // استخراج الواجبات والاختبارات الموجهة للمجموعة المحددة في مقرر المدرب
+    function getGroupTargetCourseTasks(groupName) {
+        const courseKey = (typeof getActiveTrainerCourseKey === 'function')
+            ? getActiveTrainerCourseKey()
+            : ((typeof findCourseKeyForTrainer === 'function') ? findCourseKeyForTrainer(currentUser?.name || activeTrainerForDashboard) : null);
+        const course = (courseKey && typeof lmsCourses !== 'undefined' && lmsCourses[courseKey])
+            ? lmsCourses[courseKey]
+            : (typeof lmsCourses !== 'undefined' ? Object.values(lmsCourses)[0] : null);
+
+        const targetAssignments = [];
+        const targetQuizzes = [];
+        if (course && Array.isArray(course.weeks)) {
+            course.weeks.forEach(w => {
+                (w.assignments || []).forEach(a => {
+                    if (!a.targetGroup || a.targetGroup === 'ALL' || (typeof isGroupMatch === 'function' && isGroupMatch(a.targetGroup, groupName)) || a.targetGroup === groupName) {
+                        targetAssignments.push(a);
+                    }
+                });
+                (w.quizzes || []).forEach(q => {
+                    if (!q.targetGroup || q.targetGroup === 'ALL' || (typeof isGroupMatch === 'function' && isGroupMatch(q.targetGroup, groupName)) || q.targetGroup === groupName) {
+                        targetQuizzes.push(q);
+                    }
+                });
+            });
+        }
+        return { courseKey, course, targetAssignments, targetQuizzes };
+    }
+
+    // فحص ملخص تسليمات متدرب معين لكافة واجبات واختبارات الشعبة
+    function getTraineeSubmissionsSummary(trainee, targetAssignments, targetQuizzes) {
+        if (!targetAssignments && !targetQuizzes) return { totalTasks: 0, submittedCount: 0, pendingCount: 0, isComplete: true };
+        const tCleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(trainee.id) : String(trainee.id).trim();
+        const tId = String(trainee.id).trim();
+
+        let submittedCount = 0;
+        const totalTasks = (targetAssignments?.length || 0) + (targetQuizzes?.length || 0);
+
+        (targetAssignments || []).forEach(a => {
+            const key1 = `${tId}_${a.id}`;
+            const key2 = `${tCleanId}_${a.id}`;
+            const hasSub = (typeof studentAssignmentSubmissions !== 'undefined') && (
+                Boolean(studentAssignmentSubmissions[key1]) ||
+                Boolean(studentAssignmentSubmissions[key2]) ||
+                Object.values(studentAssignmentSubmissions).some(s => s && (s.assignmentId === a.id) && (String(s.studentId) === tId || cleanNationalId(s.studentId) === tCleanId))
+            );
+            if (hasSub) submittedCount++;
+        });
+
+        (targetQuizzes || []).forEach(q => {
+            const key1 = `${tId}_${q.id}`;
+            const key2 = `${tCleanId}_${q.id}`;
+            const hasSub = (typeof studentQuizSubmissions !== 'undefined') && (
+                Boolean(studentQuizSubmissions[key1]) ||
+                Boolean(studentQuizSubmissions[key2]) ||
+                Object.values(studentQuizSubmissions).some(s => s && (s.quizId === q.id) && (String(s.studentId) === tId || cleanNationalId(s.studentId) === tCleanId))
+            );
+            if (hasSub) submittedCount++;
+        });
+
+        const pendingCount = Math.max(0, totalTasks - submittedCount);
+        return {
+            totalTasks,
+            submittedCount,
+            pendingCount,
+            isComplete: totalTasks === 0 || pendingCount === 0
+        };
+    }
+
+    // رسم بطاقة التحليل المختصر لبيانات المجموعة (الحضور، الغياب، التسليمات)
+    function renderGroupAnalyticsStrip(groupName, groupTrainees, tasksInfo) {
+        const cont = document.getElementById('tdGroupAnalyticsStrip');
+        if (!cont) return;
+
+        if (!groupName || isLAGroup(groupName) || !groupTrainees || groupTrainees.length === 0) {
+            if (groupName && isLAGroup(groupName)) {
+                cont.innerHTML = `
+                    <div class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 text-center text-xs text-slate-500 font-bold">
+                        ℹ️ مجموعة (${groupName}) مصنفة كـ LA - تعتبر (0 متدرب) ولا تحتسب ضمن مؤشرات الحضور والتسليمات المعتمدة.
+                    </div>
+                `;
+            } else {
+                cont.innerHTML = '';
+            }
+            return;
+        }
+
+        const totalTrainees = groupTrainees.length;
+        const dayName = (typeof weekDates !== 'undefined' && weekDates[activeDayIndex]) 
+            ? weekDates[activeDayIndex] 
+            : ((typeof DEFAULT_DAYS !== 'undefined' && DEFAULT_DAYS[activeDayIndex]) || 'اليوم');
+
+        // 1. حساب أرقام الحضور والغياب لليوم المختار
+        let presentCount = 0, violatorCount = 0, absentCount = 0, sumRate = 0, atRiskCount = 0, aicCount = 0;
+        groupTrainees.forEach(t => {
+            const checks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIndex] : [false, false, false, false];
+            const st = calculateStatus(checks, t);
+            if (st.type === 'present') presentCount++;
+            else if (st.type === 'violator') violatorCount++;
+            else absentCount++;
+
+            const r = (t.rate !== undefined && t.rate !== null) ? Number(t.rate) : 100;
+            sumRate += r;
+            if (r < 80) atRiskCount++;
+
+            if (/AIC/i.test(t.company || t.group || '')) aicCount++;
+        });
+
+        const rateToday = totalTrainees > 0 ? Math.round((presentCount / totalTrainees) * 100) : 0;
+        const avgCumulativeRate = totalTrainees > 0 ? Math.round(sumRate / totalTrainees) : 100;
+
+        // 2. حساب بيانات التسليمات والواجبات والاختبارات
+        const targetAssignments = tasksInfo?.targetAssignments || [];
+        const targetQuizzes = tasksInfo?.targetQuizzes || [];
+        const totalExpectedAssignments = targetAssignments.length * totalTrainees;
+        const totalExpectedQuizzes = targetQuizzes.length * totalTrainees;
+
+        let assignSubmissionsCount = 0;
+        let quizSubmissionsCount = 0;
+        let totalQuizScores = 0;
+        let totalQuizzesEvaluated = 0;
+        let traineesWithMissingTasks = 0;
+
+        groupTrainees.forEach(t => {
+            const subSumm = getTraineeSubmissionsSummary(t, targetAssignments, targetQuizzes);
+            if (!subSumm.isComplete) traineesWithMissingTasks++;
+
+            const tCleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id).trim();
+            const tId = String(t.id).trim();
+
+            targetAssignments.forEach(a => {
+                const k1 = `${tId}_${a.id}`;
+                const k2 = `${tCleanId}_${a.id}`;
+                if (typeof studentAssignmentSubmissions !== 'undefined' && (
+                    studentAssignmentSubmissions[k1] ||
+                    studentAssignmentSubmissions[k2] ||
+                    Object.values(studentAssignmentSubmissions).some(s => s && s.assignmentId === a.id && (String(s.studentId) === tId || cleanNationalId(s.studentId) === tCleanId))
+                )) {
+                    assignSubmissionsCount++;
+                }
+            });
+
+            targetQuizzes.forEach(q => {
+                const k1 = `${tId}_${q.id}`;
+                const k2 = `${tCleanId}_${q.id}`;
+                const sub = typeof studentQuizSubmissions !== 'undefined' ? (
+                    studentQuizSubmissions[k1] ||
+                    studentQuizSubmissions[k2] ||
+                    Object.values(studentQuizSubmissions).find(s => s && s.quizId === q.id && (String(s.studentId) === tId || cleanNationalId(s.studentId) === tCleanId))
+                ) : null;
+                if (sub) {
+                    quizSubmissionsCount++;
+                    const sc = sub.bestScore !== undefined ? sub.bestScore : (sub.score !== undefined ? sub.score : null);
+                    if (sc !== null && !isNaN(sc)) {
+                        totalQuizScores += Number(sc);
+                        totalQuizzesEvaluated++;
+                    }
+                }
+            });
+        });
+
+        const assignRate = totalExpectedAssignments > 0 ? Math.round((assignSubmissionsCount / totalExpectedAssignments) * 100) : 100;
+        const assignPending = Math.max(0, totalExpectedAssignments - assignSubmissionsCount);
+
+        const quizRate = totalExpectedQuizzes > 0 ? Math.round((quizSubmissionsCount / totalExpectedQuizzes) * 100) : 100;
+        const avgQuizScore = totalQuizzesEvaluated > 0 ? (totalQuizScores / totalQuizzesEvaluated).toFixed(1) : (targetQuizzes.length > 0 ? '--' : '10');
+
+        // مؤشر التقييم التنفيذي العام
+        let healthText = '';
+        let healthClass = '';
+        if (absentCount === 0 && assignPending === 0) {
+            healthText = '✨ أداء مثالي: انضباط تام بالحضور وتسليم كافة الواجبات (100%)';
+            healthClass = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800';
+        } else if (absentCount === 0) {
+            healthText = `🟢 حضور ممتاز اليوم (0 غياب) • ${assignPending > 0 ? `${assignPending} واجب معلق بانتظار التسليم` : 'التسليمات منتظمة'}`;
+            healthClass = 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800';
+        } else if (absentCount <= 2) {
+            healthText = `⚠️ متابعة: يوجد ${absentCount} غائبين اليوم • ${assignPending > 0 ? `${assignPending} واجب معلق` : 'الواجبات مكتملة'}`;
+            healthClass = 'bg-amber-50 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800';
+        } else {
+            healthText = `🚨 تنبيه هام: نسبة الغياب مرتفعة (${absentCount} متدربين) • يتطلب التواصل العاجل`;
+            healthClass = 'bg-rose-50 text-rose-900 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300 dark:border-rose-800';
+        }
+
+        const filterPillClass = (f) => activeTraineeListFilter === f
+            ? 'bg-[#0F2942] text-white border-[#0F2942] dark:bg-amber-500 dark:text-slate-950 dark:border-amber-400 shadow-2xs font-black'
+            : 'bg-white dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-amber-400 font-bold';
+
+        cont.innerHTML = `
+            <div class="bg-gradient-to-br from-slate-50 via-white to-amber-50/25 dark:from-[#111C2D] dark:via-slate-900 dark:to-[#0F2942]/40 border border-amber-300/70 dark:border-amber-500/30 rounded-2xl p-4 md:p-5 shadow-sm space-y-4">
+                <!-- شريط رأس التحليل التنفيذي -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-200/80 dark:border-slate-800">
+                    <div class="flex items-center flex-wrap gap-2">
+                        <span class="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs px-3 py-1 rounded-xl shadow-xs">
+                            <span>📊 تحليل شعبة:</span>
+                            <span dir="ltr">${groupName}</span>
+                        </span>
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                            <span>📅 ${dayName}</span>
+                            <span class="text-slate-300 dark:text-slate-700">•</span>
+                            <span class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg text-slate-700 dark:text-slate-300 font-mono text-[11px] font-black">${totalTrainees} متدرب مسجل</span>
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-black px-3 py-1 rounded-xl inline-flex items-center gap-1.5 ${healthClass}">
+                            ${healthText}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- شبكة البطاقات الرقمية المختصرة (KPI Cards) -->
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3">
+                    <!-- بطاقة 1: الحضور والغياب اليومي -->
+                    <div onclick="setTraineeListFilter('${activeTraineeListFilter === 'absent' ? 'ALL' : 'absent'}')" 
+                         class="group/kpi bg-white dark:bg-slate-900/90 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-500 transition cursor-pointer shadow-2xs hover:shadow-md flex flex-col justify-between"
+                         title="انقر لفلترة وعرض الغائبين فقط في الجدول">
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-black text-slate-600 dark:text-slate-400 mb-1">
+                                <span>الحضور اليومي</span>
+                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-black">اليوم ✓</span>
+                            </div>
+                            <div class="flex items-baseline justify-between">
+                                <span class="font-black text-xl md:text-2xl font-mono ${rateToday >= 85 ? 'text-emerald-600 dark:text-emerald-400' : (rateToday >= 70 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400')}">
+                                    ${rateToday}%
+                                </span>
+                                <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">${presentCount} من ${totalTrainees}</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 my-2 overflow-hidden">
+                                <div class="${rateToday >= 85 ? 'bg-emerald-500' : (rateToday >= 70 ? 'bg-amber-500' : 'bg-rose-500')} h-1.5 rounded-full transition-all duration-500" style="width: ${rateToday}%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] font-black pt-1 border-t border-slate-100 dark:border-slate-800/80">
+                            <span class="text-emerald-600 dark:text-emerald-400">حاضر: ${presentCount}</span>
+                            <span class="text-amber-600 dark:text-amber-400">مخالف: ${violatorCount}</span>
+                            <span class="text-rose-600 dark:text-rose-400 ${absentCount > 0 ? 'bg-rose-50 dark:bg-rose-950/50 px-1.5 py-0.2 rounded border border-rose-200 dark:border-rose-900' : ''}">غائب: ${absentCount}</span>
+                        </div>
+                    </div>
+
+                    <!-- بطاقة 2: المعدل التراكمي ومؤشر الانضباط -->
+                    <div onclick="setTraineeListFilter('${activeTraineeListFilter === 'at_risk' ? 'ALL' : 'at_risk'}')" 
+                         class="group/kpi bg-white dark:bg-slate-900/90 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 transition cursor-pointer shadow-2xs hover:shadow-md flex flex-col justify-between"
+                         title="انقر لفلترة وعرض المتدربين المعرضين للإنذار والحرمان (<80%)">
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-black text-slate-600 dark:text-slate-400 mb-1">
+                                <span>المعدل التراكمي</span>
+                                <span class="text-[10px] text-amber-600 dark:text-amber-400 font-black">عام 📈</span>
+                            </div>
+                            <div class="flex items-baseline justify-between">
+                                <span class="font-black text-xl md:text-2xl font-mono text-slate-900 dark:text-white">
+                                    ${avgCumulativeRate}%
+                                </span>
+                                <span class="text-[11px] font-bold ${atRiskCount > 0 ? 'text-rose-600 dark:text-rose-400 font-black' : 'text-emerald-600 dark:text-emerald-400'}">
+                                    ${atRiskCount > 0 ? `⚠️ ${atRiskCount} إنذار` : '✓ أمان تام'}
+                                </span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 my-2 overflow-hidden">
+                                <div class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: ${avgCumulativeRate}%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+                            <span>منتظم: ${totalTrainees - atRiskCount}</span>
+                            <span class="${atRiskCount > 0 ? 'text-rose-600 dark:text-rose-400 font-black' : ''}">خطر: ${atRiskCount}</span>
+                            ${aicCount > 0 ? `<span class="text-sky-600 font-mono text-[10px]">${aicCount} AIC</span>` : '<span>0 AIC</span>'}
+                        </div>
+                    </div>
+
+                    <!-- بطاقة 3: تسليم الواجبات والتكليفات -->
+                    <div onclick="setTraineeListFilter('${activeTraineeListFilter === 'pending_tasks' ? 'ALL' : 'pending_tasks'}')" 
+                         class="group/kpi bg-white dark:bg-slate-900/90 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 transition cursor-pointer shadow-2xs hover:shadow-md flex flex-col justify-between"
+                         title="انقر لفلترة وعرض المتدربين الذين لديهم تكليفات أو واجبات معلقة">
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-black text-slate-600 dark:text-slate-400 mb-1">
+                                <span>تسليم الواجبات</span>
+                                <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-black">واجبات 📝</span>
+                            </div>
+                            <div class="flex items-baseline justify-between">
+                                <span class="font-black text-xl md:text-2xl font-mono text-indigo-700 dark:text-indigo-400">
+                                    ${assignRate}%
+                                </span>
+                                <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">${assignSubmissionsCount} من ${totalExpectedAssignments || '--'}</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 my-2 overflow-hidden">
+                                <div class="bg-indigo-600 h-1.5 rounded-full transition-all duration-500" style="width: ${assignRate}%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+                            <span class="text-emerald-600 dark:text-emerald-400">مسلم: ${assignSubmissionsCount}</span>
+                            <span class="${assignPending > 0 ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-slate-400'}">معلق: ${assignPending}</span>
+                            <span class="text-slate-500 font-mono text-[10px]">${targetAssignments.length} واجب</span>
+                        </div>
+                    </div>
+
+                    <!-- بطاقة 4: الاختبارات والتقييمات -->
+                    <div class="bg-white dark:bg-slate-900/90 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-purple-400 dark:hover:border-purple-500 transition shadow-2xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-black text-slate-600 dark:text-slate-400 mb-1">
+                                <span>الاختبارات والتقييم</span>
+                                <span class="text-[10px] text-purple-600 dark:text-purple-400 font-black">اختبارات 🎯</span>
+                            </div>
+                            <div class="flex items-baseline justify-between">
+                                <span class="font-black text-xl md:text-2xl font-mono text-purple-700 dark:text-purple-400">
+                                    ${quizRate}%
+                                </span>
+                                <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">${quizSubmissionsCount} من ${totalExpectedQuizzes || '--'}</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 my-2 overflow-hidden">
+                                <div class="bg-purple-600 h-1.5 rounded-full transition-all duration-500" style="width: ${quizRate}%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+                            <span class="text-emerald-600 dark:text-emerald-400">منجز: ${quizSubmissionsCount}</span>
+                            <span class="text-purple-700 dark:text-purple-300 font-black">متوسط: ${avgQuizScore}</span>
+                            <span class="text-slate-500 font-mono text-[10px]">${targetQuizzes.length} اختبار</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- شريط الفلترة السريعة الفورية للجدول -->
+                <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-200/70 dark:border-slate-800 text-xs">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[11px] font-black text-slate-600 dark:text-slate-400 ml-1">تصفية الجدول سريعة:</span>
+                        <button type="button" onclick="setTraineeListFilter('ALL')" class="px-2.5 py-1 rounded-xl border text-[11px] transition cursor-pointer ${filterPillClass('ALL')}">
+                            الكل (${totalTrainees})
+                        </button>
+                        <button type="button" onclick="setTraineeListFilter('present')" class="px-2.5 py-1 rounded-xl border text-[11px] transition cursor-pointer ${filterPillClass('present')}">
+                            <span class="text-emerald-500">✓</span> حاضر (${presentCount})
+                        </button>
+                        <button type="button" onclick="setTraineeListFilter('violator')" class="px-2.5 py-1 rounded-xl border text-[11px] transition cursor-pointer ${filterPillClass('violator')}">
+                            <span class="text-amber-500">⚠️</span> مخالف (${violatorCount})
+                        </button>
+                        <button type="button" onclick="setTraineeListFilter('absent')" class="px-2.5 py-1 rounded-xl border text-[11px] transition cursor-pointer ${filterPillClass('absent')}">
+                            <span class="text-rose-500">✕</span> غائب (${absentCount})
+                        </button>
+                        <button type="button" onclick="setTraineeListFilter('pending_tasks')" class="px-2.5 py-1 rounded-xl border text-[11px] transition cursor-pointer ${filterPillClass('pending_tasks')}">
+                            <span>📝</span> تسليمات معلقة (${traineesWithMissingTasks})
+                        </button>
+                        <button type="button" onclick="setTraineeListFilter('at_risk')" class="px-2.5 py-1 rounded-xl border text-[11px] transition cursor-pointer ${filterPillClass('at_risk')}">
+                            <span>🚨</span> إنذار (<80%) (${atRiskCount})
+                        </button>
+                    </div>
+                    ${activeTraineeListFilter !== 'ALL' ? `
+                        <button type="button" onclick="setTraineeListFilter('ALL')" class="text-[11px] text-amber-700 dark:text-amber-400 font-black underline hover:opacity-80 transition cursor-pointer">
+                            إلغاء الفلترة وعرض الكل ✕
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
     function renderTraineesOfSelectedGroup() {
         const titleEl = document.getElementById('tdSelectedGroupTitle');
         const listBody = document.getElementById('tdTraineesListBody');
@@ -10271,7 +10633,12 @@
 
         const tableColSpan = isSuperAdmin ? 7 : 6;
 
-        // إذا قام المدرب بكتابة رقم هوية أو اسم في خانة البحث، نبحث في جميع شعب المدرب مباشرةً لتسهيل الوصول لملف المتدرب
+        // استخراج المهام والتكليفات الموجهة لهذه الشعبة
+        const tasksInfo = getGroupTargetCourseTasks(activeGroup);
+        const { targetAssignments, targetQuizzes } = tasksInfo;
+        const totalCourseTasks = (targetAssignments?.length || 0) + (targetQuizzes?.length || 0);
+
+        // إذا قام المدرب بكتابة رقم هوية أو اسم في خانة البحث، نبحث في جميع شعب المدرب مباشرةً
         let matchedTrainees = [];
         if (searchQuery) {
             const cleanQ = cleanNationalId(searchQuery);
@@ -10281,7 +10648,6 @@
                 (cleanQ && cleanNationalId(t.id).includes(cleanQ)) ||
                 (t.name && t.name.includes(searchQuery))
             );
-            // إذا لم يوجد في شعب المدرب الحالية نبحث في القائمة العامة لتمكين الاطلاع على الملف بالهوية
             if (matchedTrainees.length === 0) {
                 matchedTrainees = trainees.filter(t =>
                     !isLAGroup(t.group) && (
@@ -10294,8 +10660,8 @@
 
             titleEl.innerHTML = `
                 <span class="inline-flex items-center gap-1.5">
-                    <span class="text-slate-900 font-black">نتائج البحث برقم الهوية / الاسم:</span>
-                    <span dir="ltr" class="inline-block bg-amber-50 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-lg font-black text-xs shadow-2xs">${searchQuery}</span>
+                    <span class="text-slate-900 dark:text-white font-black">نتائج البحث برقم الهوية / الاسم:</span>
+                    <span dir="ltr" class="inline-block bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700 px-2.5 py-0.5 rounded-lg font-black text-xs shadow-2xs">${searchQuery}</span>
                 </span>
                 <span class="inline-flex items-center gap-1.5 text-xs font-black px-3 py-0.5 rounded-full border bg-[#0F2942] text-white border-[#0F2942] shadow-2xs">
                     <span class="font-mono bg-white/15 px-1.5 rounded text-[11px]">${matchedTrainees.length}</span>
@@ -10304,25 +10670,27 @@
             `;
         } else {
             if (!activeGroup) {
+                renderGroupAnalyticsStrip(null, []);
                 titleEl.innerText = 'يرجى اختيار شعبة لمعاينة طلابها';
-                listBody.innerHTML = `<tr><td colspan="${tableColSpan}" class="p-8 text-center text-slate-400 font-bold">اضغط على إحدى الشعب في الأعلى لمعاينة حضور الطلاب أو ابحث برقم الهوية</td></tr>`;
+                listBody.innerHTML = `<tr><td colspan="${tableColSpan}" class="p-8 text-center text-slate-400 font-bold">اضغط على إحدى الشعب في جدول الحصص الأسبوعي لمعاينة حضور الطلاب والتسليمات أو ابحث برقم الهوية</td></tr>`;
                 return;
             }
 
             // إذا كانت الشعبة LA: تعتبر 0 ولا تحسب في القائمة
             if (isLAGroup(activeGroup)) {
+                renderGroupAnalyticsStrip(activeGroup, []);
                 titleEl.innerHTML = `
                     <span class="inline-flex items-center gap-1.5">
-                        <span class="text-slate-900 font-black">طلاب شعبة:</span>
-                        <span dir="ltr" class="inline-block bg-slate-100 text-slate-800 border border-slate-300 px-2.5 py-0.5 rounded-lg font-black text-xs shadow-2xs">${activeGroup}</span>
+                        <span class="text-slate-900 dark:text-white font-black">طلاب شعبة:</span>
+                        <span dir="ltr" class="inline-block bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2.5 py-0.5 rounded-lg font-black text-xs shadow-2xs">${activeGroup}</span>
                     </span>
-                    <span class="inline-flex items-center gap-1 text-xs font-bold px-3 py-0.5 rounded-full border bg-slate-100 text-slate-700 border-slate-300">
+                    <span class="inline-flex items-center gap-1 text-xs font-bold px-3 py-0.5 rounded-full border bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700">
                         <span>مجموعة LA (تعتبر 0 متدرب - لا تُحسب ضمن القائمة)</span>
                     </span>
                 `;
                 listBody.innerHTML = `
                     <tr>
-                        <td colspan="${tableColSpan}" class="p-8 text-center text-xs text-slate-500" font-bold bg-slate-50/50">
+                        <td colspan="${tableColSpan}" class="p-8 text-center text-xs text-slate-500 font-bold bg-slate-50/50 dark:bg-slate-900/50">
                             ℹ️ مجموعة (${activeGroup}) مصنفة كـ LA - حسب التوجيه المعتمد: لا يتم احتسابها ضمن القائمة وتعتبر (0 متدرب).
                         </td>
                     </tr>
@@ -10330,17 +10698,36 @@
                 return;
             }
 
-            matchedTrainees = trainees.filter(t => isGroupMatch(activeGroup, t.group) || t.group === activeGroup);
+            const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []);
+            matchedTrainees = pool.filter(t => isGroupMatch(activeGroup, t.group) || t.group === activeGroup);
+
+            // تحديث بطاقة التحليل المختصر لبيانات المجموعة
+            renderGroupAnalyticsStrip(activeGroup, matchedTrainees, tasksInfo);
+
+            let filterLabel = '';
+            if (activeTraineeListFilter === 'present') filterLabel = 'الحاضرون فقط';
+            else if (activeTraineeListFilter === 'violator') filterLabel = 'المخالفون فقط';
+            else if (activeTraineeListFilter === 'absent') filterLabel = 'الغائبون فقط';
+            else if (activeTraineeListFilter === 'pending_tasks') filterLabel = 'تسليمات معلقة';
+            else if (activeTraineeListFilter === 'at_risk') filterLabel = 'إنذار حرمان (<80%)';
 
             titleEl.innerHTML = `
-                <span class="inline-flex items-center gap-1.5">
-                    <span class="text-slate-900 font-black">طلاب شعبة:</span>
-                    <span dir="ltr" class="inline-block bg-amber-50 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-lg font-black text-xs shadow-2xs">${activeGroup}</span>
-                </span>
-                <span class="inline-flex items-center gap-1.5 text-xs font-black px-3 py-0.5 rounded-full border bg-[#0F2942] text-white border-[#0F2942] shadow-2xs">
-                    <span class="font-mono bg-white/15 px-1.5 rounded text-[11px]">${matchedTrainees.length}</span>
-                    <span>متدرب مسجل</span>
-                </span>
+                <div class="flex items-center flex-wrap gap-2">
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="text-slate-900 dark:text-white font-black">طلاب شعبة:</span>
+                        <span dir="ltr" class="inline-block bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700 px-2.5 py-0.5 rounded-lg font-black text-xs shadow-2xs">${activeGroup}</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-black px-3 py-0.5 rounded-full border bg-[#0F2942] text-white border-[#0F2942] shadow-2xs">
+                        <span class="font-mono bg-white/15 px-1.5 rounded text-[11px]">${matchedTrainees.length}</span>
+                        <span>متدرب مسجل</span>
+                    </span>
+                    ${filterLabel ? `
+                        <span class="inline-flex items-center gap-1.5 text-xs font-black px-3 py-0.5 rounded-full border bg-amber-500 text-slate-950 border-amber-400 shadow-2xs">
+                            <span>تصفية: ${filterLabel}</span>
+                            <button type="button" onclick="setTraineeListFilter('ALL')" class="hover:opacity-75 font-black text-sm" title="إلغاء التصفية">✕</button>
+                        </span>
+                    ` : ''}
+                </div>
             `;
         }
 
@@ -10355,31 +10742,89 @@
             return;
         }
 
-        listBody.innerHTML = matchedTrainees.map((t, idx) => {
+        // تطبيق الفلترة السريعة على جدول المتدربين إذا كانت محددة
+        let displayTrainees = matchedTrainees;
+        if (!searchQuery && activeTraineeListFilter !== 'ALL') {
+            if (activeTraineeListFilter === 'present') {
+                displayTrainees = matchedTrainees.filter(t => {
+                    const checks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIndex] : [];
+                    return calculateStatus(checks, t).type === 'present';
+                });
+            } else if (activeTraineeListFilter === 'violator') {
+                displayTrainees = matchedTrainees.filter(t => {
+                    const checks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIndex] : [];
+                    return calculateStatus(checks, t).type === 'violator';
+                });
+            } else if (activeTraineeListFilter === 'absent') {
+                displayTrainees = matchedTrainees.filter(t => {
+                    const checks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIndex] : [];
+                    return calculateStatus(checks, t).type === 'absent';
+                });
+            } else if (activeTraineeListFilter === 'at_risk') {
+                displayTrainees = matchedTrainees.filter(t => (t.rate !== undefined ? Number(t.rate) : 100) < 80);
+            } else if (activeTraineeListFilter === 'pending_tasks') {
+                displayTrainees = matchedTrainees.filter(t => {
+                    const s = getTraineeSubmissionsSummary(t, targetAssignments, targetQuizzes);
+                    return s.pendingCount > 0;
+                });
+            }
+        }
+
+        if (displayTrainees.length === 0) {
+            listBody.innerHTML = `
+                <tr>
+                    <td colspan="${tableColSpan}" class="p-8 text-center text-xs text-slate-400 font-bold">
+                        لا يوجد متدربون يطابقون شرط التصفية المحدد (${activeTraineeListFilter}).
+                        <div class="mt-2">
+                            <button type="button" onclick="setTraineeListFilter('ALL')" class="bg-amber-500 text-slate-950 font-black px-3 py-1 rounded-xl text-xs cursor-pointer shadow-2xs hover:bg-amber-600 transition">
+                                إلغاء التصفية وعرض جميع الطلاب (${matchedTrainees.length})
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        listBody.innerHTML = displayTrainees.map((t, idx) => {
             const dayChecks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIndex] : [false, false, false, false];
-            const status = calculateStatus(dayChecks);
+            const status = calculateStatus(dayChecks, t);
+            const subSumm = getTraineeSubmissionsSummary(t, targetAssignments, targetQuizzes);
 
             const whatsappMsg = encodeURIComponent(
                 `السلام عليكم المتدرب: ${t.name}\n` +
                 `معهد الذهب الأسود للتدريب (فرع عنك) - نفيدكم بأن حالة حضورك ليوم ${weekDates[activeDayIndex] || DEFAULT_DAYS[activeDayIndex]} في دورة (${t.group}) هي: ${status.label} (${status.periodsLabel}).`
             );
 
+            // بادج حالة التسليمات والواجبات للمتدرب
+            let subBadgeHtml = '';
+            if (totalCourseTasks > 0) {
+                if (subSumm.isComplete) {
+                    subBadgeHtml = `<span class="text-[10px] font-black text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 px-2 py-0.5 rounded-lg inline-flex items-center gap-1" title="أنجز جميع التكليفات والواجبات والاختبارات (${subSumm.submittedCount}/${totalCourseTasks})">✓ كافة التسليمات منجزة</span>`;
+                } else {
+                    subBadgeHtml = `<span class="text-[10px] font-black text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/80 px-2 py-0.5 rounded-lg inline-flex items-center gap-1" title="متبقي ${subSumm.pendingCount} تكليف بحاجة لتسليم">⚠️ معلق ${subSumm.pendingCount} تسليم (${subSumm.submittedCount}/${totalCourseTasks})</span>`;
+                }
+            }
+
             return `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-3 font-mono text-slate-400">${idx + 1}</td>
-                    <td class="p-3 font-black text-slate-900">
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                    <td class="p-3 font-mono text-slate-400 dark:text-slate-500">${idx + 1}</td>
+                    <td class="p-3 font-black text-slate-900 dark:text-white">
                         <div>${t.name}</div>
-                        ${searchQuery ? `<span dir="ltr" class="inline-block text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200 mt-0.5">${t.group}</span>` : ''}
+                        <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                            ${searchQuery ? `<span dir="ltr" class="inline-block text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">${t.group}</span>` : ''}
+                            ${subBadgeHtml}
+                        </div>
                     </td>
-                    <td class="p-3 font-mono text-slate-700 font-bold">
+                    <td class="p-3 font-mono text-slate-700 dark:text-slate-300 font-bold">
                         <div>${t.id}</div>
-                        <div class="text-[10px] font-black text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 mt-0.5 inline-block" title="نسبة الحضور المعتمدة في النظام">
+                        <div class="text-[10px] font-black ${ (t.rate !== undefined && Number(t.rate) < 80) ? 'text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800' : 'text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700' } px-1.5 py-0.5 rounded border mt-0.5 inline-block" title="نسبة الحضور المعتمدة في النظام">
                             نسبة الحضور: ${t.rate !== undefined ? t.rate : 100}%
                         </div>
                     </td>
                     ${isSuperAdmin ? `
                     <td class="p-3">
-                        <div class="flex items-center gap-1 font-mono font-bold ${t.phone ? 'text-slate-800' : 'text-amber-600'}">
+                        <div class="flex items-center gap-1 font-mono font-bold ${t.phone ? 'text-slate-800 dark:text-slate-200' : 'text-amber-600'}">
                             <span>${t.phone || 'غير مسجل'}</span>
                             ${t.phone ? `
                                 <button type="button" onclick="copySinglePhone('${t.phone}', '${t.name.replace(/'/g, "\\'")}')" title="نسخ رقم الجوال فردياً" class="text-slate-400 hover:text-amber-600 p-0.5 rounded transition">
@@ -10394,16 +10839,16 @@
                         <div class="inline-flex items-center justify-center gap-1.5 flex-wrap">
                             <span class="text-[11px] font-black px-2 py-0.5 rounded-md border flex items-center gap-1 ${
                                 status.period1 
-                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
-                                : 'bg-red-50 text-red-800 border-red-200'
+                                ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800' 
+                                : 'bg-red-50 dark:bg-red-950/60 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800'
                             }">
                                 <span>فترة 1:</span>
                                 <span>${status.period1 ? 'حاضر ✓' : 'غائب ✕'}</span>
                             </span>
                             <span class="text-[11px] font-black px-2 py-0.5 rounded-md border flex items-center gap-1 ${
                                 status.period2 
-                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
-                                : 'bg-red-50 text-red-800 border-red-200'
+                                ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800' 
+                                : 'bg-red-50 dark:bg-red-950/60 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800'
                             }">
                                 <span>فترة 2:</span>
                                 <span>${status.period2 ? 'حاضر ✓' : 'غائب ✕'}</span>
@@ -10421,7 +10866,7 @@
                                 ملف ودرجات 👤
                             </button>
                             ${(isSuperAdmin && t.phone) ? `
-                                <a href="https://wa.me/966${t.phone.replace(/^0/, '')}?text=${whatsappMsg}" target="_blank" class="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold px-2 py-1 rounded text-[11px] transition">
+                                <a href="https://wa.me/966${t.phone.replace(/^0/, '')}?text=${whatsappMsg}" target="_blank" class="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 font-bold px-2 py-1 rounded text-[11px] transition">
                                     واتساب 💬
                                 </a>
                             ` : ''}
