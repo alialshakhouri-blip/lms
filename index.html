@@ -139,17 +139,51 @@
 
         
         /* ==============================================================
-           SLEEK BLACK SIDEBAR MENU SYSTEM (قائمة جانبية سوداء بأيقونات بيضاء)
+           INVERTED SIDEBAR THEME SYSTEM (المنيو الجانبي المنعكس):
+           - الوضع النهاري (LIGHT MODE): منيو أسود ونصوص وأيقونات بيضاء
+           - الوضع الليلي (DARK MODE): منيو أبيض ونصوص وأيقونات سوداء
            ============================================================== */
-        #sidebarMenu,
-        body:not(.app-dark-mode) #sidebarMenu,
-        body.app-dark-mode #sidebarMenu {
+
+        /* --- 1. LIGHT MODE (الوضع النهاري): منيو أسود بالكامل + نص أبيض + أيقونات بيضاء --- */
+        body:not(.app-dark-mode) #sidebarMenu {
             background-color: #0C0F17 !important;
             border-color: #1F2636 !important;
             color: #FFFFFF !important;
         }
 
-        #sidebarMenu .nav-item-active {
+        body:not(.app-dark-mode) #sidebarMenu .sidebar-header {
+            border-color: #1F2636 !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu .sidebar-title,
+        body:not(.app-dark-mode) #sidebarMenu #sidebarUserName {
+            color: #FFFFFF !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu #sidebarUserRole {
+            color: #FBBF24 !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu .sidebar-user-card {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu .sidebar-close-btn {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: #FFFFFF !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu .sidebar-close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu .sidebar-nav-label {
+            color: #94A3B8 !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu .nav-item-active {
             background-color: rgba(255, 255, 255, 0.15) !important;
             color: #FFFFFF !important;
             font-weight: 800 !important;
@@ -157,32 +191,223 @@
             border-right: 4px solid #F59E0B !important;
         }
 
-        #sidebarMenu .nav-item-active svg {
+        body:not(.app-dark-mode) #sidebarMenu .nav-item-active svg {
             color: #FFFFFF !important;
             stroke: #FFFFFF !important;
         }
 
-        #sidebarMenu .nav-item-inactive {
+        body:not(.app-dark-mode) #sidebarMenu .nav-item-inactive {
             color: #CBD5E1 !important;
             background-color: transparent !important;
             border-right: 4px solid transparent !important;
         }
 
-        #sidebarMenu .nav-item-inactive svg {
+        body:not(.app-dark-mode) #sidebarMenu .nav-item-inactive svg {
             color: #FFFFFF !important;
             stroke: #FFFFFF !important;
             opacity: 0.88;
         }
 
-        #sidebarMenu .nav-item-inactive:hover {
+        body:not(.app-dark-mode) #sidebarMenu .nav-item-inactive:hover {
             background-color: rgba(255, 255, 255, 0.09) !important;
             color: #FFFFFF !important;
         }
 
-        #sidebarMenu .nav-item-inactive:hover svg {
+        body:not(.app-dark-mode) #sidebarMenu .nav-item-inactive:hover svg {
             opacity: 1;
         }
 
+        body:not(.app-dark-mode) #sidebarMenu .sidebar-footer {
+            background-color: #070A10 !important;
+            border-color: #1F2636 !important;
+            color: #CBD5E1 !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu .sidebar-support-btn {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: #FFFFFF !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu .sidebar-support-btn svg {
+            color: #FFFFFF !important;
+            stroke: #FFFFFF !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu .sidebar-support-btn:hover {
+            background-color: rgba(255, 255, 255, 0.18) !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu #sidebarDarkModeToggleBtn {
+            background-color: #111827 !important;
+            color: #E2E8F0 !important;
+            border-color: #374151 !important;
+        }
+
+        body:not(.app-dark-mode) #sidebarMenu button[onclick="logout()"] {
+            background-color: rgba(153, 27, 27, 0.25) !important;
+            color: #FCA5A5 !important;
+            border-color: rgba(153, 27, 27, 0.5) !important;
+        }
+
+
+        /* --- 2. DARK MODE (الوضع الليلي): منيو أبيض بالكامل + نص أسود + أيقونات سوداء --- */
+        body.app-dark-mode #sidebarMenu,
+        html.dark #sidebarMenu {
+            background-color: #FFFFFF !important;
+            border-color: #CBD5E1 !important;
+            color: #0F172A !important;
+            box-shadow: -4px 0 25px rgba(0, 0, 0, 0.35) !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-header,
+        html.dark #sidebarMenu .sidebar-header {
+            border-color: #E2E8F0 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-title,
+        body.app-dark-mode #sidebarMenu #sidebarUserName,
+        html.dark #sidebarMenu .sidebar-title,
+        html.dark #sidebarMenu #sidebarUserName {
+            color: #0F172A !important;
+        }
+
+        body.app-dark-mode #sidebarMenu #sidebarUserRole,
+        html.dark #sidebarMenu #sidebarUserRole {
+            color: #B45309 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-user-card,
+        html.dark #sidebarMenu .sidebar-user-card {
+            background-color: #F8FAFC !important;
+            border-color: #E2E8F0 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-user-card:hover,
+        html.dark #sidebarMenu .sidebar-user-card:hover {
+            background-color: #F1F5F9 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-close-btn,
+        html.dark #sidebarMenu .sidebar-close-btn {
+            background-color: #F1F5F9 !important;
+            color: #0F172A !important;
+            border-color: #CBD5E1 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-close-btn:hover,
+        html.dark #sidebarMenu .sidebar-close-btn:hover {
+            background-color: #E2E8F0 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-nav-label,
+        html.dark #sidebarMenu .sidebar-nav-label {
+            color: #64748B !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .nav-item-active,
+        html.dark #sidebarMenu .nav-item-active {
+            background-color: rgba(15, 23, 42, 0.08) !important;
+            color: #0F172A !important;
+            font-weight: 800 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+            border-right: 4px solid #D97706 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .nav-item-active svg,
+        html.dark #sidebarMenu .nav-item-active svg {
+            color: #0F172A !important;
+            stroke: #0F172A !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .nav-item-inactive,
+        html.dark #sidebarMenu .nav-item-inactive {
+            color: #334155 !important;
+            background-color: transparent !important;
+            border-right: 4px solid transparent !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .nav-item-inactive svg,
+        html.dark #sidebarMenu .nav-item-inactive svg {
+            color: #1E293B !important;
+            stroke: #1E293B !important;
+            opacity: 0.9;
+        }
+
+        body.app-dark-mode #sidebarMenu .nav-item-inactive:hover,
+        html.dark #sidebarMenu .nav-item-inactive:hover {
+            background-color: rgba(0, 0, 0, 0.05) !important;
+            color: #0F172A !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .nav-item-inactive:hover svg,
+        html.dark #sidebarMenu .nav-item-inactive:hover svg {
+            color: #0F172A !important;
+            stroke: #0F172A !important;
+            opacity: 1;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-footer,
+        html.dark #sidebarMenu .sidebar-footer {
+            background-color: #F8FAFC !important;
+            border-color: #E2E8F0 !important;
+            color: #475569 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-footer span.text-amber-400,
+        html.dark #sidebarMenu .sidebar-footer span.text-amber-400 {
+            color: #B45309 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-support-btn,
+        html.dark #sidebarMenu .sidebar-support-btn {
+            background-color: #0F172A !important;
+            color: #FFFFFF !important;
+            border-color: #0F172A !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-support-btn svg,
+        html.dark #sidebarMenu .sidebar-support-btn svg {
+            color: #FFFFFF !important;
+            stroke: #FFFFFF !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .sidebar-support-btn:hover,
+        html.dark #sidebarMenu .sidebar-support-btn:hover {
+            background-color: #000000 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu #sidebarDarkModeToggleBtn,
+        html.dark #sidebarMenu #sidebarDarkModeToggleBtn {
+            background-color: #F1F5F9 !important;
+            color: #0F172A !important;
+            border-color: #CBD5E1 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu #sidebarDarkModeToggleBtn:hover,
+        html.dark #sidebarMenu #sidebarDarkModeToggleBtn:hover {
+            background-color: #E2E8F0 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu button[onclick="logout()"],
+        html.dark #sidebarMenu button[onclick="logout()"] {
+            background-color: #FEF2F2 !important;
+            color: #DC2626 !important;
+            border-color: #FECACA !important;
+        }
+
+        body.app-dark-mode #sidebarMenu button[onclick="logout()"]:hover,
+        html.dark #sidebarMenu button[onclick="logout()"]:hover {
+            background-color: #FEE2E2 !important;
+        }
+
+        body.app-dark-mode #sidebarMenu .border-slate-800,
+        html.dark #sidebarMenu .border-slate-800,
+        body.app-dark-mode #sidebarMenu .border-slate-800\/80,
+        html.dark #sidebarMenu .border-slate-800\/80 {
+            border-color: #E2E8F0 !important;
+        }
+        
         /* Active Navigation Link */
         .nav-item-active {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -430,10 +655,7 @@
             background-color: #FFFFFF !important;
             border-color: #E2E8F0 !important;
         }
-        body:not(.app-dark-mode) #sidebarMenu {
-            background-color: #FFFFFF !important;
-            border-color: #E2E8F0 !important;
-        }
+        /* Handled by Inverted Sidebar Theme rules above */
         body:not(.app-dark-mode) #studentBottomNav {
             background-color: rgba(255, 255, 255, 0.95) !important;
             border-color: #E2E8F0 !important;
@@ -454,7 +676,6 @@
 
         /* Top Header, Sidebar, Footer & Mobile Bottom Bar */
         body.app-dark-mode header,
-        body.app-dark-mode #sidebarMenu,
         body.app-dark-mode footer,
         body.app-dark-mode #studentBottomNav {
             background-color: #0F172A !important;
@@ -462,9 +683,7 @@
             color: #F1F5F9 !important;
         }
 
-        body.app-dark-mode #sidebarMenu .border-slate-200 {
-            border-color: #1E293B !important;
-        }
+        /* Handled by Inverted Sidebar Theme rules above */
 
         /* Cards & Surfaces */
         body.app-dark-mode .bg-white,
@@ -1273,23 +1492,23 @@
 
 
         <!-- ==================== SIDEBAR MENU (منيو جانبي قابل للطي بالكامل) ==================== -->
-        <aside id="sidebarMenu" class="w-72 bg-[#0C0F17] text-white border-l border-slate-800/80 shadow-2xl flex flex-col justify-between fixed top-0 bottom-0 right-0 z-50 transition-transform duration-300 ease-in-out translate-x-full">
+        <aside id="sidebarMenu" class="w-72 shadow-2xl flex flex-col justify-between fixed top-0 bottom-0 right-0 z-50 transition-transform duration-300 ease-in-out translate-x-full border-l">
             
             <div class="p-4 space-y-4 overflow-y-auto">
                 <!-- Sidebar Header with Close Arrow -->
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3 sidebar-header">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                        <span class="font-black text-sm text-white">القائمة الرئيسية</span>
+                        <span class="font-black text-sm text-white sidebar-title">القائمة الرئيسية</span>
                     </div>
-                    <button type="button" onclick="toggleSidebar(false)" class="p-1 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition text-xs font-bold flex items-center gap-1 cursor-pointer border border-white/10" title="إخفاء القائمة">
+                    <button type="button" onclick="toggleSidebar(false)" class="sidebar-close-btn p-1 px-2.5 rounded-xl transition text-xs font-bold flex items-center gap-1 cursor-pointer border" title="إخفاء القائمة">
                         <span>إغلاق</span>
                         <span class="text-sm">➡️</span>
                     </button>
                 </div>
 
                 <!-- Current Role Box -->
-                <div onclick="openMyProfileModal()" title="اضغط لتعديل ملفك الشخصي والصورة الشخصية" class="bg-white/5 hover:bg-white/10 border border-white/10 p-3 rounded-2xl flex items-center gap-3 cursor-pointer transition">
+                <div onclick="openMyProfileModal()" title="اضغط لتعديل ملفك الشخصي والصورة الشخصية" class="sidebar-user-card border p-3 rounded-2xl flex items-center gap-3 cursor-pointer transition">
                     <div class="w-10 h-10 rounded-xl gold-gradient-bg flex items-center justify-center text-lg text-slate-950 font-black shadow-xs overflow-hidden p-0.5 shrink-0" id="sidebarAvatar">
                         <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M6 36C6 27 12 25 18 25C24 25 30 27 30 36Z" fill="#1e293b"/>
@@ -1318,7 +1537,7 @@
 
                 <!-- Navigation Links List (أيقونات بيضاء بسيطة وتصميم أسود فخم مستوحى من نظام SaaS) -->
                 <nav class="space-y-1">
-                    <div class="text-[10px] font-black text-slate-400 px-3 py-1 uppercase tracking-wider">الأقسام والخدمات:</div>
+                    <div class="text-[10px] font-black px-3 py-1 uppercase tracking-wider sidebar-nav-label">الأقسام والخدمات:</div>
 
                     <!-- Link 1: Attendance Dashboard -->
                     <button onclick="switchTab('attendance')" id="btn-attendance" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-active cursor-pointer">
@@ -1532,7 +1751,7 @@
             </div>
 
             <!-- Sidebar Bottom Controls -->
-            <div class="p-4 border-t border-slate-800/80 bg-[#0A0D14] space-y-2">
+            <div class="p-4 border-t space-y-2 sidebar-footer">
                 <div class="flex items-center justify-between text-[11px] text-slate-400">
                     <span class="font-bold">الفرع:</span>
                     <span class="font-black text-amber-400">فرع عنك</span>
@@ -1542,7 +1761,7 @@
                 </div>
 
                 <!-- Technical Support Quick Action in Footer -->
-                <button type="button" onclick="openTechnicalSupportModal()" class="w-full bg-white/10 hover:bg-white/15 text-white border border-white/15 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
+                <button type="button" onclick="openTechnicalSupportModal()" class="sidebar-support-btn w-full font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs border">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
