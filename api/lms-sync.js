@@ -59,12 +59,16 @@ export default async function handler(req, res) {
       const coursesMap = {};
       for (const row of rows) {
         const key = row.course_key || row.id;
+        const meta = row.metadata || {};
         coursesMap[key] = {
           courseTitle: row.title,
-          trainerName: row.trainer_name,
+          trainer: row.trainer_name || meta.trainer || '',
+          trainerName: row.trainer_name || meta.trainer || '',
           courseCode: row.course_code,
+          room: meta.room || '',
+          description: meta.description || '',
           weeks: row.weeks || [],
-          metadata: row.metadata || {}
+          metadata: meta
         };
       }
 
@@ -125,27 +129,31 @@ export default async function handler(req, res) {
       if (allCourses && typeof allCourses === 'object') {
         for (const [key, data] of Object.entries(allCourses)) {
           if (data && typeof data === 'object') {
+            const trName = data.trainerName || data.trainer || '';
+            const meta = { ...(data.metadata || {}), room: data.room || data.metadata?.room || '', trainer: trName, description: data.description || '' };
             rowsToUpsert.push({
               id: key,
               course_key: key,
               title: data.courseTitle || key,
-              trainer_name: data.trainerName || '',
+              trainer_name: trName,
               course_code: data.courseCode || '',
               weeks: Array.isArray(data.weeks) ? data.weeks : [],
-              metadata: data.metadata || {},
+              metadata: meta,
               updated_at: new Date().toISOString()
             });
           }
         }
       } else if (courseKey && courseData) {
+        const trName = courseData.trainerName || courseData.trainer || '';
+        const meta = { ...(courseData.metadata || {}), room: courseData.room || courseData.metadata?.room || '', trainer: trName, description: courseData.description || '' };
         rowsToUpsert.push({
           id: courseKey,
           course_key: courseKey,
           title: courseData.courseTitle || courseKey,
-          trainer_name: courseData.trainerName || '',
+          trainer_name: trName,
           course_code: courseData.courseCode || '',
           weeks: Array.isArray(courseData.weeks) ? courseData.weeks : [],
-          metadata: courseData.metadata || {},
+          metadata: meta,
           updated_at: new Date().toISOString()
         });
       } else {

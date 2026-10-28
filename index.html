@@ -4614,6 +4614,11 @@
                     </div>
                 </div>
 
+                <!-- 1.5. Pending Tasks & Quizzes Across All Enrolled Courses (كافة المقررات المعتمدة بما فيها مقرر أ. فاضل الماجد) -->
+                <div id="sdAllPendingQuizzesCard" class="hidden bg-white border-2 border-indigo-200/90 rounded-3xl p-5 md:p-6 shadow-sm space-y-3.5 text-right">
+                    <!-- Populated dynamically via renderStudentDashboard() -->
+                </div>
+
                 <!-- 2. Compact 7-Day Weekly Calendar Strip (تمت إزالته وإخفاؤه تماماً من واجهة المتدرب) -->
                 <div id="sdCompactWeeklyCalendarCard" class="hidden"></div>
 
@@ -7187,12 +7192,22 @@
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
                                 <span>المجموعة المستهدفة بالاختبار:</span>
-                                
                             </label>
                             <select id="lmsQuizTargetGroup" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-[#0F2942]">
                                 <option value="ALL">جميع المجموعات المرتبطة بالمدرب</option>
                             </select>
-                            
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                                <span class="flex items-center gap-1.5">
+                                    <span>🔗</span>
+                                    <span>رابط الاختبار الإلكتروني (Google Forms / MS Forms / رابط مباشر - اختياري):</span>
+                                </span>
+                                <span class="text-[10px] text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">نماذج خارجية أو أسئلة النظام</span>
+                            </label>
+                            <input type="url" id="lmsQuizLinkInput" placeholder="https://forms.gle/... أو https://forms.office.com/... أو اتركه فارغاً" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-[#0F2942] font-mono">
+                            <p class="text-[10px] text-slate-500 mt-1">إذا وضعت رابط نموذج خارجي (Google Forms أو Microsoft Forms)، سيتمكن المتدرب من فتح وأداء الاختبار مباشرة داخل النظام أو بنافذة منبثقة مع توثيق التسليم.</p>
                         </div>
 
                         <!-- Questions Builder Container -->
@@ -22803,6 +22818,18 @@ function openReportFromProfile() {
     if (INITIAL_LMS_COURSES["فاضل الماجد"]) {
         if (!lmsCourses["فاضل الماجد"]) lmsCourses["فاضل الماجد"] = INITIAL_LMS_COURSES["فاضل الماجد"];
         if (!lmsCourses["السلامة والصحة"]) lmsCourses["السلامة والصحة"] = lmsCourses["فاضل الماجد"];
+        if (!lmsCourses["صحة وسلامة"]) lmsCourses["صحة وسلامة"] = lmsCourses["فاضل الماجد"];
+        if (!lmsCourses["أ. فاضل الماجد"]) lmsCourses["أ. فاضل الماجد"] = lmsCourses["فاضل الماجد"];
+    }
+    const englishBaseCourse = lmsCourses["لغة إنجليزية"] || lmsCourses["قاسم الماجد"] || INITIAL_LMS_COURSES["لغة إنجليزية"];
+    if (englishBaseCourse) {
+        if (!lmsCourses["لغة إنجليزية"]) lmsCourses["لغة إنجليزية"] = englishBaseCourse;
+        if (!lmsCourses["يوسف جمال"]) lmsCourses["يوسف جمال"] = JSON.parse(JSON.stringify(englishBaseCourse));
+        if (lmsCourses["يوسف جمال"]) { lmsCourses["يوسف جمال"].trainer = 'يوسف جمال'; lmsCourses["يوسف جمال"].trainerName = 'يوسف جمال'; }
+        if (!lmsCourses["علي عبدالسلام"]) lmsCourses["علي عبدالسلام"] = JSON.parse(JSON.stringify(englishBaseCourse));
+        if (lmsCourses["علي عبدالسلام"]) { lmsCourses["علي عبدالسلام"].trainer = 'علي عبدالسلام'; lmsCourses["علي عبدالسلام"].trainerName = 'علي عبدالسلام'; }
+        if (!lmsCourses["شرف الدين"]) lmsCourses["شرف الدين"] = JSON.parse(JSON.stringify(englishBaseCourse));
+        if (lmsCourses["شرف الدين"]) { lmsCourses["شرف الدين"].trainer = 'شرف الدين'; lmsCourses["شرف الدين"].trainerName = 'شرف الدين'; }
     }
     // تطهير وحذف أي وصف غير مرغوب فيه
     for (let k in lmsCourses) {
@@ -22813,14 +22840,14 @@ function openReportFromProfile() {
 
     // تطهير وحذف أي مقررات أو مستندات أو اختبارات تجريبية غير رسمية (بناءً على طلب المستخدم)
     const OFFICIAL_COURSE_KEYS = new Set([
-        "اللحام", "رضا مطيلق",
-        "الكهرباء", "حسين العبد المحسن",
-        "الميكانيكا", "الميكانيكية", "ميكانيكا", "سيد احمد", "سيد أحمد",
-        "السلامة والصحة", "فاضل الماجد",
-        "الادارة المكتبية والسكرتارية", "ادارة مكتبية", "إدارة مكتبية", "أحمد الاصيل", "احمد الاصيل",
-        "لغة إنجليزية", "الانجليزي", "اللغة الانجليزية", "قاسم الماجد",
-        "إنشاءات", "انشاءات", "ناجي محمد",
-        "الحاسب الالي", "حاسب الي", "إمام يعقوب", "امام يعقوب"
+        "اللحام", "رضا مطيلق", "أ. رضا مطيلق",
+        "الكهرباء", "حسين العبد المحسن", "عصام سعيد", "أ. عصام سعيد", "أ. حسين العبد المحسن",
+        "الميكانيكا", "الميكانيكية", "ميكانيكا", "سيد احمد", "سيد أحمد", "أ. سيد احمد",
+        "السلامة والصحة", "صحة وسلامة", "فاضل الماجد", "أ. فاضل الماجد",
+        "الادارة المكتبية والسكرتارية", "ادارة مكتبية", "إدارة مكتبية", "أحمد الاصيل", "احمد الاصيل", "أ. أحمد الاصيل",
+        "لغة إنجليزية", "الانجليزي", "اللغة الانجليزية", "إنجليزي", "انجليزي", "قاسم الماجد", "يوسف جمال", "علي عبدالسلام", "شرف الدين", "أ. يوسف جمال", "أ. علي عبدالسلام", "أ. قاسم الماجد", "أ. شرف الدين",
+        "إنشاءات", "انشاءات", "ناجي محمد", "أ. ناجي محمد",
+        "الحاسب الالي", "الحاسب الآلي", "حاسب الي", "حاسب آلي", "إمام يعقوب", "امام يعقوب", "أ. إمام يعقوب"
     ]);
 
     // مسح أية مقررات غير معتمدة أو تجريبية
@@ -25666,6 +25693,112 @@ function openReportFromProfile() {
             }).join('');
         }
 
+        // 1.5. عرض بطاقة الاختبارات والتكليفات المستحقة لكافة المقررات المعتمدة
+        const pendingCardEl = document.getElementById('sdAllPendingQuizzesCard');
+        if (pendingCardEl) {
+            const studentGroup = (currentUser.group || '').trim();
+            const studentCleanId = cleanNationalId(currentUser.id);
+            const curWNum = activeStudentLmsWeek || 1;
+            let allPendingTasks = [];
+
+            allStudentCourses.forEach(c => {
+                const cData = lmsCourses[c.lmsKey] || lmsCourses[c.rawTrainerName];
+                if (!cData || !cData.weeks) return;
+                const wk = cData.weeks.find(w => (w.week || w.weekNum) === curWNum) || cData.weeks[0];
+                if (!wk) return;
+
+                // Quizzes
+                (wk.quizzes || []).forEach(q => {
+                    if (!q || deletedLmsItemIds.has(String(q.id))) return false;
+                    const isMatch = !q.targetGroup || q.targetGroup === 'ALL' || isGroupMatch(q.targetGroup, studentGroup) ||
+                           (studentGroup && studentGroup.toLowerCase().includes(q.targetGroup.toLowerCase())) ||
+                           (q.targetGroup && q.targetGroup.toLowerCase().includes(studentGroup.toLowerCase()));
+                    if (!isMatch) return;
+
+                    const subKey = `${currentUser.id}_${q.id}`;
+                    const subKeyClean = `${studentCleanId}_${q.id}`;
+                    const subRecord = (typeof studentQuizSubmissions !== 'undefined') ? (studentQuizSubmissions[subKey] || studentQuizSubmissions[subKeyClean]) : null;
+
+                    allPendingTasks.push({
+                        type: 'quiz',
+                        id: q.id,
+                        title: q.title,
+                        link: q.link || q.url || q.quizUrl || '',
+                        courseTitle: c.courseTitle,
+                        courseShort: c.courseShort,
+                        courseKey: c.lmsKey,
+                        trainerName: c.trainerName,
+                        periodLabel: c.periodLabel,
+                        points: q.totalPoints || 10,
+                        duration: q.timeMinutes || 10,
+                        dueDate: q.quizDate || q.dueDate || 'الخميس 11:59 م',
+                        isDone: !!subRecord,
+                        subRecord: subRecord
+                    });
+                });
+            });
+
+            if (allPendingTasks.length > 0) {
+                pendingCardEl.classList.remove('hidden');
+                pendingCardEl.innerHTML = `
+                    <div class="flex items-center justify-between pb-3 border-b border-indigo-100 flex-wrap gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-2xl p-2 bg-gradient-to-br from-indigo-600 to-[#0F2942] text-amber-300 rounded-xl font-black shadow-xs shrink-0">🏁</span>
+                            <div>
+                                <h4 class="font-black text-slate-900 text-sm md:text-base">الاختبارات والتكليفات المعتمدة للأسبوع التدريبي (${ARABIC_ORDINAL_WEEKS[curWNum] || 'الأسبوع ' + curWNum})</h4>
+                                <p class="text-[11px] text-slate-500 font-bold">متابعة وإنجاز اختبارات فترتيك التدريبيتين مباشرة دون انقطاع</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black bg-indigo-50 text-indigo-900 border border-indigo-200 px-3 py-1 rounded-full">
+                            ${allPendingTasks.length} اختبارات متاحة
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+                        ${allPendingTasks.map(t => {
+                            const isDone = t.isDone;
+                            const hasLink = !!t.link;
+                            return `
+                                <div class="p-4 rounded-2xl border-2 ${isDone ? 'border-emerald-200 bg-emerald-50/50' : 'border-indigo-200 bg-gradient-to-br from-indigo-50/40 via-white to-blue-50/20'} space-y-3 transition shadow-2xs hover:shadow-sm">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div>
+                                            <span class="text-[10px] font-black px-2.5 py-0.5 rounded-full ${isDone ? 'bg-emerald-100 text-emerald-900' : 'bg-indigo-100 text-indigo-900 border border-indigo-200'}">
+                                                ${t.courseShort} • ${t.trainerName}
+                                            </span>
+                                            <h5 class="font-black text-xs md:text-sm text-slate-900 mt-1.5 leading-snug">${t.title}</h5>
+                                        </div>
+                                        <span class="text-[10px] font-black px-2.5 py-1 rounded-full shrink-0 ${isDone ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-amber-100 text-amber-950 border border-amber-300'}">
+                                            ${isDone ? '✓ تم التسليم' : '⏳ مطلوب'}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-[10px] text-slate-600 font-bold flex-wrap">
+                                        <span class="bg-white px-2 py-0.5 rounded border border-slate-200">📅 ${t.dueDate}</span>
+                                        <span class="bg-white px-2 py-0.5 rounded border border-slate-200">⏱️ ${t.duration} دقيقة</span>
+                                        <span class="bg-white px-2 py-0.5 rounded border border-slate-200">🎯 ${t.points} درجات</span>
+                                        ${hasLink ? '<span class="bg-blue-100 text-blue-900 px-2 py-0.5 rounded font-black">🌐 نموذج مباشر</span>' : ''}
+                                    </div>
+                                    <div class="pt-1 flex justify-end">
+                                        ${isDone ? `
+                                            <button type="button" onclick="switchStudentActiveCourse('${t.courseKey}'); openTakeQuizModal('${t.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3.5 py-1.5 rounded-xl text-xs transition cursor-pointer">
+                                                مراجعة التسليم ⚡
+                                            </button>
+                                        ` : `
+                                            <button type="button" onclick="switchStudentActiveCourse('${t.courseKey}'); openTakeQuizModal('${t.id}')" class="bg-gradient-to-r from-[#0F2942] to-[#1E3A8A] hover:from-[#1E3A8A] hover:to-blue-900 text-amber-300 font-black px-4 py-2 rounded-xl text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer hover:scale-[1.02]">
+                                                <span>بدء الاختبار</span>
+                                                <span>🏁</span>
+                                            </button>
+                                        `}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                pendingCardEl.classList.add('hidden');
+                pendingCardEl.innerHTML = '';
+            }
+        }
+
         // 2. جلب بيانات المتدرب الحقيقية المسجلة في النظام
         const cleanId = cleanNationalId(currentUser.id);
         const traineePool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) ? trainees : SAMPLE_TRAINEES;
@@ -26469,7 +26602,62 @@ function openReportFromProfile() {
                        (q.targetGroup && q.targetGroup.toLowerCase().includes(studentGroup.toLowerCase()));
             });
 
-            qContainer.innerHTML = visibleQuizzes.length ? visibleQuizzes.map(q => {
+            // فحص اختبارات المقررات الأخرى المعتمدة للمتدرب (مثل مقرر أ. فاضل الماجد)
+            let otherCourseQuizzesHtml = '';
+            const allOtherCourses = (typeof allStudentCourses !== 'undefined' && Array.isArray(allStudentCourses) && allStudentCourses.length) 
+                ? allStudentCourses 
+                : (typeof getAllCoursesForTrainee === 'function' ? getAllCoursesForTrainee(currentUser) : []);
+
+            allOtherCourses.forEach(otherC => {
+                if (otherC.lmsKey === courseKey || otherC.rawTrainerName === courseKey) return;
+                const oData = lmsCourses[otherC.lmsKey] || lmsCourses[otherC.rawTrainerName];
+                if (!oData || !oData.weeks) return;
+                const oWk = oData.weeks.find(w => (w.week || w.weekNum) === currentActiveWeekNum) || oData.weeks[0];
+                if (!oWk || !oWk.quizzes || oWk.quizzes.length === 0) return;
+
+                const visibleOther = oWk.quizzes.filter(oq => {
+                    if (!oq || deletedLmsItemIds.has(String(oq.id))) return false;
+                    if (!oq.targetGroup || oq.targetGroup === 'ALL') return true;
+                    return isGroupMatch(oq.targetGroup, studentGroup) ||
+                           (studentGroup && studentGroup.toLowerCase().includes(oq.targetGroup.toLowerCase())) ||
+                           (oq.targetGroup && oq.targetGroup.toLowerCase().includes(studentGroup.toLowerCase()));
+                });
+
+                if (visibleOther.length > 0) {
+                    otherCourseQuizzesHtml += `
+                        <div class="p-5 rounded-2xl bg-gradient-to-r from-[#0F2942] via-[#1E3A8A] to-blue-900 text-white shadow-lg border border-amber-400 space-y-3.5 mt-3.5 mb-2 text-right">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl p-2.5 bg-amber-400 text-slate-950 rounded-2xl font-black shrink-0">🏁</span>
+                                    <div>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="text-[10px] font-black bg-amber-400 text-slate-950 px-2.5 py-0.5 rounded-full">تنبيه: توجد اختبارات متاحة في مقرراتك الأخرى (${otherC.periodLabel || 'فترة تدريبية أخرى'})</span>
+                                            <h6 class="font-black text-sm text-white">${otherC.courseTitle} (المدرب: ${otherC.trainerName})</h6>
+                                        </div>
+                                        <p class="text-xs text-blue-100 font-bold mt-1">يوجد اختبار معتمد متاح لك لهذا الأسبوع في هذا المقرر</p>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="switchStudentActiveCourse('${otherC.lmsKey}', true); openTakeQuizModal('${visibleOther[0].id}')" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl transition shadow-md flex items-center gap-2 cursor-pointer hover:scale-[1.02]">
+                                    <span>بدء اختبار ${otherC.courseShort || 'المقرر'}</span>
+                                    <span>⚡</span>
+                                </button>
+                            </div>
+                            <div class="pt-2 border-t border-white/20 space-y-2">
+                                ${visibleOther.map(oq => `
+                                    <div class="bg-white/10 p-3 rounded-xl flex items-center justify-between flex-wrap gap-2 text-xs">
+                                        <span class="font-black text-amber-200">🏁 ${oq.title}</span>
+                                        <button type="button" onclick="switchStudentActiveCourse('${otherC.lmsKey}', true); openTakeQuizModal('${oq.id}')" class="bg-white text-slate-900 font-black px-3 py-1 rounded-lg text-[11px] hover:bg-amber-300 cursor-pointer">
+                                            دخول الاختبار ⚡
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            const mainQuizzesHtml = visibleQuizzes.length ? visibleQuizzes.map(q => {
                 const subKey = `${currentUser.id}_${q.id}`;
                 const subRecord = studentQuizSubmissions[subKey];
                 const maxAttempts = q.maxAttempts || 2;
@@ -26525,9 +26713,13 @@ function openReportFromProfile() {
                     ? `<span class="text-[10px] font-black bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-md">مخصص لمجموعتك: ${q.targetGroup}</span>`
                     : `<span class="text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 rounded-md">متاح لجميع المجموعات</span>`;
 
+                const hasExternalLink = !!(q.link || q.url || q.quizUrl);
                 const quizCatBadge = q.quizCategory === 'optional'
                     ? `<span class="text-[10px] font-black bg-indigo-50 text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-md">اختبار اختياري</span>`
                     : `<span class="text-[10px] font-black bg-[#0F2942] text-white px-2 py-0.5 rounded-md">اختبار نهاية الأسبوع</span>`;
+                const extLinkBadge = hasExternalLink
+                    ? `<span class="text-[10px] font-black bg-blue-50 text-blue-900 border border-blue-200 px-2 py-0.5 rounded-md">🌐 نموذج إلكتروني</span>`
+                    : '';
 
                 return `
                     <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/80 space-y-3">
@@ -26535,6 +26727,7 @@ function openReportFromProfile() {
                             <div class="flex items-center gap-2 flex-wrap">
                                 <h5 class="font-black text-xs md:text-sm text-slate-900">${q.title}</h5>
                                 ${quizCatBadge}
+                                ${extLinkBadge}
                                 ${groupBadge}
                             </div>
                             ${statusBadge}
@@ -26555,13 +26748,15 @@ function openReportFromProfile() {
                         </div>
                     </div>
                 `;
-            }).join('') : `
+}).join('') : `
                 <div class="saas-empty-card py-6 space-y-2">
                     <span class="text-2xl">🏁</span>
-                    <h6 class="font-black text-xs text-slate-700">لا توجد اختبارات مجدولة لمجموعتك لهذا الأسبوع</h6>
+                    <h6 class="font-black text-xs text-slate-700">لا توجد اختبارات مجدولة لمجموعتك لهذا الأسبوع في هذا المقرر</h6>
                     <p class="text-[11px] text-slate-500 max-w-sm">سيقوم المدرب بنشر الاختبار الأسبوعي وفق التقويم الأكاديمي المعتمد.</p>
                 </div>
             `;
+
+            qContainer.innerHTML = mainQuizzesHtml + (otherCourseQuizzesHtml || '');
         }
 
         // 4. الواجبات والتكليفات الأسبوعية
@@ -28046,10 +28241,12 @@ function openReportFromProfile() {
 
     function openTakeQuizModal(quizId) {
         const binding = getTrainerAndCourseForTrainee(currentUser);
-        const courseKey = activeStudentLmsCourse || binding.lmsKey || 'رضا مطيلق';
-        const courseData = lmsCourses[courseKey] || lmsCourses['رضا مطيلق'] || lmsCourses['اللحام'];
+        let courseKey = activeStudentLmsCourse || binding.lmsKey || 'رضا مطيلق';
+        let courseData = lmsCourses[courseKey] || lmsCourses['رضا مطيلق'] || lmsCourses['اللحام'];
 
         let foundQuiz = null;
+        let foundCourseKey = courseKey;
+
         if (courseData && courseData.weeks) {
             for (let w of courseData.weeks) {
                 for (let q of (w.quizzes || [])) {
@@ -28070,6 +28267,7 @@ function openReportFromProfile() {
                         for (let q of (w.quizzes || [])) {
                             if (q.id === quizId) {
                                 foundQuiz = q;
+                                foundCourseKey = cKey;
                                 break;
                             }
                         }
@@ -28078,6 +28276,14 @@ function openReportFromProfile() {
                 }
                 if (foundQuiz) break;
             }
+        }
+
+        if (foundCourseKey && foundCourseKey !== activeStudentLmsCourse) {
+            activeStudentLmsCourse = foundCourseKey;
+            try {
+                localStorage.setItem('sys_active_student_lms_course_v1', foundCourseKey);
+                sessionStorage.setItem('sys_active_student_lms_course_v1', foundCourseKey);
+            } catch(e) {}
         }
 
         if (!foundQuiz) {
@@ -28152,10 +28358,36 @@ function openReportFromProfile() {
             }
         });
 
+        // Support for External Quiz Forms (Google Forms / MS Forms / Direct Quiz URL)
+        const extQuizUrl = foundQuiz.link || foundQuiz.url || foundQuiz.quizUrl || '';
+        let extQuizHtml = '';
+        if (extQuizUrl) {
+            extQuizHtml = `
+                <div class="space-y-3 pb-3 border-b border-slate-200">
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3.5 rounded-2xl flex items-center justify-between flex-wrap gap-2 text-xs">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-xl">🌐</span>
+                            <div>
+                                <span class="font-black text-blue-950 block">الاختبار الإلكتروني المعتمد عبر النموذج المباشر</span>
+                                <span class="text-[11px] text-blue-700 font-bold">يمكنك حل الأسئلة في النموذج المدمج أدناه، أو فتحه في صفحة مستقلة ثم تأكيد التسليم.</span>
+                            </div>
+                        </div>
+                        <a href="${extQuizUrl}" target="_blank" rel="noopener noreferrer" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-4 py-2 rounded-xl text-xs shadow-xs transition flex items-center gap-1.5">
+                            <span>فتح النموذج في صفحة مستقلة</span>
+                            <span>↗</span>
+                        </a>
+                    </div>
+                    <div class="w-full h-[62vh] min-h-[420px] rounded-2xl overflow-hidden border-2 border-slate-300 shadow-inner bg-slate-50 relative">
+                        <iframe src="${extQuizUrl}" class="w-full h-full border-0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+            `;
+        }
+
         // بناء الأسئلة
         const container = document.getElementById('tqQuestionsContainer');
         if (container) {
-            container.innerHTML = (foundQuiz.questions || []).map((q, idx) => {
+            const nativeQuestionsHtml = (foundQuiz.questions || []).map((q, idx) => {
                 const qType = q.type || 'mcq';
 
                 if (qType === 'matching') {
@@ -28328,6 +28560,7 @@ function openReportFromProfile() {
                     </div>
                 `;
             }).join('');
+            container.innerHTML = extQuizHtml + nativeQuestionsHtml;
         }
 
         const submitBtn = document.getElementById('tqSubmitBtn');
@@ -28442,6 +28675,11 @@ function openReportFromProfile() {
         const ptsPerQ = totalPoints / (questions.length || 1);
 
         const answersMap = {};
+        if (questions.length === 0 && (currentTakingQuiz.link || currentTakingQuiz.url || currentTakingQuiz.quizUrl)) {
+            score = totalPoints;
+            answersMap['external_form_submitted'] = true;
+            answersMap['form_url'] = currentTakingQuiz.link || currentTakingQuiz.url || currentTakingQuiz.quizUrl;
+        }
         questions.forEach(q => {
             const qType = q.type || 'mcq';
             const qPoints = q.points || ptsPerQ;
@@ -31413,6 +31651,14 @@ function openReportFromProfile() {
 
         if (cleanTr) {
             keys.add(cleanTr);
+            if (cleanTr.includes('فاضل') || cleanTr.includes('سلام') || cleanTr.includes('صحة')) {
+                ['فاضل الماجد', 'السلامة والصحة', 'صحة وسلامة', 'أ. فاضل الماجد'].forEach(ak => {
+                    keys.add(ak);
+                    if (lmsCourses && !lmsCourses[ak] && (lmsCourses['فاضل الماجد'] || lmsCourses['السلامة والصحة'])) {
+                        lmsCourses[ak] = lmsCourses['فاضل الماجد'] || lmsCourses['السلامة والصحة'];
+                    }
+                });
+            }
             if (lmsCourses[cleanTr]) keys.add(cleanTr);
             for (const k in lmsCourses) {
                 const c = lmsCourses[k];
@@ -31470,10 +31716,14 @@ function openReportFromProfile() {
                     const cloudMap = {};
                     data.forEach(row => {
                         const k = row.course_key || row.id;
+                        const trName = row.trainer_name || row.metadata?.trainer || k;
                         cloudMap[k] = {
                             courseTitle: row.title,
-                            trainerName: row.trainer_name,
+                            trainer: trName,
+                            trainerName: trName,
                             courseCode: row.course_code,
+                            room: row.metadata?.room || '',
+                            description: row.metadata?.description || '',
                             weeks: Array.isArray(row.weeks) ? row.weeks : [],
                             metadata: row.metadata || {}
                         };
@@ -31516,11 +31766,7 @@ function openReportFromProfile() {
             const isItemDeleted = (item) => {
                 if (!item) return true;
                 const iId = String(item[idKey] || item.id || '');
-                const iTitle = String(item.title || item.name || '').trim();
-                const iUrl = String(item.url || item.video_url || item.file_url || '').trim();
                 if (iId && deletedLmsItemIds.has(iId)) return true;
-                if (iTitle && deletedLmsItemIds.has(iTitle)) return true;
-                if (iUrl && deletedLmsItemIds.has(iUrl)) return true;
                 return false;
             };
 
@@ -31627,7 +31873,7 @@ function openReportFromProfile() {
                         targetW.videos = (targetW.videos || []).filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)));
                         targetW.docs = (targetW.docs || targetW.documents || []).filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)));
                         targetW.documents = targetW.docs;
-                        targetW.quizzes = (targetW.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
+                        targetW.quizzes = (targetW.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)));
                         targetW.assignments = (targetW.assignments || []).filter(a => a && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
                         mergedWeeks.push(targetW);
                         localChanged = true;
@@ -31638,7 +31884,7 @@ function openReportFromProfile() {
                         targetW.videos = (targetW.videos || []).filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)));
                         targetW.docs = (targetW.docs || targetW.documents || []).filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)));
                         targetW.documents = targetW.docs;
-                        targetW.quizzes = (targetW.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
+                        targetW.quizzes = (targetW.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)));
                         targetW.assignments = (targetW.assignments || []).filter(a => a && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
                         mergedWeeks.push(targetW);
                         if (localHasItems) needsCloudSync = true;
@@ -33879,6 +34125,9 @@ END $$;`;
         const qdInput = document.getElementById('lmsQuizDate');
         if (qdInput) qdInput.value = 'الخميس 11:59 م';
 
+        const linkInput = document.getElementById('lmsQuizLinkInput');
+        if (linkInput) linkInput.value = '';
+
         tempQuizQuestions = [];
         addQuestionToQuizBuilder();
         renderQuizBuilderQuestions();
@@ -33903,6 +34152,9 @@ END $$;`;
         document.getElementById('lmsQuizTitle').value = q.title || '';
         const qdEditInput = document.getElementById('lmsQuizDate');
         if (qdEditInput) qdEditInput.value = q.quizDate || q.dueDate || 'الخميس 11:59 م';
+
+        const linkEditInput = document.getElementById('lmsQuizLinkInput');
+        if (linkEditInput) linkEditInput.value = q.link || q.url || q.quizUrl || '';
 
         const dateInputEl = document.getElementById('lmsQuizDueDateInput');
         const timeInputEl = document.getElementById('lmsQuizDueTimeInput');
@@ -34223,7 +34475,19 @@ END $$;`;
         const wNum = parseInt(activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1, 10);
         if (typeof unmarkLmsWeekCleared === 'function') unmarkLmsWeekCleared(wNum, courseKey);
 
-        const title = document.getElementById('lmsQuizTitle').value.trim();
+        const rawTitle = document.getElementById('lmsQuizTitle').value.trim();
+        const rawLink = (document.getElementById('lmsQuizLinkInput')?.value || '').trim();
+
+        // Extract any URL pasted inside title (e.g. Google Forms / MS Forms links)
+        let quizLink = rawLink;
+        let title = rawTitle;
+        const urlMatch = rawTitle.match(/(https?:\/\/[^\s]+)/i);
+        if (urlMatch) {
+            if (!quizLink) quizLink = urlMatch[0];
+            title = rawTitle.replace(/(https?:\/\/[^\s]+)/ig, '').replace(/^[\s:–\-]*رابط\s*الاختبار[\s:–\-]*/i, '').trim();
+            if (!title) title = 'الاختبار الإلكتروني التفاعلي';
+        }
+
         const dateInputVal = document.getElementById('lmsQuizDueDateInput')?.value;
         const timeInputVal = document.getElementById('lmsQuizDueTimeInput')?.value;
 
@@ -34244,27 +34508,31 @@ END $$;`;
         const quizCategory = document.getElementById('lmsQuizCategory')?.value || 'weekend';
         const gradingMode = document.getElementById('lmsQuizGradingMode')?.value || 'system_auto';
 
-        if (!tempQuizQuestions || tempQuizQuestions.length === 0) {
-            showToast('يرجى إضافة سؤال واحد على الأقل للاختبار', 'error');
+        const hasQuestions = Array.isArray(tempQuizQuestions) && tempQuizQuestions.length > 0;
+        if (!hasQuestions && !quizLink) {
+            showToast('يرجى إضافة سؤال واحد على الأقل للاختبار أو وضع رابط نموذج إلكتروني (Google Forms / MS Forms)', 'error');
             return;
         }
-        for (let i = 0; i < tempQuizQuestions.length; i++) {
-            const q = tempQuizQuestions[i];
-            if (!q.text || !q.text.trim()) {
-                showToast(`يرجى كتابة نص السؤال رقم ${i + 1}`, 'error');
-                return;
-            }
-            const isTf = q.type === 'true_false' || (q.options && q.options.length === 2);
-            const isMatch = q.type === 'matching' && Array.isArray(q.pairs);
-            if (isMatch) {
-                if (!q.pairs || q.pairs.length < 2 || q.pairs.some(p => !p.left?.trim() || !p.right?.trim())) {
-                    showToast(`يرجى تعبئة كافة أزواج التوصيل للسؤال رقم ${i + 1}`, 'error');
+
+        if (hasQuestions) {
+            for (let i = 0; i < tempQuizQuestions.length; i++) {
+                const q = tempQuizQuestions[i];
+                if (!q.text || !q.text.trim()) {
+                    showToast(`يرجى كتابة نص السؤال رقم ${i + 1}`, 'error');
                     return;
                 }
-            } else if (!isTf) {
-                if (!q.options || q.options.length < 2 || q.options.some(opt => !opt.trim())) {
-                    showToast(`يرجى تعبئة كافة خيارات الإجابة للسؤال رقم ${i + 1}`, 'error');
-                    return;
+                const isTf = q.type === 'true_false' || (q.options && q.options.length === 2);
+                const isMatch = q.type === 'matching' && Array.isArray(q.pairs);
+                if (isMatch) {
+                    if (!q.pairs || q.pairs.length < 2 || q.pairs.some(p => !p.left?.trim() || !p.right?.trim())) {
+                        showToast(`يرجى تعبئة كافة أزواج التوصيل للسؤال رقم ${i + 1}`, 'error');
+                        return;
+                    }
+                } else if (!isTf) {
+                    if (!q.options || q.options.length < 2 || q.options.some(opt => !opt.trim())) {
+                        showToast(`يرجى تعبئة كافة خيارات الإجابة للسؤال رقم ${i + 1}`, 'error');
+                        return;
+                    }
                 }
             }
         }
@@ -34273,6 +34541,9 @@ END $$;`;
 
         const quizData = {
             title: title,
+            link: quizLink || '',
+            url: quizLink || '',
+            quizUrl: quizLink || '',
             quizDate: quizDate,
             dueDate: dateInputVal || quizDate,
             dueDateIso: dueDateIso,
@@ -34284,7 +34555,7 @@ END $$;`;
             targetGroup: targetGroup,
             quizCategory: quizCategory,
             gradingMode: gradingMode,
-            questions: JSON.parse(JSON.stringify(tempQuizQuestions))
+            questions: hasQuestions ? JSON.parse(JSON.stringify(tempQuizQuestions)) : []
         };
 
         if (editingQuizIndex >= 0 && activeWeek.quizzes[editingQuizIndex]) {
@@ -41907,7 +42178,7 @@ function buildDemoExecutiveReport(params) {
                             const isCalWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cCourse.lmsKey, wNum, cWeek) || isLmsWeekCleared(null, wNum, cWeek));
                             const cAssList = isCalWeekCleared ? [] : (cWeek.assignments || []).filter(a => a && a.assignmentCategory !== 'group' && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
                             const cWeeklyAss = cAssList[0] || null;
-                            const cWeekQuizzes = isCalWeekCleared ? [] : (cWeek.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
+                            const cWeekQuizzes = isCalWeekCleared ? [] : (cWeek.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)));
                             const cWkdQuiz = cWeekQuizzes.find(q => q.quizCategory !== 'optional') || cWeekQuizzes[0] || null;
 
                             const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, cData, wNum);
@@ -42111,7 +42382,7 @@ function buildDemoExecutiveReport(params) {
                             const isCalWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(cCourse.lmsKey, wNum, cWeek) || isLmsWeekCleared(null, wNum, cWeek));
                             const cAssList = isCalWeekCleared ? [] : (cWeek.assignments || []).filter(a => a && a.assignmentCategory !== 'group' && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
                             const cWeeklyAss = cAssList[0] || null;
-                            const cWeekQuizzes = isCalWeekCleared ? [] : (cWeek.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
+                            const cWeekQuizzes = isCalWeekCleared ? [] : (cWeek.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)));
                             const cWkdQuiz = cWeekQuizzes.find(q => q.quizCategory !== 'optional') || cWeekQuizzes[0] || null;
 
                             const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, cData, wNum);
