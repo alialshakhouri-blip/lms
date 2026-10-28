@@ -259,6 +259,7 @@ export default async function handler(req, res) {
         laVacancies: syncStates['sys_la_vacancies_v9'] || null,
         virtualClassrooms: syncStates['sys_virtual_classrooms_v1'] || null,
         archiveData: syncStates['sys_archive_data_v1'] || null,
+        lmsCourses: syncStates['sys_lms_courses_v2'] || null,
         totalSubmissions: submissionsList.length,
         serverTimestamp: new Date().toISOString()
       });
@@ -564,6 +565,13 @@ export default async function handler(req, res) {
           upsertRows.push({
             key: 'sys_archive_data_v1',
             data: body.archiveData,
+            updated_at: new Date().toISOString()
+          });
+        }
+        if (body.lmsCourses && typeof body.lmsCourses === 'object') {
+          upsertRows.push({
+            key: 'sys_lms_courses_v2',
+            data: body.lmsCourses,
             updated_at: new Date().toISOString()
           });
         }

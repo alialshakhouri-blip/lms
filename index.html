@@ -1577,67 +1577,58 @@
                         <span class="text-xs font-bold" id="sidebarAttendanceLabel">لوحة التحكم</span>
                     </button>
 
-                    <!-- Link 2: Trainer Dashboard -->
-                    <button onclick="switchTab('trainerDashboard')" id="btn-trainerDashboard" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 2: Dedicated Attendance Sheet -->
+                    <button onclick="switchTab('attendanceSheet')" id="btn-attendanceSheet" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11l2 2-2 2"/>
+                            <rect x="3" y="4" width="18" height="16" rx="2"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 15h18M9 4v16"/>
                         </svg>
-                        <span class="text-xs font-bold">لوحة المدرب</span>
+                        <span class="text-xs font-bold">كشف الحضور</span>
                     </button>
 
-                    <!-- Link 3: LMS Academic System -->
-                    <button onclick="switchTab('trainerLms')" id="btn-trainerLms" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 3: Institution Files -->
+                    <button onclick="switchTab('institutionFiles')" id="btn-institutionFiles" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                         </svg>
-                        <span class="text-xs font-bold">المحتوى الأكاديمي</span>
+                        <span class="text-xs font-bold">ملفات المؤسسة</span>
                     </button>
 
-                    <!-- Link 4: Grades & Submissions -->
-                    <button onclick="openGradesSystemWeeksHub(); switchTab('gradesSystem');" id="btn-gradesSystem" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 4: Admin Reports -->
+                    <button onclick="switchTab('adminReports')" id="btn-adminReports" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 20v-5m6 5v-10m6 10v-16"/>
                         </svg>
-                        <span class="text-xs font-bold">الدرجات</span>
+                        <span class="text-xs font-bold">التقارير</span>
                     </button>
 
-                    <!-- Link 5: Submissions Calendar -->
-                    <button onclick="switchTab('submissionsCalendar')" id="btn-submissionsCalendar" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 5: Admin Certificates -->
+                    <button onclick="switchTab('adminCertificates')" id="btn-adminCertificates" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <rect x="3" y="4" width="18" height="18" rx="2"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
                         </svg>
-                        <span class="text-xs font-bold">تقويم التسليمات</span>
+                        <span class="text-xs font-bold">الشهادات</span>
                     </button>
 
-                    <!-- Link 6: Trainer Reports / Delays -->
-                    <button onclick="switchTab('trainerReports')" id="btn-trainerReports" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 6: Master Schedule -->
+                    <button onclick="switchTab('masterSchedule')" id="btn-masterSchedule" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            <circle cx="12" cy="12" r="9"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/>
                         </svg>
-                        <span class="text-xs font-bold">بلاغات التأخير</span>
+                        <span class="text-xs font-bold">الجدول الدراسي</span>
                     </button>
 
-                    <!-- Link 7: Virtual Class -->
-                    <button onclick="switchTab('virtualClass')" id="btn-virtualClass" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 7: Timesheet / Salaries -->
+                    <button onclick="switchTab('timesheet')" id="btn-timesheet" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer" title="الرواتب">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            <rect x="2" y="5" width="20" height="14" rx="3"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2 10h20M6 14h3"/>
                         </svg>
-                        <span class="text-xs font-bold">القاعة الافتراضية</span>
+                        <span class="text-xs font-bold">الرواتب</span>
                     </button>
 
-                    <!-- Link 8: Settings & Sync -->
-                    <button onclick="switchTab('settings')" id="btn-settings" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
-                        <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        <span class="text-xs font-bold">الإعدادات والمزامنة</span>
-                    </button>
-
-                    <!-- Link 9: User Management -->
+                    <!-- Link 8: User Management -->
                     <button onclick="switchTab('users')" id="btn-users" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center justify-between nav-item-inactive cursor-pointer">
                         <div class="flex items-center gap-3">
                             <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -1648,7 +1639,7 @@
                         <span id="navUsersPendingBadge" class="hidden text-[10px] bg-purple-600 text-white font-black px-2 py-0.5 rounded-full shadow-xs">0</span>
                     </button>
 
-                    <!-- Super Admin Link: Support Requests Hub (طلبات الدعم الفني والمساعدة) -->
+                    <!-- Link 9: Support Requests Hub (طلبات الدعم الفني والمساعدة) -->
                     <button onclick="switchTab('supportTickets')" id="btn-supportTickets" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center justify-between nav-item-inactive cursor-pointer hidden" title="إدارة ومعالجة طلبات الدعم الفني والمساعدة">
                         <div class="flex items-center gap-3">
                             <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -1659,55 +1650,64 @@
                         <span id="sidebarSupportBadge" class="hidden text-[10px] font-black bg-rose-600 text-white px-2 py-0.5 rounded-full shadow-xs">0</span>
                     </button>
 
-                    <!-- Link 10: Timesheet / Salaries -->
-                    <button onclick="switchTab('timesheet')" id="btn-timesheet" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer" title="الرواتب">
+                    <!-- Link 10: Trainer Reports / Delays -->
+                    <button onclick="switchTab('trainerReports')" id="btn-trainerReports" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <rect x="2" y="5" width="20" height="14" rx="3"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2 10h20M6 14h3"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                         </svg>
-                        <span class="text-xs font-bold">الرواتب</span>
+                        <span class="text-xs font-bold">بلاغات التأخير</span>
                     </button>
 
-                    <!-- Link 11: Admin Reports -->
-                    <button onclick="switchTab('adminReports')" id="btn-adminReports" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 11: Grades & Submissions -->
+                    <button onclick="openGradesSystemWeeksHub(); switchTab('gradesSystem');" id="btn-gradesSystem" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 20v-5m6 5v-10m6 10v-16"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
                         </svg>
-                        <span class="text-xs font-bold">التقارير</span>
+                        <span class="text-xs font-bold">الدرجات</span>
                     </button>
 
-                    <!-- Link 12: Admin Certificates -->
-                    <button onclick="switchTab('adminCertificates')" id="btn-adminCertificates" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 12: Virtual Class -->
+                    <button onclick="switchTab('virtualClass')" id="btn-virtualClass" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                         </svg>
-                        <span class="text-xs font-bold">الشهادات</span>
+                        <span class="text-xs font-bold">القاعة الافتراضية</span>
                     </button>
 
-                    <!-- Link 13: Institution Files -->
-                    <button onclick="switchTab('institutionFiles')" id="btn-institutionFiles" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 13: Settings & Sync -->
+                    <button onclick="switchTab('settings')" id="btn-settings" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
-                        <span class="text-xs font-bold">ملفات المؤسسة</span>
+                        <span class="text-xs font-bold">الإعدادات والمزامنة</span>
                     </button>
 
-                    <!-- Link 14: Dedicated Attendance Sheet -->
-                    <button onclick="switchTab('attendanceSheet')" id="btn-attendanceSheet" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 14: Trainer Dashboard -->
+                    <button onclick="switchTab('trainerDashboard')" id="btn-trainerDashboard" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <rect x="3" y="4" width="18" height="16" rx="2"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 15h18M9 4v16"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11l2 2-2 2"/>
                         </svg>
-                        <span class="text-xs font-bold">كشف الحضور</span>
+                        <span class="text-xs font-bold">لوحة المدرب</span>
                     </button>
 
-                    <!-- Link 15: Master Schedule -->
-                    <button onclick="switchTab('masterSchedule')" id="btn-masterSchedule" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <!-- Link 15: LMS Academic System -->
+                    <button onclick="switchTab('trainerLms')" id="btn-trainerLms" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="9"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
-                        <span class="text-xs font-bold">الجدول الدراسي</span>
+                        <span class="text-xs font-bold">المحتوى الأكاديمي</span>
+                    </button>
+
+                    <!-- Link 16: Submissions Calendar -->
+                    <button onclick="switchTab('submissionsCalendar')" id="btn-submissionsCalendar" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                        <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <rect x="3" y="4" width="18" height="18" rx="2"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/>
+                        </svg>
+                        <span class="text-xs font-bold">تقويم التسليمات</span>
                     </button>
 
                     <!-- Trainee Link: Dashboard -->
@@ -2385,6 +2385,10 @@
                             <input type="text" id="tdTraineeSearchIdInput" oninput="renderTraineesOfSelectedGroup()" onkeydown="if(event.key==='Enter'){openTrainerSearchedTraineeProfile();}" placeholder="ابحث برقم الهوية الوطنية أو اسم المتدرب للاطلاع على ملف المتدرب وكشف درجاته..." class="w-full bg-white border border-slate-300 focus:border-[#0F2942] rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 outline-none transition">
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="openTrainerSearchedTraineeContent()" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-4 py-2 rounded-xl text-xs transition shadow-2xs cursor-pointer flex items-center gap-1.5" title="معاينة محتوى المتدرب وتكليفاته المعروضة">
+                                <span>📚</span>
+                                <span>المحتوى والتكليفات</span>
+                            </button>
                             <button type="button" onclick="openTrainerSearchedTraineeProfile()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-2xs cursor-pointer flex items-center gap-1.5">
                                 <span>👤</span>
                                 <span>فتح ملف المتدرب وكشف الدرجات</span>
@@ -3368,7 +3372,7 @@
                     </div>
 
                     <!-- Quick Contact & Action Buttons -->
-                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
                         <button type="button" id="tpQuickCopyPhoneBtn" onclick="copyModalPhone()" class="bg-white hover:bg-amber-50 text-slate-800 font-bold p-2.5 rounded-xl text-xs transition border border-slate-200 flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
                             <span>📲</span>
                             <span>نسخ الجوال</span>
@@ -3377,6 +3381,14 @@
                             <span>💬</span>
                             <span>مراسلة واتساب</span>
                         </a>
+                        <button type="button" onclick="closeTraineeProfileModal(); openTraineeCourseContentModal(document.getElementById('tpOriginalId').value);" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer" title="معاينة محتوى المتدرب المعروض وتكليفاته وتسليماته الأكاديمية">
+                            <span>📚</span>
+                            <span>المحتوى والتسليمات</span>
+                        </button>
+                        <button type="button" onclick="closeTraineeProfileModal(); openTraineeSubmissionsCalendar(document.getElementById('tpOriginalId').value);" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer" title="الانتقال المباشر لتقويم تسليمات المتدرب">
+                            <span>📅</span>
+                            <span>تقويم التسليمات</span>
+                        </button>
                         <button type="button" onclick="closeTraineeProfileModal(); navigateToInstitutionFilesFromProfile();" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer" title="الانتقال المباشر لبيانات المتدرب وشعبته في ملفات المؤسسة">
                             <span>🏛️</span>
                             <span>كشف المؤسسة</span>
@@ -3741,6 +3753,117 @@
                                 إغلاق
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TRAINEE COURSE CONTENT & SUBMISSIONS MODAL ==================== -->
+            <div id="traineeCourseContentModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 md:p-4">
+                <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full p-5 md:p-6 shadow-2xl space-y-4 border border-slate-200 dark:border-slate-800 max-h-[92vh] overflow-y-auto text-right">
+                    
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 flex-wrap gap-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-[#0F2942] text-amber-300 flex items-center justify-center text-xl font-black shadow-xs shrink-0">
+                                📚
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h3 class="font-black text-slate-900 dark:text-white text-base" id="tccModalName">محتوى وتكليفات المتدرب</h3>
+                                    <span id="tccGroupBadge" class="text-[10px] font-black px-2.5 py-0.5 rounded-full border bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700">شعبة</span>
+                                    <span id="tccAttendanceRateBadge" class="text-[10px] font-black px-2.5 py-0.5 rounded-full border bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-300">100% حضور</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs text-slate-500 font-bold mt-0.5 flex-wrap">
+                                    <span>الهوية: <span class="font-mono text-slate-800 dark:text-slate-200 font-extrabold" id="tccModalId"></span></span>
+                                    <span>•</span>
+                                    <span id="tccTrainerAndCourseText">المقرر: دورة تدريبية</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="closeTraineeCourseContentModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xl font-bold p-1 cursor-pointer">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- Course Switcher (if trainee has 2 courses / periods) -->
+                    <div id="tccCourseSwitcherContainer" class="hidden flex items-center gap-2 pt-1 flex-wrap"></div>
+
+                    <!-- Week Navigator Pills (Weeks 1 to 6) -->
+                    <div class="space-y-1.5">
+                        <div class="text-[11px] font-black text-slate-500 flex items-center justify-between">
+                            <span>الأسابيع الدراسية للوحدات:</span>
+                            <span id="tccWeekDateRangeBadge" class="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded"></span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2" id="tccWeekTabsContainer">
+                            <!-- Dynamically rendered week pills with status -->
+                        </div>
+                    </div>
+
+                    <!-- Selected Week Title Banner -->
+                    <div class="bg-gradient-to-r from-slate-900 to-[#0F2942] text-white p-3.5 rounded-2xl flex items-center justify-between flex-wrap gap-2 shadow-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">🎯</span>
+                            <div>
+                                <h4 class="font-black text-xs md:text-sm text-amber-300" id="tccActiveWeekTitle">الأسبوع 1</h4>
+                                <p class="text-[11px] text-slate-300" id="tccActiveWeekTopic">موضوع الوحدة الأسبوعية</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="tccActiveWeekSubCount" class="text-[11px] font-black bg-white/10 px-2.5 py-1 rounded-lg border border-white/15">0 تسليم</span>
+                        </div>
+                    </div>
+
+                    <!-- Coursework Content Sections -->
+                    <div class="space-y-4" id="tccMainContentContainer">
+                        <!-- 1. Assignments & Submissions -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <h5 class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                                    <span>📝</span>
+                                    <span>الواجبات والتكليفات الأسبوعية وحالة التسليم والدرجة:</span>
+                                </h5>
+                            </div>
+                            <div id="tccAssignmentsContainer" class="space-y-2.5"></div>
+                        </div>
+
+                        <!-- 2. Quizzes & Exams -->
+                        <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <h5 class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                                    <span>🏁</span>
+                                    <span>الاختبارات الأسبوعية التفاعلية ودرجات المتدرب:</span>
+                                </h5>
+                            </div>
+                            <div id="tccQuizzesContainer" class="space-y-2.5"></div>
+                        </div>
+
+                        <!-- 3. Lectures & Materials -->
+                        <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <h5 class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                                    <span>🎥</span>
+                                    <span>المحاضرات والمذكرات المعروضة للمتدرب في هذه الوحدة:</span>
+                                </h5>
+                            </div>
+                            <div id="tccMaterialsContainer" class="space-y-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Footer Actions -->
+                    <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3 flex-wrap gap-2">
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="tccOpenCalendarBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-2xs transition cursor-pointer">
+                                <span>📅</span>
+                                <span>تقويم تسليمات المتدرب</span>
+                            </button>
+                            <button type="button" id="tccOpenProfileBtn" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-2xs transition cursor-pointer">
+                                <span>👤</span>
+                                <span>الملف وكشف الدرجات</span>
+                            </button>
+                        </div>
+                        <button type="button" onclick="closeTraineeCourseContentModal()" class="px-4 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 transition cursor-pointer">
+                            إغلاق
+                        </button>
                     </div>
                 </div>
             </div>
@@ -9306,6 +9429,12 @@ ${details}
             console.error('Error rendering tab content:', tabErr);
         }
 
+        if (['trainerDashboard', 'trainerLms', 'submissionsCalendar', 'studentLms', 'studentCourses', 'studentTasks', 'institutionFiles', 'gradesSystem'].includes(tab)) {
+            if (typeof pullLmsCoursesFromSupabase === 'function') {
+                pullLmsCoursesFromSupabase().catch(() => {});
+            }
+        }
+
         if (typeof toggleSidebar === 'function') {
             toggleSidebar(false);
         }
@@ -11009,6 +11138,11 @@ ${details}
         activeSelectedGroupInTrainerDashboard = '';
         activeTrainerLmsCourse = null; // إعادة تعيين حتى يختار LMS المقرر المتطابق مع المدرب النشط
         renderTrainerDashboard();
+        if (typeof pullLmsCoursesFromSupabase === 'function') {
+            pullLmsCoursesFromSupabase().then(() => {
+                if (typeof currentActiveTabId !== 'undefined' && currentActiveTabId === 'trainerDashboard') renderTrainerDashboard();
+            }).catch(() => {});
+        }
     }
 
     function renderTrainerDashboard() {
@@ -11984,7 +12118,10 @@ ${details}
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                     <td class="p-3 font-mono text-slate-400 dark:text-slate-500">${idx + 1}</td>
                     <td class="p-3 font-black text-slate-900 dark:text-white">
-                        <div>${t.name}</div>
+                        <button type="button" onclick="openTraineeCourseContentModal('${t.id}')" class="text-right font-black text-slate-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer flex items-center gap-1.5" title="معاينة محتوى المتدرب المعروض وتكليفاته وتسليماته الأكاديمية">
+                            <span>${t.name}</span>
+                            <span class="text-[10px] text-amber-500 font-normal">👁️</span>
+                        </button>
                         <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                             ${searchQuery ? `<span dir="ltr" class="inline-block text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">${t.group}</span>` : ''}
                             ${subBadgeHtml}
@@ -12036,6 +12173,12 @@ ${details}
                     </td>
                     <td class="p-3 text-center">
                         <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                            <button onclick="openTraineeCourseContentModal('${t.id}')" title="معاينة محتوى المتدرب المعروض وتكليفاته وتسليماته" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-2.5 py-1 rounded text-[11px] transition shadow-2xs cursor-pointer flex items-center gap-1">
+                                <span>📚 المحتوى</span>
+                            </button>
+                            <button onclick="openTraineeSubmissionsCalendar('${t.id}')" title="معاينة تقويم تسليمات هذا المتدرب" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-2.5 py-1 rounded text-[11px] transition shadow-2xs cursor-pointer flex items-center gap-1">
+                                <span>📅 التقويم</span>
+                            </button>
                             <button onclick="openTraineeProfileModal('${t.id}')" title="معاينة وتعديل ملف المتدرب وكشف درجاته" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-2.5 py-1 rounded text-[11px] transition shadow-2xs cursor-pointer">
                                 ملف ودرجات 👤
                             </button>
@@ -15956,6 +16099,544 @@ ${details}
             executePostDeletionReload(currentUser?.role === 'trainer' ? 'trainerReports' : 'adminReports');
         }
     }
+
+    
+    // ==============================================================================
+    // نافذة استعراض محتوى وتكليفات المتدرب المعروضة (TRAINEE COURSE CONTENT & SUBMISSIONS)
+    // مربوطة بالمدرب والمتدرب مباشرة لعرض المحاضرات، الملفات، والواجبات والاختبارات
+    // ==============================================================================
+    let currentTccTraineeId = null;
+    let currentTccActiveWeek = 1;
+    let currentTccCourseKey = null;
+
+    function openTraineeCourseContentModal(traineeId, weekNum, courseKey) {
+        if (!traineeId) return;
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
+        const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : ((typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : []));
+        const trainee = pool.find(t => t.id === traineeId || cleanNationalId(t.id) === cleanId || String(t.id).trim() === cleanId) ||
+                        (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[traineeId] || phoneDirectory[cleanId]) : null) ||
+                        { id: traineeId, name: 'متدرب', group: 'عام' };
+
+        currentTccTraineeId = trainee.id;
+        currentTccActiveWeek = weekNum ? parseInt(weekNum, 10) : ((typeof getCurrentAcademicWeekNum === 'function') ? getCurrentAcademicWeekNum() : 1);
+        
+        const allCourses = (typeof getAllCoursesForTrainee === 'function') ? getAllCoursesForTrainee(trainee) : [];
+        if (courseKey) {
+            currentTccCourseKey = courseKey;
+        } else if (allCourses.length > 0) {
+            currentTccCourseKey = allCourses[0].lmsKey;
+        } else {
+            currentTccCourseKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : 'اللحام';
+        }
+
+        const modal = document.getElementById('traineeCourseContentModal');
+        if (modal) modal.classList.remove('hidden');
+
+        renderTraineeCourseContentModal();
+        if (typeof pullLmsCoursesFromSupabase === 'function') {
+            pullLmsCoursesFromSupabase().then(() => {
+                const curModal = document.getElementById('traineeCourseContentModal');
+                if (curModal && !curModal.classList.contains('hidden')) {
+                    renderTraineeCourseContentModal();
+                }
+            }).catch(() => {});
+        }
+    }
+    window.openTraineeCourseContentModal = openTraineeCourseContentModal;
+
+    function closeTraineeCourseContentModal() {
+        const modal = document.getElementById('traineeCourseContentModal');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeTraineeCourseContentModal = closeTraineeCourseContentModal;
+
+    function switchTccCourse(courseKey) {
+        currentTccCourseKey = courseKey;
+        renderTraineeCourseContentModal();
+    }
+    window.switchTccCourse = switchTccCourse;
+
+    function setTccWeek(weekNum) {
+        currentTccActiveWeek = parseInt(weekNum, 10) || 1;
+        renderTraineeCourseContentModal();
+    }
+    window.setTccWeek = setTccWeek;
+
+    function openTrainerSearchedTraineeContent() {
+        const searchEl = document.getElementById('tdTraineeSearchIdInput');
+        const q = (searchEl ? searchEl.value : '').trim();
+        if (!q) {
+            showToast('يرجى كتابة رقم الهوية أو اسم المتدرب للمعاينة', 'info');
+            if (searchEl) searchEl.focus();
+            return;
+        }
+        const cleanQ = cleanNationalId(q);
+        const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : trainees;
+        const found = pool.find(t => String(t.id).includes(q) || cleanNationalId(t.id) === cleanQ || (t.name && t.name.includes(q)));
+        if (!found) {
+            showToast(`لم يتم العثور على متدرب برقم الهوية أو الاسم: (${q})`, 'error');
+            return;
+        }
+        openTraineeCourseContentModal(found.id);
+    }
+    window.openTrainerSearchedTraineeContent = openTrainerSearchedTraineeContent;
+
+    function renderTraineeCourseContentModal() {
+        if (!currentTccTraineeId) return;
+        const cleanId = cleanNationalId(currentTccTraineeId);
+        const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : trainees;
+        const trainee = pool.find(t => t.id === currentTccTraineeId || cleanNationalId(t.id) === cleanId) ||
+                        (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[currentTccTraineeId] || phoneDirectory[cleanId]) : null) ||
+                        { id: currentTccTraineeId, name: 'متدرب', group: 'عام' };
+
+        const allCourses = (typeof getAllCoursesForTrainee === 'function') ? getAllCoursesForTrainee(trainee) : [];
+        let courseData = (currentTccCourseKey && typeof lmsCourses !== 'undefined' && lmsCourses[currentTccCourseKey])
+            ? lmsCourses[currentTccCourseKey]
+            : (allCourses[0] && lmsCourses[allCourses[0].lmsKey] ? lmsCourses[allCourses[0].lmsKey] : Object.values(lmsCourses || {})[0]);
+
+        if (courseData && typeof ensureLmsCourseWeeklyPillars === 'function') {
+            ensureLmsCourseWeeklyPillars(courseData);
+        }
+
+        // Header info
+        const nameEl = document.getElementById('tccModalName');
+        if (nameEl) nameEl.innerText = trainee.name;
+        const idEl = document.getElementById('tccModalId');
+        if (idEl) idEl.innerText = trainee.id;
+        const grpEl = document.getElementById('tccGroupBadge');
+        if (grpEl) grpEl.innerText = 'شعبة: ' + (trainee.group || 'عامة');
+        const rateEl = document.getElementById('tccAttendanceRateBadge');
+        if (rateEl) {
+            const r = (trainee.rate !== undefined) ? trainee.rate : 100;
+            rateEl.innerText = r + '% نسبة الحضور';
+            rateEl.className = (Number(r) < 80)
+                ? 'text-[10px] font-black px-2.5 py-0.5 rounded-full border bg-rose-50 text-rose-800 border-rose-300'
+                : 'text-[10px] font-black px-2.5 py-0.5 rounded-full border bg-emerald-50 text-emerald-800 border-emerald-300';
+        }
+        const textEl = document.getElementById('tccTrainerAndCourseText');
+        if (textEl) {
+            textEl.innerText = 'المقرر: ' + (courseData?.courseTitle || 'مقرر عام') + ' • المدرب: أ. ' + (courseData?.trainer || 'المدرب المشرف') + ' • القاعة: ' + (courseData?.room || trainee.room || 'القاعة التدريبية');
+        }
+
+        // Course Switcher for trainees with multiple courses (e.g. 105 Sinopec/Sabic)
+        const switcherEl = document.getElementById('tccCourseSwitcherContainer');
+        if (switcherEl) {
+            if (allCourses.length > 1) {
+                switcherEl.className = 'flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800 flex-wrap';
+                switcherEl.innerHTML = `
+                    <span class="text-xs font-black text-slate-700 dark:text-slate-300">المقررات المعتمدة للمتدرب:</span>
+                    ${allCourses.map((c, cIdx) => {
+                        const isAct = (c.lmsKey === currentTccCourseKey);
+                        return `
+                            <button type="button" onclick="switchTccCourse('${c.lmsKey}')" class="px-3 py-1 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
+                                isAct
+                                    ? 'bg-[#0F2942] text-amber-300 border-[#0F2942] ring-2 ring-amber-300/40'
+                                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+                            }">
+                                <span>${cIdx === 0 ? '📘' : '💻'}</span>
+                                <span>${c.periodLabel || `الفترة ${cIdx + 1}`}: ${c.courseShort} (${c.trainerName})</span>
+                                ${isAct ? '<span class="text-[9px] bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded font-black">المقرر المعروض</span>' : ''}
+                            </button>
+                        `;
+                    }).join('')}
+                `;
+            } else {
+                switcherEl.className = 'hidden';
+                switcherEl.innerHTML = '';
+            }
+        }
+
+        // Week Tabs (Weeks 1 to 6)
+        const tabsEl = document.getElementById('tccWeekTabsContainer');
+        const weeks = (courseData?.weeks || []);
+        if (tabsEl) {
+            tabsEl.innerHTML = [1, 2, 3, 4, 5, 6].map(wNum => {
+                const wObj = weeks.find(wk => (wk.week || wk.weekNum || 1) === wNum) || {};
+                const isCleared = (typeof isLmsWeekCleared === 'function') && isLmsWeekCleared(currentTccCourseKey, wNum, wObj);
+                const aList = isCleared ? [] : (wObj.assignments || []).filter(a => a && !deletedLmsItemIds.has(String(a.id)));
+                const qList = isCleared ? [] : (wObj.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)));
+                const totalTasks = aList.length + qList.length;
+
+                let doneTasks = 0;
+                aList.forEach(a => {
+                    const sub = (typeof studentAssignmentSubmissions !== 'undefined') && (
+                        studentAssignmentSubmissions[`${trainee.id}_${a.id}`] ||
+                        studentAssignmentSubmissions[`${cleanId}_${a.id}`] ||
+                        Object.values(studentAssignmentSubmissions).find(s => s && s.assignmentId === a.id && (String(s.studentId) === trainee.id || cleanNationalId(s.studentId) === cleanId))
+                    );
+                    if (sub) doneTasks++;
+                });
+                qList.forEach(q => {
+                    const sub = (typeof studentQuizSubmissions !== 'undefined') && (
+                        studentQuizSubmissions[`${trainee.id}_${q.id}`] ||
+                        studentQuizSubmissions[`${cleanId}_${q.id}`] ||
+                        Object.values(studentQuizSubmissions).find(s => s && s.quizId === q.id && (String(s.studentId) === trainee.id || cleanNationalId(s.studentId) === cleanId))
+                    );
+                    if (sub) doneTasks++;
+                });
+
+                const isAct = (wNum === currentTccActiveWeek);
+                let badge = '';
+                if (totalTasks === 0) badge = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isAct ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}">إثرائي</span>`;
+                else if (doneTasks === totalTasks) badge = `<span class="text-[9px] font-black px-1.5 py-0.5 rounded ${isAct ? 'bg-emerald-400 text-slate-950' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">✓ مكتمل (${doneTasks}/${totalTasks})</span>`;
+                else if (doneTasks > 0) badge = `<span class="text-[9px] font-black px-1.5 py-0.5 rounded ${isAct ? 'bg-amber-300 text-slate-950' : 'bg-amber-100 text-amber-900 border border-amber-300'}">⏳ معلق (${doneTasks}/${totalTasks})</span>`;
+                else badge = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isAct ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}">لم يبدأ (0/${totalTasks})</span>`;
+
+                return `
+                    <button type="button" onclick="setTccWeek(${wNum})" class="rounded-2xl p-2.5 text-right flex flex-col justify-between gap-1.5 cursor-pointer transition border-2 ${
+                        isAct
+                            ? 'bg-gradient-to-br from-[#0F2942] to-[#1E3A8A] text-white border-[#0F2942] shadow-md'
+                            : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-[#0F2942]'
+                    }">
+                        <div class="flex items-center justify-end w-full">${badge}</div>
+                        <span class="font-black text-xs">${ARABIC_ORDINAL_WEEKS[wNum] || `الأسبوع ${wNum}`}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Active week banner
+        const activeWeekObj = weeks.find(wk => (wk.week || wk.weekNum || 1) === currentTccActiveWeek) || weeks[0] || {};
+        const titleBannerEl = document.getElementById('tccActiveWeekTitle');
+        if (titleBannerEl) titleBannerEl.innerText = `${ARABIC_ORDINAL_WEEKS[currentTccActiveWeek] || `الأسبوع ${currentTccActiveWeek}`}`;
+        const topicBannerEl = document.getElementById('tccActiveWeekTopic');
+        if (topicBannerEl) topicBannerEl.innerText = activeWeekObj.topic || activeWeekObj.title || 'الوحدة التدريبية الأسبوعية ومفرداتها';
+        
+        const range = (typeof getAcademicWeekDateRange === 'function') ? getAcademicWeekDateRange(currentTccActiveWeek) : { fullRangeLabel: '' };
+        const rangeBadgeEl = document.getElementById('tccWeekDateRangeBadge');
+        if (rangeBadgeEl) rangeBadgeEl.innerText = range.fullRangeLabel;
+
+        const isCleared = (typeof isLmsWeekCleared === 'function') && isLmsWeekCleared(currentTccCourseKey, currentTccActiveWeek, activeWeekObj);
+
+        // 1. Assignments
+        const aContainer = document.getElementById('tccAssignmentsContainer');
+        const assignments = isCleared ? [] : (activeWeekObj.assignments || []).filter(a => a && !deletedLmsItemIds.has(String(a.id)));
+        let totalAssDone = 0;
+
+        if (aContainer) {
+            if (assignments.length === 0) {
+                aContainer.innerHTML = `<div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl text-center text-xs text-slate-400 font-bold">لا توجد واجبات أو تكليفات مسجلة في هذا الأسبوع.</div>`;
+            } else {
+                aContainer.innerHTML = assignments.map(a => {
+                    const subKey = `${trainee.id}_${a.id}`;
+                    const sub = (typeof studentAssignmentSubmissions !== 'undefined') ? (
+                        studentAssignmentSubmissions[subKey] ||
+                        studentAssignmentSubmissions[`${cleanId}_${a.id}`] ||
+                        Object.values(studentAssignmentSubmissions).find(s => s && s.assignmentId === a.id && (String(s.studentId) === trainee.id || cleanNationalId(s.studentId) === cleanId))
+                    ) : null;
+
+                    if (sub) totalAssDone++;
+                    const isSubmitted = !!sub;
+                    const score = sub ? (sub.score !== undefined ? sub.score : 10) : '';
+
+                    return `
+                        <div class="border rounded-2xl p-4 transition ${isSubmitted ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800' : 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800'} space-y-3">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="text-base">${isSubmitted ? '✅' : '⏳'}</span>
+                                    <h6 class="font-black text-xs md:text-sm text-slate-900 dark:text-white">${a.title || 'واجب أسبوعي'}</h6>
+                                    <span class="text-[10px] font-black bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">الدرجة: ${a.points || 10} درجات</span>
+                                    ${a.dueDate ? `<span class="text-[10px] font-mono font-bold text-slate-500">موعد الاستحقاق: ${a.dueDate}</span>` : ''}
+                                </div>
+                                <div>
+                                    ${isSubmitted
+                                        ? `<span class="text-[11px] font-black bg-emerald-600 text-white px-2.5 py-0.5 rounded-full shadow-2xs">✓ تم التسليم بنجاح</span>`
+                                        : `<span class="text-[11px] font-black bg-amber-500 text-slate-950 px-2.5 py-0.5 rounded-full shadow-2xs">⚠️ لم يقم المتدرب بالتسليم بعد</span>`
+                                    }
+                                </div>
+                            </div>
+
+                            ${a.description ? `<p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed bg-white/70 dark:bg-slate-800/70 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">${a.description}</p>` : ''}
+
+                            <!-- Submission content if submitted -->
+                            ${isSubmitted ? `
+                                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/60 space-y-2 text-xs">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 text-[11px]">
+                                        <span class="font-black text-slate-700 dark:text-slate-300">نص إجابة المتدرب المرفوعة:</span>
+                                        <span class="font-mono text-slate-400">${sub.submissionDate ? new Date(sub.submissionDate).toLocaleString('ar-SA') : 'مسجل في النظام'}</span>
+                                    </div>
+                                    <div class="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-lg text-slate-800 dark:text-slate-200 text-xs leading-relaxed whitespace-pre-wrap">${sub.submissionText || 'تم تسليم الواجب بنجاح عبر النظام.'}</div>
+                                    ${sub.fileName ? `
+                                        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-lg text-[11px]">
+                                            <span class="font-mono font-bold text-slate-700 dark:text-slate-300">📎 المرفق: ${sub.fileName}</span>
+                                            ${sub.fileData ? `<a href="${sub.fileData}" download="${sub.fileName}" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-bold px-2.5 py-1 rounded text-[10px]">تحميل المرفق 📥</a>` : ''}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+
+                            <!-- Trainer Quick Grade & Feedback Control -->
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <label class="text-xs font-black text-slate-800 dark:text-slate-200 whitespace-nowrap">الدرجة المرصودة (من 10):</label>
+                                    <input type="number" id="tccAssScore_${a.id}" min="0" max="10" step="0.5" value="${score}" placeholder="10" class="w-16 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-mono font-black text-center text-slate-900 dark:text-white outline-none focus:border-amber-500">
+                                    <input type="text" id="tccAssFeedback_${a.id}" value="${(sub?.feedback || '').replace(/"/g, '&quot;')}" placeholder="ملاحظات وتوجيهات المدرب للمتدرب..." class="flex-1 min-w-[180px] bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-amber-500">
+                                </div>
+                                <button type="button" onclick="saveTrainerTraineeAssignmentGrade('${trainee.id}', '${a.id}', document.getElementById('tccAssScore_${a.id}').value, document.getElementById('tccAssFeedback_${a.id}').value)" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-4 py-1.5 rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs whitespace-nowrap border border-amber-400/40">
+                                    <span>💾</span>
+                                    <span>حفظ واعتماد الدرجة</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // 2. Quizzes
+        const qContainer = document.getElementById('tccQuizzesContainer');
+        const quizzes = isCleared ? [] : (activeWeekObj.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)));
+        let totalQuizDone = 0;
+
+        if (qContainer) {
+            if (quizzes.length === 0) {
+                qContainer.innerHTML = `<div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl text-center text-xs text-slate-400 font-bold">لا توجد اختبارات مسجلة في هذا الأسبوع.</div>`;
+            } else {
+                qContainer.innerHTML = quizzes.map(q => {
+                    const qSubKey = `${trainee.id}_${q.id}`;
+                    const qSub = (typeof studentQuizSubmissions !== 'undefined') ? (
+                        studentQuizSubmissions[qSubKey] ||
+                        studentQuizSubmissions[`${cleanId}_${q.id}`] ||
+                        Object.values(studentQuizSubmissions).find(s => s && s.quizId === q.id && (String(s.studentId) === trainee.id || cleanNationalId(s.studentId) === cleanId))
+                    ) : null;
+
+                    if (qSub) totalQuizDone++;
+                    const isAttempted = !!qSub;
+                    const bestScore = qSub ? (qSub.bestScore !== undefined ? qSub.bestScore : (qSub.score || 0)) : '';
+                    const attempts = qSub ? (qSub.attemptsCount || (Array.isArray(qSub.attempts) ? qSub.attempts.length : 1)) : 0;
+                    const maxAttempts = q.maxAttempts || 2;
+                    const totalPoints = q.totalPoints || 10;
+                    const pct = isAttempted ? Math.round((Number(bestScore) / totalPoints) * 100) : 0;
+                    const passed = pct >= 60;
+
+                    return `
+                        <div class="border rounded-2xl p-4 transition ${isAttempted ? 'bg-indigo-50/40 dark:bg-indigo-950/20 border-indigo-300 dark:border-indigo-800' : 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800'} space-y-3">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="text-base">${isAttempted ? '🏁' : '⏳'}</span>
+                                    <h6 class="font-black text-xs md:text-sm text-slate-900 dark:text-white">${q.title || 'اختبار أسبوعي'}</h6>
+                                    <span class="text-[10px] font-black bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">الدرجة: ${totalPoints} درجات</span>
+                                    <span class="text-[10px] font-mono text-slate-500 font-bold">المدة: ${q.timeMinutes || 10} دقائق • المحاولات المتاحة: ${maxAttempts}</span>
+                                </div>
+                                <div>
+                                    ${isAttempted
+                                        ? `<span class="text-[11px] font-black ${passed ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'} px-2.5 py-0.5 rounded-full shadow-2xs">${passed ? `✓ اجتاز الاختبار (${bestScore}/${totalPoints})` : `لم يجتز (${bestScore}/${totalPoints})`}</span>`
+                                        : `<span class="text-[11px] font-black bg-amber-500 text-slate-950 px-2.5 py-0.5 rounded-full shadow-2xs">⚠️ لم يقم المتدرب بإجراء الاختبار</span>`
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Quiz record stats -->
+                            ${isAttempted ? `
+                                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-between flex-wrap gap-3 text-xs">
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-xl font-mono font-black text-indigo-700 dark:text-indigo-300">${bestScore} / ${totalPoints}</div>
+                                        <div class="text-[11px] text-slate-500 font-bold">المحاولات المستهلكة: <span class="font-mono text-slate-800 dark:text-slate-200">${attempts} من ${maxAttempts}</span></div>
+                                    </div>
+                                    <div class="text-[11px] font-bold ${passed ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}">
+                                        النسبة المئوية: %${pct} (${passed ? 'ناجح' : 'راسب'})
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- Trainer Adjust Score Control -->
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <label class="text-xs font-black text-slate-800 dark:text-slate-200 whitespace-nowrap">درجة الاختبار المعتمدة (من ${totalPoints}):</label>
+                                    <input type="number" id="tccQuizScore_${q.id}" min="0" max="${totalPoints}" step="0.5" value="${bestScore}" placeholder="${totalPoints}" class="w-16 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-mono font-black text-center text-slate-900 dark:text-white outline-none focus:border-amber-500">
+                                </div>
+                                <button type="button" onclick="saveTrainerTraineeQuizGrade('${trainee.id}', '${q.id}', document.getElementById('tccQuizScore_${q.id}').value)" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-4 py-1.5 rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs whitespace-nowrap border border-amber-400/40">
+                                    <span>💾</span>
+                                    <span>تحديث درجة الاختبار</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Sub count in top banner
+        const subCountEl = document.getElementById('tccActiveWeekSubCount');
+        if (subCountEl) {
+            const totTasks = assignments.length + quizzes.length;
+            const doneTasks = totalAssDone + totalQuizDone;
+            subCountEl.innerText = `${doneTasks} من ${totTasks} منجز`;
+        }
+
+        // 3. Lectures & Materials
+        const mContainer = document.getElementById('tccMaterialsContainer');
+        const videos = isCleared ? [] : (activeWeekObj.videos || []).filter(v => v && !deletedLmsItemIds.has(String(v.id)));
+        const docs = isCleared ? [] : ((activeWeekObj.docs && activeWeekObj.docs.length) ? activeWeekObj.docs : (activeWeekObj.documents || [])).filter(d => d && !deletedLmsItemIds.has(String(d.id)));
+
+        if (mContainer) {
+            if (videos.length === 0 && docs.length === 0) {
+                mContainer.innerHTML = `<div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl text-center text-xs text-slate-400 font-bold">لا توجد محاضرات أو مذكرات إضافية لهذا الأسبوع. الشروحات تتم بالقاعة التدريبية.</div>`;
+            } else {
+                mContainer.innerHTML = `
+                    <div class="space-y-2.5">
+                        ${videos.map((v, vIdx) => {
+                            const rawUrl = (v.embedUrl || v.url || '').trim();
+                            const hasPlayer = rawUrl && (v.materialType !== 'link' || rawUrl.includes('youtube.com') || rawUrl.includes('youtu.be'));
+                            const embedUrl = hasPlayer ? toYouTubeEmbedUrl(rawUrl) : '';
+                            return `
+                                <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 space-y-2.5">
+                                    <div class="flex items-center justify-between flex-wrap gap-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-base">🎥</span>
+                                            <h6 class="font-black text-xs md:text-sm text-slate-900 dark:text-white">${v.title}</h6>
+                                            <span class="text-[10px] font-bold bg-sky-50 dark:bg-sky-950/60 text-[#0F2942] dark:text-sky-300 px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800">${v.duration || 'محاضرة'}</span>
+                                        </div>
+                                    </div>
+                                    ${hasPlayer ? `
+                                        <div class="aspect-video w-full max-w-lg rounded-xl overflow-hidden shadow-inner bg-black">
+                                            <iframe src="${embedUrl}" title="${v.title}" class="w-full h-full border-0" allowfullscreen></iframe>
+                                        </div>
+                                    ` : ''}
+                                    ${v.lectureFile ? `
+                                        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl text-xs gap-2 flex-wrap">
+                                            <span class="font-black text-slate-800 dark:text-slate-200 truncate">ملف المحاضرة: ${v.lectureFile.name}</span>
+                                            <button type="button" onclick="downloadLmsLectureFile('${v.lectureFile.id || v.id}', '${(v.lectureFile.name || 'lecture').replace(/'/g, "\'")}', '${v.lectureFile.data || ''}', '${v.lectureFile.url || v.url || ''}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold px-3 py-1.5 rounded-lg text-xs transition cursor-pointer flex items-center gap-1 shadow-2xs">
+                                                <span>📥</span>
+                                                <span>تحميل الملف</span>
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                        ${docs.map(d => `
+                            <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2.5 truncate">
+                                    <span class="text-lg">📑</span>
+                                    <div class="truncate">
+                                        <h6 class="font-black text-xs text-slate-900 dark:text-white truncate">${d.title}</h6>
+                                        <span class="text-[10px] text-slate-500 font-bold">${d.desc || 'مذكرة دراسية'}</span>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="openReadDocModal('${d.id}')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-white font-bold text-xs px-3 py-1.5 rounded-xl transition cursor-pointer">
+                                    قراءة المذكرة
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        // Modal footer buttons
+        const openCalBtn = document.getElementById('tccOpenCalendarBtn');
+        if (openCalBtn) openCalBtn.onclick = () => openTraineeSubmissionsCalendar(trainee.id);
+        const openProfBtn = document.getElementById('tccOpenProfileBtn');
+        if (openProfBtn) openProfBtn.onclick = () => { closeTraineeCourseContentModal(); openTraineeProfileModal(trainee.id); };
+    }
+    window.renderTraineeCourseContentModal = renderTraineeCourseContentModal;
+
+    // رصد وحفظ درجة الواجب من نافذة محتوى المتدرب
+    function saveTrainerTraineeAssignmentGrade(traineeId, assignmentId, score, feedback) {
+        if (!traineeId || !assignmentId) return;
+        const validScore = (score === '' || isNaN(parseFloat(score))) ? 10 : Math.min(10, Math.max(0, parseFloat(score)));
+        const subKey = `${traineeId}_${assignmentId}`;
+
+        if (!studentAssignmentSubmissions[subKey]) {
+            studentAssignmentSubmissions[subKey] = {
+                id: 'sub_' + Date.now(),
+                studentId: traineeId,
+                assignmentId: assignmentId,
+                submissionDate: new Date().toISOString(),
+                submissionText: feedback ? `تم الرصد بواسطة المدرب: ${feedback}` : 'رصد يدوي مباشر من لوحة المدرب',
+                score: validScore,
+                status: 'graded',
+                gradedByTrainer: true,
+                gradedAt: new Date().toISOString(),
+                gradedBy: currentUser?.name || 'المدرب المشرف',
+                feedback: feedback || ''
+            };
+        } else {
+            studentAssignmentSubmissions[subKey].score = validScore;
+            studentAssignmentSubmissions[subKey].status = 'graded';
+            studentAssignmentSubmissions[subKey].gradedByTrainer = true;
+            studentAssignmentSubmissions[subKey].gradedAt = new Date().toISOString();
+            studentAssignmentSubmissions[subKey].gradedBy = currentUser?.name || 'المدرب المشرف';
+            if (feedback !== undefined) studentAssignmentSubmissions[subKey].feedback = feedback;
+        }
+
+        try {
+            localStorage.setItem('sys_student_assignment_submissions_v1', JSON.stringify(studentAssignmentSubmissions));
+        } catch(e){}
+
+        if (typeof syncStudentSubmissionToCloud === 'function') {
+            syncStudentSubmissionToCloud('assignment', subKey, studentAssignmentSubmissions[subKey]);
+        }
+
+        const located = (typeof findAssessmentWeekAndCourse === 'function') ? findAssessmentWeekAndCourse('assignment', assignmentId) : null;
+        const weekNum = located ? located.weekNum : (currentTccActiveWeek || 1);
+        if (typeof getOrInitTraineeGradebook === 'function') {
+            const gb = getOrInitTraineeGradebook(traineeId);
+            if (gb && gb.weeks && gb.weeks[weekNum]) {
+                gb.weeks[weekNum].weeklyAssignment = validScore;
+                gb.updatedAt = new Date().toISOString();
+                if (typeof saveTraineeGradebooksToStorage === 'function') saveTraineeGradebooksToStorage();
+            }
+        }
+
+        showToast(`✅ تم حفظ درجة الواجب (${validScore}/10) للأسبوع ${weekNum}`, 'success');
+        renderTraineeCourseContentModal();
+    }
+    window.saveTrainerTraineeAssignmentGrade = saveTrainerTraineeAssignmentGrade;
+
+    // رصد وتعديل درجة الاختبار من نافذة محتوى المتدرب
+    function saveTrainerTraineeQuizGrade(traineeId, quizId, score) {
+        if (!traineeId || !quizId) return;
+        const validScore = (score === '' || isNaN(parseFloat(score))) ? 10 : Math.min(10, Math.max(0, parseFloat(score)));
+        const subKey = `${traineeId}_${quizId}`;
+
+        if (!studentQuizSubmissions[subKey]) {
+            studentQuizSubmissions[subKey] = {
+                id: 'qsub_' + Date.now(),
+                studentId: traineeId,
+                quizId: quizId,
+                score: validScore,
+                bestScore: validScore,
+                attemptsCount: 1,
+                attempts: [{ attemptNumber: 1, score: validScore, finishedAt: new Date().toISOString() }],
+                status: 'graded',
+                gradedByTrainer: true,
+                gradedAt: new Date().toISOString(),
+                gradedBy: currentUser?.name || 'المدرب المشرف'
+            };
+        } else {
+            studentQuizSubmissions[subKey].score = validScore;
+            studentQuizSubmissions[subKey].bestScore = validScore;
+            studentQuizSubmissions[subKey].gradedByTrainer = true;
+            studentQuizSubmissions[subKey].gradedAt = new Date().toISOString();
+            studentQuizSubmissions[subKey].gradedBy = currentUser?.name || 'المدرب المشرف';
+        }
+
+        try {
+            localStorage.setItem('sys_student_quiz_submissions_v1', JSON.stringify(studentQuizSubmissions));
+        } catch(e){}
+
+        if (typeof syncStudentSubmissionToCloud === 'function') {
+            syncStudentSubmissionToCloud('quiz', subKey, studentQuizSubmissions[subKey]);
+        }
+
+        const located = (typeof findAssessmentWeekAndCourse === 'function') ? findAssessmentWeekAndCourse('quiz', quizId) : null;
+        const weekNum = located ? located.weekNum : (currentTccActiveWeek || 1);
+        if (typeof getOrInitTraineeGradebook === 'function') {
+            const gb = getOrInitTraineeGradebook(traineeId);
+            if (gb && gb.weeks && gb.weeks[weekNum]) {
+                gb.weeks[weekNum].weekendExam = validScore;
+                gb.updatedAt = new Date().toISOString();
+                if (typeof saveTraineeGradebooksToStorage === 'function') saveTraineeGradebooksToStorage();
+            }
+        }
+
+        showToast(`✅ تم حفظ درجة الاختبار (${validScore}/10) للأسبوع ${weekNum}`, 'success');
+        renderTraineeCourseContentModal();
+    }
+    window.saveTrainerTraineeQuizGrade = saveTrainerTraineeQuizGrade;
+
 
     // ==================== ملف المتدرب وبياناته الشخصية (TRAINEE PROFILE) ====================
     function openTraineeProfileModal(traineeId) {
@@ -30765,6 +31446,21 @@ function openReportFromProfile() {
                     console.warn('Failed to pull cloud tombstones:', delErr);
                 }
 
+                // Also check app_sync_state for sys_lms_courses_v2 (unified cloud state snapshot)
+                try {
+                    const { data: stateData } = await supabaseClient
+                        .from('app_sync_state')
+                        .select('data')
+                        .eq('key', 'sys_lms_courses_v2')
+                        .maybeSingle();
+                    if (stateData && stateData.data && typeof stateData.data === 'object' && Object.keys(stateData.data).length > 0) {
+                        mergeCloudCoursesIntoLocal(stateData.data);
+                    }
+                } catch (stErr) {
+                    console.warn('Failed to pull courses from app_sync_state:', stErr);
+                }
+
+                // Direct table query from lms_courses
                 const { data, error } = await supabaseClient
                     .from('lms_courses')
                     .select('*')
@@ -30804,28 +31500,102 @@ function openReportFromProfile() {
         }
     }
     window.pullLmsCoursesFromSupabase = pullLmsCoursesFromSupabase;
+    window.lmsCourses = lmsCourses;
+    window.mergeCloudCoursesIntoLocal = mergeCloudCoursesIntoLocal;
 
     function mergeCloudCoursesIntoLocal(cloudCourses) {
         if (!cloudCourses || typeof cloudCourses !== 'object') return;
         let localChanged = false;
         let needsCloudSync = false;
 
+        function mergeItemList(localList, cloudList, idKey = 'id') {
+            const merged = [];
+            const seenIds = new Set();
+            const seenTitles = new Set();
+
+            const isItemDeleted = (item) => {
+                if (!item) return true;
+                const iId = String(item[idKey] || item.id || '');
+                const iTitle = String(item.title || item.name || '').trim();
+                const iUrl = String(item.url || item.video_url || item.file_url || '').trim();
+                if (iId && deletedLmsItemIds.has(iId)) return true;
+                if (iTitle && deletedLmsItemIds.has(iTitle)) return true;
+                if (iUrl && deletedLmsItemIds.has(iUrl)) return true;
+                return false;
+            };
+
+            // 1. Cloud Items: Primary shared source of truth across all devices
+            (cloudList || []).forEach(item => {
+                if (!item || isItemDeleted(item)) return;
+                const iId = String(item[idKey] || item.id || '');
+                const iTitle = String(item.title || item.name || '').trim();
+                if (iId) seenIds.add(iId);
+                if (iTitle) seenTitles.add(iTitle);
+                merged.push(JSON.parse(JSON.stringify(item)));
+            });
+
+            // 2. Local Items: Retain any locally-created items not yet in cloud
+            let localHasUnsynced = false;
+            (localList || []).forEach(item => {
+                if (!item || isItemDeleted(item)) return;
+                const iId = String(item[idKey] || item.id || '');
+                const iTitle = String(item.title || item.name || '').trim();
+
+                const idMatched = iId && seenIds.has(iId);
+                const titleMatched = iTitle && seenTitles.has(iTitle);
+
+                if (!idMatched && !titleMatched) {
+                    merged.push(JSON.parse(JSON.stringify(item)));
+                    if (iId) seenIds.add(iId);
+                    if (iTitle) seenTitles.add(iTitle);
+                    localHasUnsynced = true;
+                } else {
+                    const idx = merged.findIndex(m => (iId && String(m[idKey] || m.id) === iId) || (iTitle && String(m.title || m.name || '').trim() === iTitle));
+                    if (idx >= 0) {
+                        const cloudTime = new Date(merged[idx].updated_at || merged[idx].updatedAt || 0).getTime();
+                        const localTime = new Date(item.updated_at || item.updatedAt || 0).getTime();
+                        if (localTime > cloudTime && localTime > 0) {
+                            merged[idx] = { ...merged[idx], ...item };
+                            localHasUnsynced = true;
+                        } else {
+                            merged[idx] = { ...item, ...merged[idx] };
+                        }
+                    }
+                }
+            });
+
+            return { merged, localHasUnsynced };
+        }
+
         for (const [key, cData] of Object.entries(cloudCourses)) {
+            if (!cData || typeof cData !== 'object') continue;
+
             if (!lmsCourses[key]) {
-                lmsCourses[key] = cData;
+                lmsCourses[key] = JSON.parse(JSON.stringify(cData));
                 localChanged = true;
             } else {
                 const localCourse = lmsCourses[key];
+                if (cData.courseTitle && !localCourse.courseTitle) { localCourse.courseTitle = cData.courseTitle; localChanged = true; }
+                if (cData.trainerName && !localCourse.trainerName) { localCourse.trainerName = cData.trainerName; localChanged = true; }
+                if (cData.courseCode && !localCourse.courseCode) { localCourse.courseCode = cData.courseCode; localChanged = true; }
+
                 const cloudWeeks = Array.isArray(cData.weeks) ? cData.weeks : [];
                 const localWeeks = Array.isArray(localCourse.weeks) ? localCourse.weeks : [];
-
-                const maxWeeks = Math.max(localWeeks.length, cloudWeeks.length);
+                const maxWeeks = Math.max(localWeeks.length, cloudWeeks.length, 6);
                 const mergedWeeks = [];
 
                 for (let i = 0; i < maxWeeks; i++) {
                     const lW = localWeeks[i];
                     const cW = cloudWeeks[i];
                     const wNum = i + 1;
+
+                    const cloudHasItems = cW && (
+                        (Array.isArray(cW.videos) && cW.videos.length > 0) ||
+                        (Array.isArray(cW.docs) && cW.docs.length > 0) ||
+                        (Array.isArray(cW.documents) && cW.documents.length > 0) ||
+                        (Array.isArray(cW.quizzes) && cW.quizzes.length > 0) ||
+                        (Array.isArray(cW.assignments) && cW.assignments.length > 0)
+                    );
                     const localHasItems = lW && (
                         (Array.isArray(lW.videos) && lW.videos.length > 0) ||
                         (Array.isArray(lW.docs) && lW.docs.length > 0) ||
@@ -30834,9 +31604,9 @@ function openReportFromProfile() {
                         (Array.isArray(lW.assignments) && lW.assignments.length > 0)
                     );
 
-                    if (localHasItems) {
+                    if (cloudHasItems || localHasItems) {
                         unmarkLmsWeekCleared(wNum, key);
-                    } else if ((typeof isLmsWeekCleared === 'function') && isLmsWeekCleared(key, wNum, lW)) {
+                    } else if (typeof isLmsWeekCleared === 'function' && isLmsWeekCleared(key, wNum, lW)) {
                         mergedWeeks.push({
                             weekNum: wNum,
                             week: wNum,
@@ -30851,37 +31621,83 @@ function openReportFromProfile() {
                     }
 
                     if (!lW && cW) {
-                        mergedWeeks.push(JSON.parse(JSON.stringify(cW)));
+                        const targetW = JSON.parse(JSON.stringify(cW));
+                        targetW.weekNum = targetW.weekNum || wNum;
+                        targetW.week = targetW.week || wNum;
+                        targetW.videos = (targetW.videos || []).filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)));
+                        targetW.docs = (targetW.docs || targetW.documents || []).filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)));
+                        targetW.documents = targetW.docs;
+                        targetW.quizzes = (targetW.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
+                        targetW.assignments = (targetW.assignments || []).filter(a => a && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
+                        mergedWeeks.push(targetW);
                         localChanged = true;
                     } else if (lW && !cW) {
-                        mergedWeeks.push(lW);
-                        needsCloudSync = true;
+                        const targetW = JSON.parse(JSON.stringify(lW));
+                        targetW.weekNum = targetW.weekNum || wNum;
+                        targetW.week = targetW.week || wNum;
+                        targetW.videos = (targetW.videos || []).filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)));
+                        targetW.docs = (targetW.docs || targetW.documents || []).filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)));
+                        targetW.documents = targetW.docs;
+                        targetW.quizzes = (targetW.quizzes || []).filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
+                        targetW.assignments = (targetW.assignments || []).filter(a => a && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
+                        mergedWeeks.push(targetW);
+                        if (localHasItems) needsCloudSync = true;
                     } else {
-                        // المحتوى المحلي هو المرجع المعتمد عند التعديل أو الحذف، مع تصفية أي عناصر محذوفة
                         const targetW = { ...cW, ...lW };
+                        targetW.weekNum = targetW.weekNum || wNum;
+                        targetW.week = targetW.week || wNum;
 
                         // 1. Quizzes
                         const lQ = Array.isArray(lW.quizzes) ? lW.quizzes : [];
-                        targetW.quizzes = lQ.filter(q => q && !deletedLmsItemIds.has(String(q.id)) && !deletedLmsItemIds.has(String(q.title)));
+                        const cQ = Array.isArray(cW.quizzes) ? cW.quizzes : [];
+                        const qRes = mergeItemList(lQ, cQ, 'id');
+                        targetW.quizzes = qRes.merged;
+                        if (qRes.localHasUnsynced) needsCloudSync = true;
+                        if (JSON.stringify(targetW.quizzes) !== JSON.stringify(lQ)) localChanged = true;
 
                         // 2. Assignments
                         const lA = Array.isArray(lW.assignments) ? lW.assignments : [];
-                        targetW.assignments = lA.filter(a => a && !deletedLmsItemIds.has(String(a.id)) && !deletedLmsItemIds.has(String(a.title)));
+                        const cA = Array.isArray(cW.assignments) ? cW.assignments : [];
+                        const aRes = mergeItemList(lA, cA, 'id');
+                        targetW.assignments = aRes.merged;
+                        if (aRes.localHasUnsynced) needsCloudSync = true;
+                        if (JSON.stringify(targetW.assignments) !== JSON.stringify(lA)) localChanged = true;
 
                         // 3. Videos
                         const lV = Array.isArray(lW.videos) ? lW.videos : [];
-                        targetW.videos = lV.filter(v => v && !deletedLmsItemIds.has(String(v.id)) && !deletedLmsItemIds.has(String(v.title)) && !deletedLmsItemIds.has(String(v.url)));
+                        const cV = Array.isArray(cW.videos) ? cW.videos : [];
+                        const vRes = mergeItemList(lV, cV, 'id');
+                        targetW.videos = vRes.merged;
+                        if (vRes.localHasUnsynced) needsCloudSync = true;
+                        if (JSON.stringify(targetW.videos) !== JSON.stringify(lV)) localChanged = true;
 
                         // 4. Docs
                         const lD = (Array.isArray(lW.docs) && lW.docs.length) ? lW.docs : (Array.isArray(lW.documents) ? lW.documents : []);
-                        targetW.docs = lD.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && !deletedLmsItemIds.has(String(d.title)) && !deletedLmsItemIds.has(String(d.url)));
+                        const cD = (Array.isArray(cW.docs) && cW.docs.length) ? cW.docs : (Array.isArray(cW.documents) ? cW.documents : []);
+                        const dRes = mergeItemList(lD, cD, 'id');
+                        targetW.docs = dRes.merged;
                         targetW.documents = targetW.docs;
+                        if (dRes.localHasUnsynced) needsCloudSync = true;
+                        if (JSON.stringify(targetW.docs) !== JSON.stringify(lD)) localChanged = true;
 
                         mergedWeeks.push(targetW);
                     }
                 }
 
-                localCourse.weeks = mergedWeeks;
+                if (JSON.stringify(mergedWeeks) !== JSON.stringify(localWeeks)) {
+                    localCourse.weeks = mergedWeeks;
+                    localChanged = true;
+                }
+            }
+
+            // Mirror merged course to all its aliases
+            if (typeof getActiveTrainerCourseAliases === 'function') {
+                const aliases = getActiveTrainerCourseAliases(key);
+                aliases.forEach(aliasKey => {
+                    if (aliasKey !== key && lmsCourses[key]) {
+                        lmsCourses[aliasKey] = JSON.parse(JSON.stringify(lmsCourses[key]));
+                    }
+                });
             }
         }
 
@@ -30890,10 +31706,28 @@ function openReportFromProfile() {
             if (typeof renderTrainerLms === 'function' && document.getElementById('trainerLmsModal') && !document.getElementById('trainerLmsModal').classList.contains('hidden')) {
                 renderTrainerLms();
             }
+            if (typeof renderTrainerDashboard === 'function' && (typeof currentActiveTabId !== 'undefined' && currentActiveTabId === 'trainerDashboard' || document.getElementById('tab-trainerDashboard') && !document.getElementById('tab-trainerDashboard').classList.contains('hidden'))) {
+                renderTrainerDashboard();
+            }
+            if (typeof renderTraineeCourseContentModal === 'function') {
+                const tccModal = document.getElementById('traineeCourseContentModal');
+                if (tccModal && !tccModal.classList.contains('hidden')) {
+                    renderTraineeCourseContentModal();
+                }
+            }
+            if (typeof renderSubmissionsCalendarPage === 'function' && (typeof currentActiveTabId !== 'undefined' && currentActiveTabId === 'submissionsCalendar' || document.getElementById('tab-submissionsCalendar') && !document.getElementById('tab-submissionsCalendar').classList.contains('hidden'))) {
+                renderSubmissionsCalendarPage();
+            }
             if (typeof renderStudentLms === 'function' && document.getElementById('tab-studentLms') && !document.getElementById('tab-studentLms').classList.contains('hidden')) {
                 renderStudentLms();
             }
-            console.log('🔄 تم دمج وتحديث المقررات الأكاديمية بنجاح دون فقدان المحتوى.');
+            if (typeof renderStudentCoursesPage === 'function' && (typeof currentActiveTabId !== 'undefined' && currentActiveTabId === 'studentCourses' || document.getElementById('tab-studentCourses') && !document.getElementById('tab-studentCourses').classList.contains('hidden'))) {
+                renderStudentCoursesPage();
+            }
+            if (typeof renderStudentTasksPage === 'function' && (typeof currentActiveTabId !== 'undefined' && currentActiveTabId === 'studentTasks' || document.getElementById('tab-studentTasks') && !document.getElementById('tab-studentTasks').classList.contains('hidden'))) {
+                renderStudentTasksPage();
+            }
+            console.log('🔄 تم دمج وتحديث المقررات الأكاديمية بنجاح من السحابة دون فقدان أي محتوى عبر كافة الأجهزة.');
         }
 
         if (needsCloudSync) {
@@ -30966,6 +31800,13 @@ function openReportFromProfile() {
                 await supabaseClient
                     .from('lms_courses')
                     .upsert(rows, { onConflict: 'course_key' });
+
+                // Also upsert complete sys_lms_courses_v2 to app_sync_state as primary resilient cloud snapshot
+                try {
+                    await supabaseClient.from('app_sync_state').upsert([
+                        { key: 'sys_lms_courses_v2', data: lmsCourses, updated_at: new Date().toISOString() }
+                    ], { onConflict: 'key' });
+                } catch (stErr) { console.warn('app_sync_state courses upsert warning:', stErr); }
 
                 // Also populate dedicated relational tables: lectures, quizzes, assignments
                 const lectureRows = [];
@@ -31160,15 +32001,28 @@ function openReportFromProfile() {
     }
 
     function persistLmsCourses() {
-        persistLmsCoursesLocalOnly();
-        // مزامنة كافة المفاتيح المرتبطة بالمدرب لضمان عدم بقاء نسخ قديمة بالسحابة
+        // Mirror active course to aliases first so all alias keys stay in sync locally
         const activeKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null;
         const aliases = (typeof getActiveTrainerCourseAliases === 'function') ? getActiveTrainerCourseAliases(activeKey) : [activeKey].filter(Boolean);
+        if (activeKey && lmsCourses[activeKey] && aliases.length > 1) {
+            const activeData = lmsCourses[activeKey];
+            aliases.forEach(aliasKey => {
+                if (aliasKey !== activeKey) {
+                    lmsCourses[aliasKey] = JSON.parse(JSON.stringify(activeData));
+                }
+            });
+        }
+
+        persistLmsCoursesLocalOnly();
+
         aliases.forEach(k => {
             if (k) syncLmsCourseToSupabase(k);
         });
         if (typeof syncAllLmsCoursesToSupabase === 'function') {
             syncAllLmsCoursesToSupabase();
+        }
+        if (typeof syncCoreDataToCloud === 'function') {
+            syncCoreDataToCloud();
         }
     }
     window.persistLmsCourses = persistLmsCourses;
@@ -31225,6 +32079,15 @@ function openReportFromProfile() {
                     cloudVacancies = stateMap['sys_la_vacancies_v9'] || null;
                     cloudVirtualClassrooms = stateMap['sys_virtual_classrooms_v1'] || null;
                     cloudArchiveData = stateMap['sys_archive_data_v1'] || null;
+
+                    // Pull Courses & Tombstones from app_sync_state
+                    if (stateMap['sys_lms_courses_v2'] && typeof stateMap['sys_lms_courses_v2'] === 'object') {
+                        mergeCloudCoursesIntoLocal(stateMap['sys_lms_courses_v2']);
+                    }
+                    if (stateMap['lms_deleted_items_v1'] && Array.isArray(stateMap['lms_deleted_items_v1'])) {
+                        stateMap['lms_deleted_items_v1'].forEach(id => deletedLmsItemIds.add(String(id)));
+                        localStorage.setItem('sys_lms_deleted_items_v1', JSON.stringify(Array.from(deletedLmsItemIds)));
+                    }
 
                     // Students Table (Primary single source of truth for students across devices)
                     if (stRes.status === 'fulfilled' && !stRes.value.error && Array.isArray(stRes.value.data) && stRes.value.data.length > 0) {
@@ -31390,6 +32253,9 @@ function openReportFromProfile() {
                             cloudVacancies = json.laVacancies || null;
                             cloudVirtualClassrooms = json.virtualClassrooms || null;
                             cloudArchiveData = json.archiveData || null;
+                            if (json.lmsCourses && typeof json.lmsCourses === 'object') {
+                                mergeCloudCoursesIntoLocal(json.lmsCourses);
+                            }
                         }
                     }
                 } catch (apiErr) {
@@ -31910,6 +32776,18 @@ function openReportFromProfile() {
                 if (typeof archiveData !== 'undefined' && archiveData && Object.keys(archiveData).length > 0) {
                     upsertRows.push({ key: 'sys_archive_data_v1', data: archiveData, updated_at: new Date().toISOString() });
                 }
+                if (typeof lmsCourses !== 'undefined' && lmsCourses && Object.keys(lmsCourses).length > 0) {
+                    upsertRows.push({ key: 'sys_lms_courses_v2', data: lmsCourses, updated_at: new Date().toISOString() });
+                }
+                if (typeof studentQuizSubmissions !== 'undefined' && studentQuizSubmissions && Object.keys(studentQuizSubmissions).length > 0) {
+                    upsertRows.push({ key: 'sys_student_quiz_submissions_v1', data: studentQuizSubmissions, updated_at: new Date().toISOString() });
+                }
+                if (typeof studentAssignmentSubmissions !== 'undefined' && studentAssignmentSubmissions && Object.keys(studentAssignmentSubmissions).length > 0) {
+                    upsertRows.push({ key: 'sys_student_assignment_submissions_v1', data: studentAssignmentSubmissions, updated_at: new Date().toISOString() });
+                }
+                if (typeof traineeGradebooks !== 'undefined' && traineeGradebooks && Object.keys(traineeGradebooks).length > 0) {
+                    upsertRows.push({ key: 'sys_trainee_gradebooks_v1', data: traineeGradebooks, updated_at: new Date().toISOString() });
+                }
 
                 if (upsertRows.length === 0) return;
 
@@ -31975,11 +32853,15 @@ function openReportFromProfile() {
                             studentCreds,
                             laVacancies,
                             virtualClassrooms,
-                            archiveData
+                            archiveData,
+                            lmsCourses,
+                            studentQuizSubmissions,
+                            studentAssignmentSubmissions,
+                            traineeGradebooks
                         })
                     });
                 }
-                console.log('☁️ تم مزامنة بيانات التطبيق الأساسية (الطلاب والحضور والجدول) مع السحابة.');
+                console.log('☁️ تم مزامنة بيانات التطبيق الأساسية (الطلاب والحضور والجدول والمقررات) مع السحابة.');
             } catch (coreSyncErr) {
                 console.warn('syncCoreDataToCloud error:', coreSyncErr);
             }
@@ -40717,6 +41599,31 @@ function buildDemoExecutiveReport(params) {
     // REAL CALENDAR DESIGN (GRID / WEEK / AGENDA) - تصميم تقويم حقيقي احترافي
     // ===================================================================
     let activeCalendarPageViewMode = 'month'; // 'month' | 'week' | 'agenda'
+    let activeCalendarPageTraineeId = null;
+    let activeCalendarPageTrainerFilter = null;
+
+    function setCalendarPageTraineeFilter(traineeId) {
+        activeCalendarPageTraineeId = traineeId ? String(traineeId).trim() : null;
+        renderSubmissionsCalendarPage();
+    }
+    window.setCalendarPageTraineeFilter = setCalendarPageTraineeFilter;
+
+    function setCalendarPageTrainerFilter(trainerName) {
+        activeCalendarPageTrainerFilter = trainerName ? String(trainerName).trim() : null;
+        activeCalendarPageTraineeId = null;
+        renderSubmissionsCalendarPage();
+    }
+    window.setCalendarPageTrainerFilter = setCalendarPageTrainerFilter;
+
+    function openTraineeSubmissionsCalendar(traineeId) {
+        if (!traineeId) return;
+        activeCalendarPageTraineeId = String(traineeId).trim();
+        if (typeof closeTraineeCourseContentModal === 'function') closeTraineeCourseContentModal();
+        if (typeof closeTraineeProfileModal === 'function') closeTraineeProfileModal();
+        switchTab('submissionsCalendar');
+        if (typeof renderSubmissionsCalendarPage === 'function') renderSubmissionsCalendarPage();
+    }
+    window.openTraineeSubmissionsCalendar = openTraineeSubmissionsCalendar;
     let activeCalendarPageWeekFilter = 'ALL';  // 'ALL' | '1'..'6'
     let activeCalendarPageSelectedWeek = 1;
     let activeCalendarPageCourseFilter = 'ALL';
@@ -40817,6 +41724,22 @@ function buildDemoExecutiveReport(params) {
             if (titleEl) titleEl.innerText = `تقويم المهام والتسليمات الأكاديمية`;
             if (roleBadge) { roleBadge.innerText = ''; roleBadge.classList.add('hidden'); }
             if (subEl) { subEl.innerText = ''; subEl.classList.add('hidden'); }
+        }
+
+        const calTraineeObj = (!isStudent && typeof activeCalendarPageTraineeId !== 'undefined' && activeCalendarPageTraineeId)
+            ? ((Array.isArray(trainees) ? trainees : []).find(t => String(t.id).trim() === String(activeCalendarPageTraineeId).trim() || (typeof cleanNationalId === 'function' && cleanNationalId(t.id) === cleanNationalId(activeCalendarPageTraineeId))) || null)
+            : null;
+        const isViewingIndividualTrainee = Boolean(isStudent || calTraineeObj);
+        const evalStudentId = isStudent ? (currentUser?.traineeId || currentUser?.username || currentUser?.id || '') : (calTraineeObj ? calTraineeObj.id : '');
+
+        if (!isStudent) {
+            if (calTraineeObj) {
+                studentCourses = (typeof getAllCoursesForTrainee === 'function') ? getAllCoursesForTrainee(calTraineeObj) : [];
+                coursesToScan = (studentCourses && studentCourses.length > 0) ? studentCourses : [{ lmsKey: getActiveTrainerCourseKey(), courseShort: courseData?.courseTitle || 'المقرر', courseTitle: courseData?.courseTitle || 'المقرر', course: courseData }];
+            } else {
+                const cKey = getActiveTrainerCourseKey();
+                coursesToScan = [{ lmsKey: cKey, courseShort: courseData?.courseTitle || 'المقرر', courseTitle: courseData?.courseTitle || 'المقرر', course: courseData }];
+            }
         }
 
         if (courseData) ensureLmsCourseWeeklyPillars(courseData);
@@ -41054,7 +41977,7 @@ function buildDemoExecutiveReport(params) {
 
                                 ${isStudent ? `
                                     ${studentDayTasks.map(task => `
-                                        <div onclick="switchStudentActiveCourse('${task.course.lmsKey}'); ${task.type === 'assignment' ? `openSubmitAssignmentModal('${task.item.id}')` : `openTakeQuizModal('${task.item.id}')`}" class="rounded-lg p-1.5 border transition cursor-pointer text-right shadow-2xs ${task.isDone ? 'bg-emerald-50 border-emerald-300 text-emerald-950 hover:bg-emerald-100' : (task.courseIdx === 0 ? 'bg-amber-50 border-amber-300 text-amber-950 hover:bg-amber-100' : 'bg-sky-50 border-sky-300 text-sky-950 hover:bg-sky-100')}">
+                                        <div onclick="${isStudent ? `switchStudentActiveCourse('${task.course.lmsKey}'); ${task.type === 'assignment' ? `openSubmitAssignmentModal('${task.item.id}')` : `openTakeQuizModal('${task.item.id}')`}` : `openTraineeCourseContentModal('${evalStudentId}', ${wNum}, '${task.course.lmsKey}')`}" class="rounded-lg p-1.5 border transition cursor-pointer text-right shadow-2xs ${task.isDone ? 'bg-emerald-50 border-emerald-300 text-emerald-950 hover:bg-emerald-100' : (task.courseIdx === 0 ? 'bg-amber-50 border-amber-300 text-amber-950 hover:bg-amber-100' : 'bg-sky-50 border-sky-300 text-sky-950 hover:bg-sky-100')}">
                                             <div class="flex items-center justify-between text-[10px] font-black">
                                                 <span class="flex items-center gap-1">
                                                     <span class="text-[9px] px-1 py-0.2 rounded font-bold ${task.courseIdx === 0 ? 'bg-amber-200 text-amber-950' : 'bg-sky-200 text-sky-950'}">${task.course.courseShort}</span>
@@ -41249,11 +42172,11 @@ function buildDemoExecutiveReport(params) {
                                 </div>
                             </div>
 
-                            ${isStudent ? `
+                            ${isViewingIndividualTrainee ? `
                                 ${dayTasks.length > 0 ? `
                                     <div class="space-y-2 mt-2">
                                         ${dayTasks.map(task => `
-                                            <div onclick="switchStudentActiveCourse('${task.course.lmsKey}'); ${task.type === 'assignment' ? `openSubmitAssignmentModal('${task.item.id}')` : `openTakeQuizModal('${task.item.id}')`}" class="p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 cursor-pointer transition shadow-2xs ${task.isDone ? 'bg-emerald-50 border-emerald-300 text-emerald-950 hover:bg-emerald-100' : (task.courseIdx === 0 ? 'bg-amber-50 border-amber-300 text-amber-950 hover:bg-amber-100' : 'bg-sky-50 border-sky-300 text-sky-950 hover:bg-sky-100')}">
+                                            <div onclick="${isStudent ? `switchStudentActiveCourse('${task.course.lmsKey}'); ${task.type === 'assignment' ? `openSubmitAssignmentModal('${task.item.id}')` : `openTakeQuizModal('${task.item.id}')`}` : `openTraineeCourseContentModal('${evalStudentId}', ${wNum}, '${task.course.lmsKey}')`}" class="p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 cursor-pointer transition shadow-2xs ${task.isDone ? 'bg-emerald-50 border-emerald-300 text-emerald-950 hover:bg-emerald-100' : (task.courseIdx === 0 ? 'bg-amber-50 border-amber-300 text-amber-950 hover:bg-amber-100' : 'bg-sky-50 border-sky-300 text-sky-950 hover:bg-sky-100')}">
                                                 <div class="space-y-1">
                                                     <div class="flex items-center gap-2 flex-wrap">
                                                         <span class="text-[10px] font-black px-2 py-0.5 rounded ${task.courseIdx === 0 ? 'bg-amber-200 text-amber-950' : 'bg-sky-200 text-sky-950'}">${task.course.courseShort}</span>
@@ -41396,8 +42319,8 @@ function buildDemoExecutiveReport(params) {
             const wkdPct = Math.round((wkdSubCount / totalPoolCount) * 100);
 
             let isAssDone = false, assScore = null, isWkdDone = false, wkdScore = null;
-            if (isStudent) {
-                const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, courseData, wNum);
+            if (isViewingIndividualTrainee) {
+                const subDetails = getTraineeWeekSubmissionsDetail(evalStudentId || currentUser?.id, courseData, wNum);
                 const aSub = subDetails.weekly?.sub || subDetails.individual?.sub;
                 const qSub = subDetails.weekendExam?.rec || subDetails.optionalQuiz?.rec;
                 isAssDone = !!aSub;
@@ -41412,7 +42335,7 @@ function buildDemoExecutiveReport(params) {
                 const isWeekend = day.isWeekend;
 
                 let studentDayTasks = [];
-                if (isStudent) {
+                if (isViewingIndividualTrainee) {
                     coursesToScan.forEach((cCourse, cIdx) => {
                         const cData = cCourse.course || lmsCourses[cCourse.lmsKey];
                         if (!cData) return;
@@ -41487,7 +42410,7 @@ function buildDemoExecutiveReport(params) {
                                                     ${task.isDone ? `
                                                         <div class="text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg">✅ تم الإنجاز (${task.score}/10)</div>
                                                     ` : `
-                                                        <button type="button" onclick="switchStudentActiveCourse('${task.course.lmsKey}'); ${task.type === 'assignment' ? `openSubmitAssignmentModal('${task.item.id}')` : `openTakeQuizModal('${task.item.id}')`}" class="w-full ${task.type === 'assignment' ? 'bg-amber-500 hover:bg-amber-600 text-slate-950' : 'bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300'} font-black text-xs py-2 rounded-xl transition cursor-pointer shadow-2xs">
+                                                        <button type="button" onclick="${isStudent ? `switchStudentActiveCourse('${task.course.lmsKey}'); ${task.type === 'assignment' ? `openSubmitAssignmentModal('${task.item.id}')` : `openTakeQuizModal('${task.item.id}')`}` : `openTraineeCourseContentModal('${evalStudentId}', ${wNum}, '${task.course.lmsKey}')`}" class="w-full ${task.type === 'assignment' ? 'bg-amber-500 hover:bg-amber-600 text-slate-950' : 'bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300'} font-black text-xs py-2 rounded-xl transition cursor-pointer shadow-2xs">
                                                             ${task.type === 'assignment' ? '✍️ حل وتسليم الواجب' : '🏁 بدء الاختبار'}
                                                         </button>
                                                     `}
@@ -41597,7 +42520,7 @@ function buildDemoExecutiveReport(params) {
             for (let w = 1; w <= 6; w++) {
                 const range = getAcademicWeekDateRange(w);
 
-                if (isStudent) {
+                if (isViewingIndividualTrainee) {
                     coursesToScan.forEach((cCourse, cIdx) => {
                         const cData = cCourse.course || lmsCourses[cCourse.lmsKey];
                         if (!cData) return;
@@ -41609,7 +42532,7 @@ function buildDemoExecutiveReport(params) {
                         const weekQuizzes = weekObj.quizzes || [];
                         const wkdQuiz = weekQuizzes.find(q => q.quizCategory !== 'optional') || weekQuizzes[0] || null;
 
-                        const subDetails = getTraineeWeekSubmissionsDetail(currentUser.id, cData, w);
+                        const subDetails = getTraineeWeekSubmissionsDetail(evalStudentId || currentUser?.id, cData, w);
                         const aSub = subDetails.weekly?.sub || subDetails.individual?.sub;
                         const qSub = subDetails.weekendExam?.rec || subDetails.optionalQuiz?.rec;
                         const isAssDone = !!aSub;
