@@ -3454,6 +3454,9 @@
                             </div>
                         </div>
 
+                        <!-- Course Switcher for Trainees with Multiple Courses -->
+                        <div id="tpGradebookCourseSwitcher" class="hidden"></div>
+
                         <!-- 6-Week Editable Gradebook Table -->
                         <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
                             <table class="w-full text-right text-xs">
@@ -5097,8 +5100,9 @@
 
                         <!-- Action Buttons Toolbar: Compact, Single-Row Responsive, Whitespace-Nowrap -->
                         <div class="flex items-center gap-2 flex-wrap shrink-0 justify-start lg:justify-end pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
-                            <div id="tlCourseSelectorWrapper" class="hidden">
-                                <select id="tlCourseSelector" onchange="onTrainerLmsCourseChange(this.value)"></select>
+                            <div id="tlCourseSelectorWrapper" class="hidden flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2 py-1 rounded-xl">
+                                <label for="tlCourseSelector" class="text-[11px] font-black text-slate-700 whitespace-nowrap">📚 المقرر:</label>
+                                <select id="tlCourseSelector" onchange="onTrainerLmsCourseChange(this.value)" class="bg-white text-slate-900 border border-slate-300 rounded-lg px-2 py-1 text-xs font-black shadow-2xs outline-none cursor-pointer hover:border-[#0F2942]"></select>
                             </div>
 
                             <button type="button" onclick="goBackTab('trainerDashboard')" class="bg-slate-900 hover:bg-black text-amber-300 text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition shadow-2xs whitespace-nowrap shrink-0" title="العودة للشاشة السابقة">
@@ -12122,6 +12126,9 @@ ${details}
             return;
         }
 
+        const currentTrainerIdentifier = activeTrainerForDashboard || (currentUser?.trainerProfile || currentUser?.name);
+        const currentTrainerCourseKey = (typeof findCourseKeyForTrainer === 'function') ? (findCourseKeyForTrainer(currentTrainerIdentifier) || currentTrainerIdentifier) : '';
+
         listBody.innerHTML = displayTrainees.map((t, idx) => {
             const dayChecks = t.weeklyAttendance ? t.weeklyAttendance[activeDayIndex] : [false, false, false, false];
             const status = calculateStatus(dayChecks, t);
@@ -12146,7 +12153,7 @@ ${details}
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                     <td class="p-3 font-mono text-slate-400 dark:text-slate-500">${idx + 1}</td>
                     <td class="p-3 font-black text-slate-900 dark:text-white">
-                        <button type="button" onclick="openTraineeCourseContentModal('${t.id}')" class="text-right font-black text-slate-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer flex items-center gap-1.5" title="معاينة محتوى المتدرب المعروض وتكليفاته وتسليماته الأكاديمية">
+                        <button type="button" onclick="openTraineeCourseContentModal('${t.id}', null, '${currentTrainerCourseKey}')" class="text-right font-black text-slate-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer flex items-center gap-1.5" title="معاينة محتوى المتدرب المعروض وتكليفاته وتسليماته الأكاديمية">
                             <span>${t.name}</span>
                             <span class="text-[10px] text-amber-500 font-normal">👁️</span>
                         </button>
@@ -12201,10 +12208,10 @@ ${details}
                     </td>
                     <td class="p-3 text-center">
                         <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                            <button onclick="openTraineeCourseContentModal('${t.id}')" title="معاينة محتوى المتدرب المعروض وتكليفاته وتسليماته" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-2.5 py-1 rounded text-[11px] transition shadow-2xs cursor-pointer flex items-center gap-1">
+                            <button onclick="openTraineeCourseContentModal('${t.id}', null, '${currentTrainerCourseKey}')" title="معاينة محتوى المتدرب المعروض وتكليفاته وتسليماته" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-2.5 py-1 rounded text-[11px] transition shadow-2xs cursor-pointer flex items-center gap-1">
                                 <span>📚 المحتوى</span>
                             </button>
-                            <button onclick="openTraineeSubmissionsCalendar('${t.id}')" title="معاينة تقويم تسليمات هذا المتدرب" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-2.5 py-1 rounded text-[11px] transition shadow-2xs cursor-pointer flex items-center gap-1">
+                            <button onclick="openTraineeSubmissionsCalendar('${t.id}', '${currentTrainerCourseKey}')" title="معاينة تقويم تسليمات هذا المتدرب" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-2.5 py-1 rounded text-[11px] transition shadow-2xs cursor-pointer flex items-center gap-1">
                                 <span>📅 التقويم</span>
                             </button>
                             <button onclick="openTraineeProfileModal('${t.id}')" title="معاينة وتعديل ملف المتدرب وكشف درجاته" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-2.5 py-1 rounded text-[11px] transition shadow-2xs cursor-pointer">
@@ -16150,11 +16157,32 @@ ${details}
         
         const allCourses = (typeof getAllCoursesForTrainee === 'function') ? getAllCoursesForTrainee(trainee) : [];
         if (courseKey) {
-            currentTccCourseKey = courseKey;
-        } else if (allCourses.length > 0) {
-            currentTccCourseKey = allCourses[0].lmsKey;
+            const matched = allCourses.find(c => c.lmsKey === courseKey || c.rawTrainerName === courseKey || (c.trainerName && c.trainerName.includes(courseKey)));
+            currentTccCourseKey = matched ? matched.lmsKey : courseKey;
         } else {
-            currentTccCourseKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : 'اللحام';
+            // التحقق من هوية وسياق المدرب النشط حالياً لمنع فتح مقرر مدرب آخر بالخطأ
+            const activeTrainer = (currentUser?.role === 'trainer')
+                ? (currentUser.trainerProfile || currentUser.name)
+                : (typeof activeTrainerForDashboard !== 'undefined' && activeTrainerForDashboard ? activeTrainerForDashboard : null);
+            
+            let matchedCourse = null;
+            if (activeTrainer && allCourses.length > 0) {
+                const cleanTr = String(activeTrainer).replace(/^أ\.\s*/, '').trim();
+                matchedCourse = allCourses.find(c => {
+                    const cTr = String(c.rawTrainerName || c.trainerName || '').replace(/^أ\.\s*/, '').trim();
+                    return cTr === cleanTr || cTr.includes(cleanTr) || cleanTr.includes(cTr);
+                });
+            }
+            if (!matchedCourse && typeof activeTrainerLmsCourse !== 'undefined' && activeTrainerLmsCourse) {
+                matchedCourse = allCourses.find(c => c.lmsKey === activeTrainerLmsCourse);
+            }
+            if (matchedCourse) {
+                currentTccCourseKey = matchedCourse.lmsKey;
+            } else if (allCourses.length > 0) {
+                currentTccCourseKey = allCourses[0].lmsKey;
+            } else {
+                currentTccCourseKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : 'اللحام';
+            }
         }
 
         const modal = document.getElementById('traineeCourseContentModal');
@@ -16205,7 +16233,11 @@ ${details}
             showToast(`لم يتم العثور على متدرب برقم الهوية أو الاسم: (${q})`, 'error');
             return;
         }
-        openTraineeCourseContentModal(found.id);
+        const activeTrainer = (currentUser?.role === 'trainer')
+            ? (currentUser.trainerProfile || currentUser.name)
+            : (typeof activeTrainerForDashboard !== 'undefined' && activeTrainerForDashboard ? activeTrainerForDashboard : null);
+        const trCourseKey = (typeof findCourseKeyForTrainer === 'function') ? findCourseKeyForTrainer(activeTrainer) : null;
+        openTraineeCourseContentModal(found.id, null, trCourseKey);
     }
     window.openTrainerSearchedTraineeContent = openTrainerSearchedTraineeContent;
 
@@ -16858,6 +16890,7 @@ ${details}
             `}).join('') || '<div class="text-center text-[11px] text-slate-400 p-2">لا توجد ملاحظات أو بلاغات مسجلة لهذا المتدرب</div>';
         }
 
+        currentEditingGradebookCourseKey = null;
         if (typeof renderTraineeGradebookInModal === 'function') {
             renderTraineeGradebookInModal(tObj.id);
         }
@@ -26303,34 +26336,11 @@ function openReportFromProfile() {
         const courseDescEl = document.getElementById('sdLmsCourseDesc');
         if (courseDescEl) { courseDescEl.innerText = ''; courseDescEl.classList.add('hidden'); }
 
-        // شريط التبديل السلس بين مقرري المتدرب (نظام الفترتين) مع إبراز المقرر المختار حالياً
+        // شريط التبديل السلس العلوي الموحد كافٍ (sdDualCourseSwitcherBar) لمنع التكرار
         const switcherContainer = document.getElementById('sdCourseSwitcherContainer');
-        const allStudentCourses = getAllCoursesForTrainee(currentUser);
         if (switcherContainer) {
-            if (allStudentCourses.length > 1) {
-                const normActive = (typeof normalizeStudentLmsCourseKey === 'function') ? normalizeStudentLmsCourseKey(activeStudentLmsCourse) : activeStudentLmsCourse;
-                switcherContainer.className = 'flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap w-full';
-                switcherContainer.innerHTML = `
-                    <span class="text-xs font-black text-slate-700 pl-1">مقرراتك التدريبية المعتمدة:</span>
-                    ${allStudentCourses.map((c, cIdx) => {
-                        const isAct = (normActive && (normalizeStudentLmsCourseKey(c.lmsKey) === normActive || c.lmsKey === normActive));
-                        return `
-                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}', true)" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-2xs border ${
-                                isAct
-                                    ? 'bg-[#0F2942] text-amber-300 border-[#0F2942] ring-2 ring-amber-300/40'
-                                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-                            }">
-                                <span>${cIdx === 0 ? '📘' : '💻'}</span>
-                                <span>${c.periodLabel || `الفترة ${cIdx + 1}`}: ${c.courseShort} (${c.trainerName})</span>
-                                ${isAct ? '<span class="text-[9px] bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded font-black">المقرر النشط</span>' : ''}
-                            </button>
-                        `;
-                    }).join('')}
-                `;
-            } else {
-                switcherContainer.className = 'hidden';
-                switcherContainer.innerHTML = '';
-            }
+            switcherContainer.className = 'hidden';
+            switcherContainer.innerHTML = '';
         }
 
         // أزرار الأسابيع الستة مع مؤشرات الإنجاز الذكية لكل أسبوع
@@ -29915,12 +29925,36 @@ function openReportFromProfile() {
         const courseDisplay = document.getElementById('tlCurrentCourseDisplay');
         if (courseDisplay) courseDisplay.innerText = `${courseData.courseTitle || courseKey}`;
 
-        // إبقاء عنصر الاختيار مخفياً ومقصوراً على مقرر المدرب نفسه فقط
+        // إتاحة التبديل السلس بين مقررات المدربين للإدارة وحصرها على مقرر المدرب للمدربين
+        const isAdminOrSuper = currentUser?.role === 'superadmin' || currentUser?.role === 'admin';
         const selWrapper = document.getElementById('tlCourseSelectorWrapper');
-        if (selWrapper) selWrapper.classList.add('hidden');
+        if (selWrapper) {
+            if (isAdminOrSuper) selWrapper.classList.remove('hidden');
+            else selWrapper.classList.add('hidden');
+        }
         const sel = document.getElementById('tlCourseSelector');
         if (sel) {
-            sel.innerHTML = `<option value="${courseKey}" selected>${courseData.courseTitle || courseKey}</option>`;
+            if (isAdminOrSuper) {
+                const distinctCourses = [
+                    { key: 'رضا مطيلق', title: 'اللحام - أ. رضا مطيلق' },
+                    { key: 'عصام سعيد', title: 'الكهرباء - أ. عصام سعيد' },
+                    { key: 'سيد احمد', title: 'الميكانيكا - أ. سيد أحمد' },
+                    { key: 'فاضل الماجد', title: 'السلامة والصحة - أ. فاضل الماجد' },
+                    { key: 'أحمد الاصيل', title: 'إدارة مكتبية - أ. أحمد الاصيل' },
+                    { key: 'ناجي محمد', title: 'إنشاءات - أ. ناجي محمد' },
+                    { key: 'إمام يعقوب', title: 'حاسب آلي - أ. إمام يعقوب' },
+                    { key: 'يوسف جمال', title: 'لغة إنجليزية - أ. يوسف جمال' },
+                    { key: 'علي عبدالسلام', title: 'لغة إنجليزية - أ. علي عبدالسلام' },
+                    { key: 'قاسم الماجد', title: 'لغة إنجليزية / حاسب - أ. قاسم الماجد' },
+                    { key: 'شرف الدين', title: 'لغة إنجليزية - أ. شرف الدين' }
+                ];
+                sel.innerHTML = distinctCourses.map(dc => {
+                    const isSel = (dc.key === courseKey) || (courseKey && (courseKey.includes(dc.key) || dc.key.includes(courseKey)));
+                    return `<option value="${dc.key}" ${isSel ? 'selected' : ''}>${dc.title}</option>`;
+                }).join('');
+            } else {
+                sel.innerHTML = `<option value="${courseKey}" selected>${courseData.courseTitle || courseKey}</option>`;
+            }
         }
 
         const tlStartInput = document.getElementById('tlCourseStartDateInput');
@@ -31520,39 +31554,92 @@ function openReportFromProfile() {
 
     // (تم تقديم تعريف تومبستون الحذف وتفريغ الأسابيع إلى أعلى الملف لضمان الحماية المبكرة عند الإقلاع)
 
-    // دالة محورية لجلب كافة المفاتيح البديلة للمقرر والمدرب لضمان الحذف الشامل
+    // دالة محورية لجلب كافة المفاتيح البديلة للمقرر والمدرب لضمان الحذف الشامل دون أي خلط بين المقررات
     function getActiveTrainerCourseAliases(courseKey) {
+        const targetKey = courseKey || ((typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null);
+        if (!targetKey) return [];
         const keys = new Set();
-        if (courseKey) keys.add(courseKey);
-        const activeKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null;
-        if (activeKey) keys.add(activeKey);
+        keys.add(targetKey);
 
-        const currentCourse = (courseKey && lmsCourses[courseKey]) || (activeKey && lmsCourses[activeKey]);
-        const trName = currentCourse?.trainer || currentCourse?.trainerName || (currentUser?.trainerProfile || currentUser?.name || '');
+        const currentCourse = (typeof lmsCourses !== 'undefined' && lmsCourses) ? lmsCourses[targetKey] : null;
+        let trName = currentCourse?.trainer || currentCourse?.trainerName || '';
+        if (!trName) {
+            const cleanTarget = String(targetKey).replace(/^أ\.\s*/, '').trim();
+            const knownTrainers = [
+                'فاضل الماجد', 'يوسف جمال', 'علي عبدالسلام', 'شرف الدين', 'قاسم الماجد',
+                'إمام يعقوب', 'سيد احمد', 'رضا مطيلق', 'عصام سعيد', 'أحمد الاصيل', 'ناجي محمد'
+            ];
+            const matched = knownTrainers.find(kt => kt === cleanTarget || cleanTarget.includes(kt) || kt.includes(cleanTarget));
+            if (matched) trName = matched;
+        }
+
         const cleanTr = String(trName).replace(/^أ\.\s*/, '').trim();
 
         if (cleanTr) {
-            keys.add(cleanTr);
+            if (lmsCourses && lmsCourses[cleanTr]) keys.add(cleanTr);
+            if (lmsCourses && lmsCourses[`أ. ${cleanTr}`]) keys.add(`أ. ${cleanTr}`);
+
+            // حصر البدائل الصريحة لكل مدرب ومقرره بدقة متناهية لمنع التداخل
             if (cleanTr.includes('فاضل') || cleanTr.includes('سلام') || cleanTr.includes('صحة')) {
                 ['فاضل الماجد', 'السلامة والصحة', 'صحة وسلامة', 'أ. فاضل الماجد'].forEach(ak => {
-                    keys.add(ak);
-                    if (lmsCourses && !lmsCourses[ak] && (lmsCourses['فاضل الماجد'] || lmsCourses['السلامة والصحة'])) {
-                        lmsCourses[ak] = lmsCourses['فاضل الماجد'] || lmsCourses['السلامة والصحة'];
-                    }
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
+                });
+            } else if (cleanTr.includes('رضا') || cleanTr.includes('لحام')) {
+                ['اللحام', 'رضا مطيلق', 'أ. رضا مطيلق'].forEach(ak => {
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
+                });
+            } else if (cleanTr.includes('سيد') || cleanTr.includes('ميكانيك')) {
+                ['الميكانيكا', 'الميكانيكية', 'ميكانيكا', 'سيد احمد', 'سيد أحمد', 'أ. سيد احمد'].forEach(ak => {
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
+                });
+            } else if (cleanTr.includes('عصام') || cleanTr.includes('كهربا')) {
+                ['الكهرباء', 'عصام سعيد', 'أ. عصام سعيد'].forEach(ak => {
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
+                });
+            } else if (cleanTr.includes('اصيل') || cleanTr.includes('أصيل') || cleanTr.includes('ادارة') || cleanTr.includes('إدارة')) {
+                ['الادارة المكتبية والسكرتارية', 'ادارة مكتبية', 'إدارة مكتبية', 'أحمد الاصيل', 'احمد الاصيل', 'أ. أحمد الاصيل'].forEach(ak => {
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
+                });
+            } else if (cleanTr.includes('ناجي') || cleanTr.includes('انشاء') || cleanTr.includes('إنشاء')) {
+                ['إنشاءات', 'انشاءات', 'ناجي محمد', 'أ. ناجي محمد'].forEach(ak => {
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
+                });
+            } else if (cleanTr.includes('يعقوب') || cleanTr.includes('إمام') || cleanTr.includes('امام')) {
+                ['الحاسب الالي', 'الحاسب الآلي', 'حاسب الي', 'حاسب آلي', 'إمام يعقوب', 'امام يعقوب', 'أ. إمام يعقوب'].forEach(ak => {
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
+                });
+            } else if (cleanTr.includes('يوسف')) {
+                ['يوسف جمال', 'أ. يوسف جمال'].forEach(ak => {
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
+                });
+            } else if (cleanTr.includes('علي عبدالسلام') || cleanTr.includes('عبدالسلام')) {
+                ['علي عبدالسلام', 'أ. علي عبدالسلام'].forEach(ak => {
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
+                });
+            } else if (cleanTr.includes('قاسم')) {
+                ['قاسم الماجد', 'أ. قاسم الماجد'].forEach(ak => {
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
+                });
+            } else if (cleanTr.includes('شرف الدين') || cleanTr.includes('شرف')) {
+                ['شرف الدين', 'أ. شرف الدين'].forEach(ak => {
+                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
                 });
             }
-            if (lmsCourses[cleanTr]) keys.add(cleanTr);
-            for (const k in lmsCourses) {
-                const c = lmsCourses[k];
-                if (c) {
-                    const cTr = String(c.trainer || c.trainerName || '').replace(/^أ\.\s*/, '').trim();
-                    if (cTr && (cTr === cleanTr || cTr === `أ. ${cleanTr}` || `أ. ${cTr}` === cleanTr)) {
-                        keys.add(k);
+
+            // مطابقة إضافية فقط للمقررات التي تتطابق مع اسم المدرب نفسه بنسبة 100%
+            if (lmsCourses) {
+                for (const k in lmsCourses) {
+                    const c = lmsCourses[k];
+                    if (c) {
+                        const cTr = String(c.trainer || c.trainerName || '').replace(/^أ\.\s*/, '').trim();
+                        if (cTr && cTr === cleanTr) {
+                            keys.add(k);
+                        }
                     }
                 }
             }
         }
-        return Array.from(keys).filter(k => lmsCourses[k]);
+        return Array.from(keys).filter(k => lmsCourses && lmsCourses[k]);
     }
     window.getActiveTrainerCourseAliases = getActiveTrainerCourseAliases;
 
@@ -34919,15 +35006,11 @@ END $$;`;
         const activeWeek = getActiveTrainerLmsWeekObj(courseData);
         const wNum = parseInt(activeWeek ? (activeWeek.week || activeWeek.weekNum || activeTrainerLmsWeek || 1) : (activeTrainerLmsWeek || 1), 10) || 1;
 
-        // تحديد المقررات والأقسام المستهدفة بالتفريغ لضمان سريان الحذف لجميع الأقسام الأربعة
+        // تحديد المقررات والأقسام المستهدفة بالتفريغ لمقرر هذا المدرب فقط
         const targetCourseKeys = new Set();
         if (courseKey) targetCourseKeys.add(courseKey);
         const aliases = getActiveTrainerCourseAliases(courseKey);
         aliases.forEach(k => targetCourseKeys.add(k));
-
-        for (const k in lmsCourses) {
-            targetCourseKeys.add(k);
-        }
 
         let totalItems = 0;
         targetCourseKeys.forEach(k => {
@@ -39069,10 +39152,26 @@ function buildDemoExecutiveReport(params) {
         }
     }
 
-    function getOrInitTraineeGradebook(traineeId) {
-        const cleanId = cleanNationalId(traineeId) || String(traineeId);
+    function getGradebookStorageKey(traineeId, courseKey) {
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
+        if (!courseKey) return cleanId;
+        const normKey = (typeof normalizeStudentLmsCourseKey === 'function') ? normalizeStudentLmsCourseKey(courseKey) : String(courseKey).trim();
+        return `${cleanId}__${normKey}`;
+    }
+
+    function getOrInitTraineeGradebook(traineeId, courseKey) {
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId).trim();
+        const storageKey = getGradebookStorageKey(cleanId, courseKey);
         const totalW = (typeof getAcademicCourseTotalWeeks === 'function') ? getAcademicCourseTotalWeeks() : 6;
-        if (!traineeGradebooks[cleanId]) {
+        
+        let targetGb = traineeGradebooks[storageKey];
+        if (!targetGb && storageKey !== cleanId && traineeGradebooks[cleanId]) {
+            targetGb = JSON.parse(JSON.stringify(traineeGradebooks[cleanId]));
+            targetGb.courseKey = courseKey;
+            traineeGradebooks[storageKey] = targetGb;
+        }
+
+        if (!targetGb) {
             const weeksObj = {};
             for (let w = 1; w <= totalW; w++) {
                 weeksObj[w] = {
@@ -39083,8 +39182,9 @@ function buildDemoExecutiveReport(params) {
                     published: false
                 };
             }
-            traineeGradebooks[cleanId] = {
+            targetGb = {
                 traineeId: cleanId,
+                courseKey: courseKey || null,
                 weeks: weeksObj,
                 finalGradeOverride: null,
                 published: false,
@@ -39092,11 +39192,12 @@ function buildDemoExecutiveReport(params) {
                 publishedBy: null,
                 updatedAt: new Date().toISOString()
             };
+            traineeGradebooks[storageKey] = targetGb;
         } else {
-            if (!traineeGradebooks[cleanId].weeks) traineeGradebooks[cleanId].weeks = {};
+            if (!targetGb.weeks) targetGb.weeks = {};
             for (let w = 1; w <= totalW; w++) {
-                if (!traineeGradebooks[cleanId].weeks[w]) {
-                    traineeGradebooks[cleanId].weeks[w] = {
+                if (!targetGb.weeks[w]) {
+                    targetGb.weeks[w] = {
                         weeklyAssignment: null,
                         optionalQuiz: null,
                         weekendExam: null,
@@ -39104,7 +39205,7 @@ function buildDemoExecutiveReport(params) {
                         published: false
                     };
                 } else {
-                    const row = traineeGradebooks[cleanId].weeks[w];
+                    const row = targetGb.weeks[w];
                     if (row.weeklyAssignment === undefined || row.weeklyAssignment === null) {
                         row.weeklyAssignment = (row.individualAssignment !== undefined && row.individualAssignment !== null) ? row.individualAssignment : null;
                     }
@@ -39112,14 +39213,14 @@ function buildDemoExecutiveReport(params) {
                         row.behavior = 10;
                     }
                     if (row.published === undefined) {
-                        row.published = !!traineeGradebooks[cleanId].published;
+                        row.published = !!targetGb.published;
                     }
                     delete row.groupAssignment;
                     delete row.individualAssignment;
                 }
             }
         }
-        return traineeGradebooks[cleanId];
+        return targetGb;
     }
 
     function findAssessmentWeekAndCourse(type, itemId) {
@@ -39144,8 +39245,9 @@ function buildDemoExecutiveReport(params) {
     function autoRecordAssessmentGradeForTrainee(traineeId, type, assessmentObj, rawScore) {
         if (!traineeId || !assessmentObj) return;
 
-        const gb = getOrInitTraineeGradebook(traineeId);
         const located = findAssessmentWeekAndCourse(type, assessmentObj.id);
+        const courseKey = located ? located.courseKey : null;
+        const gb = getOrInitTraineeGradebook(traineeId, courseKey);
         const weekNum = located ? located.weekNum : 1;
         if (!gb.weeks[weekNum]) {
             gb.weeks[weekNum] = { weeklyAssignment: null, optionalQuiz: null, weekendExam: null, behavior: 10, published: false };
@@ -39189,9 +39291,10 @@ function buildDemoExecutiveReport(params) {
         }
 
         const located = findAssessmentWeekAndCourse('assignment', assignmentId);
+        const courseKey = located ? located.courseKey : null;
         const weekNum = located ? located.weekNum : (activeTrainerLmsWeek || 1);
 
-        const gb = getOrInitTraineeGradebook(studentId);
+        const gb = getOrInitTraineeGradebook(studentId, courseKey);
         gb.weeks[weekNum].weeklyAssignment = validScore;
         gb.updatedAt = new Date().toISOString();
         saveTraineeGradebooksToStorage();
@@ -39207,6 +39310,7 @@ function buildDemoExecutiveReport(params) {
 
     function pullAllAssignmentSubmissionsToGradebook(assignmentId) {
         const located = findAssessmentWeekAndCourse('assignment', assignmentId);
+        const courseKey = located ? located.courseKey : null;
         const weekNum = located ? located.weekNum : (activeTrainerLmsWeek || 1);
         let count = 0;
 
@@ -39216,7 +39320,7 @@ function buildDemoExecutiveReport(params) {
                 const studentId = sub.studentId || key.split('_')[0];
                 const score = sub.score !== null && sub.score !== undefined ? parseFloat(sub.score) : 10;
                 if (!isNaN(score)) {
-                    const gb = getOrInitTraineeGradebook(studentId);
+                    const gb = getOrInitTraineeGradebook(studentId, courseKey);
                     gb.weeks[weekNum].weeklyAssignment = Math.min(10, Math.max(0, score));
                     gb.updatedAt = new Date().toISOString();
                     count++;
@@ -39236,10 +39340,11 @@ function buildDemoExecutiveReport(params) {
         const validScore = isNaN(scoreVal) ? 0 : Math.min(10, Math.max(0, scoreVal));
 
         const located = findAssessmentWeekAndCourse('quiz', quizId);
+        const courseKey = located ? located.courseKey : null;
         const weekNum = located ? located.weekNum : (activeTrainerLmsWeek || 1);
         const quizObj = located ? located.item : { quizCategory: 'weekend' };
 
-        const gb = getOrInitTraineeGradebook(studentId);
+        const gb = getOrInitTraineeGradebook(studentId, courseKey);
         if (quizObj.quizCategory === 'optional') {
             gb.weeks[weekNum].optionalQuiz = validScore;
         } else {
@@ -39390,14 +39495,77 @@ function buildDemoExecutiveReport(params) {
     }
 
     let currentEditingTraineeId = null;
+    let currentEditingGradebookCourseKey = null;
+
+    function switchTpGradebookCourse(courseKey) {
+        currentEditingGradebookCourseKey = courseKey;
+        renderTraineeGradebookInModal(currentEditingTraineeId, courseKey);
+    }
+    window.switchTpGradebookCourse = switchTpGradebookCourse;
 
     // عرض جدول كشف الدرجات وتعديل درجات السلوك والاختبارات ونشر الأسابيع داخل ملف المتدرب (#traineeProfileModal)
-    function renderTraineeGradebookInModal(traineeId) {
+    function renderTraineeGradebookInModal(traineeId, courseKey) {
         const targetId = traineeId || currentEditingTraineeId || document.getElementById('tpOriginalId')?.value;
         if (!targetId) return;
         currentEditingTraineeId = targetId;
 
-        const gb = getOrInitTraineeGradebook(targetId);
+        const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : []);
+        const traineeObj = pool.find(t => t.id === targetId || cleanNationalId(t.id) === cleanNationalId(targetId)) || { id: targetId };
+        const allCourses = (typeof getAllCoursesForTrainee === 'function') ? getAllCoursesForTrainee(traineeObj) : [];
+
+        if (courseKey) {
+            currentEditingGradebookCourseKey = courseKey;
+        } else if (!currentEditingGradebookCourseKey) {
+            const activeTrainer = (currentUser?.role === 'trainer')
+                ? (currentUser.trainerProfile || currentUser.name)
+                : (typeof activeTrainerForDashboard !== 'undefined' && activeTrainerForDashboard ? activeTrainerForDashboard : null);
+            if (activeTrainer && allCourses.length > 0) {
+                const cleanTr = String(activeTrainer).replace(/^أ\.\s*/, '').trim();
+                const matched = allCourses.find(c => {
+                    const cTr = String(c.rawTrainerName || c.trainerName || '').replace(/^أ\.\s*/, '').trim();
+                    return cTr === cleanTr || cTr.includes(cleanTr) || cleanTr.includes(cTr);
+                });
+                if (matched) currentEditingGradebookCourseKey = matched.lmsKey;
+            }
+            if (!currentEditingGradebookCourseKey && allCourses.length > 0) {
+                currentEditingGradebookCourseKey = allCourses[0].lmsKey;
+            }
+        }
+
+        // عرض شريط التبديل بين مقرري المتدربين متعددي الفترات (مثل سابك 105 أو 108)
+        const switcherEl = document.getElementById('tpGradebookCourseSwitcher');
+        if (switcherEl) {
+            if (allCourses && allCourses.length > 1) {
+                switcherEl.classList.remove('hidden');
+                switcherEl.innerHTML = `
+                    <div class="flex items-center gap-2 p-2.5 bg-amber-50/80 border border-amber-200/90 rounded-2xl flex-wrap">
+                        <span class="text-xs font-black text-amber-950 flex items-center gap-1">
+                            <span>📚</span>
+                            <span>المقرر المعروض درجاته:</span>
+                        </span>
+                        ${allCourses.map((c, idx) => {
+                            const isAct = (c.lmsKey === currentEditingGradebookCourseKey);
+                            return `
+                                <button type="button" onclick="switchTpGradebookCourse('${c.lmsKey}')" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
+                                    isAct
+                                        ? 'bg-[#0F2942] text-amber-300 border-[#0F2942] ring-2 ring-amber-300/40'
+                                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                                }">
+                                    <span>${idx === 0 ? '📘' : '🛡️'}</span>
+                                    <span>${c.periodLabel || `الفترة ${idx + 1}`}: ${c.courseShort} (${c.trainerName})</span>
+                                    ${isAct ? '<span class="text-[9px] bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded font-black">المعروض</span>' : ''}
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                switcherEl.classList.add('hidden');
+                switcherEl.innerHTML = '';
+            }
+        }
+
+        const gb = getOrInitTraineeGradebook(targetId, currentEditingGradebookCourseKey);
         const tbody = document.getElementById('tpGradebookTableBody');
         if (!tbody) return;
 
@@ -39497,7 +39665,7 @@ function buildDemoExecutiveReport(params) {
 
     function onTraineeGradebookCellEdit(weekNum) {
         if (!currentEditingTraineeId) return;
-        const gb = getOrInitTraineeGradebook(currentEditingTraineeId);
+        const gb = getOrInitTraineeGradebook(currentEditingTraineeId, currentEditingGradebookCourseKey);
         for (let w = 1; w <= 6; w++) {
             const assEl = document.getElementById(`tp_gb_w${w}_ass`);
             const wkdEl = document.getElementById(`tp_gb_w${w}_wkd`);
@@ -39527,10 +39695,12 @@ function buildDemoExecutiveReport(params) {
         }
     }
 
-    // دالة مساعدة لسحب درجات متدرب محدد من النظام
-    function pullSystemGradesForTraineeId(traineeId) {
+    // دالة مساعدة لسحب درجات متدرب محدد من النظام حسب المقرر
+    function pullSystemGradesForTraineeId(traineeId, targetCourseKey) {
         if (!traineeId) return 0;
-        const gb = getOrInitTraineeGradebook(traineeId);
+        const courseKeyToUse = targetCourseKey || currentEditingGradebookCourseKey || null;
+        const gb = getOrInitTraineeGradebook(traineeId, courseKeyToUse);
+        const normTarget = courseKeyToUse ? (typeof normalizeStudentLmsCourseKey === 'function' ? normalizeStudentLmsCourseKey(courseKeyToUse) : courseKeyToUse) : null;
         const cleanTId = cleanNationalId(traineeId);
         let pulledCount = 0;
 
@@ -39541,6 +39711,12 @@ function buildDemoExecutiveReport(params) {
             if (cleanNationalId(subStudentId) === cleanTId || subStudentId === traineeId) {
                 const assId = sub.assignmentId || key.split('_').slice(1).join('_');
                 const located = findAssessmentWeekAndCourse('assignment', assId);
+                if (normTarget && located && located.courseKey) {
+                    const locNorm = normalizeStudentLmsCourseKey(located.courseKey);
+                    if (locNorm !== normTarget && !located.courseKey.includes(normTarget) && !normTarget.includes(located.courseKey)) {
+                        continue; // تخطي واجبات المقررات الأخرى
+                    }
+                }
                 const wNum = located ? located.weekNum : 1;
                 const score = (sub.score !== null && sub.score !== undefined) ? parseFloat(sub.score) : 10;
                 if (!isNaN(score)) {
@@ -39558,8 +39734,13 @@ function buildDemoExecutiveReport(params) {
                 const rec = studentQuizSubmissions[key];
                 const quizId = (rec && rec.quizId) ? rec.quizId : parts.slice(1).join('_');
                 const located = findAssessmentWeekAndCourse('quiz', quizId);
+                if (normTarget && located && located.courseKey) {
+                    const locNorm = normalizeStudentLmsCourseKey(located.courseKey);
+                    if (locNorm !== normTarget && !located.courseKey.includes(normTarget) && !normTarget.includes(located.courseKey)) {
+                        continue; // تخطي اختبارات المقررات الأخرى
+                    }
+                }
                 const wNum = located ? located.weekNum : 1;
-                const quizObj = located ? located.item : { quizCategory: 'weekend' };
                 const score = (rec && rec.bestScore !== undefined) ? parseFloat(rec.bestScore) : (parseFloat(rec?.score) || 0);
 
                 gb.weeks[wNum].weekendExam = score;
@@ -39583,9 +39764,9 @@ function buildDemoExecutiveReport(params) {
 
     function syncTraineeGradesFromSystem() {
         if (!currentEditingTraineeId) return;
-        const pulledCount = pullSystemGradesForTraineeId(currentEditingTraineeId);
+        const pulledCount = pullSystemGradesForTraineeId(currentEditingTraineeId, currentEditingGradebookCourseKey);
         saveTraineeGradebooksToStorage();
-        renderTraineeGradebookInModal(currentEditingTraineeId);
+        renderTraineeGradebookInModal(currentEditingTraineeId, currentEditingGradebookCourseKey);
         if (typeof renderGradesSystemTab === 'function' && !document.getElementById('tab-gradesSystem')?.classList.contains('hidden')) {
             renderGradesSystemTab();
         }
@@ -39599,7 +39780,7 @@ function buildDemoExecutiveReport(params) {
 
     function saveTraineeGradebookFromProfile(silent = false) {
         if (!currentEditingTraineeId) return;
-        const gb = getOrInitTraineeGradebook(currentEditingTraineeId);
+        const gb = getOrInitTraineeGradebook(currentEditingTraineeId, currentEditingGradebookCourseKey);
 
         for (let w = 1; w <= 6; w++) {
             const assEl = document.getElementById(`tp_gb_w${w}_ass`);
@@ -39618,7 +39799,7 @@ function buildDemoExecutiveReport(params) {
 
         gb.updatedAt = new Date().toISOString();
         saveTraineeGradebooksToStorage();
-        renderTraineeGradebookInModal(currentEditingTraineeId);
+        renderTraineeGradebookInModal(currentEditingTraineeId, currentEditingGradebookCourseKey);
         if (typeof renderGradesSystemTab === 'function' && !document.getElementById('tab-gradesSystem')?.classList.contains('hidden')) {
             renderGradesSystemTab();
         }
@@ -39661,13 +39842,13 @@ function buildDemoExecutiveReport(params) {
         if (!currentEditingTraineeId) return;
         saveTraineeGradebookFromProfile(true);
 
-        const gb = getOrInitTraineeGradebook(currentEditingTraineeId);
+        const gb = getOrInitTraineeGradebook(currentEditingTraineeId, currentEditingGradebookCourseKey);
         gb.published = !gb.published;
         gb.publishedAt = gb.published ? new Date().toISOString() : null;
         gb.publishedBy = currentUser?.name || 'المدرب المعتمد';
         saveTraineeGradebooksToStorage();
 
-        renderTraineeGradebookInModal(currentEditingTraineeId);
+        renderTraineeGradebookInModal(currentEditingTraineeId, currentEditingGradebookCourseKey);
         if (typeof renderGradesSystemTab === 'function' && !document.getElementById('tab-gradesSystem')?.classList.contains('hidden')) {
             renderGradesSystemTab();
         }
@@ -39683,7 +39864,7 @@ function buildDemoExecutiveReport(params) {
         const targetId = traineeId || currentEditingTraineeId;
         if (!targetId) return;
         const parsedW = parseInt(weekNum, 10) || 1;
-        const gb = getOrInitTraineeGradebook(targetId);
+        const gb = getOrInitTraineeGradebook(targetId, currentEditingGradebookCourseKey);
         if (!gb.weeks[parsedW]) {
             gb.weeks[parsedW] = { weeklyAssignment: null, optionalQuiz: null, weekendExam: null, behavior: 10, published: false };
         }
@@ -39691,7 +39872,7 @@ function buildDemoExecutiveReport(params) {
         gb.updatedAt = new Date().toISOString();
         saveTraineeGradebooksToStorage();
 
-        renderTraineeGradebookInModal(targetId);
+        renderTraineeGradebookInModal(targetId, currentEditingGradebookCourseKey);
         if (typeof renderGradesSystemTab === 'function' && !document.getElementById('tab-gradesSystem')?.classList.contains('hidden')) {
             renderGradesSystemTab();
         }
@@ -39708,7 +39889,8 @@ function buildDemoExecutiveReport(params) {
         const cardLms = document.getElementById('sdLmsPublishedGradebookCard');
         if (!cardDash && !cardLms) return;
 
-        const gb = getOrInitTraineeGradebook(studentId);
+        const activeCourseKey = activeStudentLmsCourse || ((typeof getTrainerAndCourseForTrainee === 'function' && currentUser) ? getTrainerAndCourseForTrainee(currentUser)?.lmsKey : null);
+        const gb = getOrInitTraineeGradebook(studentId, activeCourseKey);
         const summary = calculateGradebookSummary(gb);
 
         let htmlContent = '';
@@ -39807,9 +39989,11 @@ function buildDemoExecutiveReport(params) {
             }
         }
 
+        const allStudentCourses = (typeof getAllCoursesForTrainee === 'function') ? getAllCoursesForTrainee(student) : [];
         const binding = (typeof getTrainerAndCourseForTrainee === 'function') ? getTrainerAndCourseForTrainee(student) : null;
+        const activeCourseKey = activeStudentLmsCourse || binding?.lmsKey || (allStudentCourses[0]?.lmsKey) || null;
         if (binding && binding.trainerName) trainerName = binding.trainerName;
-        const courseObj = (binding && binding.lmsKey && lmsCourses[binding.lmsKey]) ? lmsCourses[binding.lmsKey] : lmsCourses[trainerName];
+        const courseObj = (activeCourseKey && lmsCourses[activeCourseKey]) ? lmsCourses[activeCourseKey] : (binding && binding.lmsKey && lmsCourses[binding.lmsKey] ? lmsCourses[binding.lmsKey] : lmsCourses[trainerName]);
         const nameEl = document.getElementById('sgStudentName');
         const groupEl = document.getElementById('sgStudentGroup');
         const idEl = document.getElementById('sgStudentId');
@@ -39819,14 +40003,39 @@ function buildDemoExecutiveReport(params) {
         if (nameEl) nameEl.innerText = student.name;
         if (groupEl) groupEl.innerText = student.group;
         if (idEl) idEl.innerText = student.id;
-        if (trainerEl) trainerEl.innerText = trainerName;
+        if (trainerEl) trainerEl.innerText = courseObj?.trainer || trainerName;
         if (courseEl) courseEl.innerText = courseObj?.courseTitle || 'الحقيبة التدريبية المعتمدة';
 
         const container = document.getElementById('sgMainContentContainer');
         if (!container) return;
 
-        const gb = getOrInitTraineeGradebook(student.id);
+        const gb = getOrInitTraineeGradebook(student.id, activeCourseKey);
         const summary = calculateGradebookSummary(gb);
+
+        const switcherHtml = (allStudentCourses && allStudentCourses.length > 1) ? `
+            <div class="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-3 flex items-center justify-between flex-wrap gap-2 mb-4">
+                <span class="text-xs font-black text-amber-950 flex items-center gap-1.5">
+                    <span>📚</span>
+                    <span>كشف درجات المقرر المعروض:</span>
+                </span>
+                <div class="flex items-center gap-2 flex-wrap">
+                    ${allStudentCourses.map((c, idx) => {
+                        const isAct = (c.lmsKey === activeCourseKey) || (activeCourseKey && (c.lmsKey.includes(activeCourseKey) || activeCourseKey.includes(c.lmsKey)));
+                        return `
+                            <button type="button" onclick="switchStudentActiveCourse('${c.lmsKey}', true); renderStudentGradesTab();" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
+                                isAct
+                                    ? 'bg-[#0F2942] text-amber-300 border-[#0F2942] ring-2 ring-amber-300/40'
+                                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                            }">
+                                <span>${idx === 0 ? '📘' : '🛡️'}</span>
+                                <span>${c.periodLabel || `الفترة ${idx + 1}`}: ${c.courseShort} (${c.trainerName})</span>
+                                ${isAct ? '<span class="text-[9px] bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded font-black">المعروض</span>' : ''}
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        ` : '';
 
         let rowsHtml = '';
         for (let w = 1; w <= 6; w++) {
@@ -39868,6 +40077,7 @@ function buildDemoExecutiveReport(params) {
         }
 
         container.innerHTML = `
+            ${switcherHtml}
             <!-- Summary Banner (6 Weeks Cumulative & Pass/Fail Status) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white border-2 ${gb.published ? (summary.passed ? 'border-emerald-500/40' : 'border-red-400') : 'border-amber-300'} rounded-3xl p-5 shadow-xs flex items-center justify-between">
@@ -40763,11 +40973,13 @@ function buildDemoExecutiveReport(params) {
             weekSubmissionCounts[wk] = totalSubs;
         }
 
+        const currentCourseKey = courseData?.courseKey || trainerName;
+
         // حساب مؤشرات الأداء لمتدربي المدرب
         let publishedCount = 0;
         let sumFinalScores = 0;
         pool.forEach(t => {
-            const gb = getOrInitTraineeGradebook(t.id);
+            const gb = getOrInitTraineeGradebook(t.id, currentCourseKey);
             const sum = calculateGradebookSummary(gb);
             if (gb.published) publishedCount++;
             sumFinalScores += sum.finalScore100;
@@ -41025,7 +41237,7 @@ function buildDemoExecutiveReport(params) {
 
         let filtered = pool.filter(t => {
             if (selectedGrp !== 'ALL' && !isGroupMatch(selectedGrp, t.group)) return false;
-            const gb = getOrInitTraineeGradebook(t.id);
+            const gb = getOrInitTraineeGradebook(t.id, currentCourseKey);
             if (selectedPub === 'PUBLISHED' && !gb.published) return false;
             if (selectedPub === 'UNPUBLISHED' && gb.published) return false;
             if (searchQ) {
@@ -41064,7 +41276,7 @@ function buildDemoExecutiveReport(params) {
         }
 
         const rowsHtml = filtered.map((t, idx) => {
-            const gb = getOrInitTraineeGradebook(t.id);
+            const gb = getOrInitTraineeGradebook(t.id, currentCourseKey);
             const sum = calculateGradebookSummary(gb);
             const row = gb.weeks[w] || {};
             const assVal = (row.weeklyAssignment !== null && row.weeklyAssignment !== undefined)
@@ -41768,9 +41980,19 @@ function buildDemoExecutiveReport(params) {
     }
     window.setCalendarPageTrainerFilter = setCalendarPageTrainerFilter;
 
-    function openTraineeSubmissionsCalendar(traineeId) {
+    function openTraineeSubmissionsCalendar(traineeId, courseKey) {
         if (!traineeId) return;
         activeCalendarPageTraineeId = String(traineeId).trim();
+        if (courseKey) {
+            activeCalendarPageCourseFilter = courseKey;
+        } else {
+            const activeTrainer = (currentUser?.role === 'trainer')
+                ? (currentUser.trainerProfile || currentUser.name)
+                : (typeof activeTrainerForDashboard !== 'undefined' && activeTrainerForDashboard ? activeTrainerForDashboard : null);
+            const trKey = (typeof findCourseKeyForTrainer === 'function') ? findCourseKeyForTrainer(activeTrainer) : null;
+            if (trKey) activeCalendarPageCourseFilter = trKey;
+            else activeCalendarPageCourseFilter = 'ALL';
+        }
         if (typeof closeTraineeCourseContentModal === 'function') closeTraineeCourseContentModal();
         if (typeof closeTraineeProfileModal === 'function') closeTraineeProfileModal();
         switchTab('submissionsCalendar');
@@ -41888,7 +42110,21 @@ function buildDemoExecutiveReport(params) {
         if (!isStudent) {
             if (calTraineeObj) {
                 studentCourses = (typeof getAllCoursesForTrainee === 'function') ? getAllCoursesForTrainee(calTraineeObj) : [];
-                coursesToScan = (studentCourses && studentCourses.length > 0) ? studentCourses : [{ lmsKey: getActiveTrainerCourseKey(), courseShort: courseData?.courseTitle || 'المقرر', courseTitle: courseData?.courseTitle || 'المقرر', course: courseData }];
+                if (studentCourses && studentCourses.length > 0) {
+                    if (activeCalendarPageCourseFilter !== 'ALL') {
+                        const normFilter = (typeof normalizeStudentLmsCourseKey === 'function') ? normalizeStudentLmsCourseKey(activeCalendarPageCourseFilter) : activeCalendarPageCourseFilter;
+                        coursesToScan = studentCourses.filter(c => {
+                            const normC = (typeof normalizeStudentLmsCourseKey === 'function') ? normalizeStudentLmsCourseKey(c.lmsKey) : c.lmsKey;
+                            return normC === normFilter || c.lmsKey === activeCalendarPageCourseFilter || c.rawTrainerName === activeCalendarPageCourseFilter;
+                        });
+                        if (coursesToScan.length === 0) coursesToScan = studentCourses;
+                    } else {
+                        coursesToScan = studentCourses;
+                    }
+                } else {
+                    const cKey = getActiveTrainerCourseKey();
+                    coursesToScan = [{ lmsKey: cKey, courseShort: courseData?.courseTitle || 'المقرر', courseTitle: courseData?.courseTitle || 'المقرر', course: courseData }];
+                }
             } else {
                 const cKey = getActiveTrainerCourseKey();
                 coursesToScan = [{ lmsKey: cKey, courseShort: courseData?.courseTitle || 'المقرر', courseTitle: courseData?.courseTitle || 'المقرر', course: courseData }];
@@ -41917,7 +42153,7 @@ function buildDemoExecutiveReport(params) {
                     <!-- Right: Controls & View Switcher -->
                     <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-between lg:justify-end">
                         <!-- Multi-Course Filter for Dual-Course Trainees -->
-                        ${(isStudent && studentCourses.length > 1) ? `
+                        ${(studentCourses && studentCourses.length > 1) ? `
                             <div class="bg-amber-50 p-1 rounded-2xl flex items-center gap-1 border border-amber-200 shadow-inner flex-wrap">
                                 <span class="text-[11px] font-black text-amber-900 px-2 flex items-center gap-1">
                                     <span>📚</span>
