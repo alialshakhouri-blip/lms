@@ -9147,10 +9147,11 @@ ${details}
             }
         }
 
-        // إخفاء الجوال وزر نسخه عن كافة المستخدمين عدا السوبر أدمن
+        // إظهار الجوال وزر نسخه للإدارة والمدربين
         const thTdPhone = document.getElementById('thTdPhone');
         const btnCopyGroupPhones = document.getElementById('btnCopyGroupPhones');
-        if (currentUser && currentUser.role === 'superadmin') {
+        const canViewPhone = currentUser && (currentUser.role === 'superadmin' || currentUser.role === 'admin' || currentUser.role === 'trainer');
+        if (canViewPhone) {
             if (thTdPhone) thTdPhone.classList.remove('hidden');
             if (btnCopyGroupPhones) btnCopyGroupPhones.classList.remove('hidden');
         } else {
@@ -11582,12 +11583,11 @@ ${details}
             if (searchEl) searchEl.focus();
             return;
         }
-        const cleanQ = cleanNationalId(q);
         const trainerPool = getActiveTrainerAllowedTrainees();
-        // البحث أولاً ضمن طلاب المدرب ثم في كافة المتدربين
-        let found = trainerPool.find(t => String(t.id).includes(q) || cleanNationalId(t.id) === cleanQ || (t.name && t.name.includes(q)));
+        // البحث أولاً ضمن طلاب المدرب ثم في كافة المتدربين بالهوية والاسم ورقم الجوال
+        let found = trainerPool.find(t => matchTraineeQuery(t, q));
         if (!found) {
-            found = trainees.find(t => String(t.id).includes(q) || cleanNationalId(t.id) === cleanQ || (t.name && t.name.includes(q)));
+            found = trainees.find(t => matchTraineeQuery(t, q));
         }
         if (!found) {
             showToast(`لم يتم العثور على متدرب برقم الهوية أو الاسم: (${q})`, 'error');
@@ -11960,15 +11960,16 @@ ${details}
         const isSuperAdmin = currentUser?.role === 'superadmin';
         const searchQuery = (document.getElementById('tdTraineeSearchIdInput')?.value || '').trim();
 
-        // إخفاء أو إظهار عمود الجوال وزر نسخه حسب الصلاحية
+        // إظهار عمود الجوال وزر نسخه لكافة الكادر الإداري والتدريبي
+        const canSeePhone = currentUser?.role === 'superadmin' || currentUser?.role === 'admin' || currentUser?.role === 'trainer' || !currentUser?.role;
         const thTdPhone = document.getElementById('thTdPhone');
         if (thTdPhone) {
-            if (isSuperAdmin) thTdPhone.classList.remove('hidden');
+            if (canSeePhone) thTdPhone.classList.remove('hidden');
             else thTdPhone.classList.add('hidden');
         }
         const btnCopyPhones = document.getElementById('btnCopyGroupPhones');
         if (btnCopyPhones) {
-            if (isSuperAdmin) btnCopyPhones.classList.remove('hidden');
+            if (canSeePhone) btnCopyPhones.classList.remove('hidden');
             else btnCopyPhones.classList.add('hidden');
         }
 
@@ -11982,21 +11983,10 @@ ${details}
         // إذا قام المدرب بكتابة رقم هوية أو اسم في خانة البحث، نبحث في جميع شعب المدرب مباشرةً
         let matchedTrainees = [];
         if (searchQuery) {
-            const cleanQ = cleanNationalId(searchQuery);
             const pool = getActiveTrainerAllowedTrainees();
-            matchedTrainees = pool.filter(t =>
-                String(t.id).includes(searchQuery) ||
-                (cleanQ && cleanNationalId(t.id).includes(cleanQ)) ||
-                (t.name && t.name.includes(searchQuery))
-            );
+            matchedTrainees = pool.filter(t => matchTraineeQuery(t, searchQuery));
             if (matchedTrainees.length === 0) {
-                matchedTrainees = trainees.filter(t =>
-                    !isLAGroup(t.group) && (
-                        String(t.id).includes(searchQuery) ||
-                        (cleanQ && cleanNationalId(t.id).includes(cleanQ)) ||
-                        (t.name && t.name.includes(searchQuery))
-                    )
-                );
+                matchedTrainees = trainees.filter(t => !isLAGroup(t.group) && matchTraineeQuery(t, searchQuery));
             }
 
             titleEl.innerHTML = `
@@ -12708,6 +12698,51 @@ ${details}
         }
         return str;
     }
+
+    // مطابقة وبحث المتدرب الشامل (بالهوية، الاسم، الشعبة، ورقم الجوال بمختلف الصيغ العربية والإنجليزية والدولية)
+    function matchTraineeQuery(trainee, query) {
+        if (!trainee || !query) return false;
+        const rawQ = String(query).trim();
+        if (!rawQ) return false;
+
+        const lowerQ = rawQ.toLowerCase();
+        const digitsQ = convertArabicToAsciiDigits(rawQ).replace(/\D/g, '');
+        const phoneQ = cleanPhone(rawQ);
+
+        const tId = String(trainee.id || '').trim();
+        const tCleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tId) : convertArabicToAsciiDigits(tId).replace(/\D/g, '');
+        const tName = String(trainee.name || '').toLowerCase();
+        const tGroup = String(trainee.group || '').toLowerCase();
+
+        // 1. مطابقة الهوية الوطنية (أرقام عربية أو إنجليزية)
+        if (digitsQ && (tCleanId === digitsQ || tCleanId.includes(digitsQ) || tId.includes(rawQ))) return true;
+
+        // 2. مطابقة الاسم
+        if (tName.includes(lowerQ)) return true;
+
+        // 3. مطابقة الشعبة
+        if (tGroup.includes(lowerQ)) return true;
+
+        // 4. مطابقة رقم الجوال (سواء مخزن في كائن المتدرب أو في دليل الهواتف phoneDirectory)
+        const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[tId] || phoneDirectory[tCleanId] || {}) : {});
+        const tPhone = trainee.phone || pDir.phone || '';
+        if (tPhone) {
+            const cleanTPhone = cleanPhone(tPhone);
+            const rawTPhone = convertArabicToAsciiDigits(tPhone).replace(/\D/g, '');
+
+            if (phoneQ && phoneQ.length >= 3) {
+                if (cleanTPhone.includes(phoneQ)) return true;
+            }
+            if (digitsQ && digitsQ.length >= 3) {
+                if (rawTPhone.includes(digitsQ) || cleanTPhone.includes(digitsQ)) return true;
+                if (('0' + digitsQ).length === 10 && cleanTPhone === ('0' + digitsQ)) return true;
+                if (cleanTPhone.endsWith(digitsQ)) return true;
+            }
+        }
+
+        return false;
+    }
+    window.matchTraineeQuery = matchTraineeQuery;
 
     function isChecked(val) {
         if (val === true || val === 1 || val === '1' || val === 1.0 || val === '1.0') return true;
@@ -15061,11 +15096,7 @@ ${details}
                 }
             }
 
-            const matchesSearch = t.name.toLowerCase().includes(search) || 
-                                  t.id.includes(search) || 
-                                  cleanId.includes(search) ||
-                                  (t.phone && t.phone.includes(search)) ||
-                                  t.group.toLowerCase().includes(search);
+            const matchesSearch = matchTraineeQuery(t, search);
 
             return matchesComp && matchesGroup && matchesStatus && matchesArch && matchesSearch;
         });
@@ -16227,9 +16258,8 @@ ${details}
             if (searchEl) searchEl.focus();
             return;
         }
-        const cleanQ = cleanNationalId(q);
         const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : trainees;
-        const found = pool.find(t => String(t.id).includes(q) || cleanNationalId(t.id) === cleanQ || (t.name && t.name.includes(q)));
+        const found = pool.find(t => matchTraineeQuery(t, q));
         if (!found) {
             showToast(`لم يتم العثور على متدرب برقم الهوية أو الاسم: (${q})`, 'error');
             return;
@@ -16707,20 +16737,20 @@ ${details}
         const trainee = pool.find(t => (cleanNationalId(t.id) === cleanId || t.id === traineeId || String(t.id).trim() === cleanId)) || (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[traineeId] || phoneDirectory[cleanId]) : null);
         if (!trainee) return showToast('لم يتم العثور على بيانات المتدرب', 'error');
 
-        const isSuperAdmin = currentUser?.role === 'superadmin';
+        const canManagePhone = currentUser?.role === 'superadmin' || currentUser?.role === 'admin' || currentUser?.role === 'trainer' || !currentUser?.role;
         const phoneContainer = document.getElementById('tpInputPhoneContainer');
         if (phoneContainer) {
-            if (isSuperAdmin) phoneContainer.classList.remove('hidden');
+            if (canManagePhone) phoneContainer.classList.remove('hidden');
             else phoneContainer.classList.add('hidden');
         }
         const quickPhoneBtn = document.getElementById('tpQuickCopyPhoneBtn');
         if (quickPhoneBtn) {
-            if (isSuperAdmin) quickPhoneBtn.classList.remove('hidden');
+            if (canManagePhone) quickPhoneBtn.classList.remove('hidden');
             else quickPhoneBtn.classList.add('hidden');
         }
         const wpBtn = document.getElementById('tpWhatsappBtn');
         if (wpBtn) {
-            if (isSuperAdmin && trainee.phone) wpBtn.classList.remove('hidden');
+            if (canManagePhone && (trainee.phone || phoneDirectory[traineeId]?.phone)) wpBtn.classList.remove('hidden');
             else wpBtn.classList.add('hidden');
         }
 
@@ -16974,7 +17004,7 @@ ${details}
 
         // حفظ في دليل الهواتف والبيانات الدائم (phoneDirectory) مع دمج البيانات وعدم إتلاف بيانات المؤسسة ومنار
         const prevDirRec = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[origId] || phoneDirectory[newId] || {}) : {});
-        phoneDirectory[newId] = {
+        const updatedRec = {
             ...prevDirRec,
             name,
             phone,
@@ -16997,6 +17027,20 @@ ${details}
             manarCertificateIssued: (typeof t.manarCertificateIssued !== 'undefined') ? t.manarCertificateIssued : (prevDirRec.manarCertificateIssued || false),
             manarCertificateDate: t.manarCertificateDate || prevDirRec.manarCertificateDate || null
         };
+        phoneDirectory[newId] = updatedRec;
+        const cleanNId = cleanNationalId(newId);
+        if (cleanNId && cleanNId !== newId) {
+            phoneDirectory[cleanNId] = updatedRec;
+        }
+        if (origId && origId !== newId) {
+            phoneDirectory[origId] = updatedRec;
+            const cleanOId = cleanNationalId(origId);
+            if (cleanOId) phoneDirectory[cleanOId] = updatedRec;
+        }
+        try {
+            localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
+            localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+        } catch(e) {}
 
         if (typeof renderInstTraineesTable === 'function') {
             try { renderInstTraineesTable(); } catch(e) {}
@@ -18595,7 +18639,79 @@ function openReportFromProfile() {
     window.unregisterLmsItemDeleted = unregisterLmsItemDeleted;
 
     // تهيئة المقررات بنسخة نظيفة مفرغة لكل مدرب وفق الجدول الأكاديمي
-    const LMS_STORAGE_VERSION = 'v5_clean_wipe_all_courses';
+        // دالة التطهير والفرز الصارم: تضمن أن كل مقرر يحتوي فقط وحصرياً على مادته العلمية دون أي تداخل
+    function sanitizeCourseContentForTrainer(courseKey, courseData) {
+        if (!courseKey || !courseData) return;
+        const cleanKey = (typeof findCourseKeyForTrainer === 'function') ? findCourseKeyForTrainer(courseKey) : courseKey;
+
+        // مطابقة وترسيخ بيانات المقرر والمدرب المعتمدة 100%
+        const initDef = (typeof INITIAL_LMS_COURSES !== 'undefined' && INITIAL_LMS_COURSES[cleanKey]) ? INITIAL_LMS_COURSES[cleanKey] : null;
+        if (initDef) {
+            courseData.trainer = initDef.trainer;
+            courseData.trainerName = initDef.trainerName;
+            courseData.courseTitle = initDef.courseTitle;
+            courseData.courseShort = initDef.courseShort;
+            courseData.room = initDef.room;
+            if (!courseData.description || courseData.description.includes('undefined')) {
+                courseData.description = initDef.description;
+            }
+        }
+
+        if (!Array.isArray(courseData.weeks)) return;
+
+        const isSafety = cleanKey === 'فاضل الماجد';
+        const isEnglish = cleanKey === 'علي عبدالسلام' || cleanKey === 'يوسف جمال' || cleanKey === 'شرف الدين';
+        const isComputer = cleanKey === 'إمام يعقوب' || cleanKey === 'قاسم الماجد';
+        const isWelding = cleanKey === 'رضا مطيلق';
+        const isElectricity = cleanKey === 'عصام سعيد';
+        const isMechanics = cleanKey === 'سيد احمد';
+        const isOffice = cleanKey === 'أحمد الاصيل';
+        const isConstruction = cleanKey === 'ناجي محمد';
+
+        const isQuizForbidden = (title) => {
+            const t = String(title || '').toLowerCase();
+            if (isSafety) {
+                if (t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('grammar') || t.includes('طباعة') || t.includes('typing') || t.includes('الحاسب') || t.includes('لوحة المفاتيح') || t.includes('لحام') || t.includes('smaw') || t.includes('كهرباء') || t.includes('ميكانيكا')) return true;
+            } else if (isEnglish) {
+                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('osha') || t.includes('أرامكو') || t.includes('طباعة') || t.includes('typing') || t.includes('لحام') || t.includes('smaw') || t.includes('كهرباء') || t.includes('ميكانيكا')) return true;
+            } else if (isComputer) {
+                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('لحام') || t.includes('كهرباء') || t.includes('ميكانيكا')) return true;
+            } else if (isWelding) {
+                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('طباعة') || t.includes('typing') || t.includes('كهرباء') || t.includes('ميكانيكا')) return true;
+            } else if (isElectricity) {
+                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('طباعة') || t.includes('typing') || t.includes('لحام') || t.includes('ميكانيكا')) return true;
+            } else if (isMechanics) {
+                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('طباعة') || t.includes('typing') || t.includes('لحام') || t.includes('كهرباء')) return true;
+            } else if (isOffice) {
+                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('لحام') || t.includes('كهرباء') || t.includes('ميكانيكا')) return true;
+            } else if (isConstruction) {
+                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('طباعة') || t.includes('typing') || t.includes('لحام') || t.includes('كهرباء')) return true;
+            }
+            return false;
+        };
+
+        courseData.weeks.forEach(w => {
+            if (!w) return;
+            if (Array.isArray(w.quizzes)) {
+                w.quizzes = w.quizzes.filter(q => q && !isQuizForbidden(q.title || q.name));
+            }
+            if (Array.isArray(w.assignments)) {
+                w.assignments = w.assignments.filter(a => a && !isQuizForbidden(a.title || a.name));
+            }
+        });
+    }
+    window.sanitizeCourseContentForTrainer = sanitizeCourseContentForTrainer;
+
+    function sanitizeAllLmsCourses() {
+        if (!lmsCourses || typeof lmsCourses !== 'object') return;
+        for (const k in lmsCourses) {
+            sanitizeCourseContentForTrainer(k, lmsCourses[k]);
+        }
+    }
+    window.sanitizeAllLmsCourses = sanitizeAllLmsCourses;
+
+    // تهيئة المقررات بنسخة نظيفة مفرغة ومطهرة لكل مدرب وفق الجدول الأكاديمي
+    const LMS_STORAGE_VERSION = 'v6_clean_isolated_trainer_courses';
     const isLmsCleaned = (localStorage.getItem('sys_lms_version_flag') === LMS_STORAGE_VERSION);
 
     let lmsCourses = {};
@@ -18639,6 +18755,9 @@ function openReportFromProfile() {
         }
     }
 
+    if (typeof sanitizeAllLmsCourses === 'function') {
+        sanitizeAllLmsCourses();
+    }
     try {
         localStorage.setItem('sys_lms_courses_v3', JSON.stringify(lmsCourses));
         localStorage.setItem('sys_lms_courses_v2', JSON.stringify(lmsCourses));
@@ -18682,17 +18801,26 @@ function openReportFromProfile() {
         if (INITIAL_LMS_COURSES && INITIAL_LMS_COURSES[tName]) return tName;
 
         const clean = tName;
+        if (clean.includes('عبدالسلام') || clean.includes('علي عبد')) return 'علي عبدالسلام';
+        if (clean.includes('فاضل')) return 'فاضل الماجد';
         if (clean.includes('شرف')) return 'شرف الدين';
         if (clean.includes('يوسف')) return 'يوسف جمال';
-        if (clean.includes('عبدالسلام')) return 'علي عبدالسلام';
         if (clean.includes('عصام')) return 'عصام سعيد';
         if (clean.includes('رضا') || clean.includes('مطيلق')) return 'رضا مطيلق';
         if (clean.includes('سيد')) return 'سيد احمد';
-        if (clean.includes('فاضل')) return 'فاضل الماجد';
         if (clean.includes('اصيل') || clean.includes('أصيل')) return 'أحمد الاصيل';
         if (clean.includes('ناجي')) return 'ناجي محمد';
         if (clean.includes('يعقوب') || clean.includes('إمام') || clean.includes('امام')) return 'إمام يعقوب';
         if (clean.includes('قاسم')) return 'قاسم الماجد';
+
+        if (clean.includes('سلامة') || clean.includes('السلامة') || clean.includes('صحة') || clean.includes('الصحة')) return 'فاضل الماجد';
+        if (clean.includes('لحام') || clean.includes('اللحام')) return 'رضا مطيلق';
+        if (clean.includes('كهربا') || clean.includes('الكهرباء')) return 'عصام سعيد';
+        if (clean.includes('ميكانيك') || clean.includes('الميكانيكا')) return 'سيد احمد';
+        if (clean.includes('انشاء') || clean.includes('إنشاء') || clean.includes('الإنشاءات')) return 'ناجي محمد';
+        if (clean.includes('ادارة') || clean.includes('إدارة') || clean.includes('سكرتار')) return 'أحمد الاصيل';
+        if (clean.includes('حاسب') || clean.includes('كمبيوتر')) return 'إمام يعقوب';
+        if (clean.includes('انجليز') || clean.includes('إنجليز') || clean.includes('english')) return 'علي عبدالسلام';
 
         return tName;
     }
@@ -18877,17 +19005,28 @@ function openReportFromProfile() {
         const clean = rawKey.replace(/^أ\.\s*/, '').trim();
         if (lmsCourses && lmsCourses[clean]) return clean;
 
-        if (clean.includes('فاضل') || clean.includes('سلام') || clean.includes('صحة')) return 'فاضل الماجد';
+        // 1. مطابقة صريحة لأسماء المدربين الـ 11 بدون أي خلط (فحص عبدالسلام يسبق السلامة لمنع التداخل)
+        if (clean.includes('عبدالسلام') || clean.includes('علي عبد')) return 'علي عبدالسلام';
+        if (clean.includes('فاضل')) return 'فاضل الماجد';
         if (clean.includes('يوسف')) return 'يوسف جمال';
-        if (clean.includes('علي عبدالسلام') || clean.includes('عبدالسلام')) return 'علي عبدالسلام';
         if (clean.includes('شرف')) return 'شرف الدين';
-        if (clean.includes('رضا') || clean.includes('لحام')) return 'رضا مطيلق';
-        if (clean.includes('سيد') || clean.includes('ميكانيك')) return 'سيد احمد';
-        if (clean.includes('عصام') || clean.includes('كهربا')) return 'عصام سعيد';
-        if (clean.includes('اصيل') || clean.includes('أصيل') || clean.includes('ادارة') || clean.includes('إدارة')) return 'أحمد الاصيل';
-        if (clean.includes('ناجي') || clean.includes('انشاء') || clean.includes('إنشاء')) return 'ناجي محمد';
+        if (clean.includes('عصام')) return 'عصام سعيد';
+        if (clean.includes('رضا') || clean.includes('مطيلق')) return 'رضا مطيلق';
+        if (clean.includes('سيد')) return 'سيد احمد';
+        if (clean.includes('اصيل') || clean.includes('أصيل')) return 'أحمد الاصيل';
+        if (clean.includes('ناجي')) return 'ناجي محمد';
         if (clean.includes('يعقوب') || clean.includes('إمام') || clean.includes('امام')) return 'إمام يعقوب';
         if (clean.includes('قاسم')) return 'قاسم الماجد';
+
+        // 2. مطابقة التخصصات والموضوعات الصريحة
+        if (clean.includes('سلامة') || clean.includes('السلامة') || clean.includes('صحة') || clean.includes('الصحة') || clean.includes('osha')) return 'فاضل الماجد';
+        if (clean.includes('لحام') || clean.includes('اللحام')) return 'رضا مطيلق';
+        if (clean.includes('كهربا') || clean.includes('الكهرباء')) return 'عصام سعيد';
+        if (clean.includes('ميكانيك') || clean.includes('الميكانيكا')) return 'سيد احمد';
+        if (clean.includes('انشاء') || clean.includes('إنشاء') || clean.includes('الإنشاءات')) return 'ناجي محمد';
+        if (clean.includes('ادارة') || clean.includes('إدارة') || clean.includes('سكرتار')) return 'أحمد الاصيل';
+        if (clean.includes('حاسب') || clean.includes('كمبيوتر')) return 'إمام يعقوب';
+        if (clean.includes('انجليز') || clean.includes('إنجليز') || clean.includes('english')) return 'علي عبدالسلام';
 
         return clean;
     }
@@ -27142,16 +27281,15 @@ function openReportFromProfile() {
 
     // (تم تقديم تعريف تومبستون الحذف وتفريغ الأسابيع إلى أعلى الملف لضمان الحماية المبكرة عند الإقلاع)
 
-    // دالة محورية لجلب كافة المفاتيح البديلة للمقرر والمدرب لضمان الحذف الشامل دون أي خلط بين المقررات
+        // دالة محورية لجلب مفتاح المقرر المعتمد للمدرب حصرياً بدون أي دمج أو تداخل
     function getActiveTrainerCourseAliases(courseKey) {
         const targetKey = courseKey || ((typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null);
         if (!targetKey) return [];
-        const normKey = (typeof normalizeStudentLmsCourseKey === 'function') ? normalizeStudentLmsCourseKey(targetKey) : String(targetKey).replace(/^أ\.\s*/, '').trim();
+        const canonical = (typeof findCourseKeyForTrainer === 'function') ? findCourseKeyForTrainer(targetKey) : targetKey;
         const keys = new Set();
-        keys.add(normKey);
-        keys.add(`أ. ${normKey}`);
+        keys.add(canonical);
         if (targetKey) keys.add(targetKey);
-        return Array.from(keys);
+        return Array.from(keys).filter(k => lmsCourses && lmsCourses[k]);
     }
     window.getActiveTrainerCourseAliases = getActiveTrainerCourseAliases;
 
@@ -27172,91 +27310,14 @@ function openReportFromProfile() {
 
     // (تم تقديم تعريف تومبستون الحذف وتفريغ الأسابيع إلى أعلى الملف لضمان الحماية المبكرة عند الإقلاع)
 
-    // دالة محورية لجلب كافة المفاتيح البديلة للمقرر والمدرب لضمان الحذف الشامل دون أي خلط بين المقررات
+        // دالة محورية لجلب مفتاح المقرر المعتمد للمدرب حصرياً بدون أي دمج أو تداخل
     function getActiveTrainerCourseAliases(courseKey) {
         const targetKey = courseKey || ((typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null);
         if (!targetKey) return [];
+        const canonical = (typeof findCourseKeyForTrainer === 'function') ? findCourseKeyForTrainer(targetKey) : targetKey;
         const keys = new Set();
-        keys.add(targetKey);
-
-        const currentCourse = (typeof lmsCourses !== 'undefined' && lmsCourses) ? lmsCourses[targetKey] : null;
-        let trName = currentCourse?.trainer || currentCourse?.trainerName || '';
-        if (!trName) {
-            const cleanTarget = String(targetKey).replace(/^أ\.\s*/, '').trim();
-            const knownTrainers = [
-                'فاضل الماجد', 'يوسف جمال', 'علي عبدالسلام', 'شرف الدين', 'قاسم الماجد',
-                'إمام يعقوب', 'سيد احمد', 'رضا مطيلق', 'عصام سعيد', 'أحمد الاصيل', 'ناجي محمد'
-            ];
-            const matched = knownTrainers.find(kt => kt === cleanTarget || cleanTarget.includes(kt) || kt.includes(cleanTarget));
-            if (matched) trName = matched;
-        }
-
-        const cleanTr = String(trName).replace(/^أ\.\s*/, '').trim();
-
-        if (cleanTr) {
-            if (lmsCourses && lmsCourses[cleanTr]) keys.add(cleanTr);
-            if (lmsCourses && lmsCourses[`أ. ${cleanTr}`]) keys.add(`أ. ${cleanTr}`);
-
-            // حصر البدائل الصريحة لكل مدرب ومقرره بدقة متناهية لمنع التداخل
-            if (cleanTr.includes('فاضل') || cleanTr.includes('سلام') || cleanTr.includes('صحة')) {
-                ['فاضل الماجد', 'السلامة والصحة', 'صحة وسلامة', 'أ. فاضل الماجد'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            } else if (cleanTr.includes('رضا') || cleanTr.includes('لحام')) {
-                ['اللحام', 'رضا مطيلق', 'أ. رضا مطيلق'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            } else if (cleanTr.includes('سيد') || cleanTr.includes('ميكانيك')) {
-                ['الميكانيكا', 'الميكانيكية', 'ميكانيكا', 'سيد احمد', 'سيد أحمد', 'أ. سيد احمد'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            } else if (cleanTr.includes('عصام') || cleanTr.includes('كهربا')) {
-                ['الكهرباء', 'عصام سعيد', 'أ. عصام سعيد'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            } else if (cleanTr.includes('اصيل') || cleanTr.includes('أصيل') || cleanTr.includes('ادارة') || cleanTr.includes('إدارة')) {
-                ['الادارة المكتبية والسكرتارية', 'ادارة مكتبية', 'إدارة مكتبية', 'أحمد الاصيل', 'احمد الاصيل', 'أ. أحمد الاصيل'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            } else if (cleanTr.includes('ناجي') || cleanTr.includes('انشاء') || cleanTr.includes('إنشاء')) {
-                ['إنشاءات', 'انشاءات', 'ناجي محمد', 'أ. ناجي محمد'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            } else if (cleanTr.includes('يعقوب') || cleanTr.includes('إمام') || cleanTr.includes('امام')) {
-                ['الحاسب الالي', 'الحاسب الآلي', 'حاسب الي', 'حاسب آلي', 'إمام يعقوب', 'امام يعقوب', 'أ. إمام يعقوب'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            } else if (cleanTr.includes('يوسف')) {
-                ['يوسف جمال', 'أ. يوسف جمال'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            } else if (cleanTr.includes('علي عبدالسلام') || cleanTr.includes('عبدالسلام')) {
-                ['علي عبدالسلام', 'أ. علي عبدالسلام'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            } else if (cleanTr.includes('قاسم')) {
-                ['قاسم الماجد', 'أ. قاسم الماجد'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            } else if (cleanTr.includes('شرف الدين') || cleanTr.includes('شرف')) {
-                ['شرف الدين', 'أ. شرف الدين'].forEach(ak => {
-                    if (lmsCourses && lmsCourses[ak]) keys.add(ak);
-                });
-            }
-
-            // مطابقة إضافية فقط للمقررات التي تتطابق مع اسم المدرب نفسه بنسبة 100%
-            if (lmsCourses) {
-                for (const k in lmsCourses) {
-                    const c = lmsCourses[k];
-                    if (c) {
-                        const cTr = String(c.trainer || c.trainerName || '').replace(/^أ\.\s*/, '').trim();
-                        if (cTr && cTr === cleanTr) {
-                            keys.add(k);
-                        }
-                    }
-                }
-            }
-        }
+        keys.add(canonical);
+        if (targetKey) keys.add(targetKey);
         return Array.from(keys).filter(k => lmsCourses && lmsCourses[k]);
     }
     window.getActiveTrainerCourseAliases = getActiveTrainerCourseAliases;
@@ -27412,6 +27473,9 @@ function openReportFromProfile() {
             const key = (typeof normalizeStudentLmsCourseKey === 'function') ? normalizeStudentLmsCourseKey(rawKey) : rawKey.replace(/^أ\.\s*/, '').trim();
             if (!VALID_TRAINER_KEYS.has(key)) continue;
 
+            if (typeof sanitizeCourseContentForTrainer === 'function') {
+                sanitizeCourseContentForTrainer(key, cData);
+            }
             if (!lmsCourses[key]) {
                 lmsCourses[key] = JSON.parse(JSON.stringify(cData));
                 localChanged = true;
@@ -27843,23 +27907,12 @@ function openReportFromProfile() {
     }
 
     function persistLmsCourses() {
-        // Mirror active course to aliases first so all alias keys stay in sync locally
-        const activeKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null;
-        const aliases = (typeof getActiveTrainerCourseAliases === 'function') ? getActiveTrainerCourseAliases(activeKey) : [activeKey].filter(Boolean);
-        if (activeKey && lmsCourses[activeKey] && aliases.length > 1) {
-            const activeData = lmsCourses[activeKey];
-            aliases.forEach(aliasKey => {
-                if (aliasKey !== activeKey) {
-                    lmsCourses[aliasKey] = JSON.parse(JSON.stringify(activeData));
-                }
-            });
-        }
-
+        // حفظ محلي نظيف ومستقل حصرياً للمقرر النشط دون أي نسخ أو تداخل مع مقررات المدربين الآخرين
         persistLmsCoursesLocalOnly();
-
-        aliases.forEach(k => {
-            if (k) syncLmsCourseToSupabase(k);
-        });
+        const activeKey = (typeof getActiveTrainerCourseKey === 'function') ? getActiveTrainerCourseKey() : null;
+        if (activeKey) {
+            syncLmsCourseToSupabase(activeKey);
+        }
         if (typeof syncAllLmsCoursesToSupabase === 'function') {
             syncAllLmsCoursesToSupabase();
         }
@@ -28160,9 +28213,23 @@ function openReportFromProfile() {
                 hasChanges = true;
             }
 
-            // Merge Phone Directory
+            // Merge Phone Directory مع حماية أرقام الجوال المحدثة محلياً من المسح بالقديم السحابي
             if (cloudPhoneDir && typeof cloudPhoneDir === 'object' && Object.keys(cloudPhoneDir).length > 0) {
-                phoneDirectory = { ...phoneDirectory, ...cloudPhoneDir };
+                for (const [k, cRec] of Object.entries(cloudPhoneDir)) {
+                    if (!phoneDirectory[k]) {
+                        phoneDirectory[k] = cRec;
+                    } else {
+                        const localRec = phoneDirectory[k];
+                        phoneDirectory[k] = {
+                            ...cRec,
+                            ...localRec,
+                            phone: localRec.phone || cRec.phone || '',
+                            email: localRec.email || cRec.email || '',
+                            institutionApproved: (typeof localRec.institutionApproved !== 'undefined') ? localRec.institutionApproved : (cRec.institutionApproved || false),
+                            manarCertificateIssued: (typeof localRec.manarCertificateIssued !== 'undefined') ? localRec.manarCertificateIssued : (cRec.manarCertificateIssued || false)
+                        };
+                    }
+                }
                 localStorage.setItem('sys_phone_dir_v9', JSON.stringify(phoneDirectory));
             }
 
@@ -36003,11 +36070,10 @@ function buildDemoExecutiveReport(params) {
             if (searchEl) searchEl.focus();
             return;
         }
-        const cleanQ = cleanNationalId(q);
         const { pool } = getGradesSystemTargetTrainees();
-        let found = pool.find(t => String(t.id).includes(q) || cleanNationalId(t.id) === cleanQ || (t.name && t.name.includes(q)));
+        let found = pool.find(t => matchTraineeQuery(t, q));
         if (!found) {
-            found = trainees.find(t => String(t.id).includes(q) || cleanNationalId(t.id) === cleanQ || (t.name && t.name.includes(q)));
+            found = trainees.find(t => matchTraineeQuery(t, q));
         }
         if (!found) {
             showToast(`لم يتم العثور على متدرب برقم الهوية أو الاسم: (${q})`, 'error');
@@ -43322,12 +43388,7 @@ function buildDemoExecutiveReport(params) {
             ? trainees 
             : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
 
-        const matches = pool.filter(t => {
-            const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id || '') : (t.id || '');
-            const name = (t.name || '').toLowerCase();
-            const idStr = (t.id || '').toLowerCase();
-            return cleanId.includes(q) || idStr.includes(q) || name.includes(q);
-        }).slice(0, 6);
+        const matches = pool.filter(t => matchTraineeQuery(t, q)).slice(0, 6);
 
         if (matches.length === 0) {
             sugBox.innerHTML = `
@@ -43391,14 +43452,7 @@ function buildDemoExecutiveReport(params) {
             ? trainees 
             : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
 
-        const found = pool.find(t => {
-            const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id || '') : (t.id || '');
-            const qClean = (typeof cleanNationalId === 'function') ? cleanNationalId(q) : q;
-            if (qClean && cleanId === qClean) return true;
-            if (t.id && t.id.trim() === q) return true;
-            if (t.name && t.name.toLowerCase().includes(q.toLowerCase())) return true;
-            return false;
-        });
+        const found = pool.find(t => matchTraineeQuery(t, q));
 
         const sugBox = document.getElementById('adminQuickTraineeSuggestions');
         if (sugBox) sugBox.classList.add('hidden');
