@@ -3674,7 +3674,7 @@
 
                                 </div>
 
-                                <p class="text-[11px] text-slate-300 font-bold mt-0.5">أدخل رقم الهوية الوطنية (10 أرقام) أو اسم المتدرب للاستعراض الفوري لملف المتدرب الشامل وسجل الحضور والدرجات</p>
+                                <p class="text-[11px] text-slate-300 font-bold mt-0.5">أدخل رقم الهوية الوطنية أو اسم المتدرب أو رقم الجوال للاستعراض الفوري لملف المتدرب الشامل وسجل الحضور والدرجات</p>
 
                             </div>
 
@@ -3708,7 +3708,7 @@
 
                                        onkeydown="if(event.key==='Enter'){openAdminSearchedTraineeProfile();}" 
 
-                                       placeholder="أدخل رقم الهوية الوطنية (10 أرقام) أو اسم المتدرب... ثم اضغط Enter أو استعراض الملف" 
+                                       placeholder="ابحث برقم الهوية الوطنية أو اسم المتدرب أو رقم الجوال... ثم اضغط Enter أو استعراض الملف" 
 
                                        class="w-full bg-white text-slate-900 placeholder-slate-400 font-black text-xs md:text-sm pr-10 pl-24 py-3 rounded-2xl border-2 border-amber-400/60 focus:border-amber-400 outline-none shadow-inner transition">
 
@@ -4766,7 +4766,7 @@
 
                             <span class="text-lg">🔍</span>
 
-                            <input type="text" id="tdTraineeSearchIdInput" oninput="renderTraineesOfSelectedGroup()" onkeydown="if(event.key==='Enter'){openTrainerSearchedTraineeProfile();}" placeholder="ابحث برقم الهوية الوطنية أو اسم المتدرب للاطلاع على ملف المتدرب وكشف درجاته..." class="w-full bg-white border border-slate-300 focus:border-[#0F2942] rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 outline-none transition">
+                            <input type="text" id="tdTraineeSearchIdInput" oninput="renderTraineesOfSelectedGroup()" onkeydown="if(event.key==='Enter'){openTrainerSearchedTraineeProfile();}" placeholder="ابحث برقم الهوية الوطنية أو اسم المتدرب أو رقم الجوال للاطلاع على ملف المتدرب وكشف درجاته..." class="w-full bg-white border border-slate-300 focus:border-[#0F2942] rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 outline-none transition">
 
                         </div>
 
@@ -25477,89 +25477,55 @@ ${details}
     // مطابقة وبحث المتدرب الشامل (بالهوية، الاسم، الشعبة، ورقم الجوال بمختلف الصيغ العربية والإنجليزية والدولية)
 
     function matchTraineeQuery(trainee, query) {
-
         if (!trainee || !query) return false;
-
         const rawQ = String(query).trim();
-
         if (!rawQ) return false;
 
-
-
         const lowerQ = rawQ.toLowerCase();
-
-        const digitsQ = convertArabicToAsciiDigits(rawQ).replace(/\D/g, '');
-
-        const phoneQ = cleanPhone(rawQ);
-
-
+        const digitsQ = (typeof convertArabicToAsciiDigits === 'function') ? convertArabicToAsciiDigits(rawQ).replace(/\D/g, '') : rawQ.replace(/\D/g, '');
+        const phoneQ = (typeof cleanPhone === 'function') ? cleanPhone(rawQ) : digitsQ;
 
         const tId = String(trainee.id || '').trim();
-
-        const tCleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tId) : convertArabicToAsciiDigits(tId).replace(/\D/g, '');
-
+        const tCleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tId) : ((typeof convertArabicToAsciiDigits === 'function') ? convertArabicToAsciiDigits(tId).replace(/\D/g, '') : tId.replace(/\D/g, ''));
         const tName = String(trainee.name || '').toLowerCase();
-
         const tGroup = String(trainee.group || '').toLowerCase();
 
-
-
         // 1. مطابقة الهوية الوطنية (أرقام عربية أو إنجليزية)
-
-        if (digitsQ && (tCleanId === digitsQ || tCleanId.includes(digitsQ) || tId.includes(rawQ))) return true;
-
-
+        if (digitsQ && digitsQ.length >= 2 && (tCleanId === digitsQ || tCleanId.includes(digitsQ) || tId.includes(rawQ))) return true;
 
         // 2. مطابقة الاسم
-
         if (tName.includes(lowerQ)) return true;
 
-
-
         // 3. مطابقة الشعبة
-
         if (tGroup.includes(lowerQ)) return true;
 
-
-
         // 4. مطابقة رقم الجوال (سواء مخزن في كائن المتدرب أو في دليل الهواتف phoneDirectory)
-
-        const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[tId] || phoneDirectory[tCleanId] || {}) : {});
-
+        const pDir = (typeof phoneDirectory !== 'undefined' && phoneDirectory) ? (phoneDirectory[tId] || phoneDirectory[tCleanId] || {}) : {};
         const tPhone = trainee.phone || pDir.phone || '';
-
         if (tPhone) {
+            const rawTPhone = (typeof convertArabicToAsciiDigits === 'function') ? convertArabicToAsciiDigits(tPhone).replace(/\D/g, '') : String(tPhone).replace(/\D/g, '');
+            const cleanTPhone = (typeof cleanPhone === 'function') ? cleanPhone(tPhone) : rawTPhone;
 
-            const cleanTPhone = cleanPhone(tPhone);
-
-            const rawTPhone = convertArabicToAsciiDigits(tPhone).replace(/\D/g, '');
-
-
-
+            // مطابقة بالرقم النظيف (مثل 05XXXXXXXX)
             if (phoneQ && phoneQ.length >= 3) {
-
-                if (cleanTPhone.includes(phoneQ)) return true;
-
+                if (cleanTPhone && (cleanTPhone.includes(phoneQ) || phoneQ.includes(cleanTPhone))) return true;
+                if (rawTPhone && (rawTPhone.includes(phoneQ) || phoneQ.includes(rawTPhone))) return true;
             }
 
+            // مطابقة بالأرقام المجردة (مثل 5XXXXXXXX أو 9665XXXXXXXX)
             if (digitsQ && digitsQ.length >= 3) {
-
-                if (rawTPhone.includes(digitsQ) || cleanTPhone.includes(digitsQ)) return true;
-
+                if (rawTPhone && (rawTPhone.includes(digitsQ) || digitsQ.includes(rawTPhone))) return true;
+                if (cleanTPhone && (cleanTPhone.includes(digitsQ) || digitsQ.includes(cleanTPhone))) return true;
                 if (('0' + digitsQ).length === 10 && cleanTPhone === ('0' + digitsQ)) return true;
-
-                if (cleanTPhone.endsWith(digitsQ)) return true;
-
+                if (cleanTPhone.endsWith(digitsQ) || rawTPhone.endsWith(digitsQ)) return true;
+                const last9Q = digitsQ.length >= 9 ? digitsQ.slice(-9) : digitsQ;
+                const last9T = rawTPhone.length >= 9 ? rawTPhone.slice(-9) : rawTPhone;
+                if (last9Q.length >= 5 && (last9T.includes(last9Q) || last9Q.includes(last9T))) return true;
             }
-
         }
 
-
-
         return false;
-
     }
-
     window.matchTraineeQuery = matchTraineeQuery;
 
 
@@ -86822,93 +86788,57 @@ function buildDemoExecutiveReport(params) {
 
 
     function handleAdminQuickTraineeInput(val) {
-
         const q = (val || '').trim().toLowerCase();
-
         const sugBox = document.getElementById('adminQuickTraineeSuggestions');
-
         if (!sugBox) return;
 
-
-
         if (q.length < 2) {
-
             sugBox.classList.add('hidden');
-
             sugBox.innerHTML = '';
-
             return;
-
         }
 
-
-
-        const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) 
-
-            ? trainees 
-
-            : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
-
-
+        const pool = (typeof getUnifiedTraineesPool === 'function')
+            ? getUnifiedTraineesPool()
+            : ((typeof trainees !== 'undefined' && trainees && trainees.length > 0) 
+                ? trainees 
+                : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []));
 
         const matches = pool.filter(t => matchTraineeQuery(t, q)).slice(0, 6);
 
-
-
         if (matches.length === 0) {
-
             sugBox.innerHTML = `
-
                 <div class="p-3 text-center text-xs font-bold text-slate-400">
-
                     لا توجد نتائج مطابقة لـ "${q}"
-
                 </div>
-
             `;
-
             sugBox.classList.remove('hidden');
-
             return;
-
         }
 
-
-
-        sugBox.innerHTML = matches.map(t => `
-
+        sugBox.innerHTML = matches.map(t => {
+            const pDir = (typeof phoneDirectory !== 'undefined' && phoneDirectory) ? (phoneDirectory[t.id] || phoneDirectory[cleanNationalId ? cleanNationalId(t.id) : t.id] || {}) : {};
+            const displayPhone = t.phone || pDir.phone || '';
+            return `
             <div onclick="selectAdminQuickTrainee('${t.id}')" class="p-3 hover:bg-amber-50 cursor-pointer flex items-center justify-between gap-3 transition">
-
                 <div class="flex items-center gap-2.5">
-
                     <span class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-sm font-black text-[#0F2942]">👤</span>
-
                     <div>
-
                         <div class="text-xs font-black text-slate-900">${t.name}</div>
-
-                        <div class="text-[11px] font-mono font-bold text-slate-500">هوية: ${t.id} | شعبة: ${t.group || '—'}</div>
-
+                        <div class="text-[11px] font-mono font-bold text-slate-500">
+                            هوية: ${t.id} | شعبة: ${t.group || '—'}${displayPhone ? ` | 📱 <span dir="ltr" class="text-amber-800">${displayPhone}</span>` : ''}
+                        </div>
                     </div>
-
                 </div>
-
                 <div class="flex items-center gap-2">
-
                     <span class="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-lg">${t.company || 'معهد الذهب الأسود'}</span>
-
                     <span class="text-xs text-amber-600 font-black">استعراض الملف ⬅️</span>
-
                 </div>
-
             </div>
-
-        `).join('');
-
+            `;
+        }).join('');
         sugBox.classList.remove('hidden');
-
     }
-
     window.handleAdminQuickTraineeInput = handleAdminQuickTraineeInput;
 
 
@@ -86958,55 +86888,32 @@ function buildDemoExecutiveReport(params) {
 
 
     function openAdminSearchedTraineeProfile() {
-
         const input = document.getElementById('adminQuickTraineeIdInput');
-
         const q = (input?.value || '').trim();
-
         if (!q) {
-
-            return showToast('يرجى إدخال رقم الهوية الوطنية أو اسم المتدرب أولاً', 'info');
-
+            return showToast('يرجى إدخال رقم الهوية الوطنية أو اسم المتدرب أو رقم الجوال أولاً', 'info');
         }
 
-
-
-        const pool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) 
-
-            ? trainees 
-
-            : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
-
-
+        const pool = (typeof getUnifiedTraineesPool === 'function')
+            ? getUnifiedTraineesPool()
+            : ((typeof trainees !== 'undefined' && trainees && trainees.length > 0) 
+                ? trainees 
+                : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []));
 
         const found = pool.find(t => matchTraineeQuery(t, q));
 
-
-
         const sugBox = document.getElementById('adminQuickTraineeSuggestions');
-
         if (sugBox) sugBox.classList.add('hidden');
 
-
-
         if (found) {
-
             showToast(`تم فتح ملف المتدرب: ${found.name}`, 'success');
-
             if (typeof openTraineeProfileModal === 'function') {
-
                 openTraineeProfileModal(found.id);
-
             }
-
         } else {
-
-            showToast(`لم يتم العثور على متدرب برقم الهوية أو الاسم المدخل: ${q}`, 'warning');
-
+            showToast(`لم يتم العثور على متدرب برقم الهوية أو الاسم أو رقم الجوال المدخل: ${q}`, 'warning');
         }
-
     }
-
     window.openAdminSearchedTraineeProfile = openAdminSearchedTraineeProfile;
 
 
