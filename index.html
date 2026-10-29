@@ -37253,166 +37253,188 @@ function openReportFromProfile() {
 
         // دالة التطهير والفرز الصارم: تضمن أن كل مقرر يحتوي فقط وحصرياً على مادته العلمية دون أي تداخل
 
-    function sanitizeCourseContentForTrainer(courseKey, courseData) {
+    // دالة محورية للكشف عن العناصر الوهمية السابقة (Dummy Data) التي تم توريثها من القوالب القديمة
+    function isLegacyDummyLmsItem(item) {
+        if (!item) return false;
+        const id = String(item.id || '').trim();
+        const title = String(item.title || item.name || '').trim();
+        const desc = String(item.description || item.desc || item.notes || item.text || '').trim();
+        const combined = (title + ' ' + desc).toLowerCase();
 
-        if (!courseKey || !courseData) return;
-
-        const cleanKey = (typeof findCourseKeyForTrainer === 'function') ? findCourseKeyForTrainer(courseKey) : courseKey;
-
-
-
-        // مطابقة وترسيخ بيانات المقرر والمدرب المعتمدة 100%
-
-        const initDef = (typeof INITIAL_LMS_COURSES !== 'undefined' && INITIAL_LMS_COURSES[cleanKey]) ? INITIAL_LMS_COURSES[cleanKey] : null;
-
-        if (initDef) {
-
-            courseData.trainer = initDef.trainer;
-
-            courseData.trainerName = initDef.trainerName;
-
-            courseData.courseTitle = initDef.courseTitle;
-
-            courseData.courseShort = initDef.courseShort;
-
-            courseData.room = initDef.room;
-
-            if (!courseData.description || courseData.description.includes('undefined')) {
-
-                courseData.description = initDef.description;
-
-            }
-
+        // 1. فحص معرّفات القوالب السابقة الصلبة
+        if (/^[vqad]-w\d+-\d+$/i.test(id) || /^[qa]q-\d+$/i.test(id) || /^v-w1-[12]$/.test(id) || /^d-w1-[12]$/.test(id)) {
+            return true;
         }
 
+        // 2. الكشف عن العناوين والقوالب الوهمية السابقة بالكامل
+        const DUMMY_PHRASES = [
+            "السكرتارية التنفيذية", "مهام وأخلاقيات السكرتارية", "إدارة المكاتب الحديثة",
+            "رسم دائرة كهربائية", "قانون أوم", "ستار دلتا", "توالي وتوازي", "المقاومة المكافئة",
+            "عكس اتجاه دوران", "مخطط دائرة تشغيل", "لوحة المفاتيح الهامة", "تظليل عدسة",
+            "سلك الفلر", "Stick Welding 101", "قناع اللحام", "SMAW", "E7018", "الوصلات الخمس",
+            "كيف تحترم", "آداب التعامل مع الأبوين", "كيف تبر والديك", "صلة قرابة الوالدين",
+            "فضل بر الوالدين", "أخلاقيات المتدرب والسلوك المهني", "حسن الاستماع والإنصات",
+            "احترام المدربين والزملاء", "معايرة وضبط الآلات الميكانيكية", "خواص الخرسانة المسلحة",
+            "أساسيات المساحة وقراءة المخططات", "أمن المعلومات والحماية من الهجمات",
+            "أنظمة الحفظ والأرشفة الإلكترونية", "Distribution Boards", "Circuit Breakers",
+            "Job Interview in Oil", "Report Incidents and Safety Hazards in English",
+            "Tool-box Meetings (TBM)", "Units of Measurement in Oil"
+        ];
 
+        for (let i = 0; i < DUMMY_PHRASES.length; i++) {
+            if (combined.includes(DUMMY_PHRASES[i].toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    window.isLegacyDummyLmsItem = isLegacyDummyLmsItem;
+
+    // دالة محورية لمنع أي تداخل محتوى بين تخصصات المدربين
+    function isItemCrossContaminated(trainerKey, item) {
+        if (!item || !trainerKey) return false;
+        const title = String(item.title || item.name || '').trim();
+        const desc = String(item.description || item.desc || item.notes || item.text || '').trim();
+        const t = (title + ' ' + desc).toLowerCase();
+
+        const isSafety = trainerKey === 'فاضل الماجد';
+        const isEnglish = trainerKey === 'علي عبدالسلام' || trainerKey === 'يوسف جمال' || trainerKey === 'شرف الدين';
+        const isComputer = trainerKey === 'إمام يعقوب' || trainerKey === 'قاسم الماجد';
+        const isWelding = trainerKey === 'رضا مطيلق';
+        const isElectricity = trainerKey === 'عصام سعيد';
+        const isMechanics = trainerKey === 'سيد احمد';
+        const isOffice = trainerKey === 'أحمد الاصيل';
+        const isConstruction = trainerKey === 'ناجي محمد';
+
+        if (isSafety) {
+            if (t.includes('سكرتار') || t.includes('إدارة المكاتب') || t.includes('مكتبية') || t.includes('أرشفة') || t.includes('مراسلات إدارية')) return true;
+            if (t.includes('كهربا') || t.includes('دائر') || t.includes('قانون أوم') || t.includes('توالي') || t.includes('توازي') || t.includes('ستار دلتا') || t.includes('محرك كهربائي') || t.includes('قواطع الدوائر')) return true;
+            if (t.includes('لحام القوس') || t.includes('لحام التاج') || t.includes('smaw') || t.includes('e7018') || t.includes('أقطاب اللحام') || t.includes('سلك الفلر')) return true;
+            if (t.includes('grammar') || t.includes('present simple') || t.includes('pronouns') || t.includes('قواعد اللغة الإنجليزية')) return true;
+            if (t.includes('ميكانيك') || t.includes('هيدروليك') || t.includes('صمامات تحكم') || t.includes('مضخات صناعية')) return true;
+            if (t.includes('حاسب آلي') || t.includes('لوحة المفاتيح') || t.includes('طباعة سريعة') || t.includes('معالج النصوص')) return true;
+            if (t.includes('إنشاءات') || t.includes('خرسانة') || t.includes('تسليح') || t.includes('شدات خشبية')) return true;
+        } else if (isEnglish) {
+            if (t.includes('السلامة والصحة المهنية') || t.includes('مخاطر الحريق') || t.includes('الأماكن المغلقة') || t.includes('تصاريح العمل الساخن')) return true;
+            if (t.includes('سكرتار') || t.includes('إدارة المكاتب') || t.includes('مكتبية')) return true;
+            if (t.includes('كهربا') || t.includes('قانون أوم') || t.includes('دوائر كهربائية')) return true;
+            if (t.includes('لحام القوس') || t.includes('smaw')) return true;
+            if (t.includes('ميكانيك') || t.includes('هيدروليك')) return true;
+            if (t.includes('خرسانة') || t.includes('إنشاءات')) return true;
+        } else if (isElectricity) {
+            if (t.includes('السلامة والصحة') || t.includes('سكرتار') || t.includes('لحام') || t.includes('ميكانيك') || t.includes('خرسانة') || t.includes('إنشاءات') || t.includes('grammar')) return true;
+        } else if (isWelding) {
+            if (t.includes('السلامة والصحة') || t.includes('سكرتار') || t.includes('كهربا') || t.includes('ميكانيك') || t.includes('خرسانة') || t.includes('إنشاءات') || t.includes('grammar')) return true;
+        } else if (isOffice) {
+            if (t.includes('السلامة والصحة') || t.includes('كهربا') || t.includes('لحام') || t.includes('ميكانيك') || t.includes('خرسانة') || t.includes('إنشاءات') || t.includes('grammar')) return true;
+        } else if (isMechanics) {
+            if (t.includes('السلامة والصحة') || t.includes('سكرتار') || t.includes('كهربا') || t.includes('لحام') || t.includes('خرسانة') || t.includes('إنشاءات') || t.includes('grammar')) return true;
+        } else if (isComputer) {
+            if (t.includes('السلامة والصحة') || t.includes('سكرتار') || t.includes('كهربا') || t.includes('لحام') || t.includes('ميكانيك') || t.includes('خرسانة') || t.includes('إنشاءات') || t.includes('grammar')) return true;
+        } else if (isConstruction) {
+            if (t.includes('السلامة والصحة') || t.includes('سكرتار') || t.includes('كهربا') || t.includes('لحام') || t.includes('ميكانيك') || t.includes('grammar')) return true;
+        }
+        return false;
+    }
+    window.isItemCrossContaminated = isItemCrossContaminated;
+
+    // دالة إزالة التكرار من قوائم الأسبوع للحفاظ على نظافة المقررات
+    function deduplicateLmsItemList(list) {
+        if (!Array.isArray(list) || list.length <= 1) return list || [];
+        const seenTitles = new Map();
+        for (let i = list.length - 1; i >= 0; i--) {
+            const item = list[i];
+            if (!item) continue;
+            const normTitle = String(item.title || item.name || '').trim().replace(/\s+/g, ' ');
+            if (normTitle && !seenTitles.has(normTitle)) {
+                seenTitles.set(normTitle, item);
+            } else if (!normTitle) {
+                seenTitles.set('idx_' + i, item);
+            }
+        }
+        return Array.from(seenTitles.values()).reverse();
+    }
+    window.deduplicateLmsItemList = deduplicateLmsItemList;
+
+    // دالة التطهير والفرز الصارم: تضمن أن كل مقرر يحتوي فقط وحصرياً على مادته العلمية دون أي تداخل أو تكرار
+    function sanitizeCourseContentForTrainer(courseKey, courseData) {
+        if (!courseKey || !courseData) return;
+        const cleanKey = (typeof findCourseKeyForTrainer === 'function') ? findCourseKeyForTrainer(courseKey) : courseKey;
+
+        // مطابقة وترسيخ بيانات المقرر والمدرب المعتمدة 100%
+        const initDef = (typeof INITIAL_LMS_COURSES !== 'undefined' && INITIAL_LMS_COURSES[cleanKey]) ? INITIAL_LMS_COURSES[cleanKey] : null;
+        if (initDef) {
+            courseData.trainer = initDef.trainer;
+            courseData.trainerName = initDef.trainerName;
+            courseData.courseTitle = initDef.courseTitle;
+            courseData.courseShort = initDef.courseShort;
+            courseData.room = initDef.room;
+            if (!courseData.description || courseData.description.includes('undefined')) {
+                courseData.description = initDef.description;
+            }
+        }
 
         if (!Array.isArray(courseData.weeks)) return;
 
-
-
-        const isSafety = cleanKey === 'فاضل الماجد';
-
-        const isEnglish = cleanKey === 'علي عبدالسلام' || cleanKey === 'يوسف جمال' || cleanKey === 'شرف الدين';
-
-        const isComputer = cleanKey === 'إمام يعقوب' || cleanKey === 'قاسم الماجد';
-
-        const isWelding = cleanKey === 'رضا مطيلق';
-
-        const isElectricity = cleanKey === 'عصام سعيد';
-
-        const isMechanics = cleanKey === 'سيد احمد';
-
-        const isOffice = cleanKey === 'أحمد الاصيل';
-
-        const isConstruction = cleanKey === 'ناجي محمد';
-
-
-
-        const isQuizForbidden = (title) => {
-
-            const t = String(title || '').toLowerCase();
-
-            if (isSafety) {
-
-                if (t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('grammar') || t.includes('طباعة') || t.includes('typing') || t.includes('الحاسب') || t.includes('لوحة المفاتيح') || t.includes('لحام') || t.includes('smaw') || t.includes('كهرباء') || t.includes('ميكانيكا')) return true;
-
-            } else if (isEnglish) {
-
-                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('osha') || t.includes('أرامكو') || t.includes('طباعة') || t.includes('typing') || t.includes('لحام') || t.includes('smaw') || t.includes('كهرباء') || t.includes('ميكانيكا')) return true;
-
-            } else if (isComputer) {
-
-                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('لحام') || t.includes('كهرباء') || t.includes('ميكانيكا')) return true;
-
-            } else if (isWelding) {
-
-                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('طباعة') || t.includes('typing') || t.includes('كهرباء') || t.includes('ميكانيكا')) return true;
-
-            } else if (isElectricity) {
-
-                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('طباعة') || t.includes('typing') || t.includes('لحام') || t.includes('ميكانيكا')) return true;
-
-            } else if (isMechanics) {
-
-                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('طباعة') || t.includes('typing') || t.includes('لحام') || t.includes('كهرباء')) return true;
-
-            } else if (isOffice) {
-
-                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('لحام') || t.includes('كهرباء') || t.includes('ميكانيكا')) return true;
-
-            } else if (isConstruction) {
-
-                if (t.includes('السلامة') || t.includes('سلامة') || t.includes('إنجليزية') || t.includes('انجليزية') || t.includes('english') || t.includes('طباعة') || t.includes('typing') || t.includes('لحام') || t.includes('كهرباء')) return true;
-
-            }
-
-            return false;
-
-        };
-
-
-
-        if (Array.isArray(courseData.weeks) && courseData.weeks.length > 5) {
-
+        if (courseData.weeks.length > 5) {
             courseData.weeks = courseData.weeks.slice(0, 5);
-
         }
 
         courseData.weeks.forEach(w => {
-
             if (!w) return;
 
+            // 1. المحاضرات والشروحات
             if (Array.isArray(w.videos)) {
-
-                w.videos = w.videos.filter(v => v && !isQuizForbidden(v.title || v.name || v.description));
-
+                w.videos = w.videos.filter(v => v && !isLegacyDummyLmsItem(v) && !isItemCrossContaminated(cleanKey, v));
+                w.videos = deduplicateLmsItemList(w.videos);
             }
 
+            // 2. المذكرات وقاموس المصطلحات
             if (Array.isArray(w.docs)) {
-
-                w.docs = w.docs.filter(d => d && !isQuizForbidden(d.title || d.name || d.description || d.content));
-
+                w.docs = w.docs.filter(d => d && !isLegacyDummyLmsItem(d) && !isItemCrossContaminated(cleanKey, d));
+                w.docs = deduplicateLmsItemList(w.docs);
             }
-
             if (Array.isArray(w.documents)) {
-
-                w.documents = w.documents.filter(d => d && !isQuizForbidden(d.title || d.name || d.description || d.content));
-
+                w.documents = w.documents.filter(d => d && !isLegacyDummyLmsItem(d) && !isItemCrossContaminated(cleanKey, d));
+                w.documents = deduplicateLmsItemList(w.documents);
+            } else {
+                w.documents = w.docs;
             }
 
+            // 3. الاختبارات (منع التكرار وحظر أي تداخل مع مدرب آخر)
             if (Array.isArray(w.quizzes)) {
-
-                w.quizzes = w.quizzes.filter(q => q && !isQuizForbidden(q.title || q.name));
-
+                w.quizzes = w.quizzes.filter(q => q && !isLegacyDummyLmsItem(q) && !isItemCrossContaminated(cleanKey, q));
+                w.quizzes = deduplicateLmsItemList(w.quizzes);
             }
 
+            // 4. الواجبات (منع التكرار وحظر أي تداخل مع مدرب آخر)
             if (Array.isArray(w.assignments)) {
-
-                w.assignments = w.assignments.filter(a => a && !isQuizForbidden(a.title || a.name));
-
+                w.assignments = w.assignments.filter(a => a && !isLegacyDummyLmsItem(a) && !isItemCrossContaminated(cleanKey, a));
+                w.assignments = deduplicateLmsItemList(w.assignments);
             }
-
         });
-
     }
-
     window.sanitizeCourseContentForTrainer = sanitizeCourseContentForTrainer;
 
-
-
-    function sanitizeAllLmsCourses() {
-
+    function sanitizeAllLmsCourses(shouldSyncCloud = false) {
         if (!lmsCourses || typeof lmsCourses !== 'object') return;
-
         for (const k in lmsCourses) {
-
             sanitizeCourseContentForTrainer(k, lmsCourses[k]);
-
         }
+        try {
+            localStorage.setItem('sys_lms_courses_v3', JSON.stringify(lmsCourses));
+            localStorage.setItem('sys_lms_courses_v2', JSON.stringify(lmsCourses));
+        } catch(e) {}
 
+        if (shouldSyncCloud && window.supabaseClient && window.isSupabaseConnected) {
+            try {
+                supabaseClient.from('app_sync_state').upsert([
+                    { key: 'sys_lms_courses_v2', data: lmsCourses, updated_at: new Date().toISOString() },
+                    { key: 'sys_lms_courses_v3', data: lmsCourses, updated_at: new Date().toISOString() }
+                ], { onConflict: 'key' }).catch(() => {});
+            } catch(e) {}
+        }
     }
-
     window.sanitizeAllLmsCourses = sanitizeAllLmsCourses;
 
 
@@ -37515,7 +37537,7 @@ function openReportFromProfile() {
 
     if (typeof sanitizeAllLmsCourses === 'function') {
 
-        sanitizeAllLmsCourses();
+        sanitizeAllLmsCourses(true);
 
     }
 
@@ -44008,6 +44030,10 @@ function openReportFromProfile() {
                            Object.values(lmsCourses)[0];
 
         if (!courseData) return;
+        if (typeof sanitizeCourseContentForTrainer === 'function') {
+            sanitizeCourseContentForTrainer(courseKey, courseData);
+        }
+
 
 
 
@@ -50991,6 +51017,10 @@ function openReportFromProfile() {
         const courseKey = getActiveTrainerCourseKey();
 
         const courseData = lmsCourses[courseKey] || lmsCourses['اللحام'];
+        if (typeof sanitizeCourseContentForTrainer === 'function') {
+            sanitizeCourseContentForTrainer(courseKey, courseData);
+        }
+
 
 
 
@@ -54631,6 +54661,8 @@ function openReportFromProfile() {
                 const iTitle = String(item.title || item.name || '').trim();
 
                 if (iId && deletedLmsItemIds.has(iId)) return true;
+                if (typeof isLegacyDummyLmsItem === 'function' && isLegacyDummyLmsItem(item)) return true;
+
 
                 if (iTitle.includes('SMAW') || iTitle.includes('كيف تحترم') || iTitle.includes('E7018') || iTitle.includes('قناع اللحام') || iTitle.includes('الوصلات الخمس')) return true;
 
@@ -55013,6 +55045,11 @@ function openReportFromProfile() {
         }
 
 
+
+        // تطهير نهائي فوري وشامل لجميع المقررات لمنع أي تداخل أو تسلل لعناصر مكررة أو وهمية
+        if (typeof sanitizeAllLmsCourses === 'function') {
+            sanitizeAllLmsCourses(false);
+        }
 
         if (localChanged) {
 
@@ -67816,439 +67853,223 @@ function buildDemoExecutiveReport(params) {
 
             const finalVideoUrl = resolveClientDirectYouTubeUrl(enteredUrl, finalVideoTitle, finalVideoTitle, 0);
 
-
-
             const lecTitle = document.getElementById('aiLectureTitle')?.value.trim() || finalVideoTitle;
-
             const lecDuration = document.getElementById('aiLectureDuration')?.value.trim() || '15';
-
             const lecSummary = document.getElementById('aiLectureSummary')?.value.trim() || '';
 
-
-
-            activeWeek.videos.push({
-
+            const newVideoObj = {
                 id: 'v-' + Date.now(),
-
                 title: lecTitle,
-
                 url: finalVideoUrl,
-
                 materialType: isPpt ? 'ppt' : 'pdf',
-
                 duration: `${lecDuration}:00 دقيقة`,
-
                 notes: lecSummary,
-
                 lectureFile: selectedAiFile ? {
-
                     id: 'ai_' + Date.now(),
-
                     name: selectedAiFile.name,
-
                     size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
-
                     type: selectedAiFile.type || (isPpt ? 'presentation' : 'document'),
-
                     kind: isPpt ? 'ppt' : 'pdf',
-
                     url: cloudFileUrl || ''
-
                 } : null,
-
                 lectureLinks: finalVideoUrl ? [finalVideoUrl] : []
-
-            });
-
-
+            };
 
             // ═════════════════════════════════════════════════════════════════
-
             // 2. SAVE COMPONENT 02: STUDY NOTES, TOPICS & GLOSSARY
-
             // ═════════════════════════════════════════════════════════════════
-
-            if (!activeWeek.docs) activeWeek.docs = [];
-
             const glossTitle = document.getElementById('aiGlossaryTitle')?.value.trim() || 'قاموس ومذكرات مصطلحات الأسبوع';
-
             const terms = Array.isArray(currentAiGeneratedData.glossary_notes?.terms) ? currentAiGeneratedData.glossary_notes.terms : [];
-
-            
-
-            // Collect topics
-
             const topicInputs = document.querySelectorAll('.aiTopicInput');
-
             const collectedTopics = [];
-
             topicInputs.forEach(ti => {
-
                 if (ti.value.trim()) collectedTopics.push(ti.value.trim());
-
             });
-
-
 
             let docDescription = (currentAiGeneratedData.glossary_notes?.description || '') + '\n\n';
-
             if (collectedTopics.length > 0) {
-
                 docDescription += '📌 المحاور والمواضيع الدراسية الأساسية:\n' + collectedTopics.map(tp => `• ${tp}`).join('\n') + '\n\n';
-
             }
-
             if (terms.length > 0) {
-
                 docDescription += '📖 المصطلحات الفنية المعتمدة:\n' + terms.map(t => `• ${t.en} (${t.ar}): ${t.definition || ''}`).join('\n');
-
             }
 
-
-
-            activeWeek.docs.push({
-
+            const newDocObj = {
                 id: 'd-' + Date.now(),
-
                 title: glossTitle,
-
                 docKind: 'text',
-
                 type: 'مذكرة دراسية وقاموس مصطلحات',
-
                 description: docDescription,
-
                 desc: docDescription,
-
                 topics: collectedTopics,
-
                 url: cloudFileUrl || ''
-
-            });
-
-
+            };
 
             // ═════════════════════════════════════════════════════════════════
-
             // 3. SAVE COMPONENT 03: ASSIGNMENT (MCQ OR TEXT WRITING)
-
             // ═════════════════════════════════════════════════════════════════
-
-            if (!activeWeek.assignments) activeWeek.assignments = [];
-
-            const aTitle = document.getElementById('aiAssignmentTitle')?.value.trim() || 'الواجب الأسبوعي';
-
+            const aTitle = document.getElementById('aiAssignmentTitle')?.value.trim() || 'الواجب والتكليف التطبيقي';
             const aInstructions = document.getElementById('aiAssignmentInstructions')?.value.trim() || '';
-
             const targetGrp = (activeTrainerLmsGroupFilter && activeTrainerLmsGroupFilter !== 'ALL') ? activeTrainerLmsGroupFilter : 'ALL';
 
-
-
+            let newAssignmentObj = null;
             if (currentAiAssignmentMode === 'text') {
-
-                // Text Writing / Essay Assignment
-
                 const prompt1 = document.getElementById('aiTextPrompt-0')?.value.trim() || 'اكتب تقريراً موجزاً باللغة الإنجليزية التقنية يوضح المفاهيم الأساسية للدرس.';
-
                 const guide1 = document.getElementById('aiTextGuide-0')?.value.trim() || 'استخدم المصطلحات المعتمدة وراعِ السلامة المهنية.';
-
-
-
-                activeWeek.assignments.push({
-
+                newAssignmentObj = {
                     id: 'a-' + Date.now(),
-
                     title: aTitle,
-
                     dueDate: resolvedAssignmentDueDate,
-
                     dueDateIso: resolvedAssignmentDueDate,
-
                     points: 10,
-
                     targetGroup: targetGrp,
-
                     assignmentCategory: 'essay',
-
                     submissionType: 'text',
-
                     gradingMode: 'manual_trainer',
-
                     instructions: aInstructions,
-
                     promptText: prompt1,
-
                     guidelines: guide1,
-
                     pdfFile: (selectedAiFile && !isPpt) ? {
-
                         name: selectedAiFile.name,
-
                         size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
-
                         url: cloudFileUrl || '',
-
                         data: ''
-
                     } : null,
-
                     questions: []
-
-                });
-
+                };
             } else {
-
-                // MCQ Questions Assignment
-
                 const rawAssignmentQuestions = Array.isArray(currentAiGeneratedData.assignment?.mcq_questions) && currentAiGeneratedData.assignment.mcq_questions.length > 0
-
                     ? currentAiGeneratedData.assignment.mcq_questions
-
                     : (Array.isArray(currentAiGeneratedData.assignment?.questions) ? currentAiGeneratedData.assignment.questions : []);
 
-
-
                 const assignmentQuestionsFormatted = rawAssignmentQuestions.map((q, idx) => {
-
                     const rawOpts = Array.isArray(q.options) && q.options.length > 0 ? [...q.options] : ['خيار 1', 'خيار 2', 'خيار 3', 'خيار 4'];
-
                     while (rawOpts.length < 4) rawOpts.push(`خيار ${rawOpts.length + 1}`);
-
                     let correctIdx = 0;
-
                     if (q.correct_answer) {
-
                         const foundIdx = rawOpts.findIndex(opt => opt.trim() === q.correct_answer.trim());
-
                         if (foundIdx >= 0) correctIdx = foundIdx;
-
                     }
-
                     return {
-
                         id: 'aq-' + Date.now() + '-' + idx,
-
                         text: q.question || `تطبيق رقم ${idx + 1}`,
-
                         options: rawOpts.slice(0, 4),
-
                         correctIndex: correctIdx
-
                     };
-
                 });
 
-
-
-                activeWeek.assignments.push({
-
+                newAssignmentObj = {
                     id: 'a-' + Date.now(),
-
                     title: aTitle,
-
                     dueDate: resolvedAssignmentDueDate,
-
                     dueDateIso: resolvedAssignmentDueDate,
-
                     points: 10,
-
                     targetGroup: targetGrp,
-
                     assignmentCategory: 'individual',
-
                     submissionType: 'mcq',
-
                     gradingMode: 'system_auto',
-
                     instructions: aInstructions,
-
                     pdfFile: (selectedAiFile && !isPpt) ? {
-
                         name: selectedAiFile.name,
-
                         size: (selectedAiFile.size / 1024).toFixed(0) + ' KB',
-
                         url: cloudFileUrl || '',
-
                         data: ''
-
                     } : null,
-
                     questions: assignmentQuestionsFormatted
-
-                });
-
+                };
             }
 
-
-
             // ═════════════════════════════════════════════════════════════════
-
             // 4. SAVE COMPONENT 04: QUIZ (الاختبار الأسبوعي)
-
             // ═════════════════════════════════════════════════════════════════
-
-            if (!activeWeek.quizzes) activeWeek.quizzes = [];
-
             const qTitle = document.getElementById('aiQuizTitle')?.value.trim() || 'اختبار الأسبوع';
-
             const qDur = parseInt(document.getElementById('aiQuizDuration')?.value, 10) || 15;
-
             const qGrade = parseInt(document.getElementById('aiQuizGrade')?.value, 10) || 10;
-
-
-
             const rawQuizQuestions = Array.isArray(currentAiGeneratedData.quiz?.questions) ? currentAiGeneratedData.quiz.questions : [];
-
             const quizQuestionsFormatted = rawQuizQuestions.map((q, idx) => {
-
                 const qType = q.type || 'mcq';
-
-
-
                 if (qType === 'matching') {
-
                     return {
-
                         id: 'qq-' + Date.now() + '-' + idx,
-
                         type: 'matching',
-
                         text: q.question || `🔗 سؤال التوصيل والمطابقة ${idx + 1}`,
-
                         pairs: Array.isArray(q.pairs) ? q.pairs : [],
-
                         explanation: q.explanation || ''
-
                     };
-
                 }
-
-
-
                 if (qType === 'true_false') {
-
                     const rawOpts = ['صح ✓', 'خطأ ✗'];
-
                     let correctIdx = 0;
-
                     if (q.correct_answer && (q.correct_answer.includes('خطأ') || q.correct_answer === 'False' || q.correct_answer === false)) {
-
                         correctIdx = 1;
-
                     }
-
                     return {
-
                         id: 'qq-' + Date.now() + '-' + idx,
-
                         type: 'true_false',
-
                         text: q.question || `سؤال صح أو خطأ ${idx + 1}`,
-
                         options: rawOpts,
-
                         correct_answer: rawOpts[correctIdx],
-
                         correctIndex: correctIdx,
-
                         explanation: q.explanation || ''
-
                     };
-
                 }
-
-
-
-                // Default MCQ
-
                 const rawOpts = Array.isArray(q.options) ? [...q.options] : [];
-
                 while (rawOpts.length < 4) rawOpts.push(`الخيار ${rawOpts.length + 1}`);
-
-
-
                 let correctIdx = 0;
-
                 if (q.correct_answer) {
-
                     const foundIdx = rawOpts.findIndex(opt => opt.trim() === q.correct_answer.trim() || opt.includes(q.correct_answer));
-
                     if (foundIdx >= 0) correctIdx = foundIdx;
-
                 }
-
-
-
                 return {
-
                     id: 'qq-' + Date.now() + '-' + idx,
-
                     type: 'mcq',
-
                     text: q.question || `سؤال رقم ${idx + 1}`,
-
                     options: rawOpts.slice(0, 4),
-
                     correct_answer: rawOpts[correctIdx],
-
                     correctIndex: correctIdx,
-
                     explanation: q.explanation || ''
-
                 };
-
             });
-
-
 
             const newAiQuizId = 'q-' + Date.now();
-
-            activeWeek.quizzes.push({
-
+            const newQuizObj = {
                 id: newAiQuizId,
-
                 title: qTitle,
-
                 quizDate: resolvedQuizDueDate,
-
                 dueDate: resolvedQuizDueDate,
-
                 dueDateIso: resolvedQuizDueDate,
-
                 timeMinutes: qDur,
-
                 totalPoints: qGrade,
-
                 maxAttempts: 2,
-
                 targetGroup: targetGrp,
-
                 quizCategory: 'weekend',
-
                 gradingMode: 'system_auto',
-
                 questions: quizQuestionsFormatted
+            };
 
-            });
-
-
+            // ═════════════════════════════════════════════════════════════════
+            // اعتماد حزمة الأسبوع النظيفة: 1 محاضرة، 1 مذكرة، 1 واجب، 1 اختبار حصراً
+            // تفريغ التراكمات والمحتوى القديم لضمان درس أسبوعي نظيف تماماً
+            // ═════════════════════════════════════════════════════════════════
+            activeWeek.videos = [ newVideoObj ];
+            activeWeek.docs = [ newDocObj ];
+            activeWeek.documents = activeWeek.docs;
+            activeWeek.assignments = newAssignmentObj ? [ newAssignmentObj ] : [];
+            activeWeek.quizzes = [ newQuizObj ];
 
             // تطهير تومبستونات الحذف لجميع عناصر المحتوى المولد وضمان إلغاء حظر الأسبوع
-
             unmarkLmsWeekCleared(currentAiWeekNum, courseKey);
-
             unregisterLmsItemDeleted(newAiQuizId);
-
             if (qTitle) unregisterLmsItemDeleted(qTitle);
-
             if (aTitle) unregisterLmsItemDeleted(aTitle);
-
             if (glossTitle) unregisterLmsItemDeleted(glossTitle);
-
             if (lecTitle) unregisterLmsItemDeleted(lecTitle);
-
             if (finalVideoUrl) unregisterLmsItemDeleted(finalVideoUrl);
+
+            // تطبيق الفرز والتطهير الفوري لمقرر هذا المدرب
+            if (typeof sanitizeCourseContentForTrainer === 'function') {
+                sanitizeCourseContentForTrainer(courseKey, courseData);
+            }
 
             const lastVid = activeWeek.videos[activeWeek.videos.length - 1];
 
