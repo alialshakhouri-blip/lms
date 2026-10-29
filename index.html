@@ -7596,7 +7596,7 @@
 
                         </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2" id="tccWeekTabsContainer">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2" id="tccWeekTabsContainer">
 
                             <!-- Dynamically rendered week pills with status -->
 
@@ -9940,7 +9940,7 @@
 
                 <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
 
-                    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-2 md:gap-2.5" id="sdLmsWeekTabsContainer">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-2.5" id="sdLmsWeekTabsContainer">
 
                         <!-- 6 Week Buttons -->
 
@@ -10256,33 +10256,10 @@
 
                         <div class="flex items-center gap-2 flex-wrap">
 
-                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl text-xs font-bold">
-
-                                <label class="text-slate-600">📅 بداية الكورس:</label>
-
-                                <input type="date" id="tlCourseStartDateInput" class="bg-white text-slate-900 rounded-lg px-2 py-0.5 text-xs font-mono font-bold border border-slate-300 outline-none cursor-pointer">
-
-                            </div>
-
-                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl text-xs font-bold">
-
-                                <label class="text-slate-600">نهاية الكورس:</label>
-
-                                <input type="date" id="tlCourseEndDateInput" class="bg-white text-slate-900 rounded-lg px-2 py-0.5 text-xs font-mono font-bold border border-slate-300 outline-none cursor-pointer">
-
-                            </div>
-
-                            <button type="button" onclick="applyCourseDateRangeAndGenerateWeeks('tlCourseStartDateInput', 'tlCourseEndDateInput')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer whitespace-nowrap border border-amber-400/30" title="اعتماد الفترة الزمنية وتوليد الأسابيع">
-
-                                <span>⚡</span>
-
-                                <span>توليد الأسابيع حسب التواريخ</span>
-
-                            </button>
 
                             <span class="text-[11px] font-bold text-[#0F2942] bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs" id="tlCourseWeeksCountBadge">
 
-                                6 أسابيع دراسية
+                                5 أسابيع دراسية
 
                             </span>
 
@@ -10294,7 +10271,7 @@
 
                     <!-- Prominent 6-Week Module Cards Grid -->
 
-                    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-2 md:gap-3" id="tlWeekTabsContainer">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-3" id="tlWeekTabsContainer">
 
                         <!-- Populated dynamically with prominent clickable Week Cards -->
 
@@ -11700,7 +11677,7 @@
 
                         </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-1">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-1">
 
                             <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer bg-white px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-400">
 
@@ -32658,7 +32635,7 @@ ${details}
 
         if (tabsEl) {
 
-            tabsEl.innerHTML = [1, 2, 3, 4, 5, 6].map(wNum => {
+            tabsEl.innerHTML = [1, 2, 3, 4, 5].map(wNum => {
 
                 const wObj = weeks.find(wk => (wk.week || wk.weekNum || 1) === wNum) || {};
 
@@ -36776,7 +36753,7 @@ function openReportFromProfile() {
 
 
 
-    function createEmptyLmsWeeks(count = 12) {
+    function createEmptyLmsWeeks(count = 5) {
 
         return Array.from({ length: count }, (_, i) => ({
 
@@ -36822,7 +36799,7 @@ function openReportFromProfile() {
 
             description: "مقرر اللغة الإنجليزية - المدرب أ. شرف الدين",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         },
 
@@ -36840,7 +36817,7 @@ function openReportFromProfile() {
 
             description: "مقرر اللغة الإنجليزية - المدرب أ. يوسف جمال",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         },
 
@@ -36858,7 +36835,7 @@ function openReportFromProfile() {
 
             description: "مقرر اللغة الإنجليزية - المدرب أ. علي عبدالسلام",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         },
 
@@ -36876,7 +36853,7 @@ function openReportFromProfile() {
 
             description: "مقرر الكهرباء - المدرب أ. عصام سعيد",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         },
 
@@ -36894,7 +36871,7 @@ function openReportFromProfile() {
 
             description: "مقرر اللحام - المدرب أ. رضا مطيلق",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         },
 
@@ -36912,7 +36889,7 @@ function openReportFromProfile() {
 
             description: "مقرر الميكانيكا - المدرب أ. سيد أحمد",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         },
 
@@ -36930,7 +36907,7 @@ function openReportFromProfile() {
 
             description: "مقرر السلامة والصحة المهنية - المدرب أ. فاضل الماجد",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         },
 
@@ -36948,7 +36925,7 @@ function openReportFromProfile() {
 
             description: "مقرر الإدارة المكتبية والسكرتارية - المدرب أ. أحمد الاصيل",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         },
 
@@ -36966,7 +36943,7 @@ function openReportFromProfile() {
 
             description: "مقرر الإنشاءات - المدرب أ. ناجي محمد",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         },
 
@@ -36984,7 +36961,7 @@ function openReportFromProfile() {
 
             description: "مقرر الحاسب الآلي - المدرب أ. إمام يعقوب",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         },
 
@@ -37002,7 +36979,7 @@ function openReportFromProfile() {
 
             description: "مقرر الحاسب الآلي - المدرب أ. قاسم الماجد",
 
-            weeks: createEmptyLmsWeeks(12)
+            weeks: createEmptyLmsWeeks(5)
 
         }
 
@@ -37356,9 +37333,33 @@ function openReportFromProfile() {
 
 
 
+        if (Array.isArray(courseData.weeks) && courseData.weeks.length > 5) {
+
+            courseData.weeks = courseData.weeks.slice(0, 5);
+
+        }
+
         courseData.weeks.forEach(w => {
 
             if (!w) return;
+
+            if (Array.isArray(w.videos)) {
+
+                w.videos = w.videos.filter(v => v && !isQuizForbidden(v.title || v.name || v.description));
+
+            }
+
+            if (Array.isArray(w.docs)) {
+
+                w.docs = w.docs.filter(d => d && !isQuizForbidden(d.title || d.name || d.description || d.content));
+
+            }
+
+            if (Array.isArray(w.documents)) {
+
+                w.documents = w.documents.filter(d => d && !isQuizForbidden(d.title || d.name || d.description || d.content));
+
+            }
 
             if (Array.isArray(w.quizzes)) {
 
@@ -37398,7 +37399,7 @@ function openReportFromProfile() {
 
     // تهيئة المقررات بنسخة نظيفة مفرغة ومطهرة لكل مدرب وفق الجدول الأكاديمي
 
-    const LMS_STORAGE_VERSION = 'v6_clean_isolated_trainer_courses';
+    const LMS_STORAGE_VERSION = 'v8_wipe_clean_5weeks_strict_isolated_courses';
 
     const isLmsCleaned = (localStorage.getItem('sys_lms_version_flag') === LMS_STORAGE_VERSION);
 
@@ -37433,6 +37434,12 @@ function openReportFromProfile() {
             localStorage.setItem('sys_lms_courses_v2', JSON.stringify(lmsCourses));
 
             localStorage.setItem('sys_lms_courses_v1', JSON.stringify(lmsCourses));
+
+            localStorage.setItem('sys_academic_course_total_weeks', '5');
+
+            localStorage.removeItem('sys_academic_course_start_date');
+
+            localStorage.removeItem('sys_academic_course_end_date');
 
             localStorage.removeItem('sys_student_quiz_submissions_v1');
 
@@ -50140,11 +50147,11 @@ function openReportFromProfile() {
 
     function getAcademicCourseTotalWeeks() {
 
-        const saved = parseInt(localStorage.getItem('sys_academic_course_total_weeks'), 10);
+        // [FIXED] 5 أسابيع ثابتة — لا يتغير
 
-        if (!isNaN(saved) && saved >= 1 && saved <= 16) return saved;
+        // if (!isNaN(saved) && saved >= 1 && saved <= 16) return saved;
 
-        return 6;
+        return 5; // خمسة أسابيع ثابتة
 
     }
 
@@ -50234,88 +50241,12 @@ function openReportFromProfile() {
 
     function applyCourseDateRangeAndGenerateWeeks(startInputId, endInputId) {
 
-        const sInput = (startInputId ? document.getElementById(startInputId) : null) || 
+        // [ثابت] 5 أسابيع دائماً — لا تتغير بالتواريخ
+        const totalWeeks = 5;
 
-                       document.getElementById('courseStartDateInput') || 
+        localStorage.setItem('sys_academic_course_total_weeks', '5');
 
-                       document.getElementById('tlCourseStartDateInput');
-
-        const eInput = (endInputId ? document.getElementById(endInputId) : null) || 
-
-                       document.getElementById('courseEndDateInput') || 
-
-                       document.getElementById('tlCourseEndDateInput');
-
-
-
-        const sVal = sInput?.value?.trim();
-
-        const eVal = eInput?.value?.trim();
-
-
-
-        if (!sVal) {
-
-            showToast('يرجى تحديد تاريخ بداية الدورة', 'warning');
-
-            return false;
-
-        }
-
-        if (!eVal) {
-
-            showToast('يرجى تحديد تاريخ نهاية الدورة', 'warning');
-
-            return false;
-
-        }
-
-
-
-        const start = new Date(sVal + 'T00:00:00');
-
-        const end = new Date(eVal + 'T23:59:59');
-
-
-
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-
-            showToast('تاريخ بداية أو نهاية الدورة غير صالح', 'error');
-
-            return false;
-
-        }
-
-
-
-        if (end < start) {
-
-            showToast('⚠️ تاريخ نهاية الدورة لا يمكن أن يكون قبل تاريخ بدايتها!', 'error');
-
-            return false;
-
-        }
-
-
-
-        const diffMs = end.getTime() - start.getTime();
-
-        const diffDays = Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)) + 1);
-
-        const totalWeeks = Math.max(1, Math.min(16, Math.ceil(diffDays / 7)));
-
-
-
-        localStorage.setItem('sys_academic_course_start_date', sVal);
-
-        localStorage.setItem('sys_academic_course_end_date', eVal);
-
-        localStorage.setItem('sys_academic_course_total_weeks', String(totalWeeks));
-
-
-
-        // Generate / Update Weeks in all courses in lmsCourses
-
+        // توليد/تحديث الأسابيع في جميع المقررات — كل مقرر مستقل
         if (typeof lmsCourses !== 'undefined' && lmsCourses) {
 
             for (const cKey in lmsCourses) {
@@ -50326,8 +50257,6 @@ function openReportFromProfile() {
 
                 if (!Array.isArray(course.weeks)) course.weeks = [];
 
-
-
                 for (let w = 1; w <= totalWeeks; w++) {
 
                     let wkObj = course.weeks.find(x => (x.week || x.weekNum || 1) === w);
@@ -50335,25 +50264,11 @@ function openReportFromProfile() {
                     if (!wkObj) {
 
                         wkObj = {
-
                             week: w,
-
                             weekNum: w,
-
                             title: `الوحدة التدريبية ${w}`,
-
                             topic: `موضوع وتطبيقات الأسبوع ${w}`,
-
-                            videos: [],
-
-                            docs: [],
-
-                            documents: [],
-
-                            quizzes: [],
-
-                            assignments: []
-
+                            videos: [], docs: [], documents: [], quizzes: [], assignments: []
                         };
 
                         course.weeks.push(wkObj);
@@ -50370,135 +50285,32 @@ function openReportFromProfile() {
 
                 }
 
-
-
+                // حذف الأسابيع الزائدة عن 5
                 if (course.weeks.length > totalWeeks) {
-
                     course.weeks = course.weeks.filter(x => (x.week || x.weekNum || 1) <= totalWeeks);
-
                 }
 
                 course.weeks.sort((a, b) => (a.week || a.weekNum || 1) - (b.week || b.weekNum || 1));
 
-
-
                 if (typeof ensureLmsCourseWeeklyPillars === 'function') {
-
                     ensureLmsCourseWeeklyPillars(course);
-
                 }
 
             }
 
-            try {
-
-                localStorage.setItem('sys_lms_courses_v2', JSON.stringify(lmsCourses));
-
-            } catch(e) {}
+            try { localStorage.setItem('sys_lms_courses_v2', JSON.stringify(lmsCourses)); } catch(e) {}
+            try { localStorage.setItem('sys_lms_courses_v3', JSON.stringify(lmsCourses)); } catch(e) {}
 
         }
 
+        if (typeof renderTrainerLms === 'function') renderTrainerLms();
+        if (typeof renderSubmissionsCalendarPage === 'function') renderSubmissionsCalendarPage();
+        if (typeof renderGradesSystemTab === 'function') renderGradesSystemTab();
+        if (typeof renderTrainerDashboard === 'function') renderTrainerDashboard();
 
-
-        // Sync to Supabase app_state
-
-        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-
-            try {
-
-                supabaseClient.from('app_state').upsert([
-
-                    { key: 'sys_academic_course_start_date', data: sVal, updated_at: new Date().toISOString() },
-
-                    { key: 'sys_academic_course_end_date', data: eVal, updated_at: new Date().toISOString() },
-
-                    { key: 'sys_academic_course_total_weeks', data: totalWeeks, updated_at: new Date().toISOString() },
-
-                    { key: 'sys_lms_courses_v2', data: lmsCourses, updated_at: new Date().toISOString() }
-
-                ], { onConflict: 'key' }).then(() => {}).catch(() => {});
-
-            } catch(e) {}
-
-        }
-
-
-
-        // Refresh views
-
-        if (typeof renderSubmissionsCalendarPage === 'function' && !document.getElementById('tab-submissionsCalendar')?.classList.contains('hidden')) {
-
-            renderSubmissionsCalendarPage();
-
-        }
-
-        if (typeof renderTrainerLms === 'function' && !document.getElementById('tab-trainerLms')?.classList.contains('hidden')) {
-
-            renderTrainerLms();
-
-        }
-
-        if (typeof renderGradesSystemTab === 'function' && !document.getElementById('tab-gradesSystem')?.classList.contains('hidden')) {
-
-            renderGradesSystemTab();
-
-        }
-
-        if (typeof renderTrainerSubmissionsCalendar === 'function') {
-
-            renderTrainerSubmissionsCalendar();
-
-        }
-
-        if (typeof renderStudentSubmissionsCalendar === 'function') {
-
-            renderStudentSubmissionsCalendar();
-
-        }
-
-        if (typeof renderStudentDashboard === 'function' && !document.getElementById('tab-studentDashboard')?.classList.contains('hidden')) {
-
-            renderStudentDashboard();
-
-        }
-
-
-
-        showToast(`✓ تم اعتماد فترة الدورة من (${formatGregorianDayMonthArabic(start)}) إلى (${formatGregorianDayMonthArabic(end)}) وتوليد ${totalWeeks} أسابيع تدريبية بنجاح!`, 'success');
+        showToast('\u2714 5 أسابيع ثابتة محددة لجميع المقررات', 'success');
 
         return true;
-
-    }
-
-    window.applyCourseDateRangeAndGenerateWeeks = applyCourseDateRangeAndGenerateWeeks;
-
-    window.getAcademicCourseEndDate = getAcademicCourseEndDate;
-
-    window.getAcademicCourseTotalWeeks = getAcademicCourseTotalWeeks;
-
-    window.getAcademicCourseWeeksList = getAcademicCourseWeeksList;
-
-
-
-    function getCurrentAcademicWeekNum() {
-
-        const start = getAcademicCourseStartDate();
-
-        const now = new Date();
-
-        now.setHours(0, 0, 0, 0);
-
-        const diffMs = now.getTime() - start.getTime();
-
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 0) return 1;
-
-        const weekIndex = Math.floor(diffDays / 7) + 1;
-
-        const maxW = (typeof getAcademicCourseTotalWeeks === 'function') ? getAcademicCourseTotalWeeks() : 6;
-
-        return Math.min(maxW, Math.max(1, weekIndex));
 
     }
 
@@ -54712,7 +54524,7 @@ function openReportFromProfile() {
 
                             description: row.metadata?.description || '',
 
-                            weeks: Array.isArray(row.weeks) ? row.weeks : [],
+                            weeks: Array.isArray(row.weeks) ? row.weeks.slice(0, 5) : [],
 
                             metadata: row.metadata || {}
 
@@ -54942,7 +54754,7 @@ function openReportFromProfile() {
 
                 const localWeeks = Array.isArray(localCourse.weeks) ? localCourse.weeks : [];
 
-                const maxWeeks = Math.max(localWeeks.length, cloudWeeks.length, 6);
+                const maxWeeks = 5; // [STRICT] 5 أسابيع ثابتة دائماً
 
                 const mergedWeeks = [];
 
@@ -70494,7 +70306,7 @@ function buildDemoExecutiveReport(params) {
 
         let rowsHtml = '';
 
-        for (let w = 1; w <= 6; w++) {
+        for (let w = 1; w <= 5; w++) {
 
             const row = gb.weeks[w] || {};
 
@@ -70682,7 +70494,7 @@ function buildDemoExecutiveReport(params) {
 
         const gb = getOrInitTraineeGradebook(currentEditingTraineeId, currentEditingGradebookCourseKey);
 
-        for (let w = 1; w <= 6; w++) {
+        for (let w = 1; w <= 5; w++) {
 
             const assEl = document.getElementById(`tp_gb_w${w}_ass`);
 
@@ -70706,7 +70518,7 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        for (let w = 1; w <= 6; w++) {
+        for (let w = 1; w <= 5; w++) {
 
             const sumEl = document.getElementById(`tp_gb_w${w}_sum`);
 
@@ -70848,7 +70660,7 @@ function buildDemoExecutiveReport(params) {
 
         // 3. ضبط السلوك على 10 تلقائياً إن لم يكن محدداً
 
-        for (let w = 1; w <= 6; w++) {
+        for (let w = 1; w <= 5; w++) {
 
             if (gb.weeks[w].behavior === null || gb.weeks[w].behavior === undefined) {
 
@@ -70914,7 +70726,7 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        for (let w = 1; w <= 6; w++) {
+        for (let w = 1; w <= 5; w++) {
 
             const assEl = document.getElementById(`tp_gb_w${w}_ass`);
 
@@ -71184,7 +70996,7 @@ function buildDemoExecutiveReport(params) {
 
             let weeksPills = '';
 
-            for (let w = 1; w <= 6; w++) {
+            for (let w = 1; w <= 5; w++) {
 
                 const wSum = summary.weekTotals[w] || 0;
 
@@ -71266,7 +71078,7 @@ function buildDemoExecutiveReport(params) {
 
                     </div>
 
-                    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-2 md:gap-2.5">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-2.5">
 
                         ${weeksPills}
 
@@ -71426,7 +71238,7 @@ function buildDemoExecutiveReport(params) {
 
         let rowsHtml = '';
 
-        for (let w = 1; w <= 6; w++) {
+        for (let w = 1; w <= 5; w++) {
 
             const row = gb.weeks[w] || {};
 
@@ -73390,7 +73202,7 @@ function buildDemoExecutiveReport(params) {
 
             if (gridContainer) {
 
-                const weeksList = [1, 2, 3, 4, 5, 6];
+                const weeksList = [1, 2, 3, 4, 5];
 
                 gridContainer.innerHTML = weeksList.map(wk => {
 
@@ -73652,7 +73464,7 @@ function buildDemoExecutiveReport(params) {
 
         if (weekBar) {
 
-            const weeksModes = [1, 2, 3, 4, 5, 6];
+            const weeksModes = [1, 2, 3, 4, 5];
 
             weekBar.innerHTML = weeksModes.map(wkNum => {
 
@@ -74404,7 +74216,7 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        const weeksToShow = (filterWeek === 'ALL') ? [1, 2, 3, 4, 5, 6] : [parseInt(filterWeek, 10)];
+        const weeksToShow = (filterWeek === 'ALL') ? [1, 2, 3, 4, 5] : [parseInt(filterWeek, 10)];
 
         const totalPoolCount = pool.length || 1;
 
@@ -74856,7 +74668,7 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        const weeksToShow = (filterWeek === 'ALL') ? [1, 2, 3, 4, 5, 6] : [parseInt(filterWeek, 10)];
+        const weeksToShow = (filterWeek === 'ALL') ? [1, 2, 3, 4, 5] : [parseInt(filterWeek, 10)];
 
 
 
@@ -75446,7 +75258,7 @@ function buildDemoExecutiveReport(params) {
 
         const totalWeeks = (typeof getAcademicCourseTotalWeeks === 'function') ? getAcademicCourseTotalWeeks() : 6;
 
-        const weeksList = (typeof getAcademicCourseWeeksList === 'function') ? getAcademicCourseWeeksList() : [1, 2, 3, 4, 5, 6];
+        const weeksList = (typeof getAcademicCourseWeeksList === 'function') ? getAcademicCourseWeeksList() : [1, 2, 3, 4, 5];
 
         const rangeW1 = getAcademicWeekDateRange(1);
 
@@ -75720,39 +75532,6 @@ function buildDemoExecutiveReport(params) {
 
 
 
-                        <!-- Course Date Range & Dynamic Weeks (Trainer/Supervisor/Admin) -->
-
-                        ${(!isStudent) ? `
-
-                            <div class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 p-1.5 px-3 rounded-2xl border border-slate-200 text-xs font-bold shrink-0 flex-wrap">
-
-                                <div class="flex items-center gap-1.5">
-
-                                    <label for="courseStartDateInput" class="text-slate-700 font-black whitespace-nowrap">📅 بداية الكورس:</label>
-
-                                    <input type="date" id="courseStartDateInput" value="${startYmd}" class="bg-white text-slate-900 rounded-lg px-2 py-1 text-xs font-mono font-bold border border-slate-300 outline-none cursor-pointer shadow-2xs">
-
-                                </div>
-
-                                <div class="flex items-center gap-1.5">
-
-                                    <label for="courseEndDateInput" class="text-slate-700 font-black whitespace-nowrap">نهاية الكورس:</label>
-
-                                    <input type="date" id="courseEndDateInput" value="${endYmd}" class="bg-white text-slate-900 rounded-lg px-2 py-1 text-xs font-mono font-bold border border-slate-300 outline-none cursor-pointer shadow-2xs">
-
-                                </div>
-
-                                <button type="button" onclick="applyCourseDateRangeAndGenerateWeeks('courseStartDateInput', 'courseEndDateInput')" class="bg-[#0F2942] hover:bg-[#1E3A8A] text-amber-300 font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer whitespace-nowrap border border-amber-400/40" title="اعتماد الفترة الزمنية للدورة وتوليد الأسابيع">
-
-                                    <span>⚡</span>
-
-                                    <span>توليد الأسابيع حسب التواريخ</span>
-
-                                </button>
-
-                            </div>
-
-                        ` : ''}
 
                     </div>
 
@@ -77160,7 +76939,7 @@ function buildDemoExecutiveReport(params) {
 
             const agendaRows = [];
 
-            for (let w = 1; w <= 6; w++) {
+            for (let w = 1; w <= 5; w++) {
 
                 const range = getAcademicWeekDateRange(w);
 
@@ -81008,7 +80787,7 @@ function buildDemoExecutiveReport(params) {
 
         const tasksByWeek = {};
 
-        for (let w = 1; w <= 6; w++) {
+        for (let w = 1; w <= 5; w++) {
 
             tasksByWeek[w] = [];
 
