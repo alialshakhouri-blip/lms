@@ -8710,7 +8710,27 @@
 
 
 
-                            <!-- Passcode & Topic -->
+                            <!-- Course Selection, Passcode & Topic -->
+
+                            <div class="space-y-1 pt-1">
+
+                                <label class="block text-xs font-black text-slate-700">المقرر التدريبي للمحاضرة عن بعد <span class="text-red-500">*</span></label>
+
+                                <div class="relative">
+
+                                    <select id="vcCourseSelect" onchange="onVcCourseSelectChange()" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs font-black text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 transition cursor-pointer">
+
+                                        <!-- Populated dynamically -->
+
+                                    </select>
+
+                                </div>
+
+                                <p class="text-[11px] text-slate-500 font-bold">تحديد المقرر التدريبي الذي تخصه هذه المحاضرة لضمان وصول الرابط لمتدربي هذا المقرر حصراً</p>
+
+                            </div>
+
+
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
 
@@ -9988,7 +10008,15 @@
 
                             <div class="flex items-center gap-3">
 
-                                <span class="text-2xl">🎥</span>
+                                <div class="w-8 h-8 rounded-lg bg-[#0F2942] flex items-center justify-center shrink-0 shadow-2xs">
+
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+
+                                    </svg>
+
+                                </div>
 
                                 <div>
 
@@ -10000,7 +10028,7 @@
 
                             <div class="flex items-center gap-2">
 
-                                <span class="text-[10px] font-black bg-blue-50 text-blue-900 px-2.5 py-0.5 rounded-full border border-blue-200" id="sdVideosCountBadge">شروحات مرئية</span>
+                                <span class="text-[10px] font-black bg-slate-100 text-[#0F2942] px-2.5 py-0.5 rounded-full border border-slate-300 font-mono" id="sdVideosCountBadge">شروحات مرئية</span>
 
                             </div>
 
@@ -10024,7 +10052,15 @@
 
                             <div class="flex items-center gap-3">
 
-                                <span class="text-2xl">📑</span>
+                                <div class="w-8 h-8 rounded-lg bg-[#0F2942] flex items-center justify-center shrink-0 shadow-2xs">
+
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+
+                                    </svg>
+
+                                </div>
 
                                 <div>
 
@@ -10036,7 +10072,7 @@
 
                             <div class="flex items-center gap-2">
 
-                                <span class="text-[10px] font-black bg-purple-50 text-purple-900 px-2.5 py-0.5 rounded-full border border-purple-200" id="sdDocsCountBadge">مذكرات</span>
+                                <span class="text-[10px] font-black bg-slate-100 text-[#0F2942] px-2.5 py-0.5 rounded-full border border-slate-300 font-mono" id="sdDocsCountBadge">مذكرات</span>
 
                             </div>
 
@@ -10060,11 +10096,19 @@
 
                             <div class="flex items-center gap-3">
 
-                                <span class="text-2xl">🏁</span>
+                                <div class="w-8 h-8 rounded-lg bg-[#0F2942] flex items-center justify-center shrink-0 shadow-2xs">
+
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+
+                                    </svg>
+
+                                </div>
 
                                 <div>
 
-                                    <h5 class="text-slate-900 font-black text-sm md:text-base">الاختبارات التفاعلية الموقوتة</h5>
+                                    <h5 class="text-slate-900 font-black text-sm md:text-base">الاختبارات</h5>
 
                                 </div>
 
@@ -10072,7 +10116,7 @@
 
                             <div class="flex items-center gap-2">
 
-                                <span class="text-[10px] font-black bg-emerald-50 text-emerald-900 px-2.5 py-0.5 rounded-full border border-emerald-200" id="sdQuizzesCountBadge">اختبارات</span>
+                                <span class="text-[10px] font-black bg-slate-100 text-[#0F2942] px-2.5 py-0.5 rounded-full border border-slate-300 font-mono" id="sdQuizzesCountBadge">اختبارات</span>
 
                             </div>
 
@@ -10096,11 +10140,19 @@
 
                             <div class="flex items-center gap-3">
 
-                                <span class="text-2xl">📝</span>
+                                <div class="w-8 h-8 rounded-lg bg-[#0F2942] flex items-center justify-center shrink-0 shadow-2xs">
+
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+
+                                    </svg>
+
+                                </div>
 
                                 <div>
 
-                                    <h5 class="text-slate-900 font-black text-sm md:text-base">الواجبات والتكليفات الأسبوعية</h5>
+                                    <h5 class="text-slate-900 font-black text-sm md:text-base">الواجبات</h5>
 
                                 </div>
 
@@ -10108,7 +10160,7 @@
 
                             <div class="flex items-center gap-2">
 
-                                <span class="text-[10px] font-black bg-amber-50 text-amber-900 px-2.5 py-0.5 rounded-full border border-amber-200" id="sdAssignmentsCountBadge">واجبات</span>
+                                <span class="text-[10px] font-black bg-slate-100 text-[#0F2942] px-2.5 py-0.5 rounded-full border border-slate-300 font-mono" id="sdAssignmentsCountBadge">واجبات</span>
 
                             </div>
 
@@ -10379,9 +10431,7 @@
 
                                     </div>
 
-                                    <button type="button" id="tlAddVideoBtn" onclick="openAddVideoModal()" class="lms-action-btn bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/35 transition active:scale-95 border-0">
-
-                                        <span class="text-sm">🎥</span>
+                                    <button type="button" id="tlAddVideoBtn" onclick="openAddVideoModal()" class="lms-action-btn lms-navy-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs">
 
                                         <span>+ إضافة محاضرة</span>
 
@@ -10407,7 +10457,7 @@
 
                                     <div class="flex items-center gap-3">
 
-                                        <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 flex items-center justify-center text-xs font-mono font-black shrink-0">
+                                        <div class="w-9 h-9 rounded-lg bg-[#0F2942]/10 border border-[#0F2942]/30 text-[#0F2942] flex items-center justify-center text-xs font-mono font-black shrink-0">
 
                                             02
 
@@ -10429,9 +10479,7 @@
 
                                     </div>
 
-                                    <button type="button" id="tlAddDocBtn" onclick="openAddDocModal()" class="lms-action-btn bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/35 transition active:scale-95 border-0">
-
-                                        <span class="text-sm">📝</span>
+                                    <button type="button" id="tlAddDocBtn" onclick="openAddDocModal()" class="lms-action-btn lms-navy-btn text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs">
 
                                         <span>+ إضافة مذكرة</span>
 
@@ -10493,7 +10541,7 @@
 
 
 
-                        <!-- Area 4: Assignments (الواجبات والتكليفات الأسبوعية) -->
+                        <!-- Area 4: Assignments (الواجبات) -->
 
                         <div class="lms-section-card rounded-2xl p-5 md:p-6 flex flex-col justify-between space-y-4">
 
@@ -10513,7 +10561,7 @@
 
                                             <div class="flex items-center gap-2">
 
-                                                <h5 class="font-black text-sm text-slate-900">الواجبات والتكليفات الأسبوعية</h5>
+                                                <h5 class="font-black text-sm text-slate-900">الواجبات</h5>
 
                                                 <span id="tlAssignmentsCountBadge" class="text-[10px] font-mono font-bold bg-slate-100 text-slate-800 border border-slate-300 px-2 py-0.5 rounded-full">0</span>
 
@@ -44690,7 +44738,7 @@ function openReportFromProfile() {
 
                         ? `<span class="text-[10px] font-black bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-md">مخصص لمجموعتك: ${q.targetGroup}</span>`
 
-                        : `<span class="text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 rounded-md">متاح لجميع المجموعات</span>`;
+                        : '';
 
 
 
@@ -44828,7 +44876,7 @@ function openReportFromProfile() {
 
                     ? `<span class="text-[10px] font-black bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-md">مخصص لمجموعتك: ${a.targetGroup}</span>`
 
-                    : `<span class="text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-0.5 rounded-md">متاح لجميع المجموعات</span>`;
+                    : '';
 
 
 
@@ -51497,9 +51545,7 @@ function openReportFromProfile() {
 
                                 <span>المدة/النوع: ${v.duration || 'محاضرة تفاعلية'}</span>
 
-                                <span>•</span>
 
-                                <span class="text-[#0F2942] font-bold">عام لجميع المجموعات</span>
 
                             </div>
 
@@ -51715,7 +51761,7 @@ function openReportFromProfile() {
 
                 const targetBadge = (!q.targetGroup || q.targetGroup === 'ALL')
 
-                    ? `<span class="text-[10px] font-bold bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md border border-slate-200">المستهدف: جميع المجموعات</span>`
+                    ? ''
 
                     : `<span class="text-[10px] font-black bg-amber-50 text-amber-900 px-2.5 py-0.5 rounded-md border border-amber-300">مخصص لمجموعة: ${q.targetGroup}</span>`;
 
@@ -51859,7 +51905,7 @@ function openReportFromProfile() {
 
                 const targetBadge = (!a.targetGroup || a.targetGroup === 'ALL')
 
-                    ? `<span class="text-[10px] font-bold bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md border border-slate-200">المستهدف: جميع المجموعات</span>`
+                    ? ''
 
                     : `<span class="text-[10px] font-black bg-amber-50 text-amber-900 px-2.5 py-0.5 rounded-md border border-amber-300">مخصص لمجموعة: ${a.targetGroup}</span>`;
 
@@ -77947,6 +77993,30 @@ function buildDemoExecutiveReport(params) {
 
 
 
+            // Check course selection match if courseKey is specified on the virtual classroom
+
+            if (vc.courseKey) {
+
+                const bindingKey = binding.lmsKey || findCourseKeyForTrainer(binding.trainerName);
+
+                const bindingCourse = binding.courseTitle || '';
+
+                const isCourseMatch = (vc.courseKey === bindingKey) || 
+
+                                      (vc.courseKey === binding.rawTrainerName) ||
+
+                                      (vc.courseTitle && bindingCourse && (vc.courseTitle.includes(bindingCourse) || bindingCourse.includes(vc.courseTitle)));
+
+                if (!isCourseMatch) {
+
+                    continue;
+
+                }
+
+            }
+
+
+
             // 1. Check if scheduled for a future calendar date
 
             if (vc.dateScope === 'calendar' && vc.calendarDate && vc.calendarDate > todayStr) {
@@ -78569,6 +78639,124 @@ function buildDemoExecutiveReport(params) {
 
 
 
+    function getCoursesForActiveVcTrainer(trainerName) {
+
+        const courses = [];
+
+        const tObj = getTrainerObj(trainerName);
+
+        const clean = tObj ? tObj.name : (trainerName || '').replace(/^أ\.\s*/, '').trim();
+
+
+
+        // 1. From INITIAL_LMS_COURSES
+
+        if (typeof INITIAL_LMS_COURSES !== 'undefined') {
+
+            for (let k in INITIAL_LMS_COURSES) {
+
+                const item = INITIAL_LMS_COURSES[k];
+
+                const trName = (item.trainerName || item.trainer || '').replace(/^أ\.\s*/, '').trim();
+
+                if (trName === clean || k === clean) {
+
+                    courses.push({
+
+                        courseKey: k,
+
+                        courseTitle: item.courseTitle || item.courseShort || k,
+
+                        room: item.room || ''
+
+                    });
+
+                }
+
+            }
+
+        }
+
+
+
+        // 2. From scheduleData
+
+        const tr = (scheduleData || []).find(t => t.name === clean || t.name.includes(clean) || clean.includes(t.name));
+
+        if (tr && tr.course) {
+
+            const cKey = findCourseKeyForTrainer(clean) || clean;
+
+            if (!courses.some(c => c.courseKey === cKey || c.courseTitle === tr.course)) {
+
+                courses.push({
+
+                    courseKey: cKey,
+
+                    courseTitle: tr.course,
+
+                    room: tr.room || ''
+
+                });
+
+            }
+
+        }
+
+
+
+        // 3. Fallback if none found
+
+        if (courses.length === 0) {
+
+            const cKey = findCourseKeyForTrainer(clean) || clean;
+
+            courses.push({
+
+                courseKey: cKey,
+
+                courseTitle: tObj?.course || 'المقرر التدريبي المعتمد',
+
+                room: tObj?.room || ''
+
+            });
+
+        }
+
+        return courses;
+
+    }
+
+    window.getCoursesForActiveVcTrainer = getCoursesForActiveVcTrainer;
+
+
+
+    function onVcCourseSelectChange() {
+
+        const cSel = document.getElementById('vcCourseSelect');
+
+        if (!cSel) return;
+
+        const selOption = cSel.options[cSel.selectedIndex];
+
+        const courseTitle = selOption ? selOption.getAttribute('data-title') || selOption.text : '';
+
+        const topicInput = document.getElementById('vcMeetingTopic');
+
+        if (topicInput && (!topicInput.value || topicInput.value.startsWith('محاضرة '))) {
+
+            topicInput.value = `محاضرة ${courseTitle} (عن بعد)`;
+
+        }
+
+        onVcInputChange();
+
+    }
+
+    window.onVcCourseSelectChange = onVcCourseSelectChange;
+
+
+
     function renderVirtualClassTab() {
 
         loadVirtualClassrooms();
@@ -78648,6 +78836,24 @@ function buildDemoExecutiveReport(params) {
         const linkedGroups = getGroupsForTrainer(activeVcTrainer);
 
         const linkedTrainees = getTraineesForTrainer(activeVcTrainer);
+
+
+
+        // 2.5 تعبئة قائمة اختيار المقرر التدريبي للمحاضرة عن بعد
+
+        const availableCourses = getCoursesForActiveVcTrainer(activeVcTrainer);
+
+        const courseSelect = document.getElementById('vcCourseSelect');
+
+        if (courseSelect) {
+
+            courseSelect.innerHTML = availableCourses.map(c => `
+
+                <option value="${c.courseKey}" data-title="${c.courseTitle}">📚 ${c.courseTitle} ${c.room ? '(' + c.room + ')' : ''}</option>
+
+            `).join('');
+
+        }
 
 
 
@@ -78731,7 +78937,15 @@ function buildDemoExecutiveReport(params) {
 
         if (urlInput) urlInput.value = cData.link || '';
 
-        if (topicInput) topicInput.value = cData.topic || (`محاضرة ${getTrainerObj(activeVcTrainer)?.course || 'التخصص'} (عن بعد)`);
+        if (courseSelect && cData.courseKey) {
+
+            courseSelect.value = cData.courseKey;
+
+        }
+
+        const selectedCourseTitle = courseSelect?.options[courseSelect.selectedIndex]?.getAttribute('data-title') || getTrainerObj(activeVcTrainer)?.course || 'التخصص';
+
+        if (topicInput) topicInput.value = cData.topic || (`محاضرة ${selectedCourseTitle} (عن بعد)`);
 
         if (passcodeInput) passcodeInput.value = cData.passcode || '';
 
@@ -79005,13 +79219,25 @@ function buildDemoExecutiveReport(params) {
 
 
 
+        const courseSelect = document.getElementById('vcCourseSelect');
+
+        const selectedCourseKey = courseSelect ? courseSelect.value : (findCourseKeyForTrainer(activeVcTrainer) || activeVcTrainer);
+
+        const selectedCourseTitle = courseSelect?.options[courseSelect.selectedIndex]?.getAttribute('data-title') || getTrainerObj(activeVcTrainer)?.course || 'التخصص';
+
+
+
         virtualClassrooms[activeVcTrainer] = {
 
             platform: currentVcPlatform,
 
             link: url,
 
-            topic: topic || (`محاضرة ${getTrainerObj(activeVcTrainer)?.course || 'التخصص'} (عن بعد)`),
+            courseKey: selectedCourseKey,
+
+            courseTitle: selectedCourseTitle,
+
+            topic: topic || (`محاضرة ${selectedCourseTitle} (عن بعد)`),
 
             targetGroups: targetGroups,
 
