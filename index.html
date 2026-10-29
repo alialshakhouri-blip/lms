@@ -12629,6 +12629,17 @@
 
 
 
+                    <!-- Actions Strip: Instructions & Wipe All Phones Button -->
+                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 flex-wrap">
+                        <div class="text-[11px] text-slate-500 font-bold">
+                            <span>💡 ملاحظة: عند رفع ملف الإكسل يتم فقط مطابقة وتحديث أرقام المتدربين المسجلين في كشف التحضير الصباحي حصراً.</span>
+                        </div>
+                        <button type="button" onclick="if(confirm('هل أنت متأكد من مسح جميع أرقام الجوال من النظام بالكامل لإعادة رفعها من جديد؟')){ wipeAllSystemPhones(true); showToast('\u2705 تم مسح جميع أرقام الجوال من النظام بنجاح، النظام جاهز لإعادة رفع الملف!', 'success'); }" class="bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-700 font-black text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-rose-200" title="مسح كافة أرقام الجوال المسجلة لإعادة استراد ملف الأرقام النظيف">
+                            <span>🗑️</span>
+                            <span>مسح جميع أرقام الجوال (لإعادة الرفع)</span>
+                        </button>
+                    </div>
+
                     <!-- Dynamic Alert / Review Banner -->
 
                     <div id="instAlertBanner" class="p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between gap-3 bg-amber-50 border-amber-200 text-amber-900">
@@ -17357,6 +17368,63 @@ ${details}
         return changed;
     }
     window.purgeDeletedPhonesFromSystem = purgeDeletedPhonesFromSystem;
+
+    // ===================================================================
+    // [WIPE ALL PHONES] مسح جميع أرقام الجوال من النظام لإعادة الرفع النظيف
+    // ===================================================================
+    function wipeAllSystemPhones(shouldSyncCloud = true) {
+        // 1. مسح رقم الجوال من جميع المتدربين
+        if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+            trainees.forEach(t => {
+                if (t) t.phone = '';
+            });
+        }
+        // 2. تفريغ دليل الهواتف بالكامل
+        phoneDirectory = {};
+        if (typeof window !== 'undefined') window.phoneDirectory = {};
+
+        // 3. مسح الأرقام من بيانات حسابات الدخول
+        try {
+            const stuCreds = JSON.parse(localStorage.getItem('sys_student_creds_v1') || '{}');
+            if (stuCreds && typeof stuCreds === 'object') {
+                Object.keys(stuCreds).forEach(k => {
+                    if (stuCreds[k]) stuCreds[k].phone = '';
+                });
+                localStorage.setItem('sys_student_creds_v1', JSON.stringify(stuCreds));
+            }
+        } catch(e) {}
+
+        // 4. الحفظ في الذاكرة المحلية
+        try {
+            if (typeof trainees !== 'undefined') localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+            localStorage.setItem('sys_phone_dir_v9', JSON.stringify({}));
+            localStorage.removeItem('sys_phone_dir_v8');
+            localStorage.removeItem('sys_phone_dir_v7');
+            localStorage.removeItem('sys_phone_dir');
+            localStorage.setItem('sys_all_phones_wiped_flag', 'v2_wiped_all_phones_clean');
+        } catch(e) {}
+
+        // 5. المزامنة السحابية الفورية لمسح الأرقام من Supabase حتى لا تعود
+        if (shouldSyncCloud && window.supabaseClient && window.isSupabaseConnected) {
+            try {
+                supabaseClient.from('app_sync_state').upsert([
+                    { key: 'sys_phone_dir_v9', data: {}, updated_at: new Date().toISOString() },
+                    { key: 'sys_trainees_v9', data: trainees, updated_at: new Date().toISOString() }
+                ], { onConflict: 'key' }).catch(() => {});
+            } catch(e) {}
+        }
+        if (typeof renderApp === 'function') renderApp();
+        if (typeof renderInstTraineesTable === 'function') renderInstTraineesTable();
+        return true;
+    }
+    window.wipeAllSystemPhones = wipeAllSystemPhones;
+
+    // تطبيق مسح الأرقام الشامل فوراً عند تشغيل النظام
+    const ALL_PHONES_WIPED_FLAG = 'v2_wiped_all_phones_clean';
+    if (localStorage.getItem('sys_all_phones_wiped_flag') !== ALL_PHONES_WIPED_FLAG) {
+        wipeAllSystemPhones(true);
+    }
+
 
 
 
@@ -25841,6 +25909,17 @@ ${details}
 
                 if (!id || id.length < 8 || id.length > 12) return;
 
+                // [SHEET-AUTHORITY] التحقق من وجود المتدرب في كشف التحضير الصباحي (المرجع الوحيد للهويات)
+                const isRegisteredInSheet = trainees.some(t => {
+                    const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+                    return cid === id || t.id === id;
+                });
+                if (!isRegisteredInSheet) {
+                    // أي هوية غير موجودين في كشف التحضير يتم تجاهلها فوراً ولا تدخل النظام
+                    return;
+                }
+
+
 
 
                 // استخراج الاسم وتجزئته بدقة
@@ -26053,67 +26132,8 @@ ${details}
 
                 // إضافة أي متدرب جديد مسجل في الملف إلى قاعدة بيانات المتدربين الأساسية مباشرة
 
-                if (!matched) {
-
-                    trainees.push({
-
-                        id,
-
-                        name: (name && name !== 'متدرب بدون اسم') ? name : `متدرب (${id})`,
-
-                        originalName: name || '',
-
-                        company: (company && company !== 'المؤسسة' && company !== 'عام') ? company : (detectCompany(group) || 'المؤسسة'),
-
-                        group: group || 'عام',
-
-                        room: 'غير محدد',
-
-                        qual: qual || 'غير محدد',
-
-                        phone: phone || '',
-
-                        email: email || '',
-
-                        notes: '',
-
-                        rate: 0,
-
-                        weeklyAttendedSessions: 0,
-
-                        weeklyRate: 0,
-
-                        weeklyAttendance: [
-
-                            [false, false, false, false],
-
-                            [false, false, false, false],
-
-                            [false, false, false, false],
-
-                            [false, false, false, false],
-
-                            [false, false, false, false]
-
-                        ],
-
-                        dob: formattedDob || '',
-
-                        gender: normGender || 'ذكر',
-
-                        nationality: rawNationality || (id.startsWith('1') ? 'سعودي' : 'غير سعودي'),
-
-                        first_name: finalP1 || '',
-
-                        second_name: finalP2 || '',
-
-                        third_name: finalP3 || '',
-
-                        last_name: finalP4 || ''
-
-                    });
-
-                }
+                // [SHEET-AUTHORITY] لا يُضاف متدرب جديد من ملف التسجيل — شيت التحضير الصباحي هو المرجع الوحيد
+                // trainees.push({...}) -- DISABLED: sheet is sole authority
 
             });
 
@@ -56138,7 +56158,7 @@ function openReportFromProfile() {
 
                         if (ct.first_name && !local.first_name) local.first_name = ct.first_name;
 
-                        if (ct.phone && !local.phone && !isPurgedSystemPhone(ct.phone)) local.phone = ct.phone;
+                        // [WIPE PHONES] لا يتم استرجاع أرقام الجوال القديمة من السحابة — الرفع الجديد هو المرجع
 
                         if (ct.email && !local.email) local.email = ct.email;
 
@@ -56220,7 +56240,7 @@ function openReportFromProfile() {
 
                             ...localRec,
 
-                            phone: (isPurgedSystemPhone(localRec.phone || cRec.phone) ? '' : (localRec.phone || cRec.phone || '')),
+                            phone: (localRec.phone || ''), // الاعتماد على المحلي فقط دون استرجاع قديم من السحابة
 
                             email: localRec.email || cRec.email || '',
 
