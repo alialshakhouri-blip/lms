@@ -9178,11 +9178,23 @@
 
                             </div>
 
-                            <div class="text-xs text-slate-500 font-medium flex items-center gap-2">
+                            <div class="text-xs text-slate-500 font-medium flex items-center gap-2 flex-wrap pt-0.5">
 
                                 <span>رقم الهوية:</span>
 
                                 <b class="font-mono text-slate-900 font-black bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200" id="sdStudentId">--</b>
+
+                                <span>•</span>
+
+                                <span>رقم الجوال:</span>
+
+                                <b class="font-mono text-slate-900 font-black bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200" id="sdStudentPhone">--</b>
+
+                                <span>•</span>
+
+                                <span>القاعة:</span>
+
+                                <b class="font-bold text-[#0F2942]" id="sdStudentRoom">--</b>
 
                             </div>
 
@@ -9677,6 +9689,10 @@
                             <div class="flex items-center gap-2 text-xs text-slate-500 font-medium flex-wrap pt-0.5">
 
                                 <span>الهوية الوطنية: <b class="font-mono text-slate-900 font-black bg-slate-100 px-1.5 py-0.5 rounded" id="saStudentId">--</b></span>
+
+                                <span>•</span>
+
+                                <span>رقم الجوال: <b class="font-mono text-slate-900 font-black bg-slate-100 px-1.5 py-0.5 rounded" id="saStudentPhone">--</b></span>
 
                                 <span>•</span>
 
@@ -18035,9 +18051,11 @@ ${details}
 
         if (currentUser.role === 'student') {
 
-            // المتدرب يرى فقط أزرار المتدرب في القائمة الجانبية وواجهته المستقلة
+            // المتدرب يرى فقط أزرار المتدرب في القائمة الجانبية وواجهته المستقلة (إخفاء طلبات الدعم وكافة أزرار الكادر)
 
-            const allStaffBtns = [btnAttendance, btnTrainerDashboard, btnTrainerLms, btnTrainerSubmissions, btnGradesSystem, btnSubmissionsCalendar, btnMasterSchedule, btnSettings, btnTrainerReports, btnUsers, btnTimesheet, btnArchive, btnVirtualClass, btnAdminReports, btnAdminCertificates, btnInstitutionFiles];
+            const btnSupportTickets = document.getElementById('btn-supportTickets');
+
+            const allStaffBtns = [btnAttendance, btnTrainerDashboard, btnTrainerLms, btnTrainerSubmissions, btnGradesSystem, btnSubmissionsCalendar, btnMasterSchedule, btnSettings, btnTrainerReports, btnUsers, btnTimesheet, btnArchive, btnVirtualClass, btnAdminReports, btnAdminCertificates, btnInstitutionFiles, btnSupportTickets];
 
             allStaffBtns.forEach(b => { if (b) b.classList.add('hidden'); });
 
@@ -18075,7 +18093,7 @@ ${details}
 
 
 
-            ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'virtualClass', 'adminReports', 'adminCertificates', 'institutionFiles', 'attendanceSheet'].forEach(tabId => {
+            ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'virtualClass', 'adminReports', 'adminCertificates', 'institutionFiles', 'attendanceSheet', 'supportTickets'].forEach(tabId => {
 
                 const el = document.getElementById(`tab-${tabId}`);
 
@@ -18324,13 +18342,13 @@ ${details}
 
 
 
-            // مركز الدعم الفني والمساعدة للسوبر أدمن تحت خانة طلبات الدعم
+            // مركز الدعم الفني والمساعدة للإدارة فقط (مخفي تماماً ومستبعد عن المتدرب والمدرب)
 
             const btnSupportTickets = document.getElementById('btn-supportTickets');
 
             if (btnSupportTickets) {
 
-                if (currentUser.role === 'superadmin' || currentUser.role === 'admin') {
+                if ((currentUser.role === 'superadmin' || currentUser.role === 'admin') && currentUser.role !== 'student') {
 
                     btnSupportTickets.classList.remove('hidden');
 
@@ -42804,17 +42822,30 @@ function openReportFromProfile() {
 
 
 
-        // 1. بيانات الهيدر وبطاقة التعريف المبسطة للمتدرب (الاسم، جهة التدريب، رقم الهوية)
+        // 1. بيانات الهيدر وبطاقة التعريف المبسطة للمتدرب (الاسم، الهوية، المجموعة، الجوال، الشركة، القاعة)
+        const cleanStudentId = (typeof cleanNationalId === 'function') ? cleanNationalId(currentUser.id) : String(currentUser.id || '').trim();
+        const pDir = (typeof phoneDirectory !== 'undefined' && phoneDirectory) ? (phoneDirectory[currentUser.id] || phoneDirectory[cleanStudentId] || {}) : {};
+        const poolMatch = (typeof getUnifiedTraineesPool === 'function') 
+            ? getUnifiedTraineesPool().find(t => (typeof cleanNationalId === 'function' ? cleanNationalId(t.id) : String(t.id || '').trim()) === cleanStudentId)
+            : null;
 
-        if (document.getElementById('sdStudentName')) document.getElementById('sdStudentName').innerText = currentUser.name;
+        const effectiveName = currentUser.name || poolMatch?.name || pDir.name || 'المتدرب';
+        const effectiveGroup = currentUser.group || poolMatch?.group || pDir.group || 'شعبة معتمدة';
+        const effectiveCompany = currentUser.company || poolMatch?.company || pDir.company || 'المؤسسة';
+        const effectiveRoom = currentUser.room || poolMatch?.room || pDir.room || 'غير محدد';
+        const effectivePhone = currentUser.phone || poolMatch?.phone || pDir.phone || 'غير مسجل';
 
-        if (document.getElementById('sdStudentId')) document.getElementById('sdStudentId').innerText = currentUser.id;
+        if (document.getElementById('sdStudentName')) document.getElementById('sdStudentName').innerText = effectiveName;
 
-        if (document.getElementById('sdStudentGroup')) document.getElementById('sdStudentGroup').innerText = currentUser.group;
+        if (document.getElementById('sdStudentId')) document.getElementById('sdStudentId').innerText = cleanStudentId || currentUser.id;
 
-        if (document.getElementById('sdStudentCompany')) document.getElementById('sdStudentCompany').innerText = currentUser.company;
+        if (document.getElementById('sdStudentGroup')) document.getElementById('sdStudentGroup').innerText = effectiveGroup;
 
-        if (document.getElementById('sdStudentRoom')) document.getElementById('sdStudentRoom').innerText = currentUser.room;
+        if (document.getElementById('sdStudentCompany')) document.getElementById('sdStudentCompany').innerText = effectiveCompany;
+
+        if (document.getElementById('sdStudentRoom')) document.getElementById('sdStudentRoom').innerText = effectiveRoom;
+
+        if (document.getElementById('sdStudentPhone')) document.getElementById('sdStudentPhone').innerText = effectivePhone;
 
 
 
@@ -81161,7 +81192,18 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        // 1. Profile Data
+        // 1. Profile Data (الاسم، الهوية، المجموعة، الجوال، الشركة، القاعة)
+        const cleanStudentId = (typeof cleanNationalId === 'function') ? cleanNationalId(currentUser.id) : String(currentUser.id || '').trim();
+        const pDir = (typeof phoneDirectory !== 'undefined' && phoneDirectory) ? (phoneDirectory[currentUser.id] || phoneDirectory[cleanStudentId] || {}) : {};
+        const poolMatch = (typeof getUnifiedTraineesPool === 'function') 
+            ? getUnifiedTraineesPool().find(t => (typeof cleanNationalId === 'function' ? cleanNationalId(t.id) : String(t.id || '').trim()) === cleanStudentId)
+            : null;
+
+        const effectiveName = currentUser.name || poolMatch?.name || pDir.name || 'المتدرب';
+        const effectiveGroup = currentUser.group || poolMatch?.group || pDir.group || 'شعبة معتمدة';
+        const effectiveCompany = currentUser.company || poolMatch?.company || pDir.company || 'الشركة الراعية';
+        const effectiveRoom = currentUser.room || poolMatch?.room || pDir.room || 'القاعة التدريبية';
+        const effectivePhone = currentUser.phone || poolMatch?.phone || pDir.phone || 'غير مسجل';
 
         const nameEl = document.getElementById('saStudentName');
 
@@ -81173,19 +81215,23 @@ function buildDemoExecutiveReport(params) {
 
         const roomEl = document.getElementById('saStudentRoom');
 
+        const phoneEl = document.getElementById('saStudentPhone');
+
         const coursesTextEl = document.getElementById('saStudentCoursesText');
 
 
 
-        if (nameEl) nameEl.innerText = currentUser.name || 'المتدرب';
+        if (nameEl) nameEl.innerText = effectiveName;
 
-        if (groupEl) groupEl.innerText = currentUser.group || 'شعبة معتمدة';
+        if (groupEl) groupEl.innerText = effectiveGroup;
 
-        if (compEl) compEl.innerText = currentUser.company || 'الشركة الراعية';
+        if (compEl) compEl.innerText = effectiveCompany;
 
-        if (idEl) idEl.innerText = currentUser.id || '--';
+        if (idEl) idEl.innerText = cleanStudentId || currentUser.id || '--';
 
-        if (roomEl) roomEl.innerText = currentUser.room || 'القاعة التدريبية';
+        if (roomEl) roomEl.innerText = effectiveRoom;
+
+        if (phoneEl) phoneEl.innerText = effectivePhone;
 
 
 
