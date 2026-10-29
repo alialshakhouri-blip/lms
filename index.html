@@ -18159,7 +18159,7 @@ ${details}
 
             // إخفاء حاويات الصفحات غير المصرح بها
 
-            ['attendance', 'settings', 'timesheet', 'users', 'archive', 'studentDashboard', 'studentLms', 'studentGrades', 'studentVirtualClass', 'adminReports', 'adminCertificates'].forEach(tabId => {
+            ['attendance', 'attendanceSheet', 'institutionFiles', 'settings', 'timesheet', 'users', 'archive', 'studentDashboard', 'studentLms', 'studentGrades', 'studentVirtualClass', 'adminReports', 'adminCertificates'].forEach(tabId => {
 
                 const el = document.getElementById(`tab-${tabId}`);
 
@@ -18189,13 +18189,14 @@ ${details}
 
             
 
-            // ملفات المؤسسة وتصدير Excel متاحة للمدرب والإدارة والسوبر أدمن ومربوطة بجدول التحضير
+            // ملفات المؤسسة وكشف الحضور العام مخفية عن واجهة المدرب وتقتصر على الإدارة والسوبر أدمن
 
-            if (btnInstitutionFiles) btnInstitutionFiles.classList.remove('hidden');
+            if (btnInstitutionFiles) btnInstitutionFiles.classList.add('hidden');
 
-            if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.remove('hidden');
+            if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.add('hidden');
 
-            if (attendanceSheetInstFilesBtn) attendanceSheetInstFilesBtn.classList.remove('hidden');
+            if (attendanceSheetInstFilesBtn) attendanceSheetInstFilesBtn.classList.add('hidden');
+            if (btnAttendanceSheet) btnAttendanceSheet.classList.add('hidden');
 
 
 
@@ -18529,7 +18530,7 @@ ${details}
 
 
 
-                const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'attendanceSheet', 'institutionFiles'];
+                const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass'];
 
                 let candidateTab = savedTab;
 
@@ -18675,7 +18676,7 @@ ${details}
 
         } else if (currentUser.role === 'trainer') {
 
-            const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass', 'attendanceSheet', 'institutionFiles'];
+                const allowedTrainerTabs = ['trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'trainerReports', 'submissionsCalendar', 'virtualClass'];
 
             if (!allowedTrainerTabs.includes(tab)) {
 
@@ -37278,7 +37279,11 @@ function openReportFromProfile() {
             "أساسيات المساحة وقراءة المخططات", "أمن المعلومات والحماية من الهجمات",
             "أنظمة الحفظ والأرشفة الإلكترونية", "Distribution Boards", "Circuit Breakers",
             "Job Interview in Oil", "Report Incidents and Safety Hazards in English",
-            "Tool-box Meetings (TBM)", "Units of Measurement in Oil"
+            "Tool-box Meetings (TBM)", "Units of Measurement in Oil",
+            "كيف تصبح رجل محترم", "رجل محترم", "أسس السلوك والاحترام",
+            "مفاهيم الاحترام والسلوك الأخلاقي", "مبادئ الإنجليزية الصناعية والمفردات الهندسية الأساسية",
+            "مبادئ الإنجليزية الصناعية", "سلوكيات عملية تعكس الاحترام", "تعكس الاحترام، النزاهة، التعاطف",
+            "Respect (احترام)", "Integrity (نزاهة)", "Empathy (تعاطف)", "Responsibility (مسؤولية)",
         ];
 
         for (let i = 0; i < DUMMY_PHRASES.length; i++) {
@@ -37307,6 +37312,8 @@ function openReportFromProfile() {
         const isConstruction = trainerKey === 'ناجي محمد';
 
         if (isSafety) {
+            if (t.includes('إنجليز') || t.includes('انجليز') || t.includes('english') || t.includes('grammar') || t.includes('vocabulary') || t.includes('present simple') || t.includes('pronouns') || t.includes('مفردات هندسية')) return true;
+            if (t.includes('رجل محترم') || t.includes('كيف تصبح') || t.includes('السلوك الأخلاقي') || t.includes('الاحترام كقيمة') || t.includes('تعاطف ومسؤولية') || t.includes('بر الوالدين') || t.includes('مفاهيم الاحترام')) return true;
             if (t.includes('سكرتار') || t.includes('إدارة المكاتب') || t.includes('مكتبية') || t.includes('أرشفة') || t.includes('مراسلات إدارية')) return true;
             if (t.includes('كهربا') || t.includes('دائر') || t.includes('قانون أوم') || t.includes('توالي') || t.includes('توازي') || t.includes('ستار دلتا') || t.includes('محرك كهربائي') || t.includes('قواطع الدوائر')) return true;
             if (t.includes('لحام القوس') || t.includes('لحام التاج') || t.includes('smaw') || t.includes('e7018') || t.includes('أقطاب اللحام') || t.includes('سلك الفلر')) return true;
@@ -44311,7 +44318,8 @@ function openReportFromProfile() {
 
         const isStudentWeekCleared = (typeof isLmsWeekCleared === 'function') && (isLmsWeekCleared(activeStudentLmsCourse, currentActiveWeekNum, activeWeek) || isLmsWeekCleared(null, currentActiveWeekNum, activeWeek));
 
-        const studentVideosList = isStudentWeekCleared ? [] : (activeWeek.videos || []).filter(v => v && !deletedLmsItemIds.has(String(v.id)));
+        const rawStudentVideos = isStudentWeekCleared ? [] : (activeWeek.videos || []).filter(v => v && !deletedLmsItemIds.has(String(v.id)) && (!isLegacyDummyLmsItem || !isLegacyDummyLmsItem(v)) && (!isItemCrossContaminated || !isItemCrossContaminated(courseKey, v)));
+        const studentVideosList = (typeof deduplicateLmsItemList === 'function') ? deduplicateLmsItemList(rawStudentVideos) : rawStudentVideos;
 
 
 
@@ -44473,7 +44481,8 @@ function openReportFromProfile() {
 
             const rawStuDocs = isStudentWeekCleared ? [] : ((activeWeek.docs && activeWeek.docs.length) ? activeWeek.docs : (activeWeek.documents || []));
 
-            const docList = rawStuDocs.filter(d => d && !deletedLmsItemIds.has(String(d.id)));
+            const rawFilteredDocs = rawStuDocs.filter(d => d && !deletedLmsItemIds.has(String(d.id)) && (!isLegacyDummyLmsItem || !isLegacyDummyLmsItem(d)) && (!isItemCrossContaminated || !isItemCrossContaminated(courseKey, d)));
+            const docList = (typeof deduplicateLmsItemList === 'function') ? deduplicateLmsItemList(rawFilteredDocs) : rawFilteredDocs;
 
             dContainer.innerHTML = docList.length ? docList.map(d => {
 
@@ -44556,6 +44565,8 @@ function openReportFromProfile() {
             const visibleQuizzes = rawStuQuizzes.filter(q => {
 
                 if (!q || deletedLmsItemIds.has(String(q.id))) return false;
+                if (typeof isLegacyDummyLmsItem === 'function' && isLegacyDummyLmsItem(q)) return false;
+                if (typeof isItemCrossContaminated === 'function' && isItemCrossContaminated(courseKey, q)) return false;
 
                 if (!q.targetGroup || q.targetGroup === 'ALL') return true;
 
@@ -44790,6 +44801,8 @@ function openReportFromProfile() {
             const visibleAssignments = rawStuAssignments.filter(a => {
 
                 if (!a || deletedLmsItemIds.has(String(a.id))) return false;
+                if (typeof isLegacyDummyLmsItem === 'function' && isLegacyDummyLmsItem(a)) return false;
+                if (typeof isItemCrossContaminated === 'function' && isItemCrossContaminated(courseKey, a)) return false;
 
                 if (!a.targetGroup || a.targetGroup === 'ALL') return true;
 
