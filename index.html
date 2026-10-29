@@ -28512,6 +28512,14 @@ ${details}
 
             renderMasterSchedule();
 
+            if (typeof renderAttendanceSheetPage === 'function' && !document.getElementById('tab-attendanceSheet')?.classList.contains('hidden')) {
+                renderAttendanceSheetPage();
+            }
+
+            if (typeof renderInstTraineesTable === 'function' && !document.getElementById('tab-institutionFiles')?.classList.contains('hidden')) {
+                renderInstTraineesTable();
+            }
+
             if (typeof renderStudentDashboard === 'function' && !document.getElementById('tab-studentDashboard')?.classList.contains('hidden')) {
 
                 renderStudentDashboard();
@@ -30232,7 +30240,7 @@ ${details}
 
 
 
-            const matchesSearch = matchTraineeQuery(t, search);
+            const matchesSearch = !search || matchTraineeQuery(t, search);
 
 
 
