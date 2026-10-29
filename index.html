@@ -17444,85 +17444,9 @@ ${details}
 
 
 
-            if (!existingIds.has(cleanId)) {
-
-                const grp = (p.group && p.group !== 'عام') ? p.group : '';
-
-                const comp = (p.company && p.company !== 'المؤسسة' && p.company !== 'عام') ? p.company : (grp && typeof detectCompany === 'function' ? detectCompany(grp) : 'المؤسسة');
-
-                trainees.push({
-
-                    id: cleanId,
-
-                    name: p.name || `متدرب (${cleanId})`,
-
-                    originalName: p.name || '',
-
-                    company: comp,
-
-                    group: grp || 'عام',
-
-                    room: p.room || 'غير محدد',
-
-                    qual: p.qual || 'غير محدد',
-
-                    phone: (p.phone && !isPurgedSystemPhone(p.phone)) ? p.phone : '',
-
-                    email: p.email || '',
-
-                    notes: p.notes || '',
-
-                    rate: 0,
-
-                    weeklyAttendedSessions: 0,
-
-                    weeklyRate: 0,
-
-                    weeklyAttendance: [
-
-                        [false, false, false, false],
-
-                        [false, false, false, false],
-
-                        [false, false, false, false],
-
-                        [false, false, false, false],
-
-                        [false, false, false, false]
-
-                    ],
-
-                    dob: p.dob || '',
-
-                    gender: p.gender || 'ذكر',
-
-                    nationality: p.nationality || (cleanId.startsWith('1') ? 'سعودي' : 'غير سعودي'),
-
-                    first_name: p.first_name || '',
-
-                    second_name: p.second_name || '',
-
-                    third_name: p.third_name || '',
-
-                    last_name: p.last_name || '',
-
-                    manarCertificateIssued: Boolean(p.manarCertificateIssued),
-
-                    manarCertificateDate: p.manarCertificateDate || null,
-
-                    institutionApproved: Boolean(p.institutionApproved),
-
-                    institutionApprovalDate: p.institutionApprovalDate || null,
-
-                    institutionApprovalGroup: p.institutionApprovalGroup || ''
-
-                });
-
-                existingIds.add(cleanId);
-
-                addedCount++;
-
-            } else {
+            // [SHEET-AUTHORITY] دليل الهواتف لا يُضيف متدربين جدداً — ورقة Google هي المصدر الوحيد لإضافة المتدربين
+            // trainees.push() -- DISABLED: Google Sheet is sole authority
+            if (existingIds.has(cleanId)) {
 
                 // تحديث المتدرب الموجود مسبقاً دون مسح درجاته أو تحضيره (تحديث حقول البيانات فقط)
 
@@ -28376,7 +28300,7 @@ ${details}
 
             // 2. إضافة أي متدرب جديد ظهر في الشيت
 
-            // 3. الاحتفاظ بالمتدربين المسجلين في النظام حتى وإن لم يتضمنهم كشف هذا الأسبوع
+            // [SHEET-AUTHORITY] الورقة هي المصدر الوحيد: يتم حذف المتدربين الغير موجودين في الورقة
 
             const sheetTraineesMap = new Map();
 
@@ -28389,6 +28313,16 @@ ${details}
             });
 
 
+
+
+            // [SHEET-AUTHORITY] حذف المتدربين الغير موجودين في شيت الحضور (الورقة هي المرجع الوحيد)
+            const removedCount = trainees.length;
+            trainees = trainees.filter(t => {
+                const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+                return sheetTraineesMap.has(cid);
+            });
+            const removedFromSystem = removedCount - trainees.length;
+            if (removedFromSystem > 0) console.log(`[SHEET-AUTHORITY] تم حذف ${removedFromSystem} متدرب غير موجود في الورقة`);
 
             const existingIds = new Set();
 
@@ -28528,7 +28462,7 @@ ${details}
 
             if (!isSilent) {
 
-                showToast(`✅ تم تحديث التحضير المباشر: مطابقة وتحديث (${updatedAttendanceCount}) متدرب وإضافة (${addedFromSheetCount})، مع الاحتفاظ بكامل قاعدة البيانات (${trainees.length} متدرب مسجل).`, 'success');
+                showToast(`✅ تم تحديث التحضير المباشر: تحديث (${updatedAttendanceCount}) وإضافة (${addedFromSheetCount}) من الورقة — الورقة هي المرجع الوحيد (${trainees.length} متدرب مسجل).`, 'success');
 
             }
 
@@ -40250,7 +40184,7 @@ function openReportFromProfile() {
 
                 const p = phoneDirectory[rawId] || {};
 
-                if (cId) {
+                if (cId && map.has(cId)) { // [SHEET-AUTHORITY] يثرّي الموجودين فقط — لا ينشئ مدخلات جديدة
 
                     const existing = map.get(cId) || {};
 
@@ -56378,15 +56312,9 @@ function openReportFromProfile() {
 
                     const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(ct.id) : String(ct.id || '').trim();
 
-                    if (!existingMap.has(cid)) {
-
-                        trainees.push(ct);
-
-                        existingMap.set(cid, ct);
-
-                        hasChanges = true;
-
-                    } else {
+                    // [SHEET-AUTHORITY] لا يُضاف متدرب جديد من السحاب— يسمح فقط تحديث بيانات الموجودين
+                    // trainees.push(ct) -- DISABLED: Google Sheet is sole authority
+                    if (existingMap.has(cid)) {
 
                         const local = existingMap.get(cid);
 
