@@ -40262,9 +40262,14 @@ function openReportFromProfile() {
 
 
 
-        // 1. المتدربون من نموذج العينة (SAMPLE_TRAINEES) كقاعدة أساسية
+        // [SHEET-AUTHORITY] إذا كانت مصفوفة المتدربين الأساسية من كشف التحضير المباشر تحتوي متدربين، فهي المرجع الوحيد
+        // ولا يتم إدراج بيانات عينة SAMPLE_TRAINEES التجريبية إطلاقاً
+        const hasLiveTrainees = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0);
 
-        if (typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) {
+
+
+        // 1. المتدربون من نموذج العينة (SAMPLE_TRAINEES) كقاعدة فقط في حال كان النظام فارغاً تماماً
+        if (!hasLiveTrainees && typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) {
 
             SAMPLE_TRAINEES.forEach(st => {
 
@@ -40604,13 +40609,9 @@ function openReportFromProfile() {
 
 
 
-        if (currentGrpVal && (currentGrpVal === 'ALL' || sortedGroups.includes(currentGrpVal))) {
+        if (currentGrpVal && currentGrpVal !== '' && currentGrpVal !== 'ALL' && sortedGroups.includes(currentGrpVal)) {
 
             grpFilterEl.value = currentGrpVal;
-
-        } else if (sortedGroups.length > 0) {
-
-            grpFilterEl.value = (currentGrpVal === 'ALL' || !sortedGroups.includes(currentGrpVal)) ? 'ALL' : currentGrpVal;
 
         } else {
 
@@ -41294,11 +41295,11 @@ function openReportFromProfile() {
 
 
 
-        const selectedCompany = compFilterEl ? compFilterEl.value : 'ALL';
+        const selectedCompany = compFilterEl ? (compFilterEl.value || 'ALL') : 'ALL';
 
-        const rawGroup = grpFilterEl ? grpFilterEl.value : 'ALL';
+        const rawGroup = grpFilterEl ? (grpFilterEl.value || 'ALL') : 'ALL';
 
-        const selectedGroup = (!rawGroup || rawGroup === '') ? 'ALL' : rawGroup;
+        let selectedGroup = (!rawGroup || rawGroup === '' || rawGroup === 'ALL') ? 'ALL' : rawGroup;
 
         const filterStatus = statusFilterEl ? statusFilterEl.value : 'ALL';
 
@@ -41312,11 +41313,33 @@ function openReportFromProfile() {
 
             groupTrainees = pool.filter(t => t.group && (t.group.trim() === selectedGroup.trim() || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group))));
 
+            // إذا لم توجد نتائج بالشعبة المحددة، التراجع تلقائياً لعرض الكل حتى لا تظهر الصفحة فارغة للمستخدم
+            if (groupTrainees.length === 0 && pool.length > 0) {
+
+                groupTrainees = pool;
+
+                selectedGroup = 'ALL';
+
+                if (grpFilterEl) grpFilterEl.value = 'ALL';
+
+            }
+
         }
 
         if (selectedCompany !== 'ALL') {
 
-            groupTrainees = groupTrainees.filter(t => t.company === selectedCompany);
+            const compFiltered = groupTrainees.filter(t => t.company === selectedCompany);
+
+            if (compFiltered.length > 0 || pool.length === 0) {
+
+                groupTrainees = compFiltered;
+
+            } else {
+
+                // إذا كانت الشركة لا تطابق، عرض الكل لمنع ظهور الصفحة فارغة
+                if (compFilterEl) compFilterEl.value = 'ALL';
+
+            }
 
         }
 
