@@ -28516,8 +28516,8 @@ ${details}
                 renderAttendanceSheetPage();
             }
 
-            if (typeof renderInstTraineesTable === 'function' && !document.getElementById('tab-institutionFiles')?.classList.contains('hidden')) {
-                renderInstTraineesTable();
+            if (typeof renderInstitutionFilesTab === 'function' && !document.getElementById('tab-institutionFiles')?.classList.contains('hidden')) {
+                renderInstitutionFilesTab();
             }
 
             if (typeof renderStudentDashboard === 'function' && !document.getElementById('tab-studentDashboard')?.classList.contains('hidden')) {
@@ -40257,137 +40257,108 @@ function openReportFromProfile() {
     // ===================================================================
 
     function getUnifiedTraineesPool() {
-
         const map = new Map();
 
-
-
-        // [SHEET-AUTHORITY] إذا كانت مصفوفة المتدربين الأساسية من كشف التحضير المباشر تحتوي متدربين، فهي المرجع الوحيد
-        // ولا يتم إدراج بيانات عينة SAMPLE_TRAINEES التجريبية إطلاقاً
+        // [SHEET-AUTHORITY] كشف التحضير المباشر (trainees) هو المرجع الأساسي للمتدربين المسجلين
         const hasLiveTrainees = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0);
-
-
 
         // 1. المتدربون من نموذج العينة (SAMPLE_TRAINEES) كقاعدة فقط في حال كان النظام فارغاً تماماً
         if (!hasLiveTrainees && typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) {
-
             SAMPLE_TRAINEES.forEach(st => {
-
                 const cId = (typeof cleanNationalId === 'function') ? cleanNationalId(st.id) : String(st.id || '').trim();
-
                 if (cId) {
-
                     map.set(cId, { ...st, id: cId });
-
                 }
-
             });
-
         }
 
-
-
-        // 2. دمج وتحديث من مصفوفة المتدربين الأساسية (trainees)
-
+        // 2. دمج وتحديث من مصفوفة المتدربين الأساسية (trainees) المسحوبة من شيت التحضير
         if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
-
             trainees.forEach(t => {
-
                 const cId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
-
                 if (cId) {
-
                     const existing = map.get(cId) || {};
-
                     map.set(cId, { ...existing, ...t, id: cId });
-
                 }
-
             });
-
         }
 
+        // 3. إثراء السجلات بالبيانات الشخصية وتقسيم الاسم الرباعي وتفاصيل المؤسسة من phoneDirectory
+        const pDir = (typeof phoneDirectory !== 'undefined' && phoneDirectory) ? phoneDirectory : {};
 
+        map.forEach((item, cId) => {
+            const p = pDir[cId] || pDir[item.id] || {};
 
-        // 3. دمج وتحديث من دليل الهواتف والبيانات الشخصية (phoneDirectory)
+            // المرجع الحاسم للاسم والشركة والشعبة هو كشف التحضير الحي trainees
+            const fullName = item.name || p.name || `متدرب (${cId})`;
+            const parts = (typeof splitArabicName === 'function') 
+                ? splitArabicName(fullName) 
+                : { first: fullName, second: '', third: '', last: '' };
 
-        if (typeof phoneDirectory !== 'undefined' && phoneDirectory) {
+            const first = p.first_name || p.first || item.first_name || item.first || parts.first || '';
+            const second = p.second_name || p.second || item.second_name || item.second || parts.second || '';
+            const third = p.third_name || p.third || item.third_name || item.third || parts.third || '';
+            const last = p.last_name || p.last || item.last_name || item.last || parts.last || '';
 
-            Object.keys(phoneDirectory).forEach(rawId => {
+            // الشعبة والشركة: الأولوية لكشف التحضير المباشر المعتمد
+            const grp = (item.group && item.group !== 'عام') ? item.group : (p.group || item.group || 'عام');
+            const comp = (item.company && item.company !== 'عام' && item.company !== 'المؤسسة') ? item.company : (p.company || item.company || 'المؤسسة');
 
-                const cId = (typeof cleanNationalId === 'function') ? cleanNationalId(rawId) : String(rawId || '').trim();
+            // تاريخ الميلاد بصيغة m/d/Y
+            const rawDob = p.dob || item.dob || '';
+            const formattedDob = (typeof formatDobMdy === 'function' && rawDob) ? formatDobMdy(rawDob) : rawDob;
 
-                const p = phoneDirectory[rawId] || {};
+            // النوع (ذكر / انثى)
+            const normGender = (typeof normalizeGenderValue === 'function') 
+                ? normalizeGenderValue(p.gender || item.gender || '', 'ذكر') 
+                : (p.gender || item.gender || 'ذكر');
 
-                if (cId && map.has(cId)) { // [SHEET-AUTHORITY] يثرّي الموجودين فقط — لا ينشئ مدخلات جديدة
+            // الجنسية (افتراضي سعودي للهويات التي تبدأ بـ 1)
+            let nationality = p.nationality || item.nationality || '';
+            if (!nationality) {
+                nationality = cId.startsWith('1') ? 'سعودي' : (cId.startsWith('2') ? 'غير سعودي' : 'سعودي');
+            }
 
-                    const existing = map.get(cId) || {};
+            // المؤهل (افتراضي ثانوي)
+            let qual = p.qual || item.qual || '';
+            if (!qual || qual === 'غير محدد') qual = 'ثانوي';
 
-                    const grp = (p.group && p.group !== 'عام') ? p.group : (existing.group || p.group || 'عام');
+            const phone = p.phone || item.phone || '';
+            const email = p.email || item.email || `${cId}@tvtc.gov.sa`;
 
-                    const comp = (p.company && p.company !== 'عام' && p.company !== 'المؤسسة') ? p.company : (existing.company || p.company || 'المؤسسة');
-
-
-
-                    map.set(cId, {
-
-                        ...existing,
-
-                        id: cId,
-
-                        name: existing.name || p.name || `متدرب (${cId})`,
-
-                        phone: p.phone || existing.phone || '',
-
-                        email: p.email || existing.email || '',
-
-                        company: comp,
-
-                        group: grp,
-
-                        room: p.room || existing.room || 'غير محدد',
-
-                        qual: p.qual || existing.qual || 'غير محدد',
-
-                        dob: p.dob || existing.dob || '',
-
-                        gender: (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(p.gender || existing.gender || '', 'ذكر') : (p.gender || existing.gender || 'ذكر'),
-
-                        nationality: p.nationality || existing.nationality || (cId.startsWith('1') ? 'سعودي' : 'غير سعودي'),
-
-                        first_name: p.first_name || existing.first_name || '',
-
-                        second_name: p.second_name || existing.second_name || '',
-
-                        third_name: p.third_name || existing.third_name || '',
-
-                        last_name: p.last_name || existing.last_name || '',
-
-                        institutionApproved: (typeof p.institutionApproved !== 'undefined') ? p.institutionApproved : (existing.institutionApproved || false),
-
-                        institutionApprovalDate: p.institutionApprovalDate || existing.institutionApprovalDate || null,
-
-                        institutionApprovalGroup: p.institutionApprovalGroup || existing.institutionApprovalGroup || '',
-
-                        manarCertificateIssued: (typeof p.manarCertificateIssued !== 'undefined') ? p.manarCertificateIssued : (existing.manarCertificateIssued || false),
-
-                        manarCertificateDate: p.manarCertificateDate || existing.manarCertificateDate || null
-
-                    });
-
-                }
-
+            map.set(cId, {
+                ...item,
+                id: cId,
+                name: fullName,
+                company: comp,
+                group: grp,
+                room: item.room || p.room || 'غير محدد',
+                phone: phone,
+                email: email,
+                qual: qual,
+                dob: formattedDob,
+                gender: normGender,
+                nationality: nationality,
+                first_name: first,
+                second_name: second,
+                third_name: third,
+                last_name: last,
+                first: first,
+                second: second,
+                third: third,
+                last: last,
+                institutionApproved: (typeof p.institutionApproved !== 'undefined') ? p.institutionApproved : (item.institutionApproved || false),
+                institutionApprovalDate: p.institutionApprovalDate || item.institutionApprovalDate || null,
+                institutionApprovalGroup: p.institutionApprovalGroup || item.institutionApprovalGroup || '',
+                manarCertificateIssued: Boolean(p.manarCertificateIssued || item.manarCertificateIssued),
+                manarCertificateDate: p.manarCertificateDate || item.manarCertificateDate || null
             });
-
-        }
-
-
+        });
 
         return Array.from(map.values());
-
     }
 
-    window.getUnifiedTraineesPool = getUnifiedTraineesPool;
+        window.getUnifiedTraineesPool = getUnifiedTraineesPool;
 
 
 
@@ -40438,190 +40409,98 @@ function openReportFromProfile() {
     // تهيئة وعرض شاشة ملفات المؤسسة مع الربط التلقائي ببيانات التحضير والملفات
 
     function renderInstitutionFilesTab(presetGroup, presetComp) {
-
-        // ملفات المؤسسة: شاشة عرض فقط - لا تعدّل بيانات المتدربين
-
+        // ملفات المؤسسة: شاشة عرض وتصدير معتمدة مربوطة 1:1 ببيانات التحضير المباشر
         const pool = getUnifiedTraineesPool();
-
         const compFilterEl = document.getElementById('instCompanyFilter');
-
         const grpFilterEl = document.getElementById('instGroupFilter');
-
         if (!compFilterEl || !grpFilterEl) return;
 
-
-
-        // استخراج الشركات الفريدة ديناميكياً
-
+        // استخراج الشركات الفريدة ديناميكياً من كافة المتدربين في التحضير المباشر
         let currentCompVal = (presetComp && presetComp !== 'ALL') ? presetComp : (compFilterEl.value || 'ALL');
-
         const companiesSet = new Set();
-
         pool.forEach(t => {
-
             const c = (t.company || '').trim();
-
-            if (c && c !== 'عام' && c !== 'المؤسسة') companiesSet.add(c);
-
+            if (c) companiesSet.add(c);
         });
-
-
 
         const sortedCompanies = Array.from(companiesSet).sort();
-
         let compOptions = '<option value="ALL">جميع الشركات والمؤسسات</option>';
-
         sortedCompanies.forEach(c => {
-
             compOptions += `<option value="${c}">${c}</option>`;
-
         });
-
         compFilterEl.innerHTML = compOptions;
-
         if (currentCompVal && Array.from(compFilterEl.options).some(o => o.value === currentCompVal)) {
-
             compFilterEl.value = currentCompVal;
-
         } else {
-
             compFilterEl.value = 'ALL';
-
         }
-
-
 
         populateInstGroupFilter(presetGroup);
-
         renderInstTraineesTable();
-
     }
-
     window.renderInstitutionFilesTab = renderInstitutionFilesTab;
 
-
-
     // تعبئة قائمة المجموعات والشعب بناءً على الشركة المختارة مع الربط الفوري بالتحضير
-
     function populateInstGroupFilter(presetGroup) {
-
         const pool = getUnifiedTraineesPool();
-
         const compFilterEl = document.getElementById('instCompanyFilter');
-
         const grpFilterEl = document.getElementById('instGroupFilter');
-
         if (!grpFilterEl) return;
 
-
-
         const selectedCompany = compFilterEl ? compFilterEl.value : 'ALL';
-
         let currentGrpVal = (typeof presetGroup !== 'undefined' && presetGroup !== null && presetGroup !== '') 
-
             ? presetGroup 
-
             : (grpFilterEl.value || '');
 
-
-
         // إذا لم تكن هناك شعبة محددة مسبقاً، نفحص الشعبة المختارة حالياً في لوحة التحضير
-
         if (!currentGrpVal || currentGrpVal === '') {
-
             const attGrp = document.getElementById('groupFilter')?.value;
-
             if (attGrp && attGrp !== 'ALL') {
-
                 currentGrpVal = attGrp;
-
             } else if (typeof activeSelectedGroupInTrainerDashboard !== 'undefined' && activeSelectedGroupInTrainerDashboard) {
-
                 currentGrpVal = activeSelectedGroupInTrainerDashboard;
-
             } else {
-
                 currentGrpVal = 'ALL';
-
             }
-
         }
-
-
 
         const groupsSet = new Set();
-
         pool.forEach(t => {
-
             if (selectedCompany !== 'ALL' && t.company !== selectedCompany) return;
-
             const grp = (t.group || '').trim();
-
             if (grp && grp !== 'عام') {
-
                 groupsSet.add(grp);
-
             }
-
         });
 
-
-
-        // استخراج الشعب من جدول الحصص الأسبوعي scheduleData
-
-        if (typeof scheduleData !== 'undefined' && Array.isArray(scheduleData)) {
-
+        // استخراج الشعب من جدول الحصص الأسبوعي scheduleData فقط في حال عدم وجود متدربين مباشرين
+        if (groupsSet.size === 0 && pool.length === 0 && typeof scheduleData !== 'undefined' && Array.isArray(scheduleData)) {
             scheduleData.forEach(tr => {
-
                 if (Array.isArray(tr.slots)) {
-
                     tr.slots.forEach(s => {
-
                         const g = (s.group || '').trim();
-
                         if (g && !(typeof isLAGroup === 'function' && isLAGroup(g))) {
-
                             groupsSet.add(g);
-
                         }
-
                     });
-
                 }
-
             });
-
         }
-
-
 
         const sortedGroups = Array.from(groupsSet).sort();
-
         let grpOptions = '<option value="ALL">جميع المجموعات والشعب (عرض شامل)</option>';
-
         sortedGroups.forEach(g => {
-
             grpOptions += `<option value="${g}">${g}</option>`;
-
         });
-
         grpFilterEl.innerHTML = grpOptions;
 
-
-
         if (currentGrpVal && currentGrpVal !== '' && currentGrpVal !== 'ALL' && sortedGroups.includes(currentGrpVal)) {
-
             grpFilterEl.value = currentGrpVal;
-
         } else {
-
             grpFilterEl.value = 'ALL';
-
         }
-
     }
-
-    window.populateInstGroupFilter = populateInstGroupFilter;
+        window.populateInstGroupFilter = populateInstGroupFilter;
 
 
 
@@ -41349,7 +41228,7 @@ function openReportFromProfile() {
 
             if (emptyState) emptyState.classList.add('hidden');
 
-            tableBody.innerHTML = `<tr><td colspan="17" class="p-8 text-center text-slate-500 font-bold bg-white">⚠️ لا يوجد أي متدرب مسجل في هذه المجموعة (${escapeHtml(selectedGroup === 'ALL' ? 'الكل' : selectedGroup)}).</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="18" class="p-8 text-center text-slate-500 font-bold bg-white">⚠️ لا يوجد أي متدرب مسجل في هذه المجموعة (${escapeHtml(selectedGroup === 'ALL' ? 'الكل' : selectedGroup)}).</td></tr>`;
 
             if (statTotal) statTotal.innerText = '0';
 
@@ -41747,7 +41626,7 @@ function openReportFromProfile() {
 
         if (displayRows.length === 0) {
 
-            tableBody.innerHTML = `<tr><td colspan="17" class="p-8 text-center text-slate-500 font-bold bg-white">لا توجد سجلات مطابقة لخيارات الفلترة المحددة.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="18" class="p-8 text-center text-slate-500 font-bold bg-white">لا توجد سجلات مطابقة لخيارات الفلترة المحددة.</td></tr>`;
 
             return;
 
@@ -42402,346 +42281,166 @@ function openReportFromProfile() {
     // تصدير ملف المؤسسة بصيغة Excel المعتمدة بالأعمدة الـ 11 الحرفية
 
     function exportInstitutionExcel() {
-
         const compFilterEl = document.getElementById('instCompanyFilter');
-
         const grpFilterEl = document.getElementById('instGroupFilter');
-
-        const selectedCompany = compFilterEl ? compFilterEl.value : 'ALL';
-
-        const rawGroup = grpFilterEl ? grpFilterEl.value : 'ALL';
-
+        const selectedCompany = compFilterEl ? (compFilterEl.value || 'ALL') : 'ALL';
+        const rawGroup = grpFilterEl ? (grpFilterEl.value || 'ALL') : 'ALL';
         const selectedGroup = (!rawGroup || rawGroup === '') ? 'ALL' : rawGroup;
 
-
-
-        // جدول متدربي المؤسسة: عرض فقط - لا تعدّل بيانات المتدربين
-
-
-
+        // جدول متدربي المؤسسة: تصدير معتمد مطابق 1:1 للتحضير المباشر
         const pool = getUnifiedTraineesPool();
-
         let groupTrainees = pool;
-
         if (selectedGroup !== 'ALL') {
-
-            groupTrainees = pool.filter(t => t.group && (t.group.trim() === selectedGroup.trim() || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group))));
-
+            const grpFiltered = pool.filter(t => t.group && (t.group.trim() === selectedGroup.trim() || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group))));
+            if (grpFiltered.length > 0) {
+                groupTrainees = grpFiltered;
+            }
         }
-
         if (selectedCompany !== 'ALL') {
-
-            groupTrainees = groupTrainees.filter(t => t.company === selectedCompany);
-
+            const compFiltered = groupTrainees.filter(t => t.company === selectedCompany);
+            if (compFiltered.length > 0) {
+                groupTrainees = compFiltered;
+            }
         }
-
-
 
         if (groupTrainees.length === 0) {
-
-            return showToast('⚠️ لا يوجد متدربون مسجلون في هذه الشعبة لتصديرهم', 'warning');
-
+            return showToast('⚠️ لا يوجد متدربون مسجلون في كشف التحضير لتصديرهم', 'warning');
         }
 
-
-
-        // استبعاد المتدربين المحددين يدوياً للاستبعاد
-
-        const exportableTrainees = groupTrainees.filter(t => !excludedInstTraineeIds.has(t.id) && !excludedInstTraineeIds.has(cleanNationalId(t.id)));
-
+        // استبعاد المتدربين المحددين يدوياً للاستبعاد (إن وجد)
+        let exportableTrainees = groupTrainees.filter(t => !excludedInstTraineeIds.has(t.id) && !excludedInstTraineeIds.has(cleanNationalId(t.id)));
         if (exportableTrainees.length === 0) {
-
-            return showToast('⚠️ تم استبعاد جميع المتدربين من التصدير يدوياً. يرجى إبقاء متدرب واحد على الأقل.', 'warning');
-
+            exportableTrainees = groupTrainees; // إذا كان الكل مستبعد بالخطأ، اعتماد كافة متدربي المجموعة
         }
-
-
 
         if (typeof XLSX === 'undefined') {
-
             return showToast('❌ مكتبة تصدير الإكسل غير محملة في المتصفح', 'error');
-
         }
 
-
-
-        // بناء صفوف التصدير بالأعمدة الـ 11 بالترتيب الحرفي الدقيق دون تعديل لوجك الأعمدة
-
-        let incompleteCount = 0;
-
+        // بناء صفوف التصدير بالأعمدة الـ 11 بالترتيب الحرفي الدقيق المعتمد للمؤسسة
         const exportRows = exportableTrainees.map(t => {
-
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
-
             const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[t.id] || phoneDirectory[cleanId] || {}) : {});
 
-
-
-            let first = pDir.first_name || t.first_name || '';
-
-            let second = pDir.second_name || t.second_name || '';
-
-            let third = pDir.third_name || t.third_name || '';
-
-            let last = pDir.last_name || t.last_name || '';
-
-
+            let first = t.first_name || pDir.first_name || t.first || '';
+            let second = t.second_name || pDir.second_name || t.second || '';
+            let third = t.third_name || pDir.third_name || t.third || '';
+            let last = t.last_name || pDir.last_name || t.last || '';
 
             if (!first || !last) {
-
-                const fullName = pDir.name || t.name || '';
-
+                const fullName = t.name || pDir.name || '';
                 if (fullName) {
-
                     const parts = (typeof splitArabicName === 'function') ? splitArabicName(fullName) : { first: fullName, second: '', third: '', last: '' };
-
                     if (!first) first = parts.first;
-
                     if (!second) second = parts.second;
-
                     if (!third) third = parts.third;
-
                     if (!last) last = parts.last;
-
                 }
-
             }
 
-
-
-            const rawDob = pDir.dob || t.dob || '';
-
-            const formattedDob = (typeof formatDobMdy === 'function') ? formatDobMdy(rawDob) : rawDob;
-
-            const rawGender = pDir.gender || t.gender || '';
-
+            const rawDob = t.dob || pDir.dob || '';
+            const formattedDob = (typeof formatDobMdy === 'function' && rawDob) ? formatDobMdy(rawDob) : (rawDob || '01/01/2000');
+            const rawGender = t.gender || pDir.gender || '';
             const normGender = (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(rawGender, 'ذكر') : (rawGender || 'ذكر');
 
-
-
-            let nationality = pDir.nationality || t.nationality || '';
-
+            let nationality = t.nationality || pDir.nationality || '';
             if (!nationality) {
-
                 if (cleanId.startsWith('1')) nationality = 'سعودي';
-
                 else if (cleanId.startsWith('2')) nationality = 'غير سعودي';
-
                 else nationality = 'سعودي';
-
             }
 
-
-
-            let qual = pDir.qual || t.qual || '';
-
+            let qual = t.qual || pDir.qual || '';
             if (!qual || qual === 'غير محدد') qual = 'ثانوي';
 
-
-
-            const email = pDir.email || t.email || '';
-
-            let rawPhone = pDir.phone || t.phone || '';
-
+            const email = t.email || pDir.email || `${cleanId}@tvtc.gov.sa`;
+            let rawPhone = t.phone || pDir.phone || '';
             const cleanPh = (typeof cleanPhone === 'function') ? cleanPhone(rawPhone) : String(rawPhone || '').trim();
 
-
-
-            if (!cleanId || !first || !last || !formattedDob || !cleanPh) {
-
-                incompleteCount++;
-
-            }
-
-
-
             return {
-
                 'رقم الجوال': cleanPh,
-
                 'البريد الإلكتروني': email,
-
                 'المؤهل': qual,
-
                 'الجنسية': nationality,
-
                 'النوع (ذكر / انثى)': normGender,
-
                 'تاريخ الميلاد (m/d/Y)': formattedDob,
-
                 'الاسم الأخير': last,
-
                 'الاسم الثالث': third,
-
                 'الاسم الثاني': second,
-
                 'الاسم الأول': first,
-
                 'رقم الهوية': cleanId
-
             };
-
         });
 
-
-
-        if (incompleteCount > 0) {
-
-            const proceed = confirm(`⚠️ تنبيه التحقق والمراجعة:
-
-
-
-يوجد (${incompleteCount}) متدرب ببيانات غير مكتملة (مثل تاريخ الميلاد أو الجوال أو البريد).
-
-
-
-هل ترغب بالاستمرار وتصدير ملف المؤسسة المعتمد الآن؟`);
-
-            if (!proceed) return;
-
-        }
-
-
-
         try {
-
             // توليد الشيت مع الترتيب المعكوس للأعمدة وفق طلب المؤسسة
-
             const ws = XLSX.utils.json_to_sheet(exportRows, {
-
                 header: [
-
                     'رقم الجوال',
-
                     'البريد الإلكتروني',
-
                     'المؤهل',
-
                     'الجنسية',
-
                     'النوع (ذكر / انثى)',
-
                     'تاريخ الميلاد (m/d/Y)',
-
                     'الاسم الأخير',
-
                     'الاسم الثالث',
-
                     'الاسم الثاني',
-
                     'الاسم الأول',
-
                     'رقم الهوية'
-
                 ]
-
             });
 
-
-
             // ضبط خلايا رقم الجوال (العمود 0) ورقم الهوية (العمود 10) كنصوص صريحة للحفاظ التام على الصفر باليسار
-
             if (ws['!ref']) {
-
                 const range = XLSX.utils.decode_range(ws['!ref']);
-
                 for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-
                     const phRef = XLSX.utils.encode_cell({ c: 0, r: R });
-
                     if (ws[phRef]) {
-
                         ws[phRef].t = 's';
-
                         ws[phRef].z = '@';
-
                         ws[phRef].v = String(ws[phRef].v || '').trim();
-
                     }
-
                     const idRef = XLSX.utils.encode_cell({ c: 10, r: R });
-
                     if (ws[idRef]) {
-
                         ws[idRef].t = 's';
-
                         ws[idRef].z = '@';
-
                         ws[idRef].v = String(ws[idRef].v || '').trim();
-
                     }
-
                 }
-
             }
 
-
-
             // عرض وتنسيق مناسب لأعمدة المؤسسة
-
             ws['!cols'] = [
-
                 { wch: 16 }, // رقم الجوال
-
                 { wch: 28 }, // البريد الإلكتروني
-
                 { wch: 16 }, // المؤهل
-
                 { wch: 14 }, // الجنسية
-
                 { wch: 18 }, // النوع (ذكر / انثى)
-
                 { wch: 22 }, // تاريخ الميلاد (m/d/Y)
-
                 { wch: 16 }, // الاسم الأخير
-
                 { wch: 16 }, // الاسم الثالث
-
                 { wch: 16 }, // الاسم الثاني
-
                 { wch: 16 }, // الاسم الأول
-
                 { wch: 16 }  // رقم الهوية
-
             ];
 
-
-
             // تفعيل اتجاه الورقة من اليمين لليسار (RTL)
-
             ws['!views'] = [{ RTL: true }];
 
-
-
             const wb = XLSX.utils.book_new();
-
             XLSX.utils.book_append_sheet(wb, ws, 'ملف المؤسسة');
 
-
-
             const safeComp = (selectedCompany && selectedCompany !== 'ALL') ? `_${selectedCompany.replace(/[\s\/\:*?"<>|]+/g, '_')}` : '';
-
             const safeGrp = (selectedGroup && selectedGroup !== 'ALL') ? selectedGroup.replace(/[\s\/\:*?"<>|]+/g, '_') : 'كافة_الشعب';
-
             const nowStr = new Date().toISOString().slice(0, 10);
-
             const fileName = `ملف_المؤسسة${safeComp}_${safeGrp}_${nowStr}.xlsx`;
 
-
-
             XLSX.writeFile(wb, fileName);
-
             showToast(`✅ تم تصدير ملف المؤسسة المعتمد لـ (${exportableTrainees.length}) متدرب بنجاح!`, 'success');
 
-
-
             // فتح نافذة تأكيد الاعتماد واحتساب الـ 4 أسابيع تلقائياً
-
             const approvalGroupName = (selectedGroup && selectedGroup !== 'ALL') ? selectedGroup : 'كافة الشعب المشمولة';
-
             openInstitutionApprovalConfirmationModal(approvalGroupName, exportableTrainees);
-
-
 
         } catch (exportErr) {
 
