@@ -16568,6 +16568,62 @@
 
     window.isSupabaseConnected = false;
 
+    var virtualClassrooms = {};
+    var activeVcTrainer = null;
+    var currentVcPlatform = 'meet';
+    var currentVcDateScope = 'today';
+    var currentVcLockMode = 'period';
+
+    var DEFAULT_VIRTUAL_CLASSROOMS = {
+        'شرف الدين': {
+            platform: 'meet',
+            link: 'https://meet.google.com/qmv-wqzk-pbc',
+            topic: 'محاضرة المصطلحات الفنية والسلامة المهنية (عن بعد)',
+            time: 'من 08:00 ص إلى 04:00 م (حسب فترات الجدول)',
+            targetGroups: 'ALL',
+            passcode: '',
+            notes: 'يرجى الدخول بالاسم الثلاثي الصريح وإبقاء المايكروفون مغلقاً حتى طلب الإذن بالمداخلة.',
+            isActive: false,
+            dateScope: 'today',
+            calendarDate: '',
+            lockByPeriod: true,
+            updatedAt: new Date().toISOString(),
+            updatedBy: 'أ. شرف الدين'
+        },
+        'رضا مطيلق': {
+            platform: 'zoom',
+            link: 'https://zoom.us/j/9876543210',
+            topic: 'محاضرة تقنيات اللحام وقراءة المخططات (عن بعد)',
+            time: 'من 08:00 ص إلى 04:00 م (حسب فترات الجدول)',
+            targetGroups: 'ALL',
+            passcode: '2026',
+            notes: 'الرجاء الالتزام بموعد الدخول وتجهيز دفتر الملاحظات.',
+            isActive: false,
+            dateScope: 'today',
+            calendarDate: '',
+            lockByPeriod: true,
+            updatedAt: new Date().toISOString(),
+            updatedBy: 'أ. رضا مطيلق'
+        },
+        'عصام سعيد': {
+            platform: 'meet',
+            link: 'https://meet.google.com/ert-bnmk-iop',
+            topic: 'محاضرة صيانة الأنظمة الكهربائية وتطبيقاتها (عن بعد)',
+            time: 'من 08:00 ص إلى 04:00 م (حسب فترات الجدول)',
+            targetGroups: 'ALL',
+            passcode: '',
+            notes: 'المحاضرة تفاعلية مباشرة تشمل حل تمارين ومناقشة تقييمات الأسبوع.',
+            isActive: false,
+            dateScope: 'today',
+            calendarDate: '',
+            lockByPeriod: true,
+            updatedAt: new Date().toISOString(),
+            updatedBy: 'أ. عصام سعيد'
+        }
+    };
+    window.DEFAULT_VIRTUAL_CLASSROOMS = DEFAULT_VIRTUAL_CLASSROOMS;
+    window.virtualClassrooms = virtualClassrooms;
+
 
 
     // دالة فتح وإغلاق القائمة الجانبية (شاملة لجميع الشاشات)
@@ -17477,8 +17533,8 @@ ${details}
                 ], { onConflict: 'key' }).catch(() => {});
             } catch(e) {}
         }
-        if (typeof renderApp === 'function') renderApp();
-        if (typeof renderInstTraineesTable === 'function') renderInstTraineesTable();
+        if (document.readyState === 'complete' && typeof renderApp === 'function') renderApp();
+        if (document.readyState === 'complete' && typeof renderInstTraineesTable === 'function') renderInstTraineesTable();
         return true;
     }
     window.wipeAllSystemPhones = wipeAllSystemPhones;
@@ -18017,6 +18073,18 @@ ${details}
 
         const btnStudentVirtualClass = document.getElementById('btn-studentVirtualClass');
 
+    function isAnyVirtualClassActiveForTrainee(studentUser) {
+        if (!studentUser || studentUser.role !== 'student') return false;
+        if (typeof evaluateTraineeSessionAccess !== 'function') return false;
+        try {
+            const evalResult = evaluateTraineeSessionAccess(studentUser);
+            return Boolean(evalResult && evalResult.status === 'open' && evalResult.classroom && evalResult.classroom.isActive && evalResult.classroom.link);
+        } catch(e) {
+            return false;
+        }
+    }
+    window.isAnyVirtualClassActiveForTrainee = isAnyVirtualClassActiveForTrainee;
+
         const studentBottomNav = document.getElementById('studentBottomNav');
 
         const btnAttendanceSheet = document.getElementById('btn-attendanceSheet');
@@ -18079,7 +18147,13 @@ ${details}
 
             if (btnStudentGrades) btnStudentGrades.classList.add('hidden'); // يفتح عبر حسابي
 
-            if (btnStudentVirtualClass) btnStudentVirtualClass.classList.remove('hidden');
+            if (btnStudentVirtualClass) {
+                if (typeof isAnyVirtualClassActiveForTrainee === 'function' && isAnyVirtualClassActiveForTrainee(currentUser)) {
+                    btnStudentVirtualClass.classList.remove('hidden');
+                } else {
+                    btnStudentVirtualClass.classList.add('hidden');
+                }
+            }
 
 
 
@@ -18735,6 +18809,16 @@ ${details}
             if (!allowedStudentTabs.includes(tab)) {
 
                 showToast('⛔ عذراً: غير مصرح للمتدرب بالوصول لشاشات الإدارة أو المدربين', 'error');
+
+                return;
+
+            }
+
+            if (tab === 'studentVirtualClass' && typeof isAnyVirtualClassActiveForTrainee === 'function' && !isAnyVirtualClassActiveForTrainee(currentUser)) {
+
+                showToast('المحاضرات قائمة حضورياً بالقاعة التدريبية - لا توجد محاضرة عن بعد نشطة حالياً', 'info');
+
+                switchTab('studentDashboard');
 
                 return;
 
@@ -42963,6 +43047,15 @@ function openReportFromProfile() {
 
             renderStudentVirtualClassBanner();
 
+        }
+
+        const sideStudentVcBtn = document.getElementById('btn-studentVirtualClass');
+        if (sideStudentVcBtn && typeof isAnyVirtualClassActiveForTrainee === 'function') {
+            if (isAnyVirtualClassActiveForTrainee(currentUser)) {
+                sideStudentVcBtn.classList.remove('hidden');
+            } else {
+                sideStudentVcBtn.classList.add('hidden');
+            }
         }
 
 
@@ -77020,15 +77113,15 @@ function buildDemoExecutiveReport(params) {
 
     // ===================================================================
 
-    let virtualClassrooms = {};
+    if (typeof virtualClassrooms === 'undefined' || !virtualClassrooms) virtualClassrooms = {};
 
-    let activeVcTrainer = null;
+    if (typeof activeVcTrainer === 'undefined') activeVcTrainer = null;
 
-    let currentVcPlatform = 'meet';
+    if (typeof currentVcPlatform === 'undefined') currentVcPlatform = 'meet';
 
-    let currentVcDateScope = 'today'; // 'today' | 'week' | 'calendar'
+    if (typeof currentVcDateScope === 'undefined') currentVcDateScope = 'today';
 
-    let currentVcLockMode = 'period'; // 'period' | 'allday'
+    if (typeof currentVcLockMode === 'undefined') currentVcLockMode = 'period';
 
 
 
@@ -77178,99 +77271,7 @@ function buildDemoExecutiveReport(params) {
 
 
 
-    const DEFAULT_VIRTUAL_CLASSROOMS = {
-
-        'شرف الدين': {
-
-            platform: 'meet',
-
-            link: 'https://meet.google.com/qmv-wqzk-pbc',
-
-            topic: 'محاضرة المصطلحات الفنية والسلامة المهنية (عن بعد)',
-
-            time: 'من 08:00 ص إلى 04:00 م (حسب فترات الجدول)',
-
-            targetGroups: 'ALL',
-
-            passcode: '',
-
-            notes: 'يرجى الدخول بالاسم الثلاثي الصريح وإبقاء المايكروفون مغلقاً حتى طلب الإذن بالمداخلة.',
-
-            isActive: true,
-
-            dateScope: 'today',
-
-            calendarDate: getTodayDateString(),
-
-            lockByPeriod: true,
-
-            updatedAt: new Date().toISOString(),
-
-            updatedBy: 'أ. شرف الدين'
-
-        },
-
-        'رضا مطيلق': {
-
-            platform: 'zoom',
-
-            link: 'https://zoom.us/j/9876543210',
-
-            topic: 'محاضرة تقنيات اللحام وقراءة المخططات (عن بعد)',
-
-            time: 'من 08:00 ص إلى 04:00 م (حسب فترات الجدول)',
-
-            targetGroups: 'ALL',
-
-            passcode: '2026',
-
-            notes: 'الرجاء الالتزام بموعد الدخول وتجهيز دفتر الملاحظات.',
-
-            isActive: true,
-
-            dateScope: 'today',
-
-            calendarDate: getTodayDateString(),
-
-            lockByPeriod: true,
-
-            updatedAt: new Date().toISOString(),
-
-            updatedBy: 'أ. رضا مطيلق'
-
-        },
-
-        'عصام سعيد': {
-
-            platform: 'meet',
-
-            link: 'https://meet.google.com/ert-bnmk-iop',
-
-            topic: 'محاضرة صيانة الأنظمة الكهربائية وتطبيقاتها (عن بعد)',
-
-            time: 'من 08:00 ص إلى 04:00 م (حسب فترات الجدول)',
-
-            targetGroups: 'ALL',
-
-            passcode: '',
-
-            notes: 'المحاضرة تفاعلية مباشرة تشمل حل تمارين ومناقشة تقييمات الأسبوع.',
-
-            isActive: true,
-
-            dateScope: 'today',
-
-            calendarDate: getTodayDateString(),
-
-            lockByPeriod: true,
-
-            updatedAt: new Date().toISOString(),
-
-            updatedBy: 'أ. عصام سعيد'
-
-        }
-
-    };
+    // DEFAULT_VIRTUAL_CLASSROOMS is initialized globally at top of script
 
 
 
@@ -77344,19 +77345,35 @@ function buildDemoExecutiveReport(params) {
 
 
 
+    const VC_STORAGE_VERSION = 'v2_default_off_course_binding';
+
     function loadVirtualClassrooms() {
 
         try {
 
+            const isMigrated = (localStorage.getItem('sys_vc_version_flag') === VC_STORAGE_VERSION);
+
             const raw = localStorage.getItem('sys_virtual_classrooms_v1');
 
-            if (raw) {
+            if (raw && isMigrated) {
 
                 virtualClassrooms = JSON.parse(raw);
 
             } else {
 
                 virtualClassrooms = { ...DEFAULT_VIRTUAL_CLASSROOMS };
+
+                for (let k in virtualClassrooms) {
+
+                    if (virtualClassrooms[k]) {
+
+                        virtualClassrooms[k].isActive = false;
+
+                    }
+
+                }
+
+                localStorage.setItem('sys_vc_version_flag', VC_STORAGE_VERSION);
 
                 localStorage.setItem('sys_virtual_classrooms_v1', JSON.stringify(virtualClassrooms));
 
@@ -77588,9 +77605,9 @@ function buildDemoExecutiveReport(params) {
 
 
 
-    function getVirtualClassroomForTrainer(trainerNameOrObj) {
+    function getVirtualClassroomForTrainer(trainerNameOrObj, courseKey) {
 
-        if (!trainerNameOrObj) return null;
+        if (!trainerNameOrObj && !courseKey) return null;
 
         loadVirtualClassrooms();
 
@@ -77598,27 +77615,35 @@ function buildDemoExecutiveReport(params) {
 
         const cleanName = trainerObj ? trainerObj.name.trim() : (typeof trainerNameOrObj === 'string' ? trainerNameOrObj.replace(/^أ\.\s*/, '').trim() : '');
 
-        if (!cleanName) return null;
+        // 1. مفتاح مركب: اسم المدرب + مفتاح المقرر
+        if (cleanName && courseKey && virtualClassrooms[`${cleanName}_${courseKey}`]) {
+            return virtualClassrooms[`${cleanName}_${courseKey}`];
+        }
 
+        // 2. البحث باسم المدرب المعتمد
+        if (cleanName && virtualClassrooms[cleanName]) {
+            return virtualClassrooms[cleanName];
+        }
 
+        // 3. البحث بمفتاح المقرر مباشرة
+        if (courseKey && virtualClassrooms[courseKey]) {
+            return virtualClassrooms[courseKey];
+        }
 
-        if (virtualClassrooms[cleanName]) return virtualClassrooms[cleanName];
-
-
-
-        for (let key in virtualClassrooms) {
-
-            if (key.includes(cleanName) || cleanName.includes(key)) {
-
-                return virtualClassrooms[key];
-
+        // 4. مطابقة جزئية باسم المدرب
+        if (cleanName) {
+            for (let key in virtualClassrooms) {
+                if (key.includes(cleanName) || cleanName.includes(key)) {
+                    return virtualClassrooms[key];
+                }
             }
-
         }
 
         return null;
 
     }
+
+    window.getVirtualClassroomForTrainer = getVirtualClassroomForTrainer;
 
 
 
@@ -77674,7 +77699,11 @@ function buildDemoExecutiveReport(params) {
 
             const trainerName = binding.trainerName;
 
-            const vc = getVirtualClassroomForTrainer(trainerName) || getVirtualClassroomForTrainer(binding.rawTrainerName);
+            const courseKey = binding.lmsKey || findCourseKeyForTrainer(binding.trainerName);
+
+            const vc = getVirtualClassroomForTrainer(trainerName, courseKey) || 
+
+                       getVirtualClassroomForTrainer(binding.rawTrainerName, courseKey);
 
 
 
@@ -77746,6 +77775,8 @@ function buildDemoExecutiveReport(params) {
 
 
 
+            // الشرط الأساسي: لا تظهر للمتدرب أبداً إذا لم يفعلها المدرب أو لم يكن هناك رابط
+
             if (!vc || !vc.isActive || !vc.link) {
 
                 continue;
@@ -77754,7 +77785,7 @@ function buildDemoExecutiveReport(params) {
 
 
 
-            // Check course selection match if courseKey is specified on the virtual classroom
+            // التحقق من مطابقة المقرر التدريبي المحدد للقاعة مع مقرر المتدرب
 
             if (vc.courseKey) {
 
@@ -77778,37 +77809,63 @@ function buildDemoExecutiveReport(params) {
 
 
 
-            // 1. Check if scheduled for a future calendar date
+            // التحقق من استهداف شعبة المتدرب
 
-            if (vc.dateScope === 'calendar' && vc.calendarDate && vc.calendarDate > todayStr) {
+            if (vc.targetGroups && vc.targetGroups !== 'ALL') {
 
-                if (!futureSessionResult) {
+                const isGrpMatch = (typeof isGroupMatch === 'function' ? isGroupMatch(vc.targetGroups, studentGroup) : false) ||
 
-                    futureSessionResult = {
+                                   (studentGroup && (vc.targetGroups.includes(studentGroup) || studentGroup.includes(vc.targetGroups)));
 
-                        ...currentBindingResult,
+                if (!isGrpMatch) {
 
-                        status: 'future_date',
-
-                        scheduledDate: vc.calendarDate,
-
-                        formattedDate: formatDateToArabic(vc.calendarDate),
-
-                        periodLabel: `مجدولة بتاريخ: ${formatDateToArabic(vc.calendarDate)}`
-
-                    };
+                    continue;
 
                 }
-
-                continue;
 
             }
 
 
 
-            // 2. Active Session: Since the trainer explicitly turned on the live classroom (isActive: true),
+            // التحقق من تاريخ الجدولة بالتقويم
 
-            // open access immediately for the trainee without schedule locking blockers!
+            if (vc.dateScope === 'calendar' && vc.calendarDate) {
+
+                if (vc.calendarDate > todayStr) {
+
+                    if (!futureSessionResult) {
+
+                        futureSessionResult = {
+
+                            ...currentBindingResult,
+
+                            status: 'future_date',
+
+                            scheduledDate: vc.calendarDate,
+
+                            formattedDate: formatDateToArabic(vc.calendarDate),
+
+                            periodLabel: `مجدولة بتاريخ: ${formatDateToArabic(vc.calendarDate)}`
+
+                        };
+
+                    }
+
+                    continue;
+
+                } else if (vc.calendarDate < todayStr) {
+
+                    // تاريخ منقضي
+
+                    continue;
+
+                }
+
+            }
+
+
+
+            // المحاضرة مفعلة الآن صراحة للمتدرب المربوط بهذا المقرر
 
             const isCurrentActiveLms = activeStudentLmsCourse && 
 
@@ -77827,8 +77884,6 @@ function buildDemoExecutiveReport(params) {
             };
 
 
-
-            // If this is the student's currently viewed LMS course, prioritize it immediately
 
             if (isCurrentActiveLms) {
 
@@ -78216,13 +78271,45 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        if (activeVcTrainer && virtualClassrooms[activeVcTrainer]) {
+        const cleanTrainerName = (activeVcTrainer || '').replace(/^أ\.\s*/, '').trim();
 
-            virtualClassrooms[activeVcTrainer].isActive = isChecked;
+        const courseSelect = document.getElementById('vcCourseSelect');
 
-            saveVirtualClassroomsToStorage();
+        const selectedCourseKey = courseSelect ? courseSelect.value : '';
+
+
+
+        if (cleanTrainerName) {
+
+            if (!virtualClassrooms[cleanTrainerName]) virtualClassrooms[cleanTrainerName] = {};
+
+            virtualClassrooms[cleanTrainerName].isActive = isChecked;
 
         }
+
+        if (selectedCourseKey) {
+
+            if (!virtualClassrooms[selectedCourseKey]) virtualClassrooms[selectedCourseKey] = {};
+
+            virtualClassrooms[selectedCourseKey].isActive = isChecked;
+
+            if (cleanTrainerName) {
+
+                const compKey = `${cleanTrainerName}_${selectedCourseKey}`;
+
+                if (!virtualClassrooms[compKey]) virtualClassrooms[compKey] = {};
+
+                virtualClassrooms[compKey].isActive = isChecked;
+
+            }
+
+        }
+
+
+
+        saveVirtualClassroomsToStorage();
+
+        if (typeof enforceRoleVisibility === 'function') enforceRoleVisibility();
 
         updateHeaderActiveBadge(isChecked);
 
@@ -78408,55 +78495,28 @@ function buildDemoExecutiveReport(params) {
 
         const clean = tObj ? tObj.name : (trainerName || '').replace(/^أ\.\s*/, '').trim();
 
+        const sourceLms = (typeof lmsCourses !== 'undefined' && lmsCourses && Object.keys(lmsCourses).length > 0)
+            ? lmsCourses
+            : ((typeof INITIAL_LMS_COURSES !== 'undefined') ? INITIAL_LMS_COURSES : {});
 
+        // 1. مقررات هذا المدرب أولاً
+        for (let k in sourceLms) {
 
-        // 1. From INITIAL_LMS_COURSES
+            const item = sourceLms[k];
 
-        if (typeof INITIAL_LMS_COURSES !== 'undefined') {
+            const trName = (item.trainerName || item.trainer || '').replace(/^أ\.\s*/, '').trim();
 
-            for (let k in INITIAL_LMS_COURSES) {
-
-                const item = INITIAL_LMS_COURSES[k];
-
-                const trName = (item.trainerName || item.trainer || '').replace(/^أ\.\s*/, '').trim();
-
-                if (trName === clean || k === clean) {
-
-                    courses.push({
-
-                        courseKey: k,
-
-                        courseTitle: item.courseTitle || item.courseShort || k,
-
-                        room: item.room || ''
-
-                    });
-
-                }
-
-            }
-
-        }
-
-
-
-        // 2. From scheduleData
-
-        const tr = (scheduleData || []).find(t => t.name === clean || t.name.includes(clean) || clean.includes(t.name));
-
-        if (tr && tr.course) {
-
-            const cKey = findCourseKeyForTrainer(clean) || clean;
-
-            if (!courses.some(c => c.courseKey === cKey || c.courseTitle === tr.course)) {
+            if (trName === clean || k === clean || clean.includes(trName) || trName.includes(clean)) {
 
                 courses.push({
 
-                    courseKey: cKey,
+                    courseKey: k,
 
-                    courseTitle: tr.course,
+                    courseTitle: item.courseTitle || item.courseShort || k,
 
-                    room: tr.room || ''
+                    room: item.room || '',
+
+                    trainerName: trName || clean
 
                 });
 
@@ -78464,10 +78524,61 @@ function buildDemoExecutiveReport(params) {
 
         }
 
+        // 2. من جدول الحصص العام للمدرب
+        const matchedTrainers = (scheduleData || []).filter(t => t.name === clean || t.name.includes(clean) || clean.includes(t.name));
 
+        matchedTrainers.forEach(tr => {
 
-        // 3. Fallback if none found
+            if (tr && tr.course) {
 
+                const cKey = findCourseKeyForTrainer(clean) || clean;
+
+                if (!courses.some(c => c.courseKey === cKey || c.courseTitle === tr.course)) {
+
+                    courses.push({
+
+                        courseKey: cKey,
+
+                        courseTitle: tr.course,
+
+                        room: tr.room || '',
+
+                        trainerName: clean
+
+                    });
+
+                }
+
+            }
+
+        });
+
+        // 3. إضافة باقي المقررات النشطة بالمعهد لتمكين المدرب/المشرف من الاختيار والربط
+        for (let k in sourceLms) {
+
+            const item = sourceLms[k];
+
+            if (!courses.some(c => c.courseKey === k)) {
+
+                const trName = (item.trainerName || item.trainer || '').replace(/^أ\.\s*/, '').trim();
+
+                courses.push({
+
+                    courseKey: k,
+
+                    courseTitle: `${item.courseTitle || item.courseShort || k} (أ. ${trName || k})`,
+
+                    room: item.room || '',
+
+                    trainerName: trName || k
+
+                });
+
+            }
+
+        }
+
+        // 4. Fallback إذا لم يتم العثور على أي مقرر
         if (courses.length === 0) {
 
             const cKey = findCourseKeyForTrainer(clean) || clean;
@@ -78478,7 +78589,9 @@ function buildDemoExecutiveReport(params) {
 
                 courseTitle: tObj?.course || 'المقرر التدريبي المعتمد',
 
-                room: tObj?.room || ''
+                room: tObj?.room || '',
+
+                trainerName: clean
 
             });
 
@@ -78498,23 +78611,148 @@ function buildDemoExecutiveReport(params) {
 
         if (!cSel) return;
 
+        const selKey = cSel.value;
+
         const selOption = cSel.options[cSel.selectedIndex];
 
-        const courseTitle = selOption ? selOption.getAttribute('data-title') || selOption.text : '';
+        const courseTitle = selOption ? (selOption.getAttribute('data-title') || selOption.text).replace(/\s*\(أ\..*?\)/, '') : '';
+
+        const cleanTrainer = (activeVcTrainer || '').replace(/^أ\.\s*/, '').trim();
+
+        // جلب الإعدادات المسبقة الخاصة بهذا المقرر المحدد
+        const savedData = (virtualClassrooms && (
+
+            virtualClassrooms[`${cleanTrainer}_${selKey}`] || 
+
+            virtualClassrooms[selKey] || 
+
+            (virtualClassrooms[cleanTrainer] && virtualClassrooms[cleanTrainer].courseKey === selKey ? virtualClassrooms[cleanTrainer] : null)
+
+        )) || null;
 
         const topicInput = document.getElementById('vcMeetingTopic');
 
-        if (topicInput && (!topicInput.value || topicInput.value.startsWith('محاضرة '))) {
+        if (topicInput) {
 
-            topicInput.value = `محاضرة ${courseTitle} (عن بعد)`;
+            topicInput.value = (savedData && savedData.topic) ? savedData.topic : `محاضرة ${courseTitle} (عن بعد)`;
 
         }
+
+        const urlInput = document.getElementById('vcMeetingUrl');
+
+        if (urlInput) {
+
+            urlInput.value = (savedData && savedData.link) ? savedData.link : '';
+
+        }
+
+        const passcodeInput = document.getElementById('vcMeetingPasscode');
+
+        if (passcodeInput) {
+
+            passcodeInput.value = (savedData && savedData.passcode) ? savedData.passcode : '';
+
+        }
+
+        const notesInput = document.getElementById('vcMeetingNotes');
+
+        if (notesInput) {
+
+            notesInput.value = (savedData && savedData.notes) ? savedData.notes : 'يرجى الدخول بالاسم الثلاثي الصريح والالتزام بالوقت، وإبقاء المايكروفون مغلقاً.';
+
+        }
+
+        // حالة التفعيل لهذا المقرر تحديداً (افتراضياً غير مفعل إذا لم يحفظ)
+        const isActive = Boolean(savedData && savedData.isActive === true);
+
+        onVcToggleActive(isActive);
+
+        // تحديث المجموعات والشعب وعدد المتدربين للمقرر المختار
+        updateVcCourseGroupsAndCount(selKey);
 
         onVcInputChange();
 
     }
 
     window.onVcCourseSelectChange = onVcCourseSelectChange;
+
+
+
+    function updateVcCourseGroupsAndCount(courseKey) {
+
+        let trainerForCourse = activeVcTrainer;
+
+        if (courseKey && typeof lmsCourses !== 'undefined' && lmsCourses[courseKey]) {
+
+            trainerForCourse = (lmsCourses[courseKey].trainerName || lmsCourses[courseKey].trainer || activeVcTrainer).replace(/^أ\.\s*/, '').trim();
+
+        }
+
+        const linkedGroups = getGroupsForTrainer(trainerForCourse);
+
+        const linkedTrainees = getTraineesForTrainer(trainerForCourse);
+
+        const groupsSelect = document.getElementById('vcTargetGroups');
+
+        if (groupsSelect) {
+
+            const currentVal = groupsSelect.value;
+
+            const groupOpts = linkedGroups.map(g => `<option value="${g}">المجموعة: ${g}</option>`).join('');
+
+            groupsSelect.innerHTML = `
+
+                <option value="ALL">🌐 كافة المجموعات والشعب المعتمدة (${linkedGroups.join(', ') || 'الكل'})</option>
+
+                ${groupOpts}
+
+            `;
+
+            if (currentVal && (currentVal === 'ALL' || linkedGroups.includes(currentVal))) {
+
+                groupsSelect.value = currentVal;
+
+            }
+
+        }
+
+        const countBadge = document.getElementById('vcTraineesCountBadge');
+
+        if (countBadge) {
+
+            countBadge.innerText = `${linkedTrainees.length} متدرب مسجل`;
+
+        }
+
+        const groupsTags = document.getElementById('vcLinkedGroupsTags');
+
+        if (groupsTags) {
+
+            if (linkedGroups.length > 0) {
+
+                groupsTags.innerHTML = linkedGroups.map(g => `
+
+                    <span class="bg-blue-50 text-blue-900 border border-blue-200 text-xs font-black px-3 py-1 rounded-xl shadow-2xs flex items-center gap-1.5">
+
+                        <span>👥</span>
+
+                        <span>${g}</span>
+
+                    </span>
+
+                `).join('');
+
+            } else {
+
+                groupsTags.innerHTML = `<span class="text-xs text-slate-400 font-medium">لا توجد مجموعات مسجلة بجدول هذا المقرر حالياً</span>`;
+
+            }
+
+        }
+
+    }
+
+    window.updateVcCourseGroupsAndCount = updateVcCourseGroupsAndCount;
 
 
 
@@ -78738,7 +78976,9 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        const isActive = (cData.isActive !== false);
+        updateVcCourseGroupsAndCount(courseSelect ? courseSelect.value : '');
+
+        const isActive = Boolean(cData && cData.isActive === true);
 
         onVcToggleActive(isActive);
 
@@ -78988,7 +79228,9 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        virtualClassrooms[activeVcTrainer] = {
+        const cleanTrainerName = (activeVcTrainer || '').replace(/^أ\.\s*/, '').trim();
+
+        const classroomData = {
 
             platform: currentVcPlatform,
 
@@ -78997,6 +79239,8 @@ function buildDemoExecutiveReport(params) {
             courseKey: selectedCourseKey,
 
             courseTitle: selectedCourseTitle,
+
+            trainerName: cleanTrainerName,
 
             topic: topic || (`محاضرة ${selectedCourseTitle} (عن بعد)`),
 
@@ -79020,9 +79264,22 @@ function buildDemoExecutiveReport(params) {
 
         };
 
+        // حفظ الإعدادات بالمفتاح المركب واسم المدرب ومفتاح المقرر
+        virtualClassrooms[cleanTrainerName] = classroomData;
+
+        virtualClassrooms[`${cleanTrainerName}_${selectedCourseKey}`] = classroomData;
+
+        if (selectedCourseKey) {
+
+            virtualClassrooms[selectedCourseKey] = classroomData;
+
+        }
+
 
 
         saveVirtualClassroomsToStorage();
+
+        if (typeof enforceRoleVisibility === 'function') enforceRoleVisibility();
 
         updateHeaderActiveBadge(isActive);
 
@@ -79030,7 +79287,7 @@ function buildDemoExecutiveReport(params) {
 
         renderVcScheduleMatrix();
 
-        showToast('✅ تم حفظ وتطبيق إعدادات القاعة الافتراضية بنجاح', 'success');
+        showToast(isActive ? '✅ تم حفظ وتفعيل القاعة الافتراضية بنجاح' : '✅ تم حفظ إعدادات القاعة الافتراضية (الحالة: متوقفة)', 'success');
 
     }
 
@@ -79045,6 +79302,26 @@ function buildDemoExecutiveReport(params) {
         if (switchEl) switchEl.checked = false;
 
         onVcToggleActive(false);
+
+        const cleanTrainerName = (activeVcTrainer || '').replace(/^أ\.\s*/, '').trim();
+
+        const courseSelect = document.getElementById('vcCourseSelect');
+
+        const selectedCourseKey = courseSelect ? courseSelect.value : '';
+
+        if (virtualClassrooms[cleanTrainerName]) virtualClassrooms[cleanTrainerName].isActive = false;
+
+        if (selectedCourseKey && virtualClassrooms[selectedCourseKey]) virtualClassrooms[selectedCourseKey].isActive = false;
+
+        if (cleanTrainerName && selectedCourseKey && virtualClassrooms[`${cleanTrainerName}_${selectedCourseKey}`]) {
+
+            virtualClassrooms[`${cleanTrainerName}_${selectedCourseKey}`].isActive = false;
+
+        }
+
+        saveVirtualClassroomsToStorage();
+
+        if (typeof enforceRoleVisibility === 'function') enforceRoleVisibility();
 
         showToast('⏹️ تم إيقاف التدريب عن بعد والعودة للحضوري', 'info');
 
@@ -79848,7 +80125,8 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        if (evalResult.status === 'open' && evalResult.classroom) {
+        // تظهر للمتدرب حصراً في حال تفعيل المدرب للمحاضرة عن بعد ولنفس المقرر المربوط به
+        if (evalResult && evalResult.status === 'open' && evalResult.classroom && evalResult.classroom.isActive && evalResult.classroom.link) {
 
             const vc = evalResult.classroom;
 
@@ -79890,7 +80168,7 @@ function buildDemoExecutiveReport(params) {
 
                             <p class="text-xs text-slate-300 font-medium">
 
-                                🕒 فترة حصتك: <b class="text-white">${evalResult.periodLabel}</b> • المنصة: <b class="text-blue-200">${pObj.name}</b>
+                                🕒 فترة حصتك: <b class="text-white">${evalResult.periodLabel}</b> • المقرر: <b class="text-amber-200">${evalResult.courseTitle}</b> • المنصة: <b class="text-blue-200">${pObj.name}</b>
 
                                 ${vc.passcode ? ` • رمز المرور: <b class="text-amber-300 font-mono">${vc.passcode}</b>` : ''}
 
@@ -79924,54 +80202,9 @@ function buildDemoExecutiveReport(params) {
 
             `;
 
-        } else if (evalResult.status === 'upcoming') {
-
-            bannerEl.className = 'block';
-
-            bannerEl.innerHTML = `
-
-                <div class="p-4 rounded-3xl bg-amber-50 border-2 border-amber-300 shadow-sm text-amber-950 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-
-                    <div class="flex items-center gap-3.5">
-
-                        <div class="w-11 h-11 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl shrink-0">
-
-                            ⏳
-
-                        </div>
-
-                        <div class="space-y-0.5">
-
-                            <div class="flex items-center gap-2 flex-wrap">
-
-                                <span class="bg-amber-500 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full">محاضرة عن بعد مجدولة اليوم</span>
-
-                                <span class="font-black text-sm text-slate-900">${evalResult.classroom?.topic || 'المحاضرة المباشرة'}</span>
-
-                            </div>
-
-                            <p class="text-xs text-amber-900 font-medium">
-
-                                🕒 موعد حصتك: <b class="text-slate-900 font-bold">${evalResult.periodLabel}</b> • سيفتح الرابط تلقائياً عند حلول موعد الحصة (${evalResult.startStr}).
-
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    <button type="button" onclick="switchTab('studentVirtualClass')" class="bg-amber-400 hover:bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition border border-amber-500 shadow-2xs cursor-pointer">
-
-                        عرض تفاصيل القاعة
-
-                    </button>
-
-                </div>
-
-            `;
-
         } else {
 
+            // في حال لم يفعلها المدرب: إخفاء الشريط تماماً ولا يظهر للمتدرب
             bannerEl.className = 'hidden';
 
             bannerEl.innerHTML = '';
@@ -80007,6 +80240,28 @@ function buildDemoExecutiveReport(params) {
                     } else if (currentActiveTabId === 'studentDashboard') {
 
                         renderStudentVirtualClassBanner();
+
+                    }
+
+                    if (currentUser && currentUser.role === 'student') {
+
+                        renderStudentVirtualClassBanner();
+
+                        const intervalVcBtn = document.getElementById('btn-studentVirtualClass');
+
+                        if (intervalVcBtn && typeof isAnyVirtualClassActiveForTrainee === 'function') {
+
+                            if (isAnyVirtualClassActiveForTrainee(currentUser)) {
+
+                                intervalVcBtn.classList.remove('hidden');
+
+                            } else {
+
+                                intervalVcBtn.classList.add('hidden');
+
+                            }
+
+                        }
 
                     }
 
@@ -80209,6 +80464,32 @@ function buildDemoExecutiveReport(params) {
 
 
                     <!-- Direct Launch Button -->
+
+                    ${(function() {
+
+                        const courseVc = (typeof getVirtualClassroomForTrainer === 'function')
+
+                            ? (getVirtualClassroomForTrainer(c.trainerName, c.lmsKey) || getVirtualClassroomForTrainer(c.rawTrainerName, c.lmsKey))
+
+                            : null;
+
+                        const isVcLiveNow = Boolean(courseVc && courseVc.isActive && courseVc.link && (!courseVc.calendarDate || courseVc.calendarDate === getTodayDateString()));
+
+                        return isVcLiveNow ? `
+
+                            <a href="${courseVc.link}" target="_blank" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-3 px-4 rounded-2xl text-xs transition duration-200 shadow-md flex items-center justify-center gap-2 mb-2 animate-pulse cursor-pointer">
+
+                                <span>🔴</span>
+
+                                <span>محاضرة مباشرة عن بعد نشطة الآن (دخول البث المباشر)</span>
+
+                                <span class="text-sm">👈</span>
+
+                            </a>
+
+                        ` : '';
+
+                    })()}
 
                     <button type="button" onclick="openStudentLmsForCourse('${c.lmsKey}', activeStudentLmsWeek)" class="w-full ${btnClass} font-black py-3.5 px-5 rounded-2xl text-xs md:text-sm transition duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-95">
 
