@@ -1956,7 +1956,8 @@
 
             #certificatePrintableArea, #certificatePrintableArea *,
 
-            #adminReportPrintArea, #adminReportPrintArea * {
+            #adminReportPrintArea, #adminReportPrintArea *,
+            #cdPrintableReportArea, #cdPrintableReportArea * {
 
                 visibility: visible !important;
 
@@ -1990,7 +1991,7 @@
 
             }
 
-            #adminReportPrintArea {
+            #adminReportPrintArea, #cdPrintableReportArea {
 
                 position: absolute !important;
 
@@ -3205,6 +3206,15 @@
                     </button>
 
 
+
+                    <!-- Link 4.5: Company Statistics Dashboard -->
+                    <button onclick="switchTab('companyDashboard')" id="btn-companyDashboard" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer" title="إحصائيات الشركات ومتابعة العقود">
+                        <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                        </svg>
+                        <span class="text-xs font-bold">إحصائيات الشركات</span>
+                    </button>
 
                     <!-- Link 5: Admin Certificates -->
 
@@ -12201,6 +12211,273 @@
 
 
 
+                        <!-- ==================== TAB: COMPANY DASHBOARD (إحصائيات الشركات ومتابعة عقود المجموعات) ==================== -->
+            <div id="tab-companyDashboard" class="hidden space-y-6">
+
+                <!-- Header Card (No-print) -->
+                <div class="bg-gradient-to-r from-[#0F2942] via-slate-800 to-slate-900 text-white rounded-3xl p-5 md:p-6 shadow-xl border border-amber-400/30 no-print">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <button type="button" onclick="goBackTab()" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-black px-3.5 py-2.5 rounded-2xl text-xs transition cursor-pointer flex items-center gap-1.5 shrink-0" title="الرجوع">
+                                <span>🔙</span>
+                                <span>رجوع</span>
+                            </button>
+                            <div class="w-14 h-14 rounded-2xl bg-[#0F2942] border border-amber-400/40 text-amber-300 flex items-center justify-center text-2xl font-black shadow-lg shrink-0">
+                                <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h3 class="font-black text-white text-xl">لوحة إحصائيات الشركات وعقود المجموعات</h3>
+                                    <span class="bg-amber-400/20 text-amber-300 text-xs font-black px-2.5 py-0.5 rounded-full border border-amber-400/30">متابعة العقود بالمجموعات</span>
+                                </div>
+                                <p class="text-xs text-slate-300 font-bold mt-1">عقود وتواريخ تدريب كل مجموعة • التخصصات • أعداد المتدربين من التحضير الفعلي • نسب الحضور والطاقة الاستيعابية</p>
+                            </div>
+                        </div>
+
+                        <!-- Top Actions -->
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <button type="button" onclick="refreshCompanyDashboardFromLive(true)" class="bg-amber-400 hover:bg-amber-500 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                                <svg class="w-4 h-4 text-slate-950" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                <span>مزامنة التحضير المباشر</span>
+                            </button>
+                            <button type="button" onclick="openGroupContractModal()" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                </svg>
+                                <span>تعديل عقود المجموعات</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Capacity Cards Row (No-print) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                    <div class="bg-gradient-to-br from-[#0F2942] to-slate-800 rounded-2xl p-5 shadow-sm border border-slate-700/60 text-white">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <div class="text-xs font-bold text-amber-300">طاقة الساعة الواحدة</div>
+                                <div class="text-[11px] text-slate-300 mt-0.5">سعة القاعات في الساعة</div>
+                            </div>
+                            <span class="w-8 h-8 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center text-xs font-black">1h</span>
+                        </div>
+                        <div class="text-3xl font-black text-white" id="cdCapacity1h">149</div>
+                        <div class="text-[11px] text-slate-300 mt-1 font-bold">متدرب في الساعة الواحدة</div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-emerald-900 to-emerald-800 rounded-2xl p-5 shadow-sm border border-emerald-700/60 text-white">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <div class="text-xs font-bold text-emerald-300">متوسط ساعتين دوام</div>
+                                <div class="text-[11px] text-emerald-100 mt-0.5">الطاقة الاستيعابية اليومية</div>
+                            </div>
+                            <span class="w-8 h-8 rounded-xl bg-emerald-400/20 text-emerald-300 flex items-center justify-center text-xs font-black">2h</span>
+                        </div>
+                        <div class="text-3xl font-black text-white" id="cdCapacity2h">596</div>
+                        <div class="text-[11px] text-emerald-100 mt-1 font-bold">متدرب يومياً بمتوسط ساعتين</div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-indigo-900 to-indigo-800 rounded-2xl p-5 shadow-sm border border-indigo-700/60 text-white">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <div class="text-xs font-bold text-indigo-300">أقصى طاقة استيعابية</div>
+                                <div class="text-[11px] text-indigo-100 mt-0.5">الطاقة اليومية الكاملة</div>
+                            </div>
+                            <span class="w-8 h-8 rounded-xl bg-indigo-400/20 text-indigo-300 flex items-center justify-center text-xs font-black">MAX</span>
+                        </div>
+                        <div class="text-3xl font-black text-white" id="cdCapacityMax">1,192</div>
+                        <div class="text-[11px] text-indigo-100 mt-1 font-bold">متدرب يومياً (ساعة بساعة)</div>
+                    </div>
+                </div>
+
+                <!-- Live Summary Stats Row (No-print) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 no-print" id="cdLiveSummaryStats">
+                    <!-- Filled dynamically by JS -->
+                </div>
+
+                <!-- Report Generator Controls Card (No-print) -->
+                <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 no-print">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                <h4 class="font-black text-slate-900 dark:text-white text-base">مركز إصدار وتصدير التقارير</h4>
+                                <span class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-black px-2 py-0.5 rounded-full">PDF & Excel</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-bold">اختر نوع التقرير المطلوب والشركة ثم اطبعه PDF بجودة A4 أو صدّره كملف جدول بيانات</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- Report Type Dropdown -->
+                            <div class="min-w-[240px]">
+                                <label class="text-[10px] font-black text-slate-500 dark:text-slate-400 block mb-1">نوع التقرير:</label>
+                                <select id="cdReportTypeSelect" onchange="onCDReportTypeChange()" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl p-2.5 text-xs bg-slate-50 dark:bg-slate-700 font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-amber-500">
+                                    <option value="groupContracts">1. كشف عقود وتدريب المجموعات والتخصصات (تفصيلي)</option>
+                                    <option value="summary">2. تقرير إحصائي شامل لجميع الشركات والطاقة</option>
+                                    <option value="singleCompany">3. تقرير تحليلي تفصيلي لشركة محددة</option>
+                                    <option value="attendance">4. كشف مقارنة نسب الحضور الفعلي</option>
+                                    <option value="capacity">5. تقرير الطاقة الاستيعابية ومعدل الإشغال</option>
+                                </select>
+                            </div>
+
+                            <!-- Company Select (dynamic) -->
+                            <div class="min-w-[180px]" id="cdCompanySelectWrapper">
+                                <label class="text-[10px] font-black text-slate-500 dark:text-slate-400 block mb-1">تحديد الشركة:</label>
+                                <select id="cdCompanySelect" onchange="onCDCompanyChange()" class="w-full border border-slate-200 dark:border-slate-600 rounded-xl p-2.5 text-xs bg-slate-50 dark:bg-slate-700 font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-amber-500">
+                                    <option value="ALL">جميع الشركات</option>
+                                </select>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex items-end gap-2 pt-4 lg:pt-0">
+                                <button type="button" onclick="printCDReportPDF()" class="bg-[#0F2942] hover:bg-[#0d2235] text-amber-300 font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                                    <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                    </svg>
+                                    <span>طباعة التقرير PDF</span>
+                                </button>
+                                <button type="button" onclick="exportCDReportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <span>تصدير Excel / CSV</span>
+                                </button>
+                                <button type="button" onclick="toggleCDReportPreview()" id="btn-toggleCDPreview" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-black px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
+                                    <span>معاينة التقرير</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Printable Report Sheet Area (Visible during print or preview) -->
+                <div id="cdPrintableReportArea" class="hidden bg-white text-slate-900 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-300">
+                    <div id="cdPrintableReportContent">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- =================================================================== -->
+                <!-- GROUP-LEVEL CONTRACTS & TRAINING TIMELINE TRACKER (مخطط عقود المجموعات) -->
+                <!-- =================================================================== -->
+                <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 md:p-6 shadow-sm border border-slate-200 dark:border-slate-700 no-print space-y-4">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700 pb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                <h4 class="font-black text-slate-900 dark:text-white text-base">جدول ومخطط عقود المجموعات والتدريب (مفصل لكل مجموعة)</h4>
+                                <span class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-black px-2 py-0.5 rounded-full" id="cdGroupTotalCountBadge">0 مجموعة</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-bold mt-0.5">تواريخ بداية ونهاية التدريب والتخصص لكل مجموعة • أعداد المتدربين الفعليين مسحوبة من كشف التحضير المباشر</p>
+                        </div>
+
+                        <!-- Search and Controls -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Company Filter -->
+                            <select id="cdGroupFilterCompany" onchange="renderCDGroupContractsUI()" class="border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-700 font-bold text-slate-800 dark:text-slate-200 outline-none">
+                                <option value="ALL">جميع الشركات</option>
+                                <option value="Samsung">Samsung (سامسونج)</option>
+                                <option value="Sinopec">Sinopec (سينوبك)</option>
+                                <option value="HYUNDAI">HYUNDAI (هيونداي)</option>
+                                <option value="Eleco">Eleco (إليكو)</option>
+                                <option value="Amana">Amana (أمانة)</option>
+                                <option value="Shinbo">Shinbo (شينبو)</option>
+                            </select>
+
+                            <!-- Status Filter -->
+                            <select id="cdGroupFilterStatus" onchange="renderCDGroupContractsUI()" class="border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-700 font-bold text-slate-800 dark:text-slate-200 outline-none">
+                                <option value="ALL">جميع الحالات</option>
+                                <option value="EXPIRING">تنتهي قريباً (عاجل)</option>
+                                <option value="ACTIVE">سارية التدريب</option>
+                                <option value="OPEN">غير محدد النهاية</option>
+                                <option value="EXPIRED">منتهية</option>
+                            </select>
+
+                            <!-- Search Input -->
+                            <input type="text" id="cdGroupSearchInput" oninput="renderCDGroupContractsUI()" placeholder="بحث بالمجموعة أو التخصص..."
+                                   class="border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-700 font-bold text-slate-800 dark:text-slate-200 outline-none w-44 focus:border-amber-500">
+
+                            <!-- View Mode Toggle -->
+                            <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl text-xs font-bold">
+                                <button type="button" onclick="setCDGroupViewMode('table')" id="cdViewMode-table" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs font-black">جدول معتمد</button>
+                                <button type="button" onclick="setCDGroupViewMode('cards')" id="cdViewMode-cards" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400">بطاقات ورسوم</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Groups Container (Table or Cards) -->
+                    <div id="cdGroupContractsDisplay">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Main Charts Grid (Doughnut + Bar) (No-print) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 no-print">
+                    <!-- Distribution Chart -->
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="font-black text-slate-900 dark:text-white text-sm">توزيع المتدربين الفعليين بالشركات</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">الحصص النسبية لكل شركة من إجمالي متدربي التحضير</p>
+                            </div>
+                            <span class="text-xs font-black text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-lg">نسبة %</span>
+                        </div>
+                        <div style="position:relative; height:250px;">
+                            <canvas id="cdPieChart"></canvas>
+                        </div>
+                        <div id="cdPieLegend" class="mt-4 flex flex-wrap gap-2 justify-center"></div>
+                    </div>
+
+                    <!-- Trainee Count Bar Chart -->
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="font-black text-slate-900 dark:text-white text-sm">أعداد المتدربين الفعليين لكل شركة</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">مقارنة أعداد المتدربين المسجلين في كشوف التحضير</p>
+                            </div>
+                            <span class="text-xs font-black text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-lg">عدد المتدربين</span>
+                        </div>
+                        <div style="position:relative; height:250px;">
+                            <canvas id="cdBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Attendance Rate Chart (No-print) -->
+                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 no-print">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h4 class="font-black text-slate-900 dark:text-white text-sm">نسب الحضور الفعلي لكل شركة</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">متوسط نسب الحضور المستخرجة مباشرة من كشف التحضير المرفوع</p>
+                        </div>
+                        <span class="text-xs font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-lg">سجلات التحضير</span>
+                    </div>
+                    <div style="position:relative; height:210px;">
+                        <canvas id="cdAttendanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Capacity Utilization Breakdown (No-print) -->
+                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 no-print">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h4 class="font-black text-slate-900 dark:text-white text-sm">معدلات إشغال الطاقة الاستيعابية للمعهد</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">مقارنة إجمالي متدربي التحضير بالطاقة الاستيعابية لمعهد الذهب الأسود</p>
+                        </div>
+                        <span class="text-xs font-black text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-lg">تحليل الطاقة</span>
+                    </div>
+                    <div id="cdCapacityBars" class="space-y-4">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+            </div>
+            <!-- ==================== END TAB: COMPANY DASHBOARD ==================== -->
+
+
             <!-- ==================== TAB: ADMIN CERTIFICATES MANAGEMENT (مركز إدارة واعتماد نشر شهادات إتمام المقررات) ==================== -->
 
             <div id="tab-adminCertificates" class="hidden space-y-6">
@@ -18878,7 +19155,7 @@ ${details}
 
 
 
-        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentTasks', 'studentLms', 'studentGrades', 'submissionsCalendar', 'studentAccount', 'virtualClass', 'studentVirtualClass', 'attendanceSheet', 'adminReports', 'adminCertificates', 'institutionFiles', 'supportTickets'];
+        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentTasks', 'studentLms', 'studentGrades', 'submissionsCalendar', 'studentAccount', 'virtualClass', 'studentVirtualClass', 'attendanceSheet', 'adminReports', 'adminCertificates', 'institutionFiles', 'supportTickets', 'companyDashboard'];
 
         tabs.forEach(t => {
 
@@ -19041,6 +19318,10 @@ ${details}
             } else if (tab === 'adminReports') {
 
                 if (typeof renderAdminReportsHub === 'function') renderAdminReportsHub();
+
+            } else if (tab === 'companyDashboard') {
+
+                if (typeof renderCompanyDashboard === 'function') renderCompanyDashboard();
 
             } else if (tab === 'adminCertificates') {
 
@@ -28581,6 +28862,7 @@ ${details}
             renderApp();
 
             renderMasterSchedule();
+            if (typeof renderCompanyDashboard === 'function') renderCompanyDashboard();
 
             if (typeof renderAttendanceSheetPage === 'function' && !document.getElementById('tab-attendanceSheet')?.classList.contains('hidden')) {
                 renderAttendanceSheetPage();
@@ -86949,7 +87231,1206 @@ function buildDemoExecutiveReport(params) {
 
 
 
+
+    // ===================================================================
+    // COMPANY STATISTICS & GROUP-LEVEL CONTRACT MANAGEMENT SYSTEM
+    // ===================================================================
+
+    const CD_STORAGE_KEY_GROUPS = 'sys_group_contracts_v3';
+    const CD_CAPACITY_PER_HOUR = 149;
+    let cdCurrentViewMode = 'table';
+    let isCDReportPreviewOpen = false;
+
+    // Master default contracts matrix per GROUP from user specifications & image table
+    const CD_DEFAULT_GROUP_CONTRACTS = [
+        // 1. HYUNDAI
+        { company: 'HYUNDAI', companyAr: 'هيونداي', group: 'HYUNDAI 1+2', specialty: 'أكثر من تخصص', start: '2025-01-12', end: null, note: '' },
+        { company: 'HYUNDAI', companyAr: 'هيونداي', group: 'HYUNDAI 3', specialty: 'عام', start: '2025-01-12', end: null, note: '' },
+        { company: 'HYUNDAI', companyAr: 'هيونداي', group: 'HYUNDAI 4', specialty: 'عام', start: '2025-01-12', end: null, note: '' },
+        { company: 'HYUNDAI', companyAr: 'هيونداي', group: 'HYUNDAI 5', specialty: 'عام', start: '2025-01-12', end: null, note: '' },
+        { company: 'HYUNDAI', companyAr: 'هيونداي', group: 'HYUNDAI 6', specialty: 'عام', start: '2025-01-12', end: null, note: '' },
+        { company: 'HYUNDAI', companyAr: 'هيونداي', group: 'HYUNDAI 7', specialty: 'عام', start: '2025-01-12', end: null, note: '' },
+        { company: 'HYUNDAI', companyAr: 'هيونداي', group: 'HYUNDAI 8', specialty: 'عام', start: '2025-01-12', end: null, note: '' },
+
+        // 2. Amana
+        { company: 'Amana', companyAr: 'أمانة', group: 'Amana 1', specialty: 'أكثر من تخصص', start: '2026-04-10', end: '2027-04-09', note: '' },
+        { company: 'Amana', companyAr: 'أمانة', group: 'Amana 2', specialty: 'أكثر من تخصص', start: '2026-04-10', end: '2027-04-09', note: '' },
+
+        // 3. Samsung
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung101+102', specialty: 'كهربائي', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung103', specialty: 'مشغل معدات', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung104', specialty: 'مشغل معدات وميكانيكا', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung105', specialty: 'مشغل معدات وميكانيكا', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung106', specialty: 'مشغل معدات وميكانيكا', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung107', specialty: 'مشغل معدات وميكانيكا', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung108', specialty: 'لحام', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung109+110', specialty: 'لحام', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung111+115', specialty: 'إنشاءات', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung112', specialty: 'إنشاءات', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung113', specialty: 'إنشاءات', start: '2025-12-01', end: '2026-11-30', note: '' },
+        { company: 'Samsung', companyAr: 'سامسونج', group: 'Samsung114', specialty: 'إنشاءات', start: '2025-12-01', end: '2026-11-30', note: '' },
+
+        // 4. Eleco
+        { company: 'Eleco', companyAr: 'إليكو', group: 'Eleco 101', specialty: 'أنابيب', start: '2025-12-15', end: null, note: '' },
+        { company: 'Eleco', companyAr: 'إليكو', group: 'Eleco 102', specialty: 'أنابيب', start: '2025-09-14', end: null, note: '' },
+        { company: 'Eleco', companyAr: 'إليكو', group: 'Eleco 103', specialty: 'أنابيب', start: '2025-09-14', end: null, note: '' },
+
+        // 5. Sinopec
+        { company: 'Sinopec', companyAr: 'سينوبك', group: 'Sinopec 101', specialty: 'كهربائي وأنابيب', start: '2025-10-27', end: '2026-10-26', note: '' },
+        { company: 'Sinopec', companyAr: 'سينوبك', group: 'Sinopec 102', specialty: 'كهربائي وأنابيب', start: '2025-05-06', end: '2026-05-05', note: '' },
+        { company: 'Sinopec', companyAr: 'سينوبك', group: 'Sinopec 103', specialty: 'كهربائي وأنابيب', start: '2025-10-28', end: '2026-10-27', note: '' },
+        { company: 'Sinopec', companyAr: 'سينوبك', group: 'Sinopec 104', specialty: 'لحام', start: '2026-04-28', end: '2027-04-27', note: '' },
+        { company: 'Sinopec', companyAr: 'سينوبك', group: 'Sinopec 105', specialty: 'لحام', start: '2026-04-28', end: '2027-04-27', note: '' },
+        { company: 'Sinopec', companyAr: 'سينوبك', group: 'Sinopec 106', specialty: 'لحام', start: '2026-05-12', end: '2027-05-11', note: '' },
+        { company: 'Sinopec', companyAr: 'سينوبك', group: 'Sinopec 107', specialty: 'لحام', start: '2026-05-01', end: '2027-05-01', note: '' },
+        { company: 'Sinopec', companyAr: 'سينوبك', group: 'Sinopec 108', specialty: 'لحام', start: '2026-06-01', end: '2027-06-01', note: '' },
+        { company: 'Sinopec', companyAr: 'سينوبك', group: 'Sinopec 109', specialty: 'لحام', start: '2026-06-12', end: '2027-05-11', note: '' },
+        { company: 'Sinopec', companyAr: 'سينوبك', group: 'Sinopec 110', specialty: 'لحام', start: '2026-06-12', end: '2027-06-12', note: '' },
+
+        // 6. Shinbo
+        { company: 'Shinbo', companyAr: 'شينبو', group: 'shinbo101', specialty: 'عامل', start: '2026-02-03', end: null, note: '' },
+        { company: 'Shinbo', companyAr: 'شينبو', group: 'shinbo102', specialty: 'عامل', start: '2026-01-19', end: null, note: '' },
+        { company: 'Shinbo', companyAr: 'شينبو', group: 'shinbo103', specialty: 'كهربائي', start: '2026-02-19', end: null, note: '' },
+        { company: 'Shinbo', companyAr: 'شينبو', group: 'shinbo104', specialty: 'عام', start: '2026-02-03', end: null, note: '' }
+    ];
+
+    function cleanGroupNameForMatch(str) {
+        if (!str) return '';
+        return String(str).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+    }
+
+    function getStoredGroupContracts() {
+        try {
+            const stored = localStorage.getItem(CD_STORAGE_KEY_GROUPS);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            }
+        } catch (e) {}
+        return JSON.parse(JSON.stringify(CD_DEFAULT_GROUP_CONTRACTS));
+    }
+
+    function saveStoredGroupContracts(data) {
+        try {
+            localStorage.setItem(CD_STORAGE_KEY_GROUPS, JSON.stringify(data));
+        } catch (e) {}
+    }
+
+    const CD_COMPANY_COLORS = {
+        'Samsung': '#1d4ed8',
+        'Sinopec': '#b45309',
+        'HYUNDAI': '#0f766e',
+        'Eleco': '#7c3aed',
+        'Amana': '#065f46',
+        'Shinbo': '#be185d'
+    };
+
+    function detectCompanyFromGroup(groupName) {
+        const upper = (groupName || '').toUpperCase();
+        if (upper.includes('SAMSUNG')) return 'Samsung';
+        if (upper.includes('SINOPEC')) return 'Sinopec';
+        if (upper.includes('HYUNDAI')) return 'HYUNDAI';
+        if (upper.includes('ELECO')) return 'Eleco';
+        if (upper.includes('AMANA')) return 'Amana';
+        if (upper.includes('SHINBO')) return 'Shinbo';
+        return 'أخرى';
+    }
+
+    function getCompanyArabicName(comp) {
+        const map = {
+            'Samsung': 'سامسونج',
+            'Sinopec': 'سينوبك',
+            'HYUNDAI': 'هيونداي',
+            'Eleco': 'إليكو',
+            'Amana': 'أمانة',
+            'Shinbo': 'شينبو'
+        };
+        return map[comp] || comp;
+    }
+
+    function getCDLiveData() {
+        let pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0)
+            ? trainees
+            : [];
+
+        if (pool.length === 0) {
+            try {
+                const storedTrainees = JSON.parse(localStorage.getItem('sys_trainees_v9'));
+                if (Array.isArray(storedTrainees) && storedTrainees.length > 0) pool = storedTrainees;
+            } catch (e) {}
+        }
+
+        let usingTimesheet = false;
+        if (pool.length === 0) {
+            let ts = (typeof timesheetRecords !== 'undefined' && Array.isArray(timesheetRecords) && timesheetRecords.length > 0)
+                ? timesheetRecords
+                : [];
+            if (ts.length === 0) {
+                try { ts = JSON.parse(localStorage.getItem('sys_timesheet_v9')) || []; } catch (e) {}
+            }
+            if (ts.length > 0) {
+                pool = ts;
+                usingTimesheet = true;
+            }
+        }
+
+        const liveGroupsMap = {};
+        let totalTraineesCount = 0;
+
+        pool.forEach(t => {
+            const rawGrp = t.group ? String(t.group).trim() : 'غير محدد';
+            if (!rawGrp || rawGrp === 'غير محدد') return;
+
+            const cleanG = cleanGroupNameForMatch(rawGrp);
+            if (!liveGroupsMap[cleanG]) {
+                liveGroupsMap[cleanG] = {
+                    originalName: rawGrp,
+                    count: 0,
+                    rates: [],
+                    trainees: []
+                };
+            }
+
+            liveGroupsMap[cleanG].count++;
+            totalTraineesCount++;
+
+            let rateVal = 0;
+            if (typeof t.rate === 'number') rateVal = t.rate;
+            else if (typeof t.weeklyRate === 'number') rateVal = t.weeklyRate;
+            else if (typeof t.rate === 'string') {
+                rateVal = parseFloat(t.rate.replace('٪', '').replace('%', '').trim()) || 0;
+            }
+            if (rateVal > 0) liveGroupsMap[cleanG].rates.push(rateVal);
+
+            liveGroupsMap[cleanG].trainees.push({
+                id: t.id || t.nationalId || '',
+                name: t.name || '',
+                rate: rateVal
+            });
+        });
+
+        const storedContracts = getStoredGroupContracts();
+        const matchedContracts = [];
+        const consumedLiveKeys = new Set();
+
+        storedContracts.forEach(sc => {
+            const cleanKey = cleanGroupNameForMatch(sc.group);
+
+            let liveMatch = null;
+            let matchedLiveKey = null;
+
+            if (liveGroupsMap[cleanKey]) {
+                liveMatch = liveGroupsMap[cleanKey];
+                matchedLiveKey = cleanKey;
+            } else {
+                for (const k in liveGroupsMap) {
+                    if (k === cleanKey || k.includes(cleanKey) || cleanKey.includes(k)) {
+                        liveMatch = liveGroupsMap[k];
+                        matchedLiveKey = k;
+                        break;
+                    }
+                }
+            }
+
+            if (matchedLiveKey) {
+                consumedLiveKeys.add(matchedLiveKey);
+            }
+
+            const traineeCount = liveMatch ? liveMatch.count : 0;
+            const rates = liveMatch ? liveMatch.rates : [];
+            const avgRate = rates.length > 0 ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length) : 0;
+
+            matchedContracts.push({
+                ...sc,
+                cleanKey,
+                traineesCount: traineeCount,
+                avgAttendance: avgRate,
+                traineeList: liveMatch ? liveMatch.trainees : []
+            });
+        });
+
+        // Any live group from Google Sheets not yet matched (like morning 200 groups)
+        for (const cleanG in liveGroupsMap) {
+            if (!consumedLiveKeys.has(cleanG)) {
+                const liveObj = liveGroupsMap[cleanG];
+                const rawName = liveObj.originalName;
+                const comp = detectCompanyFromGroup(rawName);
+                const is200Series = /20\d|21\d|2\d\d/.test(rawName);
+
+                const avgRate = liveObj.rates.length > 0
+                    ? Math.round(liveObj.rates.reduce((a, b) => a + b, 0) / liveObj.rates.length)
+                    : 0;
+
+                matchedContracts.push({
+                    company: comp,
+                    companyAr: getCompanyArabicName(comp),
+                    group: rawName,
+                    specialty: is200Series ? 'مجموعات 200 الصباحية' : 'تخصص عام',
+                    start: is200Series ? '2026-07-01' : null,
+                    end: is200Series ? '2027-06-30' : null,
+                    note: is200Series ? '(دخلوا شهر 6-7-8 وتحسب سنة) (تحتاج تأكيد)' : '',
+                    cleanKey: cleanG,
+                    traineesCount: liveObj.count,
+                    avgAttendance: avgRate,
+                    traineeList: liveObj.trainees
+                });
+            }
+        }
+
+        const companySummary = {};
+        matchedContracts.forEach(gc => {
+            const comp = gc.company || 'أخرى';
+            if (!companySummary[comp]) {
+                companySummary[comp] = {
+                    nameEn: comp,
+                    nameAr: gc.companyAr || getCompanyArabicName(comp),
+                    color: CD_COMPANY_COLORS[comp] || '#0F2942',
+                    totalTrainees: 0,
+                    rates: [],
+                    avgAttendance: 0,
+                    groupsCount: 0
+                };
+            }
+            companySummary[comp].totalTrainees += gc.traineesCount;
+            companySummary[comp].groupsCount++;
+            if (gc.avgAttendance > 0) companySummary[comp].rates.push(gc.avgAttendance);
+        });
+
+        for (const comp in companySummary) {
+            const cs = companySummary[comp];
+            cs.avgAttendance = cs.rates.length > 0
+                ? Math.round(cs.rates.reduce((a, b) => a + b, 0) / cs.rates.length)
+                : 0;
+        }
+
+        return {
+            groupContracts: matchedContracts,
+            companySummary,
+            totalTrainees: totalTraineesCount,
+            dataSource: usingTimesheet ? 'تايم شيت' : 'كشف التحضير'
+        };
+    }
+
+    function computeCDContractStatus(startStr, endStr) {
+        if (!endStr) {
+            return {
+                statusKey: 'OPEN',
+                label: 'غير محدد النهاية',
+                badgeClass: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
+                dotClass: 'bg-blue-500',
+                daysLeft: null,
+                percentElapsed: 50
+            };
+        }
+
+        const now = new Date();
+        const end = new Date(endStr);
+        if (isNaN(end.getTime())) {
+            return {
+                statusKey: 'OPEN',
+                label: 'غير محدد',
+                badgeClass: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
+                dotClass: 'bg-slate-400',
+                daysLeft: null,
+                percentElapsed: 0
+            };
+        }
+
+        const start = startStr ? new Date(startStr) : new Date(end.getTime() - 365*86400000);
+        const totalDuration = Math.max(1, end.getTime() - start.getTime());
+        const elapsed = Math.max(0, now.getTime() - start.getTime());
+        const percentElapsed = Math.min(100, Math.round((elapsed / totalDuration) * 100));
+
+        const msDiff = end.getTime() - now.getTime();
+        const daysLeft = Math.round(msDiff / 86400000);
+
+        if (daysLeft < 0) {
+            return {
+                statusKey: 'EXPIRED',
+                label: `منتهي منذ ${Math.abs(daysLeft)} يوم`,
+                badgeClass: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-800',
+                dotClass: 'bg-red-500',
+                daysLeft,
+                percentElapsed: 100
+            };
+        } else if (daysLeft <= 60) {
+            return {
+                statusKey: 'EXPIRING',
+                label: `ينتهي قريباً (متبقي ${daysLeft} يوم)`,
+                badgeClass: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-black animate-pulse',
+                dotClass: 'bg-amber-500',
+                daysLeft,
+                percentElapsed
+            };
+        } else {
+            return {
+                statusKey: 'ACTIVE',
+                label: `ساري التدريب (متبقي ${daysLeft} يوم)`,
+                badgeClass: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800',
+                dotClass: 'bg-emerald-500',
+                daysLeft,
+                percentElapsed
+            };
+        }
+    }
+
+    let cdPieInstance = null;
+    let cdBarInstance = null;
+    let cdAttendanceInstance = null;
+
+    function renderCompanyDashboard() {
+        const live = getCDLiveData();
+        populateCDCompanySelect(live);
+        renderCDLiveSummary(live);
+        renderCDGroupContractsUI();
+        renderCDCapacityBars(live);
+
+        if (typeof Chart === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+            script.onload = () => renderCDCharts(live);
+            document.head.appendChild(script);
+        } else {
+            renderCDCharts(live);
+        }
+    }
+
+    async function refreshCompanyDashboardFromLive(showFeedback = true) {
+        if (typeof syncLiveAttendanceFromGoogleSheets === 'function') {
+            try {
+                if (showFeedback && typeof showToast === 'function') {
+                    showToast('جاري سحب بيانات التحضير المباشر من Google Sheets...', 'info');
+                }
+                await syncLiveAttendanceFromGoogleSheets(false);
+                renderCompanyDashboard();
+                if (showFeedback && typeof showToast === 'function') {
+                    showToast('تم تحديث أعداد المجموعات والتحضير بنجاح', 'success');
+                }
+            } catch (err) {
+                console.error(err);
+                renderCompanyDashboard();
+            }
+        } else {
+            renderCompanyDashboard();
+            if (typeof showToast === 'function') showToast('تم تحديث الشاشة', 'success');
+        }
+    }
+
+    function populateCDCompanySelect(live) {
+        const sel = document.getElementById('cdCompanySelect');
+        if (!sel) return;
+        const currentVal = sel.value;
+        let html = '<option value="ALL">جميع الشركات المعتمدة</option>';
+        for (const k in live.companySummary) {
+            const c = live.companySummary[k];
+            html += `<option value="${k}" ${k === currentVal ? 'selected' : ''}>${c.nameAr} (${c.nameEn}) - ${c.totalTrainees} متدرب</option>`;
+        }
+        sel.innerHTML = html;
+    }
+
+    function renderCDLiveSummary(live) {
+        const el = document.getElementById('cdLiveSummaryStats');
+        if (!el) return;
+
+        let activeCompaniesCount = 0;
+        let weightedRateSum = 0;
+        let totalCountedForRate = 0;
+
+        for (const k in live.companySummary) {
+            const c = live.companySummary[k];
+            if (c.totalTrainees > 0) {
+                activeCompaniesCount++;
+                weightedRateSum += (c.avgAttendance * c.totalTrainees);
+                totalCountedForRate += c.totalTrainees;
+            }
+        }
+
+        const overallAvgRate = totalCountedForRate > 0 ? Math.round(weightedRateSum / totalCountedForRate) : 0;
+        const capacityUtilization = Math.round((live.totalTrainees / (CD_CAPACITY_PER_HOUR * 4)) * 100);
+
+        el.innerHTML = `
+            <div class="bg-gradient-to-br from-[#0F2942] to-slate-800 rounded-2xl p-4 text-white shadow-sm border border-slate-700/60 flex flex-col gap-1">
+                <div class="text-[11px] font-bold text-slate-300">إجمالي المتدربين المسجلين</div>
+                <div class="text-3xl font-black text-amber-300">${live.totalTrainees.toLocaleString()}</div>
+                <div class="text-[10px] text-slate-400 font-bold">مطابق لكشف ${live.dataSource}</div>
+            </div>
+
+            <div class="bg-gradient-to-br from-blue-900 to-blue-800 rounded-2xl p-4 text-white shadow-sm border border-blue-700/60 flex flex-col gap-1">
+                <div class="text-[11px] font-bold text-blue-200">الشركات المعتمدة</div>
+                <div class="text-3xl font-black text-white">${activeCompaniesCount}</div>
+                <div class="text-[10px] text-blue-200 font-bold">إجمالي ${live.groupContracts.length} مجموعة</div>
+            </div>
+
+            <div class="bg-gradient-to-br from-emerald-900 to-emerald-800 rounded-2xl p-4 text-white shadow-sm border border-emerald-700/60 flex flex-col gap-1">
+                <div class="text-[11px] font-bold text-emerald-200">متوسط الحضور الفعلي</div>
+                <div class="text-3xl font-black text-white">${overallAvgRate}%</div>
+                <div class="text-[10px] text-emerald-200 font-bold">مستخرج من كشف الحضور الأسبوعي</div>
+            </div>
+
+            <div class="bg-gradient-to-br from-amber-900 to-amber-800 rounded-2xl p-4 text-white shadow-sm border border-amber-700/60 flex flex-col gap-1">
+                <div class="text-[11px] font-bold text-amber-200">معدل إشغال المعهد</div>
+                <div class="text-3xl font-black text-white">${capacityUtilization}%</div>
+                <div class="text-[10px] text-amber-200 font-bold">من طاقة دوام ساعتين (596)</div>
+            </div>
+        `;
+    }
+
+    function setCDGroupViewMode(mode) {
+        cdCurrentViewMode = mode;
+        const btnT = document.getElementById('cdViewMode-table');
+        const btnC = document.getElementById('cdViewMode-cards');
+        if (mode === 'table') {
+            if (btnT) btnT.className = 'px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs font-black';
+            if (btnC) btnC.className = 'px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400 font-bold';
+        } else {
+            if (btnT) btnT.className = 'px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400 font-bold';
+            if (btnC) btnC.className = 'px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs font-black';
+        }
+        renderCDGroupContractsUI();
+    }
+
+    function renderCDGroupContractsUI() {
+        const container = document.getElementById('cdGroupContractsDisplay');
+        if (!container) return;
+
+        const live = getCDLiveData();
+        const compFilter = document.getElementById('cdGroupFilterCompany')?.value || 'ALL';
+        const statusFilter = document.getElementById('cdGroupFilterStatus')?.value || 'ALL';
+        const searchVal = (document.getElementById('cdGroupSearchInput')?.value || '').trim().toLowerCase();
+
+        let list = live.groupContracts.map(gc => {
+            const status = computeCDContractStatus(gc.start, gc.end);
+            return { ...gc, status };
+        });
+
+        if (compFilter !== 'ALL') {
+            list = list.filter(gc => gc.company.toLowerCase() === compFilter.toLowerCase());
+        }
+
+        if (statusFilter === 'EXPIRING') {
+            list = list.filter(gc => gc.status.statusKey === 'EXPIRING' || gc.status.statusKey === 'EXPIRED');
+        } else if (statusFilter === 'ACTIVE') {
+            list = list.filter(gc => gc.status.statusKey === 'ACTIVE');
+        } else if (statusFilter === 'OPEN') {
+            list = list.filter(gc => gc.status.statusKey === 'OPEN');
+        } else if (statusFilter === 'EXPIRED') {
+            list = list.filter(gc => gc.status.statusKey === 'EXPIRED');
+        }
+
+        if (searchVal) {
+            list = list.filter(gc =>
+                gc.group.toLowerCase().includes(searchVal) ||
+                (gc.specialty || '').toLowerCase().includes(searchVal) ||
+                (gc.companyAr || '').toLowerCase().includes(searchVal)
+            );
+        }
+
+        const badge = document.getElementById('cdGroupTotalCountBadge');
+        if (badge) badge.innerText = `${list.length} مجموعة`;
+
+        if (list.length === 0) {
+            container.innerHTML = '<div class="text-center py-8 text-xs font-bold text-slate-400">لا توجد مجموعات تطابق شروط التصفية أو البحث</div>';
+            return;
+        }
+
+        if (cdCurrentViewMode === 'table') {
+            container.innerHTML = `
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <table class="w-full text-xs text-right border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 dark:bg-slate-700/70 text-slate-700 dark:text-slate-200 font-black border-b border-slate-200 dark:border-slate-600">
+                                <th class="p-3">#</th>
+                                <th class="p-3">الشركة</th>
+                                <th class="p-3">المجموعة</th>
+                                <th class="p-3">التخصص</th>
+                                <th class="p-3 text-center">عدد المتدربين (التحضير)</th>
+                                <th class="p-3 text-center">نسبة الحضور</th>
+                                <th class="p-3 text-center">بداية التدريب</th>
+                                <th class="p-3 text-center">نهاية التدريب</th>
+                                <th class="p-3 text-center">حالة العقد والانتهاء</th>
+                                <th class="p-3">الملاحظات</th>
+                                <th class="p-3 text-center">إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60">
+                            ${list.map((gc, idx) => {
+                                const s = gc.status;
+                                const isExpiring = s.statusKey === 'EXPIRING' || s.statusKey === 'EXPIRED';
+                                const compColor = CD_COMPANY_COLORS[gc.company] || '#0F2942';
+
+                                return `
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition ${isExpiring ? 'bg-amber-50/40 dark:bg-amber-950/15' : ''}">
+                                        <td class="p-3 font-bold text-slate-400">${idx + 1}</td>
+                                        <td class="p-3">
+                                            <span class="font-black" style="color:${compColor};">${gc.companyAr}</span>
+                                            <span class="text-[10px] text-slate-400 font-bold block">(${gc.company})</span>
+                                        </td>
+                                        <td class="p-3 font-black text-slate-900 dark:text-white">${gc.group}</td>
+                                        <td class="p-3 text-slate-700 dark:text-slate-300 font-bold">${gc.specialty || 'عام'}</td>
+                                        <td class="p-3 text-center">
+                                            <span class="inline-block bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-xl font-black text-slate-900 dark:text-white">
+                                                ${gc.traineesCount}
+                                            </span>
+                                        </td>
+                                        <td class="p-3 text-center">
+                                            <span class="font-black ${gc.avgAttendance >= 80 ? 'text-emerald-600 dark:text-emerald-400' : (gc.avgAttendance >= 65 ? 'text-amber-600' : 'text-slate-500')}">
+                                                ${gc.avgAttendance > 0 ? gc.avgAttendance + '%' : '—'}
+                                            </span>
+                                        </td>
+                                        <td class="p-3 text-center font-bold text-slate-700 dark:text-slate-300">${gc.start || 'غير محدد'}</td>
+                                        <td class="p-3 text-center font-bold ${isExpiring ? 'text-amber-700 dark:text-amber-400 font-black' : 'text-slate-700 dark:text-slate-300'}">${gc.end || 'غير محدد'}</td>
+                                        <td class="p-3 text-center">
+                                            <span class="text-[10px] font-black px-2 py-0.5 rounded-full inline-block ${s.badgeClass}">
+                                                ${s.label}
+                                            </span>
+                                        </td>
+                                        <td class="p-3 text-slate-600 dark:text-slate-400 text-[11px] font-bold">
+                                            ${gc.note ? `<span class="text-amber-700 dark:text-amber-400">${gc.note}</span>` : '—'}
+                                        </td>
+                                        <td class="p-3 text-center">
+                                            <button type="button" onclick="openGroupContractModal('${gc.group}')" class="text-amber-600 dark:text-amber-400 hover:underline font-black text-[11px] px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-700/60">
+                                                تعديل
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    ${list.map(gc => {
+                        const s = gc.status;
+                        const isExpiring = s.statusKey === 'EXPIRING' || s.statusKey === 'EXPIRED';
+                        const compColor = CD_COMPANY_COLORS[gc.company] || '#0F2942';
+
+                        return `
+                            <div class="bg-slate-50 dark:bg-slate-700/40 rounded-2xl p-4 border ${isExpiring ? 'border-amber-300 dark:border-amber-600/70 bg-amber-50/50 dark:bg-amber-950/20' : 'border-slate-200 dark:border-slate-700'} transition hover:shadow-xs space-y-3">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2.5 h-2.5 rounded-full ${s.dotClass}"></span>
+                                            <h5 class="font-black text-slate-900 dark:text-white text-sm">${gc.group}</h5>
+                                        </div>
+                                        <div class="text-[11px] font-bold mt-0.5" style="color:${compColor};">
+                                            ${gc.companyAr} (${gc.company}) • ${gc.specialty || 'عام'}
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-black bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-2 py-0.5 rounded-lg text-slate-900 dark:text-white">
+                                        ${gc.traineesCount} متدرب
+                                    </span>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                                        <span>بداية: ${gc.start || 'غير محدد'}</span>
+                                        <span>نهاية: ${gc.end || 'غير محدد'}</span>
+                                    </div>
+                                    <div class="h-2.5 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                                        <div class="h-full rounded-full transition-all duration-1000 ${isExpiring ? 'bg-gradient-to-r from-amber-500 to-red-500' : 'bg-gradient-to-r from-blue-600 to-emerald-500'}"
+                                             style="width:${gc.end ? s.percentElapsed : 100}%;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-200 dark:border-slate-600">
+                                    <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${s.badgeClass}">
+                                        ${s.label}
+                                    </span>
+                                    <button type="button" onclick="openGroupContractModal('${gc.group}')" class="text-amber-600 dark:text-amber-400 hover:underline font-black text-[11px]">
+                                        تعديل العقد
+                                    </button>
+                                </div>
+
+                                ${gc.note ? `<div class="text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-100/50 dark:bg-amber-900/30 p-1.5 rounded-xl">⚠️ ${gc.note}</div>` : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+    }
+
+    function renderCDCharts(live) {
+        const isDark = document.documentElement.classList.contains('dark');
+        const textColor = isDark ? '#e2e8f0' : '#1e293b';
+        const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+
+        const companiesWithData = Object.values(live.companySummary).filter(c => c.totalTrainees > 0);
+        const listToDisplay = companiesWithData.length > 0 ? companiesWithData : Object.values(live.companySummary);
+
+        const labels = listToDisplay.map(c => c.nameAr);
+        const counts = listToDisplay.map(c => c.totalTrainees);
+        const rates = listToDisplay.map(c => c.avgAttendance);
+        const colors = listToDisplay.map(c => c.color || '#0F2942');
+
+        const pieEl = document.getElementById('cdPieChart');
+        if (pieEl) {
+            if (cdPieInstance) cdPieInstance.destroy();
+            cdPieInstance = new Chart(pieEl, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: colors,
+                        borderColor: isDark ? '#1e293b' : '#ffffff',
+                        borderWidth: 3,
+                        hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    animation: { animateRotate: true, duration: 1000 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const val = ctx.parsed || 0;
+                                    const total = counts.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                                    return ` ${ctx.label}: ${val} متدرب (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const leg = document.getElementById('cdPieLegend');
+            if (leg) {
+                leg.innerHTML = listToDisplay.map(c => `
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+                        <span class="w-3 h-3 rounded-full" style="background:${c.color};"></span>
+                        <span>${c.nameAr}:</span>
+                        <span class="font-black text-slate-900 dark:text-white">${c.totalTrainees}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        const barEl = document.getElementById('cdBarChart');
+        if (barEl) {
+            if (cdBarInstance) cdBarInstance.destroy();
+            cdBarInstance = new Chart(barEl, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'أعداد المتدربين',
+                        data: counts,
+                        backgroundColor: colors,
+                        borderRadius: 10,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 900 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.y} متدرب مسجل` } }
+                    },
+                    scales: {
+                        x: { ticks: { color: textColor, font: { size: 10, weight: 'bold' } }, grid: { display: false } },
+                        y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }
+                    }
+                }
+            });
+        }
+
+        const attEl = document.getElementById('cdAttendanceChart');
+        if (attEl) {
+            if (cdAttendanceInstance) cdAttendanceInstance.destroy();
+            cdAttendanceInstance = new Chart(attEl, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'نسبة الحضور الفعلي %',
+                        data: rates,
+                        backgroundColor: (ctx) => {
+                            const val = ctx.parsed?.y || 0;
+                            if (val >= 80) return '#10b981';
+                            if (val >= 65) return '#f59e0b';
+                            return '#ef4444';
+                        },
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 900 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => ` نسبة الحضور: ${ctx.parsed.y}%` } }
+                    },
+                    scales: {
+                        x: { ticks: { color: textColor, font: { size: 10, weight: 'bold' } }, grid: { display: false } },
+                        y: { min: 0, max: 100, ticks: { color: textColor, font: { size: 10 }, callback: v => v + '%' }, grid: { color: gridColor } }
+                    }
+                }
+            });
+        }
+    }
+
+    function renderCDCapacityBars(live) {
+        const el = document.getElementById('cdCapacityBars');
+        if (!el) return;
+
+        const total = live.totalTrainees;
+        const cap1h = CD_CAPACITY_PER_HOUR;
+        const cap2h = CD_CAPACITY_PER_HOUR * 4;
+        const capMax = CD_CAPACITY_PER_HOUR * 8;
+
+        const tiers = [
+            { label: 'مقابل طاقة دوام ساعتين (596)', cap: cap2h, color: '#10b981' },
+            { label: 'مقابل الطاقة الاستيعابية القصوى (1,192)', cap: capMax, color: '#6366f1' },
+            { label: 'مقابل سعة المعهد في الساعة الواحدة (149)', cap: cap1h, color: '#f59e0b' }
+        ];
+
+        el.innerHTML = tiers.map(t => {
+            const pct = Math.min(100, Math.round((total / t.cap) * 100));
+            return `
+                <div>
+                    <div class="flex justify-between text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">
+                        <span>${t.label}</span>
+                        <span>${total.toLocaleString()} / ${t.cap.toLocaleString()} متدرب <span class="font-black" style="color:${t.color};">(${pct}%)</span></span>
+                    </div>
+                    <div class="h-3.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-1000 flex items-center justify-end pr-2 text-[9px] font-black text-white"
+                             style="width:${pct}%; background:${t.color};">
+                            ${pct > 12 ? pct + '%' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ==========================================
+    // REPORT GENERATION & PRINTING SYSTEM
+    // ==========================================
+
+    function onCDReportTypeChange() {
+        const rType = document.getElementById('cdReportTypeSelect')?.value;
+        const wrap = document.getElementById('cdCompanySelectWrapper');
+        if (wrap) {
+            if (rType === 'singleCompany') wrap.classList.remove('hidden');
+            else wrap.classList.add('hidden');
+        }
+        if (isCDReportPreviewOpen) generateCDReportContent();
+    }
+
+    function onCDCompanyChange() {
+        if (isCDReportPreviewOpen) generateCDReportContent();
+    }
+
+    function toggleCDReportPreview() {
+        const area = document.getElementById('cdPrintableReportArea');
+        const btn = document.getElementById('btn-toggleCDPreview');
+        if (!area) return;
+
+        if (area.classList.contains('hidden')) {
+            area.classList.remove('hidden');
+            isCDReportPreviewOpen = true;
+            generateCDReportContent();
+            if (btn) btn.innerHTML = 'إخفاء المعاينة';
+        } else {
+            area.classList.add('hidden');
+            isCDReportPreviewOpen = false;
+            if (btn) btn.innerHTML = 'معاينة التقرير';
+        }
+    }
+
+    function generateCDReportContent() {
+        const contentEl = document.getElementById('cdPrintableReportContent');
+        if (!contentEl) return;
+
+        const live = getCDLiveData();
+        const rType = document.getElementById('cdReportTypeSelect')?.value || 'groupContracts';
+        const targetCompany = document.getElementById('cdCompanySelect')?.value || 'ALL';
+        const dateStr = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        let reportTitle = 'كشف وتفاصيل عقود وتدريب المجموعات';
+        let reportSubtitle = 'معهد الذهب الأسود للتدريب الصناعي - فرع عنك';
+        let bodyHtml = '';
+
+        if (rType === 'groupContracts') {
+            reportTitle = 'كشف عقود وتدريب المجموعات والتخصصات ومواعيد الانتهاء';
+            bodyHtml = `
+                <table class="w-full text-xs text-right border-collapse border border-slate-300 mt-4">
+                    <thead>
+                        <tr class="bg-slate-100 font-black">
+                            <th class="border border-slate-300 p-2">#</th>
+                            <th class="border border-slate-300 p-2">الشركة</th>
+                            <th class="border border-slate-300 p-2">المجموعة</th>
+                            <th class="border border-slate-300 p-2">التخصص</th>
+                            <th class="border border-slate-300 p-2 text-center">عدد المتدربين</th>
+                            <th class="border border-slate-300 p-2 text-center">نسبة الحضور</th>
+                            <th class="border border-slate-300 p-2 text-center">بداية التدريب</th>
+                            <th class="border border-slate-300 p-2 text-center">نهاية التدريب</th>
+                            <th class="border border-slate-300 p-2 text-center">حالة العقد</th>
+                            <th class="border border-slate-300 p-2">الملاحظات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${live.groupContracts.map((gc, i) => {
+                            const s = computeCDContractStatus(gc.start, gc.end);
+                            return `
+                                <tr>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${i + 1}</td>
+                                    <td class="border border-slate-300 p-2 font-black">${gc.companyAr} (${gc.company})</td>
+                                    <td class="border border-slate-300 p-2 font-black">${gc.group}</td>
+                                    <td class="border border-slate-300 p-2 font-bold">${gc.specialty || 'عام'}</td>
+                                    <td class="border border-slate-300 p-2 text-center font-black">${gc.traineesCount}</td>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${gc.avgAttendance > 0 ? gc.avgAttendance + '%' : '—'}</td>
+                                    <td class="border border-slate-300 p-2 text-center">${gc.start || 'غير محدد'}</td>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${gc.end || 'غير محدد'}</td>
+                                    <td class="border border-slate-300 p-2 text-center">${s.label}</td>
+                                    <td class="border border-slate-300 p-2 text-slate-600">${gc.note || '—'}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        } else if (rType === 'summary') {
+            reportTitle = 'التقرير الإحصائي الشامل للشركات والطاقة الاستيعابية';
+            bodyHtml = `
+                <div class="grid grid-cols-4 gap-3 my-4">
+                    <div class="border border-slate-300 p-3 rounded-xl text-center">
+                        <div class="text-xs text-slate-500 font-bold">إجمالي المتدربين المسجلين</div>
+                        <div class="text-2xl font-black text-slate-900">${live.totalTrainees}</div>
+                    </div>
+                    <div class="border border-slate-300 p-3 rounded-xl text-center">
+                        <div class="text-xs text-slate-500 font-bold">طاقة الساعة الواحدة</div>
+                        <div class="text-2xl font-black text-slate-900">${CD_CAPACITY_PER_HOUR}</div>
+                    </div>
+                    <div class="border border-slate-300 p-3 rounded-xl text-center">
+                        <div class="text-xs text-slate-500 font-bold">طاقة دوام ساعتين</div>
+                        <div class="text-2xl font-black text-slate-900">${CD_CAPACITY_PER_HOUR * 4}</div>
+                    </div>
+                    <div class="border border-slate-300 p-3 rounded-xl text-center">
+                        <div class="text-xs text-slate-500 font-bold">أقصى طاقة استيعابية</div>
+                        <div class="text-2xl font-black text-slate-900">${CD_CAPACITY_PER_HOUR * 8}</div>
+                    </div>
+                </div>
+
+                <table class="w-full text-xs text-right border-collapse border border-slate-300 mt-4">
+                    <thead>
+                        <tr class="bg-slate-100 font-black">
+                            <th class="border border-slate-300 p-2">#</th>
+                            <th class="border border-slate-300 p-2">اسم الشركة</th>
+                            <th class="border border-slate-300 p-2 text-center">عدد المجموعات</th>
+                            <th class="border border-slate-300 p-2 text-center">عدد المتدربين</th>
+                            <th class="border border-slate-300 p-2 text-center">النسبة من الإجمالي</th>
+                            <th class="border border-slate-300 p-2 text-center">متوسط الحضور</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.values(live.companySummary).map((c, i) => {
+                            const pct = live.totalTrainees > 0 ? Math.round((c.totalTrainees / live.totalTrainees) * 100) : 0;
+                            return `
+                                <tr>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${i + 1}</td>
+                                    <td class="border border-slate-300 p-2 font-black">${c.nameAr} (${c.nameEn})</td>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${c.groupsCount}</td>
+                                    <td class="border border-slate-300 p-2 text-center font-black">${c.totalTrainees}</td>
+                                    <td class="border border-slate-300 p-2 text-center">${pct}%</td>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${c.avgAttendance > 0 ? c.avgAttendance + '%' : '—'}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        } else if (rType === 'singleCompany') {
+            const compKey = targetCompany !== 'ALL' ? targetCompany : 'Samsung';
+            const compGroups = live.groupContracts.filter(g => g.company.toLowerCase() === compKey.toLowerCase());
+            reportTitle = `تقرير تحليلي لمجموعات وتدريب شركة: ${getCompanyArabicName(compKey)} (${compKey})`;
+
+            bodyHtml = `
+                <table class="w-full text-xs text-right border-collapse border border-slate-300 mt-4">
+                    <thead>
+                        <tr class="bg-slate-100 font-black">
+                            <th class="border border-slate-300 p-2">المجموعة</th>
+                            <th class="border border-slate-300 p-2">التخصص</th>
+                            <th class="border border-slate-300 p-2 text-center">عدد المتدربين</th>
+                            <th class="border border-slate-300 p-2 text-center">متوسط الحضور</th>
+                            <th class="border border-slate-300 p-2 text-center">بداية التدريب</th>
+                            <th class="border border-slate-300 p-2 text-center">نهاية التدريب</th>
+                            <th class="border border-slate-300 p-2 text-center">الحالة</th>
+                            <th class="border border-slate-300 p-2">ملاحظات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${compGroups.map(gc => {
+                            const s = computeCDContractStatus(gc.start, gc.end);
+                            return `
+                                <tr>
+                                    <td class="border border-slate-300 p-2 font-black">${gc.group}</td>
+                                    <td class="border border-slate-300 p-2 font-bold">${gc.specialty || 'عام'}</td>
+                                    <td class="border border-slate-300 p-2 text-center font-black">${gc.traineesCount}</td>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${gc.avgAttendance > 0 ? gc.avgAttendance + '%' : '—'}</td>
+                                    <td class="border border-slate-300 p-2 text-center">${gc.start || 'غير محدد'}</td>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${gc.end || 'غير محدد'}</td>
+                                    <td class="border border-slate-300 p-2 text-center">${s.label}</td>
+                                    <td class="border border-slate-300 p-2 text-slate-600">${gc.note || '—'}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        } else if (rType === 'attendance') {
+            reportTitle = 'كشف مقارنة نسب الحضور الفعلي بين الشركات';
+            bodyHtml = `
+                <table class="w-full text-xs text-right border-collapse border border-slate-300 mt-4">
+                    <thead>
+                        <tr class="bg-slate-100 font-black">
+                            <th class="border border-slate-300 p-2">الشركة</th>
+                            <th class="border border-slate-300 p-2 text-center">عدد المجموعات</th>
+                            <th class="border border-slate-300 p-2 text-center">عدد المتدربين</th>
+                            <th class="border border-slate-300 p-2 text-center">متوسط الحضور الفعلي</th>
+                            <th class="border border-slate-300 p-2 text-center">التقييم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.values(live.companySummary).map(c => {
+                            const rate = c.avgAttendance;
+                            const rating = rate >= 80 ? 'ممتاز' : (rate >= 65 ? 'جيد' : (rate > 0 ? 'منخفض' : 'لا تتوفر بيانات'));
+                            return `
+                                <tr>
+                                    <td class="border border-slate-300 p-2 font-black">${c.nameAr} (${c.nameEn})</td>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${c.groupsCount}</td>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${c.totalTrainees}</td>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${rate > 0 ? rate + '%' : '—'}</td>
+                                    <td class="border border-slate-300 p-2 text-center font-bold">${rating}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        } else if (rType === 'capacity') {
+            reportTitle = 'تقرير الطاقة الاستيعابية وتحليل معدل الإشغال';
+            const cap2h = CD_CAPACITY_PER_HOUR * 4;
+            const capMax = CD_CAPACITY_PER_HOUR * 8;
+            bodyHtml = `
+                <div class="my-4 space-y-3">
+                    <div class="border border-slate-300 p-4 rounded-xl">
+                        <div class="font-black text-sm mb-1">المعهد: معهد الذهب الأسود للتدريب الصناعي</div>
+                        <div class="text-xs text-slate-600">الطاقة الاستيعابية في الساعة: ${CD_CAPACITY_PER_HOUR} متدرب</div>
+                        <div class="text-xs text-slate-600">الطاقة الاستيعابية اليومية (متوسط دوام ساعتين): ${cap2h} متدرب</div>
+                        <div class="text-xs text-slate-600">الطاقة الاستيعابية القصوى الكلية: ${capMax} متدرب</div>
+                        <div class="text-xs font-black text-emerald-700 mt-2">إجمالي المتدربين المسجلين حالياً: ${live.totalTrainees} متدرب (${Math.round(live.totalTrainees/cap2h*100)}% من طاقة ساعتين)</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        contentEl.innerHTML = `
+            <div class="border-b-2 border-slate-800 pb-4 mb-4 flex justify-between items-start">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900">${reportTitle}</h2>
+                    <p class="text-xs text-slate-600 mt-1">${reportSubtitle}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">تاريخ الإصدار: ${dateStr}</p>
+                </div>
+                <div class="text-left font-black text-xs text-slate-800">
+                    <div>معهد الذهب الأسود للتدريب الصناعي</div>
+                    <div class="text-[10px] text-slate-500 font-bold">فرع عنك - إدارة شؤون المتدربين</div>
+                </div>
+            </div>
+
+            ${bodyHtml}
+
+            <div class="mt-8 pt-4 border-t border-slate-300 flex justify-between text-[11px] font-bold text-slate-500">
+                <div>يعتمد من إدارة المعهد</div>
+                <div>الختم الرسمي</div>
+                <div>صفحة 1 من 1</div>
+            </div>
+        `;
+    }
+
+    function printCDReportPDF() {
+        const area = document.getElementById('cdPrintableReportArea');
+        if (area) {
+            area.classList.remove('hidden');
+            generateCDReportContent();
+        }
+        window.print();
+    }
+
+    function exportCDReportExcel() {
+        const live = getCDLiveData();
+        const rType = document.getElementById('cdReportTypeSelect')?.value || 'groupContracts';
+
+        let csv = '\uFEFF';
+
+        if (rType === 'groupContracts') {
+            csv += 'م,الشركة,المجموعة,التخصص,عدد المتدربين,متوسط الحضور,بداية التدريب,نهاية التدريب,حالة العقد,الملاحظات\n';
+            live.groupContracts.forEach((gc, idx) => {
+                const s = computeCDContractStatus(gc.start, gc.end);
+                csv += `"${idx + 1}","${gc.companyAr} (${gc.company})","${gc.group}","${gc.specialty || ''}","${gc.traineesCount}","${gc.avgAttendance}%","${gc.start || ''}","${gc.end || ''}","${s.label}","${gc.note || ''}"\n`;
+            });
+        } else if (rType === 'summary') {
+            csv += 'م,الشركة,الاسم الإنجليزي,عدد المجموعات,عدد المتدربين,النسبة المئوية,متوسط الحضور\n';
+            Object.values(live.companySummary).forEach((c, idx) => {
+                const pct = live.totalTrainees > 0 ? Math.round((c.totalTrainees / live.totalTrainees) * 100) : 0;
+                csv += `"${idx + 1}","${c.nameAr}","${c.nameEn}","${c.groupsCount}","${c.totalTrainees}","${pct}%","${c.avgAttendance}%"\n`;
+            });
+        } else {
+            csv += 'المجموعة,الشركة,التخصص,عدد المتدربين,بداية التدريب,نهاية التدريب\n';
+            live.groupContracts.forEach(gc => {
+                csv += `"${gc.group}","${gc.company}","${gc.specialty || ''}","${gc.traineesCount}","${gc.start || ''}","${gc.end || ''}"\n`;
+            });
+        }
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `كشف_عقود_المجموعات_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // ==========================================
+    // GROUP CONTRACT EDIT MODAL FUNCTIONS
+    // ==========================================
+
+    function openGroupContractModal(highlightGroup = null) {
+        const stored = getStoredGroupContracts();
+        const body = document.getElementById('companyContractModalBody');
+        if (!body) return;
+
+        body.innerHTML = stored.map((gc, i) => {
+            const isHl = highlightGroup && cleanGroupNameForMatch(gc.group) === cleanGroupNameForMatch(highlightGroup);
+            return `
+                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-4 border ${isHl ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20' : 'border-slate-200 dark:border-slate-600'} space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="font-black text-slate-900 dark:text-white text-sm">${gc.group}</span>
+                            <span class="text-xs text-slate-400 mr-2 font-bold">${gc.companyAr || gc.company}</span>
+                        </div>
+                        <input type="text" value="${gc.specialty || ''}" data-idx="${i}" data-field="specialty" placeholder="التخصص (مثال: لحام / كهربائي)..."
+                               class="border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs bg-white dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200 outline-none w-44">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-600 dark:text-slate-400 block mb-1">📅 بداية التدريب</label>
+                            <input type="date" value="${gc.start || ''}" data-idx="${i}" data-field="start"
+                                   class="w-full border border-slate-200 dark:border-slate-600 rounded-xl p-2 text-xs bg-white dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-600 dark:text-slate-400 block mb-1">📅 نهاية التدريب</label>
+                            <input type="date" value="${gc.end || ''}" data-idx="${i}" data-field="end"
+                                   class="w-full border border-slate-200 dark:border-slate-600 rounded-xl p-2 text-xs bg-white dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-slate-600 dark:text-slate-400 block mb-1">📝 ملاحظات المجموعة</label>
+                        <input type="text" value="${gc.note || ''}" data-idx="${i}" data-field="note"
+                               class="w-full border border-slate-200 dark:border-slate-600 rounded-xl p-2 text-xs bg-white dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-amber-500"
+                               placeholder="ملاحظات...">
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const modal = document.getElementById('companyContractModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeGroupContractModal() {
+        const modal = document.getElementById('companyContractModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function addNewGroupContractPrompt() {
+        const groupName = prompt('أدخل اسم المجموعة الجديدة (مثال: Sinopec 201):');
+        if (!groupName || !groupName.trim()) return;
+
+        const compName = prompt('أدخل اسم الشركة (مثال: Sinopec أو Samsung أو HYUNDAI):') || 'أخرى';
+        const stored = getStoredGroupContracts();
+
+        stored.push({
+            company: compName.trim(),
+            companyAr: getCompanyArabicName(compName.trim()),
+            group: groupName.trim(),
+            specialty: 'عام',
+            start: '',
+            end: '',
+            note: ''
+        });
+
+        saveStoredGroupContracts(stored);
+        openGroupContractModal(groupName.trim());
+    }
+
+    function saveGroupContracts() {
+        const stored = getStoredGroupContracts();
+        const inputs = document.querySelectorAll('#companyContractModalBody input');
+
+        inputs.forEach(inp => {
+            const idx = parseInt(inp.dataset.idx, 10);
+            const field = inp.dataset.field;
+            if (!isNaN(idx) && field && stored[idx]) {
+                stored[idx][field] = inp.value ? inp.value.trim() : null;
+            }
+        });
+
+        saveStoredGroupContracts(stored);
+        closeGroupContractModal();
+        renderCompanyDashboard();
+        if (typeof showToast === 'function') {
+            showToast('تم حفظ تواريخ وتخصصات عقود المجموعات بنجاح', 'success');
+        }
+    }
+
+    // ===================================================================
+    // END COMPANY STATISTICS & GROUP-LEVEL CONTRACT MANAGEMENT SYSTEM
+    // ===================================================================
+    // ===================================================================
+
 </script>
+
+    <!-- ==================== Company Contract Edit Modal ==================== -->
+    <div id="companyContractModal" class="fixed inset-0 z-[200] flex items-center justify-center p-4 hidden no-print" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-slate-300 dark:border-slate-700">
+            <div class="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800 rounded-t-3xl z-10">
+                <div>
+                    <h3 class="font-black text-slate-900 dark:text-white text-base">تعديل عقود وتواريخ تدريب المجموعات</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">تحديد تواريخ البداية والنهاية والتخصص لكل مجموعة بشكل مستقل</p>
+                </div>
+                <button type="button" onclick="closeGroupContractModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center cursor-pointer transition text-slate-700 dark:text-slate-200 font-bold">✕</button>
+            </div>
+            <div class="p-5 space-y-3" id="companyContractModalBody">
+                <!-- Filled dynamically by JS -->
+            </div>
+            <div class="p-5 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center sticky bottom-0 bg-white dark:bg-slate-800 rounded-b-3xl">
+                <button type="button" onclick="addNewGroupContractPrompt()" class="px-4 py-2 rounded-xl border border-dashed border-amber-500 text-amber-600 dark:text-amber-400 font-black text-xs hover:bg-amber-50 dark:hover:bg-amber-950/30 transition">
+                    + إضافة مجموعة جديدة
+                </button>
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="closeGroupContractModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 font-bold text-sm text-slate-700 dark:text-slate-200 transition cursor-pointer">إلغاء</button>
+                    <button type="button" onclick="saveGroupContracts()" class="px-5 py-2.5 rounded-xl bg-[#0F2942] hover:bg-[#0d2235] text-amber-300 font-black text-sm transition cursor-pointer shadow-sm">حفظ التعديلات</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 
