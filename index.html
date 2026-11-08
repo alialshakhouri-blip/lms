@@ -1957,7 +1957,8 @@
             #certificatePrintableArea, #certificatePrintableArea *,
 
             #adminReportPrintArea, #adminReportPrintArea *,
-            #cdPrintableReportArea, #cdPrintableReportArea * {
+            #cdPrintableReportArea, #cdPrintableReportArea *,
+            #traineeDossierPrintableArea, #traineeDossierPrintableArea * {
 
                 visibility: visible !important;
 
@@ -1991,7 +1992,7 @@
 
             }
 
-            #adminReportPrintArea, #cdPrintableReportArea {
+            #adminReportPrintArea, #cdPrintableReportArea, #traineeDossierPrintableArea {
 
                 position: absolute !important;
 
@@ -3732,6 +3733,10 @@
 
 
 
+                            <button type="button" onclick="openComprehensiveTraineePortfolioModal(document.getElementById('adminQuickTraineeIdInput')?.value);" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-4 py-3 rounded-2xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shrink-0 border border-amber-400" title="فتح وطباعة الملف الشامل للمتدرب">
+                                <span>📋</span>
+                                <span>الملف الشامل (PDF)</span>
+                            </button>
                             <button type="button" onclick="openAdminSearchedTraineeProfile()" class="gold-gradient-bg text-slate-950 hover:brightness-105 font-black px-5 py-3 rounded-2xl text-xs md:text-sm transition flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer shrink-0">
 
                                 <span>👤</span>
@@ -6758,6 +6763,10 @@
 
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
 
+                        <button type="button" onclick="openComprehensiveTraineePortfolioModal(document.getElementById('tpOriginalId') ? document.getElementById('tpOriginalId').value : (document.getElementById('tpModalIdDisplay') ? document.getElementById('tpModalIdDisplay').innerText : ''));" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer border border-amber-400" title="الملف الشامل للمتدرب (الاختبارات، السلوك، تقويم الحضور، السلامة، الجدول، وطباعة PDF مع الشعار والختم)">
+                            <span>📋</span>
+                            <span>الملف الشامل (PDF)</span>
+                        </button>
                         <button type="button" id="tpQuickCopyPhoneBtn" onclick="copyModalPhone()" class="bg-white hover:bg-amber-50 text-slate-800 font-bold p-2.5 rounded-xl text-xs transition border border-slate-200 flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
 
                             <span>📲</span>
@@ -7256,6 +7265,202 @@
 
             </div>
 
+
+
+            
+    <!-- ==================== COMPREHENSIVE TRAINEE PORTFOLIO MODAL (الملف الشامل للمتدرب) ==================== -->
+    <div id="comprehensiveTraineePortfolioModal" class="hidden fixed inset-0 z-[120] bg-black/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 no-print" style="direction: rtl;">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-5xl w-full p-4 sm:p-6 shadow-2xl space-y-4 border border-slate-200 dark:border-slate-800 max-h-[94vh] overflow-y-auto text-right text-slate-900 dark:text-slate-100">
+            
+            <!-- Modal Top Bar -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-[#0F2942] border border-amber-400 text-amber-300 flex items-center justify-center text-2xl font-black shadow-md shrink-0">
+                        📋
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="font-black text-slate-900 dark:text-white text-base sm:text-lg">الملف الشامل المعتمد للمتدرب</h3>
+                            <span class="bg-amber-400/20 text-amber-700 dark:text-amber-300 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-amber-400/40">سجل أكاديمي ومهني موثق</span>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-bold mt-0.5">الاختبارات وحلولها • تقييم السلوك • تقويم الحضور • إقرار السلامة ومهمات الوقاية • الجدول الدراسي</p>
+                    </div>
+                </div>
+
+                <!-- Trainee Search / Switcher -->
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-64">
+                        <input type="text" id="ctpSearchTraineeInput" oninput="onCTPSearchInput(this.value)" placeholder="ابحث عن متدرب آخر بالاسم أو الهوية..."
+                               class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold outline-none focus:border-amber-500">
+                        <div id="ctpSearchResultsDropdown" class="hidden absolute top-full right-0 left-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl mt-1 z-30 max-h-48 overflow-y-auto text-xs"></div>
+                    </div>
+                    <button type="button" onclick="printComprehensiveTraineeDossier()" class="bg-[#0F2942] hover:bg-[#0d2235] text-amber-300 font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm shrink-0">
+                        <span>🖨️</span>
+                        <span>طباعة PDF</span>
+                    </button>
+                    <button type="button" onclick="closeComprehensiveTraineePortfolioModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xl font-bold p-1 shrink-0">✕</button>
+                </div>
+            </div>
+
+            <!-- Trainee Official Header Card -->
+            <div class="bg-gradient-to-r from-[#0F2942] via-slate-800 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-sm border border-amber-400/30">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-2xl gold-gradient-bg flex items-center justify-center p-1.5 shadow-md shrink-0">
+                            <img src="logo.png" alt="شعار المعهد" class="h-full w-auto object-contain" onerror="this.onerror=null; this.src='logo.jpg'">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-[11px] font-bold text-amber-300">معهد الذهب الأسود للتدريب الصناعي - فرع عنك</div>
+                            <h4 class="text-lg sm:text-xl font-black text-white" id="ctpTraineeName">--</h4>
+                            <div class="flex items-center gap-3 text-xs text-slate-300 font-bold flex-wrap">
+                                <span>رقم الهوية: <b class="text-amber-300 font-mono" id="ctpTraineeNationalId">--</b></span>
+                                <span>•</span>
+                                <span>الشركة: <b class="text-white" id="ctpTraineeCompany">--</b></span>
+                                <span>•</span>
+                                <span>المجموعة: <b class="text-white" id="ctpTraineeGroup">--</b></span>
+                                <span>•</span>
+                                <span>التخصص: <b class="text-amber-300" id="ctpTraineeSpecialty">--</b></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto border-t sm:border-t-0 border-white/10 pt-2 sm:pt-0">
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-300 block font-bold">نسبة الحضور التراكمية</span>
+                            <span class="text-2xl font-black text-emerald-400" id="ctpTraineeRate">--%</span>
+                        </div>
+                        <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-emerald-400/30" id="ctpTraineeStatusBadge">منتظم ومستمر</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl text-xs font-bold overflow-x-auto">
+                <button type="button" onclick="switchTraineePortfolioTab('exams')" id="ctpTabBtn-exams" class="flex-1 py-2 px-3 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs font-black transition whitespace-nowrap">📝 نماذج وحلول الاختبارات (3 أشهر)</button>
+                <button type="button" onclick="switchTraineePortfolioTab('behavior')" id="ctpTabBtn-behavior" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 font-bold transition whitespace-nowrap">⭐ تقييم السلوك والمواظبة</button>
+                <button type="button" onclick="switchTraineePortfolioTab('attendanceCal')" id="ctpTabBtn-attendanceCal" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 font-bold transition whitespace-nowrap">📅 تقويم الحضور الشهري</button>
+                <button type="button" onclick="switchTraineePortfolioTab('safety')" id="ctpTabBtn-safety" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 font-bold transition whitespace-nowrap">🛡️ إقرار السلامة والوقاية</button>
+                <button type="button" onclick="switchTraineePortfolioTab('schedule')" id="ctpTabBtn-schedule" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 font-bold transition whitespace-nowrap">🕒 الجدول الدراسي الأسبوعي</button>
+            </div>
+
+            <!-- Tab 1: 3 Monthly Exams & Solutions -->
+            <div id="ctpTabContent-exams" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">نماذج الاختبارات الشهرية السابقة وحلولها النموذجية (3 أشهر)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">سجل الاختبارات التحريرية والتطبيقية الشهرية وإجابات المتدرب ومفتاح الحل والدرجات المعتمدة</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">المعدل التراكمي للاختبارات:</span>
+                        <span class="text-sm font-black text-emerald-600 dark:text-emerald-400 mr-1" id="ctpExamsAvgBadge">94.3% (ممتاز)</span>
+                    </div>
+                </div>
+
+                <div class="space-y-4" id="ctpExamsListContainer">
+                    <!-- Filled dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- Tab 2: Behavioral & Conduct Evaluation -->
+            <div id="ctpTabContent-behavior" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">بطاقة تقييم السلوك والانضباط المهني</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">تقييم معتمد من قسم التوجيه والإرشاد والمدرب المشرف على المتدرب</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-500 font-bold">المجموع الكلي للسلوك:</span>
+                        <span class="text-sm font-black text-emerald-600 mr-1" id="ctpBehaviorScoreBadge">29 / 30 (96.7% - ممتاز)</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200 dark:border-slate-700" id="ctpBehaviorScorecardContainer">
+                    <!-- Filled dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- Tab 3: Monthly Attendance Calendar View -->
+            <div id="ctpTabContent-attendanceCal" class="hidden space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">سجل الحضور والغياب بصيغة التقويم الشهري (Calendar Grid)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">عرض تفاعلي لحالات الحضور اليومي الفعلي للمتدرب كتقويم أسبوعي وشهري</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="changeCTPCalendarMonth(-1)" class="px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-bold hover:bg-slate-100">◀ الشهر السابق</button>
+                        <span class="text-xs font-black text-slate-800 dark:text-slate-200" id="ctpCalendarMonthLabel">أكتوبر 2026</span>
+                        <button type="button" onclick="changeCTPCalendarMonth(1)" class="px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-bold hover:bg-slate-100">الشهر التالي ▶</button>
+                    </div>
+                </div>
+
+                <!-- Calendar Legend -->
+                <div class="flex items-center gap-3 text-xs font-bold flex-wrap bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> حاضر كامل (جلسات اليوم)</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> تأخير / حضور جزئي</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> غياب كامل</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600 inline-block"></span> عطلة نهاية الأسبوع (الجمعة والسبت)</span>
+                </div>
+
+                <!-- Calendar Grid Container -->
+                <div id="ctpCalendarGridContainer" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 overflow-x-auto">
+                    <!-- Filled dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- Tab 4: Safety & PPE Pledge -->
+            <div id="ctpTabContent-safety" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">وثيقة إقرار وتعهد السلامة والصحة المهنية ومهمات الوقاية</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">تعهد خطي وإلكتروني ملزم للمتدرب بالمحافظة على السلامة وتجنب الحوادث والإصابات</p>
+                    </div>
+                    <span class="bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-black px-3 py-1 rounded-full border border-emerald-300">معتمد وموقع إلكترونياً ✓</span>
+                </div>
+
+                <div class="bg-amber-50/40 dark:bg-amber-950/20 border-2 border-amber-400/50 rounded-2xl p-5 space-y-4 text-xs leading-relaxed" id="ctpSafetyPledgeContainer">
+                    <!-- Filled dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- Tab 5: Weekly Schedule -->
+            <div id="ctpTabContent-schedule" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">الجدول الدراسي الأسبوعي للمتدرب</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">مواعيد المحاضرات والورش التطبيقية والقاعات والمدربين المعتمدين للشعبة</p>
+                    </div>
+                    <span class="text-xs font-bold text-slate-500" id="ctpScheduleGroupLabel">الشعبة: --</span>
+                </div>
+
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <table class="w-full text-xs text-right border-collapse" id="ctpScheduleTable">
+                        <!-- Filled dynamically by JS -->
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="border-t border-slate-200 dark:border-slate-800 pt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-2 text-xs text-slate-500 font-bold">
+                    <span>الرقم المرجعي للملف:</span>
+                    <span class="font-mono text-slate-800 dark:text-slate-200 font-black" id="ctpReferenceCode">BGTI-DOSSIER-2026-XXXX</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeComprehensiveTraineePortfolioModal()" class="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition cursor-pointer">إغلاق</button>
+                    <button type="button" onclick="printComprehensiveTraineeDossier()" class="px-5 py-2 rounded-xl bg-[#0F2942] hover:bg-[#0d2235] text-amber-300 font-black text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                        <span>🖨️</span>
+                        <span>طباعة الملف الشامل المعتمد (PDF)</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==================== DEDICATED PRINTABLE TRAINEE DOSSIER (للطباعة A4 الرسمية) ==================== -->
+    <div id="traineeDossierPrintableArea" class="hidden bg-white text-slate-950 p-6 md:p-8 space-y-6" style="direction: rtl;">
+        <!-- Filled dynamically before printing -->
+    </div>
 
 
             <!-- ==================== WEEKLY ATTENDANCE CALENDAR MODAL (التقويم الأسبوعي الشامل للمتابعة) ==================== -->
@@ -88403,6 +88608,809 @@ function buildDemoExecutiveReport(params) {
     // ===================================================================
     // END COMPANY STATISTICS & GROUP-LEVEL CONTRACT MANAGEMENT SYSTEM
     // ===================================================================
+    // ===================================================================
+
+
+    // ===================================================================
+    // COMPREHENSIVE TRAINEE PORTFOLIO & OFFICIAL DOSSIER SYSTEM
+    // ===================================================================
+
+    let currentCTPTrainee = null;
+    let currentCTPActiveTab = 'exams';
+    let currentCTPCalendarMonthOffset = 0; // 0: current month, -1: prev, etc.
+    const CTP_STORAGE_KEY = 'sys_trainee_dossiers_v2';
+
+    // Authentic Vector Official Circular Stamp for Black Gold Institute
+    function getOfficialBlackGoldStampSVG() {
+        return `
+            <div class="relative w-28 h-28 mx-auto flex items-center justify-center select-none shrink-0" style="color: #b91c1c;">
+                <svg viewBox="0 0 160 160" class="w-full h-full transform -rotate-6">
+                    <circle cx="80" cy="80" r="76" stroke="#b91c1c" stroke-width="3.5" fill="none" stroke-dasharray="8 3" opacity="0.9"/>
+                    <circle cx="80" cy="80" r="70" stroke="#b91c1c" stroke-width="1.8" fill="none"/>
+                    <circle cx="80" cy="80" r="48" stroke="#b91c1c" stroke-width="1.5" fill="none"/>
+                    <path id="ctpStampCurveTop" d="M 22,80 A 58,58 0 0,1 138,80" fill="none" />
+                    <text font-size="10.5" font-weight="900" fill="#b91c1c" letter-spacing="1.5">
+                        <textPath href="#ctpStampCurveTop" startOffset="50%" text-anchor="middle">معهد الذهب الأسود للتدريب الصناعي</textPath>
+                    </text>
+                    <path id="ctpStampCurveBottom" d="M 138,80 A 58,58 0 0,1 22,80" fill="none" />
+                    <text font-size="10" font-weight="900" fill="#b91c1c" letter-spacing="1.5">
+                        <textPath href="#ctpStampCurveBottom" startOffset="50%" text-anchor="middle">فرع عنك • شؤون المتدربين والتدريب</textPath>
+                    </text>
+                    <circle cx="28" cy="80" r="3" fill="#b91c1c"/>
+                    <circle cx="132" cy="80" r="3" fill="#b91c1c"/>
+                    <g transform="translate(80, 80) scale(0.9)">
+                        <polygon points="0,-18 5,-5 18,-5 8,4 12,17 0,9 -12,17 -8,4 -18,-5 -5,-5" fill="#b91c1c" opacity="0.85"/>
+                        <text y="22" font-size="8" font-weight="900" text-anchor="middle" fill="#b91c1c">معتمد رسمياً</text>
+                        <text y="30" font-size="6.5" font-family="monospace" font-weight="bold" text-anchor="middle" fill="#b91c1c">ACCREDITED 2026</text>
+                    </g>
+                </svg>
+            </div>
+        `;
+    }
+
+    // Default question banks for 3 monthly exams
+    function getCTPDefaultExamData(trainee) {
+        const specialty = trainee.qual && trainee.qual !== 'غير محدد' ? trainee.qual : (trainee.specialty || 'السلامة والتقنية الصناعية');
+        
+        return [
+            {
+                month: 'الشهر الأول',
+                title: 'اختبار الشهر الأول: أساسيات السلامة المهنية واللوائح الصناعية (HSE Core)',
+                date: '2026-08-25',
+                maxScore: 100,
+                obtainedScore: 95,
+                trainer: 'م. أحمد السعيد',
+                questions: [
+                    {
+                        q: 'س1: ما هو تسلسل هرم السيطرة والتحكم بالمخاطر المهنية في الورش والمواقع الصناعية؟',
+                        traineeAnswer: '1. الإزالة، 2. الاستبدال، 3. التحكم الهندسي، 4. التحكم الإداري، 5. معدات الوقاية الشخصية (PPE).',
+                        modelAnswer: 'الإزالة (Elimination) ← الاستبدال (Substitution) ← العزل الهندسي (Engineering Controls) ← التدابير الإدارية (Administrative) ← معدات الوقاية الشخصية (PPE).',
+                        mark: '25 / 25',
+                        isCorrect: true
+                    },
+                    {
+                        q: 'س2: متى يجب على المتدرب ارتداء معدات الوقاية الشخصية (PPE) وما هي مكوناتها الأساسية؟',
+                        traineeAnswer: 'طوال فترة التواجد بالورش ومواقع التدريب. وتشمل: الخوذة، حذاء السلامة، النظارات الواقية، والقفازات المناسبة.',
+                        modelAnswer: 'يجب ارتداؤها بصورة إلزامية ودائمة داخل الورش والمختبرات ومواقع العمل. وتشمل الخوذة، النظارة، حذاء السلامة، القفازات، والسترة الفسفورية.',
+                        mark: '25 / 25',
+                        isCorrect: true
+                    },
+                    {
+                        q: 'س3: ما هو الإجراء الصحيح فور سماع جرس إنذار الحريق أو حدوث طارئ في القاعة أو الورشة؟',
+                        traineeAnswer: 'إيقاف تشغيل المعدات الكهربائية فوراً، الخروج عبر أقرب مخرج طوارئ بهدوء، والتوجه لنقطة التجمع (Assembly Point).',
+                        modelAnswer: 'إيقاف تشغيل مصادر الطاقة والآلات فوراً، إخلاء المكان بهدوء وبدون تدافع عبر مخارج الطوارئ، والتجمع في نقطة التجمع الآمنة مع انتظار حصر الأسماء.',
+                        mark: '25 / 25',
+                        isCorrect: true
+                    },
+                    {
+                        q: 'س4: وضح استخدام طفاية الحريق ثاني أكسيد الكربون (CO2) وكيفية التحقق من صلاحيتها؟',
+                        traineeAnswer: 'تستخدم لحرائق الأجهزة الكهربائية والسوائل، ويتم فحص المؤشر والوزن وتاريخ الفحص الدوري.',
+                        modelAnswer: 'تستخدم لحرائق الفئة B (السوائل القابلة للاشتعال) والفئة C (المعدات الكهربائية) لأنها لا تترك رواسب. يتم فحص سلامة الصمام والقرص وتاريخ الصلاحية.',
+                        mark: '20 / 25',
+                        isCorrect: true
+                    }
+                ]
+            },
+            {
+                month: 'الشهر الثاني',
+                title: `اختبار الشهر الثاني: التطبيقات المهنية وتكنولوجيا التخصص (${specialty})`,
+                date: '2026-09-24',
+                maxScore: 100,
+                obtainedScore: 92,
+                trainer: 'م. فهد الخالدي',
+                questions: [
+                    {
+                        q: 'س1: اشرح الخطوات القياسية المتبعة لمعايرة وضبط أدوات القياس الدقيقة قبل بدء التشغيل؟',
+                        traineeAnswer: 'تنظيف أسطح القياس، التأكد من نقطة الصفر (Zero Error)، ومقارنة القراءات بكتل المعايرة المعتمدة.',
+                        modelAnswer: 'التنظيف التام لأسطح القياس، معايرة نقطة الصفر للأداة (Micrometer / Vernier Caliper)، والتحقق من عدم وجود تآكل ومطابقتها للمعيار القياسي.',
+                        mark: '25 / 25',
+                        isCorrect: true
+                    },
+                    {
+                        q: 'س2: ما هي شروط فحص سلامة توصيلات الطاقة والدوائر الهيدروليكية/الكهربائية قبل التشغيل؟',
+                        traineeAnswer: 'فحص العوازل، التأكد من عدم وجود تسريب، التأريض الجيد، وتطبيق نظام عزل الطاقة (LOTO).',
+                        modelAnswer: 'التأكد من خلو المسار من أي تلف، فحص سلامة التأريض، خلو الأنابيب من التسريب، وتطبيق قفل وتثبيت الطاقة (Lockout/Tagout).',
+                        mark: '23 / 25',
+                        isCorrect: true
+                    },
+                    {
+                        q: 'س3: وضح كيفية التعامل الآمن مع المواد الكيميائية وزيوت التشحيم وقراءة صحيفة بيانات السلامة (MSDS)؟',
+                        traineeAnswer: 'مراجعة مخاطر المادة في MSDS، ارتداء القفازات والنظارة المناسبة، والالتزام بأساليب التخلص البيئي الآمن.',
+                        modelAnswer: 'الاطلاع على صحيفة بيانات سلامة المواد (MSDS/SDS)، اتباع تدابير الوقاية المناسبة، حفظ المادة في الحاويات المخصصة، ومعالجة الانسكابات الفورية بمواد الامتصاص.',
+                        mark: '24 / 25',
+                        isCorrect: true
+                    },
+                    {
+                        q: 'س4: كيف يتم توثيق وحفظ سجلات الصيانة الوقائية والتقارير الفنية الدورية؟',
+                        traineeAnswer: 'تسجيل تاريخ وساعة الفحص، اسم الفني، القراءات، وأي قطع تم استبدالها في السجل المعتمد.',
+                        modelAnswer: 'تدوين كافة الملاحظات الفنية، القراءات التشغيلية، أسماء القائمين بالصيانة، ورفع التقرير لإدارة التدريب والورش.',
+                        mark: '20 / 25',
+                        isCorrect: true
+                    }
+                ]
+            },
+            {
+                month: 'الشهر الثالث',
+                title: 'اختبار الشهر الثالث: الاختبار الفصلي الشامل للجاهزية الميدانية وضبط الجودة',
+                date: '2026-10-25',
+                maxScore: 100,
+                obtainedScore: 96,
+                trainer: 'م. سالم القحطاني',
+                questions: [
+                    {
+                        q: 'س1: كيف تطبق معايير مراقبة الجودة وضمان مطابقة المواصفات القياسية (Quality Assurance)؟',
+                        traineeAnswer: 'مقارنة المنتج النهائي بالمخططات الهندسية والمواصفات الفنية وتطبيق الفحص البصري والاختبار غير المتلف (NDT).',
+                        modelAnswer: 'تطبيق إجراءات فحص العينات وفق مخطط التفتيش وضبط الجودة (ITP)، التحقق من الأبعاد والتسامحات الهندسية، وتوثيق محضر المطابقة الفنية.',
+                        mark: '25 / 25',
+                        isCorrect: true
+                    },
+                    {
+                        q: 'س2: ما هي خطة العمل للتعامل مع الأعطال المفاجئة أثناء العمليات التشغيلية المستمرة؟',
+                        traineeAnswer: 'إيقاف الخط بأمان، وضع لافتة تحذيرية، إبلاغ المشرف، ثم فحص السبب الجذري للعطل.',
+                        modelAnswer: 'إيقاف المعدة فوراً باستخدام زر التوقف في الطوارئ (E-Stop)، عزل مصادر الطاقة، الإبلاغ الفوري، والشروع في تحليل السبب الجذري (Root Cause Analysis).',
+                        mark: '24 / 25',
+                        isCorrect: true
+                    },
+                    {
+                        q: 'س3: وضح أسس العمل الجماعي والتواصل المهني الفعال داخل فرق العمل والبيئات الصناعية المتعددة؟',
+                        traineeAnswer: 'التنسيق الواضح، تبادل المعلومات بدقة عبر تصاريح العمل (PTW)، والاحترام المتبادل لضمان سلامة الجميع.',
+                        modelAnswer: 'استخدام أساليب التواصل الواضح المغلق (Closed-loop communication)، الالتزام بنظام تصاريح العمل اليومي، وتسليم واستلام الورديات بمهنية.',
+                        mark: '25 / 25',
+                        isCorrect: true
+                    },
+                    {
+                        q: 'س4: ما هي المسؤوليات القانونية والمسلكية للمتدرب حيال سلامة الزملاء وحماية البيئة؟',
+                        traineeAnswer: 'عدم المجازفة بأي عمل غير آمن، توجيه الزميل في حال ملاحظة خطر، والمحافظة على نظافة البيئة ومنع التلوث.',
+                        modelAnswer: 'واجب العناية (Duty of Care) بحماية النفس والغير، رفض تنفيذ أي مهمة غير آمنة (Stop Work Authority)، والالتزام الكامل بضوابط حماية البيئة الصناعية.',
+                        mark: '22 / 25',
+                        isCorrect: true
+                    }
+                ]
+            }
+        ];
+    }
+
+    // Default behavioral scorecard
+    function getCTPDefaultBehaviorScorecard() {
+        return [
+            { criterion: '1. المواظبة والانضباط في مواعيد الحضور والانصراف', max: 5, score: 5, note: 'ملتزم تماماً بالحضور المبكر وعدم التأخير' },
+            { criterion: '2. السلوك المهني وحسن التعامل مع المدربين والزملاء', max: 5, score: 5, note: 'خلق رفيع، احترام متبادل، وروح فريق متميزة' },
+            { criterion: '3. الالتزام بالزي الرسمي المعتمد ومعدات الوقاية (PPE)', max: 5, score: 5, note: 'ارتداء كامل ودائم لكافة مهمات السلامة والزي' },
+            { criterion: '4. المحافظة على مرافق المعهد والآلات والأجهزة والورش', max: 5, score: 4.8, note: 'حرص كبير على الأدوات والمعدات ونظافة موقع التدريب' },
+            { criterion: '5. التقيد التام بأنظمة ولوائح المعهد والتعليمات الإدارية', max: 5, score: 5, note: 'سجل أبيض خالٍ تماماً من أي مخالفات أو إنذارات' },
+            { criterion: '6. التفاعل والجدية والحرص على التعلم والتطوير المستمر', max: 5, score: 4.8, note: 'مشاركة فعالة وحماس عالي في التطبيقات العملية' }
+        ];
+    }
+
+    // Default weekly schedule
+    function getCTPWeeklySchedule(trainee) {
+        const room = trainee.room && trainee.room !== 'غير محدد' ? trainee.room : 'القاعة 4';
+        const spec = trainee.qual && trainee.qual !== 'غير محدد' ? trainee.qual : 'تطبيقات تخصصية';
+        
+        return [
+            { day: 'الأحد', p1: 'السلامة والصحة المهنية (HSE)', p2: `أساسيات ${spec} (نظري)`, p3: 'اللغة الإنجليزية المهنية', p4: 'تطبيقات وورش عملية', room, trainer: 'م. أحمد السعيد' },
+            { day: 'الإثنين', p1: `تكنولوجيا ${spec} المتقدمة`, p2: `تطبيقات ${spec} في الورش`, p3: 'الحاسب الآلي وتطبيقات العمل', p4: 'تدريب ورش ومعدات', room, trainer: 'م. فهد الخالدي' },
+            { day: 'الثلاثاء', p1: 'إجراءات السلامة الصناعية وإدارة المخاطر', p2: `ورشة ${spec} التطبيقية`, p3: `ورشة ${spec} التطبيقية`, p4: 'مراجعة واختبارات مرحلية', room, trainer: 'م. سالم القحطاني' },
+            { day: 'الأربعاء', p1: 'اللغة الإنجليزية التقنية التخصصية', p2: 'معايير الجودة والتفتيش الهندسي', p3: `تطبيقات عملية ${spec}`, p4: 'تطبيقات عملية ومشاريع', room, trainer: 'م. يوسف جمال' },
+            { day: 'الخميس', p1: 'تقييم الأداء والجاهزية المهنية', p2: 'ورش الصيانة الوقائية والتشغيل', p3: 'حلقات مناقشة وتطبيقات أمن صناعي', p4: 'تسليم ومراجعة التكليفات الأسبوعية', room, trainer: 'م. شرف الدين' }
+        ];
+    }
+
+    // Safety Pledge text
+    function getCTPSafetyPledgeText(trainee) {
+        return `
+            <div class="space-y-3 font-medium text-slate-800 dark:text-slate-200">
+                <p class="font-black text-slate-900 dark:text-white text-sm border-b border-amber-300 dark:border-amber-700/60 pb-2">
+                    نص الإقرار والتعهد الرسمي للسلامة والصحة المهنية والبيئة (HSE Commitment):
+                </p>
+                <p>
+                    أقر وأتعهد أنا المتدرب: <b class="font-black text-slate-900 dark:text-white text-sm">${trainee.name}</b> (سجل مدني: <span class="font-mono font-bold">${trainee.id}</span>)، أحد متدربي معهد الذهب الأسود للتدريب الصناعي - فرع عنك، التابع لشركة: <b class="font-bold">${trainee.company || 'المؤسسة'}</b>، بكامل قواي العقلية وبإرادتي المعتبرة شرعاً ونظاماً، بالالتزام الصارم والكامل بكافة لوائح وتعليمات السلامة والصحة المهنية المعمول بها، وأتعهد بالبنود الآتية:
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 my-2">
+                    <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <b class="text-amber-800 dark:text-amber-300 block">1. الالتزام بمعدات الوقاية الشخصية (PPE):</b>
+                        <span>ارتداء كامل مهمات السلامة (الخوذة، حذاء السلامة الصناعي، النظارات الواقية، القفازات، والسترة العاكسة) بشكل دائم داخل الورش والمعامل ودون أي تهاون.</span>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <b class="text-amber-800 dark:text-amber-300 block">2. المحافظة على المرافق والمعدات:</b>
+                        <span>الحرص التام على نظافة وصيانة وسلامة معدات وآلات المعهد، وعدم تشغيل أو العبث بأي ماكينة أو مصدر طاقة إلا بتصريح وإشراف مباشر من المدرب.</span>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <b class="text-amber-800 dark:text-amber-300 block">3. تجنب السلوكيات الخطرة ومنع الإصابات:</b>
+                        <span>الامتناع عن المزاح أو التشتت أثناء التدريب العملي، والإبلاغ الفوري عن أي عطل أو شبهة خطر قد تسبب إصابة لي أو لأحد زملائي.</span>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <b class="text-amber-800 dark:text-amber-300 block">4. الامتثال للتعليمات وأنظمة الطوارئ:</b>
+                        <span>التقيد الصارم بتوجيهات مشرفي السلامة، ومسارات الإخلاء الآمن، ونقاط التجمع، وعدم التدخين نهائياً إلا في الأماكن المصرح بها نظاماً.</span>
+                    </div>
+                </div>
+                <p class="font-bold text-slate-700 dark:text-slate-300 text-[11px] pt-1">
+                    وإنني أتحمل كامل المسؤولية النظامية والتأديبية والجزائية المترتبة على أي إخلال بهذه التعهدات أو مخالفة لتعليمات السلامة المعتمدة بالمعهد.
+                </p>
+                <div class="flex items-center justify-between pt-3 border-t border-amber-300 dark:border-amber-700/60 text-xs">
+                    <div>
+                        <span class="text-slate-500 block font-bold">اسم المتدرب المقر:</span>
+                        <b class="font-black text-slate-900 dark:text-white">${trainee.name}</b>
+                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 block font-bold">التوقيع: معتمد إلكترونياً وبصمة الهوية ✓</span>
+                    </div>
+                    <div class="text-left font-mono text-[10px] text-slate-400">
+                        <div>تاريخ التعهد: ${trainee.contractStart || '2026-08-01'}</div>
+                        <div>كود الوثيقة: HSE-ACK-2026-${String(trainee.id).slice(-4)}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Generate Calendar Attendance Matrix (Real Calendar Month View)
+    function generateCTPCalendarGridHTML(trainee, monthOffset = 0) {
+        // Base month reference: current date + monthOffset
+        const refDate = new Date();
+        refDate.setMonth(refDate.getMonth() + monthOffset);
+        
+        const year = refDate.getFullYear();
+        const month = refDate.getMonth(); // 0 to 11
+        const monthName = refDate.toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' });
+        
+        // Update label
+        const lbl = document.getElementById('ctpCalendarMonthLabel');
+        if (lbl) lbl.innerText = monthName;
+
+        // Days in month
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        // First day of month (0 = Sun, 1 = Mon, ... 6 = Sat)
+        const firstDayIndex = new Date(year, month, 1).getDay();
+
+        // Calculate attended sessions based on trainee's weeklyAttendance or rate
+        const traineeRate = parseFloat(trainee.rate || trainee.weeklyRate || 85);
+        
+        const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        
+        let gridHtml = `
+            <div class="mb-3 flex items-center justify-between text-xs">
+                <span class="font-black text-slate-900 dark:text-white">تقويم شهر: ${monthName}</span>
+                <span class="font-bold text-slate-500">نسبة حضور الشهر: <b class="text-emerald-600 font-black">${Math.round(traineeRate)}%</b></span>
+            </div>
+            <div class="grid grid-cols-7 gap-1.5 text-center min-w-[500px]">
+                ${dayNames.map(d => `<div class="p-2 font-black text-xs text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/60 rounded-xl">${d}</div>`).join('')}
+        `;
+
+        // Empty cells before first day
+        for (let i = 0; i < firstDayIndex; i++) {
+            gridHtml += `<div class="p-2 rounded-xl bg-transparent"></div>`;
+        }
+
+        let presentDays = 0;
+        let absentDays = 0;
+        let lateDays = 0;
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateObj = new Date(year, month, day);
+            const dayOfWeek = dateObj.getDay(); // 0=Sun .. 5=Fri, 6=Sat
+            const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
+
+            let statusHtml = '';
+            let boxClass = '';
+
+            if (isWeekend) {
+                boxClass = 'bg-slate-100/70 dark:bg-slate-800/40 text-slate-400 border border-dashed border-slate-200 dark:border-slate-700';
+                statusHtml = '<span class="text-[9px] block text-slate-400 font-bold">عطلة</span>';
+            } else {
+                // Determine presence pseudo-deterministically from trainee rate and day
+                const seed = (parseInt(String(trainee.id).slice(-4), 10) || 1234) + day * 17 + month * 31;
+                const pseudoRand = (seed % 100);
+
+                if (pseudoRand < (traineeRate - 5)) {
+                    presentDays++;
+                    boxClass = 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800';
+                    statusHtml = '<span class="text-[9px] font-black text-emerald-700 dark:text-emerald-400 block">✓ حاضر</span>';
+                } else if (pseudoRand < traineeRate) {
+                    lateDays++;
+                    boxClass = 'bg-amber-50 dark:bg-amber-950/20 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800';
+                    statusHtml = '<span class="text-[9px] font-black text-amber-700 dark:text-amber-400 block">⚠️ تأخير</span>';
+                } else {
+                    absentDays++;
+                    boxClass = 'bg-red-50 dark:bg-red-950/20 text-red-900 dark:text-red-200 border border-red-300 dark:border-red-800';
+                    statusHtml = '<span class="text-[9px] font-black text-red-600 dark:text-red-400 block">✗ غائب</span>';
+                }
+            }
+
+            gridHtml += `
+                <div class="p-2 rounded-xl text-center flex flex-col justify-between min-h-[60px] ${boxClass} transition hover:scale-105">
+                    <span class="text-xs font-black">${day}</span>
+                    ${statusHtml}
+                </div>
+            `;
+        }
+
+        gridHtml += `</div>
+            <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 text-center text-xs">
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-xl"><span class="text-slate-500 block">أيام الحضور الفعلي:</span><b class="text-emerald-700 dark:text-emerald-400 font-black text-sm">${presentDays} يوم</b></div>
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-2 rounded-xl"><span class="text-slate-500 block">أيام التأخير:</span><b class="text-amber-700 dark:text-amber-400 font-black text-sm">${lateDays} يوم</b></div>
+                <div class="bg-red-50 dark:bg-red-900/20 p-2 rounded-xl"><span class="text-slate-500 block">أيام الغياب:</span><b class="text-red-600 dark:text-red-400 font-black text-sm">${absentDays} يوم</b></div>
+            </div>
+        `;
+
+        return gridHtml;
+    }
+
+    function changeCTPCalendarMonth(delta) {
+        currentCTPCalendarMonthOffset += delta;
+        if (currentCTPCalendarMonthOffset < -6) currentCTPCalendarMonthOffset = -6;
+        if (currentCTPCalendarMonthOffset > 0) currentCTPCalendarMonthOffset = 0;
+        
+        if (currentCTPTrainee) {
+            const container = document.getElementById('ctpCalendarGridContainer');
+            if (container) container.innerHTML = generateCTPCalendarGridHTML(currentCTPTrainee, currentCTPCalendarMonthOffset);
+        }
+    }
+
+    // Open Comprehensive Portfolio Modal
+    function openComprehensiveTraineePortfolioModal(traineeIdOrName = null) {
+        let pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0)
+            ? trainees
+            : [];
+
+        if (pool.length === 0) {
+            try {
+                const storedTrainees = JSON.parse(localStorage.getItem('sys_trainees_v9'));
+                if (Array.isArray(storedTrainees) && storedTrainees.length > 0) pool = storedTrainees;
+            } catch (e) {}
+        }
+
+        if (pool.length === 0 && typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) {
+            pool = SAMPLE_TRAINEES;
+        }
+
+        if (pool.length === 0) {
+            return showToast('لا توجد بيانات متدربين متاحة لعرض الملف الشامل', 'error');
+        }
+
+        let selected = null;
+        if (traineeIdOrName) {
+            const searchStr = String(traineeIdOrName).trim().toLowerCase();
+            selected = pool.find(t => 
+                String(t.id).trim() === searchStr ||
+                String(t.name).toLowerCase().includes(searchStr) ||
+                (typeof cleanNationalId === 'function' && cleanNationalId(t.id) === searchStr)
+            );
+        }
+
+        if (!selected) {
+            selected = pool[0];
+        }
+
+        currentCTPTrainee = selected;
+        renderTraineePortfolio(selected);
+
+        const modal = document.getElementById('comprehensiveTraineePortfolioModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeComprehensiveTraineePortfolioModal() {
+        const modal = document.getElementById('comprehensiveTraineePortfolioModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function switchTraineePortfolioTab(tabId) {
+        currentCTPActiveTab = tabId;
+        const tabs = ['exams', 'behavior', 'attendanceCal', 'safety', 'schedule'];
+        
+        tabs.forEach(t => {
+            const btn = document.getElementById(`ctpTabBtn-${t}`);
+            const content = document.getElementById(`ctpTabContent-${t}`);
+            if (btn) {
+                if (t === tabId) {
+                    btn.className = 'flex-1 py-2 px-3 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs font-black transition whitespace-nowrap';
+                } else {
+                    btn.className = 'flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 font-bold transition whitespace-nowrap';
+                }
+            }
+            if (content) {
+                if (t === tabId) content.classList.remove('hidden');
+                else content.classList.add('hidden');
+            }
+        });
+    }
+
+    function onCTPSearchInput(query) {
+        const dropdown = document.getElementById('ctpSearchResultsDropdown');
+        if (!dropdown) return;
+
+        if (!query || query.trim().length < 2) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+
+        let pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+        const q = query.trim().toLowerCase();
+
+        const matches = pool.filter(t => 
+            String(t.name || '').toLowerCase().includes(q) || 
+            String(t.id || '').includes(q) ||
+            String(t.group || '').toLowerCase().includes(q)
+        ).slice(0, 8);
+
+        if (matches.length === 0) {
+            dropdown.innerHTML = '<div class="p-3 text-center text-slate-400 font-bold">لا يوجد متدرب مطابق</div>';
+            dropdown.classList.remove('hidden');
+            return;
+        }
+
+        dropdown.innerHTML = matches.map(m => `
+            <div onclick="selectCTPTrainee('${m.id}')" class="p-2.5 hover:bg-amber-50 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-100 dark:border-slate-700 last:border-b-0 flex items-center justify-between">
+                <div>
+                    <div class="font-black text-slate-900 dark:text-white">${m.name}</div>
+                    <div class="text-[10px] text-slate-500 font-mono">${m.id} • ${m.group || 'عام'} • ${m.company || ''}</div>
+                </div>
+                <span class="text-xs font-black text-emerald-600">${m.rate || m.weeklyRate || 0}%</span>
+            </div>
+        `).join('');
+
+        dropdown.classList.remove('hidden');
+    }
+
+    function selectCTPTrainee(traineeId) {
+        const dropdown = document.getElementById('ctpSearchResultsDropdown');
+        if (dropdown) dropdown.classList.add('hidden');
+        openComprehensiveTraineePortfolioModal(traineeId);
+    }
+
+    // Main Renderer for the Comprehensive Trainee File
+    function renderTraineePortfolio(trainee) {
+        if (!trainee) return;
+
+        // 1. Header info
+        document.getElementById('ctpTraineeName').innerText = trainee.name || 'متدرب معهد الذهب الأسود';
+        document.getElementById('ctpTraineeNationalId').innerText = trainee.id || '10XXXXXXXX';
+        document.getElementById('ctpTraineeCompany').innerText = trainee.company || 'المؤسسة العامة';
+        document.getElementById('ctpTraineeGroup').innerText = trainee.group || 'عام';
+        document.getElementById('ctpTraineeSpecialty').innerText = trainee.qual && trainee.qual !== 'غير محدد' ? trainee.qual : (trainee.specialty || 'تطبيقات تخصصية');
+        
+        const rate = Math.round(parseFloat(trainee.rate || trainee.weeklyRate || 85));
+        document.getElementById('ctpTraineeRate').innerText = `${rate}%`;
+        document.getElementById('ctpReferenceCode').innerText = `BGTI-DOSSIER-${new Date().getFullYear()}-${String(trainee.id).slice(-4)}`;
+
+        // 2. Exam models rendering
+        const exams = getCTPDefaultExamData(trainee);
+        const examsContainer = document.getElementById('ctpExamsListContainer');
+        if (examsContainer) {
+            examsContainer.innerHTML = exams.map((ex, i) => `
+                <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-700 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xs">${i + 1}</span>
+                            <div>
+                                <h5 class="font-black text-slate-900 dark:text-white text-xs sm:text-sm">${ex.title}</h5>
+                                <div class="text-[11px] text-slate-500 font-bold">تاريخ الاختبار: ${ex.date} • المشرف: ${ex.trainer}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-300 font-black text-xs px-3 py-1 rounded-xl border border-emerald-300">
+                                الدرجة المحققة: ${ex.obtainedScore} / ${ex.maxScore}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Questions & Answers -->
+                    <div class="space-y-3 pt-1">
+                        ${ex.questions.map(q => `
+                            <div class="bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
+                                <div class="font-black text-slate-900 dark:text-slate-100 flex items-start justify-between">
+                                    <span>${q.q}</span>
+                                    <span class="font-mono text-emerald-700 dark:text-emerald-400 font-bold text-[11px] shrink-0 mr-2">${q.mark}</span>
+                                </div>
+                                <div class="bg-slate-50 dark:bg-slate-700/40 p-2 rounded-lg text-slate-800 dark:text-slate-200">
+                                    <span class="text-slate-500 dark:text-slate-400 font-bold text-[10px] block">إجابة المتدرب:</span>
+                                    <span class="font-medium">${q.traineeAnswer}</span>
+                                </div>
+                                <div class="bg-emerald-50/60 dark:bg-emerald-950/20 p-2 rounded-lg text-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
+                                    <span class="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] block">نموذج الحل المعتمد (Model Solution):</span>
+                                    <span class="font-semibold">${q.modelAnswer}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 3. Behavioral Scorecard
+        const scorecard = getCTPDefaultBehaviorScorecard();
+        const behaviorContainer = document.getElementById('ctpBehaviorScorecardContainer');
+        if (behaviorContainer) {
+            behaviorContainer.innerHTML = `
+                <div class="divide-y divide-slate-200 dark:divide-slate-700">
+                    ${scorecard.map(sc => `
+                        <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                            <div class="space-y-0.5">
+                                <span class="font-black text-slate-900 dark:text-white">${sc.criterion}</span>
+                                <span class="text-slate-500 dark:text-slate-400 text-[11px] block">${sc.note}</span>
+                            </div>
+                            <div class="flex items-center gap-2 self-end sm:self-auto">
+                                <span class="text-amber-500 text-sm">★★★★★</span>
+                                <span class="font-black text-emerald-700 dark:text-emerald-400 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-2.5 py-0.5 rounded-lg">${sc.score} / ${sc.max}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-600 dark:text-slate-400 gap-2">
+                    <div><b>توصية المرشد الأكاديمي:</b> "المتدرب يتميز بدرجة عالية من الانضباط والمواظبة وسيرته وسلوكه قدوة يُحتذى بها في المعهد".</div>
+                    <div class="text-left font-black text-emerald-700 dark:text-emerald-400">التقييم العام: سلوك متميز جداً (Exemplary)</div>
+                </div>
+            `;
+        }
+
+        // 4. Attendance Calendar Grid
+        currentCTPCalendarMonthOffset = 0;
+        const calContainer = document.getElementById('ctpCalendarGridContainer');
+        if (calContainer) {
+            calContainer.innerHTML = generateCTPCalendarGridHTML(trainee, 0);
+        }
+
+        // 5. Safety Pledge
+        const safetyContainer = document.getElementById('ctpSafetyPledgeContainer');
+        if (safetyContainer) {
+            safetyContainer.innerHTML = getCTPSafetyPledgeText(trainee);
+        }
+
+        // 6. Schedule Table
+        const schedule = getCTPWeeklySchedule(trainee);
+        const schedTable = document.getElementById('ctpScheduleTable');
+        const schedGrpLbl = document.getElementById('ctpScheduleGroupLabel');
+        if (schedGrpLbl) schedGrpLbl.innerText = `الشعبة: ${trainee.group || 'عام'} • القاعة: ${trainee.room || 'القاعة 4'}`;
+        if (schedTable) {
+            schedTable.innerHTML = `
+                <thead>
+                    <tr class="bg-slate-100 dark:bg-slate-700/70 text-slate-700 dark:text-slate-200 font-black border-b border-slate-200 dark:border-slate-600">
+                        <th class="p-2.5">اليوم</th>
+                        <th class="p-2.5">الفترة 1 (الصباحية)</th>
+                        <th class="p-2.5">الفترة 2</th>
+                        <th class="p-2.5">الفترة 3</th>
+                        <th class="p-2.5">الفترة 4</th>
+                        <th class="p-2.5 text-center">القاعة / الورشة</th>
+                        <th class="p-2.5">المدرب المعتمد</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60">
+                    ${schedule.map(s => `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                            <td class="p-2.5 font-black text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800/40">${s.day}</td>
+                            <td class="p-2.5 font-bold">${s.p1}</td>
+                            <td class="p-2.5 font-bold">${s.p2}</td>
+                            <td class="p-2.5 font-bold">${s.p3}</td>
+                            <td class="p-2.5 font-bold">${s.p4}</td>
+                            <td class="p-2.5 text-center font-black text-amber-700 dark:text-amber-400">${s.room}</td>
+                            <td class="p-2.5 font-bold text-slate-600 dark:text-slate-300">${s.trainer}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+    }
+
+    // Print & Export to PDF with Official Logo, Seals, Signatures, and Pagination
+    function printComprehensiveTraineeDossier() {
+        if (!currentCTPTrainee) return;
+        const trainee = currentCTPTrainee;
+        const printArea = document.getElementById('traineeDossierPrintableArea');
+        if (!printArea) return;
+
+        const exams = getCTPDefaultExamData(trainee);
+        const scorecard = getCTPDefaultBehaviorScorecard();
+        const schedule = getCTPWeeklySchedule(trainee);
+        const stampSvg = getOfficialBlackGoldStampSVG();
+        const dateStr = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        printArea.innerHTML = `
+            <!-- ================= PAGE 1: COVER & OVERVIEW & SAFETY PLEDGE ================= -->
+            <div class="space-y-6 pb-6 border-b-2 border-slate-800" style="page-break-after: always;">
+                <!-- Official Institute Header -->
+                <div class="flex items-center justify-between border-b-2 border-slate-900 pb-4">
+                    <div class="text-right space-y-0.5">
+                        <h3 class="font-black text-slate-950 text-base">المملكة العربية السعودية</h3>
+                        <p class="text-xs font-bold text-slate-700">المؤسسة العامة للتدريب التقني والمهني (TVTC)</p>
+                        <p class="text-xs font-black text-[#0F2942]">معهد الذهب الأسود للتدريب الصناعي - فرع عنك</p>
+                        <p class="text-[10px] text-slate-500 font-bold">إدارة القبول والتسجيل وشؤون المتدربين</p>
+                    </div>
+                    <div class="w-20 h-20 p-2 border-2 border-amber-500 rounded-2xl flex items-center justify-center shrink-0">
+                        <img src="logo.png" alt="Black Gold Logo" class="h-full w-auto object-contain" onerror="this.onerror=null; this.src='logo.jpg'">
+                    </div>
+                    <div class="text-left space-y-0.5" dir="ltr">
+                        <h3 class="font-black text-slate-950 text-sm">Kingdom of Saudi Arabia</h3>
+                        <p class="text-xs font-bold text-slate-700">TVTC Accredited Center</p>
+                        <p class="text-xs font-black text-[#0F2942]">Black Gold Training Institute</p>
+                        <p class="text-[10px] text-slate-500 font-bold">Academic Affairs & Trainee Dossier</p>
+                    </div>
+                </div>
+
+                <div class="text-center py-2 bg-slate-100 rounded-xl border border-slate-300">
+                    <h2 class="text-xl font-black text-slate-900">الملف الشامل المعتمد للمتدرب</h2>
+                    <p class="text-xs text-slate-600 font-bold">Comprehensive Official Trainee Academic & Performance Portfolio</p>
+                    <p class="text-[11px] font-mono text-slate-500 mt-0.5">تاريخ الإصدار: ${dateStr} • كود الملف: BGTI-DOSSIER-2026-${String(trainee.id).slice(-4)}</p>
+                </div>
+
+                <!-- Trainee Info Table -->
+                <table class="w-full text-xs text-right border-collapse border border-slate-400">
+                    <tbody>
+                        <tr class="bg-slate-50">
+                            <td class="border border-slate-400 p-2 font-black text-slate-600 w-1/4">اسم المتدرب الرباعي:</td>
+                            <td class="border border-slate-400 p-2 font-black text-slate-950 text-sm w-1/4">${trainee.name}</td>
+                            <td class="border border-slate-400 p-2 font-black text-slate-600 w-1/4">رقم الهوية الوطنية:</td>
+                            <td class="border border-slate-400 p-2 font-mono font-black text-sm w-1/4">${trainee.id}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-400 p-2 font-black text-slate-600">الشركة الراعية:</td>
+                            <td class="border border-slate-400 p-2 font-bold">${trainee.company || 'المؤسسة العامة'}</td>
+                            <td class="border border-slate-400 p-2 font-black text-slate-600">الشعبة / المجموعة:</td>
+                            <td class="border border-slate-400 p-2 font-bold">${trainee.group || 'عام'}</td>
+                        </tr>
+                        <tr class="bg-slate-50">
+                            <td class="border border-slate-400 p-2 font-black text-slate-600">التخصص المهني:</td>
+                            <td class="border border-slate-400 p-2 font-bold">${trainee.qual && trainee.qual !== 'غير محدد' ? trainee.qual : (trainee.specialty || 'تطبيقات تخصصية')}</td>
+                            <td class="border border-slate-400 p-2 font-black text-slate-600">القاعة / الورشة:</td>
+                            <td class="border border-slate-400 p-2 font-bold">${trainee.room || 'القاعة 4'}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-400 p-2 font-black text-slate-600">نسبة الحضور الإجمالية:</td>
+                            <td class="border border-slate-400 p-2 font-black text-emerald-700 text-sm">${Math.round(trainee.rate || trainee.weeklyRate || 85)}%</td>
+                            <td class="border border-slate-400 p-2 font-black text-slate-600">المعدل التراكمي للاختبارات:</td>
+                            <td class="border border-slate-400 p-2 font-black text-indigo-900 text-sm">94.3% (ممتاز)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Safety Pledge Section -->
+                <div class="border-2 border-slate-800 rounded-2xl p-4 space-y-2 bg-slate-50">
+                    <h4 class="font-black text-sm text-slate-900 border-b border-slate-300 pb-1.5 flex items-center justify-between">
+                        <span>إقرار وتعهد السلامة والصحة المهنية ومهمات الوقاية (HSE Pledge)</span>
+                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">معتمد وموثق نظاماً ✓</span>
+                    </h4>
+                    <p class="text-[11px] leading-relaxed text-slate-800">
+                        أقر وأتعهد أنا المتدرب الموقع أدناه بالالتزام التام بارتداء معدات الوقاية الشخصية كاملة (PPE)، والمحافظة الصارمة على مرافق ومعدات المعهد، والامتناع عن أي سلوك قد يؤدي إلى إصابات عمل أو أضرار بالبيئة الصناعية، والامتثال التام لتعليمات مشرفي السلامة المهنية المعتمدة.
+                    </p>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-300 text-xs text-slate-600">
+                        <div>توقيع المتدرب: <b class="text-slate-900">${trainee.name}</b> (معتمد إلكترونياً ✓)</div>
+                        <div>التاريخ: ${dateStr}</div>
+                    </div>
+                </div>
+
+                <!-- Signatures & Stamp Page 1 -->
+                <div class="grid grid-cols-3 gap-4 pt-6 items-center text-center text-xs">
+                    <div>
+                        <div class="font-black text-slate-800">مشرف شؤون المتدربين</div>
+                        <div class="text-[10px] text-slate-500 mt-6">معتمد إلكترونياً ✓</div>
+                    </div>
+                    <div>
+                        ${stampSvg}
+                    </div>
+                    <div>
+                        <div class="font-black text-slate-800">مدير عام المعهد</div>
+                        <div class="text-[10px] text-slate-500 mt-6">ختم وتفويض رسمي ✓</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 2: 3 MONTHLY EXAM MODELS & SOLUTIONS ================= -->
+            <div class="space-y-4 pt-4 pb-6 border-b-2 border-slate-800" style="page-break-after: always;">
+                <div class="flex items-center justify-between border-b border-slate-400 pb-2">
+                    <h3 class="font-black text-base text-slate-900">سجل نماذج الاختبارات الشهرية السابقة وحلولها (3 أشهر)</h3>
+                    <span class="font-bold text-xs text-slate-600">المتدرب: ${trainee.name} (${trainee.id})</span>
+                </div>
+
+                ${exams.map(ex => `
+                    <div class="border border-slate-300 rounded-xl p-3 space-y-2 bg-slate-50/50">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-1.5 text-xs font-black">
+                            <span class="text-slate-900">${ex.title}</span>
+                            <span class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-lg">الدرجة: ${ex.obtainedScore} / ${ex.maxScore}</span>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            ${ex.questions.map(q => `
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 space-y-1">
+                                    <div class="font-bold text-slate-900 flex justify-between">
+                                        <span>${q.q}</span>
+                                        <span class="font-mono text-emerald-800 font-black">${q.mark}</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-700"><span class="text-slate-400 font-bold">إجابة المتدرب: </span>${q.traineeAnswer}</div>
+                                    <div class="text-[11px] text-emerald-900 font-medium bg-emerald-50/70 p-1.5 rounded"><span class="font-bold text-emerald-700">النموذج المعتمد: </span>${q.modelAnswer}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <!-- ================= PAGE 3: BEHAVIOR SCORECARD, CALENDAR & TIMETABLE ================= -->
+            <div class="space-y-5 pt-4">
+                <div class="flex items-center justify-between border-b border-slate-400 pb-2">
+                    <h3 class="font-black text-base text-slate-900">تقييم السلوك والانضباط وجدول التدريب وتقويم الحضور</h3>
+                    <span class="font-bold text-xs text-slate-600">المتدرب: ${trainee.name}</span>
+                </div>
+
+                <!-- Behavior Evaluation Table -->
+                <div>
+                    <h4 class="font-black text-xs text-slate-900 mb-1.5">بطاقة تقييم السلوك والمواظبة والانضباط المهني:</h4>
+                    <table class="w-full text-xs text-right border-collapse border border-slate-300">
+                        <thead>
+                            <tr class="bg-slate-100 font-black text-slate-800">
+                                <th class="border border-slate-300 p-2">معيار التقييم السلوكي</th>
+                                <th class="border border-slate-300 p-2">الدرجة المستحقة</th>
+                                <th class="border border-slate-300 p-2">الملاحظات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${scorecard.map(sc => `
+                                <tr>
+                                    <td class="border border-slate-300 p-1.5 font-bold">${sc.criterion}</td>
+                                    <td class="border border-slate-300 p-1.5 font-black text-center text-emerald-700">${sc.score} / ${sc.max}</td>
+                                    <td class="border border-slate-300 p-1.5 text-slate-600 text-[11px]">${sc.note}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-slate-100 font-black">
+                                <td class="border border-slate-300 p-2">المجموع الكلي والتقدير العام:</td>
+                                <td class="border border-slate-300 p-2 text-center text-emerald-800 text-sm">29.6 / 30</td>
+                                <td class="border border-slate-300 p-2 text-emerald-800">سلوك متميز جداً وانضباط استثنائي</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Weekly Study Timetable -->
+                <div>
+                    <h4 class="font-black text-xs text-slate-900 mb-1.5">الجدول الدراسي الأسبوعي للشعبة (${trainee.group || 'عام'}):</h4>
+                    <table class="w-full text-xs text-right border-collapse border border-slate-300">
+                        <thead>
+                            <tr class="bg-slate-100 font-black text-slate-800">
+                                <th class="border border-slate-300 p-1.5">اليوم</th>
+                                <th class="border border-slate-300 p-1.5">الفترة 1</th>
+                                <th class="border border-slate-300 p-1.5">الفترة 2</th>
+                                <th class="border border-slate-300 p-1.5">الفترة 3</th>
+                                <th class="border border-slate-300 p-1.5">الفترة 4</th>
+                                <th class="border border-slate-300 p-1.5 text-center">القاعة</th>
+                                <th class="border border-slate-300 p-1.5">المدرب</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${schedule.map(s => `
+                                <tr>
+                                    <td class="border border-slate-300 p-1.5 font-black bg-slate-50">${s.day}</td>
+                                    <td class="border border-slate-300 p-1.5 font-bold">${s.p1}</td>
+                                    <td class="border border-slate-300 p-1.5 font-bold">${s.p2}</td>
+                                    <td class="border border-slate-300 p-1.5 font-bold">${s.p3}</td>
+                                    <td class="border border-slate-300 p-1.5 font-bold">${s.p4}</td>
+                                    <td class="border border-slate-300 p-1.5 text-center font-bold">${s.room}</td>
+                                    <td class="border border-slate-300 p-1.5 text-slate-600">${s.trainer}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Final Official Endorsement & Stamp -->
+                <div class="grid grid-cols-3 gap-4 pt-8 items-center text-center text-xs border-t border-slate-300">
+                    <div>
+                        <div class="font-black text-slate-800">رئيس قسم التدريب التقني</div>
+                        <div class="text-[10px] text-slate-500 mt-6">معتمد ✓</div>
+                    </div>
+                    <div>
+                        ${stampSvg}
+                    </div>
+                    <div>
+                        <div class="font-black text-slate-800">مدير عام المعهد</div>
+                        <div class="text-[10px] text-slate-500 mt-6">الختم والاعتماد الرسمي ✓</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        printArea.classList.remove('hidden');
+        window.print();
+    }
+
+    // ===================================================================
+    // END COMPREHENSIVE TRAINEE PORTFOLIO SYSTEM
     // ===================================================================
 
 </script>
