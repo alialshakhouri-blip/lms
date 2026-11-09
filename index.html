@@ -88779,8 +88779,8 @@ function buildDemoExecutiveReport(params) {
             return `
                 <div class="flex flex-col items-center justify-center">
                     <div class="flex items-center justify-center gap-2">
-                        <img src="assets/director_sig.jpg" alt="توقيع المدير علي الشاخوري" class="h-12 w-auto object-contain filter contrast-125 dark:invert">
-                        <img src="assets/bgti_stamp.png" alt="ختم المعهد الرسمي" class="h-12 w-auto object-contain">
+                        <img src="assets/director_sig.png" alt="توقيع المدير علي الشاخوري" class="h-12 w-auto object-contain filter contrast-125 dark:invert" style="mix-blend-mode: multiply;">
+                        <img src="assets/bgti_stamp.png" alt="ختم المعهد الرسمي" class="h-12 w-auto object-contain" style="mix-blend-mode: multiply;">
                     </div>
                     <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 mt-0.5">علي الشاخوري</span>
                     <span class="text-[9px] text-slate-500">مدير عام المعهد</span>
@@ -88790,7 +88790,7 @@ function buildDemoExecutiveReport(params) {
         if (role === 'supervisor') {
             return `
                 <div class="flex flex-col items-center justify-center">
-                    <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-12 w-auto object-contain filter contrast-125 dark:invert">
+                    <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-12 w-auto object-contain filter contrast-125 dark:invert" style="mix-blend-mode: multiply;">
                     <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 mt-0.5">علي آل عباس</span>
                     <span class="text-[9px] text-slate-500">مسؤول شؤون المتدربين</span>
                 </div>
@@ -88799,7 +88799,7 @@ function buildDemoExecutiveReport(params) {
         if (role === 'admission') {
             return `
                 <div class="flex flex-col items-center justify-center">
-                    <img src="assets/mohammed_abdrab_sig.png" alt="توقيع محمد عبدرب النبي" class="h-13 w-auto object-contain filter contrast-125 dark:invert">
+                    <img src="assets/mohammed_abdrab_sig.png" alt="توقيع محمد عبدرب النبي" class="h-13 w-auto object-contain filter contrast-125 dark:invert" style="mix-blend-mode: multiply;">
                     <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 mt-0.5">محمد عبدرب النبي</span>
                     <span class="text-[9px] text-slate-500">مسؤول القبول والتسجيل</span>
                 </div>
@@ -88822,7 +88822,7 @@ function buildDemoExecutiveReport(params) {
                     <p class="text-[11px] text-slate-600 dark:text-slate-300 font-bold mt-1">وثيقة رسمية ملزمة لجميع متدربي معهد الذهب الأسود العالي للتدريب (فرع عنك)</p>
                 </div>
 
-                <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-300 dark:border-slate-600 font-bold space-y-1">
+                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-black font-bold space-y-1">
                     <p>أقر أنا المتدرب: <b class="text-black dark:text-white text-sm">${name}</b></p>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
                         <div>رقم الهوية: <b>${id}</b></div>
@@ -89495,14 +89495,14 @@ function buildDemoExecutiveReport(params) {
                         <div class="font-black text-[10.5px] uppercase tracking-wide text-black">${ex.isEnglish ? 'Technical and Vocational Training Corporation • Black Gold Training Institute' : 'المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود العالي'}</div>
                         <div class="font-black text-xs text-black mt-0.5">${ex.title}</div>
                     </div>
-                    <div class="border-2 border-black px-2.5 py-0.5 text-center bg-slate-50 font-mono font-black text-xs">
+                    <div class="border-2 border-black px-2.5 py-0.5 text-center bg-white font-mono font-black text-xs">
                         <span class="text-[9px] block text-slate-500">${ex.isEnglish ? 'Score' : 'الدرجة'}</span>
                         ${ex.obtainedScore} / ${ex.maxScore}
                     </div>
                 </div>
 
                 <!-- Trainee Bar -->
-                <div class="grid grid-cols-4 gap-1 text-[10px] border-b border-black pb-1 bg-slate-50 p-1.5">
+                <div class="grid grid-cols-4 gap-1 text-[10px] border-b border-black pb-1 bg-white p-1.5">
                     <div><span class="text-slate-500 block text-[9px] font-bold">${ex.isEnglish ? 'Trainee Name' : 'اسم المتدرب'}</span><b>${ex.traineeName}</b></div>
                     <div><span class="text-slate-500 block text-[9px] font-bold">${ex.isEnglish ? 'National ID' : 'رقم الهوية'}</span><b>${ex.traineeId}</b></div>
                     <div><span class="text-slate-500 block text-[9px] font-bold">${ex.isEnglish ? 'Exam Date' : 'تاريخ الاختبار'}</span><b>${ex.date}</b></div>
@@ -89511,7 +89511,7 @@ function buildDemoExecutiveReport(params) {
 
                 <!-- Section 1: True / False (6 Questions - 30 Marks) -->
                 <div class="space-y-0.5">
-                    <div class="text-[9.5px] bg-slate-100 px-2 py-0.5 border border-slate-300 font-black flex items-center justify-between">
+                    <div class="text-[9.5px] bg-white px-2 py-0.5 border border-black font-black flex items-center justify-between">
                         <span>${ex.isEnglish ? 'Part 1: True or False Specialty Questions (5 Marks Each)' : 'الجزء الأول: أسئلة الصواب والخطأ التخصصية (5 درجات لكل فقرة)'}</span>
                         <span class="font-mono text-[9px]">30 Marks</span>
                     </div>
@@ -89527,7 +89527,7 @@ function buildDemoExecutiveReport(params) {
 
                 <!-- Section 2: Multiple Choice (5 Questions - 70 Marks) -->
                 <div class="space-y-1 pt-0.5">
-                    <div class="text-[9.5px] bg-slate-100 px-2 py-0.5 border border-slate-300 font-black flex items-center justify-between">
+                    <div class="text-[9.5px] bg-white px-2 py-0.5 border border-black font-black flex items-center justify-between">
                         <span>${ex.isEnglish ? 'Part 2: Multiple Choice Specialty Questions (14 Marks Each)' : 'الجزء الثاني: أسئلة الاختيار من متعدد التخصصية (14 درجة لكل فقرة)'}</span>
                         <span class="font-mono text-[9px]">70 Marks</span>
                     </div>
@@ -89537,7 +89537,7 @@ function buildDemoExecutiveReport(params) {
                                 <div class="font-bold mb-0.5">${q.q}</div>
                                 <div class="grid grid-cols-2 gap-1 text-[8.5px]">
                                     ${q.options.map(opt => `
-                                        <div class="p-0.5 px-1 rounded border ${opt.startsWith(q.selected) ? 'border-black font-black bg-slate-100' : 'border-slate-200 text-slate-700'}">
+                                        <div class="p-0.5 px-1 rounded border ${opt.startsWith(q.selected) ? 'border-black font-black bg-white' : 'border-slate-200 text-slate-700'}">
                                             ${opt} ${opt.startsWith(q.selected) ? '✔' : ''}
                                         </div>
                                     `).join('')}
@@ -89607,7 +89607,7 @@ function buildDemoExecutiveReport(params) {
                     </div>
 
                     <div class="space-y-3">
-                        <div class="font-black text-xs bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded border border-slate-300 dark:border-slate-600">أولاً: البيانات الشخصية للمتدرب</div>
+                        <div class="font-black text-xs bg-white dark:bg-slate-800 p-1.5 rounded border border-black">أولاً: البيانات الشخصية للمتدرب</div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                             <div><span class="text-slate-500 block text-[10px]">اسم المتدرب الرباعي:</span><b class="text-black dark:text-white">${trainee.name}</b></div>
                             <div><span class="text-slate-500 block text-[10px]">الاسم باللغة الإنجليزية:</span><b class="text-black dark:text-white font-mono uppercase">${transliterateArabicName(trainee.name)}</b></div>
@@ -89620,7 +89620,7 @@ function buildDemoExecutiveReport(params) {
                             <div><span class="text-slate-500 block text-[10px]">البريد الإلكتروني:</span><span class="font-mono">${adm.email}</span></div>
                         </div>
 
-                        <div class="font-black text-xs bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded border border-slate-300 dark:border-slate-600">ثانياً: العنوان الوطني والمعلومات الصحية</div>
+                        <div class="font-black text-xs bg-white dark:bg-slate-800 p-1.5 rounded border border-black">ثانياً: العنوان الوطني والمعلومات الصحية</div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                             <div><span class="text-slate-500 block text-[10px]">رقم المبنى:</span><b class="font-mono">${adm.bldNum}</b></div>
                             <div><span class="text-slate-500 block text-[10px]">الحي:</span><b>${adm.district}</b></div>
@@ -89630,14 +89630,14 @@ function buildDemoExecutiveReport(params) {
                             <div class="col-span-3"><span class="text-slate-500 block text-[10px]">المعلومات الصحية (أمراض مزمنة أو عوائق):</span><b class="text-black dark:text-white">سليم ولله الحمد (لا يعاني من أي أمراض مزمنة أو عوائق)</b></div>
                         </div>
 
-                        <div class="font-black text-xs bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded border border-slate-300 dark:border-slate-600">ثالثاً: جهات اتصال حالات الطوارئ</div>
+                        <div class="font-black text-xs bg-white dark:bg-slate-800 p-1.5 rounded border border-black">ثالثاً: جهات اتصال حالات الطوارئ</div>
                         <div class="grid grid-cols-3 gap-2">
                             <div><span class="text-slate-500 block text-[10px]">الاسم:</span><b>${adm.emergencyContact.name}</b></div>
                             <div><span class="text-slate-500 block text-[10px]">رقم التواصل:</span><b class="font-mono">${adm.emergencyContact.phone}</b></div>
                             <div><span class="text-slate-500 block text-[10px]">صلة القرابة:</span><b>${adm.emergencyContact.relation}</b></div>
                         </div>
 
-                        <div class="border border-black p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40">
+                        <div class="border border-black p-3 rounded-xl bg-white dark:bg-slate-700/40">
                             <span class="font-black text-xs block mb-1">يعبأ من قبل إدارة المعهد (الوثائق المستلمة والاعتماد):</span>
                             <div class="grid grid-cols-4 sm:grid-cols-7 gap-1 text-[11px] text-center font-bold">
                                 <div class="p-1 border border-black bg-white dark:bg-slate-800">الهوية الوطنية<br><span class="text-black dark:text-white font-black">☑ إبراز واطلاع</span></div>
@@ -89682,7 +89682,7 @@ function buildDemoExecutiveReport(params) {
                     <tbody class="divide-y divide-black bg-white dark:bg-slate-800">
                         ${schedule.map(row => `
                             <tr>
-                                <td class="p-2 font-black border border-black bg-slate-100 dark:bg-slate-700/60">${row.day}</td>
+                                <td class="p-2 font-black border border-black bg-white">${row.day}</td>
                                 <td class="p-2 border border-black font-bold text-black dark:text-white">${row.period1.course}</td>
                                 <td class="p-2 border border-black text-slate-700 dark:text-slate-300">${row.period1.trainer} • ${row.period1.room}</td>
                                 <td class="p-2 border border-black font-bold text-black dark:text-white">${row.period2.course}</td>
@@ -89725,7 +89725,7 @@ function buildDemoExecutiveReport(params) {
                         `).join('')}
                     </tbody>
                     <tfoot>
-                        <tr class="bg-slate-100 dark:bg-slate-700/80 font-black">
+                        <tr class="bg-white font-black">
                             <td colspan="3" class="p-2 border border-black text-right">المعدل التراكمي العام:</td>
                             <td class="p-2 border border-black text-center font-mono font-black text-sm">${monthlyTranscript.gpa}%</td>
                             <td colspan="3" class="p-2 border border-black text-center font-black">تاريخ الاعتماد: 31 أكتوبر 2026 م • معتمد رسمياً</td>
@@ -89760,11 +89760,8 @@ function buildDemoExecutiveReport(params) {
                                 <span class="text-[9px] font-bold block">علي آل عباس</span>
                             </div>
                             <div class="text-center">
-                                <span class="text-[9px] text-slate-500 block font-bold mb-0.5">اعتماد المدير والختم</span>
-                                <div class="flex items-center justify-center gap-1">
-                                    <img src="assets/director_sig.jpg" alt="توقيع المدير" class="h-10 w-auto object-contain">
-                                    <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-11 w-auto object-contain">
-                                </div>
+                                <span class="text-[9px] text-slate-500 block font-bold mb-0.5">اعتماد المدير</span>
+                                <img src="assets/director_sig.png" alt="توقيع المدير" class="h-10 w-auto object-contain mx-auto" style="mix-blend-mode: multiply;">
                                 <span class="text-[9px] font-bold block">علي الشاخوري</span>
                             </div>
                         </div>
@@ -89883,7 +89880,7 @@ function buildDemoExecutiveReport(params) {
                         <p class="text-xs text-slate-700 font-bold mt-1">وثيقة ملزمة للمتدرب تحفظ بملفه الرسمي بالمعهد</p>
                     </div>
 
-                    <div class="bg-slate-100 p-3 rounded-xl border border-black font-bold space-y-1">
+                    <div class="bg-white p-3 rounded-xl border border-black font-bold space-y-1">
                         <p class="text-sm">أقر أنا المتدرب: <b class="text-black font-black">${trainee.name}</b></p>
                         <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
                             <div>رقم الهوية الوطنية: <b>${trainee.id}</b></div>
@@ -89904,12 +89901,12 @@ function buildDemoExecutiveReport(params) {
                     </div>
 
                     <div class="pt-6 border-t-2 border-black grid grid-cols-2 gap-8 text-center">
-                        <div class="border border-black p-3 rounded-xl bg-slate-50 flex flex-col justify-center">
+                        <div class="border border-black p-3 rounded-xl bg-white flex flex-col justify-center">
                             <span class="block text-xs text-slate-600 font-bold mb-1">المقر بما فيه (بيانات المتدرب)</span>
                             <b class="text-sm text-black">${trainee.name}</b>
                             <span class="text-xs font-mono text-slate-700 mt-1">الهوية الوطنية: ${trainee.id} • معتمد بالنظام</span>
                         </div>
-                        <div class="border border-black p-3 rounded-xl bg-slate-50">
+                        <div class="border border-black p-3 rounded-xl bg-white">
                             <span class="block text-xs text-slate-600 font-bold mb-1">مسؤول شؤون المتدربين (توقيع)</span>
                             ${getOfficialSignatureHTML('supervisor')}
                         </div>
@@ -89961,7 +89958,7 @@ function buildDemoExecutiveReport(params) {
                             <div><span class="text-slate-500 block text-[10px]">صلة القرابة:</span><b>${adm.emergencyContact.relation}</b></div>
                         </div>
 
-                        <div class="border-2 border-black p-3 bg-slate-50">
+                        <div class="border-2 border-black p-3 bg-white">
                             <span class="font-black text-xs block mb-1">يعبأ من قبل إدارة المعهد (الوثائق الرسمية المستلمة والاطلاع):</span>
                             <div class="grid grid-cols-7 gap-1 text-[10px] text-center font-bold">
                                 <div class="p-1 border border-black bg-white">الهوية الوطنية<br><span class="font-black">☑ إبراز واطلاع</span></div>
@@ -90017,7 +90014,7 @@ function buildDemoExecutiveReport(params) {
                         <tbody class="divide-y divide-black font-medium">
                             ${schedule.map(row => `
                                 <tr>
-                                    <td class="p-3 font-black border border-black bg-slate-100">${row.day}</td>
+                                    <td class="p-3 font-black border border-black bg-white">${row.day}</td>
                                     <td class="p-3 border border-black font-bold text-black">${row.period1.course}</td>
                                     <td class="p-3 border border-black text-slate-700">${row.period1.trainer} • ${row.period1.room}</td>
                                     <td class="p-3 border border-black font-bold text-black">${row.period2.course}</td>
@@ -90027,7 +90024,7 @@ function buildDemoExecutiveReport(params) {
                         </tbody>
                     </table>
 
-                    <div class="bg-slate-50 border border-black p-3 rounded-xl space-y-1">
+                    <div class="bg-white border border-black p-3 rounded-xl space-y-1">
                         <span class="font-black text-xs block">تعليمات الحضور للجدول التدريبي:</span>
                         <p class="text-[11px] text-slate-700">• يبدأ التدريب في تمام الساعة 08:00 صباحاً ويلتزم المتدرب بالتواجد قبل الموعد بـ 10 دقائق.</p>
                         <p class="text-[11px] text-slate-700">• لا يسمح بدخول الورش التدريبية دون معدات الوقاية الشخصية المعتمدة.</p>
@@ -90035,11 +90032,11 @@ function buildDemoExecutiveReport(params) {
                     </div>
 
                     <div class="pt-6 border-t-2 border-black grid grid-cols-2 gap-8 text-center">
-                        <div class="border border-black p-3 rounded-xl bg-slate-50">
+                        <div class="border border-black p-3 rounded-xl bg-white">
                             <span class="block text-xs text-slate-600 font-bold mb-1">مسؤول شؤون المتدربين (توقيع)</span>
                             ${getOfficialSignatureHTML('supervisor')}
                         </div>
-                        <div class="border border-black p-3 rounded-xl bg-slate-50">
+                        <div class="border border-black p-3 rounded-xl bg-white">
                             <span class="block text-xs text-slate-600 font-bold mb-1">اعتماد مدير المعهد (توقيع وختم)</span>
                             ${getOfficialSignatureHTML('director')}
                         </div>
@@ -90057,7 +90054,7 @@ function buildDemoExecutiveReport(params) {
                             <h3 class="font-black text-sm text-black">كشف الدرجات الشهري المعتمد</h3>
                             <p class="text-[11px] text-slate-600 font-bold">تاريخ الإصدار: 31 أكتوبر 2026 م • الرصد مرتبط مباشرة بنسبة الحضور والمواظبة</p>
                         </div>
-                        <div class="border-2 border-black px-3 py-1 bg-slate-50 text-center">
+                        <div class="border-2 border-black px-3 py-1 bg-white text-center">
                             <span class="text-[10px] block font-bold">المعدل التراكمي العام</span>
                             <b class="text-base font-black font-mono">${monthlyTranscript.gpa}%</b>
                         </div>
@@ -90078,7 +90075,7 @@ function buildDemoExecutiveReport(params) {
                         <tbody class="divide-y divide-black font-medium">
                             ${monthlyTranscript.records.map(r => `
                                 <tr>
-                                    <td class="p-2.5 font-bold border border-black bg-slate-50">${r.month}</td>
+                                    <td class="p-2.5 font-bold border border-black bg-white">${r.month}</td>
                                     <td class="p-2.5 border border-black">${r.course1}</td>
                                     <td class="p-2.5 border border-black">${r.course2}</td>
                                     <td class="p-2.5 border border-black text-center font-mono font-black text-sm">${r.score} / 100</td>
@@ -90089,7 +90086,7 @@ function buildDemoExecutiveReport(params) {
                             `).join('')}
                         </tbody>
                         <tfoot>
-                            <tr class="bg-slate-100 font-black">
+                            <tr class="bg-white font-black">
                                 <td colspan="3" class="p-2.5 border border-black text-right">المعدل التراكمي العام:</td>
                                 <td class="p-2.5 border border-black text-center font-mono font-black text-base">${monthlyTranscript.gpa}%</td>
                                 <td colspan="3" class="p-2.5 border border-black text-center font-black">صدر رسمياً في: 31 أكتوبر 2026 م</td>
@@ -90098,11 +90095,11 @@ function buildDemoExecutiveReport(params) {
                     </table>
 
                     <div class="pt-6 border-t-2 border-black grid grid-cols-2 gap-8 text-center">
-                        <div class="border border-black p-3 rounded-xl bg-slate-50">
+                        <div class="border border-black p-3 rounded-xl bg-white">
                             <span class="block text-xs text-slate-600 font-bold mb-1">مسؤول شؤون المتدربين (توقيع)</span>
                             ${getOfficialSignatureHTML('supervisor')}
                         </div>
-                        <div class="border border-black p-3 rounded-xl bg-slate-50">
+                        <div class="border border-black p-3 rounded-xl bg-white">
                             <span class="block text-xs text-slate-600 font-bold mb-1">اعتماد مدير المعهد (توقيع وختم)</span>
                             ${getOfficialSignatureHTML('director')}
                         </div>
@@ -90123,7 +90120,7 @@ function buildDemoExecutiveReport(params) {
                     <div class="space-y-3">
                         ${warnings.map(w => `
                             <div class="border-2 border-black rounded-xl p-3 bg-white text-xs space-y-2">
-                                <div class="flex items-center justify-between border-b border-black pb-1.5 bg-slate-100 p-1.5 rounded">
+                                <div class="flex items-center justify-between border-b border-black pb-1.5 bg-white p-1.5 rounded">
                                     <span class="font-black text-black text-sm">🛑 ${w.type}</span>
                                     <div class="flex items-center gap-2">
                                         <span class="font-mono text-slate-700 font-bold text-xs">${w.date} م</span>
@@ -90136,18 +90133,15 @@ function buildDemoExecutiveReport(params) {
                                         <div><span class="text-slate-500 font-bold text-[11px]">سبب المخالفة: </span><span class="text-slate-800">${w.reason}</span></div>
                                         <div><span class="text-slate-500 font-bold text-[11px]">الإجراء والعقوبة المترتبة: </span><b class="text-black">${w.penalty}</b></div>
                                     </div>
-                                    <div class="border-r border-black pr-2 flex items-center justify-around bg-slate-50 rounded p-1">
+                                    <div class="border-r border-black pr-2 flex items-center justify-around bg-white rounded p-1">
                                         <div class="text-center">
                                             <span class="text-[9px] text-slate-600 block font-bold mb-0.5">شؤون المتدربين (توقيع)</span>
                                             <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-10 w-auto object-contain mx-auto">
                                             <span class="text-[9px] font-bold block text-black">علي آل عباس</span>
                                         </div>
                                         <div class="text-center">
-                                            <span class="text-[9px] text-slate-600 block font-bold mb-0.5">اعتماد المدير والختم</span>
-                                            <div class="flex items-center justify-center gap-1">
-                                                <img src="assets/director_sig.jpg" alt="توقيع المدير" class="h-10 w-auto object-contain">
-                                                <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-11 w-auto object-contain">
-                                            </div>
+                                            <span class="text-[9px] text-slate-600 block font-bold mb-0.5">اعتماد المدير</span>
+                                            <img src="assets/director_sig.png" alt="توقيع المدير" class="h-10 w-auto object-contain mx-auto" style="mix-blend-mode: multiply;">
                                             <span class="text-[9px] font-bold block text-black">علي الشاخوري</span>
                                         </div>
                                     </div>
@@ -90253,7 +90247,7 @@ function buildDemoExecutiveReport(params) {
                     </div>
                     <table class="w-full text-[10.5px] text-right border-collapse border border-black">
                         <thead>
-                            <tr class="bg-slate-100 font-black">
+                            <tr class="bg-white font-black">
                                 <th class="border border-black p-1">الشهر</th>
                                 <th class="border border-black p-1 text-center">أيام العمل</th>
                                 <th class="border border-black p-1 text-center">أيام الحضور</th>
@@ -90277,7 +90271,7 @@ function buildDemoExecutiveReport(params) {
                             `).join('')}
                         </tbody>
                         <tfoot>
-                            <tr class="bg-slate-100 font-black">
+                            <tr class="bg-white font-black">
                                 <td class="border border-black p-1">المعدل التراكمي:</td>
                                 <td colspan="4" class="border border-black p-1 text-center font-mono">سجل الحضور الشامل لسنة 2026 م (من شهر 1 إلى شهر 11)</td>
                                 <td class="border border-black p-1 text-center font-black">${Math.round(parseFloat(trainee.rate || trainee.weeklyRate || 85))}%</td>
@@ -90288,11 +90282,11 @@ function buildDemoExecutiveReport(params) {
                 </div>
 
                 <div class="pt-2 border-t-2 border-black grid grid-cols-2 gap-4 text-center">
-                    <div class="border border-black p-2 rounded-xl bg-slate-50">
+                    <div class="border border-black p-2 rounded-xl bg-white">
                         <span class="block text-[10px] text-slate-600 font-bold mb-0.5">مسؤول شؤون المتدربين (توقيع فقط)</span>
                         ${getOfficialSignatureHTML('supervisor')}
                     </div>
-                    <div class="border border-black p-2 rounded-xl bg-slate-50">
+                    <div class="border border-black p-2 rounded-xl bg-white">
                         <span class="block text-[10px] text-slate-600 font-bold mb-0.5">اعتماد مدير عام المعهد (توقيع وختم رسمي)</span>
                         ${getOfficialSignatureHTML('director')}
                     </div>
