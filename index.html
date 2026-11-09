@@ -6723,21 +6723,20 @@
 
                     <!-- Header -->
 
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-3">
 
                         <div class="flex items-center gap-3">
 
-                            <div class="w-12 h-12 rounded-2xl gold-gradient-bg flex items-center justify-center text-xl text-slate-950 font-black shadow-xs" id="tpAvatar">
-
-                                👤
-
+                            <div class="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shrink-0">
+                                <img src="assets/tvtc_logo.png" alt="TVTC" class="h-9 w-auto object-contain">
+                                <img src="assets/bgti_logo.png" alt="BGTI" class="h-9 w-auto object-contain">
                             </div>
 
                             <div>
 
                                 <div class="flex items-center gap-2 flex-wrap">
 
-                                    <h3 class="font-black text-slate-900 text-base" id="tpModalName">ملف المتدرب</h3>
+                                    <h3 class="font-black text-[#0F2942] text-base" id="tpModalName">ملف المتدرب</h3>
 
                                     <span id="tpStatusBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-800 border-emerald-300">حاضر</span>
 
@@ -7366,12 +7365,16 @@
 
             <!-- Tab 3: Study Schedule -->
             <div id="ctpTabContent-schedule" class="hidden space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">الجدول التدريبي الأسبوعي الثابت (المحاضرات ثابتة طوال الأسبوع)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">الفترة الأولى ثابتة طوال الأسبوع • الفترة الثانية ثابتة طوال الأسبوع (أحد - خميس)</p>
+                        <span class="text-[10px] text-slate-500 font-bold block">المملكة العربية السعودية • المؤسسة العامة للتدريب التقني والمهني</span>
+                        <h4 class="font-black text-sm text-[#0F2942]">الجدول التدريبي الأسبوعي المعتمد للفترات التدريبية</h4>
+                        <span class="text-[10px] text-amber-800 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك) • نظام فترتين ثابتتين ومقررين لكل متدرب</span>
                     </div>
-                    <span class="bg-black text-white text-[10px] font-black px-2.5 py-1 rounded-full">معتمد رسمياً</span>
+                    <div class="flex items-center gap-2">
+                        <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                        <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
+                    </div>
                 </div>
                 <div id="ctpScheduleContainer" class="overflow-x-auto rounded-2xl border border-slate-300 dark:border-slate-700">
                     <!-- Populated dynamically -->
@@ -7380,29 +7383,40 @@
 
             <!-- Tab 4: Monthly Grades Transcript -->
             <div id="ctpTabContent-grades" class="hidden space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">كشف الدرجات والمعدلات التراكمية المعتمد</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">تاريخ الإصدار: 31 أكتوبر 2026 • الدرجات مرتبطة مباشرة بنسبة الحضور والمواظبة</p>
+                        <span class="text-[10px] text-slate-500 font-bold block">المملكة العربية السعودية • المؤسسة العامة للتدريب التقني والمهني</span>
+                        <h4 class="font-black text-sm text-[#0F2942]">سجل الدرجات الشهرية والتقييم التراكمي المعتمد</h4>
+                        <span class="text-[10px] text-amber-800 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك) • إصدار رسمي: 31 أكتوبر 2026 م</span>
                     </div>
-                    <div class="text-right">
-                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">المعدل العام التراكمي:</span>
-                        <span class="text-sm font-black text-black dark:text-white mr-1" id="ctpGradesCumulativeGpa">--%</span>
+                    <div class="flex items-center gap-3">
+                        <div class="text-left bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
+                            <span class="text-[10px] text-emerald-800 block font-bold">المعدل التراكمي العام:</span>
+                            <span class="text-sm font-black text-emerald-900" id="ctpGradesCumulativeGpa">--%</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                            <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
+                        </div>
                     </div>
                 </div>
-                <div id="ctpGradesTableContainer" class="overflow-x-auto rounded-2xl border border-slate-300 dark:border-slate-700">
+                <div id="ctpGradesTableContainer" class="overflow-x-auto rounded-2xl border border-slate-300">
                     <!-- Populated dynamically -->
                 </div>
             </div>
 
             <!-- Tab 5: Disciplinary Warnings -->
             <div id="ctpTabContent-warnings" class="hidden space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">سجل الإنذارات والمخالفات</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">كل إشعار أو إنذار يحمل ختم إدارة المعهد وتوقيع مسؤول شؤون المتدربين</p>
+                        <span class="text-[10px] text-slate-500 font-bold block">المملكة العربية السعودية • المؤسسة العامة للتدريب التقني والمهني</span>
+                        <h4 class="font-black text-sm text-[#0F2942]">سجل الإنذارات والتنبيهات الانضباطية المعتمدة</h4>
+                        <span class="text-[10px] text-amber-800 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك)</span>
                     </div>
-                    <span class="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 text-xs font-mono font-bold px-2 py-0.5 rounded border border-slate-300">سجل رسمي مقيد</span>
+                    <div class="flex items-center gap-2">
+                        <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                        <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
+                    </div>
                 </div>
                 <div id="ctpDisciplinaryWarningsContainer" class="space-y-3">
                     <!-- Populated dynamically with individual stamps -->
@@ -7411,14 +7425,21 @@
 
             <!-- Tab 6: Exams Models (Reduced size to fit on one page) -->
             <div id="ctpTabContent-exams" class="hidden space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">أوراق الاختبارات الرسمية المؤطرة (مقلصة الحجم لتناسب صفحة واحدة)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">أسئلة صح وخطأ واختيار متعدد • الاسم إنجليزي في اختبار الإنجليزي • بدون توقيع مدرب</p>
+                        <span class="text-[10px] text-slate-500 font-bold block">المملكة العربية السعودية • المؤسسة العامة للتدريب التقني والمهني</span>
+                        <h4 class="font-black text-sm text-[#0F2942]">أوراق نماذج الاختبارات التخصصية المعتمدة</h4>
+                        <span class="text-[10px] text-amber-800 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك) • إجمالي 11 سؤالاً (100 درجة)</span>
                     </div>
-                    <div class="text-right">
-                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">المعدل العام للاختبارات:</span>
-                        <span class="text-sm font-black text-black dark:text-white mr-1" id="ctpExamsAverageScore">-- / 100</span>
+                    <div class="flex items-center gap-3">
+                        <div class="text-left bg-blue-50 border border-blue-200 px-3 py-1 rounded-xl">
+                            <span class="text-[10px] text-blue-800 block font-bold">متوسط الاختبارات:</span>
+                            <span class="text-sm font-black text-blue-950" id="ctpExamsAverageScore">-- / 100</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                            <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
+                        </div>
                     </div>
                 </div>
                 <div id="ctpExamModelsContainer" class="space-y-4">
@@ -7428,12 +7449,18 @@
 
             <!-- Tab 7: Monthly Attendance Calendar (From Month 1 to Month 11) -->
             <div id="ctpTabContent-attendanceCal" class="hidden space-y-4">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">سجل وتقويم الحضور الشامل (من شهر 1 يناير إلى نوفمبر 2026 م)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">تقاويم الشهور التدريبية (من شهر يناير إلى شهر نوفمبر 2026 م)</p>
+                        <span class="text-[10px] text-slate-500 font-bold block">المملكة العربية السعودية • المؤسسة العامة للتدريب التقني والمهني</span>
+                        <h4 class="font-black text-sm text-[#0F2942]">سجل وتقويم الحضور والغياب الشهري المعتمد</h4>
+                        <span class="text-[10px] text-amber-800 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك)</span>
                     </div>
-                    <div class="flex items-center gap-1.5 flex-wrap" id="ctpMonthButtonsContainer">
+                    <div class="flex items-center gap-2">
+                        <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                        <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap" id="ctpMonthButtonsContainer">
                         <!-- Populated by JS -->
                     </div>
                 </div>
@@ -88886,7 +88913,7 @@ function buildDemoExecutiveReport(params) {
         if (role === 'admission') {
             return `
                 <div class="flex flex-col items-center justify-center">
-                    <img src="assets/mohammed_abdrab_sig.png" alt="توقيع محمد عبدرب النبي" class="h-13 w-auto object-contain filter contrast-125 dark:invert" style="mix-blend-mode: multiply;">
+                    <img src="assets/mohammed_abdrab_sig.png" alt="توقيع محمد عبدرب النبي" class="h-8 max-h-8 max-w-[105px] w-auto object-contain filter contrast-125 dark:invert" style="mix-blend-mode: multiply;">
                     <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 mt-0.5">محمد عبدرب النبي</span>
                     <span class="text-[9px] text-slate-500">مسؤول القبول والتسجيل</span>
                 </div>
@@ -88903,10 +88930,17 @@ function buildDemoExecutiveReport(params) {
         const { greg, hijri } = getCTPSafetyPledgeDate(trainee);
 
         return `
-            <div class="border border-black p-5 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 space-y-4 text-xs leading-relaxed">
-                <div class="text-center border-b border-black pb-3">
-                    <h4 class="font-black text-sm text-black dark:text-white">إقرار وتعهد الالتزام باشتراطات السلامة والصحة المهنية والحفاظ على المرافق</h4>
-                    <p class="text-[11px] text-slate-600 dark:text-slate-300 font-bold mt-1">وثيقة رسمية ملزمة لجميع متدربي معهد الذهب الأسود العالي للتدريب (فرع عنك)</p>
+            <div class="border border-slate-300 p-5 rounded-2xl bg-white text-slate-900 space-y-4 text-xs leading-relaxed shadow-xs">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                    <div>
+                        <span class="text-[10px] text-slate-500 font-bold block">المملكة العربية السعودية • المؤسسة العامة للتدريب التقني والمهني</span>
+                        <h4 class="font-black text-sm text-[#0F2942]">إقرار وتعهد الالتزام باشتراطات السلامة والصحة المهنية والحفاظ على المرافق</h4>
+                        <span class="text-[10px] text-amber-800 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                        <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
+                    </div>
                 </div>
 
                 <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-black font-bold space-y-1">
