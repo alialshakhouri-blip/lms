@@ -1993,29 +1993,33 @@
             }
 
             #adminReportPrintArea, #cdPrintableReportArea, #traineeDossierPrintableArea {
-
                 position: absolute !important;
-
                 left: 0 !important;
-
                 top: 0 !important;
-
                 width: 100% !important;
-
                 margin: 0 !important;
-
                 padding: 8mm 12mm !important;
-
                 background: #FFFFFF !important;
-
                 z-index: 999999 !important;
-
                 box-shadow: none !important;
-
                 -webkit-print-color-adjust: exact !important;
-
                 print-color-adjust: exact !important;
+            }
 
+            #traineeDossierPrintableArea {
+                display: block !important;
+            }
+
+            body.printing-dossier #certificatePrintableArea,
+            body.printing-dossier #adminReportPrintArea,
+            body.printing-dossier #cdPrintableReportArea {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            body.printing-dossier #traineeDossierPrintableArea {
+                display: block !important;
+                visibility: visible !important;
             }
 
             .no-print {
@@ -7296,9 +7300,13 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2 self-end sm:self-center">
-                    <button type="button" onclick="printComprehensiveTraineeDossier()" class="bg-black hover:bg-slate-800 text-white font-black px-4 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm shrink-0 border border-slate-700">
+                    <button type="button" onclick="printComprehensiveTraineeDossier()" class="bg-black hover:bg-slate-800 text-white font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm shrink-0 border border-slate-700">
                         <span>🖨️</span>
-                        <span>طباعة الملف الشامل (PDF)</span>
+                        <span>طباعة الملف الشامل</span>
+                    </button>
+                    <button type="button" onclick="downloadComprehensiveTraineeDossierPDF()" class="bg-amber-600 hover:bg-amber-700 text-white font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm shrink-0">
+                        <span>📥</span>
+                        <span>تحميل PDF مباشر</span>
                     </button>
                     <button type="button" onclick="closeComprehensiveTraineePortfolioModal()" class="text-slate-500 hover:text-black dark:hover:text-white text-xl font-bold p-1 shrink-0 cursor-pointer">✕</button>
                 </div>
@@ -7447,9 +7455,13 @@
                     <span>القبول والتسجيل: <b class="text-black dark:text-white">محمد عبدرب النبي</b></span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button type="button" onclick="printComprehensiveTraineeDossier()" class="bg-black hover:bg-slate-800 text-white font-black px-4 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                    <button type="button" onclick="printComprehensiveTraineeDossier()" class="bg-black hover:bg-slate-800 text-white font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm border border-slate-700">
                         <span>🖨️</span>
-                        <span>طباعة الملف الشامل (PDF)</span>
+                        <span>طباعة الملف الشامل</span>
+                    </button>
+                    <button type="button" onclick="downloadComprehensiveTraineeDossierPDF()" class="bg-amber-600 hover:bg-amber-700 text-white font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                        <span>📥</span>
+                        <span>تحميل PDF مباشر</span>
                     </button>
                     <button type="button" onclick="closeComprehensiveTraineePortfolioModal()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer">
                         إغلاق
@@ -88629,6 +88641,92 @@ function buildDemoExecutiveReport(params) {
     let currentCTPSelectedMonth = 11; // 1 to 11
     let isShowingAllCalendars = false;
 
+    // Trainee Assigned Courses Strictly from Schedule
+    function getTraineeAssignedCourses(trainee) {
+        if (!trainee) return [{ trainer: 'رضا مطيلق', course: 'اللحام', room: 'القاعة 9' }];
+
+        const groupName = String(trainee.group || '').trim();
+        const schedSource = (typeof scheduleData !== 'undefined' && Array.isArray(scheduleData) && scheduleData.length > 0)
+            ? scheduleData
+            : (typeof INITIAL_MASTER_SCHEDULE !== 'undefined' && Array.isArray(INITIAL_MASTER_SCHEDULE) ? INITIAL_MASTER_SCHEDULE : []);
+
+        const cleanStr = s => String(s || '').toLowerCase().replace(/[\s\-_+&/\\()]+/g, '');
+        const targetClean = cleanStr(groupName);
+
+        const numMatch = groupName.match(/\d+/);
+        const targetNum = numMatch ? numMatch[0] : null;
+
+        const assigned = [];
+        const seenCourses = new Set();
+
+        for (const item of schedSource) {
+            let matched = false;
+            const rows = item.rows || [];
+            for (const row of rows) {
+                if (!Array.isArray(row)) continue;
+                for (const cell of row) {
+                    if (!cell) continue;
+                    const parts = String(cell).split(/[+&,/]+/);
+                    for (const part of parts) {
+                        const partClean = cleanStr(part);
+                        if (!partClean) continue;
+                        if (targetClean.includes(partClean) || partClean.includes(targetClean)) {
+                            matched = true;
+                            break;
+                        }
+                        if (targetNum && partClean.includes(targetNum)) {
+                            const companies = ['aic', 'samsung', 'sinopec', 'shinbo', 'eleco', 'amana', 'hyundai', 'سامسونج', 'سينوبك'];
+                            for (const comp of companies) {
+                                if (targetClean.includes(cleanStr(comp)) && partClean.includes(cleanStr(comp))) {
+                                    matched = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (matched) break;
+                    }
+                    if (matched) break;
+                }
+                if (matched) break;
+            }
+
+            if (matched) {
+                const key = `${item.course}-${item.name}`;
+                if (!seenCourses.has(key)) {
+                    seenCourses.add(key);
+                    assigned.push({
+                        trainer: item.name || 'مدرب معتمد',
+                        course: item.course || 'تطبيقات تخصصية',
+                        room: item.room || 'القاعة التدريبية'
+                    });
+                }
+            }
+        }
+
+        // If no match found via schedule, deduce directly from group name or company
+        if (assigned.length === 0) {
+            if (targetClean.includes('aic') || targetClean.includes('101') || targetClean.includes('لحام')) {
+                assigned.push({ trainer: 'رضا مطيلق', course: 'اللحام', room: 'القاعة 9' });
+            } else if (targetClean.includes('sinopec') || targetClean.includes('سينوبك')) {
+                assigned.push({ trainer: 'رضا مطيلق', course: 'اللحام', room: 'القاعة 9' });
+                assigned.push({ trainer: 'شرف الدين', course: 'انجليزية', room: 'القاعة 8' });
+            } else if (targetClean.includes('samsung') || targetClean.includes('سامسونج')) {
+                assigned.push({ trainer: 'عصام سعيد', course: 'الكهرباء', room: 'القاعة 6' });
+                assigned.push({ trainer: 'إمام يعقوب', course: 'الحاسب الالي', room: 'القاعة 4' });
+            } else if (targetClean.includes('eleco') || targetClean.includes('اليكو')) {
+                assigned.push({ trainer: 'شرف الدين', course: 'انجليزية', room: 'القاعة 8' });
+                assigned.push({ trainer: 'عصام سعيد', course: 'الكهرباء', room: 'القاعة 6' });
+            } else if (targetClean.includes('amana') || targetClean.includes('امانة')) {
+                assigned.push({ trainer: 'علي عبدالسلام', course: 'انجليزية', room: 'القاعة 3' });
+                assigned.push({ trainer: 'ناجي محمد', course: 'إنشاءات', room: 'القاعة 10' });
+            } else {
+                assigned.push({ trainer: 'رضا مطيلق', course: 'اللحام', room: 'القاعة 9' });
+            }
+        }
+
+        return assigned;
+    }
+
     // Transliteration helper for trainee names in English exams
     function transliterateArabicName(arName) {
         if (!arName) return 'TRAINEE NAME';
@@ -88988,7 +89086,6 @@ function buildDemoExecutiveReport(params) {
         gridHtml += `</div>`;
 
         if (isCompact) {
-            const attendedTotal = presentCount + lateCount;
             const monthRate = Math.round((presentCount / (presentCount + absentCount || 1)) * 100);
             gridHtml += `
                 <div class="mt-1 pt-1 border-t border-slate-300 flex items-center justify-between text-[9px] font-mono text-black dark:text-white">
@@ -89179,7 +89276,7 @@ function buildDemoExecutiveReport(params) {
 
         return examMonths.map((em, idx) => {
             const courseObj = (assigned.length > 1 && idx === 1) ? assigned[1] : assigned[0];
-            const isEnglish = courseObj.course.toLowerCase().includes('انجليزي') || courseObj.course.toLowerCase().includes('english');
+            const isEnglish = courseObj && courseObj.course && (courseObj.course.toLowerCase().includes('انجليزي') || courseObj.course.toLowerCase().includes('english'));
 
             let score = Math.round(baseRate + ((seed + idx * 7) % 7) - 3);
             if (score > 99) score = 99;
@@ -89192,8 +89289,8 @@ function buildDemoExecutiveReport(params) {
                     title: `Technical English Examination Paper - ${em.nameEn}`,
                     date: em.date,
                     time: '09:00 AM - 10:30 AM',
-                    room: courseObj.room,
-                    instructor: courseObj.trainer,
+                    room: courseObj ? courseObj.room : 'Hall 8',
+                    instructor: courseObj ? courseObj.trainer : 'Certified Instructor',
                     traineeName: englishName,
                     traineeId: traineeId,
                     group: groupName,
@@ -89232,15 +89329,15 @@ function buildDemoExecutiveReport(params) {
                 };
             }
 
-            const cName = courseObj.course;
+            const cName = courseObj ? courseObj.course : 'التطبيقات العملية';
             return {
                 isEnglish: false,
                 examNo: em.no,
                 title: `ورقة اختبار شهر ${em.nameAr} لمقرر (${cName})`,
                 date: em.date,
                 time: '09:00 ص - 10:30 ص',
-                room: courseObj.room,
-                instructor: courseObj.trainer,
+                room: courseObj ? courseObj.room : 'القاعة 9',
+                instructor: courseObj ? courseObj.trainer : 'المدرب المعتمد',
                 traineeName: traineeName,
                 traineeId: traineeId,
                 group: groupName,
@@ -89618,11 +89715,17 @@ function buildDemoExecutiveReport(params) {
     }
 
     // PRINTABLE COMPREHENSIVE DOSSIER BUILDER (11 DISTINCT PAGES)
-    function printComprehensiveTraineeDossier() {
-        if (!currentCTPTrainee) return;
+    function printComprehensiveTraineeDossier(shouldTriggerPrint = true) {
+        if (!currentCTPTrainee) {
+            return showToast('يرجى تحديد متدرب أولاً لعرض وطباعة الملف الشامل', 'error');
+        }
         const trainee = currentCTPTrainee;
         const printArea = document.getElementById('traineeDossierPrintableArea');
         if (!printArea) return;
+
+        // Isolate print view
+        document.body.classList.add('printing-dossier');
+        printArea.classList.remove('hidden');
 
         const assigned = getTraineeAssignedCourses(trainee);
         const adm = getCTPAdmissionFormData(trainee);
@@ -89794,7 +89897,7 @@ function buildDemoExecutiveReport(params) {
                         </div>
                         <div class="text-right font-mono text-xs">
                             <div>المجموعة: <b>${trainee.group || 'عام'}</b></div>
-                            <div>القاعة / الورشة: <b>${assigned[0].room}</b></div>
+                            <div>القاعة / الورشة: <b>${(assigned[0] && assigned[0].room) || 'القاعة 9'}</b></div>
                         </div>
                     </div>
 
@@ -90099,9 +90202,58 @@ function buildDemoExecutiveReport(params) {
             </div>
         `;
 
-        setTimeout(() => {
+        if (shouldTriggerPrint) {
+            window.onafterprint = () => {
+                document.body.classList.remove('printing-dossier');
+                printArea.classList.add('hidden');
+            };
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        }
+    }
+
+    // Direct PDF File Download using html2pdf.js
+    function downloadComprehensiveTraineeDossierPDF() {
+        if (!currentCTPTrainee) {
+            return showToast('يرجى تحديد متدرب أولاً لتنزيل الملف الشامل', 'error');
+        }
+        const trainee = currentCTPTrainee;
+        const printArea = document.getElementById('traineeDossierPrintableArea');
+        if (!printArea) return;
+
+        showToast('جاري إعداد وإنشاء ملف الـ PDF الشامل...', 'info');
+
+        // Build content without window.print
+        printComprehensiveTraineeDossier(false);
+        printArea.classList.remove('hidden');
+
+        const cleanTName = String(trainee.name || 'المتدرب').replace(/\s+/g, '_');
+        const filename = `الملف_الشامل_${cleanTName}_${trainee.id}.pdf`;
+
+        if (typeof html2pdf !== 'undefined') {
+            const opt = {
+                margin: [6, 8, 6, 8],
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            html2pdf().set(opt).from(printArea).save().then(() => {
+                showToast('تم تحميل الملف الشامل بنجاح', 'success');
+                document.body.classList.remove('printing-dossier');
+                printArea.classList.add('hidden');
+            }).catch(err => {
+                console.error('html2pdf download error:', err);
+                showToast('حدث خطأ أثناء التنزيل المباشر، جاري فتح الطباعة...', 'warning');
+                window.print();
+            });
+        } else {
+            // Fallback to native print/save as PDF
             window.print();
-        }, 300);
+        }
     }
 
     function openComprehensiveTraineePortfolioModal(traineeIdOrName = null) {
@@ -90141,6 +90293,9 @@ function buildDemoExecutiveReport(params) {
     function closeComprehensiveTraineePortfolioModal() {
         const modal = document.getElementById('comprehensiveTraineePortfolioModal');
         if (modal) modal.classList.add('hidden');
+        const printArea = document.getElementById('traineeDossierPrintableArea');
+        if (printArea) printArea.classList.add('hidden');
+        document.body.classList.remove('printing-dossier');
     }
 
     function switchTraineePortfolioTab(tabId) {
