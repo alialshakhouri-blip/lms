@@ -7289,9 +7289,9 @@
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
                             <h3 class="font-black text-slate-950 dark:text-white text-base sm:text-lg">الملف الشامل المعتمد للمتدرب</h3>
-                            <span class="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-slate-400">معهد الذهب الأسود العالي للتدريب</span>
+                            <span class="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-slate-400">المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود</span>
                         </div>
-                        <p class="text-xs text-slate-600 dark:text-slate-400 font-bold mt-0.5">إقرار السلامة في البداية • استمارة القبول • جدول فترتين • كشف الدرجات • الإنذارات • نماذج الاختبارات المؤطرة • تقويم الحضور (أبريل - نوفمبر)</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 font-bold mt-0.5">إقرار السلامة • استمارة القبول • جدول فترتين • درجات الشهور (أبريل - أكتوبر) • إنذارات • اختبارات مؤطرة • تقويم الحضور</p>
                     </div>
                 </div>
 
@@ -7310,22 +7310,27 @@
                 </div>
             </div>
 
-            <!-- Trainee Official Header Card -->
+            <!-- Trainee Official Header Card with TVTC and BGTI logos -->
             <div class="bg-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-700">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-1.5 shadow-sm shrink-0 border border-slate-300">
-                            <img src="assets/bgti_logo.png" alt="شعار المعهد" class="h-full w-auto object-contain" onerror="this.onerror=null; this.src='logo.png'">
+                    <div class="flex items-center gap-3">
+                        <div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center p-1 shadow-sm shrink-0 border border-slate-300">
+                            <img src="assets/tvtc_logo.png" alt="شعار المؤسسة" class="h-full w-auto object-contain">
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center p-1 shadow-sm shrink-0 border border-slate-300">
+                            <img src="assets/bgti_logo.png" alt="شعار المعهد" class="h-full w-auto object-contain">
                         </div>
                         <div class="space-y-1">
                             <div class="text-[11px] font-bold text-slate-300">المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود العالي للتدريب</div>
                             <h4 class="text-lg sm:text-xl font-black text-white" id="ctpTraineeName">--</h4>
                             <div class="flex items-center gap-3 text-xs text-slate-300 font-bold flex-wrap">
-                                <span>رقم الهوية: <b class="text-white font-mono" id="ctpTraineeNationalId">--</b></span>
+                                <span>الهوية: <b class="text-white font-mono" id="ctpTraineeNationalId">--</b></span>
+                                <span>•</span>
+                                <span>المؤهل: <b class="text-white" id="ctpTraineeQual">--</b></span>
                                 <span>•</span>
                                 <span>الشركة: <b class="text-white" id="ctpTraineeCompany">--</b></span>
                                 <span>•</span>
-                                <span>المجموعة: <b class="text-white" id="ctpTraineeGroup">--</b></span>
+                                <span>الشعبة: <b class="text-white" id="ctpTraineeGroup">--</b></span>
                                 <span>•</span>
                                 <span>التخصص: <b class="text-slate-200" id="ctpTraineeSpecialty">--</b></span>
                             </div>
@@ -7344,11 +7349,11 @@
 
             <!-- Navigation Tabs (Safety Pledge is FIRST) -->
             <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl text-xs font-bold overflow-x-auto border border-slate-200 dark:border-slate-700">
-                <button type="button" onclick="switchTraineePortfolioTab('safety')" id="ctpTabBtn-safety" class="flex-1 py-2 px-3 rounded-xl bg-black text-white dark:bg-white dark:text-black shadow-2xs font-black transition whitespace-nowrap">🛡️ إقرار وتعهد السلامة (في البداية)</button>
+                <button type="button" onclick="switchTraineePortfolioTab('safety')" id="ctpTabBtn-safety" class="flex-1 py-2 px-3 rounded-xl bg-black text-white dark:bg-white dark:text-black shadow-2xs font-black transition whitespace-nowrap">🛡️ إقرار السلامة</button>
                 <button type="button" onclick="switchTraineePortfolioTab('admission')" id="ctpTabBtn-admission" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📄 استمارة القبول والتسجيل</button>
-                <button type="button" onclick="switchTraineePortfolioTab('schedule')" id="ctpTabBtn-schedule" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">🕒 الجدول الدراسي (فترتين فقط)</button>
-                <button type="button" onclick="switchTraineePortfolioTab('grades')" id="ctpTabBtn-grades" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📊 كشف الدرجات الأكاديمي</button>
-                <button type="button" onclick="switchTraineePortfolioTab('warnings')" id="ctpTabBtn-warnings" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">⚠️ سجل الإنذارات والتنبيهات</button>
+                <button type="button" onclick="switchTraineePortfolioTab('schedule')" id="ctpTabBtn-schedule" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">🕒 الجدول الدراسي (فترتين)</button>
+                <button type="button" onclick="switchTraineePortfolioTab('grades')" id="ctpTabBtn-grades" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📊 كشف الدرجات الشهري</button>
+                <button type="button" onclick="switchTraineePortfolioTab('warnings')" id="ctpTabBtn-warnings" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">⚠️ سجل الإنذارات</button>
                 <button type="button" onclick="switchTraineePortfolioTab('exams')" id="ctpTabBtn-exams" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📝 نماذج الاختبارات المؤطرة</button>
                 <button type="button" onclick="switchTraineePortfolioTab('attendanceCal')" id="ctpTabBtn-attendanceCal" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📅 تقويم الحضور (أبريل - نوفمبر)</button>
             </div>
@@ -7360,7 +7365,7 @@
                 </div>
             </div>
 
-            <!-- Tab 2: Admission & Registration Application Form -->
+            <!-- Tab 2: Admission Form -->
             <div id="ctpTabContent-admission" class="hidden space-y-4">
                 <div id="ctpAdmissionFormContainer">
                     <!-- Populated dynamically with officer: محمد عبدرب النبي & director: علي الشاخوري -->
@@ -7371,8 +7376,8 @@
             <div id="ctpTabContent-schedule" class="hidden space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">الجدول التدريبي الأسبوعي المعتمد للمتدرب (فترتين فقط باليوم)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400" id="ctpScheduleHeaderDesc">الفترة الأولى (08:00 ص - 10:00 ص) • الفترة الثانية (10:15 ص - 12:15 م) • مربوط مباشرة بمقررات شعبته</p>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">الجدول التدريبي الأسبوعي (فترتين فقط باليوم)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">الفترة الأولى (08:00 ص - 10:00 ص) • الفترة الثانية (10:15 ص - 12:15 م)</p>
                     </div>
                     <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl border border-slate-300 dark:border-slate-700" id="ctpScheduleGroupLabel">--</span>
                 </div>
@@ -7383,14 +7388,14 @@
                 </div>
             </div>
 
-            <!-- Tab 4: Academic Grade Transcript -->
+            <!-- Tab 4: Monthly Grades Transcript (Months 4-10 + Total GPA) -->
             <div id="ctpTabContent-grades" class="hidden space-y-4">
                 <div id="ctpGradesContainer">
                     <!-- Populated dynamically -->
                 </div>
             </div>
 
-            <!-- Tab 5: Disciplinary & Attendance Warnings (with Supervisor: علي آل عباس) -->
+            <!-- Tab 5: Concise Warnings (Concise labels only) -->
             <div id="ctpTabContent-warnings" class="hidden space-y-4">
                 <div id="ctpWarningsContainer">
                     <!-- Populated dynamically -->
@@ -7401,8 +7406,8 @@
             <div id="ctpTabContent-exams" class="hidden space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">أوراق الاختبارات الرسمية المؤطرة (بتاريخ منتصف كل شهر)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">إطار رسمي يحاكي ورقة الاختبار الحقيقية • أسئلة صح وخطأ واختيار من متعدد • الإنجليزية إنجليزية كاملة وباقي المواد عربي كامل</p>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">أوراق الاختبارات الرسمية المؤطرة (منتصف كل شهر)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">إطار اختبار حقيقي • صح وخطأ واختيار متعدد • الإنجليزية إنجليزية كاملة وباقي المواد عربي كامل</p>
                     </div>
                     <div class="text-right">
                         <span class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">المعدل التراكمي للاختبارات:</span>
@@ -7418,19 +7423,16 @@
             <div id="ctpTabContent-attendanceCal" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">سجل وتقويم الحضور والغياب (من شهر 4 أبريل وحتى شهر 11 نوفمبر)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">نوفمبر 2026 جاري المتابعة (لم يقفل حتى الآن) • الشهور السابقة من شهر 4 مغلقة ومحسوبة</p>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">سجل وتقويم الحضور (أبريل - نوفمبر 2026)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">نوفمبر 2026 جاري المتابعة (لم يقفل حتى الآن) • الشهور من 4 إلى 10 مكتملة ومغلقة</p>
                     </div>
-                    <!-- Month Selector Buttons: Months 4 to 11 -->
                     <div class="flex items-center gap-1 flex-wrap" id="ctpMonthButtonsContainer">
                         <!-- Populated by JS -->
                     </div>
                 </div>
-                <!-- Summary Table for all Months 4-11 -->
                 <div id="ctpMonthlySummaryTableContainer" class="overflow-x-auto rounded-xl border border-slate-300 dark:border-slate-700">
                     <!-- Populated by JS -->
                 </div>
-                <!-- Single Month Calendar View -->
                 <div id="ctpCalendarGridContainer" class="p-4 rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 overflow-x-auto">
                     <!-- Dynamic Calendar Grid -->
                 </div>
@@ -7439,7 +7441,7 @@
             <!-- Modal Footer -->
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs">
                 <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-bold">
-                    <span>📌 إدارة المعهد:</span>
+                    <span>📌 الإدارة المعتمدة:</span>
                     <span>المدير العام: <b class="text-black dark:text-white">علي الشاخوري</b></span>
                     <span>•</span>
                     <span>شؤون المتدربين: <b class="text-black dark:text-white">علي آل عباس</b></span>
@@ -7460,7 +7462,7 @@
         </div>
     </div>
 
-    <!-- ==================== DEDICATED PRINTABLE TRAINEE DOSSIER (للطباعة A4 الرسمية - أبيض وأسود) ==================== -->
+    <!-- ==================== DEDICATED PRINTABLE TRAINEE DOSSIER (للطباعة A4 الرسمية - كل قسم في ورقة مستقلة) ==================== -->
     <div id="traineeDossierPrintableArea" class="hidden bg-white text-black p-6 md:p-8 space-y-6" style="direction: rtl; font-family: 'Segoe UI', Tahoma, Arial, sans-serif;">
         <!-- Filled dynamically before printing -->
     </div>
@@ -88618,16 +88620,29 @@ function buildDemoExecutiveReport(params) {
 
     
     
+    
     // ===================================================================
     // COMPREHENSIVE TRAINEE PORTFOLIO SYSTEM (الملف الشامل للمتدرب)
     // الإدارة: مدير المعهد: علي الشاخوري • شؤون المتدربين: علي آل عباس • القبول والتسجيل: محمد عبدرب النبي
+    // الشعار: شعار المؤسسة العامة (assets/tvtc_logo.png) وشعار المعهد (assets/bgti_logo.png)
+    // التواقيع: توقيع علي آل عباس (assets/ali_alabbas_sig.png) وتوقيع علي الشاخوري (assets/director_sig.jpg)
     // ===================================================================
 
     let currentCTPTrainee = null;
     let currentCTPActiveTab = 'safety'; // إقرار السلامة في البداية
     let currentCTPSelectedMonth = 11; // 4 to 11 (Nov 2026 is current unclosed)
 
-    // Distinct Official Signatures (No identical signatures, no electronic text cliché)
+    // Helper: Qualification determination (defaults to "ثانوي" if empty/missing)
+    function getTraineeEffectiveQualification(trainee) {
+        if (!trainee) return 'ثانوي';
+        const q = String(trainee.qual || '').trim();
+        if (!q || q === 'غير محدد' || q === '-' || q === 'null' || q === 'undefined') {
+            return 'ثانوي';
+        }
+        return q;
+    }
+
+    // Official Signatures: Real signature images for Ali Al-Abbas and Ali Al-Shakhouri
     function getOfficialSignatureHTML(role, seed = 123, customName = '') {
         if (role === 'director') {
             return `
@@ -88641,13 +88656,7 @@ function buildDemoExecutiveReport(params) {
         if (role === 'supervisor') {
             return `
                 <div class="flex flex-col items-center justify-center">
-                    <svg class="h-11 w-36" viewBox="0 0 160 52" fill="none" stroke="#0f2942" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M 12 36 C 28 16, 44 10, 58 20 C 68 28, 72 38, 62 44 C 52 48, 42 36, 56 22 C 72 6, 92 12, 106 28 C 118 40, 132 44, 146 32" stroke-width="2.3"/>
-                        <path d="M 36 26 C 52 18, 80 16, 110 20" stroke-width="1.8"/>
-                        <path d="M 76 10 C 82 22, 86 34, 88 42" stroke-width="2"/>
-                        <circle cx="108" cy="16" r="1.5" fill="#0f2942"/>
-                        <circle cx="114" cy="14" r="1.5" fill="#0f2942"/>
-                    </svg>
+                    <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-12 w-auto object-contain">
                     <span class="text-[11px] font-black text-black mt-0.5">علي آل عباس</span>
                 </div>
             `;
@@ -88660,7 +88669,6 @@ function buildDemoExecutiveReport(params) {
                         <path d="M 10 38 C 22 20, 38 14, 48 26 C 56 36, 66 42, 78 28 C 90 10, 105 16, 118 32 C 128 42, 138 34, 146 22" stroke-width="2.2"/>
                         <path d="M 32 30 C 58 26, 90 22, 132 18" stroke-width="1.6"/>
                         <path d="M 44 16 C 48 28, 52 38, 54 44" stroke-width="2.1"/>
-                        <path d="M 92 14 C 96 24, 100 36, 102 42" stroke-width="1.9"/>
                         <circle cx="64" cy="18" r="1.5" fill="#1e293b"/>
                     </svg>
                     <span class="text-[11px] font-black text-black mt-0.5">محمد عبدرب النبي</span>
@@ -88759,7 +88767,6 @@ function buildDemoExecutiveReport(params) {
             }
         }
 
-        // Limit to at most 2 courses
         if (assigned.length > 2) assigned.length = 2;
 
         if (assigned.length === 0) {
@@ -88816,7 +88823,6 @@ function buildDemoExecutiveReport(params) {
     // Attendance History from Month 4 (April) to Month 11 (November)
     function getCTPMonthlyAttendanceHistory(trainee) {
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
-        const baseRate = parseFloat(trainee.rate || trainee.weeklyRate || 94);
 
         const monthsDef = [
             { monthNum: 4, name: 'أبريل 2026', totalWorkDays: 22, isClosed: true },
@@ -88826,13 +88832,12 @@ function buildDemoExecutiveReport(params) {
             { monthNum: 8, name: 'أغسطس 2026', totalWorkDays: 22, isClosed: true },
             { monthNum: 9, name: 'سبتمبر 2026', totalWorkDays: 22, isClosed: true },
             { monthNum: 10, name: 'أكتوبر 2026', totalWorkDays: 22, isClosed: true },
-            { monthNum: 11, name: 'نوفمبر 2026', totalWorkDays: 7, isClosed: false } // لم يقفل حتى الآن (حتى 9 نوفمبر: 7 أيام عمل)
+            { monthNum: 11, name: 'نوفمبر 2026', totalWorkDays: 7, isClosed: false }
         ];
 
         return monthsDef.map((m, idx) => {
             let present = 0, late = 0, absent = 0;
             if (m.isClosed) {
-                // Closed historical months
                 const mSeed = (seed + idx * 17) % 100;
                 if (mSeed < 60) {
                     present = m.totalWorkDays - 1;
@@ -88848,7 +88853,6 @@ function buildDemoExecutiveReport(params) {
                     absent = 0;
                 }
             } else {
-                // November: Ongoing up to today (9 Nov)
                 present = 7;
                 late = 0;
                 absent = 0;
@@ -88869,14 +88873,14 @@ function buildDemoExecutiveReport(params) {
         });
     }
 
-    // Monthly Calendar Matrix for any Month (4 through 11)
+    // Monthly Calendar Matrix (formatted strictly as a real calendar)
     function generateCTPCalendarGridHTML(trainee, monthNum = 11) {
         const year = 2026;
-        const monthIndex = monthNum - 1; // 0-based for Date
+        const monthIndex = monthNum - 1;
         const refDate = new Date(year, monthIndex, 1);
         const monthName = refDate.toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' });
         const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-        const firstDayIndex = refDate.getDay(); // 0: Sun
+        const firstDayIndex = refDate.getDay();
 
         const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
@@ -88884,18 +88888,18 @@ function buildDemoExecutiveReport(params) {
 
         let gridHtml = `
             <div class="mb-3 flex items-center justify-between text-xs">
-                <span class="font-black text-black dark:text-white">تقويم شهر: ${monthName} ${isNov ? '<b class="text-amber-700 bg-amber-100 px-2 py-0.5 rounded mr-2 text-[10px]">نوفمبر لم يقفل حتى الآن (جاري)</b>' : '<b class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded mr-2 text-[10px]">مكتمل ومغلق</b>'}</span>
+                <span class="font-black text-black dark:text-white">تقويم شهر: ${monthName} ${isNov ? '<b class="text-amber-800 bg-amber-100 px-2 py-0.5 rounded mr-2 text-[10px]">نوفمبر لم يقفل حتى الآن (جاري)</b>' : '<b class="text-black bg-slate-100 px-2 py-0.5 rounded mr-2 text-[10px]">مكتمل ومغلق</b>'}</span>
                 <span class="font-bold text-slate-500 font-mono">سنة التدريب: 2026 م</span>
             </div>
             <div class="grid grid-cols-7 gap-1 text-center min-w-[500px]">
-                ${dayNames.map(d => `<div class="p-2 font-black text-xs text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-700/60 rounded-xl">${d}</div>`).join('')}
+                ${dayNames.map(d => `<div class="p-2 font-black text-xs text-black dark:text-slate-200 bg-slate-100 dark:bg-slate-700/60 rounded-xl border border-slate-300 dark:border-slate-600">${d}</div>`).join('')}
         `;
 
         for (let i = 0; i < firstDayIndex; i++) {
             gridHtml += `<div class="p-2 rounded-xl bg-transparent"></div>`;
         }
 
-        let presentCount = 0, lateCount = 0, absentCount = 0, remainingCount = 0;
+        let presentCount = 0, lateCount = 0, absentCount = 0;
 
         for (let day = 1; day <= daysInMonth; day++) {
             const dateObj = new Date(year, monthIndex, day);
@@ -88906,26 +88910,24 @@ function buildDemoExecutiveReport(params) {
             let boxClass = '';
 
             if (isWeekend) {
-                boxClass = 'bg-slate-100 dark:bg-slate-800/40 text-slate-400 border border-dashed border-slate-200 dark:border-slate-700';
+                boxClass = 'bg-slate-100 dark:bg-slate-800/40 text-slate-400 border border-dashed border-slate-300 dark:border-slate-700';
                 statusHtml = '<span class="text-[9px] block text-slate-400 font-bold">عطلة</span>';
             } else if (isNov && day > 9) {
-                // November future days: unclosed
-                remainingCount++;
                 boxClass = 'bg-slate-50 dark:bg-slate-800/20 text-slate-400 border border-slate-200 dark:border-slate-700/60';
                 statusHtml = '<span class="text-[9px] block text-slate-500 font-medium">قيد التدريب</span>';
             } else {
                 const dayRand = (seed + day * 19 + monthNum * 29) % 100;
                 if (dayRand < 90) {
                     presentCount++;
-                    boxClass = 'bg-slate-50 dark:bg-slate-700/50 text-black dark:text-white border border-slate-300 dark:border-slate-600 font-bold';
+                    boxClass = 'bg-white dark:bg-slate-700/50 text-black dark:text-white border border-black font-bold';
                     statusHtml = '<span class="text-[9px] font-black block">✓ حاضر</span>';
                 } else if (dayRand < 96) {
                     lateCount++;
-                    boxClass = 'bg-slate-100 dark:bg-slate-700/80 text-black dark:text-white border border-slate-400 dark:border-slate-500 font-bold';
+                    boxClass = 'bg-slate-100 dark:bg-slate-700/80 text-black dark:text-white border border-black font-bold';
                     statusHtml = '<span class="text-[9px] font-black block">⚠️ تأخير</span>';
                 } else {
                     absentCount++;
-                    boxClass = 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-400 dark:border-slate-600';
+                    boxClass = 'bg-slate-200 dark:bg-slate-800 text-black dark:text-slate-300 border border-black font-bold';
                     statusHtml = '<span class="text-[9px] font-black block">✗ غائب</span>';
                 }
             }
@@ -88939,11 +88941,11 @@ function buildDemoExecutiveReport(params) {
         }
 
         gridHtml += `</div>
-            <div class="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 text-center text-xs">
-                <div class="bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl border border-slate-200 dark:border-slate-700"><span class="text-slate-500 block">الحضور الفعلي:</span><b class="text-black dark:text-white font-black text-sm">${presentCount} يوم</b></div>
-                <div class="bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl border border-slate-200 dark:border-slate-700"><span class="text-slate-500 block">أيام التأخير:</span><b class="text-black dark:text-white font-black text-sm">${lateCount} يوم</b></div>
-                <div class="bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl border border-slate-200 dark:border-slate-700"><span class="text-slate-500 block">أيام الغياب:</span><b class="text-black dark:text-white font-black text-sm">${absentCount} يوم</b></div>
-                <div class="bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl border border-slate-200 dark:border-slate-700"><span class="text-slate-500 block">حالة الشهر:</span><b class="text-black dark:text-white font-black text-sm">${isNov ? 'لم يقفل حتى الآن' : 'مكتمل ومغلق'}</b></div>
+            <div class="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-black text-center text-xs">
+                <div class="border border-black p-2 rounded-xl"><span class="text-slate-500 block">الحضور الفعلي:</span><b class="text-black font-black text-sm">${presentCount} يوم</b></div>
+                <div class="border border-black p-2 rounded-xl"><span class="text-slate-500 block">أيام التأخير:</span><b class="text-black font-black text-sm">${lateCount} يوم</b></div>
+                <div class="border border-black p-2 rounded-xl"><span class="text-slate-500 block">أيام الغياب:</span><b class="text-black font-black text-sm">${absentCount} يوم</b></div>
+                <div class="border border-black p-2 rounded-xl"><span class="text-slate-500 block">حالة الشهر:</span><b class="text-black font-black text-sm">${isNov ? 'لم يقفل حتى الآن' : 'مكتمل ومغلق'}</b></div>
             </div>
         `;
 
@@ -88963,14 +88965,14 @@ function buildDemoExecutiveReport(params) {
         const btnContainer = document.getElementById('ctpMonthButtonsContainer');
         if (!btnContainer) return;
         const months = [
-            { n: 4, l: 'شهر 4 (أبريل)' },
-            { n: 5, l: 'شهر 5 (مايو)' },
-            { n: 6, l: 'شهر 6 (يونيو)' },
-            { n: 7, l: 'شهر 7 (يوليو)' },
-            { n: 8, l: 'شهر 8 (أغسطس)' },
-            { n: 9, l: 'شهر 9 (سبتمبر)' },
-            { n: 10, l: 'شهر 10 (أكتوبر)' },
-            { n: 11, l: 'شهر 11 (نوفمبر جاري)' }
+            { n: 4, l: 'شهر 4' },
+            { n: 5, l: 'شهر 5' },
+            { n: 6, l: 'شهر 6' },
+            { n: 7, l: 'شهر 7' },
+            { n: 8, l: 'شهر 8' },
+            { n: 9, l: 'شهر 9' },
+            { n: 10, l: 'شهر 10' },
+            { n: 11, l: 'شهر 11 (جاري)' }
         ];
 
         btnContainer.innerHTML = months.map(m => `
@@ -88980,8 +88982,66 @@ function buildDemoExecutiveReport(params) {
         `).join('');
     }
 
-    // Framed Exam Models with Mid-Month Dates (15th), True/False & Multiple Choice
-    // Technical English is 100% in English! All other courses are 100% in Arabic!
+    // Monthly Grade Transcript (Broken down by month 4 to 10 + Overall GPA & % + Issue Date: 31 Oct 2026)
+    function getCTPMonthlyGradesTranscript(trainee) {
+        const assigned = getTraineeAssignedCourses(trainee);
+        const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 777);
+
+        const months = [
+            { monthNum: 4, name: 'شهر 4 (أبريل)' },
+            { monthNum: 5, name: 'شهر 5 (مايو)' },
+            { monthNum: 6, name: 'شهر 6 (يونيو)' },
+            { monthNum: 7, name: 'شهر 7 (يوليو)' },
+            { monthNum: 8, name: 'شهر 8 (أغسطس)' },
+            { monthNum: 9, name: 'شهر 9 (سبتمبر)' },
+            { monthNum: 10, name: 'شهر 10 (أكتوبر)' }
+        ];
+
+        let grandTotalScore = 0;
+        let countScores = 0;
+
+        const monthlyRecords = months.map((m, mIdx) => {
+            const courseScores = assigned.map((crs, cIdx) => {
+                // Pseudo-random realistic grade between 88 and 99
+                const score = 90 + ((seed + mIdx * 7 + cIdx * 11) % 10);
+                grandTotalScore += score;
+                countScores++;
+                return {
+                    course: crs.course,
+                    trainer: crs.trainer,
+                    score: score
+                };
+            });
+
+            const mAvg = Math.round(courseScores.reduce((acc, c) => acc + c.score, 0) / courseScores.length);
+            const mGpa = (mAvg / 20).toFixed(2);
+
+            return {
+                monthNum: m.monthNum,
+                name: m.name,
+                courseScores: courseScores,
+                monthAverage: mAvg,
+                monthGpa: mGpa,
+                appreciation: mAvg >= 95 ? 'ممتاز مرتفع (A+)' : (mAvg >= 90 ? 'ممتاز (A)' : 'جيد جداً (B+)')
+            };
+        });
+
+        const overallPercent = Math.round(grandTotalScore / countScores);
+        const overallGpa = (overallPercent / 20).toFixed(2);
+
+        return {
+            months: monthlyRecords,
+            overallPercent: overallPercent,
+            overallGpa: overallGpa > 5.0 ? '4.88' : overallGpa,
+            overallAppreciation: 'ممتاز مع مرتبة الشرف الأولى',
+            issueDate: '2026/10/31 م',
+            issueDateHijri: '1448/05/19 هـ',
+            status: 'ناجح ومجتاز لكافة المقررات والمتطلبات المهنية بنجاح'
+        };
+    }
+
+    // Framed Exam Models: Mid-month (15th), True/False & Multiple Choice
+    // English 100% English! Other courses 100% Arabic!
     function getCTPCourseExamModels(trainee) {
         const assigned = getTraineeAssignedCourses(trainee);
         const traineeName = trainee.name || 'متدرب معهد الذهب الأسود';
@@ -88995,7 +89055,6 @@ function buildDemoExecutiveReport(params) {
             const isEnglish = courseObj.course.toLowerCase().includes('انجليزي') || courseObj.course.toLowerCase().includes('english');
 
             if (isEnglish) {
-                // 100% English Exam Paper
                 return {
                     isEnglish: true,
                     examNo: idx + 1,
@@ -89056,7 +89115,6 @@ function buildDemoExecutiveReport(params) {
                 };
             }
 
-            // 100% Arabic Exam Paper (اللحام، الكهرباء، إلخ - بدون أي كلمة إنجليزية)
             const cName = courseObj.course;
             return {
                 isEnglish: false,
@@ -89133,6 +89191,7 @@ function buildDemoExecutiveReport(params) {
     function getCTPAdmissionFormData(trainee) {
         const seed = Math.abs(parseInt(String(trainee.id || '1088776655').slice(-6), 10) || 543210);
         const englishName = (typeof transliterateArabicName === 'function') ? transliterateArabicName(trainee.name) : 'TRAINEE NAME';
+        const qual = getTraineeEffectiveQualification(trainee);
 
         const birthYear = 2001 + (seed % 4);
         const birthMonth = (seed % 12) + 1;
@@ -89157,12 +89216,12 @@ function buildDemoExecutiveReport(params) {
             fullNameArabic: trainee.name || 'متدرب معهد الذهب الأسود',
             fullNameEnglish: englishName,
             nationalId: trainee.id || '10XXXXXXXX',
-            qualification: trainee.qual || 'دبلوم الكلية التقنية (تخصص تكنولوجيا صناعية)',
+            qualification: qual,
             birthGreg: birthGreg,
             birthHijri: birthHijri,
             birthPlace: 'المنطقة الشرقية',
             age: age,
-            maritalStatus: 'أعزب', // الكل أعزب
+            maritalStatus: 'أعزب',
             dependents: 0,
             mobile: trainee.phone || `050${String(trainee.id || '1234567').slice(-7)}`,
             email: `${String(trainee.id || 'trainee')}@blackgold.edu.sa`,
@@ -89176,9 +89235,9 @@ function buildDemoExecutiveReport(params) {
             emergencyName: fatherName,
             emergencyPhone: `055${String(seed * 7).slice(0, 7)}`,
             emergencyRelation: 'الأب / ولي الأمر',
-            regOfficer: 'محمد عبدرب النبي', // مسؤول القبول والتسجيل
-            supervisor: 'علي آل عباس', // مسؤول شؤون المتدربين
-            director: 'علي الشاخوري', // مدير المعهد
+            regOfficer: 'محمد عبدرب النبي',
+            supervisor: 'علي آل عباس',
+            director: 'علي الشاخوري',
             admissionStatus: 'قبول نهائي معتمد (مقبول)',
             admissionDate: '2025/11/15',
             issueCode: `BGTI-DOS-2026-${String(trainee.id || '9999').slice(-4)}`
@@ -89193,34 +89252,34 @@ function buildDemoExecutiveReport(params) {
                 <div class="border-b-2 border-black pb-2 flex items-center justify-between">
                     <div>
                         <h4 class="font-black text-black dark:text-white text-base">إقرار وتعهد السلامة والصحة المهنية والمحافظة على المرافق (HSE Commitment)</h4>
-                        <p class="text-xs text-slate-600 font-bold">وثيقة إلزامية يوقع عليها المتدرب في بداية التحاقه بالبرنامج التدريبي بالمعهد</p>
+                        <p class="text-xs text-slate-600 font-bold">وثيقة إلزامية في بداية التحاق المتدرب بالبرنامج التدريبي</p>
                     </div>
                     <span class="bg-black text-white px-2.5 py-1 rounded text-xs font-mono font-black">HSE-DOC-2026</span>
                 </div>
                 <p class="text-xs leading-relaxed text-slate-900 dark:text-slate-100">
-                    أقر وأتعهد أنا المتدرب: <b class="font-black text-black dark:text-white text-sm">${trainee.name}</b> (سجل مدني: <span class="font-mono font-bold">${trainee.id}</span>)، المقيد بشركة: <b class="font-bold">${trainee.company || 'المؤسسة'}</b>، بكامل قواي العقلية وإرادتي المعتبرة، بالالتزام الصارم والكامل بكافة لوائح السلامة والصحة المهنية المعمول بها في معهد الذهب الأسود العالي للتدريب، وأتعهد بالبنود الآتية:
+                    أقر وأتعهد أنا المتدرب: <b class="font-black text-black dark:text-white text-sm">${trainee.name}</b> (سجل مدني: <span class="font-mono font-bold">${trainee.id}</span>)، المقيد بشركة: <b class="font-bold">${trainee.company || 'المؤسسة'}</b>، بكامل قواي العقلية وإرادتي المعتبرة، بالالتزام الصارم بكافة لوائح السلامة والصحة المهنية المعمول بها في معهد الذهب الأسود العالي للتدريب، وأتعهد بالبنود الآتية:
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 my-2 text-xs">
                     <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-black space-y-1">
                         <b class="text-black dark:text-white block font-black">1. الالتزام بمهمات الوقاية الشخصية (PPE):</b>
-                        <span>ارتداء كامل مهمات الوقاية (الخوذة، حذاء السلامة، النظارات الواقية، والقفازات الملائمة) بصورة دائمة وإلزامية داخل الورش والمعامل الصناعية دون أي تهاون.</span>
+                        <span>ارتداء كامل مهمات الوقاية (الخوذة، حذاء السلامة، النظارات الواقية، والقفازات الملائمة) بشكل دائم داخل الورش والمعامل.</span>
                     </div>
                     <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-black space-y-1">
-                        <b class="text-black dark:text-white block font-black">2. المحافظة التامة على المرافق والمعدات:</b>
-                        <span>الحرص التام على نظافة وصيانة وسلامة معدات وآلات المعهد، والامتناع التام عن تشغيل أو لمس أي ماكينة أو لوحة طاقة إلا بتصريح وإشراف مباشر من المدرب.</span>
+                        <b class="text-black dark:text-white block font-black">2. المحافظة على المرافق والمعدات:</b>
+                        <span>الحرص التام على نظافة وصيانة وسلامة معدات وآلات المعهد، وعدم تشغيل أي ماكينة إلا بتصريح وإشراف مباشر من المدرب.</span>
                     </div>
                     <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-black space-y-1">
                         <b class="text-black dark:text-white block font-black">3. تجنب السلوكيات الخطرة وتفادي الإصابات:</b>
-                        <span>الامتناع عن المزاح أو التشتت أثناء التدريب العملي، والإبلاغ الفوري عن أي عطل أو شبهة خطر قد تسبب إصابة لي أو لأحد زملائي المتدربين.</span>
+                        <span>الامتناع عن المزاح أو التشتت أثناء التدريب، والإبلاغ الفوري عن أي عطل أو شبهة خطر قد تسبب إصابة.</span>
                     </div>
                     <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-black space-y-1">
                         <b class="text-black dark:text-white block font-black">4. الامتثال للتعليمات وأنظمة الطوارئ:</b>
-                        <span>التقيد الصارم بتوجيهات مسؤولي السلامة، والتعرف على مسارات الإخلاء الآمن ونقاط التجمع، والالتزام بكافة التعليمات المعمول بها بالمنشأة.</span>
+                        <span>التقيد الصارم بتوجيهات مسؤولي السلامة، والتعرف على مسارات الإخلاء ونقاط التجمع، والالتزام بالقوانين المنظمة.</span>
                     </div>
                 </div>
                 <div class="pt-3 border-t border-black flex items-center justify-between text-xs">
                     <div>
-                        <span class="text-slate-500 block font-bold">توقيع المتدرب المقر بالتعهد:</span>
+                        <span class="text-slate-500 block font-bold">توقيع المتدرب المقر:</span>
                         ${getOfficialSignatureHTML('trainee', seed, trainee.name)}
                     </div>
                     <div>
@@ -89228,7 +89287,7 @@ function buildDemoExecutiveReport(params) {
                         ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}
                     </div>
                     <div class="text-left font-mono text-[10px] text-slate-500">
-                        <div>تاريخ التعهد: 2025/11/15</div>
+                        <div>التاريخ: 2025/11/15</div>
                         <div>كود الوثيقة: HSE-ACK-${String(trainee.id).slice(-4)}</div>
                     </div>
                 </div>
@@ -89236,79 +89295,38 @@ function buildDemoExecutiveReport(params) {
         `;
     }
 
-    // Disciplinary & Attendance Warnings (Supervisor: علي آل عباس)
+    // Concise Warnings (Concise labels only - بدون وصف نصوص أو أقسام مطولة)
     function getCTPDisciplinaryWarnings(trainee) {
         const seed = Math.abs(parseInt(String(trainee.id || '1234').slice(-4), 10) || 789);
         return [
             {
-                type: 'إنذار تأخير صباحي (Morning Lateness Warning)',
-                code: `WARN-LATE-2026-${String(100 + (seed % 800))}`,
+                type: 'إنذار تأخير صباحي',
+                code: `WARN-LATE-${String(100 + (seed % 800))}`,
                 date: '2026/06/18',
-                violation: 'تكرار التأخر الصباحي عن بدء الحصة الأولى بمقدار 20 دقيقة دون عذر رسمي مسبق.',
-                procedure: 'توجيه إنذار أولي خطي وتوقيع المتدرب على التعهد بالانضباط بالحضور الصباحي المبكر.',
-                supervisor: 'علي آل عباس (مسؤول شؤون المتدربين)',
-                status: 'تمت التسوية والالتزام التام بعد التنبيه (Closed)'
+                violation: 'تأخر صباحي متكرر (20 دقيقة)',
+                procedure: 'إنذار وتعهد خطي بالانضباط',
+                supervisor: 'علي آل عباس',
+                status: 'تمت التسوية'
             },
             {
-                type: 'تنبيه غياب بدون عذر مقبول (Unexcused Absence Notice)',
-                code: `WARN-ABS-2026-${String(200 + (seed % 700))}`,
+                type: 'تنبيه غياب',
+                code: `WARN-ABS-${String(200 + (seed % 700))}`,
                 date: '2026/08/24',
-                violation: 'تسجيل غياب يوم تدريبي كامل دون إشعار الإدارة أو إرفاق تقرير طبي معتمد عبر المنصة.',
-                procedure: 'حسم جزئي من درجة المواظبة وإشعار منسق الشركة والتزام المتدرب بالتعويض العملي.',
-                supervisor: 'علي آل عباس (مسؤول شؤون المتدربين)',
-                status: 'تم قبول الإفادة اللاحقة وإغلاق السجل (Resolved)'
+                violation: 'غياب يوم تدريبي بدون إشعار',
+                procedure: 'حسم جزئي وتعهد بالتعويض',
+                supervisor: 'علي آل عباس',
+                status: 'تم القبول والإغلاق'
             },
             {
-                type: 'تنبيه الالتزام بلوائح الورش والسلامة (Workshop Conduct & Safety Notice)',
-                code: `WARN-HSE-2026-${String(300 + (seed % 600))}`,
+                type: 'تنبيه سلوك ومواظبة',
+                code: `WARN-HSE-${String(300 + (seed % 600))}`,
                 date: '2026/10/12',
-                violation: 'التهاون المؤقت في ارتداء نظارات الحماية الشخصية أثناء التواجد بالقرب من منطقة العمليات.',
-                procedure: 'توجيه وإرشاد ميداني فوري من ضابط السلامة، وإعادة مراجعة تعليمات السلامة والصحة المهنية.',
-                supervisor: 'علي آل عباس (مسؤول شؤون المتدربين)',
-                status: 'منتهي بالامتثال الفوري والتقيد الصارم (Complied)'
+                violation: 'تهاون في ارتداء نظارة الحماية',
+                procedure: 'توجيه ميداني فوري وإرشاد',
+                supervisor: 'علي آل عباس',
+                status: 'تم الامتثال'
             }
         ];
-    }
-
-    // Academic Grade Transcript
-    function getCTPAcademicGrades(trainee) {
-        const assigned = getTraineeAssignedCourses(trainee);
-        const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 888);
-
-        let totalPoints = 0;
-        let totalHours = 0;
-
-        const coursesGrades = assigned.map((crs, idx) => {
-            const classwork = 28 + (seed % 3);
-            const midterm = 27 + ((seed + idx) % 3);
-            const finalExam = 38 + ((seed + idx * 2) % 3);
-            const total = classwork + midterm + finalExam;
-            const hours = 60;
-            totalHours += hours;
-            totalPoints += total * hours;
-
-            return {
-                code: `BGTI-${crs.course.slice(0, 3).toUpperCase()}-10${idx + 1}`,
-                course: crs.course,
-                trainer: crs.trainer,
-                room: crs.room,
-                hours: hours,
-                classwork: classwork,
-                midterm: midterm,
-                finalExam: finalExam,
-                total: total,
-                appreciation: total >= 90 ? 'ممتاز مرتفع (A+)' : (total >= 80 ? 'جيد جداً (B+)' : 'جيد (C)')
-            };
-        });
-
-        const gpa = (totalPoints / (totalHours * 20)).toFixed(2);
-        return {
-            courses: coursesGrades,
-            totalHours: totalHours,
-            gpa: gpa > 5.0 ? '4.88' : gpa,
-            appreciation: 'ممتاز مع مرتبة الشرف الأولى',
-            status: 'ناجح ومجتاز لكافة المتطلبات الأكاديمية والمهنية بنجاح'
-        };
     }
 
     // Open Comprehensive Portfolio Modal
@@ -89420,7 +89438,7 @@ function buildDemoExecutiveReport(params) {
 
         const assigned = getTraineeAssignedCourses(trainee);
         const adm = getCTPAdmissionFormData(trainee);
-        const transcript = getCTPAcademicGrades(trainee);
+        const monthlyTranscript = getCTPMonthlyGradesTranscript(trainee);
         const warnings = getCTPDisciplinaryWarnings(trainee);
         const exams = getCTPCourseExamModels(trainee);
         const schedule = getCTPWeeklySchedule(trainee);
@@ -89429,39 +89447,40 @@ function buildDemoExecutiveReport(params) {
 
         document.getElementById('ctpTraineeName').innerText = trainee.name || 'متدرب معهد الذهب الأسود';
         document.getElementById('ctpTraineeNationalId').innerText = trainee.id || '10XXXXXXXX';
+        document.getElementById('ctpTraineeQual').innerText = adm.qualification;
         document.getElementById('ctpTraineeCompany').innerText = trainee.company || 'المؤسسة العامة';
         document.getElementById('ctpTraineeGroup').innerText = trainee.group || 'عام';
         document.getElementById('ctpTraineeSpecialty').innerText = assigned.map(a => a.course).join(' و ');
         document.getElementById('ctpTraineeRate').innerText = `${Math.round(parseFloat(trainee.rate || trainee.weeklyRate || 95))}%`;
 
-        // 1. Render Safety Pledge in Tab (AT THE START)
+        // 1. Safety Pledge in Tab (AT THE START)
         const safetyContainer = document.getElementById('ctpSafetyPledgeContainer');
         if (safetyContainer) {
             safetyContainer.innerHTML = getCTPSafetyPledgeText(trainee);
         }
 
-        // 2. Render Admission Form in Tab
+        // 2. Admission Form in Tab
         const admContainer = document.getElementById('ctpAdmissionFormContainer');
         if (admContainer) {
             admContainer.innerHTML = `
                 <div class="border border-black rounded-2xl p-4 sm:p-5 space-y-4 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100">
                     <div class="flex items-center justify-between border-b border-black pb-3">
-                        <div class="space-y-0.5">
-                            <h4 class="font-black text-sm text-black dark:text-white">نموذج طلب تسجيل وقبول متدرب (Admission & Registration Form)</h4>
+                        <div>
+                            <h4 class="font-black text-sm text-black dark:text-white">نموذج تسجيل وقبول متدرب</h4>
                             <p class="text-[11px] text-slate-500 font-mono">تاريخ تقديم الطلب: ${adm.admissionDate} • رقم الملف: ${adm.issueCode}</p>
                         </div>
                         <span class="bg-black text-white dark:bg-white dark:text-black font-black px-3 py-1 rounded-lg text-xs">الحالة: ${adm.admissionStatus}</span>
                     </div>
 
                     <div class="space-y-3">
-                        <h5 class="font-black text-xs text-black dark:text-white border-r-4 border-black pr-2">1. البيانات الشخصية:</h5>
+                        <h5 class="font-black text-xs text-black dark:text-white border-r-4 border-black pr-2">البيانات الشخصية:</h5>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
                             <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700">
                                 <span class="text-slate-500 text-[10px] block font-bold">أسم المتدرب الرباعي:</span>
                                 <b class="font-black text-black dark:text-white">${adm.fullNameArabic}</b>
                             </div>
                             <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700">
-                                <span class="text-slate-500 text-[10px] block font-bold">الاسم باللغة الإنجليزية:</span>
+                                <span class="text-slate-500 text-[10px] block font-bold">الاسم بالإنجليزية:</span>
                                 <b class="font-bold font-mono text-black dark:text-white">${adm.fullNameEnglish}</b>
                             </div>
                             <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700">
@@ -89470,7 +89489,7 @@ function buildDemoExecutiveReport(params) {
                             </div>
                             <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700">
                                 <span class="text-slate-500 text-[10px] block font-bold">المؤهل الدراسي:</span>
-                                <b class="font-bold text-black dark:text-white">${adm.qualification}</b>
+                                <b class="font-black text-black dark:text-white">${adm.qualification}</b>
                             </div>
                             <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700">
                                 <span class="text-slate-500 text-[10px] block font-bold">تاريخ الميلاد ميلادي:</span>
@@ -89500,7 +89519,7 @@ function buildDemoExecutiveReport(params) {
                     </div>
 
                     <div class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-700">
-                        <h5 class="font-black text-xs text-black dark:text-white border-r-4 border-black pr-2">2. العنوان الوطني المسجل:</h5>
+                        <h5 class="font-black text-xs text-black dark:text-white border-r-4 border-black pr-2">العنوان الوطني:</h5>
                         <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-center">
                             <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700"><span class="text-slate-500 text-[10px] block">رقم المبنى</span><b class="font-mono">${adm.buildingNo}</b></div>
                             <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700"><span class="text-slate-500 text-[10px] block">الحي</span><b>${adm.district}</b></div>
@@ -89514,18 +89533,18 @@ function buildDemoExecutiveReport(params) {
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200 dark:border-slate-700">
                         <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700 space-y-1">
                             <span class="text-slate-500 text-[10px] font-bold block">المعلومات الصحية:</span>
-                            <div class="font-bold">هل تعاني من أي أمراض مزمنة أو عاهة تعيقك عن التدريب؟ <b>لا ☑ نعم ☐</b></div>
-                            <div class="text-[11px] text-slate-500">الحالة الطبية: لائق صحياً وبدنياً لكافة العمليات والورش التدريبية.</div>
+                            <div class="font-bold">هل تعاني من أي أمراض مزمنة أو عاهة تعيق التدريب؟ <b>لا ☑ نعم ☐</b></div>
+                            <div class="text-[11px] text-slate-500">الحالة: لائق طبياً وبدنياً.</div>
                         </div>
                         <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700 space-y-1">
-                            <span class="text-slate-500 text-[10px] font-bold block">جهات اتصال الحالات الطارئة:</span>
-                            <div class="font-bold">الاسم: <b>${adm.emergencyName}</b> (${adm.emergencyRelation})</div>
-                            <div class="text-[11px] font-mono text-slate-600 dark:text-slate-400">رقم التواصل: ${adm.emergencyPhone}</div>
+                            <span class="text-slate-500 text-[10px] font-bold block">جهات اتصال الطوارئ:</span>
+                            <div class="font-bold">${adm.emergencyName} (${adm.emergencyRelation})</div>
+                            <div class="text-[11px] font-mono text-slate-600 dark:text-slate-400">جوال: ${adm.emergencyPhone}</div>
                         </div>
                     </div>
 
                     <div class="p-3 rounded-xl border border-black bg-slate-50 dark:bg-slate-800 space-y-2">
-                        <span class="text-[11px] font-black block border-b border-black pb-1">يعبأ من قبل إدارة المعهد (الأوراق والمسوغات المطلوبة):</span>
+                        <span class="text-[11px] font-black block border-b border-black pb-1">يعبأ من قبل إدارة المعهد (الوثائق الرسمية):</span>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] font-bold">
                             <div>المؤهل الدراسي: ☑</div>
                             <div>السيرة الذاتية: ☑</div>
@@ -89553,7 +89572,7 @@ function buildDemoExecutiveReport(params) {
             `;
         }
 
-        // 3. Render Schedule (STRICTLY 2 PERIODS PER DAY)
+        // 3. Render Schedule (2 Periods)
         const schedTable = document.getElementById('ctpScheduleTable');
         const schedGrpLbl = document.getElementById('ctpScheduleGroupLabel');
         if (schedGrpLbl) schedGrpLbl.innerText = `الشعبة: ${trainee.group || 'عام'}`;
@@ -89582,79 +89601,86 @@ function buildDemoExecutiveReport(params) {
             `;
         }
 
-        // 4. Render Grades in Tab
+        // 4. Render Monthly Grades Transcript in Tab
         const gradesContainer = document.getElementById('ctpGradesContainer');
         if (gradesContainer) {
             gradesContainer.innerHTML = `
                 <div class="border border-black rounded-2xl p-4 sm:p-5 space-y-4 bg-white dark:bg-slate-800 text-xs">
                     <div class="flex items-center justify-between border-b border-black pb-3">
                         <div>
-                            <h4 class="font-black text-sm text-black dark:text-white">كشف الدرجات الأكاديمي والمهني الشامل (Academic Grade Transcript)</h4>
-                            <p class="text-slate-500 text-[11px]">توثيق رسمي للدرجات المسجلة في المقررات التدريبية المقيدة بجدول المتدرب</p>
+                            <h4 class="font-black text-sm text-black dark:text-white">كشف درجات الشهور (أبريل - أكتوبر 2026) والمعدل التراكمي</h4>
+                            <p class="text-slate-500 text-[11px]">تاريخ الإصدار: <b>${monthlyTranscript.issueDate}</b> (${monthlyTranscript.issueDateHijri})</p>
                         </div>
                         <div class="text-right">
-                            <span class="text-slate-500 text-[10px] block font-bold">المعدل التراكمي (GPA):</span>
-                            <span class="text-base font-black text-black dark:text-white">${transcript.gpa} / 5.00</span>
+                            <span class="text-slate-500 text-[10px] block font-bold">المعدل العام والنسبة المئوية:</span>
+                            <span class="text-base font-black text-black dark:text-white">${monthlyTranscript.overallGpa} / 5.00 (${monthlyTranscript.overallPercent}%)</span>
                         </div>
                     </div>
 
                     <table class="w-full text-xs text-right border-collapse border border-black">
                         <thead>
-                            <tr class="bg-slate-100 dark:bg-slate-700 font-black">
-                                <th class="border border-black p-2">رمز واسم المقرر</th>
-                                <th class="border border-black p-2">المدرب</th>
-                                <th class="border border-black p-2 text-center">أعمال الفصل (30)</th>
-                                <th class="border border-black p-2 text-center">النصفي/العملي (30)</th>
-                                <th class="border border-black p-2 text-center">النهائي (40)</th>
-                                <th class="border border-black p-2 text-center">المجموع (100)</th>
+                            <tr class="bg-black text-white font-black">
+                                <th class="border border-black p-2">الشهر</th>
+                                <th class="border border-black p-2">المقررات والدرجات</th>
+                                <th class="border border-black p-2 text-center">معدل الشهر</th>
+                                <th class="border border-black p-2 text-center">النسبة</th>
                                 <th class="border border-black p-2 text-center">التقدير</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${transcript.courses.map(c => `
+                            ${monthlyTranscript.months.map(m => `
                                 <tr>
-                                    <td class="border border-black p-2 font-black">${c.course} <span class="font-mono text-slate-500 text-[10px]">(${c.code})</span></td>
-                                    <td class="border border-black p-2 font-bold">${c.trainer}</td>
-                                    <td class="border border-black p-2 text-center font-bold">${c.classwork}</td>
-                                    <td class="border border-black p-2 text-center font-bold">${c.midterm}</td>
-                                    <td class="border border-black p-2 text-center font-bold">${c.finalExam}</td>
-                                    <td class="border border-black p-2 text-center font-black">${c.total}</td>
-                                    <td class="border border-black p-2 text-center font-bold">${c.appreciation}</td>
+                                    <td class="border border-black p-2 font-black bg-slate-50">${m.name}</td>
+                                    <td class="border border-black p-2">
+                                        ${m.courseScores.map(cs => `<div><b>${cs.course}:</b> <span class="font-mono font-bold">${cs.score}/100</span> <span class="text-slate-500 text-[10px]">(${cs.trainer})</span></div>`).join('')}
+                                    </td>
+                                    <td class="border border-black p-2 text-center font-mono font-bold">${m.monthGpa}</td>
+                                    <td class="border border-black p-2 text-center font-mono font-black">${m.monthAverage}%</td>
+                                    <td class="border border-black p-2 text-center font-bold">${m.appreciation}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
                         <tfoot>
-                            <tr class="bg-slate-50 dark:bg-slate-700/60 font-black">
-                                <td colspan="5" class="border border-black p-2">النتيجة والتقدير العام:</td>
-                                <td colspan="2" class="border border-black p-2 text-center">${transcript.status}</td>
+                            <tr class="bg-slate-100 font-black">
+                                <td class="border border-black p-2">المعدل التراكمي العام:</td>
+                                <td class="border border-black p-2 font-mono">${monthlyTranscript.overallGpa} من 5.00</td>
+                                <td class="border border-black p-2 text-center">النسبة الكلية:</td>
+                                <td class="border border-black p-2 text-center font-mono text-sm">${monthlyTranscript.overallPercent}%</td>
+                                <td class="border border-black p-2 text-center">${monthlyTranscript.overallAppreciation}</td>
                             </tr>
                         </tfoot>
                     </table>
+
+                    <div class="pt-2 border-t border-black flex items-center justify-between text-xs">
+                        <div>تاريخ الاعتماد: <b>آخر يوم من شهر أكتوبر 2026 (${monthlyTranscript.issueDate})</b></div>
+                        <div>النتيجة: <b>${monthlyTranscript.status}</b></div>
+                    </div>
                 </div>
             `;
         }
 
-        // 5. Render Warnings in Tab
+        // 5. Render Warnings in Tab (Concise Labels Only)
         const warnContainer = document.getElementById('ctpWarningsContainer');
         if (warnContainer) {
             warnContainer.innerHTML = `
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h4 class="font-black text-sm text-black dark:text-white">سجل الإنذارات والتنبيهات المعتادة للمتدرب</h4>
-                            <p class="text-xs text-slate-500">معتمد من مسؤول شؤون المتدربين: <b>علي آل عباس</b></p>
+                            <h4 class="font-black text-sm text-black dark:text-white">سجل الإنذارات والتنبيهات المعتادة</h4>
+                            <p class="text-xs text-slate-500">مسؤول شؤون المتدربين: <b>علي آل عباس</b></p>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         ${warnings.map(w => `
                             <div class="border border-black rounded-2xl p-4 bg-white dark:bg-slate-800 space-y-2 text-xs">
-                                <div class="border-b border-black pb-2">
-                                    <span class="text-[10px] font-mono text-slate-500 block">${w.code} • ${w.date}</span>
-                                    <h5 class="font-black text-xs text-black dark:text-white mt-0.5">${w.type}</h5>
+                                <div class="border-b border-black pb-2 flex items-center justify-between">
+                                    <h5 class="font-black text-xs text-black dark:text-white">${w.type}</h5>
+                                    <span class="text-[10px] font-mono text-slate-500">${w.code}</span>
                                 </div>
-                                <div class="space-y-1 text-slate-700 dark:text-slate-300">
-                                    <div><span class="text-slate-500 font-bold block text-[10px]">موضوع المخالفة:</span>${w.violation}</div>
-                                    <div><span class="text-slate-500 font-bold block text-[10px]">الإجراء المتخذ:</span>${w.procedure}</div>
+                                <div class="space-y-1 text-slate-800 dark:text-slate-200">
+                                    <div><b>التاريخ:</b> <span class="font-mono">${w.date}</span></div>
+                                    <div><b>المخالفة:</b> ${w.violation}</div>
+                                    <div><b>الإجراء:</b> ${w.procedure}</div>
                                 </div>
                                 <div class="pt-2 border-t border-black flex items-center justify-between text-[11px]">
                                     <span class="text-slate-700 font-bold">${w.supervisor}</span>
@@ -89670,13 +89696,12 @@ function buildDemoExecutiveReport(params) {
         // 6. Render Framed Exam Papers in Tab
         const examContainer = document.getElementById('ctpExamModelsContainer');
         if (examContainer) {
-            examContainer.innerHTML = exams.map((ex, idx) => `
+            examContainer.innerHTML = exams.map(ex => `
                 <div class="border-2 border-black rounded-2xl p-4 sm:p-5 bg-white dark:bg-slate-800 space-y-3 ${ex.isEnglish ? 'text-left' : 'text-right'}" dir="${ex.isEnglish ? 'ltr' : 'rtl'}">
-                    <!-- Exam Paper Framed Header -->
-                    <div class="border-b-2 border-black pb-3">
+                    <div class="border-b-2 border-black pb-2">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h5 class="font-black text-xs uppercase tracking-wider text-black dark:text-white">${ex.isEnglish ? 'Black Gold Training Institute - Examination Paper' : 'معهد الذهب الأسود العالي للتدريب - ورقة اختبار معتمد'}</h5>
+                                <h5 class="font-black text-xs uppercase tracking-wider text-black dark:text-white">${ex.isEnglish ? 'TVTC - Black Gold Training Institute - Examination Paper' : 'المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود'}</h5>
                                 <h4 class="font-black text-sm text-black dark:text-white mt-0.5">${ex.title}</h4>
                             </div>
                             <div class="border border-black px-3 py-1 text-center bg-slate-50 dark:bg-slate-700">
@@ -89685,74 +89710,54 @@ function buildDemoExecutiveReport(params) {
                             </div>
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2 pt-2 border-t border-slate-300 text-xs font-mono">
-                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Trainee Name' : 'اسم المتدرب'}</span><b>${ex.traineeName}</b></div>
-                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'National ID' : 'رقم الهوية'}</span><b>${ex.traineeId}</b></div>
-                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Exam Date' : 'تاريخ الاختبار'}</span><b>${ex.date}</b></div>
-                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Room / Workshop' : 'مكان الاختبار'}</span><b>${ex.room} (${ex.instructor})</b></div>
+                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Trainee' : 'المتدرب'}</span><b>${ex.traineeName}</b></div>
+                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'ID' : 'الهوية'}</span><b>${ex.traineeId}</b></div>
+                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Date' : 'التاريخ'}</span><b>${ex.date}</b></div>
+                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Location' : 'المكان'}</span><b>${ex.room} (${ex.instructor})</b></div>
                         </div>
                     </div>
 
-                    <!-- Part 1: True / False Questions -->
-                    <div class="space-y-2">
-                        <div class="font-black text-xs bg-slate-100 dark:bg-slate-700 p-1.5 rounded border border-slate-300">
-                            ${ex.isEnglish ? 'Section 1: True or False Questions (10 Marks Each)' : 'القسم الأول: ضع علامة (✔) أمام العبارة الصحيحة وعلامة (✖) أمام العبارة الخاطئة (10 درجات لكل فقرة)'}
-                        </div>
-                        <div class="space-y-1.5 text-xs">
-                            ${ex.tfQuestions.map(q => `
-                                <div class="p-2 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between">
-                                    <span class="font-medium">${q.q}</span>
-                                    <div class="flex items-center gap-3 shrink-0 ${ex.isEnglish ? 'ml-2' : 'mr-2'}">
-                                        <span class="font-black font-mono bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded border border-slate-300">[ ✔ ] ${q.traineeAns}</span>
-                                        <span class="text-[10px] text-slate-500 font-bold">${q.mark}</span>
-                                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <b class="text-[10px] bg-slate-100 dark:bg-slate-700 p-1 block border border-slate-300">${ex.isEnglish ? 'Part 1: True / False Questions' : 'القسم الأول: أسئلة الصواب والخطأ (10 درجات لكل فقرة)'}</b>
+                        ${ex.tfQuestions.map(q => `
+                            <div class="p-1.5 border border-slate-200 dark:border-slate-700 rounded flex items-center justify-between">
+                                <span>${q.q}</span>
+                                <span class="font-black font-mono shrink-0 ${ex.isEnglish ? 'ml-2' : 'mr-2'}">[ ✔ ] ${q.traineeAns} (${q.mark})</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="space-y-1.5 text-xs pt-1">
+                        <b class="text-[10px] bg-slate-100 dark:bg-slate-700 p-1 block border border-slate-300">${ex.isEnglish ? 'Part 2: Multiple Choice Questions' : 'القسم الثاني: أسئلة الاختيار من متعدد (10 درجات لكل فقرة)'}</b>
+                        ${ex.mcQuestions.map(q => `
+                            <div class="p-2 border border-slate-200 dark:border-slate-700 rounded space-y-1">
+                                <div class="font-bold">${q.q}</div>
+                                <div class="grid grid-cols-2 gap-1 text-[11px]">
+                                    ${q.options.map(opt => `
+                                        <div class="p-1 rounded border ${opt.startsWith(q.selected) ? 'border-black font-black bg-slate-100 dark:bg-slate-700' : 'border-slate-200 dark:border-slate-700 text-slate-600'}">
+                                            ${opt} ${opt.startsWith(q.selected) ? '✔' : ''}
+                                        </div>
+                                    `).join('')}
                                 </div>
-                            `).join('')}
-                        </div>
+                            </div>
+                        `).join('')}
                     </div>
 
-                    <!-- Part 2: Multiple Choice Questions -->
-                    <div class="space-y-2 pt-2">
-                        <div class="font-black text-xs bg-slate-100 dark:bg-slate-700 p-1.5 rounded border border-slate-300">
-                            ${ex.isEnglish ? 'Section 2: Multiple Choice Questions - Select the Correct Answer (10 Marks Each)' : 'القسم الثاني: اختر الإجابة الصحيحة من بين الخيارات التالية (10 درجات لكل فقرة)'}
-                        </div>
-                        <div class="space-y-2 text-xs">
-                            ${ex.mcQuestions.map(q => `
-                                <div class="p-2.5 border border-slate-200 dark:border-slate-700 rounded-lg space-y-1.5">
-                                    <div class="font-bold flex items-center justify-between">
-                                        <span>${q.q}</span>
-                                        <span class="text-[10px] text-slate-500 font-mono">${q.mark}</span>
-                                    </div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px]">
-                                        ${q.options.map(opt => {
-                                            const isSelected = opt.startsWith(q.selected);
-                                            return `
-                                                <div class="p-1 px-2 rounded border ${isSelected ? 'border-black font-black bg-slate-100 dark:bg-slate-700' : 'border-slate-200 dark:border-slate-700 text-slate-600'}">
-                                                    ${opt} ${isSelected ? ' ✔' : ''}
-                                                </div>
-                                            `;
-                                        }).join('')}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Instructor Grading & Signature Box -->
-                    <div class="pt-3 border-t-2 border-black flex items-center justify-between text-xs">
+                    <div class="pt-2 border-t-2 border-black flex items-center justify-between text-xs">
                         <div>
-                            <span class="text-slate-500 block font-bold">${ex.isEnglish ? 'Instructor Signature' : 'توقيع المدرب الفاحص:'}</span>
-                            ${getOfficialSignatureHTML('trainer', seed + idx, ex.instructor)}
+                            <span class="text-slate-500 block font-bold">${ex.isEnglish ? 'Instructor Signature:' : 'توقيع المدرب:'}</span>
+                            ${getOfficialSignatureHTML('trainer', seed + ex.examNo, ex.instructor)}
                         </div>
-                        <div class="text-center font-bold">
-                            <span class="text-slate-500 block text-[10px]">${ex.isEnglish ? 'Final Evaluation' : 'التقييم والاعتماد'}</span>
-                            <span class="font-black text-sm">${ex.isEnglish ? 'PASSED WITH EXCELLENCE' : 'ناجح ومجتاز بتفوق'}</span>
+                        <div class="font-bold text-center">
+                            <span class="text-slate-500 block text-[10px]">${ex.isEnglish ? 'Evaluation' : 'التقييم'}</span>
+                            <span class="font-black text-sm">${ex.isEnglish ? 'PASSED' : 'ناجح ومجتاز'}</span>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // 7. Render Attendance History (Months 4 through 11)
+        // 7. Attendance History (Months 4-11)
         renderMonthButtons(currentCTPSelectedMonth);
         const summContainer = document.getElementById('ctpMonthlySummaryTableContainer');
         if (summContainer) {
@@ -89792,8 +89797,7 @@ function buildDemoExecutiveReport(params) {
         }
     }
 
-    // PRINT & EXPORT: 4 Pages Official Trainee Dossier in Black & White
-    // Page 1: Safety Pledge (AT THE BEGINNING) + Registration Form
+    // PRINT & EXPORT: Every single section & exam on an INDEPENDENT PAGE
     function printComprehensiveTraineeDossier() {
         if (!currentCTPTrainee) return;
         const trainee = currentCTPTrainee;
@@ -89802,15 +89806,16 @@ function buildDemoExecutiveReport(params) {
 
         const assigned = getTraineeAssignedCourses(trainee);
         const adm = getCTPAdmissionFormData(trainee);
-        const transcript = getCTPAcademicGrades(trainee);
+        const monthlyTranscript = getCTPMonthlyGradesTranscript(trainee);
         const warnings = getCTPDisciplinaryWarnings(trainee);
         const exams = getCTPCourseExamModels(trainee);
         const schedule = getCTPWeeklySchedule(trainee);
         const historyMonths = getCTPMonthlyAttendanceHistory(trainee);
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
 
+        // Header for printable pages with TVTC and BGTI logos
         const getPageHeader = (pageTitle, pageNumber) => `
-            <div class="border-b-2 border-black pb-3 mb-3">
+            <div class="border-b-2 border-black pb-2 mb-3">
                 <div class="flex items-center justify-between">
                     <div class="text-right text-[11px] leading-tight space-y-0.5">
                         <div class="font-black text-black text-xs">المملكة العربية السعودية</div>
@@ -89818,8 +89823,9 @@ function buildDemoExecutiveReport(params) {
                         <div class="font-black text-black">معهد الذهب الأسود العالي للتدريب</div>
                         <div class="text-[10px] text-slate-600 font-mono">س.ت: 2052117185 • فرع عنك</div>
                     </div>
-                    <div class="w-24 h-16 flex items-center justify-center p-1">
-                        <img src="assets/bgti_logo.png" alt="Black Gold Logo" class="max-h-full max-w-full object-contain" onerror="this.onerror=null; this.src='logo.png'">
+                    <div class="flex items-center gap-3">
+                        <img src="assets/tvtc_logo.png" alt="TVTC Logo" class="h-14 w-auto object-contain">
+                        <img src="assets/bgti_logo.png" alt="Black Gold Logo" class="h-14 w-auto object-contain">
                     </div>
                     <div class="text-left text-[11px] leading-tight space-y-0.5" dir="ltr">
                         <div class="font-black text-black text-xs">Kingdom of Saudi Arabia</div>
@@ -89828,88 +89834,110 @@ function buildDemoExecutiveReport(params) {
                         <div class="text-[10px] text-slate-600 font-mono">CR: 2052117185 • Anak Branch</div>
                     </div>
                 </div>
-                <div class="mt-2 pt-2 border-t border-slate-300 flex items-center justify-between text-xs">
+                <div class="mt-2 pt-1 border-t border-slate-300 flex items-center justify-between text-xs">
                     <span class="font-black text-black text-sm">${pageTitle}</span>
-                    <span class="text-slate-600 font-mono text-[11px]">${adm.issueCode} • صفحة ${pageNumber} من 4</span>
+                    <span class="text-slate-600 font-mono text-[11px]">${adm.issueCode} • ورقة ${pageNumber} من 9</span>
                 </div>
             </div>
         `;
 
         printArea.innerHTML = `
-            <!-- ================= PAGE 1: SAFETY PLEDGE (IN BEGINNING) + REGISTRATION FORM ================= -->
-            <div class="space-y-3 pb-4" style="page-break-after: always;">
-                ${getPageHeader('إقرار السلامة في البداية واستمارة التسجيل والقبول الرسمية', 1)}
+            <!-- ================= PAGE 1: SAFETY PLEDGE (INDEPENDENT PAGE) ================= -->
+            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+                ${getPageHeader('إقرار وتعهد السلامة والصحة المهنية والمحافظة على المرافق', 1)}
 
-                <!-- 1. Safety Pledge FIRST -->
-                <div class="border-2 border-black p-3 space-y-1.5 bg-slate-50 text-xs">
-                    <div class="font-black text-sm border-b-2 border-black pb-1 flex items-center justify-between">
+                <div class="border-2 border-black p-4 space-y-3 bg-slate-50 text-xs">
+                    <div class="font-black text-sm border-b-2 border-black pb-2 flex items-center justify-between">
                         <span>إقرار وتعهد السلامة والصحة المهنية والمحافظة على المرافق (HSE Commitment)</span>
                         <span class="text-[10px] font-mono">وثيقة البداية الإلزامية</span>
                     </div>
-                    <p class="leading-relaxed text-[11px]">
-                        أقر وأتعهد أنا المتدرب: <b>${trainee.name}</b> (سجل مدني: <span class="font-mono font-bold">${trainee.id}</span>)، بالالتزام الصارم بارتداء معدات الوقاية الشخصية (الخوذة، الحذاء، النظارة، القفازات) بشكل دائم داخل الورش والمعامل، المحافظة التامة على مرافق ومعدات المعهد وعدم تشغيل أي ماكينة إلا بتوجيه المدرب، تجنب أي سلوك خطر لمنع وقوع أي إصابة، والتقيد التام بأنظمة الطوارئ ومسارات الإخلاء.
+                    <p class="leading-relaxed text-xs">
+                        أقر وأتعهد أنا المتدرب: <b class="font-black text-sm">${trainee.name}</b> (سجل مدني: <span class="font-mono font-bold">${trainee.id}</span>)، المقيد بشركة: <b>${trainee.company || 'المؤسسة'}</b>، بكامل قواي العقلية وإرادتي المعتبرة، بالالتزام التام بكافة لوائح وتعليمات السلامة والصحة المهنية المعمول بها بمعهد الذهب الأسود العالي للتدريب، وأتعهد بالبنود الآتية:
                     </p>
-                    <div class="grid grid-cols-2 gap-2 text-[10px] font-bold border-t border-slate-300 pt-1">
-                        <div>1. ارتداء كامل مهمات الوقاية الشخصية (PPE) ☑</div>
-                        <div>2. المحافظة على الآلات والمرافق ومنع العبث ☑</div>
-                        <div>3. تجنب السلوكيات الخطرة وتفادي أي إصابة ☑</div>
-                        <div>4. الامتثال التام للتعليمات وأنظمة الطوارئ ☑</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 my-2 text-xs">
+                        <div class="p-3 rounded-xl bg-white border border-black space-y-1">
+                            <b class="text-black block font-black">1. الالتزام بمهمات الوقاية الشخصية (PPE):</b>
+                            <span>ارتداء كامل مهمات الوقاية (الخوذة، حذاء السلامة الصناعي، النظارات الواقية، والقفازات الملائمة) بشكل دائم داخل الورش والمعامل.</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white border border-black space-y-1">
+                            <b class="text-black block font-black">2. المحافظة التامة على المرافق والمعدات:</b>
+                            <span>الحرص التام على نظافة وصيانة وسلامة معدات وآلات المعهد، والامتناع التام عن تشغيل أي ماكينة أو لوحة طاقة إلا بإشراف مباشر من المدرب.</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white border border-black space-y-1">
+                            <b class="text-black block font-black">3. تجنب السلوكيات الخطرة وتفادي الإصابات:</b>
+                            <span>الامتناع عن المزاح أو التشتت أثناء التدريب العملي، والإبلاغ الفوري عن أي عطل أو شبهة خطر قد تسبب إصابة.</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white border border-black space-y-1">
+                            <b class="text-black block font-black">4. الامتثال للتعليمات وأنظمة الطوارئ:</b>
+                            <span>التقيد الصارم بتوجيهات مسؤولي السلامة، والتعرف على مسارات الإخلاء الآمن ونقاط التجمع، والالتزام بالقوانين المعمول بها.</span>
+                        </div>
                     </div>
-                    <div class="flex items-center justify-between pt-1 border-t border-black text-[11px]">
-                        <div>توقيع المتدرب المقر: ${getOfficialSignatureHTML('trainee', seed, trainee.name)}</div>
-                        <div>مشرف شؤون المتدربين: ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}</div>
-                        <div class="font-mono text-[10px] text-slate-500">التاريخ: ${adm.admissionDate}</div>
+                    <div class="grid grid-cols-3 gap-4 pt-4 border-t-2 border-black text-center text-xs items-center">
+                        <div>
+                            <span class="text-slate-500 block font-bold">توقيع المتدرب المقر:</span>
+                            ${getOfficialSignatureHTML('trainee', seed, trainee.name)}
+                        </div>
+                        <div class="flex flex-col items-center justify-center">
+                            <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-20 w-auto object-contain">
+                        </div>
+                        <div>
+                            <span class="text-slate-500 block font-bold">مسؤول شؤون المتدربين:</span>
+                            ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- 2. Registration & Admission Application Form -->
+            <!-- ================= PAGE 2: ADMISSION & REGISTRATION FORM (INDEPENDENT PAGE) ================= -->
+            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+                ${getPageHeader('استمارة تسجيل وقبول متدرب رسمي', 2)}
+
                 <div>
-                    <div class="font-black text-xs bg-black text-white px-2 py-1 mb-1">استمارة تسجيل وقبول متدرب رسمي</div>
+                    <div class="font-black text-xs bg-black text-white px-2 py-1 mb-1">البيانات الشخصية للمتدرب</div>
                     <table class="w-full text-xs border-collapse border border-black text-right">
                         <tbody>
                             <tr>
-                                <td class="border border-black p-1.5 font-bold bg-slate-100 w-1/4">اسم المتدرب الرباعي:</td>
-                                <td class="border border-black p-1.5 font-black text-sm w-1/4">${adm.fullNameArabic}</td>
-                                <td class="border border-black p-1.5 font-bold bg-slate-100 w-1/4">الاسم باللغة الإنجليزية:</td>
-                                <td class="border border-black p-1.5 font-bold font-mono w-1/4">${adm.fullNameEnglish}</td>
+                                <td class="border border-black p-2 font-bold bg-slate-100 w-1/4">اسم المتدرب الرباعي:</td>
+                                <td class="border border-black p-2 font-black text-sm w-1/4">${adm.fullNameArabic}</td>
+                                <td class="border border-black p-2 font-bold bg-slate-100 w-1/4">الاسم بالإنجليزية:</td>
+                                <td class="border border-black p-2 font-bold font-mono w-1/4">${adm.fullNameEnglish}</td>
                             </tr>
                             <tr>
-                                <td class="border border-black p-1.5 font-bold bg-slate-100">رقم بطاقة الأحوال:</td>
-                                <td class="border border-black p-1.5 font-black font-mono">${adm.nationalId}</td>
-                                <td class="border border-black p-1.5 font-bold bg-slate-100">المؤهل الدراسي:</td>
-                                <td class="border border-black p-1.5 font-bold">${adm.qualification}</td>
+                                <td class="border border-black p-2 font-bold bg-slate-100">رقم بطاقة الأحوال:</td>
+                                <td class="border border-black p-2 font-black font-mono">${adm.nationalId}</td>
+                                <td class="border border-black p-2 font-bold bg-slate-100">المؤهل الدراسي:</td>
+                                <td class="border border-black p-2 font-black">${adm.qualification}</td>
                             </tr>
                             <tr>
-                                <td class="border border-black p-1.5 font-bold bg-slate-100">تاريخ الميلاد ميلادي:</td>
-                                <td class="border border-black p-1.5 font-mono">${adm.birthGreg}</td>
-                                <td class="border border-black p-1.5 font-bold bg-slate-100">تاريخ الميلاد الهجري:</td>
-                                <td class="border border-black p-1.5">${adm.birthHijri}</td>
+                                <td class="border border-black p-2 font-bold bg-slate-100">تاريخ الميلاد ميلادي:</td>
+                                <td class="border border-black p-2 font-mono">${adm.birthGreg}</td>
+                                <td class="border border-black p-2 font-bold bg-slate-100">تاريخ الميلاد الهجري:</td>
+                                <td class="border border-black p-2">${adm.birthHijri}</td>
                             </tr>
                             <tr>
-                                <td class="border border-black p-1.5 font-bold bg-slate-100">مكان الميلاد والعمر:</td>
-                                <td class="border border-black p-1.5">${adm.birthPlace} (${adm.age} سنة)</td>
-                                <td class="border border-black p-1.5 font-bold bg-slate-100">الحالة الاجتماعية:</td>
-                                <td class="border border-black p-1.5 font-bold">أعزب ☑  متزوج ☐  أخرى: ....... (معالين: ${adm.dependents})</td>
+                                <td class="border border-black p-2 font-bold bg-slate-100">مكان الميلاد والعمر:</td>
+                                <td class="border border-black p-2">${adm.birthPlace} (${adm.age} سنة)</td>
+                                <td class="border border-black p-2 font-bold bg-slate-100">الحالة الاجتماعية:</td>
+                                <td class="border border-black p-2 font-bold">أعزب ☑  متزوج ☐ (معالين: ${adm.dependents})</td>
                             </tr>
                             <tr>
-                                <td class="border border-black p-1.5 font-bold bg-slate-100">رقم الجوال:</td>
-                                <td class="border border-black p-1.5 font-mono font-bold">${adm.mobile}</td>
-                                <td class="border border-black p-1.5 font-bold bg-slate-100">البريد الإلكتروني:</td>
-                                <td class="border border-black p-1.5 font-mono">${adm.email}</td>
+                                <td class="border border-black p-2 font-bold bg-slate-100">رقم الجوال:</td>
+                                <td class="border border-black p-2 font-mono font-bold">${adm.mobile}</td>
+                                <td class="border border-black p-2 font-bold bg-slate-100">البريد الإلكتروني:</td>
+                                <td class="border border-black p-2 font-mono">${adm.email}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- National Address -->
                 <div>
-                    <div class="font-black text-xs bg-black text-white px-2 py-1 mb-1">العنوان الوطني وبيانات الطوارئ</div>
+                    <div class="font-black text-xs bg-black text-white px-2 py-1 mb-1">بيانات العنوان الوطني والطوارئ</div>
                     <table class="w-full text-xs border-collapse border border-black text-center">
                         <thead>
                             <tr class="bg-slate-100 font-bold">
                                 <th class="border border-black p-1">رقم المبنى</th>
-                                <th class="border border-black p-1">الحي</th>
-                                <th class="border border-black p-1">الشارع</th>
+                                <th class="border border-black p-1">اسم الحي</th>
+                                <th class="border border-black p-1">اسم الشارع</th>
                                 <th class="border border-black p-1">المدينة</th>
                                 <th class="border border-black p-1">الرمز البريدي</th>
                                 <th class="border border-black p-1">الرمز الإضافي</th>
@@ -89917,25 +89945,24 @@ function buildDemoExecutiveReport(params) {
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="border border-black p-1 font-mono">${adm.buildingNo}</td>
-                                <td class="border border-black p-1">${adm.district}</td>
-                                <td class="border border-black p-1">${adm.street}</td>
-                                <td class="border border-black p-1">${adm.city}</td>
-                                <td class="border border-black p-1 font-mono">${adm.postalCode}</td>
-                                <td class="border border-black p-1 font-mono">${adm.additionalCode}</td>
+                                <td class="border border-black p-1.5 font-mono">${adm.buildingNo}</td>
+                                <td class="border border-black p-1.5">${adm.district}</td>
+                                <td class="border border-black p-1.5">${adm.street}</td>
+                                <td class="border border-black p-1.5">${adm.city}</td>
+                                <td class="border border-black p-1.5 font-mono">${adm.postalCode}</td>
+                                <td class="border border-black p-1.5 font-mono">${adm.additionalCode}</td>
                             </tr>
                         </tbody>
                     </table>
-                    <div class="grid grid-cols-2 gap-2 border border-black border-t-0 p-1.5 text-xs text-right bg-slate-50">
+                    <div class="grid grid-cols-2 gap-2 border border-black border-t-0 p-2 text-xs text-right bg-slate-50">
                         <div>جهة اتصال الطوارئ: <b>${adm.emergencyName}</b> (${adm.emergencyRelation}) - جوال: <span class="font-mono">${adm.emergencyPhone}</span></div>
-                        <div>الحالة الصحية: <b>سليم ولائق طبياً (لا يعاني من أمراض مزمنة أو عاهة تعيق التدريب) ☑</b></div>
+                        <div>المعلومات الصحية: <b>سليم ولائق طبياً (لا يعاني من أي أمراض مزمنة أو عاهات) ☑</b></div>
                     </div>
                 </div>
 
-                <!-- Administration Decision Section -->
-                <div class="border border-black p-2.5 space-y-1.5">
-                    <div class="font-black text-xs border-b border-black pb-1">يعبأ من قبل إدارة المعهد (الوثائق الرسمية وقرار القبول):</div>
-                    <div class="grid grid-cols-3 gap-1 text-[11px]">
+                <div class="border border-black p-3 space-y-2">
+                    <div class="font-black text-xs border-b border-black pb-1">يعبأ من قبل إدارة المعهد (الوثائق الرسمية واعتماد القبول):</div>
+                    <div class="grid grid-cols-3 gap-2 text-xs py-1">
                         <div>المؤهل الدراسي: ☑</div>
                         <div>السيرة الذاتية: ☑</div>
                         <div>الحساب البنكي / الآيبان: ☑</div>
@@ -89943,13 +89970,13 @@ function buildDemoExecutiveReport(params) {
                         <div>التأمينات الاجتماعية: ☑</div>
                         <div>جدارة / طاقات: ☑</div>
                     </div>
-                    <div class="border-t border-black pt-2 grid grid-cols-3 gap-2 items-center text-center text-xs">
+                    <div class="border-t border-black pt-3 grid grid-cols-3 gap-2 text-center text-xs items-center">
                         <div>
                             <span class="text-slate-500 block font-bold">مسؤول القبول والتسجيل:</span>
                             ${getOfficialSignatureHTML('admission', seed, 'محمد عبدرب النبي')}
                         </div>
                         <div class="flex flex-col items-center justify-center">
-                            <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-20 w-auto object-contain" onerror="this.onerror=null; this.src='logo.png'">
+                            <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-20 w-auto object-contain">
                         </div>
                         <div>
                             <span class="text-slate-500 block font-bold">مدير عام المعهد:</span>
@@ -89959,113 +89986,158 @@ function buildDemoExecutiveReport(params) {
                 </div>
             </div>
 
-            <!-- ================= PAGE 2: SCHEDULE (2 PERIODS) + TRANSCRIPT + WARNINGS ================= -->
-            <div class="space-y-4 pt-2 pb-6" style="page-break-after: always;">
-                ${getPageHeader('الجدول التدريبي الأسبوعي (فترتين فقط) وكشف الدرجات وسجل الإنذارات', 2)}
+            <!-- ================= PAGE 3: SCHEDULE (2 PERIODS) (INDEPENDENT PAGE) ================= -->
+            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+                ${getPageHeader('الجدول التدريبي الأسبوعي المعتمد للمتدرب (فترتين فقط باليوم)', 3)}
 
-                <!-- 1. Schedule (STRICTLY 2 PERIODS PER DAY) -->
                 <div>
                     <div class="flex items-center justify-between bg-black text-white px-2 py-1 mb-1">
-                        <span class="font-black text-xs">الجدول التدريبي الأسبوعي المعتمد للمتدرب (فترتين فقط باليوم)</span>
-                        <span class="text-[11px] font-mono">الشعبة: ${trainee.group || 'عام'} • المتدرب: ${trainee.name}</span>
+                        <span class="font-black text-xs">الجدول التدريبي الأسبوعي للشعبة (${trainee.group || 'عام'})</span>
+                        <span class="text-[11px] font-mono">المتدرب: ${trainee.name}</span>
                     </div>
                     <table class="w-full text-xs text-right border-collapse border border-black">
                         <thead>
                             <tr class="bg-slate-100 font-black">
-                                <th class="border border-black p-1.5">اليوم</th>
-                                <th class="border border-black p-1.5">الفترة الأولى (08:00 ص - 10:00 ص)</th>
-                                <th class="border border-black p-1.5">الفترة الثانية (10:15 ص - 12:15 م)</th>
-                                <th class="border border-black p-1.5 text-center">القاعة / الورشة</th>
-                                <th class="border border-black p-1.5">المدرب المعتمد</th>
+                                <th class="border border-black p-2">اليوم</th>
+                                <th class="border border-black p-2">الفترة الأولى (08:00 ص - 10:00 ص)</th>
+                                <th class="border border-black p-2">الفترة الثانية (10:15 ص - 12:15 م)</th>
+                                <th class="border border-black p-2 text-center">القاعة / الورشة</th>
+                                <th class="border border-black p-2">المدرب المعتمد</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${schedule.map(s => `
                                 <tr>
-                                    <td class="border border-black p-1.5 font-black bg-slate-50">${s.day}</td>
-                                    <td class="border border-black p-1.5 font-bold">${s.p1}</td>
-                                    <td class="border border-black p-1.5 font-bold">${s.p2}</td>
-                                    <td class="border border-black p-1.5 text-center font-bold font-mono">${s.room}</td>
-                                    <td class="border border-black p-1.5">${s.trainer}</td>
+                                    <td class="border border-black p-2 font-black bg-slate-50">${s.day}</td>
+                                    <td class="border border-black p-2 font-bold">${s.p1}</td>
+                                    <td class="border border-black p-2 font-bold">${s.p2}</td>
+                                    <td class="border border-black p-2 text-center font-bold font-mono">${s.room}</td>
+                                    <td class="border border-black p-2">${s.trainer}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
                 </div>
 
-                <!-- 2. Academic Transcript -->
+                <div class="border border-black p-3 bg-slate-50 text-xs space-y-1">
+                    <b>ضوابط الحضور والانصراف:</b>
+                    <div>• يبدأ التدريب في تمام الساعة 08:00 صباحاً ويلتزم المتدرب بحضور الفترتين التدريبيتين كاملاً.</div>
+                    <div>• تحتسب دقائق التأخير بعد بدء المحاضرة الأولى وتُسجل في نظام المتابعة الآلي.</div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 pt-8 items-center text-center text-xs">
+                    <div>
+                        <span class="text-slate-500 block font-bold">مسؤول شؤون المتدربين:</span>
+                        ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}
+                    </div>
+                    <div class="flex flex-col items-center justify-center">
+                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-20 w-auto object-contain">
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block font-bold">مدير عام المعهد:</span>
+                        ${getOfficialSignatureHTML('director', seed, 'علي الشاخوري')}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 4: MONTHLY GRADES TRANSCRIPT (INDEPENDENT PAGE) ================= -->
+            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+                ${getPageHeader('كشف درجات الشهور (أبريل - أكتوبر 2026) والمعدل والنسبة التراكمية', 4)}
+
                 <div>
                     <div class="flex items-center justify-between bg-black text-white px-2 py-1 mb-1">
-                        <span class="font-black text-xs">كشف الدرجات الأكاديمي والمهني المعتمد</span>
-                        <span class="text-[11px] font-mono">المعدل التراكمي: ${transcript.gpa} / 5.00</span>
+                        <span class="font-black text-xs">كشف الدرجات الشهري المعتمد</span>
+                        <span class="text-[11px] font-mono">تاريخ الإصدار: ${monthlyTranscript.issueDate}</span>
                     </div>
                     <table class="w-full text-xs text-right border-collapse border border-black">
                         <thead>
-                            <tr class="bg-slate-100 font-black">
-                                <th class="border border-black p-1.5">رمز واسم المقرر</th>
-                                <th class="border border-black p-1.5">المدرب</th>
-                                <th class="border border-black p-1.5 text-center">ساعات</th>
-                                <th class="border border-black p-1.5 text-center">أعمال الفصل (30)</th>
-                                <th class="border border-black p-1.5 text-center">النصفي (30)</th>
-                                <th class="border border-black p-1.5 text-center">النهائي (40)</th>
-                                <th class="border border-black p-1.5 text-center">المجموع (100)</th>
-                                <th class="border border-black p-1.5 text-center">التقدير</th>
+                            <tr class="bg-black text-white font-black">
+                                <th class="border border-black p-2">الشهر التدريبي</th>
+                                <th class="border border-black p-2">المقررات التدريبية ودرجة التقييم</th>
+                                <th class="border border-black p-2 text-center">معدل الشهر</th>
+                                <th class="border border-black p-2 text-center">النسبة المئوية</th>
+                                <th class="border border-black p-2 text-center">التقدير</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${transcript.courses.map(c => `
+                            ${monthlyTranscript.months.map(m => `
                                 <tr>
-                                    <td class="border border-black p-1.5 font-black">${c.course} <span class="font-mono text-[10px]">(${c.code})</span></td>
-                                    <td class="border border-black p-1.5">${c.trainer}</td>
-                                    <td class="border border-black p-1.5 text-center font-mono">${c.hours}</td>
-                                    <td class="border border-black p-1.5 text-center font-mono font-bold">${c.classwork}</td>
-                                    <td class="border border-black p-1.5 text-center font-mono font-bold">${c.midterm}</td>
-                                    <td class="border border-black p-1.5 text-center font-mono font-bold">${c.finalExam}</td>
-                                    <td class="border border-black p-1.5 text-center font-mono font-black text-sm">${c.total}</td>
-                                    <td class="border border-black p-1.5 text-center font-bold">${c.appreciation}</td>
+                                    <td class="border border-black p-2 font-black bg-slate-50">${m.name}</td>
+                                    <td class="border border-black p-2">
+                                        ${m.courseScores.map(cs => `<div><b>${cs.course}:</b> <span class="font-mono font-bold">${cs.score}/100</span> <span class="text-slate-500 text-[10px]">(${cs.trainer})</span></div>`).join('')}
+                                    </td>
+                                    <td class="border border-black p-2 text-center font-mono font-bold">${m.monthGpa}</td>
+                                    <td class="border border-black p-2 text-center font-mono font-black">${m.monthAverage}%</td>
+                                    <td class="border border-black p-2 text-center font-bold">${m.appreciation}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
                         <tfoot>
                             <tr class="bg-slate-100 font-black">
-                                <td colspan="6" class="border border-black p-1.5">المعدل العام والنتيجة النهائية:</td>
-                                <td colspan="2" class="border border-black p-1.5 text-center text-sm font-black">${transcript.status}</td>
+                                <td class="border border-black p-2">المعدل التراكمي العام:</td>
+                                <td class="border border-black p-2 font-mono text-sm">${monthlyTranscript.overallGpa} من 5.00</td>
+                                <td class="border border-black p-2 text-center">النسبة المئوية التراكمية:</td>
+                                <td class="border border-black p-2 text-center font-mono text-sm font-black">${monthlyTranscript.overallPercent}%</td>
+                                <td class="border border-black p-2 text-center">${monthlyTranscript.overallAppreciation}</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
 
-                <!-- 3. Warnings Section (Endorsed by Ali Al-Abbas) -->
+                <div class="border border-black p-2.5 bg-slate-50 text-xs flex items-center justify-between">
+                    <div><b>تاريخ إصدار واعتماد الكشف:</b> آخر يوم من شهر أكتوبر 2026 (${monthlyTranscript.issueDate} م الموافق ${monthlyTranscript.issueDateHijri})</div>
+                    <div><b>الحالة:</b> ${monthlyTranscript.status}</div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 pt-8 items-center text-center text-xs">
+                    <div>
+                        <span class="text-slate-500 block font-bold">مسؤول شؤون المتدربين:</span>
+                        ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}
+                    </div>
+                    <div class="flex flex-col items-center justify-center">
+                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-20 w-auto object-contain">
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block font-bold">مدير عام المعهد:</span>
+                        ${getOfficialSignatureHTML('director', seed, 'علي الشاخوري')}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 5: DISCIPLINARY WARNINGS (INDEPENDENT PAGE - CONCISE) ================= -->
+            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+                ${getPageHeader('سجل الإنذارات والتنبيهات المعتادة', 5)}
+
                 <div>
-                    <div class="font-black text-xs bg-black text-white px-2 py-1 mb-1">سجل الإنذارات والتنبيهات المعتادة للمتدرب (أقسام مستقلة)</div>
-                    <div class="space-y-2">
+                    <div class="font-black text-xs bg-black text-white px-2 py-1 mb-2">سجل الإنذارات والتنبيهات (أقسام مستقلة وموجزة)</div>
+                    <div class="space-y-3">
                         ${warnings.map(w => `
-                            <div class="border border-black p-2 bg-slate-50 text-xs">
-                                <div class="flex items-center justify-between border-b border-black pb-1 mb-1">
-                                    <b class="font-black">${w.type}</b>
-                                    <span class="font-mono text-[10px] text-slate-600">كود: ${w.code} • تاريخ: ${w.date}</span>
+                            <div class="border border-black p-3 bg-white space-y-1.5 text-xs">
+                                <div class="flex items-center justify-between border-b border-black pb-1">
+                                    <b class="text-sm font-black">${w.type}</b>
+                                    <span class="font-mono text-xs text-slate-600">رقم الإنذار: ${w.code}</span>
                                 </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                                    <div><span class="font-bold">المخالفة المرصودة:</span> ${w.violation}</div>
-                                    <div><span class="font-bold">الإجراء التأديبي:</span> ${w.procedure}</div>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div><b>التاريخ:</b> <span class="font-mono">${w.date}</span></div>
+                                    <div><b>المسؤول المعتمد:</b> ${w.supervisor}</div>
+                                    <div class="col-span-2"><b>المخالفة:</b> ${w.violation}</div>
+                                    <div class="col-span-2"><b>الإجراء المتخذ:</b> ${w.procedure}</div>
                                 </div>
-                                <div class="flex items-center justify-between pt-1 border-t border-slate-300 mt-1 text-[10px] text-slate-600">
-                                    <span>المسؤول: <b>${w.supervisor}</b></span>
-                                    <span>الحالة: <b>${w.status}</b></span>
+                                <div class="pt-1.5 border-t border-slate-300 flex items-center justify-between text-xs">
+                                    <span>الحالة: <b class="bg-slate-100 px-2 py-0.5 rounded border border-slate-300">${w.status}</b></span>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
 
-                <!-- Signatures Page 2 -->
-                <div class="grid grid-cols-3 gap-4 pt-4 items-center text-center text-xs">
+                <div class="grid grid-cols-3 gap-4 pt-10 items-center text-center text-xs">
                     <div>
                         <span class="text-slate-500 block font-bold">مسؤول شؤون المتدربين:</span>
                         ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}
                     </div>
                     <div class="flex flex-col items-center justify-center">
-                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-20 w-auto object-contain" onerror="this.onerror=null; this.src='logo.png'">
+                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-20 w-auto object-contain">
                     </div>
                     <div>
                         <span class="text-slate-500 block font-bold">مدير عام المعهد:</span>
@@ -90074,91 +90146,37 @@ function buildDemoExecutiveReport(params) {
                 </div>
             </div>
 
-            <!-- ================= PAGE 3: FRAMED EXAM PAPERS (MID-MONTH, TRUE/FALSE & MC) ================= -->
-            <div class="space-y-4 pt-2 pb-6" style="page-break-after: always;">
-                ${getPageHeader('أوراق نماذج الاختبارات التحريرية والتطبيقية الرسمية المؤطرة (منتصف كل شهر)', 3)}
-
-                ${exams.map(ex => `
-                    <div class="border-2 border-black p-3 space-y-2 bg-white text-xs ${ex.isEnglish ? 'text-left' : 'text-right'}" dir="${ex.isEnglish ? 'ltr' : 'rtl'}">
-                        <div class="border-b-2 border-black pb-1.5 flex items-center justify-between">
-                            <div>
-                                <div class="font-black text-[10px] uppercase text-black">${ex.isEnglish ? 'Official Exam Sheet - Black Gold Training Institute' : 'ورقة اختبار معتمدة - معهد الذهب الأسود العالي للتدريب'}</div>
-                                <div class="font-black text-xs text-black">${ex.title}</div>
-                            </div>
-                            <div class="border border-black px-2 py-0.5 text-center bg-slate-100 font-mono font-black text-xs">
-                                ${ex.obtainedScore} / ${ex.maxScore}
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-4 gap-1 text-[10px] border-b border-black pb-1">
-                            <div><span class="text-slate-500 font-bold">${ex.isEnglish ? 'Trainee:' : 'المتدرب:'}</span> <b>${ex.traineeName}</b></div>
-                            <div><span class="text-slate-500 font-bold">${ex.isEnglish ? 'ID:' : 'الهوية:'}</span> <b>${ex.traineeId}</b></div>
-                            <div><span class="text-slate-500 font-bold">${ex.isEnglish ? 'Date:' : 'التاريخ:'}</span> <b>${ex.date}</b></div>
-                            <div><span class="text-slate-500 font-bold">${ex.isEnglish ? 'Location:' : 'المكان:'}</span> <b>${ex.room} (${ex.instructor})</b></div>
-                        </div>
-
-                        <!-- Section 1: True / False -->
-                        <div class="space-y-1">
-                            <b class="text-[10px] bg-slate-100 px-1 block border border-slate-300">${ex.isEnglish ? 'Part 1: True or False Questions' : 'القسم الأول: أسئلة الصواب والخطأ (10 درجات لكل فقرة)'}</b>
-                            ${ex.tfQuestions.slice(0, 3).map(q => `
-                                <div class="flex items-center justify-between text-[11px] border-b border-slate-200 pb-0.5">
-                                    <span>${q.q}</span>
-                                    <span class="font-mono font-bold shrink-0">[ ✔ ] ${q.traineeAns} (${q.mark})</span>
-                                </div>
-                            `).join('')}
-                        </div>
-
-                        <!-- Section 2: Multiple Choice -->
-                        <div class="space-y-1 pt-1">
-                            <b class="text-[10px] bg-slate-100 px-1 block border border-slate-300">${ex.isEnglish ? 'Part 2: Multiple Choice Questions' : 'القسم الثاني: أسئلة الاختيار من متعدد (10 درجات لكل فقرة)'}</b>
-                            ${ex.mcQuestions.slice(0, 2).map(q => `
-                                <div class="text-[11px] space-y-0.5 border-b border-slate-200 pb-1">
-                                    <div class="font-bold">${q.q}</div>
-                                    <div class="grid grid-cols-2 gap-1 text-[10px]">
-                                        ${q.options.slice(0, 2).map(opt => `
-                                            <div class="p-0.5 border border-slate-200 ${opt.startsWith(q.selected) ? 'font-black bg-slate-100' : ''}">${opt} ${opt.startsWith(q.selected) ? '✔' : ''}</div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-
-                        <div class="pt-1 flex items-center justify-between text-[10px] text-slate-700">
-                            <div>${ex.isEnglish ? 'Instructor Signature:' : 'توقيع المدرب:'} ${getOfficialSignatureHTML('trainer', seed + ex.examNo, ex.instructor)}</div>
-                            <div class="font-bold">${ex.isEnglish ? 'Verified & Graded' : 'رصدت الدرجة واعتمدت'}</div>
-                        </div>
-                    </div>
-                `).join('')}
-
-                <!-- Signatures Page 3 -->
-                <div class="grid grid-cols-3 gap-4 pt-4 items-center text-center text-xs">
-                    <div>
-                        <span class="text-slate-500 block font-bold">مسؤول شؤون المتدربين:</span>
-                        ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}
-                    </div>
-                    <div class="flex flex-col items-center justify-center">
-                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-20 w-auto object-contain" onerror="this.onerror=null; this.src='logo.png'">
-                    </div>
-                    <div>
-                        <span class="text-slate-500 block font-bold">مدير عام المعهد:</span>
-                        ${getOfficialSignatureHTML('director', seed, 'علي الشاخوري')}
-                    </div>
-                </div>
+            <!-- ================= PAGE 6: EXAM 1 PAPER (INDEPENDENT PAGE) ================= -->
+            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+                ${getPageHeader('ورقة نموذج الاختبار الأول المعتمد (منتصف الشهر 15 مايو 2026)', 6)}
+                ${renderSingleExamPrintablePaper(exams[0], seed, 1)}
             </div>
 
-            <!-- ================= PAGE 4: ATTENDANCE HISTORY (MONTHS 4 TO 11) & SEAL ================= -->
+            <!-- ================= PAGE 7: EXAM 2 PAPER (INDEPENDENT PAGE) ================= -->
+            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+                ${getPageHeader('ورقة نموذج الاختبار الثاني المعتمد (منتصف الشهر 15 يوليو 2026)', 7)}
+                ${renderSingleExamPrintablePaper(exams[1], seed, 2)}
+            </div>
+
+            <!-- ================= PAGE 8: EXAM 3 PAPER (INDEPENDENT PAGE) ================= -->
+            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+                ${getPageHeader('ورقة نموذج الاختبار الثالث المعتمد (منتصف الشهر 15 سبتمبر 2026)', 8)}
+                ${renderSingleExamPrintablePaper(exams[2], seed, 3)}
+            </div>
+
+            <!-- ================= PAGE 9: ATTENDANCE CALENDAR (INDEPENDENT PAGE - LIKE CALENDAR) ================= -->
             <div class="space-y-4 pt-2">
-                ${getPageHeader('سجل وتقويم الحضور للأشهر السابقة (من شهر 4 أبريل وحتى شهر 11 نوفمبر)', 4)}
+                ${getPageHeader('تقويم وسجل الحضور (من شهر 4 أبريل وحتى شهر 11 نوفمبر)', 9)}
 
-                <!-- Cumulative Summary Table for Months 4 to 11 -->
                 <div>
                     <div class="flex items-center justify-between bg-black text-white px-2 py-1 mb-1 text-xs">
-                        <span class="font-black">سجل الحضور والغياب التراكمي لشهور التدريب (أبريل - نوفمبر 2026)</span>
-                        <span class="font-mono">نوفمبر جاري المتابعة (لم يقفل)</span>
+                        <span class="font-black">سجل الحضور الشهري التراكمي (أبريل - نوفمبر 2026)</span>
+                        <span class="font-mono">نوفمبر جاري (لم يقفل)</span>
                     </div>
                     <table class="w-full text-xs text-right border-collapse border border-black">
                         <thead>
                             <tr class="bg-slate-100 font-black">
-                                <th class="border border-black p-1.5">الشهر التدريبي</th>
+                                <th class="border border-black p-1.5">الشهر</th>
                                 <th class="border border-black p-1.5 text-center">أيام العمل</th>
                                 <th class="border border-black p-1.5 text-center">أيام الحضور</th>
                                 <th class="border border-black p-1.5 text-center">أيام التأخير</th>
@@ -90182,8 +90200,8 @@ function buildDemoExecutiveReport(params) {
                         </tbody>
                         <tfoot>
                             <tr class="bg-slate-100 font-black">
-                                <td class="border border-black p-1.5">المعدل العام التراكمي:</td>
-                                <td colspan="4" class="border border-black p-1.5 text-center font-mono">إجمالي أيام التدريب المقيدة: 161 يوم عمل</td>
+                                <td class="border border-black p-1.5">المعدل التراكمي:</td>
+                                <td colspan="4" class="border border-black p-1.5 text-center font-mono">161 يوم عمل مقيد</td>
                                 <td class="border border-black p-1.5 text-center font-black">${Math.round(parseFloat(trainee.rate || trainee.weeklyRate || 95))}%</td>
                                 <td class="border border-black p-1.5 text-center font-black">ملتزم ومنتظم</td>
                             </tr>
@@ -90191,24 +90209,22 @@ function buildDemoExecutiveReport(params) {
                     </table>
                 </div>
 
-                <!-- Calendar View for November (Ongoing) -->
                 <div>
                     <div class="font-black text-xs bg-black text-white px-2 py-1 mb-1">
-                        تقويم الحضور لشهر نوفمبر 2026 (جاري المتابعة - لم يقفل حتى الآن)
+                        تقويم الحضور لشهر نوفمبر 2026 (مصفوفة التقويم - جاري المتابعة)
                     </div>
                     <div class="border border-black p-2 bg-white">
                         ${generateCTPCalendarGridHTML(trainee, 11)}
                     </div>
                 </div>
 
-                <!-- Final Official Endorsement, Stamps & Signatures -->
                 <div class="grid grid-cols-3 gap-4 pt-6 items-center text-center text-xs border-t-2 border-black">
                     <div>
                         <span class="text-slate-500 block font-bold">مسؤول شؤون المتدربين:</span>
                         ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}
                     </div>
                     <div class="flex flex-col items-center justify-center">
-                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-24 w-auto object-contain" onerror="this.onerror=null; this.src='logo.png'">
+                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-24 w-auto object-contain">
                     </div>
                     <div>
                         <span class="text-slate-500 block font-bold">مدير عام المعهد:</span>
@@ -90222,8 +90238,71 @@ function buildDemoExecutiveReport(params) {
         window.print();
     }
 
+    // Helper: Render a Single Exam Paper for Print on an Independent Page
+    function renderSingleExamPrintablePaper(ex, seed, pageExamNo) {
+        return `
+            <div class="border-2 border-black p-4 space-y-3 bg-white text-xs ${ex.isEnglish ? 'text-left' : 'text-right'}" dir="${ex.isEnglish ? 'ltr' : 'rtl'}">
+                <div class="border-b-2 border-black pb-2 flex items-center justify-between">
+                    <div>
+                        <div class="font-black text-xs uppercase text-black">${ex.isEnglish ? 'Official Exam Sheet - TVTC / Black Gold Training Institute' : 'المؤسسة العامة للتدريب التقني والمهني • ورقة اختبار معتمدة'}</div>
+                        <div class="font-black text-sm text-black mt-0.5">${ex.title}</div>
+                    </div>
+                    <div class="border-2 border-black px-3 py-1 text-center bg-slate-50 font-mono font-black text-sm">
+                        ${ex.obtainedScore} / ${ex.maxScore}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-2 text-xs border-b border-black pb-2 bg-slate-50 p-2">
+                    <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Trainee Name' : 'اسم المتدرب'}</span><b>${ex.traineeName}</b></div>
+                    <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'National ID' : 'رقم الهوية'}</span><b>${ex.traineeId}</b></div>
+                    <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Date' : 'تاريخ الاختبار'}</span><b>${ex.date}</b></div>
+                    <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Location' : 'مكان الاختبار'}</span><b>${ex.room} (${ex.instructor})</b></div>
+                </div>
+
+                <div class="space-y-2">
+                    <b class="text-xs bg-slate-100 p-1 block border border-slate-300 font-black">${ex.isEnglish ? 'Section 1: True / False Questions (10 Marks Each)' : 'القسم الأول: أسئلة الصواب والخطأ (10 درجات لكل فقرة)'}</b>
+                    ${ex.tfQuestions.map(q => `
+                        <div class="flex items-center justify-between text-xs border-b border-slate-200 pb-1">
+                            <span class="font-medium">${q.q}</span>
+                            <span class="font-mono font-black shrink-0 ${ex.isEnglish ? 'ml-3' : 'mr-3'}">[ ✔ ] ${q.traineeAns} (${q.mark})</span>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="space-y-2 pt-2">
+                    <b class="text-xs bg-slate-100 p-1 block border border-slate-300 font-black">${ex.isEnglish ? 'Section 2: Multiple Choice Questions (10 Marks Each)' : 'القسم الثاني: أسئلة الاختيار من متعدد (10 درجات لكل فقرة)'}</b>
+                    ${ex.mcQuestions.map(q => `
+                        <div class="text-xs space-y-1 border-b border-slate-200 pb-2">
+                            <div class="font-bold">${q.q}</div>
+                            <div class="grid grid-cols-2 gap-1.5 text-xs">
+                                ${q.options.map(opt => `
+                                    <div class="p-1 rounded border ${opt.startsWith(q.selected) ? 'border-black font-black bg-slate-100' : 'border-slate-200 text-slate-700'}">
+                                        ${opt} ${opt.startsWith(q.selected) ? '✔' : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="pt-4 border-t-2 border-black flex items-center justify-between text-xs">
+                    <div>
+                        <span class="text-slate-500 block font-bold">${ex.isEnglish ? 'Instructor Signature:' : 'توقيع المدرب الفاحص:'}</span>
+                        ${getOfficialSignatureHTML('trainer', seed + pageExamNo, ex.instructor)}
+                    </div>
+                    <div class="text-center font-bold">
+                        <span class="text-slate-500 block text-[10px]">${ex.isEnglish ? 'Final Evaluation' : 'النتيجة والاعتماد'}</span>
+                        <span class="font-black text-sm">${ex.isEnglish ? 'PASSED (EXCELLENT)' : 'ناجح ومجتاز بتفوق'}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     // ===================================================================
     // END COMPREHENSIVE TRAINEE PORTFOLIO SYSTEM
+    // ===================================================================
+
     // ===================================================================
 
     // ===================================================================
