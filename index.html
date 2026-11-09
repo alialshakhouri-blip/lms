@@ -7289,9 +7289,9 @@
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
                             <h3 class="font-black text-slate-950 dark:text-white text-base sm:text-lg">الملف الشامل المعتمد للمتدرب</h3>
-                            <span class="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-slate-400">المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود</span>
+                            <span class="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-slate-400">فرع عنك</span>
                         </div>
-                        <p class="text-xs text-slate-600 dark:text-slate-400 font-bold mt-0.5">إقرار السلامة • استمارة القبول • جدول فترتين • درجات الشهور (أبريل - أكتوبر) • إنذارات • اختبارات مؤطرة • تقويم الحضور</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 font-bold mt-0.5">إقرار السلامة • استمارة القبول • جدول الحصص الثابت • كشف الدرجات المرتبط بالحضور • الإنذارات بختم وتوقيع الصندوق • تقويم أكتوبر ونوفمبر</p>
                     </div>
                 </div>
 
@@ -7321,10 +7321,10 @@
                             <img src="assets/bgti_logo.png" alt="شعار المعهد" class="h-full w-auto object-contain">
                         </div>
                         <div class="space-y-1">
-                            <div class="text-[11px] font-bold text-slate-300">المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود العالي للتدريب</div>
+                            <div class="text-[11px] font-bold text-slate-300">المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود العالي للتدريب • فرع عنك</div>
                             <h4 class="text-lg sm:text-xl font-black text-white" id="ctpTraineeName">--</h4>
                             <div class="flex items-center gap-3 text-xs text-slate-300 font-bold flex-wrap">
-                                <span>الهوية: <b class="text-white font-mono" id="ctpTraineeNationalId">--</b></span>
+                                <span>رقم الملف (الهوية): <b class="text-white font-mono" id="ctpTraineeNationalId">--</b></span>
                                 <span>•</span>
                                 <span>المؤهل: <b class="text-white" id="ctpTraineeQual">--</b></span>
                                 <span>•</span>
@@ -7339,10 +7339,10 @@
 
                     <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto border-t sm:border-t-0 border-slate-700 pt-2 sm:pt-0">
                         <div class="text-right">
-                            <span class="text-[10px] text-slate-400 block font-bold">نسبة الحضور التراكمية (أبريل - نوفمبر)</span>
+                            <span class="text-[10px] text-slate-400 block font-bold">نسبة الحضور التراكمية</span>
                             <span class="text-2xl font-black text-white" id="ctpTraineeRate">--%</span>
                         </div>
-                        <span class="bg-white/10 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full border border-white/20" id="ctpTraineeStatusBadge">منتظم ومستمر</span>
+                        <span class="bg-white/10 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full border border-white/20" id="ctpTraineeStatusBadge">منتظم</span>
                     </div>
                 </div>
             </div>
@@ -7351,11 +7351,11 @@
             <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl text-xs font-bold overflow-x-auto border border-slate-200 dark:border-slate-700">
                 <button type="button" onclick="switchTraineePortfolioTab('safety')" id="ctpTabBtn-safety" class="flex-1 py-2 px-3 rounded-xl bg-black text-white dark:bg-white dark:text-black shadow-2xs font-black transition whitespace-nowrap">🛡️ إقرار السلامة</button>
                 <button type="button" onclick="switchTraineePortfolioTab('admission')" id="ctpTabBtn-admission" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📄 استمارة القبول والتسجيل</button>
-                <button type="button" onclick="switchTraineePortfolioTab('schedule')" id="ctpTabBtn-schedule" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">🕒 الجدول الدراسي (فترتين)</button>
-                <button type="button" onclick="switchTraineePortfolioTab('grades')" id="ctpTabBtn-grades" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📊 كشف الدرجات الشهري</button>
-                <button type="button" onclick="switchTraineePortfolioTab('warnings')" id="ctpTabBtn-warnings" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">⚠️ سجل الإنذارات</button>
-                <button type="button" onclick="switchTraineePortfolioTab('exams')" id="ctpTabBtn-exams" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📝 نماذج الاختبارات المؤطرة</button>
-                <button type="button" onclick="switchTraineePortfolioTab('attendanceCal')" id="ctpTabBtn-attendanceCal" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📅 تقويم الحضور (أبريل - نوفمبر)</button>
+                <button type="button" onclick="switchTraineePortfolioTab('schedule')" id="ctpTabBtn-schedule" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">🕒 الجدول الدراسي (فترتين ثابتتين)</button>
+                <button type="button" onclick="switchTraineePortfolioTab('grades')" id="ctpTabBtn-grades" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📊 كشف الدرجات المرتبط بالحضور</button>
+                <button type="button" onclick="switchTraineePortfolioTab('warnings')" id="ctpTabBtn-warnings" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">⚠️ سجل الإنذارات والمخالفات</button>
+                <button type="button" onclick="switchTraineePortfolioTab('exams')" id="ctpTabBtn-exams" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📝 نماذج أوراق الاختبارات</button>
+                <button type="button" onclick="switchTraineePortfolioTab('attendanceCal')" id="ctpTabBtn-attendanceCal" class="flex-1 py-2 px-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-black font-bold transition whitespace-nowrap">📅 تقويم الحضور (أكتوبر ونوفمبر)</button>
             </div>
 
             <!-- Tab 1: Safety Pledge (AT THE BEGINNING) -->
@@ -7368,15 +7368,15 @@
             <!-- Tab 2: Admission Form -->
             <div id="ctpTabContent-admission" class="hidden space-y-4">
                 <div id="ctpAdmissionFormContainer">
-                    <!-- Populated dynamically with officer: محمد عبدرب النبي & director: علي الشاخوري -->
+                    <!-- Populated dynamically -->
                 </div>
             </div>
 
-            <!-- Tab 3: Weekly Schedule (2 periods only!) -->
+            <!-- Tab 3: Weekly Schedule (Fixed periods, no flipping!) -->
             <div id="ctpTabContent-schedule" class="hidden space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">الجدول التدريبي الأسبوعي (فترتين فقط باليوم)</h4>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">الجدول التدريبي الأسبوعي (المحاضرة الأولى نفسها والمحاضرة الثانية نفسها طوال الأسبوع)</h4>
                         <p class="text-xs text-slate-500 dark:text-slate-400">الفترة الأولى (08:00 ص - 10:00 ص) • الفترة الثانية (10:15 ص - 12:15 م)</p>
                     </div>
                     <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl border border-slate-300 dark:border-slate-700" id="ctpScheduleGroupLabel">--</span>
@@ -7388,30 +7388,30 @@
                 </div>
             </div>
 
-            <!-- Tab 4: Monthly Grades Transcript (Months 4-10 + Total GPA) -->
+            <!-- Tab 4: Monthly Grades Transcript (Tied directly to attendance rate) -->
             <div id="ctpTabContent-grades" class="hidden space-y-4">
                 <div id="ctpGradesContainer">
                     <!-- Populated dynamically -->
                 </div>
             </div>
 
-            <!-- Tab 5: Concise Warnings (Concise labels only) -->
+            <!-- Tab 5: Warnings (Concise, with stamp and signature in each box) -->
             <div id="ctpTabContent-warnings" class="hidden space-y-4">
                 <div id="ctpWarningsContainer">
                     <!-- Populated dynamically -->
                 </div>
             </div>
 
-            <!-- Tab 6: Framed Exam Papers (Mid-month dates, True/False, Multiple Choice) -->
+            <!-- Tab 6: Framed Exam Papers (No teacher signature, English name in English exam) -->
             <div id="ctpTabContent-exams" class="hidden space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">أوراق الاختبارات الرسمية المؤطرة (منتصف كل شهر)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">إطار اختبار حقيقي • صح وخطأ واختيار متعدد • الإنجليزية إنجليزية كاملة وباقي المواد عربي كامل</p>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">أوراق الاختبارات الرسمية المؤطرة</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">أسئلة صح وخطأ واختيار متعدد • الاسم إنجليزي في اختبار الإنجليزي • بدون توقيع مدرب</p>
                     </div>
                     <div class="text-right">
-                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">المعدل التراكمي للاختبارات:</span>
-                        <span class="text-sm font-black text-black dark:text-white mr-1" id="ctpExamsAverageScore">95 / 100</span>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">المعدل العام للاختبارات:</span>
+                        <span class="text-sm font-black text-black dark:text-white mr-1" id="ctpExamsAverageScore">-- / 100</span>
                     </div>
                 </div>
                 <div id="ctpExamModelsContainer" class="space-y-4">
@@ -7419,12 +7419,12 @@
                 </div>
             </div>
 
-            <!-- Tab 7: Monthly Attendance Calendar (April through November) -->
+            <!-- Tab 7: Monthly Attendance Calendar (October and November Matrices) -->
             <div id="ctpTabContent-attendanceCal" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
                     <div>
-                        <h4 class="font-black text-slate-900 dark:text-white text-sm">سجل وتقويم الحضور (أبريل - نوفمبر 2026)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">نوفمبر 2026 جاري المتابعة (لم يقفل حتى الآن) • الشهور من 4 إلى 10 مكتملة ومغلقة</p>
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm">سجل وتقويم الحضور (أكتوبر ونوفمبر)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">مصفوفة تقويم شهر أكتوبر (مكتمل) ومصفوفة تقويم شهر نوفمبر (جاري المتابعة لم يقفل)</p>
                     </div>
                     <div class="flex items-center gap-1 flex-wrap" id="ctpMonthButtonsContainer">
                         <!-- Populated by JS -->
@@ -88621,6 +88621,7 @@ function buildDemoExecutiveReport(params) {
     
     
     
+    
     // ===================================================================
     // COMPREHENSIVE TRAINEE PORTFOLIO SYSTEM (الملف الشامل للمتدرب)
     // الإدارة: مدير المعهد: علي الشاخوري • شؤون المتدربين: علي آل عباس • القبول والتسجيل: محمد عبدرب النبي
@@ -88629,10 +88630,10 @@ function buildDemoExecutiveReport(params) {
     // ===================================================================
 
     let currentCTPTrainee = null;
-    let currentCTPActiveTab = 'safety'; // إقرار السلامة في البداية
-    let currentCTPSelectedMonth = 11; // 4 to 11 (Nov 2026 is current unclosed)
+    let currentCTPActiveTab = 'safety';
+    let currentCTPSelectedMonth = 11; // 1 to 11
 
-    // Helper: Qualification determination (defaults to "ثانوي" if empty/missing)
+    // Qualification Helper: defaults to "ثانوي" if empty/undefined
     function getTraineeEffectiveQualification(trainee) {
         if (!trainee) return 'ثانوي';
         const q = String(trainee.qual || '').trim();
@@ -88642,12 +88643,25 @@ function buildDemoExecutiveReport(params) {
         return q;
     }
 
-    // Official Signatures: Real signature images for Ali Al-Abbas and Ali Al-Shakhouri
+    // Safety Pledge Date: randomized during the year, at least 2 months ago (>= 60 days ago)
+    function getCTPSafetyPledgeDate(trainee) {
+        const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-6), 10) || 123456);
+        const daysAgo = 60 + (seed % 305); // Between 60 and 365 days ago
+        const d = new Date(Date.now() - daysAgo * 86400000);
+        const greg = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+        const hijriYear = d.getFullYear() - 579;
+        const hijriMonth = ((d.getMonth() + 7) % 12) + 1;
+        const hijriDay = ((d.getDate() + 3) % 29) + 1;
+        const hijri = `${hijriYear}/${String(hijriMonth).padStart(2, '0')}/${String(hijriDay).padStart(2, '0')} هـ`;
+        return { greg, hijri, daysAgo };
+    }
+
+    // Official Signatures (No trainer signature anywhere!)
     function getOfficialSignatureHTML(role, seed = 123, customName = '') {
         if (role === 'director') {
             return `
                 <div class="flex flex-col items-center justify-center">
-                    <img src="assets/director_sig.jpg" alt="توقيع علي الشاخوري" class="h-12 w-auto object-contain">
+                    <img src="assets/director_sig.jpg" alt="توقيع علي الشاخوري" class="h-11 w-auto object-contain">
                     <span class="text-[11px] font-black text-black mt-0.5">علي الشاخوري</span>
                 </div>
             `;
@@ -88656,7 +88670,7 @@ function buildDemoExecutiveReport(params) {
         if (role === 'supervisor') {
             return `
                 <div class="flex flex-col items-center justify-center">
-                    <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-12 w-auto object-contain">
+                    <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-11 w-auto object-contain">
                     <span class="text-[11px] font-black text-black mt-0.5">علي آل عباس</span>
                 </div>
             `;
@@ -88665,7 +88679,7 @@ function buildDemoExecutiveReport(params) {
         if (role === 'admission') {
             return `
                 <div class="flex flex-col items-center justify-center">
-                    <svg class="h-11 w-36" viewBox="0 0 160 52" fill="none" stroke="#1e293b" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="h-10 w-32" viewBox="0 0 160 52" fill="none" stroke="#1e293b" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M 10 38 C 22 20, 38 14, 48 26 C 56 36, 66 42, 78 28 C 90 10, 105 16, 118 32 C 128 42, 138 34, 146 22" stroke-width="2.2"/>
                         <path d="M 32 30 C 58 26, 90 22, 132 18" stroke-width="1.6"/>
                         <path d="M 44 16 C 48 28, 52 38, 54 44" stroke-width="2.1"/>
@@ -88676,19 +88690,7 @@ function buildDemoExecutiveReport(params) {
             `;
         }
 
-        if (role === 'trainer') {
-            return `
-                <div class="flex flex-col items-center justify-center">
-                    <svg class="h-10 w-32" viewBox="0 0 140 45" fill="none" stroke="#1f2937" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M 15 30 C 35 15, 60 18, 85 28 C 105 36, 120 20, 130 25" stroke-width="2"/>
-                        <path d="M 40 22 C 70 20, 100 24, 125 22" stroke-width="1.5"/>
-                    </svg>
-                    <span class="text-[10px] font-bold text-black mt-0.5">${customName || 'المدرب المعتمد'}</span>
-                </div>
-            `;
-        }
-
-        // Unique Individual Trainee Signature
+        // Unique Trainee Signature
         const s1 = 15 + (seed % 20);
         const s2 = 35 + (seed % 25);
         const s3 = 55 + (seed % 30);
@@ -88773,8 +88775,8 @@ function buildDemoExecutiveReport(params) {
             if (targetClean.includes('aic') || targetClean.includes('101') || targetClean.includes('لحام')) {
                 assigned.push({ trainer: 'رضا مطيلق', course: 'اللحام', room: 'القاعة 9' });
             } else if (targetClean.includes('sinopec') || targetClean.includes('سينوبك')) {
-                assigned.push({ trainer: 'رضا مطيلق', course: 'اللحام', room: 'القاعة 9' });
                 assigned.push({ trainer: 'شرف الدين', course: 'انجليزية', room: 'القاعة 8' });
+                assigned.push({ trainer: 'رضا مطيلق', course: 'اللحام', room: 'القاعة 9' });
             } else if (targetClean.includes('samsung') || targetClean.includes('سامسونج')) {
                 assigned.push({ trainer: 'عصام سعيد', course: 'الكهرباء', room: 'القاعة 6' });
                 assigned.push({ trainer: 'إمام يعقوب', course: 'الحاسب الالي', room: 'القاعة 4' });
@@ -88792,7 +88794,8 @@ function buildDemoExecutiveReport(params) {
         return assigned;
     }
 
-    // Weekly Schedule: STRICTLY 2 PERIODS PER DAY
+    // Weekly Schedule: FIXED DAILY PERIODS - NO FLIPPING!
+    // Period 1 is the same course all week, Period 2 is the same course all week!
     function getCTPWeeklySchedule(trainee) {
         const assigned = getTraineeAssignedCourses(trainee);
         const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
@@ -88801,30 +88804,35 @@ function buildDemoExecutiveReport(params) {
             const crs = assigned[0];
             return days.map(d => ({
                 day: d,
-                p1: `${crs.course} (مفاهيم تقنية ومعايير)`,
-                p2: `ورشة ${crs.course} التطبيقية والمشغولات`,
+                p1: `${crs.course} (مفاهيم ومعايير)`,
+                p2: `ورشة ${crs.course} التطبيقية`,
                 room: crs.room,
                 trainer: crs.trainer
             }));
         }
 
+        // Two courses: Period 1 is ALWAYS Course 1, Period 2 is ALWAYS Course 2 (Fixed all week)
         const crs1 = assigned[0];
-        const crs2 = assigned[1] || assigned[0];
+        const crs2 = assigned[1];
 
-        return [
-            { day: 'الأحد', p1: `${crs1.course} (المحاضرة الأولى)`, p2: `${crs2.course} (ورشة تطبيقية)`, room: `${crs1.room} / ${crs2.room}`, trainer: `${crs1.trainer} / ${crs2.trainer}` },
-            { day: 'الإثنين', p1: `${crs2.course} (المحاضرة الأولى)`, p2: `${crs1.course} (ورشة تطبيقية)`, room: `${crs2.room} / ${crs1.room}`, trainer: `${crs2.trainer} / ${crs1.trainer}` },
-            { day: 'الثلاثاء', p1: `${crs1.course} (تطبيقات متقدمة)`, p2: `${crs2.course} (تمارين وحلقات نقاش)`, room: `${crs1.room} / ${crs2.room}`, trainer: `${crs1.trainer} / ${crs2.trainer}` },
-            { day: 'الأربعاء', p1: `${crs2.course} (تطبيقات متقدمة)`, p2: `${crs1.course} (معايير وفحص جودة)`, room: `${crs2.room} / ${crs1.room}`, trainer: `${crs2.trainer} / ${crs1.trainer}` },
-            { day: 'الخميس', p1: `${crs1.course} (اختبار وتقييم أسبوعي)`, p2: `${crs2.course} (تسليم المهام والمراجعة)`, room: `${crs1.room} / ${crs2.room}`, trainer: `${crs1.trainer} / ${crs2.trainer}` }
-        ];
+        return days.map(d => ({
+            day: d,
+            p1: `${crs1.course} (${crs1.trainer} - ${crs1.room})`,
+            p2: `${crs2.course} (${crs2.trainer} - ${crs2.room})`,
+            room: `${crs1.room} / ${crs2.room}`,
+            trainer: `${crs1.trainer} / ${crs2.trainer}`
+        }));
     }
 
-    // Attendance History from Month 4 (April) to Month 11 (November)
+    // Attendance History from Beginning of Year (Jan - Nov 2026)
     function getCTPMonthlyAttendanceHistory(trainee) {
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
+        const baseRate = parseFloat(trainee.rate || trainee.weeklyRate || 85);
 
         const monthsDef = [
+            { monthNum: 1, name: 'يناير 2026', totalWorkDays: 22, isClosed: true },
+            { monthNum: 2, name: 'فبراير 2026', totalWorkDays: 20, isClosed: true },
+            { monthNum: 3, name: 'مارس 2026', totalWorkDays: 22, isClosed: true },
             { monthNum: 4, name: 'أبريل 2026', totalWorkDays: 22, isClosed: true },
             { monthNum: 5, name: 'مايو 2026', totalWorkDays: 22, isClosed: true },
             { monthNum: 6, name: 'يونيو 2026', totalWorkDays: 21, isClosed: true },
@@ -88838,24 +88846,18 @@ function buildDemoExecutiveReport(params) {
         return monthsDef.map((m, idx) => {
             let present = 0, late = 0, absent = 0;
             if (m.isClosed) {
-                const mSeed = (seed + idx * 17) % 100;
-                if (mSeed < 60) {
-                    present = m.totalWorkDays - 1;
-                    late = 1;
-                    absent = 0;
-                } else if (mSeed < 85) {
-                    present = m.totalWorkDays - 2;
-                    late = 1;
-                    absent = 1;
-                } else {
-                    present = m.totalWorkDays;
-                    late = 0;
-                    absent = 0;
-                }
+                // Presence scaled directly with trainee attendance rate!
+                const targetPresent = Math.round((baseRate / 100) * m.totalWorkDays);
+                present = Math.max(0, Math.min(m.totalWorkDays, targetPresent + ((seed + idx) % 3) - 1));
+                const remaining = m.totalWorkDays - present;
+                late = Math.min(remaining, (seed + idx) % 2);
+                absent = Math.max(0, remaining - late);
             } else {
-                present = 7;
+                // November ongoing
+                const novPresent = Math.round((baseRate / 100) * 7);
+                present = Math.max(1, novPresent);
+                absent = 7 - present;
                 late = 0;
-                absent = 0;
             }
 
             const rate = Math.round((present / m.totalWorkDays) * 100);
@@ -88873,7 +88875,7 @@ function buildDemoExecutiveReport(params) {
         });
     }
 
-    // Monthly Calendar Matrix (formatted strictly as a real calendar)
+    // Monthly Calendar Matrix (Strict Calendar Grid View)
     function generateCTPCalendarGridHTML(trainee, monthNum = 11) {
         const year = 2026;
         const monthIndex = monthNum - 1;
@@ -88884,19 +88886,20 @@ function buildDemoExecutiveReport(params) {
 
         const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
+        const baseRate = parseFloat(trainee.rate || trainee.weeklyRate || 85);
         const isNov = (monthNum === 11);
 
         let gridHtml = `
-            <div class="mb-3 flex items-center justify-between text-xs">
+            <div class="mb-2 flex items-center justify-between text-xs">
                 <span class="font-black text-black dark:text-white">تقويم شهر: ${monthName} ${isNov ? '<b class="text-amber-800 bg-amber-100 px-2 py-0.5 rounded mr-2 text-[10px]">نوفمبر لم يقفل حتى الآن (جاري)</b>' : '<b class="text-black bg-slate-100 px-2 py-0.5 rounded mr-2 text-[10px]">مكتمل ومغلق</b>'}</span>
-                <span class="font-bold text-slate-500 font-mono">سنة التدريب: 2026 م</span>
+                <span class="font-bold text-slate-600 font-mono">سنة التدريب: 2026 م</span>
             </div>
             <div class="grid grid-cols-7 gap-1 text-center min-w-[500px]">
-                ${dayNames.map(d => `<div class="p-2 font-black text-xs text-black dark:text-slate-200 bg-slate-100 dark:bg-slate-700/60 rounded-xl border border-slate-300 dark:border-slate-600">${d}</div>`).join('')}
+                ${dayNames.map(d => `<div class="p-1.5 font-black text-xs text-black dark:text-slate-200 bg-slate-100 dark:bg-slate-700/60 rounded border border-slate-300 dark:border-slate-600">${d}</div>`).join('')}
         `;
 
         for (let i = 0; i < firstDayIndex; i++) {
-            gridHtml += `<div class="p-2 rounded-xl bg-transparent"></div>`;
+            gridHtml += `<div class="p-1.5 rounded bg-transparent"></div>`;
         }
 
         let presentCount = 0, lateCount = 0, absentCount = 0;
@@ -88917,11 +88920,12 @@ function buildDemoExecutiveReport(params) {
                 statusHtml = '<span class="text-[9px] block text-slate-500 font-medium">قيد التدريب</span>';
             } else {
                 const dayRand = (seed + day * 19 + monthNum * 29) % 100;
-                if (dayRand < 90) {
+                // If trainee attendance rate is low, they get absent/late!
+                if (dayRand < (baseRate - 5)) {
                     presentCount++;
                     boxClass = 'bg-white dark:bg-slate-700/50 text-black dark:text-white border border-black font-bold';
                     statusHtml = '<span class="text-[9px] font-black block">✓ حاضر</span>';
-                } else if (dayRand < 96) {
+                } else if (dayRand < baseRate) {
                     lateCount++;
                     boxClass = 'bg-slate-100 dark:bg-slate-700/80 text-black dark:text-white border border-black font-bold';
                     statusHtml = '<span class="text-[9px] font-black block">⚠️ تأخير</span>';
@@ -88933,7 +88937,7 @@ function buildDemoExecutiveReport(params) {
             }
 
             gridHtml += `
-                <div class="p-1.5 rounded-lg text-center flex flex-col justify-between min-h-[55px] ${boxClass}">
+                <div class="p-1 rounded text-center flex flex-col justify-between min-h-[50px] ${boxClass}">
                     <span class="text-xs font-black">${day}</span>
                     ${statusHtml}
                 </div>
@@ -88941,11 +88945,11 @@ function buildDemoExecutiveReport(params) {
         }
 
         gridHtml += `</div>
-            <div class="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-black text-center text-xs">
-                <div class="border border-black p-2 rounded-xl"><span class="text-slate-500 block">الحضور الفعلي:</span><b class="text-black font-black text-sm">${presentCount} يوم</b></div>
-                <div class="border border-black p-2 rounded-xl"><span class="text-slate-500 block">أيام التأخير:</span><b class="text-black font-black text-sm">${lateCount} يوم</b></div>
-                <div class="border border-black p-2 rounded-xl"><span class="text-slate-500 block">أيام الغياب:</span><b class="text-black font-black text-sm">${absentCount} يوم</b></div>
-                <div class="border border-black p-2 rounded-xl"><span class="text-slate-500 block">حالة الشهر:</span><b class="text-black font-black text-sm">${isNov ? 'لم يقفل حتى الآن' : 'مكتمل ومغلق'}</b></div>
+            <div class="grid grid-cols-4 gap-2 mt-2 pt-2 border-t border-black text-center text-xs">
+                <div class="border border-black p-1.5 rounded"><span class="text-slate-500 block">الحضور الفعلي:</span><b class="text-black font-black text-sm">${presentCount} يوم</b></div>
+                <div class="border border-black p-1.5 rounded"><span class="text-slate-500 block">أيام التأخير:</span><b class="text-black font-black text-sm">${lateCount} يوم</b></div>
+                <div class="border border-black p-1.5 rounded"><span class="text-slate-500 block">أيام الغياب:</span><b class="text-black font-black text-sm">${absentCount} يوم</b></div>
+                <div class="border border-black p-1.5 rounded"><span class="text-slate-500 block">حالة الشهر:</span><b class="text-black font-black text-sm">${isNov ? 'لم يقفل حتى الآن' : 'مكتمل ومغلق'}</b></div>
             </div>
         `;
 
@@ -88965,29 +88969,30 @@ function buildDemoExecutiveReport(params) {
         const btnContainer = document.getElementById('ctpMonthButtonsContainer');
         if (!btnContainer) return;
         const months = [
-            { n: 4, l: 'شهر 4' },
-            { n: 5, l: 'شهر 5' },
-            { n: 6, l: 'شهر 6' },
-            { n: 7, l: 'شهر 7' },
-            { n: 8, l: 'شهر 8' },
-            { n: 9, l: 'شهر 9' },
-            { n: 10, l: 'شهر 10' },
-            { n: 11, l: 'شهر 11 (جاري)' }
+            { n: 1, l: 'شهر 1' }, { n: 2, l: 'شهر 2' }, { n: 3, l: 'شهر 3' },
+            { n: 4, l: 'شهر 4' }, { n: 5, l: 'شهر 5' }, { n: 6, l: 'شهر 6' },
+            { n: 7, l: 'شهر 7' }, { n: 8, l: 'شهر 8' }, { n: 9, l: 'شهر 9' },
+            { n: 10, l: 'شهر 10' }, { n: 11, l: 'شهر 11 (جاري)' }
         ];
 
         btnContainer.innerHTML = months.map(m => `
-            <button type="button" onclick="selectCTPCalendarMonth(${m.n})" class="px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${m.n === activeMonth ? 'bg-black text-white dark:bg-white dark:text-black font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}">
+            <button type="button" onclick="selectCTPCalendarMonth(${m.n})" class="px-2 py-0.5 rounded text-xs font-bold transition cursor-pointer ${m.n === activeMonth ? 'bg-black text-white dark:bg-white dark:text-black font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}">
                 ${m.l}
             </button>
         `).join('');
     }
 
-    // Monthly Grade Transcript (Broken down by month 4 to 10 + Overall GPA & % + Issue Date: 31 Oct 2026)
+    // Monthly Grades Transcript: DIRECTLY TIED TO ATTENDANCE RATE!
+    // Bad attendance = Bad grades!
     function getCTPMonthlyGradesTranscript(trainee) {
         const assigned = getTraineeAssignedCourses(trainee);
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 777);
+        const baseRate = parseFloat(trainee.rate || trainee.weeklyRate || 85);
 
         const months = [
+            { monthNum: 1, name: 'شهر 1 (يناير)' },
+            { monthNum: 2, name: 'شهر 2 (فبراير)' },
+            { monthNum: 3, name: 'شهر 3 (مارس)' },
             { monthNum: 4, name: 'شهر 4 (أبريل)' },
             { monthNum: 5, name: 'شهر 5 (مايو)' },
             { monthNum: 6, name: 'شهر 6 (يونيو)' },
@@ -89002,8 +89007,13 @@ function buildDemoExecutiveReport(params) {
 
         const monthlyRecords = months.map((m, mIdx) => {
             const courseScores = assigned.map((crs, cIdx) => {
-                // Pseudo-random realistic grade between 88 and 99
-                const score = 90 + ((seed + mIdx * 7 + cIdx * 11) % 10);
+                // Direct correlation: Bad attendance = bad grades!
+                // Baseline score is around the attendance rate!
+                const jitter = ((seed + mIdx * 5 + cIdx * 7) % 7) - 3;
+                let score = Math.round(baseRate + jitter);
+                if (score > 99) score = 99;
+                if (score < 25) score = 25;
+
                 grandTotalScore += score;
                 countScores++;
                 return {
@@ -89015,6 +89025,13 @@ function buildDemoExecutiveReport(params) {
 
             const mAvg = Math.round(courseScores.reduce((acc, c) => acc + c.score, 0) / courseScores.length);
             const mGpa = (mAvg / 20).toFixed(2);
+            let appreciation = 'ممتاز (A)';
+            if (mAvg >= 95) appreciation = 'ممتاز مرتفع (A+)';
+            else if (mAvg >= 90) appreciation = 'ممتاز (A)';
+            else if (mAvg >= 80) appreciation = 'جيد جداً (B+)';
+            else if (mAvg >= 70) appreciation = 'جيد (C)';
+            else if (mAvg >= 60) appreciation = 'مقبول (D)';
+            else appreciation = 'راسب وضعيف (F)';
 
             return {
                 monthNum: m.monthNum,
@@ -89022,57 +89039,78 @@ function buildDemoExecutiveReport(params) {
                 courseScores: courseScores,
                 monthAverage: mAvg,
                 monthGpa: mGpa,
-                appreciation: mAvg >= 95 ? 'ممتاز مرتفع (A+)' : (mAvg >= 90 ? 'ممتاز (A)' : 'جيد جداً (B+)')
+                appreciation: appreciation
             };
         });
 
         const overallPercent = Math.round(grandTotalScore / countScores);
         const overallGpa = (overallPercent / 20).toFixed(2);
 
+        let overallAppreciation = 'ممتاز مع مرتبة الشرف الأولى';
+        let status = 'ناجح ومجتاز لكافة المقررات والمتطلبات المهنية بنجاح';
+        if (overallPercent < 60) {
+            overallAppreciation = 'راسب وغير مجتاز لمتطلبات التدريب بسبب تدني نسبة الحضور والمواظبة';
+            status = 'راسب لتدني نسبة الحضور والدرجات';
+        } else if (overallPercent < 75) {
+            overallAppreciation = 'مقبول مع تنبيه أكاديمي لرفع مستوى المواظبة';
+            status = 'مجتاز بحد الكفاية';
+        }
+
         return {
             months: monthlyRecords,
             overallPercent: overallPercent,
             overallGpa: overallGpa > 5.0 ? '4.88' : overallGpa,
-            overallAppreciation: 'ممتاز مع مرتبة الشرف الأولى',
+            overallAppreciation: overallAppreciation,
             issueDate: '2026/10/31 م',
             issueDateHijri: '1448/05/19 هـ',
-            status: 'ناجح ومجتاز لكافة المقررات والمتطلبات المهنية بنجاح'
+            status: status
         };
     }
 
-    // Framed Exam Models: Mid-month (15th), True/False & Multiple Choice
-    // English 100% English! Other courses 100% Arabic!
+    // Framed Exam Models: Clean headers, NO teacher signature, English name in English exam
     function getCTPCourseExamModels(trainee) {
         const assigned = getTraineeAssignedCourses(trainee);
         const traineeName = trainee.name || 'متدرب معهد الذهب الأسود';
+        const englishName = (typeof transliterateArabicName === 'function') ? transliterateArabicName(trainee.name) : 'TRAINEE NAME';
         const traineeId = trainee.id || '10XXXXXXXX';
         const groupName = trainee.group || 'عام';
+        const baseRate = parseFloat(trainee.rate || trainee.weeklyRate || 85);
+        const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 777);
 
-        const midMonthDates = ['2026/05/15', '2026/07/15', '2026/09/15'];
+        const examMonths = [
+            { nameAr: 'مايو 2026', nameEn: 'May 2026', date: '2026/05/15', no: 1 },
+            { nameAr: 'يوليو 2026', nameEn: 'July 2026', date: '2026/07/15', no: 2 },
+            { nameAr: 'سبتمبر 2026', nameEn: 'September 2026', date: '2026/09/15', no: 3 }
+        ];
 
-        return midMonthDates.map((dateStr, idx) => {
+        return examMonths.map((em, idx) => {
             const courseObj = (assigned.length > 1 && idx === 1) ? assigned[1] : assigned[0];
             const isEnglish = courseObj.course.toLowerCase().includes('انجليزي') || courseObj.course.toLowerCase().includes('english');
+            
+            // Score correlates directly with attendance!
+            let score = Math.round(baseRate + ((seed + idx * 7) % 7) - 3);
+            if (score > 99) score = 99;
+            if (score < 25) score = 25;
 
             if (isEnglish) {
                 return {
                     isEnglish: true,
-                    examNo: idx + 1,
-                    title: `Mid-Term Examination Paper - Technical English (Exam 0${idx + 1})`,
-                    date: dateStr,
-                    time: '09:00 AM - 10:30 AM (Duration: 90 Minutes)',
+                    examNo: em.no,
+                    title: `Technical English Examination Paper - ${em.nameEn}`,
+                    date: em.date,
+                    time: '09:00 AM - 10:30 AM',
                     room: courseObj.room,
                     instructor: courseObj.trainer,
-                    traineeName: traineeName,
+                    traineeName: englishName, // NAME IN ENGLISH!
                     traineeId: traineeId,
                     group: groupName,
                     maxScore: 100,
-                    obtainedScore: 95,
+                    obtainedScore: score,
                     tfQuestions: [
-                        { q: '1. Personal Protective Equipment (PPE) is mandatory in industrial workshop areas.', ans: 'True', traineeAns: 'True', mark: '10 / 10' },
+                        { q: '1. Personal Protective Equipment (PPE) is mandatory in industrial workshop areas.', ans: 'True', traineeAns: score >= 60 ? 'True' : 'False', mark: score >= 60 ? '10 / 10' : '0 / 10' },
                         { q: '2. A hot work permit is only needed for electrical circuits maintenance.', ans: 'False', traineeAns: 'False', mark: '10 / 10' },
                         { q: '3. In case of emergency alarm, technicians must stop machines and evacuate to assembly points.', ans: 'True', traineeAns: 'True', mark: '10 / 10' },
-                        { q: '4. Precision instruments like micrometers must be calibrated before inspection.', ans: 'True', traineeAns: 'True', mark: '10 / 10' },
+                        { q: '4. Precision instruments like micrometers must be calibrated before inspection.', ans: 'True', traineeAns: score >= 60 ? 'True' : 'False', mark: score >= 60 ? '10 / 10' : '0 / 10' },
                         { q: '5. Smoking is permitted anywhere inside the engineering workshops.', ans: 'False', traineeAns: 'False', mark: '10 / 10' }
                     ],
                     mcQuestions: [
@@ -89085,7 +89123,7 @@ function buildDemoExecutiveReport(params) {
                                 'D) Office of Scientific Hydrology Assessment'
                             ],
                             selected: 'A',
-                            mark: '10 / 10'
+                            mark: score >= 60 ? '10 / 10' : '0 / 10'
                         },
                         {
                             q: '7. Which term describes the allowable variation from specified dimensions?',
@@ -89103,7 +89141,7 @@ function buildDemoExecutiveReport(params) {
                             q: '9. When reporting an incident, what is the most critical information required?',
                             options: ['A) Lunch break time', 'B) Date, time, location, and description of event', 'C) Color of the machine', 'D) Supervisor hometown'],
                             selected: 'B',
-                            mark: '10 / 10'
+                            mark: score >= 60 ? '10 / 10' : '0 / 10'
                         },
                         {
                             q: '10. The procedure LOTO (Lockout/Tagout) is mainly implemented to:',
@@ -89118,22 +89156,22 @@ function buildDemoExecutiveReport(params) {
             const cName = courseObj.course;
             return {
                 isEnglish: false,
-                examNo: idx + 1,
-                title: `ورقة الاختبار التحريري والتطبيقي المعتمد لمقرر (${cName}) - الاختبار 0${idx + 1}`,
-                date: dateStr,
-                time: '09:00 ص - 10:30 ص (الزمن: ساعة ونصف)',
+                examNo: em.no,
+                title: `ورقة اختبار شهر ${em.nameAr} لمقرر (${cName})`,
+                date: em.date,
+                time: '09:00 ص - 10:30 ص',
                 room: courseObj.room,
                 instructor: courseObj.trainer,
                 traineeName: traineeName,
                 traineeId: traineeId,
                 group: groupName,
                 maxScore: 100,
-                obtainedScore: 96,
+                obtainedScore: score,
                 tfQuestions: [
-                    { q: '1. يجب ارتداء معدات الوقاية الشخصية بصورة إلزامية طوال فترة التدريب العملي داخل الورش.', ans: 'صواب', traineeAns: 'صواب', mark: '10 / 10' },
+                    { q: '1. يجب ارتداء معدات الوقاية الشخصية بصورة إلزامية طوال فترة التدريب العملي داخل الورش.', ans: 'صواب', traineeAns: score >= 60 ? 'صواب' : 'خطأ', mark: score >= 60 ? '10 / 10' : '0 / 10' },
                     { q: '2. يجوز تشغيل الآلات والمعدات الثقيلة دون إذن مسبق وإشراف مباشر من المدرب المختص.', ans: 'خطأ', traineeAns: 'خطأ', mark: '10 / 10' },
                     { q: '3. يؤدي تنظيف أسطح التلامس وإزالة الصدأ والشوائب إلى رفع جودة التوصيل وكفاءة المشغولة.', ans: 'صواب', traineeAns: 'صواب', mark: '10 / 10' },
-                    { q: '4. تهدف الصيانة الوقائية الدورية إلى تقليل الأعطال المفاجئة وإطالة العمر الافتراضي للمعدات.', ans: 'صواب', traineeAns: 'صواب', mark: '10 / 10' },
+                    { q: '4. تهدف الصيانة الوقائية الدورية إلى تقليل الأعطال المفاجئة وإطالة العمر الافتراضي للمعدات.', ans: 'صواب', traineeAns: score >= 60 ? 'صواب' : 'خطأ', mark: score >= 60 ? '10 / 10' : '0 / 10' },
                     { q: '5. يتم التخلص من الزيوت والمخلفات الصناعية داخل شبكة الصرف العادية للمعهد.', ans: 'خطأ', traineeAns: 'خطأ', mark: '10 / 10' }
                 ],
                 mcQuestions: [
@@ -89146,7 +89184,7 @@ function buildDemoExecutiveReport(params) {
                             'د) جمع الحقائب والمقتنيات الشخصية أولاً'
                         ],
                         selected: 'أ',
-                        mark: '10 / 10'
+                        mark: score >= 60 ? '10 / 10' : '0 / 10'
                     },
                     {
                         q: '7. يهدف عزل مصادر الطاقة ووضع أقفال الأمان وبطاقات التحذير قبل أعمال الصيانة إلى:',
@@ -89169,7 +89207,7 @@ function buildDemoExecutiveReport(params) {
                         q: '9. يتم استخدام طفايات الحريق ثاني أكسيد الكربون بشكل خاص لمكافحة حرائق:',
                         options: ['أ) الأجهزة الكهربائية والمعدات المشحونة', 'ب) الأخشاب والأوراق العادية فقط', 'ج) المعادن القابلة للاشتعال كالمغنيسيوم', 'د) الأقمشة والستائر فقط'],
                         selected: 'أ',
-                        mark: '10 / 10'
+                        mark: score >= 60 ? '10 / 10' : '0 / 10'
                     },
                     {
                         q: '10. ما هي القاعدة الأساسية عند نقل وحمل الأوزان والمشغولات الثقيلة يدوياً في المعمل؟',
@@ -89192,6 +89230,7 @@ function buildDemoExecutiveReport(params) {
         const seed = Math.abs(parseInt(String(trainee.id || '1088776655').slice(-6), 10) || 543210);
         const englishName = (typeof transliterateArabicName === 'function') ? transliterateArabicName(trainee.name) : 'TRAINEE NAME';
         const qual = getTraineeEffectiveQualification(trainee);
+        const safetyDate = getCTPSafetyPledgeDate(trainee);
 
         const birthYear = 2001 + (seed % 4);
         const birthMonth = (seed % 12) + 1;
@@ -89239,34 +89278,36 @@ function buildDemoExecutiveReport(params) {
             supervisor: 'علي آل عباس',
             director: 'علي الشاخوري',
             admissionStatus: 'قبول نهائي معتمد (مقبول)',
-            admissionDate: '2025/11/15',
-            issueCode: `BGTI-DOS-2026-${String(trainee.id || '9999').slice(-4)}`
+            admissionDate: safetyDate.greg,
+            issueCode: `${trainee.id || '10XXXXXXXX'}` // File code is strictly National ID!
         };
     }
 
-    // Safety Pledge Text (AT THE START)
+    // Safety Pledge Text (Randomized date during year, >= 60 days ago)
     function getCTPSafetyPledgeText(trainee) {
         const seed = Math.abs(parseInt(String(trainee.id || '1234').slice(-4), 10) || 789);
+        const pDate = getCTPSafetyPledgeDate(trainee);
+
         return `
             <div class="space-y-3 font-medium text-slate-800 dark:text-slate-200">
                 <div class="border-b-2 border-black pb-2 flex items-center justify-between">
                     <div>
-                        <h4 class="font-black text-black dark:text-white text-base">إقرار وتعهد السلامة والصحة المهنية والمحافظة على المرافق (HSE Commitment)</h4>
-                        <p class="text-xs text-slate-600 font-bold">وثيقة إلزامية في بداية التحاق المتدرب بالبرنامج التدريبي</p>
+                        <h4 class="font-black text-black dark:text-white text-base">إقرار وتعهد السلامة والصحة المهنية والمحافظة على المرافق</h4>
+                        <p class="text-xs text-slate-600 font-bold">تاريخ التعهد: ${pDate.greg} (${pDate.hijri}) • رقم الملف: ${trainee.id}</p>
                     </div>
-                    <span class="bg-black text-white px-2.5 py-1 rounded text-xs font-mono font-black">HSE-DOC-2026</span>
+                    <span class="bg-black text-white px-2.5 py-1 rounded text-xs font-mono font-black">${trainee.id}</span>
                 </div>
                 <p class="text-xs leading-relaxed text-slate-900 dark:text-slate-100">
-                    أقر وأتعهد أنا المتدرب: <b class="font-black text-black dark:text-white text-sm">${trainee.name}</b> (سجل مدني: <span class="font-mono font-bold">${trainee.id}</span>)، المقيد بشركة: <b class="font-bold">${trainee.company || 'المؤسسة'}</b>، بكامل قواي العقلية وإرادتي المعتبرة، بالالتزام الصارم بكافة لوائح السلامة والصحة المهنية المعمول بها في معهد الذهب الأسود العالي للتدريب، وأتعهد بالبنود الآتية:
+                    أقر وأتعهد أنا المتدرب: <b class="font-black text-black dark:text-white text-sm">${trainee.name}</b> (رقم الهوية: <span class="font-mono font-bold">${trainee.id}</span>)، المقيد بشركة: <b class="font-bold">${trainee.company || 'المؤسسة'}</b>، بكامل قواي العقلية وإرادتي المعتبرة، بالالتزام الصارم بكافة لوائح السلامة والصحة المهنية بمعهد الذهب الأسود العالي للتدريب (فرع عنك)، وأتعهد بالبنود الآتية:
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 my-2 text-xs">
                     <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-black space-y-1">
                         <b class="text-black dark:text-white block font-black">1. الالتزام بمهمات الوقاية الشخصية (PPE):</b>
-                        <span>ارتداء كامل مهمات الوقاية (الخوذة، حذاء السلامة، النظارات الواقية، والقفازات الملائمة) بشكل دائم داخل الورش والمعامل.</span>
+                        <span>ارتداء كامل مهمات الوقاية (الخوذة، حذاء السلامة الصناعي، النظارات، القفازات) بشكل دائم داخل الورش والمعامل.</span>
                     </div>
                     <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-black space-y-1">
                         <b class="text-black dark:text-white block font-black">2. المحافظة على المرافق والمعدات:</b>
-                        <span>الحرص التام على نظافة وصيانة وسلامة معدات وآلات المعهد، وعدم تشغيل أي ماكينة إلا بتصريح وإشراف مباشر من المدرب.</span>
+                        <span>الحرص التام على نظافة وصيانة وسلامة معدات وآلات المعهد، وعدم تشغيل أي ماكينة إلا بإشراف مباشر من المدرب.</span>
                     </div>
                     <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-black space-y-1">
                         <b class="text-black dark:text-white block font-black">3. تجنب السلوكيات الخطرة وتفادي الإصابات:</b>
@@ -89274,28 +89315,28 @@ function buildDemoExecutiveReport(params) {
                     </div>
                     <div class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-black space-y-1">
                         <b class="text-black dark:text-white block font-black">4. الامتثال للتعليمات وأنظمة الطوارئ:</b>
-                        <span>التقيد الصارم بتوجيهات مسؤولي السلامة، والتعرف على مسارات الإخلاء ونقاط التجمع، والالتزام بالقوانين المنظمة.</span>
+                        <span>التقيد الصارم بتوجيهات مسؤولي السلامة، ومسارات الإخلاء ونقاط التجمع، والالتزام بالقوانين المعمول بها.</span>
                     </div>
                 </div>
                 <div class="pt-3 border-t border-black flex items-center justify-between text-xs">
                     <div>
-                        <span class="text-slate-500 block font-bold">توقيع المتدرب المقر:</span>
+                        <span class="text-slate-500 block font-bold">توقيع المتدرب:</span>
                         ${getOfficialSignatureHTML('trainee', seed, trainee.name)}
                     </div>
                     <div>
-                        <span class="text-slate-500 block font-bold">مشرف شؤون المتدربين:</span>
+                        <span class="text-slate-500 block font-bold">مسؤول شؤون المتدربين:</span>
                         ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}
                     </div>
                     <div class="text-left font-mono text-[10px] text-slate-500">
-                        <div>التاريخ: 2025/11/15</div>
-                        <div>كود الوثيقة: HSE-ACK-${String(trainee.id).slice(-4)}</div>
+                        <div>التاريخ: ${pDate.greg}</div>
+                        <div>رقم الملف: ${trainee.id}</div>
                     </div>
                 </div>
             </div>
         `;
     }
 
-    // Concise Warnings (Concise labels only - بدون وصف نصوص أو أقسام مطولة)
+    // Warnings (Concise fields, signature + stamp in EACH box, no redundant bottom stamp)
     function getCTPDisciplinaryWarnings(trainee) {
         const seed = Math.abs(parseInt(String(trainee.id || '1234').slice(-4), 10) || 789);
         return [
@@ -89303,17 +89344,17 @@ function buildDemoExecutiveReport(params) {
                 type: 'إنذار تأخير صباحي',
                 code: `WARN-LATE-${String(100 + (seed % 800))}`,
                 date: '2026/06/18',
-                violation: 'تأخر صباحي متكرر (20 دقيقة)',
-                procedure: 'إنذار وتعهد خطي بالانضباط',
+                violation: 'تأخر صباحي متكرر عن بدء المحاضرة الأولى',
+                procedure: 'إنذار خطي وتعهد بالانضباط الزمني',
                 supervisor: 'علي آل عباس',
-                status: 'تمت التسوية'
+                status: 'تمت التسوية والالتزام'
             },
             {
                 type: 'تنبيه غياب',
                 code: `WARN-ABS-${String(200 + (seed % 700))}`,
                 date: '2026/08/24',
-                violation: 'غياب يوم تدريبي بدون إشعار',
-                procedure: 'حسم جزئي وتعهد بالتعويض',
+                violation: 'تغيب عن يوم تدريبي دون إشعار رسمي',
+                procedure: 'حسم جزئي وتعهد بالتعويض العملي',
                 supervisor: 'علي آل عباس',
                 status: 'تم القبول والإغلاق'
             },
@@ -89321,10 +89362,10 @@ function buildDemoExecutiveReport(params) {
                 type: 'تنبيه سلوك ومواظبة',
                 code: `WARN-HSE-${String(300 + (seed % 600))}`,
                 date: '2026/10/12',
-                violation: 'تهاون في ارتداء نظارة الحماية',
-                procedure: 'توجيه ميداني فوري وإرشاد',
+                violation: 'تهاون في ارتداء نظارة الحماية بالورشة',
+                procedure: 'توجيه ميداني فوري وإعادة التعهد',
                 supervisor: 'علي آل عباس',
-                status: 'تم الامتثال'
+                status: 'تم الامتثال والتقيد'
             }
         ];
     }
@@ -89451,7 +89492,7 @@ function buildDemoExecutiveReport(params) {
         document.getElementById('ctpTraineeCompany').innerText = trainee.company || 'المؤسسة العامة';
         document.getElementById('ctpTraineeGroup').innerText = trainee.group || 'عام';
         document.getElementById('ctpTraineeSpecialty').innerText = assigned.map(a => a.course).join(' و ');
-        document.getElementById('ctpTraineeRate').innerText = `${Math.round(parseFloat(trainee.rate || trainee.weeklyRate || 95))}%`;
+        document.getElementById('ctpTraineeRate').innerText = `${Math.round(parseFloat(trainee.rate || trainee.weeklyRate || 85))}%`;
 
         // 1. Safety Pledge in Tab (AT THE START)
         const safetyContainer = document.getElementById('ctpSafetyPledgeContainer');
@@ -89467,7 +89508,7 @@ function buildDemoExecutiveReport(params) {
                     <div class="flex items-center justify-between border-b border-black pb-3">
                         <div>
                             <h4 class="font-black text-sm text-black dark:text-white">نموذج تسجيل وقبول متدرب</h4>
-                            <p class="text-[11px] text-slate-500 font-mono">تاريخ تقديم الطلب: ${adm.admissionDate} • رقم الملف: ${adm.issueCode}</p>
+                            <p class="text-[11px] text-slate-500 font-mono">تاريخ تقديم الطلب: ${adm.admissionDate} • رقم الملف (الهوية): ${adm.issueCode}</p>
                         </div>
                         <span class="bg-black text-white dark:bg-white dark:text-black font-black px-3 py-1 rounded-lg text-xs">الحالة: ${adm.admissionStatus}</span>
                     </div>
@@ -89534,7 +89575,7 @@ function buildDemoExecutiveReport(params) {
                         <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700 space-y-1">
                             <span class="text-slate-500 text-[10px] font-bold block">المعلومات الصحية:</span>
                             <div class="font-bold">هل تعاني من أي أمراض مزمنة أو عاهة تعيق التدريب؟ <b>لا ☑ نعم ☐</b></div>
-                            <div class="text-[11px] text-slate-500">الحالة: لائق طبياً وبدنياً.</div>
+                            <div class="text-[11px] text-slate-500">الحالة: لائق طبياً وبدنياً لكافة الورش.</div>
                         </div>
                         <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-700 space-y-1">
                             <span class="text-slate-500 text-[10px] font-bold block">جهات اتصال الطوارئ:</span>
@@ -89572,7 +89613,7 @@ function buildDemoExecutiveReport(params) {
             `;
         }
 
-        // 3. Render Schedule (2 Periods)
+        // 3. Render Schedule (Fixed Daily Periods - No Flipping!)
         const schedTable = document.getElementById('ctpScheduleTable');
         const schedGrpLbl = document.getElementById('ctpScheduleGroupLabel');
         if (schedGrpLbl) schedGrpLbl.innerText = `الشعبة: ${trainee.group || 'عام'}`;
@@ -89601,15 +89642,15 @@ function buildDemoExecutiveReport(params) {
             `;
         }
 
-        // 4. Render Monthly Grades Transcript in Tab
+        // 4. Render Monthly Grades Transcript in Tab (Scaled with Attendance)
         const gradesContainer = document.getElementById('ctpGradesContainer');
         if (gradesContainer) {
             gradesContainer.innerHTML = `
                 <div class="border border-black rounded-2xl p-4 sm:p-5 space-y-4 bg-white dark:bg-slate-800 text-xs">
                     <div class="flex items-center justify-between border-b border-black pb-3">
                         <div>
-                            <h4 class="font-black text-sm text-black dark:text-white">كشف درجات الشهور (أبريل - أكتوبر 2026) والمعدل التراكمي</h4>
-                            <p class="text-slate-500 text-[11px]">تاريخ الإصدار: <b>${monthlyTranscript.issueDate}</b> (${monthlyTranscript.issueDateHijri})</p>
+                            <h4 class="font-black text-sm text-black dark:text-white">كشف درجات الشهور ومعدل المواد (مرتبط مباشرة بالحضور والمواظبة)</h4>
+                            <p class="text-slate-500 text-[11px]">تاريخ الاعتماد: <b>${monthlyTranscript.issueDate}</b> (${monthlyTranscript.issueDateHijri})</p>
                         </div>
                         <div class="text-right">
                             <span class="text-slate-500 text-[10px] block font-bold">المعدل العام والنسبة المئوية:</span>
@@ -89620,8 +89661,8 @@ function buildDemoExecutiveReport(params) {
                     <table class="w-full text-xs text-right border-collapse border border-black">
                         <thead>
                             <tr class="bg-black text-white font-black">
-                                <th class="border border-black p-2">الشهر</th>
-                                <th class="border border-black p-2">المقررات والدرجات</th>
+                                <th class="border border-black p-2">الشهر التدريبي</th>
+                                <th class="border border-black p-2">المقررات والدرجات المقيدة</th>
                                 <th class="border border-black p-2 text-center">معدل الشهر</th>
                                 <th class="border border-black p-2 text-center">النسبة</th>
                                 <th class="border border-black p-2 text-center">التقدير</th>
@@ -89643,48 +89684,49 @@ function buildDemoExecutiveReport(params) {
                         <tfoot>
                             <tr class="bg-slate-100 font-black">
                                 <td class="border border-black p-2">المعدل التراكمي العام:</td>
-                                <td class="border border-black p-2 font-mono">${monthlyTranscript.overallGpa} من 5.00</td>
+                                <td class="border border-black p-2 font-mono text-sm">${monthlyTranscript.overallGpa} من 5.00</td>
                                 <td class="border border-black p-2 text-center">النسبة الكلية:</td>
-                                <td class="border border-black p-2 text-center font-mono text-sm">${monthlyTranscript.overallPercent}%</td>
+                                <td class="border border-black p-2 text-center font-mono text-sm font-black">${monthlyTranscript.overallPercent}%</td>
                                 <td class="border border-black p-2 text-center">${monthlyTranscript.overallAppreciation}</td>
                             </tr>
                         </tfoot>
                     </table>
 
                     <div class="pt-2 border-t border-black flex items-center justify-between text-xs">
-                        <div>تاريخ الاعتماد: <b>آخر يوم من شهر أكتوبر 2026 (${monthlyTranscript.issueDate})</b></div>
+                        <div>تاريخ الإصدار: <b>آخر يوم من شهر أكتوبر 2026 (${monthlyTranscript.issueDate})</b></div>
                         <div>النتيجة: <b>${monthlyTranscript.status}</b></div>
                     </div>
                 </div>
             `;
         }
 
-        // 5. Render Warnings in Tab (Concise Labels Only)
+        // 5. Render Warnings in Tab (Concise, with stamp and signature in each box)
         const warnContainer = document.getElementById('ctpWarningsContainer');
         if (warnContainer) {
             warnContainer.innerHTML = `
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h4 class="font-black text-sm text-black dark:text-white">سجل الإنذارات والتنبيهات المعتادة</h4>
-                            <p class="text-xs text-slate-500">مسؤول شؤون المتدربين: <b>علي آل عباس</b></p>
-                        </div>
-                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         ${warnings.map(w => `
-                            <div class="border border-black rounded-2xl p-4 bg-white dark:bg-slate-800 space-y-2 text-xs">
-                                <div class="border-b border-black pb-2 flex items-center justify-between">
-                                    <h5 class="font-black text-xs text-black dark:text-white">${w.type}</h5>
+                            <div class="border-2 border-black rounded-2xl p-3 bg-white dark:bg-slate-800 space-y-2 text-xs">
+                                <div class="border-b border-black pb-1.5 flex items-center justify-between">
+                                    <h5 class="font-black text-sm text-black dark:text-white">${w.type}</h5>
                                     <span class="text-[10px] font-mono text-slate-500">${w.code}</span>
                                 </div>
                                 <div class="space-y-1 text-slate-800 dark:text-slate-200">
                                     <div><b>التاريخ:</b> <span class="font-mono">${w.date}</span></div>
                                     <div><b>المخالفة:</b> ${w.violation}</div>
                                     <div><b>الإجراء:</b> ${w.procedure}</div>
+                                    <div><b>الحالة:</b> <span class="font-bold">${w.status}</span></div>
                                 </div>
-                                <div class="pt-2 border-t border-black flex items-center justify-between text-[11px]">
-                                    <span class="text-slate-700 font-bold">${w.supervisor}</span>
-                                    <span class="font-bold text-black dark:text-white bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">${w.status}</span>
+                                <!-- Stamp & Ali Al-Abbas Signature INSIDE EACH WARNING BOX -->
+                                <div class="pt-2 border-t border-black flex items-center justify-between">
+                                    <div class="text-center">
+                                        <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-9 w-auto object-contain">
+                                        <span class="text-[9px] font-black text-black block">علي آل عباس</span>
+                                    </div>
+                                    <div class="flex items-center justify-center">
+                                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-14 w-auto object-contain">
+                                    </div>
                                 </div>
                             </div>
                         `).join('')}
@@ -89693,7 +89735,7 @@ function buildDemoExecutiveReport(params) {
             `;
         }
 
-        // 6. Render Framed Exam Papers in Tab
+        // 6. Render Framed Exam Papers in Tab (NO teacher signature, English name in English exam)
         const examContainer = document.getElementById('ctpExamModelsContainer');
         if (examContainer) {
             examContainer.innerHTML = exams.map(ex => `
@@ -89701,7 +89743,7 @@ function buildDemoExecutiveReport(params) {
                     <div class="border-b-2 border-black pb-2">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h5 class="font-black text-xs uppercase tracking-wider text-black dark:text-white">${ex.isEnglish ? 'TVTC - Black Gold Training Institute - Examination Paper' : 'المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود'}</h5>
+                                <h5 class="font-black text-xs uppercase tracking-wider text-black dark:text-white">${ex.isEnglish ? 'Technical and Vocational Training Corporation • Black Gold Training Institute' : 'المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود'}</h5>
                                 <h4 class="font-black text-sm text-black dark:text-white mt-0.5">${ex.title}</h4>
                             </div>
                             <div class="border border-black px-3 py-1 text-center bg-slate-50 dark:bg-slate-700">
@@ -89710,15 +89752,15 @@ function buildDemoExecutiveReport(params) {
                             </div>
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2 pt-2 border-t border-slate-300 text-xs font-mono">
-                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Trainee' : 'المتدرب'}</span><b>${ex.traineeName}</b></div>
-                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'ID' : 'الهوية'}</span><b>${ex.traineeId}</b></div>
-                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Date' : 'التاريخ'}</span><b>${ex.date}</b></div>
-                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Location' : 'المكان'}</span><b>${ex.room} (${ex.instructor})</b></div>
+                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Trainee Name' : 'اسم المتدرب'}</span><b>${ex.traineeName}</b></div>
+                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'National ID' : 'رقم الهوية'}</span><b>${ex.traineeId}</b></div>
+                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Exam Date' : 'تاريخ الاختبار'}</span><b>${ex.date}</b></div>
+                            <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Room' : 'المكان'}</span><b>${ex.room}</b></div>
                         </div>
                     </div>
 
                     <div class="space-y-1.5 text-xs">
-                        <b class="text-[10px] bg-slate-100 dark:bg-slate-700 p-1 block border border-slate-300">${ex.isEnglish ? 'Part 1: True / False Questions' : 'القسم الأول: أسئلة الصواب والخطأ (10 درجات لكل فقرة)'}</b>
+                        <b class="text-[10px] bg-slate-100 dark:bg-slate-700 p-1 block border border-slate-300">${ex.isEnglish ? 'Part 1: True or False Questions' : 'القسم الأول: أسئلة الصواب والخطأ (10 درجات لكل فقرة)'}</b>
                         ${ex.tfQuestions.map(q => `
                             <div class="p-1.5 border border-slate-200 dark:border-slate-700 rounded flex items-center justify-between">
                                 <span>${q.q}</span>
@@ -89744,20 +89786,20 @@ function buildDemoExecutiveReport(params) {
                     </div>
 
                     <div class="pt-2 border-t-2 border-black flex items-center justify-between text-xs">
-                        <div>
-                            <span class="text-slate-500 block font-bold">${ex.isEnglish ? 'Instructor Signature:' : 'توقيع المدرب:'}</span>
-                            ${getOfficialSignatureHTML('trainer', seed + ex.examNo, ex.instructor)}
+                        <div class="font-bold">
+                            <span class="text-slate-500 block text-[10px]">${ex.isEnglish ? 'Official Status' : 'الاعتماد الرسمي'}</span>
+                            <span class="font-black">${ex.isEnglish ? 'EXAMINATION COMPLETED' : 'تم اعتماد رصد الدرجة رسمياً'}</span>
                         </div>
                         <div class="font-bold text-center">
-                            <span class="text-slate-500 block text-[10px]">${ex.isEnglish ? 'Evaluation' : 'التقييم'}</span>
-                            <span class="font-black text-sm">${ex.isEnglish ? 'PASSED' : 'ناجح ومجتاز'}</span>
+                            <span class="text-slate-500 block text-[10px]">${ex.isEnglish ? 'Result' : 'النتيجة'}</span>
+                            <span class="font-black text-sm">${ex.obtainedScore >= 60 ? (ex.isEnglish ? 'PASSED' : 'ناجح ومجتاز') : (ex.isEnglish ? 'FAILED' : 'راسب')}</span>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // 7. Attendance History (Months 4-11)
+        // 7. Attendance History
         renderMonthButtons(currentCTPSelectedMonth);
         const summContainer = document.getElementById('ctpMonthlySummaryTableContainer');
         if (summContainer) {
@@ -89812,8 +89854,9 @@ function buildDemoExecutiveReport(params) {
         const schedule = getCTPWeeklySchedule(trainee);
         const historyMonths = getCTPMonthlyAttendanceHistory(trainee);
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
+        const safetyDate = getCTPSafetyPledgeDate(trainee);
 
-        // Header for printable pages with TVTC and BGTI logos
+        // Header WITHOUT commercial registration, keeping ONLY "فرع عنك" / "Anak Branch"
         const getPageHeader = (pageTitle, pageNumber) => `
             <div class="border-b-2 border-black pb-2 mb-3">
                 <div class="flex items-center justify-between">
@@ -89821,7 +89864,7 @@ function buildDemoExecutiveReport(params) {
                         <div class="font-black text-black text-xs">المملكة العربية السعودية</div>
                         <div class="font-bold text-slate-800">المؤسسة العامة للتدريب التقني والمهني</div>
                         <div class="font-black text-black">معهد الذهب الأسود العالي للتدريب</div>
-                        <div class="text-[10px] text-slate-600 font-mono">س.ت: 2052117185 • فرع عنك</div>
+                        <div class="text-[10px] text-slate-600 font-bold">فرع عنك</div>
                     </div>
                     <div class="flex items-center gap-3">
                         <img src="assets/tvtc_logo.png" alt="TVTC Logo" class="h-14 w-auto object-contain">
@@ -89831,12 +89874,12 @@ function buildDemoExecutiveReport(params) {
                         <div class="font-black text-black text-xs">Kingdom of Saudi Arabia</div>
                         <div class="font-bold text-slate-800">TVTC Accredited Higher Institute</div>
                         <div class="font-black text-black">Black Gold Training Institute</div>
-                        <div class="text-[10px] text-slate-600 font-mono">CR: 2052117185 • Anak Branch</div>
+                        <div class="text-[10px] text-slate-600 font-bold">Anak Branch</div>
                     </div>
                 </div>
                 <div class="mt-2 pt-1 border-t border-slate-300 flex items-center justify-between text-xs">
                     <span class="font-black text-black text-sm">${pageTitle}</span>
-                    <span class="text-slate-600 font-mono text-[11px]">${adm.issueCode} • ورقة ${pageNumber} من 9</span>
+                    <span class="text-slate-600 font-mono text-[11px]">رقم الملف: ${trainee.id} • ورقة ${pageNumber} من 9</span>
                 </div>
             </div>
         `;
@@ -89848,20 +89891,20 @@ function buildDemoExecutiveReport(params) {
 
                 <div class="border-2 border-black p-4 space-y-3 bg-slate-50 text-xs">
                     <div class="font-black text-sm border-b-2 border-black pb-2 flex items-center justify-between">
-                        <span>إقرار وتعهد السلامة والصحة المهنية والمحافظة على المرافق (HSE Commitment)</span>
-                        <span class="text-[10px] font-mono">وثيقة البداية الإلزامية</span>
+                        <span>إقرار وتعهد السلامة والصحة المهنية والمحافظة على المرافق</span>
+                        <span class="text-xs font-mono font-bold">تاريخ التعهد: ${safetyDate.greg}</span>
                     </div>
                     <p class="leading-relaxed text-xs">
-                        أقر وأتعهد أنا المتدرب: <b class="font-black text-sm">${trainee.name}</b> (سجل مدني: <span class="font-mono font-bold">${trainee.id}</span>)، المقيد بشركة: <b>${trainee.company || 'المؤسسة'}</b>، بكامل قواي العقلية وإرادتي المعتبرة، بالالتزام التام بكافة لوائح وتعليمات السلامة والصحة المهنية المعمول بها بمعهد الذهب الأسود العالي للتدريب، وأتعهد بالبنود الآتية:
+                        أقر وأتعهد أنا المتدرب: <b class="font-black text-sm">${trainee.name}</b> (رقم الهوية: <span class="font-mono font-bold">${trainee.id}</span>)، المقيد بشركة: <b>${trainee.company || 'المؤسسة'}</b>، بكامل قواي العقلية وإرادتي المعتبرة، بالالتزام التام بكافة لوائح وتعليمات السلامة والصحة المهنية المعمول بها بمعهد الذهب الأسود العالي للتدريب (فرع عنك)، وأتعهد بالبنود الآتية:
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 my-2 text-xs">
                         <div class="p-3 rounded-xl bg-white border border-black space-y-1">
                             <b class="text-black block font-black">1. الالتزام بمهمات الوقاية الشخصية (PPE):</b>
-                            <span>ارتداء كامل مهمات الوقاية (الخوذة، حذاء السلامة الصناعي، النظارات الواقية، والقفازات الملائمة) بشكل دائم داخل الورش والمعامل.</span>
+                            <span>ارتداء كامل مهمات الوقاية (الخوذة، حذاء السلامة، النظارات، القفازات) بشكل دائم داخل الورش والمعامل.</span>
                         </div>
                         <div class="p-3 rounded-xl bg-white border border-black space-y-1">
                             <b class="text-black block font-black">2. المحافظة التامة على المرافق والمعدات:</b>
-                            <span>الحرص التام على نظافة وصيانة وسلامة معدات وآلات المعهد، والامتناع التام عن تشغيل أي ماكينة أو لوحة طاقة إلا بإشراف مباشر من المدرب.</span>
+                            <span>الحرص التام على نظافة وصيانة وسلامة معدات وآلات المعهد، والامتناع التام عن تشغيل أي ماكينة إلا بإشراف المدرب.</span>
                         </div>
                         <div class="p-3 rounded-xl bg-white border border-black space-y-1">
                             <b class="text-black block font-black">3. تجنب السلوكيات الخطرة وتفادي الإصابات:</b>
@@ -89869,12 +89912,12 @@ function buildDemoExecutiveReport(params) {
                         </div>
                         <div class="p-3 rounded-xl bg-white border border-black space-y-1">
                             <b class="text-black block font-black">4. الامتثال للتعليمات وأنظمة الطوارئ:</b>
-                            <span>التقيد الصارم بتوجيهات مسؤولي السلامة، والتعرف على مسارات الإخلاء الآمن ونقاط التجمع، والالتزام بالقوانين المعمول بها.</span>
+                            <span>التقيد الصارم بتوجيهات مسؤولي السلامة، والتعرف على مسارات الإخلاء الآمن ونقاط التجمع، والالتزام بالقوانين.</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-3 gap-4 pt-4 border-t-2 border-black text-center text-xs items-center">
                         <div>
-                            <span class="text-slate-500 block font-bold">توقيع المتدرب المقر:</span>
+                            <span class="text-slate-500 block font-bold">توقيع المتدرب:</span>
                             ${getOfficialSignatureHTML('trainee', seed, trainee.name)}
                         </div>
                         <div class="flex flex-col items-center justify-center">
@@ -89986,13 +90029,13 @@ function buildDemoExecutiveReport(params) {
                 </div>
             </div>
 
-            <!-- ================= PAGE 3: SCHEDULE (2 PERIODS) (INDEPENDENT PAGE) ================= -->
+            <!-- ================= PAGE 3: SCHEDULE (FIXED PERIODS) (INDEPENDENT PAGE) ================= -->
             <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
-                ${getPageHeader('الجدول التدريبي الأسبوعي المعتمد للمتدرب (فترتين فقط باليوم)', 3)}
+                ${getPageHeader('الجدول التدريبي الأسبوعي المعتمد للمتدرب (فترتين ثابتتين طوال الأسبوع)', 3)}
 
                 <div>
                     <div class="flex items-center justify-between bg-black text-white px-2 py-1 mb-1">
-                        <span class="font-black text-xs">الجدول التدريبي الأسبوعي للشعبة (${trainee.group || 'عام'})</span>
+                        <span class="font-black text-xs">الجدول التدريبي للشعبة (${trainee.group || 'عام'}) - فترتين ثابتتين دون تبديل</span>
                         <span class="text-[11px] font-mono">المتدرب: ${trainee.name}</span>
                     </div>
                     <table class="w-full text-xs text-right border-collapse border border-black">
@@ -90020,9 +90063,9 @@ function buildDemoExecutiveReport(params) {
                 </div>
 
                 <div class="border border-black p-3 bg-slate-50 text-xs space-y-1">
-                    <b>ضوابط الحضور والانصراف:</b>
+                    <b>ضوابط الحضور والمواظبة:</b>
+                    <div>• المحاضرة الأولى ثابتة طوال الأسبوع والمحاضرة الثانية ثابتة طوال الأسبوع دون تبديل.</div>
                     <div>• يبدأ التدريب في تمام الساعة 08:00 صباحاً ويلتزم المتدرب بحضور الفترتين التدريبيتين كاملاً.</div>
-                    <div>• تحتسب دقائق التأخير بعد بدء المحاضرة الأولى وتُسجل في نظام المتابعة الآلي.</div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-4 pt-8 items-center text-center text-xs">
@@ -90040,20 +90083,20 @@ function buildDemoExecutiveReport(params) {
                 </div>
             </div>
 
-            <!-- ================= PAGE 4: MONTHLY GRADES TRANSCRIPT (INDEPENDENT PAGE) ================= -->
+            <!-- ================= PAGE 4: MONTHLY GRADES (INDEPENDENT PAGE) ================= -->
             <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
-                ${getPageHeader('كشف درجات الشهور (أبريل - أكتوبر 2026) والمعدل والنسبة التراكمية', 4)}
+                ${getPageHeader('كشف درجات الشهور ومعدل المواد (مرتبط بالحضور والمواظبة)', 4)}
 
                 <div>
                     <div class="flex items-center justify-between bg-black text-white px-2 py-1 mb-1">
-                        <span class="font-black text-xs">كشف الدرجات الشهري المعتمد</span>
+                        <span class="font-black text-xs">كشف الدرجات الشهري المعتمد (أبريل - أكتوبر 2026)</span>
                         <span class="text-[11px] font-mono">تاريخ الإصدار: ${monthlyTranscript.issueDate}</span>
                     </div>
                     <table class="w-full text-xs text-right border-collapse border border-black">
                         <thead>
                             <tr class="bg-black text-white font-black">
                                 <th class="border border-black p-2">الشهر التدريبي</th>
-                                <th class="border border-black p-2">المقررات التدريبية ودرجة التقييم</th>
+                                <th class="border border-black p-2">المقررات والدرجات المقيدة</th>
                                 <th class="border border-black p-2 text-center">معدل الشهر</th>
                                 <th class="border border-black p-2 text-center">النسبة المئوية</th>
                                 <th class="border border-black p-2 text-center">التقدير</th>
@@ -90076,7 +90119,7 @@ function buildDemoExecutiveReport(params) {
                             <tr class="bg-slate-100 font-black">
                                 <td class="border border-black p-2">المعدل التراكمي العام:</td>
                                 <td class="border border-black p-2 font-mono text-sm">${monthlyTranscript.overallGpa} من 5.00</td>
-                                <td class="border border-black p-2 text-center">النسبة المئوية التراكمية:</td>
+                                <td class="border border-black p-2 text-center">النسبة الكلية:</td>
                                 <td class="border border-black p-2 text-center font-mono text-sm font-black">${monthlyTranscript.overallPercent}%</td>
                                 <td class="border border-black p-2 text-center">${monthlyTranscript.overallAppreciation}</td>
                             </tr>
@@ -90104,73 +90147,64 @@ function buildDemoExecutiveReport(params) {
                 </div>
             </div>
 
-            <!-- ================= PAGE 5: DISCIPLINARY WARNINGS (INDEPENDENT PAGE - CONCISE) ================= -->
+            <!-- ================= PAGE 5: WARNINGS (INDEPENDENT PAGE - WITH STAMP & SIG IN EACH BOX) ================= -->
             <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
-                ${getPageHeader('سجل الإنذارات والتنبيهات المعتادة', 5)}
+                ${getPageHeader('سجل الإنذارات والمخالفات المعتادة', 5)}
 
-                <div>
-                    <div class="font-black text-xs bg-black text-white px-2 py-1 mb-2">سجل الإنذارات والتنبيهات (أقسام مستقلة وموجزة)</div>
-                    <div class="space-y-3">
-                        ${warnings.map(w => `
-                            <div class="border border-black p-3 bg-white space-y-1.5 text-xs">
-                                <div class="flex items-center justify-between border-b border-black pb-1">
-                                    <b class="text-sm font-black">${w.type}</b>
-                                    <span class="font-mono text-xs text-slate-600">رقم الإنذار: ${w.code}</span>
+                <div class="space-y-4">
+                    ${warnings.map(w => `
+                        <div class="border-2 border-black p-3.5 bg-white space-y-2 text-xs">
+                            <div class="flex items-center justify-between border-b-2 border-black pb-1.5">
+                                <b class="text-sm font-black">${w.type}</b>
+                                <span class="font-mono text-xs text-slate-600">رقم الإشعار: ${w.code}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs py-1">
+                                <div><b>التاريخ:</b> <span class="font-mono">${w.date}</span></div>
+                                <div><b>الحالة:</b> <b class="bg-slate-100 px-2 py-0.5 rounded border border-slate-300">${w.status}</b></div>
+                                <div class="col-span-2"><b>المخالفة:</b> ${w.violation}</div>
+                                <div class="col-span-2"><b>الإجراء المتخذ:</b> ${w.procedure}</div>
+                            </div>
+                            <!-- OFFICIAL STAMP & ALI AL-ABBAS SIGNATURE INSIDE THIS EXACT BOX -->
+                            <div class="pt-2 border-t-2 border-black flex items-center justify-between bg-slate-50 p-2 rounded">
+                                <div class="text-center">
+                                    <span class="text-[10px] text-slate-500 block font-bold">توقيع مسؤول شؤون المتدربين:</span>
+                                    <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-10 w-auto object-contain inline-block">
+                                    <span class="text-[10px] font-black text-black block">علي آل عباس</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2 text-xs">
-                                    <div><b>التاريخ:</b> <span class="font-mono">${w.date}</span></div>
-                                    <div><b>المسؤول المعتمد:</b> ${w.supervisor}</div>
-                                    <div class="col-span-2"><b>المخالفة:</b> ${w.violation}</div>
-                                    <div class="col-span-2"><b>الإجراء المتخذ:</b> ${w.procedure}</div>
-                                </div>
-                                <div class="pt-1.5 border-t border-slate-300 flex items-center justify-between text-xs">
-                                    <span>الحالة: <b class="bg-slate-100 px-2 py-0.5 rounded border border-slate-300">${w.status}</b></span>
+                                <div class="flex flex-col items-center justify-center">
+                                    <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-16 w-auto object-contain">
                                 </div>
                             </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-3 gap-4 pt-10 items-center text-center text-xs">
-                    <div>
-                        <span class="text-slate-500 block font-bold">مسؤول شؤون المتدربين:</span>
-                        ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}
-                    </div>
-                    <div class="flex flex-col items-center justify-center">
-                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-20 w-auto object-contain">
-                    </div>
-                    <div>
-                        <span class="text-slate-500 block font-bold">مدير عام المعهد:</span>
-                        ${getOfficialSignatureHTML('director', seed, 'علي الشاخوري')}
-                    </div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
 
-            <!-- ================= PAGE 6: EXAM 1 PAPER (INDEPENDENT PAGE) ================= -->
+            <!-- ================= PAGE 6: EXAM 1 PAPER (INDEPENDENT PAGE - NO TEACHER SIG) ================= -->
             <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
-                ${getPageHeader('ورقة نموذج الاختبار الأول المعتمد (منتصف الشهر 15 مايو 2026)', 6)}
+                ${getPageHeader('ورقة نموذج اختبار شهر مايو 2026', 6)}
                 ${renderSingleExamPrintablePaper(exams[0], seed, 1)}
             </div>
 
-            <!-- ================= PAGE 7: EXAM 2 PAPER (INDEPENDENT PAGE) ================= -->
+            <!-- ================= PAGE 7: EXAM 2 PAPER (INDEPENDENT PAGE - NO TEACHER SIG) ================= -->
             <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
-                ${getPageHeader('ورقة نموذج الاختبار الثاني المعتمد (منتصف الشهر 15 يوليو 2026)', 7)}
+                ${getPageHeader('ورقة نموذج اختبار شهر يوليو 2026', 7)}
                 ${renderSingleExamPrintablePaper(exams[1], seed, 2)}
             </div>
 
-            <!-- ================= PAGE 8: EXAM 3 PAPER (INDEPENDENT PAGE) ================= -->
+            <!-- ================= PAGE 8: EXAM 3 PAPER (INDEPENDENT PAGE - NO TEACHER SIG) ================= -->
             <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
-                ${getPageHeader('ورقة نموذج الاختبار الثالث المعتمد (منتصف الشهر 15 سبتمبر 2026)', 8)}
+                ${getPageHeader('ورقة نموذج اختبار شهر سبتمبر 2026', 8)}
                 ${renderSingleExamPrintablePaper(exams[2], seed, 3)}
             </div>
 
-            <!-- ================= PAGE 9: ATTENDANCE CALENDAR (INDEPENDENT PAGE - LIKE CALENDAR) ================= -->
+            <!-- ================= PAGE 9: ATTENDANCE CALENDAR (OCTOBER & NOVEMBER) (INDEPENDENT PAGE) ================= -->
             <div class="space-y-4 pt-2">
-                ${getPageHeader('تقويم وسجل الحضور (من شهر 4 أبريل وحتى شهر 11 نوفمبر)', 9)}
+                ${getPageHeader('تقويم وسجل الحضور (شهري أكتوبر ونوفمبر 2026)', 9)}
 
                 <div>
                     <div class="flex items-center justify-between bg-black text-white px-2 py-1 mb-1 text-xs">
-                        <span class="font-black">سجل الحضور الشهري التراكمي (أبريل - نوفمبر 2026)</span>
+                        <span class="font-black">سجل الحضور الشهري التراكمي لشهور التدريب (2026 م)</span>
                         <span class="font-mono">نوفمبر جاري (لم يقفل)</span>
                     </div>
                     <table class="w-full text-xs text-right border-collapse border border-black">
@@ -90201,30 +90235,38 @@ function buildDemoExecutiveReport(params) {
                         <tfoot>
                             <tr class="bg-slate-100 font-black">
                                 <td class="border border-black p-1.5">المعدل التراكمي:</td>
-                                <td colspan="4" class="border border-black p-1.5 text-center font-mono">161 يوم عمل مقيد</td>
-                                <td class="border border-black p-1.5 text-center font-black">${Math.round(parseFloat(trainee.rate || trainee.weeklyRate || 95))}%</td>
-                                <td class="border border-black p-1.5 text-center font-black">ملتزم ومنتظم</td>
+                                <td colspan="4" class="border border-black p-1.5 text-center font-mono">سجل الحضور الشامل لسنة 2026</td>
+                                <td class="border border-black p-1.5 text-center font-black">${Math.round(parseFloat(trainee.rate || trainee.weeklyRate || 85))}%</td>
+                                <td class="border border-black p-1.5 text-center font-black">${parseFloat(trainee.rate || trainee.weeklyRate || 85) >= 75 ? 'ملتزم ومنتظم' : 'إنذار تدني مواظبة'}</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
 
-                <div>
-                    <div class="font-black text-xs bg-black text-white px-2 py-1 mb-1">
-                        تقويم الحضور لشهر نوفمبر 2026 (مصفوفة التقويم - جاري المتابعة)
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                    <!-- October Calendar Matrix (Closed) -->
                     <div class="border border-black p-2 bg-white">
+                        <div class="font-black text-xs bg-black text-white px-2 py-0.5 mb-1 text-center">
+                            تقويم شهر أكتوبر 2026 (مكتمل ومغلق)
+                        </div>
+                        ${generateCTPCalendarGridHTML(trainee, 10)}
+                    </div>
+                    <!-- November Calendar Matrix (Ongoing) -->
+                    <div class="border border-black p-2 bg-white">
+                        <div class="font-black text-xs bg-black text-white px-2 py-0.5 mb-1 text-center">
+                            تقويم شهر نوفمبر 2026 (جاري المتابعة - لم يقفل)
+                        </div>
                         ${generateCTPCalendarGridHTML(trainee, 11)}
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-4 pt-6 items-center text-center text-xs border-t-2 border-black">
+                <div class="grid grid-cols-3 gap-4 pt-4 items-center text-center text-xs border-t-2 border-black">
                     <div>
                         <span class="text-slate-500 block font-bold">مسؤول شؤون المتدربين:</span>
                         ${getOfficialSignatureHTML('supervisor', seed, 'علي آل عباس')}
                     </div>
                     <div class="flex flex-col items-center justify-center">
-                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-24 w-auto object-contain">
+                        <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-20 w-auto object-contain">
                     </div>
                     <div>
                         <span class="text-slate-500 block font-bold">مدير عام المعهد:</span>
@@ -90238,13 +90280,13 @@ function buildDemoExecutiveReport(params) {
         window.print();
     }
 
-    // Helper: Render a Single Exam Paper for Print on an Independent Page
+    // Helper: Render Exam Paper WITHOUT teacher signature, English name in English exam
     function renderSingleExamPrintablePaper(ex, seed, pageExamNo) {
         return `
             <div class="border-2 border-black p-4 space-y-3 bg-white text-xs ${ex.isEnglish ? 'text-left' : 'text-right'}" dir="${ex.isEnglish ? 'ltr' : 'rtl'}">
                 <div class="border-b-2 border-black pb-2 flex items-center justify-between">
                     <div>
-                        <div class="font-black text-xs uppercase text-black">${ex.isEnglish ? 'Official Exam Sheet - TVTC / Black Gold Training Institute' : 'المؤسسة العامة للتدريب التقني والمهني • ورقة اختبار معتمدة'}</div>
+                        <div class="font-black text-xs uppercase text-black">${ex.isEnglish ? 'Technical and Vocational Training Corporation • Black Gold Training Institute' : 'المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود'}</div>
                         <div class="font-black text-sm text-black mt-0.5">${ex.title}</div>
                     </div>
                     <div class="border-2 border-black px-3 py-1 text-center bg-slate-50 font-mono font-black text-sm">
@@ -90256,7 +90298,7 @@ function buildDemoExecutiveReport(params) {
                     <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Trainee Name' : 'اسم المتدرب'}</span><b>${ex.traineeName}</b></div>
                     <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'National ID' : 'رقم الهوية'}</span><b>${ex.traineeId}</b></div>
                     <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Date' : 'تاريخ الاختبار'}</span><b>${ex.date}</b></div>
-                    <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Location' : 'مكان الاختبار'}</span><b>${ex.room} (${ex.instructor})</b></div>
+                    <div><span class="text-slate-500 block text-[10px] font-bold">${ex.isEnglish ? 'Location' : 'مكان الاختبار'}</span><b>${ex.room}</b></div>
                 </div>
 
                 <div class="space-y-2">
@@ -90285,14 +90327,15 @@ function buildDemoExecutiveReport(params) {
                     `).join('')}
                 </div>
 
+                <!-- NO TEACHER SIGNATURE! Official Certification Only -->
                 <div class="pt-4 border-t-2 border-black flex items-center justify-between text-xs">
-                    <div>
-                        <span class="text-slate-500 block font-bold">${ex.isEnglish ? 'Instructor Signature:' : 'توقيع المدرب الفاحص:'}</span>
-                        ${getOfficialSignatureHTML('trainer', seed + pageExamNo, ex.instructor)}
+                    <div class="font-bold">
+                        <span class="text-slate-500 block text-[10px]">${ex.isEnglish ? 'Validation' : 'الاعتماد'}</span>
+                        <span class="font-black">${ex.isEnglish ? 'OFFICIALLY RECORDED IN DOSSIER' : 'معتمد ومقيد رسمياً في ملف المتدرب'}</span>
                     </div>
                     <div class="text-center font-bold">
-                        <span class="text-slate-500 block text-[10px]">${ex.isEnglish ? 'Final Evaluation' : 'النتيجة والاعتماد'}</span>
-                        <span class="font-black text-sm">${ex.isEnglish ? 'PASSED (EXCELLENT)' : 'ناجح ومجتاز بتفوق'}</span>
+                        <span class="text-slate-500 block text-[10px]">${ex.isEnglish ? 'Final Evaluation' : 'النتيجة النهائية'}</span>
+                        <span class="font-black text-sm">${ex.obtainedScore >= 60 ? (ex.isEnglish ? 'PASSED' : 'ناجح ومجتاز') : (ex.isEnglish ? 'FAILED' : 'راسب')}</span>
                     </div>
                 </div>
             </div>
@@ -90301,6 +90344,8 @@ function buildDemoExecutiveReport(params) {
 
     // ===================================================================
     // END COMPREHENSIVE TRAINEE PORTFOLIO SYSTEM
+    // ===================================================================
+
     // ===================================================================
 
     // ===================================================================
