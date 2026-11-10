@@ -1945,6 +1945,12 @@
 
 
         /* Printable Certificate & Administrative Report Styles */
+        .report-page-sheet {
+            border-right: 6px solid #C5A059 !important;
+            padding-right: 18px !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
 
         @media print {
 
@@ -12434,7 +12440,7 @@
 
                 <!-- This area is displayed on screen and exclusively rendered when printing (A4) -->
 
-                <div id="adminReportPrintArea" class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm space-y-6">
+                <div id="adminReportPrintArea" class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm space-y-6" style="border-right: 6px solid #C5A059;">
 
                     <!-- Dynamic Formal Report Content will be rendered here by JavaScript -->
 
@@ -12593,7 +12599,7 @@
                 </div>
 
                 <!-- Printable Report Sheet Area (Visible during print or preview) -->
-                <div id="cdPrintableReportArea" class="hidden bg-white text-slate-900 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-300">
+                <div id="cdPrintableReportArea" class="hidden bg-white text-slate-900 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-300" style="border-right: 6px solid #C5A059;">
                     <div id="cdPrintableReportContent">
                         <!-- Filled by JS -->
                     </div>
@@ -83183,8 +83189,10 @@ function buildDemoExecutiveReport(params) {
                             <div class="font-bold">كود التقرير: <span class="font-black text-[#0F2942]">${reportCode}</span></div>
 
                             <div class="font-bold">التاريخ: <span class="font-black text-slate-900">${todayStr}</span></div>
+                        <div class="mt-1"><span class="bg-[#C5A059]/15 text-[#7A5C17] border border-[#C5A059] px-2.5 py-0.5 rounded-full font-black text-[10px]">صفحة 1 من 1</span></div>
 
                             <div class="font-bold">نطاق التقرير: <span class="bg-amber-100 text-amber-900 font-black px-1.5 py-0.5 rounded text-[10px]">${weekScope === 'CUMULATIVE' ? 'تراكمي شامل' : 'الأسبوع المباشر'}</span></div>
+                            <div class="mt-1"><span class="bg-[#C5A059]/15 text-[#7A5C17] border border-[#C5A059] px-2 py-0.5 rounded-full font-black text-[10px]">صفحة 1 من 1</span></div>
 
                         </div>
 
@@ -83773,6 +83781,22 @@ function buildDemoExecutiveReport(params) {
         }
 
 
+
+        html += `
+            <div class="mt-6 pt-2.5 border-t-2 border-[#C5A059] text-[10px] text-slate-500 flex items-center justify-between font-sans">
+                <div class="flex items-center gap-2">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#C5A059]"></span>
+                    <span class="font-black text-slate-900">معهد الذهب الأسود العالي للتدريب</span>
+                    <span class="text-slate-400">•</span>
+                    <span>تقرير إداري رسمي معتمد وموثق بالنظام</span>
+                </div>
+                <div class="flex items-center gap-2.5 font-mono">
+                    <span class="text-slate-600 font-bold">كود التقرير: ${reportCode}</span>
+                    <span class="text-slate-400">•</span>
+                    <span class="font-bold text-[#8C6D23] bg-[#C5A059]/15 px-2 py-0.5 rounded border border-[#C5A059]/40">صفحة 1 من 1</span>
+                </div>
+            </div>
+        `;
 
         printArea.innerHTML = html;
 
@@ -84680,6 +84704,22 @@ function buildDemoExecutiveReport(params) {
 
 
 
+        html += `
+            <div class="mt-6 pt-2.5 border-t-2 border-[#C5A059] text-[10px] text-slate-500 flex items-center justify-between font-sans">
+                <div class="flex items-center gap-2">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#C5A059]"></span>
+                    <span class="font-black text-slate-900">معهد الذهب الأسود العالي للتدريب</span>
+                    <span class="text-slate-400">•</span>
+                    <span>تقرير تنفيذي استراتيجي معتمد</span>
+                </div>
+                <div class="flex items-center gap-2.5 font-mono">
+                    <span class="text-slate-600 font-bold">كود التقرير: BGTI-EXEC-${Date.now().toString().slice(-6)}</span>
+                    <span class="text-slate-400">•</span>
+                    <span class="font-bold text-[#8C6D23] bg-[#C5A059]/15 px-2 py-0.5 rounded border border-[#C5A059]/40">صفحة 1 من 1</span>
+                </div>
+            </div>
+        `;
+
         printArea.innerHTML = html;
 
     }
@@ -85439,6 +85479,22 @@ function buildDemoExecutiveReport(params) {
         `;
 
 
+
+        html += `
+            <div class="mt-6 pt-2.5 border-t-2 border-[#C5A059] text-[10px] text-slate-500 flex items-center justify-between font-sans">
+                <div class="flex items-center gap-2">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#C5A059]"></span>
+                    <span class="font-black text-slate-900">معهد الذهب الأسود العالي للتدريب</span>
+                    <span class="text-slate-400">•</span>
+                    <span>تقرير تقييم أداء معتمد</span>
+                </div>
+                <div class="flex items-center gap-2.5 font-mono">
+                    <span class="text-slate-600 font-bold">كود التقرير: BGTI-TRN-${trainerName.slice(0, 3)}</span>
+                    <span class="text-slate-400">•</span>
+                    <span class="font-bold text-[#8C6D23] bg-[#C5A059]/15 px-2 py-0.5 rounded border border-[#C5A059]/40">صفحة 1 من 1</span>
+                </div>
+            </div>
+        `;
 
         printArea.innerHTML = html;
 
@@ -88509,10 +88565,14 @@ function buildDemoExecutiveReport(params) {
 
             ${bodyHtml}
 
-            <div class="mt-8 pt-4 border-t border-slate-300 flex justify-between text-[11px] font-bold text-slate-500">
-                <div>يعتمد من إدارة المعهد</div>
-                <div>الختم الرسمي</div>
-                <div>صفحة 1 من 1</div>
+            <div class="mt-8 pt-3 border-t-2 border-[#C5A059] flex items-center justify-between text-xs text-slate-500">
+                <div class="flex items-center gap-2 font-bold text-slate-700">
+                    <span class="w-2 h-2 rounded-full bg-[#C5A059]"></span>
+                    <span>معهد الذهب الأسود العالي للتدريب • تقرير رسمي معتمد</span>
+                </div>
+                <div class="font-mono text-[11px] font-bold">
+                    <span class="bg-[#C5A059]/15 text-[#7A5C17] border border-[#C5A059] px-2.5 py-0.5 rounded-full">صفحة 1 من 1</span>
+                </div>
             </div>
         `;
     }
@@ -89974,28 +90034,51 @@ function buildDemoExecutiveReport(params) {
         const safetyDate = getCTPSafetyPledgeDate(trainee);
 
         const getPageHeader = (pageTitle, pageNumber) => `
-            <div class="border-b-2 border-black pb-2 mb-3">
+            <div class="border-b-2 border-[#C5A059] pb-2 mb-3 bg-white">
                 <div class="flex items-center justify-between">
-                    <div class="text-right text-[11px] leading-tight space-y-0.5">
+                    <div class="text-right text-[11.5px] leading-tight space-y-0.5">
                         <div class="font-black text-black text-xs">المملكة العربية السعودية</div>
-                        <div class="font-bold text-slate-800">المؤسسة العامة للتدريب التقني والمهني</div>
-                        <div class="font-black text-black">معهد الذهب الأسود العالي للتدريب</div>
-                        <div class="text-[10px] text-slate-600 font-bold">فرع عنك</div>
+                        <div class="font-bold text-slate-700">المؤسسة العامة للتدريب التقني والمهني</div>
+                        <div class="font-black text-[#8C6D23] text-xs">معهد الذهب الأسود العالي للتدريب</div>
+                        <div class="text-[10px] text-slate-500 font-bold">فرع عنك • مركز تدريب معتمد</div>
                     </div>
                     <div class="flex items-center justify-end">
                         <img src="assets/bgti_logo.png" alt="شعار المعهد" class="h-14 w-auto object-contain">
                     </div>
                 </div>
-                <div class="mt-2 pt-1 border-t border-slate-300 flex items-center justify-between text-xs">
-                    <span class="font-black text-black text-sm">${pageTitle}</span>
-                    <span class="text-slate-600 font-mono text-[11px]">رقم الملف: ${trainee.id} • ورقة ${pageNumber} من 11</span>
+                <div class="h-0.5 w-full bg-gradient-to-l from-[#C5A059] via-[#E8D49E] to-[#C5A059] my-1.5 opacity-90"></div>
+                <div class="flex items-center justify-between text-xs pt-0.5">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#C5A059]"></span>
+                        <span class="font-black text-black text-sm">${pageTitle}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-600 font-mono text-[11px] font-bold">ملف: ${trainee.id}</span>
+                        <span class="inline-flex items-center justify-center bg-[#C5A059]/15 text-[#7A5C17] border border-[#C5A059] px-2.5 py-0.5 rounded-full font-black text-xs">صفحة ${pageNumber} من 11</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const getPageFooter = (pageNumber, totalPages = 11) => `
+            <div class="mt-4 pt-2 border-t-2 border-[#C5A059] text-[10px] text-slate-500 flex items-center justify-between font-sans bg-white">
+                <div class="flex items-center gap-2">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#C5A059]"></span>
+                    <span class="font-black text-slate-900">معهد الذهب الأسود العالي للتدريب</span>
+                    <span class="text-slate-400">•</span>
+                    <span>وثيقة رسمية معتمدة ومحفوظة بالملف الإلكتروني للمتدرب</span>
+                </div>
+                <div class="flex items-center gap-2.5 font-mono">
+                    <span class="text-slate-600 font-bold">كود: BGTI-DOS-${trainee.id || 'TRAINEE'}</span>
+                    <span class="text-slate-400">•</span>
+                    <span class="font-bold text-[#8C6D23] bg-[#C5A059]/15 px-2 py-0.5 rounded border border-[#C5A059]/40">صفحة ${pageNumber} من ${totalPages}</span>
                 </div>
             </div>
         `;
 
         printArea.innerHTML = `
             <!-- ================= PAGE 1: SAFETY PLEDGE (INDEPENDENT PAGE) ================= -->
-            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+            <div class="space-y-4 pb-6 report-page-sheet" style="page-break-after: always; break-after: page; border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('إقرار وتعهد السلامة والصحة المهنية والحفاظ على المرافق', 1)}
                 
                 <div class="border-2 border-black p-5 rounded-2xl bg-white space-y-4 text-xs leading-relaxed">
@@ -90040,10 +90123,11 @@ function buildDemoExecutiveReport(params) {
                         </div>
                     </div>
                 </div>
+                ${getPageFooter(1, 11)}
             </div>
 
             <!-- ================= PAGE 2: ADMISSION & REGISTRATION FORM (INDEPENDENT PAGE) ================= -->
-            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+            <div class="space-y-4 pb-6 report-page-sheet" style="page-break-after: always; break-after: page; border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('استمارة القبول والتسجيل المعتمدة', 2)}
 
                 <div class="border-2 border-black p-5 rounded-2xl bg-white text-xs space-y-4">
@@ -90111,10 +90195,11 @@ function buildDemoExecutiveReport(params) {
                         </div>
                     </div>
                 </div>
+                ${getPageFooter(2, 11)}
             </div>
 
             <!-- ================= PAGE 3: SCHEDULE (FIXED PERIODS) (INDEPENDENT PAGE) ================= -->
-            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+            <div class="space-y-4 pb-6 report-page-sheet" style="page-break-after: always; break-after: page; border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('الجدول التدريبي الأسبوعي المعتمد للمتدرب', 3)}
 
                 <div class="border-2 border-black p-5 rounded-2xl bg-white space-y-4 text-xs">
@@ -90158,13 +90243,12 @@ function buildDemoExecutiveReport(params) {
                         <p class="text-[11px] text-slate-700">• لا يسمح بدخول الورش التدريبية دون معدات الوقاية الشخصية المعتمدة.</p>
                         <p class="text-[11px] text-slate-700">• يعتبر الغياب عن أي محاضرة مؤثراً على السجل التراكمي ونسب الانضباط العامة للمتدرب.</p>
                     </div>
-
-
                 </div>
+                ${getPageFooter(3, 11)}
             </div>
 
             <!-- ================= PAGE 4: MONTHLY GRADES (INDEPENDENT PAGE) ================= -->
-            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+            <div class="space-y-4 pb-6 report-page-sheet" style="page-break-after: always; break-after: page; border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('كشف الدرجات والمعدلات التراكمية المعتمد', 4)}
 
                 <div class="border-2 border-black p-5 rounded-2xl bg-white space-y-4 text-xs">
@@ -90220,10 +90304,11 @@ function buildDemoExecutiveReport(params) {
                         </div>
                     </div>
                 </div>
+                ${getPageFooter(4, 11)}
             </div>
 
             <!-- ================= PAGE 5: WARNINGS (INDEPENDENT PAGE - STAMP ONLY WITH DIRECTOR) ================= -->
-            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+            <div class="space-y-4 pb-6 report-page-sheet" style="page-break-after: always; break-after: page; border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('سجل الإنذارات والمخالفات المعتمد', 5)}
 
                 <div class="border-2 border-black p-5 rounded-2xl bg-white space-y-4 text-xs">
@@ -90260,28 +90345,32 @@ function buildDemoExecutiveReport(params) {
                         `).join('')}
                     </div>
                 </div>
+                ${getPageFooter(5, 11)}
             </div>
 
             <!-- ================= PAGE 6: EXAM 1 PAPER (INDEPENDENT PAGE - NO TEACHER SIG) ================= -->
-            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+            <div class="space-y-4 pb-6 report-page-sheet" style="page-break-after: always; break-after: page; border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('ورقة نموذج اختبار شهر مايو 2026 م', 6)}
                 ${renderSingleExamPrintablePaper(exams[0], seed, 1)}
+                ${getPageFooter(6, 11)}
             </div>
 
             <!-- ================= PAGE 7: EXAM 2 PAPER (INDEPENDENT PAGE - NO TEACHER SIG) ================= -->
-            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+            <div class="space-y-4 pb-6 report-page-sheet" style="page-break-after: always; break-after: page; border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('ورقة نموذج اختبار شهر يوليو 2026 م', 7)}
                 ${renderSingleExamPrintablePaper(exams[1], seed, 2)}
+                ${getPageFooter(7, 11)}
             </div>
 
             <!-- ================= PAGE 8: EXAM 3 PAPER (INDEPENDENT PAGE - NO TEACHER SIG) ================= -->
-            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+            <div class="space-y-4 pb-6 report-page-sheet" style="page-break-after: always; break-after: page; border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('ورقة نموذج اختبار شهر سبتمبر 2026 م', 8)}
                 ${renderSingleExamPrintablePaper(exams[2], seed, 3)}
+                ${getPageFooter(8, 11)}
             </div>
 
             <!-- ================= PAGE 9: ATTENDANCE CALENDARS 1 - 4 (JANUARY TO APRIL) ================= -->
-            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+            <div class="space-y-4 pb-6 report-page-sheet" style="page-break-after: always; break-after: page; border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('تقويم الحضور (يناير - أبريل 2026 م)', 9)}
 
                 <div class="border-2 border-black p-4 rounded-2xl bg-white space-y-3 text-xs">
@@ -90305,10 +90394,11 @@ function buildDemoExecutiveReport(params) {
                         </div>
                     </div>
                 </div>
+                ${getPageFooter(9, 11)}
             </div>
 
             <!-- ================= PAGE 10: ATTENDANCE CALENDARS 5 - 8 (MAY TO AUGUST) ================= -->
-            <div class="space-y-4 pb-6" style="page-break-after: always; break-after: page;">
+            <div class="space-y-4 pb-6 report-page-sheet" style="page-break-after: always; break-after: page; border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('تقويم الحضور (مايو - أغسطس 2026 م)', 10)}
 
                 <div class="border-2 border-black p-4 rounded-2xl bg-white space-y-3 text-xs">
@@ -90332,10 +90422,11 @@ function buildDemoExecutiveReport(params) {
                         </div>
                     </div>
                 </div>
+                ${getPageFooter(10, 11)}
             </div>
 
             <!-- ================= PAGE 11: ATTENDANCE CALENDARS 9 - 11 + CUMULATIVE REGISTRY ================= -->
-            <div class="space-y-3 pt-1">
+            <div class="space-y-3 pt-1 report-page-sheet" style="border-right: 6px solid #C5A059; padding-right: 18px;">
                 ${getPageHeader('تقويم وسجل الحضور (سبتمبر، أكتوبر، نوفمبر 2026 م) وكشف الحضور التراكمي العام', 11)}
 
                 <div class="grid grid-cols-3 gap-2">
@@ -90401,6 +90492,7 @@ function buildDemoExecutiveReport(params) {
                         ${getOfficialSignatureHTML('director')}
                     </div>
                 </div>
+                ${getPageFooter(11, 11)}
             </div>
         `;
 
