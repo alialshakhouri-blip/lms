@@ -90851,6 +90851,30 @@ function getCTPAdmissionFormData(trainee) {
     // ===================================================================
 
     function openBatchRegistrationExportModal() {
+        const selEl = document.getElementById('batchExportCompanySelect');
+        if (selEl) {
+            // Remove previous dynamically added group options
+            Array.from(selEl.querySelectorAll('option[data-dynamic-group="1"]')).forEach(o => o.remove());
+            const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : [];
+            if (pool.length > 0) {
+                const groups = Array.from(new Set(pool.map(t => String(t.group || '').trim()).filter(Boolean))).sort();
+                if (groups.length > 0) {
+                    const og = document.createElement('option');
+                    og.disabled = true;
+                    og.dataset.dynamicGroup = '1';
+                    og.textContent = '── مجموعات النظام الحالية ──';
+                    selEl.appendChild(og);
+                    groups.forEach(g => {
+                        const cnt = pool.filter(t => String(t.group || '').trim() === g).length;
+                        const opt = document.createElement('option');
+                        opt.value = 'group:' + g;
+                        opt.dataset.dynamicGroup = '1';
+                        opt.textContent = `مجموعة: ${g} (${cnt} متدرب)`;
+                        selEl.appendChild(opt);
+                    });
+                }
+            }
+        }
         const modal = document.getElementById('batchRegExportModal');
         if (modal) {
             modal.classList.remove('hidden');
@@ -90884,17 +90908,25 @@ function getCTPAdmissionFormData(trainee) {
 
         // 1. Gather target trainees
         let targetList = [];
-        if (typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined') {
+        if (sel.startsWith('group:')) {
+            const gName = sel.slice(6);
+            const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : [];
+            targetList = pool.filter(t => String(t.group || '').trim() === gName);
+        } else if (typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined') {
             const allMasters = Object.values(MASTER_TRAINEE_REGISTRATION_DIRECTORY);
             if (sel === 'all') {
                 targetList = allMasters;
             } else if (sel === 'current') {
                 targetList = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : allMasters;
             } else {
-                targetList = allMasters.filter(t => {
-                    const comp = String(t.company || '').toLowerCase();
-                    return comp.includes(sel.toLowerCase());
-                });
+                // Match either active trainees belonging to that company/group or master directory records
+                const pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : [];
+                const activeMatches = pool.filter(t => (`${t.company || ''} ${t.group || ''}`).toLowerCase().includes(sel.toLowerCase()));
+                const masterMatches = allMasters.filter(t => String(t.company || '').toLowerCase().includes(sel.toLowerCase()));
+                targetList = masterMatches.length > 0 ? masterMatches.map(m => {
+                    const active = activeMatches.find(a => cleanNationalId(a.id) === m.id);
+                    return active ? { ...m, group: active.group || m.group, company: active.company || m.company } : m;
+                }) : activeMatches;
             }
         }
 
@@ -90911,16 +90943,19 @@ function getCTPAdmissionFormData(trainee) {
         const zip = new JSZip();
         const total = targetList.length;
 
-        // Use registrationFormPrintArea in document flow for 100% reliable rendering
+        const prevScrollX = window.scrollX;
+        const prevScrollY = window.scrollY;
+        window.scrollTo(0, 0);
+
         let printArea = document.getElementById('registrationFormPrintArea');
         if (!printArea) {
             printArea = document.createElement('div');
             printArea.id = 'registrationFormPrintArea';
-            document.body.appendChild(printArea);
         }
-        printArea.classList.remove('hidden');
-        printArea.style.display = 'block';
-        printArea.style.visibility = 'visible';
+        // Place as first child of body at (0,0) with clean A4-safe width so html2canvas never clips or shifts blank
+        document.body.prepend(printArea);
+        printArea.className = '';
+        printArea.style.cssText = 'position:relative; width:730px; margin:0; padding:6px; background:#ffffff; direction:rtl; z-index:320; display:block; visibility:visible;';
 
         try {
             for (let i = 0; i < total; i++) {
@@ -90928,31 +90963,28 @@ function getCTPAdmissionFormData(trainee) {
                 const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
                 const fileName = `${cleanId || ('trainee_' + (i + 1))}.pdf`;
 
-                const adm = getCTPAdmissionFormData(tr);
-                const seed = Math.abs(parseInt(String(tr.id || '9999').slice(-4), 10) || 555);
-                const engName = tr.nameEn || (typeof transliterateArabicName === 'function' ? transliterateArabicName(tr.name) : (tr.name || ''));
-                const regDate = getTraineeRegistrationDate(tr);
+                printArea.innerHTML = getResolvedRegistrationFormHTML(tr);
 
-                printArea.innerHTML = buildRegistrationFormHTML(tr, adm, engName, regDate, seed);
+                // Ensure any images inside have finished decoding
+                const imgs = printArea.querySelectorAll('img');
+                await Promise.all(Array.from(imgs).map(img => img.complete ? Promise.resolve() : new Promise(res => { img.onload = res; img.onerror = res; setTimeout(res, 150); })));
 
-                // Update progress
                 const cur = i + 1;
                 const pct = Math.round((cur / total) * 100);
                 if (statusText) statusText.textContent = `جاري إنشاء نموذج: ${tr.name || cleanId} (${cur} من ${total})`;
                 if (percentText) percentText.textContent = `${pct}%`;
                 if (progBar) progBar.style.width = `${pct}%`;
 
-                // Small tick for DOM paint
-                await new Promise(r => setTimeout(r, 40));
+                window.scrollTo(0, 0);
+                await new Promise(r => setTimeout(r, 30));
 
                 const opt = {
-                    margin: [4, 6, 4, 6],
+                    margin: [4, 4, 4, 4],
                     filename: fileName,
                     image: { type: 'jpeg', quality: 0.95 },
                     html2canvas: {
                         scale: 2,
                         useCORS: true,
-                        letterRendering: true,
                         backgroundColor: '#FFFFFF'
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -90968,7 +91000,6 @@ function getCTPAdmissionFormData(trainee) {
                 if (percentText) percentText.textContent = `${Math.round(metadata.percent)}%`;
             });
 
-            // Trigger download
             const zipName = `نماذج_التسجيل_${sel}_${new Date().toISOString().slice(0, 10)}.zip`;
             const a = document.createElement('a');
             a.href = URL.createObjectURL(zipBlob);
@@ -90997,8 +91028,11 @@ function getCTPAdmissionFormData(trainee) {
                 startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         } finally {
-            printArea.classList.add('hidden');
+            printArea.className = 'hidden';
+            printArea.style.cssText = '';
             printArea.innerHTML = '';
+            document.body.appendChild(printArea);
+            window.scrollTo(prevScrollX, prevScrollY);
         }
     }
 
@@ -91150,20 +91184,22 @@ function getCTPAdmissionFormData(trainee) {
         document.body.classList.remove('printing-regform');
     }
 
-    function renderRegistrationForm(trainee) {
+    function getResolvedRegistrationFormHTML(trainee) {
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(trainee.id) : String(trainee.id || '').replace(/\D/g, '');
         const master = (typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined') ? MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId] : null;
+        const resolvedTrainee = (master && master.name) ? { ...trainee, name: master.name } : trainee;
 
-        if (master && master.name && (!trainee.name || trainee.name.length < 5)) {
-            trainee.name = master.name;
-        }
+        const adm = getCTPAdmissionFormData(resolvedTrainee);
+        const seed = Math.abs(parseInt(String(resolvedTrainee.id || '9999').slice(-4), 10) || 555);
+        const engName = (master && master.nameEn) ? master.nameEn : (resolvedTrainee.nameEn || (typeof transliterateArabicName === 'function' ? transliterateArabicName(resolvedTrainee.name) : (resolvedTrainee.name || '')));
+        const regDate = getTraineeRegistrationDate(resolvedTrainee);
 
-        const adm = getCTPAdmissionFormData(trainee);
-        const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
-        const engName = (master && master.nameEn) ? master.nameEn : (typeof transliterateArabicName === 'function' ? transliterateArabicName(trainee.name) : (trainee.name || ''));
-        const regDate = getTraineeRegistrationDate(trainee);
+        return buildRegistrationFormHTML(resolvedTrainee, adm, engName, regDate, seed);
+    }
 
-        const formHTML = buildRegistrationFormHTML(trainee, adm, engName, regDate, seed);
+    function renderRegistrationForm(trainee) {
+        window.currentRegFormTrainee = trainee;
+        const formHTML = getResolvedRegistrationFormHTML(trainee);
         const container = document.getElementById('registrationFormContent');
         if (container) container.innerHTML = formHTML;
     }
@@ -91181,9 +91217,7 @@ function getCTPAdmissionFormData(trainee) {
                 </div>
                 <!-- Golden arc spanning gracefully beneath the logo -->
                 <div style="width:100%; height:20px; overflow:hidden;">
-                    <svg viewBox="0 0 1000 35" preserveAspectRatio="none" style="width:100%; height:100%; display:block;">
-                        <path d="M0,6 Q500,34 1000,6 L1000,14 Q500,42 0,14 Z" fill="#C5A059" />
-                    </svg>
+                    <img src="data:image/png;base64,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" alt="" style="width:100%; height:100%; display:block;">
                 </div>
             </div>
 
@@ -91405,37 +91439,38 @@ function getCTPAdmissionFormData(trainee) {
     }
 
         async function downloadRegistrationFormPDF() {
-        const trainee = (typeof currentCTPTrainee !== 'undefined' && currentCTPTrainee) ? currentCTPTrainee : null;
+        const trainee = window.currentRegFormTrainee || ((typeof currentCTPTrainee !== 'undefined' && currentCTPTrainee) ? currentCTPTrainee : null);
         if (!trainee) return showToast('يرجى تحديد متدرب أولاً', 'error');
 
-        const printArea = document.getElementById('registrationFormPrintArea');
+        let printArea = document.getElementById('registrationFormPrintArea');
         if (!printArea) return;
 
         showToast('جاري إعداد وتحميل نموذج التسجيل (PDF)...', 'info');
 
-        const adm = getCTPAdmissionFormData(trainee);
-        const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
-        const engName = trainee.nameEn || (typeof transliterateArabicName === 'function' ? transliterateArabicName(trainee.name) : (trainee.name || ''));
-        const regDate = getTraineeRegistrationDate(trainee);
+        const prevScrollX = window.scrollX;
+        const prevScrollY = window.scrollY;
+        window.scrollTo(0, 0);
 
-        const formHTML = buildRegistrationFormHTML(trainee, adm, engName, regDate, seed);
-        printArea.innerHTML = formHTML;
-        printArea.classList.remove('hidden');
-        printArea.style.display = 'block';
-        printArea.style.visibility = 'visible';
+        document.body.prepend(printArea);
+        printArea.className = '';
+        printArea.style.cssText = 'position:relative; width:730px; margin:0; padding:6px; background:#ffffff; direction:rtl; z-index:320; display:block; visibility:visible;';
+        printArea.innerHTML = getResolvedRegistrationFormHTML(trainee);
+
+        const imgs = printArea.querySelectorAll('img');
+        await Promise.all(Array.from(imgs).map(img => img.complete ? Promise.resolve() : new Promise(res => { img.onload = res; img.onerror = res; setTimeout(res, 150); })));
+        await new Promise(r => setTimeout(r, 50));
 
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(trainee.id) : String(trainee.id || '').replace(/\D/g, '');
         const filename = `${cleanId}.pdf`;
 
         if (typeof html2pdf !== 'undefined') {
             const opt = {
-                margin: [4, 6, 4, 6],
+                margin: [4, 4, 4, 4],
                 filename: filename,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: {
                     scale: 2,
                     useCORS: true,
-                    letterRendering: true,
                     backgroundColor: '#FFFFFF'
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -91448,8 +91483,11 @@ function getCTPAdmissionFormData(trainee) {
                 console.error('html2pdf download error:', err);
                 showToast('حدث خطأ أثناء تحميل الـ PDF: ' + err.message, 'error');
             } finally {
-                printArea.classList.add('hidden');
+                printArea.className = 'hidden';
+                printArea.style.cssText = '';
                 printArea.innerHTML = '';
+                document.body.appendChild(printArea);
+                window.scrollTo(prevScrollX, prevScrollY);
             }
         } else {
             window.print();
@@ -91457,15 +91495,10 @@ function getCTPAdmissionFormData(trainee) {
     }
 
     function printRegistrationForm() {
-        const trainee = (typeof currentCTPTrainee !== 'undefined' && currentCTPTrainee) ? currentCTPTrainee : null;
+        const trainee = window.currentRegFormTrainee || ((typeof currentCTPTrainee !== 'undefined' && currentCTPTrainee) ? currentCTPTrainee : null);
         if (!trainee) return showToast('يرجى تحديد متدرب أولاً', 'error');
 
-        const adm = getCTPAdmissionFormData(trainee);
-        const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
-        const engName = typeof transliterateArabicName === 'function' ? transliterateArabicName(trainee.name) : (trainee.name || '');
-        const regDate = getTraineeRegistrationDate(trainee);
-
-        const formHTML = buildRegistrationFormHTML(trainee, adm, engName, regDate, seed);
+        const formHTML = getResolvedRegistrationFormHTML(trainee);
         const printArea = document.getElementById('registrationFormPrintArea');
         if (printArea) {
             printArea.innerHTML = formHTML;
