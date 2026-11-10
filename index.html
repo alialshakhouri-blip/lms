@@ -6727,8 +6727,7 @@
 
                         <div class="flex items-center gap-3">
 
-                            <div class="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shrink-0">
-                                <img src="assets/tvtc_logo.png" alt="TVTC" class="h-9 w-auto object-contain">
+                            <div class="flex items-center bg-white p-1 rounded-xl border border-slate-200 shrink-0">
                                 <img src="assets/bgti_logo.png" alt="BGTI" class="h-9 w-auto object-contain">
                             </div>
 
@@ -7287,8 +7286,7 @@
             <!-- Modal Top Bar -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
                 <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-2 shrink-0 bg-white p-1 rounded-2xl border border-slate-300">
-                        <img src="assets/tvtc_logo.png" alt="شعار المؤسسة" class="h-10 w-auto object-contain">
+                    <div class="flex items-center shrink-0 bg-white p-1 rounded-2xl border border-slate-300">
                         <img src="assets/bgti_logo.png" alt="شعار المعهد" class="h-10 w-auto object-contain">
                     </div>
                     <div>
@@ -7371,8 +7369,7 @@
                         <h4 class="font-black text-sm text-[#0F2942]">الجدول التدريبي الأسبوعي المعتمد للفترات التدريبية</h4>
                         <span class="text-[10px] text-amber-800 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك) • نظام فترتين ثابتتين ومقررين لكل متدرب</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                    <div class="flex items-center">
                         <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
                     </div>
                 </div>
@@ -7394,8 +7391,7 @@
                             <span class="text-[10px] text-emerald-800 block font-bold">المعدل التراكمي العام:</span>
                             <span class="text-sm font-black text-emerald-900" id="ctpGradesCumulativeGpa">--%</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                        <div class="flex items-center">
                             <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
                         </div>
                     </div>
@@ -7413,8 +7409,7 @@
                         <h4 class="font-black text-sm text-[#0F2942]">سجل الإنذارات والتنبيهات الانضباطية المعتمدة</h4>
                         <span class="text-[10px] text-amber-800 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك)</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                    <div class="flex items-center">
                         <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
                     </div>
                 </div>
@@ -7436,8 +7431,7 @@
                             <span class="text-[10px] text-blue-800 block font-bold">متوسط الاختبارات:</span>
                             <span class="text-sm font-black text-blue-950" id="ctpExamsAverageScore">-- / 100</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                        <div class="flex items-center">
                             <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
                         </div>
                     </div>
@@ -7455,8 +7449,7 @@
                         <h4 class="font-black text-sm text-[#0F2942]">سجل وتقويم الحضور والغياب الشهري المعتمد</h4>
                         <span class="text-[10px] text-amber-800 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك)</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                    <div class="flex items-center">
                         <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
                     </div>
                 </div>
@@ -88937,8 +88930,7 @@ function buildDemoExecutiveReport(params) {
                         <h4 class="font-black text-sm text-[#0F2942]">إقرار وتعهد الالتزام باشتراطات السلامة والصحة المهنية والحفاظ على المرافق</h4>
                         <span class="text-[10px] text-amber-800 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك)</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                    <div class="flex items-center">
                         <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
                     </div>
                 </div>
@@ -89625,19 +89617,18 @@ function buildDemoExecutiveReport(params) {
     function renderSingleExamPrintablePaper(ex, seed, pageExamNo) {
         return `
             <div class="border-2 border-black p-3 space-y-2 bg-white text-xs ${ex.isEnglish ? 'text-left' : 'text-right'}" dir="${ex.isEnglish ? 'ltr' : 'rtl'}" style="max-height: 860px;">
-                <!-- Header bar with official logos -->
-                <div class="border-b-2 border-black pb-1.5 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <img src="assets/tvtc_logo.png" alt="TVTC" class="h-8 w-auto object-contain">
-                        <img src="assets/bgti_logo.png" alt="BGTI" class="h-8 w-auto object-contain">
-                        <div>
-                            <div class="font-black text-[9.5px] uppercase tracking-wide text-black">${ex.isEnglish ? 'TVTC • Black Gold Higher Training Institute (Anak Branch)' : 'المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود العالي (فرع عنك)'}</div>
-                            <div class="font-black text-xs text-black mt-0.5">${ex.title}</div>
-                        </div>
+                <!-- Header bar with institute logo on left and Arabic only -->
+                <div class="border-b-2 border-black pb-1.5 flex items-center justify-between" dir="rtl">
+                    <div class="text-right">
+                        <div class="font-black text-[9.5px] text-black">المؤسسة العامة للتدريب التقني والمهني • معهد الذهب الأسود العالي (فرع عنك)</div>
+                        <div class="font-black text-xs text-black mt-0.5">${ex.title}</div>
                     </div>
-                    <div class="border-2 border-black px-2.5 py-0.5 text-center bg-white font-mono font-black text-xs shrink-0">
-                        <span class="text-[9px] block text-slate-500">${ex.isEnglish ? 'Score' : 'الدرجة'}</span>
-                        ${ex.obtainedScore} / ${ex.maxScore}
+                    <div class="flex items-center gap-3">
+                        <div class="border-2 border-black px-2.5 py-0.5 text-center bg-white font-mono font-black text-xs shrink-0">
+                            <span class="text-[9px] block text-slate-500">الدرجة</span>
+                            ${ex.obtainedScore} / ${ex.maxScore}
+                        </div>
+                        <img src="assets/bgti_logo.png" alt="شعار المعهد" class="h-9 w-auto object-contain">
                     </div>
                 </div>
 
@@ -89687,21 +89678,20 @@ function buildDemoExecutiveReport(params) {
                     </div>
                 </div>
 
-                <!-- Footer: Official Certification with Director Signature and Stamp -->
-                <div class="pt-1.5 border-t-2 border-black flex items-center justify-between text-[10px]">
-                    <div class="font-bold leading-tight">
-                        <span class="text-slate-500 block text-[9px]">${ex.isEnglish ? 'Official Registry' : 'القيد والاعتماد'}</span>
-                        <span class="font-black">${ex.isEnglish ? 'OFFICIALLY RECORDED IN DOSSIER' : 'معتمد ومقيد رسمياً في ملف المتدرب'}</span>
+                <!-- Footer: Official Certification with Stamp Only -->
+                <div class="pt-1.5 border-t-2 border-black flex items-center justify-between text-[10px]" dir="rtl">
+                    <div class="font-bold leading-tight text-right">
+                        <span class="text-slate-500 block text-[9px]">القيد والاعتماد</span>
+                        <span class="font-black">معتمد ومقيد رسمياً في ملف المتدرب</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="text-center font-bold leading-tight">
-                            <span class="text-slate-500 block text-[9px]">${ex.isEnglish ? 'Final Evaluation' : 'النتيجة النهائية'}</span>
-                            <span class="font-black text-xs">${ex.obtainedScore >= 60 ? (ex.isEnglish ? 'PASSED' : 'ناجح ومجتاز') : (ex.isEnglish ? 'FAILED' : 'راسب')}</span>
+                            <span class="text-slate-500 block text-[9px]">النتيجة النهائية</span>
+                            <span class="font-black text-xs">${ex.obtainedScore >= 60 ? 'ناجح ومجتاز' : 'راسب'}</span>
                         </div>
-                        <div class="border-r border-black pr-2 flex items-center gap-1">
-                            <img src="assets/director_sig.png" alt="توقيع المدير" class="h-8 w-auto object-contain" style="mix-blend-mode: multiply;">
-                            <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-9 w-auto object-contain" style="mix-blend-mode: multiply;">
-                            <span class="text-[8px] font-bold block">${ex.isEnglish ? 'Director: Ali Al-Shakhouri' : 'مدير المعهد: علي الشاخوري'}</span>
+                        <div class="border-r border-black pr-2 flex items-center gap-1.5">
+                            <img src="assets/bgti_stamp.png" alt="ختم المعهد" class="h-10 w-auto object-contain" style="mix-blend-mode: multiply;">
+                            <span class="text-[8px] font-bold block">ختم المعهد الرسمي</span>
                         </div>
                     </div>
                 </div>
@@ -89747,8 +89737,7 @@ function buildDemoExecutiveReport(params) {
                             <h4 class="font-black text-sm text-black dark:text-white">نموذج واستمارة التسجيل والقبول المعتمدة</h4>
                             <span class="text-[10px] text-slate-600 dark:text-slate-300 font-bold">معهد الذهب الأسود العالي للتدريب (فرع عنك)</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                        <div class="flex items-center">
                             <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
                         </div>
                     </div>
@@ -89900,16 +89889,11 @@ function buildDemoExecutiveReport(params) {
                             <div><span class="text-slate-500 font-bold">سبب المخالفة: </span><span>${w.reason}</span></div>
                             <div><span class="text-slate-500 font-bold">الإجراء والعقوبة: </span><b class="text-black dark:text-white">${w.penalty}</b></div>
                         </div>
-                        <div class="border-t sm:border-t-0 sm:border-r border-black pt-2 sm:pt-0 sm:pr-2 flex items-center justify-around">
+                        <div class="border-t sm:border-t-0 sm:border-r border-black pt-2 sm:pt-0 sm:pr-2 flex items-center justify-center">
                             <div class="text-center">
                                 <span class="text-[9px] text-slate-500 block font-bold mb-0.5">شؤون المتدربين (توقيع)</span>
                                 <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-10 w-auto object-contain mx-auto">
                                 <span class="text-[9px] font-bold block">علي آل عباس</span>
-                            </div>
-                            <div class="text-center">
-                                <span class="text-[9px] text-slate-500 block font-bold mb-0.5">اعتماد المدير</span>
-                                <img src="assets/director_sig.png" alt="توقيع المدير" class="h-10 w-auto object-contain mx-auto" style="mix-blend-mode: multiply;">
-                                <span class="text-[9px] font-bold block">علي الشاخوري</span>
                             </div>
                         </div>
                     </div>
@@ -89998,15 +89982,8 @@ function buildDemoExecutiveReport(params) {
                         <div class="font-black text-black">معهد الذهب الأسود العالي للتدريب</div>
                         <div class="text-[10px] text-slate-600 font-bold">فرع عنك</div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <img src="assets/tvtc_logo.png" alt="TVTC Logo" class="h-14 w-auto object-contain">
-                        <img src="assets/bgti_logo.png" alt="Black Gold Logo" class="h-14 w-auto object-contain">
-                    </div>
-                    <div class="text-left text-[11px] leading-tight space-y-0.5" dir="ltr">
-                        <div class="font-black text-black text-xs">Kingdom of Saudi Arabia</div>
-                        <div class="font-bold text-slate-800">TVTC Accredited Higher Institute</div>
-                        <div class="font-black text-black">Black Gold Training Institute</div>
-                        <div class="text-[10px] text-slate-600 font-bold">Anak Branch</div>
+                    <div class="flex items-center justify-end">
+                        <img src="assets/bgti_logo.png" alt="شعار المعهد" class="h-14 w-auto object-contain">
                     </div>
                 </div>
                 <div class="mt-2 pt-1 border-t border-slate-300 flex items-center justify-between text-xs">
@@ -90182,16 +90159,7 @@ function buildDemoExecutiveReport(params) {
                         <p class="text-[11px] text-slate-700">• يعتبر الغياب عن أي محاضرة مؤثراً على السجل التراكمي ونسب الانضباط العامة للمتدرب.</p>
                     </div>
 
-                    <div class="pt-6 border-t-2 border-black grid grid-cols-2 gap-8 text-center">
-                        <div class="border border-black p-3 rounded-xl bg-white">
-                            <span class="block text-xs text-slate-600 font-bold mb-1">مسؤول شؤون المتدربين (توقيع)</span>
-                            ${getOfficialSignatureHTML('supervisor')}
-                        </div>
-                        <div class="border border-black p-3 rounded-xl bg-white">
-                            <span class="block text-xs text-slate-600 font-bold mb-1">اعتماد مدير المعهد (توقيع وختم)</span>
-                            ${getOfficialSignatureHTML('director')}
-                        </div>
-                    </div>
+
                 </div>
             </div>
 
@@ -90245,14 +90213,10 @@ function buildDemoExecutiveReport(params) {
                         </tfoot>
                     </table>
 
-                    <div class="pt-6 border-t-2 border-black grid grid-cols-2 gap-8 text-center">
-                        <div class="border border-black p-3 rounded-xl bg-white">
-                            <span class="block text-xs text-slate-600 font-bold mb-1">مسؤول شؤون المتدربين (توقيع)</span>
-                            ${getOfficialSignatureHTML('supervisor')}
-                        </div>
-                        <div class="border border-black p-3 rounded-xl bg-white">
-                            <span class="block text-xs text-slate-600 font-bold mb-1">اعتماد مدير المعهد (توقيع وختم)</span>
-                            ${getOfficialSignatureHTML('director')}
+                    <div class="pt-6 border-t-2 border-black flex items-center justify-center text-center">
+                        <div class="border border-black p-3 rounded-xl bg-white flex flex-col items-center justify-center min-w-[200px]">
+                            <span class="block text-xs text-slate-700 font-bold mb-1">الختم الرسمي المعتمد للمعهد</span>
+                            <img src="assets/bgti_stamp.png" alt="ختم المعهد الرسمي" class="h-14 w-auto object-contain" style="mix-blend-mode: multiply;">
                         </div>
                     </div>
                 </div>
@@ -90265,7 +90229,7 @@ function buildDemoExecutiveReport(params) {
                 <div class="border-2 border-black p-5 rounded-2xl bg-white space-y-4 text-xs">
                     <div class="border-b-2 border-black pb-2">
                         <h3 class="font-black text-sm text-black">سجل الإنذارات والمخالفات للمتدرب</h3>
-                        <p class="text-[11px] text-slate-600 font-bold">كل إشعار مقيد بتوقيع مسؤول شؤون المتدربين ومعتمد بالختم الرسمي لمدير عام المعهد</p>
+                        <p class="text-[11px] text-slate-600 font-bold">كل إشعار مقيد بتوقيع مسؤول شؤون المتدربين</p>
                     </div>
 
                     <div class="space-y-3">
@@ -90284,16 +90248,11 @@ function buildDemoExecutiveReport(params) {
                                         <div><span class="text-slate-500 font-bold text-[11px]">سبب المخالفة: </span><span class="text-slate-800">${w.reason}</span></div>
                                         <div><span class="text-slate-500 font-bold text-[11px]">الإجراء والعقوبة المترتبة: </span><b class="text-black">${w.penalty}</b></div>
                                     </div>
-                                    <div class="border-r border-black pr-2 flex items-center justify-around bg-white rounded p-1">
+                                    <div class="border-r border-black pr-2 flex items-center justify-center bg-white rounded p-1">
                                         <div class="text-center">
                                             <span class="text-[9px] text-slate-600 block font-bold mb-0.5">شؤون المتدربين (توقيع)</span>
                                             <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-10 w-auto object-contain mx-auto">
                                             <span class="text-[9px] font-bold block text-black">علي آل عباس</span>
-                                        </div>
-                                        <div class="text-center">
-                                            <span class="text-[9px] text-slate-600 block font-bold mb-0.5">اعتماد المدير</span>
-                                            <img src="assets/director_sig.png" alt="توقيع المدير" class="h-10 w-auto object-contain mx-auto" style="mix-blend-mode: multiply;">
-                                            <span class="text-[9px] font-bold block text-black">علي الشاخوري</span>
                                         </div>
                                     </div>
                                 </div>
