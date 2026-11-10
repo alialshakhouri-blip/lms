@@ -1953,10 +1953,12 @@
         }
 
         @media print {
-            /* Fix 93-pages issue: When printing dossier, completely collapse all other DOM elements */
-            body.printing-dossier > *:not(#traineeDossierPrintableArea) {
-                display: none !important;
+            @page {
+                size: A4 portrait;
+                margin: 8mm 10mm 8mm 10mm;
             }
+
+            /* Fix 93-pages & blank pages issue: Completely isolate printable dossier as direct child of body */
             body.printing-dossier {
                 margin: 0 !important;
                 padding: 0 !important;
@@ -1964,6 +1966,11 @@
                 height: auto !important;
                 min-height: 0 !important;
                 overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            body.printing-dossier > *:not(#traineeDossierPrintableArea) {
+                display: none !important;
             }
             body.printing-dossier #traineeDossierPrintableArea {
                 display: block !important;
@@ -1976,6 +1983,21 @@
                 box-shadow: none !important;
                 border: none !important;
                 overflow: visible !important;
+                background: #FFFFFF !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            body.printing-dossier #traineeDossierPrintableArea .report-page-sheet {
+                page-break-after: always !important;
+                break-after: page !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+            }
+            body.printing-dossier #traineeDossierPrintableArea .report-page-sheet:last-child {
+                page-break-after: auto !important;
+                break-after: auto !important;
             }
 
             /* General printable areas */
@@ -7495,10 +7517,7 @@
         </div>
     </div>
 
-    <!-- ==================== DEDICATED PRINTABLE TRAINEE DOSSIER (للطباعة A4 الرسمية - كل قسم في ورقة مستقلة) ==================== -->
-    <div id="traineeDossierPrintableArea" class="hidden bg-white text-black p-6 md:p-8 space-y-6" style="direction: rtl; font-family: 'Segoe UI', Tahoma, Arial, sans-serif;">
-        <!-- Filled dynamically before printing -->
-    </div>
+
 <!-- ==================== WEEKLY ATTENDANCE CALENDAR MODAL (التقويم الأسبوعي الشامل للمتابعة) ==================== -->
 
             <div id="weeklyAttendanceCalendarModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 md:p-6 overflow-y-auto">
@@ -89030,6 +89049,28 @@ function buildDemoExecutiveReport(params) {
         `;
     }
 
+    // Helper: Trainee Personal Email (Never Black Gold / BGTI; demo email is transliterated English full name + random number @gmail.com)
+    function getTraineePersonalEmail(trainee, seed) {
+        if (!trainee) return 'trainee.demo.101@gmail.com';
+        const existing = String(trainee.email || '').trim();
+        if (existing && !/@(?:blackgold|bgti)\./i.test(existing)) {
+            return existing;
+        }
+        const arName = String(trainee.name || '').trim();
+        let engName = '';
+        if (typeof transliterateArabicName === 'function') {
+            engName = transliterateArabicName(arName);
+        } else {
+            engName = arName;
+        }
+        const cleanEng = engName.toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\.+|\.+$/g, '');
+        const numSeed = (seed !== undefined && seed !== null)
+            ? Math.abs(seed)
+            : Math.abs(parseInt(String(trainee.id || '999').slice(-4), 10) || 555);
+        const randNum = (numSeed % 899) + 100;
+        return `${cleanEng || 'trainee'}.${randNum}@gmail.com`;
+    }
+
     // Admission Form Content
     function getCTPAdmissionFormData(trainee) {
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
@@ -89047,7 +89088,7 @@ function buildDemoExecutiveReport(params) {
         const isMarried = (seed % 5 === 0);
         const dependents = isMarried ? ((seed % 3) + 1) : 0;
         const phone = trainee.phone || `05${(50000000 + (seed * 89) % 49999999)}`;
-        const email = `${(trainee.name || 'trainee').split(' ')[0].toLowerCase()}.${seed}@bgti.edu.sa`;
+        const email = getTraineePersonalEmail(trainee, seed);
 
         const bldNum = 1000 + (seed % 8999);
         const addNum = 2000 + (seed % 7999);
@@ -90749,6 +90790,10 @@ function buildDemoExecutiveReport(params) {
         </div>
     </div>
 
+    <!-- ==================== DEDICATED PRINTABLE TRAINEE DOSSIER (للطباعة A4 الرسمية - كل قسم في ورقة مستقلة) ==================== -->
+    <div id="traineeDossierPrintableArea" class="hidden bg-white text-black p-6 md:p-8 space-y-6" style="direction: rtl; font-family: 'Segoe UI', Tahoma, Arial, sans-serif;">
+        <!-- Filled dynamically before printing -->
+    </div>
 </body>
 
 </html>
