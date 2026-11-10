@@ -1953,85 +1953,81 @@
         }
 
         @media print {
-
-            body * {
-
-                visibility: hidden !important;
-
+            /* Fix 93-pages issue: When printing dossier, completely collapse all other DOM elements */
+            body.printing-dossier > *:not(#traineeDossierPrintableArea) {
+                display: none !important;
+            }
+            body.printing-dossier {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #FFFFFF !important;
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+            }
+            body.printing-dossier #traineeDossierPrintableArea {
+                display: block !important;
+                visibility: visible !important;
+                position: static !important;
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                overflow: visible !important;
             }
 
-            #certificatePrintableArea, #certificatePrintableArea *,
-
-            #adminReportPrintArea, #adminReportPrintArea *,
-            #cdPrintableReportArea, #cdPrintableReportArea *,
-            #traineeDossierPrintableArea, #traineeDossierPrintableArea * {
-
-                visibility: visible !important;
-
+            /* General printable areas */
+            body.printing-certificate > *:not(#studentCertificateModal) {
+                display: none !important;
+            }
+            body.printing-admin-report > *:not(#adminReportPrintArea) {
+                display: none !important;
+            }
+            body.printing-cd-report > *:not(#cdPrintableReportArea) {
+                display: none !important;
             }
 
             #certificatePrintableArea {
-
                 position: fixed !important;
-
                 left: 0 !important;
-
                 top: 0 !important;
-
                 width: 100vw !important;
-
                 height: 100vh !important;
-
                 margin: 0 !important;
-
                 padding: 15mm 20mm !important;
-
                 background: #FFFFFF !important;
-
                 z-index: 999999 !important;
-
                 box-shadow: none !important;
-
                 border: 6px double #D97706 !important;
-
                 page-break-inside: avoid !important;
-
             }
 
-            #adminReportPrintArea, #cdPrintableReportArea, #traineeDossierPrintableArea {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
+            #adminReportPrintArea, #cdPrintableReportArea {
+                position: static !important;
                 width: 100% !important;
                 margin: 0 !important;
-                padding: 8mm 12mm !important;
+                padding: 6mm 10mm !important;
                 background: #FFFFFF !important;
-                z-index: 999999 !important;
                 box-shadow: none !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            #traineeDossierPrintableArea {
-                display: block !important;
+            .report-page-sheet {
+                page-break-after: always !important;
+                break-after: page !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
-
-            body.printing-dossier #certificatePrintableArea,
-            body.printing-dossier #adminReportPrintArea,
-            body.printing-dossier #cdPrintableReportArea {
-                display: none !important;
-                visibility: hidden !important;
-            }
-
-            body.printing-dossier #traineeDossierPrintableArea {
-                display: block !important;
-                visibility: visible !important;
+            .report-page-sheet:last-child {
+                page-break-after: auto !important;
+                break-after: auto !important;
             }
 
             .no-print {
-
                 display: none !important;
-
             }
 
         }
@@ -89022,11 +89018,11 @@ function buildDemoExecutiveReport(params) {
                         <span class="text-[10px] font-mono text-slate-600 mt-1">الهوية الوطنية: ${id}</span>
                     </div>
                     <div class="border border-black p-2.5 rounded-xl bg-white">
-                        <span class="block text-[10px] text-slate-500 font-bold mb-1">مسؤول شؤون المتدربين (توقيع)</span>
+                        <span class="block text-[10px] text-slate-500 font-bold mb-1">مسؤول شؤون المتدربين</span>
                         ${getOfficialSignatureHTML('supervisor')}
                     </div>
                     <div class="border border-black p-2.5 rounded-xl bg-white">
-                        <span class="block text-[10px] text-slate-500 font-bold mb-1">مدير عام المعهد (اعتماد وختم)</span>
+                        <span class="block text-[10px] text-slate-500 font-bold mb-1">مدير عام المعهد</span>
                         ${getOfficialSignatureHTML('director')}
                     </div>
                 </div>
@@ -89340,6 +89336,15 @@ function buildDemoExecutiveReport(params) {
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
         const contract = getTraineeContractInfo(trainee);
 
+        // Fetch monthly attendance history to link exact attendance percentages
+        const historyMonths = (typeof getCTPMonthlyAttendanceHistory === 'function') ? getCTPMonthlyAttendanceHistory(trainee) : [];
+        const historyMap = {};
+        if (Array.isArray(historyMonths)) {
+            historyMonths.forEach(h => {
+                if (h && h.monthNum) historyMap[h.monthNum] = h.rate;
+            });
+        }
+
         const allMonths = [
             { num: 1, name: 'يناير 2026', factor: 0 },
             { num: 2, name: 'فبراير 2026', factor: 1 },
@@ -89374,6 +89379,13 @@ function buildDemoExecutiveReport(params) {
             else if (score >= 70) { gradeLetter = 'C+'; evalText = 'جيد'; }
             else if (score >= 60) { gradeLetter = 'D'; evalText = 'مقبول'; }
 
+            // Dynamic attendance rate: from monthly attendance archive or pseudo-random jitter
+            let attVal = historyMap[m.num];
+            if (attVal === undefined || attVal === null) {
+                const attJitter = ((seed * 7 + m.factor * 13) % 11) - 5;
+                attVal = Math.min(100, Math.max(70, Math.round(baseRate + attJitter)));
+            }
+
             return {
                 month: m.name,
                 course1: assigned[0] ? assigned[0].course : 'التخصص العام',
@@ -89381,7 +89393,7 @@ function buildDemoExecutiveReport(params) {
                 score: score,
                 grade: gradeLetter,
                 eval: evalText,
-                attendanceRef: `${Math.round(baseRate)}%`
+                attendanceRef: `${attVal}%`
             };
         });
 
@@ -89420,194 +89432,239 @@ function buildDemoExecutiveReport(params) {
     }
 
     // SPECIALTY-SPECIFIC HIGH-YIELD QUESTIONS ENGINE (6 True/False + 5 Multiple Choice = 11 Questions = 100 Marks!)
-    // (زد كم سوال في الاختبارات زد كم سوال شئ يخص التخصص)
-    function getCTPSpecialtyExamQuestions(courseName, isEnglish, score) {
+    // Realistic Answer Simulation linked mathematically to trainee obtained score!
+    function getCTPSpecialtyExamQuestions(courseName, isEnglish, targetScore, seed = 555) {
         const c = String(courseName || '').toLowerCase();
+
+        let rawTf = [];
+        let rawMc = [];
 
         // 1. Technical English Specialty Exam
         if (isEnglish || c.includes('انجليزي') || c.includes('english')) {
-            return {
-                tf: [
-                    { q: '1. Personal Protective Equipment (PPE) like safety shoes and goggles is strictly mandatory in workshop environments.', ans: 'True', traineeAns: score >= 60 ? 'True' : 'False', mark: score >= 60 ? '5 / 5' : '0 / 5' },
-                    { q: '2. A hot work permit is required before performing any welding or torch-cutting tasks on site.', ans: 'True', traineeAns: 'True', mark: '5 / 5' },
-                    { q: '3. Technicians may operate stationary grinding machines without face shield or eye protection.', ans: 'False', traineeAns: 'False', mark: '5 / 5' },
-                    { q: '4. Precision measuring instruments such as vernier calipers and micrometers must be calibrated before use.', ans: 'True', traineeAns: score >= 60 ? 'True' : 'False', mark: score >= 60 ? '5 / 5' : '0 / 5' },
-                    { q: '5. The emergency stop push-button (E-Stop) should only be pressed after cleaning the machine body.', ans: 'False', traineeAns: 'False', mark: '5 / 5' },
-                    { q: '6. Lockout/Tagout (LOTO) procedures are designed to isolate hazardous energy during machinery servicing.', ans: 'True', traineeAns: 'True', mark: '5 / 5' }
-                ],
-                mc: [
-                    {
-                        q: '7. Which safety acronym refers to the Occupational Safety and Health Administration standards?',
-                        options: ['A) OSHA', 'B) NASA', 'C) FIFA', 'D) OPEC'],
-                        selected: 'A',
-                        mark: score >= 60 ? '14 / 14' : '0 / 14'
-                    },
-                    {
-                        q: '8. Before starting a mechanical grinding or abrasive wheel operation, a technician must inspect the wheel for:',
-                        options: ['A) Cracks, chips, and maximum rated RPM speed', 'B) Exterior paint color', 'C) Brand packaging only', 'D) Weight of machine bench'],
-                        selected: 'A',
-                        mark: '14 / 14'
-                    },
-                    {
-                        q: '9. What is the standard technical term for the tool used to tighten or loosen bolts and hexagonal nuts?',
-                        options: ['A) Spanner / Torque Wrench', 'B) Hacksaw blade', 'C) Soldering iron', 'D) Paint roller'],
-                        selected: 'A',
-                        mark: '14 / 14'
-                    },
-                    {
-                        q: '10. When reading an engineering technical drawing, the abbreviation "DIA" or symbol "Ø" represents:',
-                        options: ['A) Diameter of a cylindrical feature or hole', 'B) Depth of incision', 'C) Drawing revision index', 'D) Distance in miles'],
-                        selected: 'A',
-                        mark: score >= 60 ? '14 / 14' : '4 / 14'
-                    },
-                    {
-                        q: '11. In case of an emergency alarm sounding inside the workshop, all personnel must:',
-                        options: ['A) Shut down equipment safely and evacuate immediately to Assembly Point', 'B) Hide inside the tool storage room', 'C) Keep working until supervisor arrives', 'D) Lock all exit doors'],
-                        selected: 'A',
-                        mark: '14 / 14'
-                    }
-                ]
-            };
-        }
-
-        // 2. Electrical Specialty (الكهرباء)
-        if (c.includes('كهرباء') || c.includes('الكهرباء') || c.includes('electric')) {
-            return {
-                tf: [
-                    { q: '1. ينص قانون أوم على أن شدة التيار المار في موصل تتناسب طردياً مع فرق الجهد وعكسياً مع المقاومة (I = V / R).', ans: 'صواب', traineeAns: score >= 60 ? 'صواب' : 'خطأ', mark: score >= 60 ? '5 / 5' : '0 / 5' },
-                    { q: '2. يجوز استبدال القاطع التفاضلي (RCD / ELCB) بقاطع تيار عادي دون الحاجة لتأريض المعدات الصناعية.', ans: 'خطأ', traineeAns: 'خطأ', mark: '5 / 5' },
-                    { q: '3. في شبكات الجهد المنخفض ثلاثية الأوجه، يكون فرق الجهد بين أي فاز والنيوترال 230 فولت، وبين فازين 400 فولت.', ans: 'صواب', traineeAns: score >= 60 ? 'صواب' : 'خطأ', mark: score >= 60 ? '5 / 5' : '0 / 5' },
-                    { q: '4. يستخدم جهاز الميجر (Megger) لاختبار مقاومة العزل للكابلات والمحركات الكهربائية تحت جهد عالي مستمر.', ans: 'صواب', traineeAns: 'صواب', mark: '5 / 5' },
-                    { q: '5. يجب توصيل جهاز قياس التيار (الأميتر) على التوازي مباشرة مع الحمل الكهربائي المراد قياسه.', ans: 'خطأ', traineeAns: 'خطأ', mark: '5 / 5' },
-                    { q: '6. يهدف نظام التأريض الوقائي (Earthing) إلى تفريغ تيارات التسريب وحماية العاملين من مخاطر الصعق الكهربائي.', ans: 'صواب', traineeAns: 'صواب', mark: '5 / 5' }
-                ],
-                mc: [
-                    {
-                        q: '7. ما هو الجهاز المستخدم لحماية الدوائر الكهربائية من زيادة الحمل (Overload) وتيار القصر (Short Circuit) معاً؟',
-                        options: ['أ) القاطع الآلي المصغر (Miniature Circuit Breaker - MCB)', 'ب) مفتاح الإنارة الميكانيكي', 'ج) المحول الرافع للجهد', 'د) عداد قياس القدرة'],
-                        selected: 'أ',
-                        mark: score >= 60 ? '14 / 14' : '0 / 14'
-                    },
-                    {
-                        q: '8. ما هي سعة حساسية القاطع التفاضلي الموصى بها لحماية الأشخاص من خطر الصعق الكهربائي المباشر في المنشآت؟',
-                        options: ['أ) 30 مللي أمبير (30 mA)', 'ب) 300 مللي أمبير', 'ج) 5 أمبير', 'د) 100 أمبير'],
-                        selected: 'أ',
-                        mark: '14 / 14'
-                    },
-                    {
-                        q: '9. ما هو الإجراء الإلزامي قبل البدء في صيانة أي لوحة توزيع كهربائية صناعية؟',
-                        options: ['أ) فصل القاطع الرئيسي وتطبيق إجراء العزل والقفل (LOTO) واختبار انعدام الجهد', 'ب) ارتداء قفازات قماشية فقط والعمل تحت الجهد', 'ج) تنظيف اللوحة بقطعة مبللة بالماء', 'د) تشغيل المروحة الهوائية فقط'],
-                        selected: 'أ',
-                        mark: '14 / 14'
-                    },
-                    {
-                        q: '10. في المحركات الكهربائية الحثية ثلاثية الأوجه، كيف يتم عكس اتجاه دوران عمود دوران المحرك؟',
-                        options: ['أ) بتبديل مكان أي طرفين من أطراف التغذية الثلاثة (Swap any two phases)', 'ب) بتغيير تردد المصدر فقط', 'ج) بزيادة جهد التغذية', 'د) بتوصيل طرف النيوترال مع الأرضي'],
-                        selected: 'أ',
-                        mark: score >= 60 ? '14 / 14' : '4 / 14'
-                    },
-                    {
-                        q: '11. ما هي وحدة قياس القدرة الكهربائية الفعالة في الأنظمة الكهربائية الصناعية؟',
-                        options: ['أ) الكيلوواط (kW)', 'ب) الكيلوفولت أمبير التفاعلي (kVAR)', 'ج) الأوم (Ohm)', 'د) الهرتز (Hz)'],
-                        selected: 'أ',
-                        mark: '14 / 14'
-                    }
-                ]
-            };
-        }
-
-        // 3. Construction / Safety Specialty (إنشاءات / أمن وسلامة)
-        if (c.includes('إنشاء') || c.includes('انشاءات') || c.includes('سلامة') || c.includes('مدني')) {
-            return {
-                tf: [
-                    { q: '1. يجب فحص السقالات المعدنية ووضع البطاقة الخضراء (Green Tag) من المشرف المؤهل قبل السماح بالعمل عليها.', ans: 'صواب', traineeAns: score >= 60 ? 'صواب' : 'خطأ', mark: score >= 60 ? '5 / 5' : '0 / 5' },
-                    { q: '2. يجوز الحفر بعمق يتجاوز 1.2 متر دون عمل تدعيم لجوانب الحفر (Shoring) أو ميول مدرجة لحماية العمال.', ans: 'خطأ', traineeAns: 'خطأ', mark: '5 / 5' },
-                    { q: '3. يُجرى اختبار هبوط الخرسانة (Slump Test) في الموقع للتحقق من قوام الخرسانة الطازجة وقابليتها للتشغيل.', ans: 'صواب', traineeAns: score >= 60 ? 'صواب' : 'خطأ', mark: score >= 60 ? '5 / 5' : '0 / 5' },
-                    { q: '4. يعتبر حزام الأمان لكامل الجسم (Full Body Harness) وممتص الصدمات إلزامياً عند العمل على ارتفاع 1.8 متر فأكثر.', ans: 'صواب', traineeAns: 'صواب', mark: '5 / 5' },
-                    { q: '5. يكتفى بوضع رمل جاف فوق حديد التسليح لحمايته من الصدأ قبل الصب دون رفعه بقطع بسكويت خرساني.', ans: 'خطأ', traineeAns: 'خطأ', mark: '5 / 5' },
-                    { q: '6. يجب معالجة الخرسانة بالرش المستمر بالماء (Curing) لمدة لا تقل عن 7 أيام لاكتمال التفاعلات واكتساب القوة.', ans: 'صواب', traineeAns: 'صواب', mark: '5 / 5' }
-                ],
-                mc: [
-                    {
-                        q: '7. ما هو الغرض من وضع قطع الخرسانة الإسمنتية الصغيرة (البسكويت الخرساني) أسفل حديد التسليح؟',
-                        options: ['أ) ضمان تحقيق الغطاء الخرساني (Concrete Cover) وحماية الحديد من الصدأ', 'ب) زيادة وزن الهيكل الإنشائي', 'ج) تثبيت قوالب الخشب فقط', 'د) تحسين المظهر الجمالي'],
-                        selected: 'أ',
-                        mark: score >= 60 ? '14 / 14' : '0 / 14'
-                    },
-                    {
-                        q: '8. ما هي البطاقة التي توضع على السقالة غير الآمنة أو قيد التركيب لمنع العمال من استخدامها قطعياً؟',
-                        options: ['أ) البطاقة الحمراء (Red Tag - Do Not Use)', 'ب) البطاقة الخضراء', 'ج) البطاقة الزرقاء', 'د) البطاقة البيضاء'],
-                        selected: 'أ',
-                        mark: '14 / 14'
-                    },
-                    {
-                        q: '9. عند العمل في الحفريات العميقة، يجب توفير سلالم خروج آمنة بحيث لا تزيد المسافة بين العامل وأقرب مخرج عن:',
-                        options: ['أ) 7.5 أمتار (25 قدماً)', 'ب) 50 متراً', 'ج) 100 متر', 'د) 30 متراً'],
-                        selected: 'أ',
-                        mark: '14 / 14'
-                    },
-                    {
-                        q: '10. ما هي النسبة القياسية للخلط الخرساني المعتاد (إسمنت : رمل : بحص) للخرسانة المسلحة العادية؟',
-                        options: ['أ) 1 : 2 : 4', 'ب) 4 : 2 : 1', 'ج) 1 : 1 : 1', 'د) 0 : 3 : 5'],
-                        selected: 'أ',
-                        mark: score >= 60 ? '14 / 14' : '4 / 14'
-                    },
-                    {
-                        q: '11. ما هي الخطوة الأولى الإلزامية قبل بدء أعمال الحفر في المواقع الإنشائية والصناعية؟',
-                        options: ['أ) استخراج تصريح الحفر (Excavation Permit) والكشف عن مسارات خطوط الخدمات المدفونة', 'ب) بدء الحفر بالمعدات الثقيلة بأقصى سرعة', 'ج) طلاء التربة باللون الأبيض', 'د) زرع شتلات زراعية'],
-                        selected: 'أ',
-                        mark: '14 / 14'
-                    }
-                ]
-            };
-        }
-
-        // 4. Default: Welding & Fabrication Specialty (تخصص اللحام والتصنيع)
-        return {
-            tf: [
-                { q: '1. يجب ارتداء قناع اللحام المجهز بعدسة تظليل مناسبة (Shade 10-12) لحماية العين من الأشعة فوق البنفسجية وتحت الحمراء.', ans: 'صواب', traineeAns: score >= 60 ? 'صواب' : 'خطأ', mark: score >= 60 ? '5 / 5' : '0 / 5' },
-                { q: '2. يجوز لحام المعادن المجلفنة أو المطلية بالزيوت والشحوم دون إزالة طبقة الزنك أو التنظيف المسبق للوصلة.', ans: 'خطأ', traineeAns: 'خطأ', mark: '5 / 5' },
-                { q: '3. يُستخدم قطب اللحام من نوع E7018 في اللحام بالقوس الكهربائي المحجب للأعمال ذات المتانة والشد العالي.', ans: 'صواب', traineeAns: score >= 60 ? 'صواب' : 'خطأ', mark: score >= 60 ? '5 / 5' : '0 / 5' },
-                { q: '4. ينشأ عيب اللحام المسمى بالمسامية (Porosity) نتيجة احتباس فقاعات الغاز داخل حوض اللحام المتصلب بسبب الرطوبة أو الرياح.', ans: 'صواب', traineeAns: 'صواب', mark: '5 / 5' },
-                { q: '5. في اللحام بغاز خامل والتنجستن (TIG / GTAW)، يتم استهلاك قطب التنجستن وذوبانه كمعادن حشو داخل الوصلة.', ans: 'خطأ', traineeAns: 'خطأ', mark: '5 / 5' },
-                { q: '6. تهدف عملية التسخين المسبق (Preheating) للفولاذ السميك إلى تقليل سرعة التبريد وتجنب حدوث التشققات الهيدروجينية الباردة.', ans: 'صواب', traineeAns: 'صواب', mark: '5 / 5' }
-            ],
-            mc: [
+            rawTf = [
+                { q: '1. Personal Protective Equipment (PPE) like safety shoes and goggles is strictly mandatory in workshop environments.', ans: 'True' },
+                { q: '2. A hot work permit is required before performing any welding or torch-cutting tasks on site.', ans: 'True' },
+                { q: '3. Technicians may operate stationary grinding machines without face shield or eye protection.', ans: 'False' },
+                { q: '4. Precision measuring instruments such as vernier calipers and micrometers must be calibrated before use.', ans: 'True' },
+                { q: '5. The emergency stop push-button (E-Stop) should only be pressed after cleaning the machine body.', ans: 'False' },
+                { q: '6. Lockout/Tagout (LOTO) procedures are designed to isolate hazardous energy during machinery servicing.', ans: 'True' }
+            ];
+            rawMc = [
+                {
+                    q: '7. Which safety acronym refers to the Occupational Safety and Health Administration standards?',
+                    options: ['A) OSHA', 'B) NASA', 'C) FIFA', 'D) OPEC'],
+                    correctLetter: 'A',
+                    wrongLetter: 'B'
+                },
+                {
+                    q: '8. Before starting a mechanical grinding or abrasive wheel operation, a technician must inspect the wheel for:',
+                    options: ['A) Exterior paint color', 'B) Cracks, chips, and maximum rated RPM speed', 'C) Brand packaging only', 'D) Weight of machine bench'],
+                    correctLetter: 'B',
+                    wrongLetter: 'A'
+                },
+                {
+                    q: '9. What is the standard technical term for the tool used to tighten or loosen bolts and hexagonal nuts?',
+                    options: ['A) Hacksaw blade', 'B) Soldering iron', 'C) Spanner / Torque Wrench', 'D) Paint roller'],
+                    correctLetter: 'C',
+                    wrongLetter: 'A'
+                },
+                {
+                    q: '10. When reading an engineering technical drawing, the abbreviation "DIA" or symbol "Ø" represents:',
+                    options: ['A) Depth of incision', 'B) Drawing revision index', 'C) Distance in miles', 'D) Diameter of a cylindrical feature or hole'],
+                    correctLetter: 'D',
+                    wrongLetter: 'A'
+                },
+                {
+                    q: '11. In case of an emergency alarm sounding inside the workshop, all personnel must:',
+                    options: ['A) Shut down equipment safely and evacuate immediately to Assembly Point', 'B) Hide inside the tool storage room', 'C) Keep working until supervisor arrives', 'D) Lock all exit doors'],
+                    correctLetter: 'A',
+                    wrongLetter: 'C'
+                }
+            ];
+        } else if (c.includes('كهرباء') || c.includes('الكهرباء') || c.includes('electric')) {
+            // 2. Electrical Specialty (الكهرباء)
+            rawTf = [
+                { q: '1. ينص قانون أوم على أن شدة التيار تتناسب طردياً مع فرق الجهد وعكسياً مع المقاومة (I = V / R).', ans: 'صواب' },
+                { q: '2. يجوز استبدال القاطع التفاضلي (RCD / ELCB) بقاطع تيار عادي دون الحاجة لتأريض المعدات الصناعية.', ans: 'خطأ' },
+                { q: '3. في شبكات الجهد المنخفض ثلاثية الأوجه، يكون فرق الجهد بين فاز ونيوترال 230 فولت، وبين فازين 400 فولت.', ans: 'صواب' },
+                { q: '4. يستخدم جهاز الميجر (Megger) لاختبار مقاومة العزل للكابلات والمحركات الكهربائية تحت جهد عالي مستمر.', ans: 'صواب' },
+                { q: '5. يجب توصيل جهاز قياس التيار (الأميتر) على التوازي مباشرة مع الحمل الكهربائي المراد قياسه.', ans: 'خطأ' },
+                { q: '6. يهدف نظام التأريض الوقائي (Earthing) إلى تفريغ تيارات التسريب وحماية العاملين من مخاطر الصعق الكهربائي.', ans: 'صواب' }
+            ];
+            rawMc = [
+                {
+                    q: '7. ما هو الجهاز المستخدم لحماية الدوائر الكهربائية من زيادة الحمل (Overload) وتيار القصر (Short Circuit) معاً؟',
+                    options: ['أ) القاطع الآلي المصغر (Miniature Circuit Breaker - MCB)', 'ب) مفتاح الإنارة الميكانيكي', 'ج) المحول الرافع للجهد', 'د) عداد قياس القدرة'],
+                    correctLetter: 'أ',
+                    wrongLetter: 'ب'
+                },
+                {
+                    q: '8. ما هي سعة حساسية القاطع التفاضلي الموصى بها لحماية الأشخاص من خطر الصعق الكهربائي المباشر في المنشآت؟',
+                    options: ['أ) 300 مللي أمبير', 'ب) 30 مللي أمبير (30 mA)', 'ج) 5 أمبير', 'د) 100 أمبير'],
+                    correctLetter: 'ب',
+                    wrongLetter: 'أ'
+                },
+                {
+                    q: '9. ما هو الإجراء الإلزامي قبل البدء في صيانة أي لوحة توزيع كهربائية صناعية؟',
+                    options: ['أ) ارتداء قفازات قماشية فقط والعمل تحت الجهد', 'ب) تنظيف اللوحة بقطعة مبللة بالماء', 'ج) فصل القاطع الرئيسي وتطبيق إجراء العزل والقفل (LOTO) واختبار انعدام الجهد', 'د) تشغيل المروحة الهوائية فقط'],
+                    correctLetter: 'ج',
+                    wrongLetter: 'أ'
+                },
+                {
+                    q: '10. في المحركات الكهربائية الحثية ثلاثية الأوجه، كيف يتم عكس اتجاه دوران عمود دوران المحرك؟',
+                    options: ['أ) بتغيير تردد المصدر فقط', 'ب) بزيادة جهد التغذية', 'ج) بتوصيل طرف النيوترال مع الأرضي', 'د) بتبديل مكان أي طرفين من أطراف التغذية الثلاثة (Swap any two phases)'],
+                    correctLetter: 'د',
+                    wrongLetter: 'أ'
+                },
+                {
+                    q: '11. ما هي وحدة قياس القدرة الكهربائية الفعالة في الأنظمة الكهربائية الصناعية؟',
+                    options: ['أ) الكيلوواط (kW)', 'ب) الكيلوفولت أمبير التفاعلي (kVAR)', 'ج) الأوم (Ohm)', 'د) الهرتز (Hz)'],
+                    correctLetter: 'أ',
+                    wrongLetter: 'ب'
+                }
+            ];
+        } else if (c.includes('إنشاء') || c.includes('انشاءات') || c.includes('سلامة') || c.includes('مدني')) {
+            // 3. Construction / Safety Specialty (إنشاءات / أمن وسلامة)
+            rawTf = [
+                { q: '1. يجب فحص السقالات المعدنية ووضع البطاقة الخضراء (Green Tag) من المشرف المؤهل قبل السماح بالعمل عليها.', ans: 'صواب' },
+                { q: '2. يجوز الحفر بعمق يتجاوز 1.2 متر دون عمل تدعيم لجوانب الحفر (Shoring) أو ميول مدرجة لحماية العمال.', ans: 'خطأ' },
+                { q: '3. يُجرى اختبار هبوط الخرسانة (Slump Test) في الموقع للتحقق من قوام الخرسانة الطازجة وقابليتها للتشغيل.', ans: 'صواب' },
+                { q: '4. يلزم ارتداء حزام الأمان لكامل الجسم وتثبيته في نقطة ربط آمنة عند العمل على ارتفاع يتجاوز 1.8 متر.', ans: 'صواب' },
+                { q: '5. يُسمح باستخدام السلالم المعدنية بالقرب من خطوط الكهرباء الهوائية والمحولات المكشوفة.', ans: 'خطأ' },
+                { q: '6. يتكون حاجز الحماية القياسي للسقالات من حاجز علوي ووسيط وحافة قدم (Toe-board) لمنع سقوط الأدوات.', ans: 'صواب' }
+            ];
+            rawMc = [
+                {
+                    q: '7. ما هي المعدة الأساسية المعتمدة لحماية المتدربين من مخاطر السقوط من الارتفاعات؟',
+                    options: ['أ) حزام الأمان لكامل الجسم (Full Body Harness) المزود بحبل امتصاص الصدمات', 'ب) نظارة السلامة الشفافة فقط', 'ج) الحذاء الرياضي الخفيف', 'د) قفازات القماش العادية'],
+                    correctLetter: 'أ',
+                    wrongLetter: 'ب'
+                },
+                {
+                    q: '8. ما هو الفحص الإلزامي المعتمد للتحقق من مطابقة قوة الضغط للخرسانة المتصلبة بعد 28 يوماً؟',
+                    options: ['أ) فحص الشد للحديد', 'ب) اختبار كسر المكعبات الخرسانية (Compressive Strength Test)', 'ج) فحص نفاذية الرمل', 'د) قياس الكثافة بالعين'],
+                    correctLetter: 'ب',
+                    wrongLetter: 'أ'
+                },
+                {
+                    q: '9. ما هي المسافة الآمنة المعتمدة لتخزين نواتج الحفر والمعدات الثقيلة بعيداً عن حافة الحفرية؟',
+                    options: ['أ) 10 سم من الحافة', 'ب) ملاصقة للحافة تماماً', 'ج) مسافة لا تقل عن 1 متر (أو ما يعادل عمق الحفر)', 'د) رمي الركام داخل الحفرية'],
+                    correctLetter: 'ج',
+                    wrongLetter: 'أ'
+                },
+                {
+                    q: '10. ما هي زاوية الميل القياسية الصحيحة لنصب السلالم المستقيمة المتنقلة على الجدران؟',
+                    options: ['أ) زاوية 30 درجة منبسطة', 'ب) زاوية 90 درجة قائمة', 'ج) زاوية 45 درجة حادة', 'د) نسبة 4 إلى 1 (زاوية 75 درجة تقريباً)'],
+                    correctLetter: 'د',
+                    wrongLetter: 'ج'
+                },
+                {
+                    q: '11. ما هو نوع طفاية الحريق المعتمدة والمناسبة لإخماد حرائق المعدات الكهربائية والتجهيزات النشطة؟',
+                    options: ['أ) طفاية غاز ثاني أكسيد الكربون (CO2) أو البودرة الجافة', 'ب) طفاية الماء المضغوط فقط', 'ج) طفاية الرغوة المائية (Foam)', 'د) سطل الرمل المبلل'],
+                    correctLetter: 'أ',
+                    wrongLetter: 'ج'
+                }
+            ];
+        } else {
+            // 4. Default: Welding & Fabrication Specialty (تخصص اللحام والتصنيع)
+            rawTf = [
+                { q: '1. يجب ارتداء قناع اللحام المجهز بعدسة تظليل مناسبة (Shade 10-12) لحماية العين من الأشعة فوق البنفسجية وتحت الحمراء.', ans: 'صواب' },
+                { q: '2. يجوز لحام المعادن المجلفنة أو المطلية بالزيوت والشحوم دون إزالة طبقة الزنك أو التنظيف المسبق للوصلة.', ans: 'خطأ' },
+                { q: '3. يُستخدم قطب اللحام من نوع E7018 في اللحام بالقوس الكهربائي المحجب للأعمال ذات المتانة والشد العالي.', ans: 'صواب' },
+                { q: '4. ينشأ عيب اللحام المسمى بالمسامية (Porosity) نتيجة احتباس فقاعات الغاز داخل حوض اللحام المتصلب بسبب الرطوبة أو الرياح.', ans: 'صواب' },
+                { q: '5. في اللحام بغاز خامل والتنجستن (TIG / GTAW)، يتم استهلاك قطب التنجستن وذوبانه كمعادن حشو داخل الوصلة.', ans: 'خطأ' },
+                { q: '6. تهدف عملية التسخين المسبق (Preheating) للفولاذ السميك إلى تقليل سرعة التبريد وتجنب حدوث التشققات الهيدروجينية الباردة.', ans: 'صواب' }
+            ];
+            rawMc = [
                 {
                     q: '7. ما هو غاز الحماية الأساسي والأكثر استخداماً في لحام التيج (TIG) للفولاذ المقاوم للصدأ وسبائك الألمنيوم؟',
                     options: ['أ) غاز الأرجون النقي (Argon 99.9%)', 'ب) غاز الأكسجين النقي', 'ج) غاز أول أكسيد الكربون', 'د) الهواء المضغوط العادي'],
-                    selected: 'أ',
-                    mark: score >= 60 ? '14 / 14' : '0 / 14'
+                    correctLetter: 'أ',
+                    wrongLetter: 'ب'
                 },
                 {
                     q: '8. ما هو السبب الفني الرئيسي لحدوث عيب الانقطاع السفلي (Undercut) على جانبي خط درزة اللحام؟',
-                    options: ['أ) استخدام تيار كهربائي (Amperage) أعلى من اللازم أو طول مفرط للقوس الكهربائي', 'ب) انخفاض تيار اللحام عن الحد المسموح', 'ج) بطء شديد في حركة يد اللحام', 'د) برودة المعدن الأساسي'],
-                    selected: 'أ',
-                    mark: '14 / 14'
+                    options: ['أ) انخفاض تيار اللحام عن الحد المسموح', 'ب) استخدام تيار كهربائي (Amperage) أعلى من اللازم أو طول مفرط للقوس الكهربائي', 'ج) بطء شديد في حركة يد اللحام', 'د) برودة المعدن الأساسي'],
+                    correctLetter: 'ب',
+                    wrongLetter: 'أ'
                 },
                 {
                     q: '9. ما الذي يشير إليه الرقمان (70) في تصنيف قطب اللحام الأمريكي المعتمد (AWS E7018)؟',
-                    options: ['أ) قوة الشد الدنيا لمعدن اللحام وتبلغ 70,000 رطل لكل بوصة مربعة (psi)', 'ب) نسبة الكربون المئوية في سلك اللحام', 'ج) القطر الخارجي للإلكترود بالملليمتر', 'د) زاوية ميلان قطب اللحام أثناء التشغيل'],
-                    selected: 'أ',
-                    mark: '14 / 14'
+                    options: ['أ) نسبة الكربون المئوية في سلك اللحام', 'ب) القطر الخارجي للإلكترود بالملليمتر', 'ج) قوة الشد الدنيا لمعدن اللحام وتبلغ 70,000 رطل لكل بوصة مربعة (psi)', 'د) درجة حرارة الانصهار'],
+                    correctLetter: 'ج',
+                    wrongLetter: 'أ'
                 },
                 {
-                    q: '10. في لحام القوس اليدوي (SMAW)، ما هي الوظيفة الأساسية لطبقة البودرة المساعدة (Flux Coating) المغلفة للإلكترود؟',
-                    options: ['أ) توليد غاز عازل لحماية القوس وتكوين الخبث (Slag) لعزل وتبريد خط اللحام تدريجياً', 'ب) تلوين خط اللحام بالألوان الزاهية', 'ج) زيادة وزن سلك اللحام أثناء النقل والتخزين', 'د) تقليل المقاومة الكهربائية لكابلات التغذية'],
-                    selected: 'أ',
-                    mark: score >= 60 ? '14 / 14' : '4 / 14'
+                    q: '10. ما الذي يشير إليه الرقم (1) في الرمز (E7018) بالنسبة لأوضاع اللحام المعتمدة؟',
+                    options: ['أ) وضع أفقي فقط', 'ب) لحام أرضي مسطح فقط', 'ج) لحام رأسي هابط فقط', 'د) كافة أوضاع اللحام (جميع الأوضاع بما فيها الرأسي وفوق الرأس)'],
+                    correctLetter: 'د',
+                    wrongLetter: 'ب'
                 },
                 {
-                    q: '11. ما هو الإجراء الفوري المعتمد عند انطلاق جرس إنذار الطوارئ أو رصد تسرب غاز داخل ورشة اللحام؟',
-                    options: ['أ) إيقاف مصدر التيار وقفل صمامات أسطوانات الغاز والتوجه فوراً لنقطة التجمع', 'ب) الاستمرار في اللحام لحين إنهاء الوصلة', 'ج) إخفاء أدوات اللحام داخل الدواليب', 'د) إغلاق الأبواب والانتظار داخل الورشة'],
-                    selected: 'أ',
-                    mark: '14 / 14'
+                    q: '11. ما هو الإجراء الفوري المعتمد عند حدوث اشتعال ارتدادي للهب (Flashback) في محطة اللحام بالأكسي-أسيتيلين؟',
+                    options: ['أ) إغلاق محبس الأكسجين فوراً ثم محبس الوقود وفحص مانع الارتداد', 'ب) مواصلة اللحام لخفض الضغط', 'ج) زيادة تدفق غاز الأسيتيلين', 'د) تغطية فوهة المشعل بقطعة قماش'],
+                    correctLetter: 'أ',
+                    wrongLetter: 'ب'
                 }
-            ]
-        };
+            ];
+        }
+
+        // Realistic linking to trainee score
+        const score = Math.max(30, Math.min(100, Math.round(targetScore)));
+        const pointsToDrop = 100 - score;
+
+        let numMcFail = Math.min(5, Math.floor(pointsToDrop / 14));
+        let rem = pointsToDrop - (numMcFail * 14);
+        let numTfFail = Math.min(6, Math.round(rem / 5));
+
+        const mcFailSet = new Set();
+        for (let k = 0; k < numMcFail; k++) {
+            mcFailSet.add((seed + k * 2) % 5);
+        }
+
+        const tfFailSet = new Set();
+        for (let k = 0; k < numTfFail; k++) {
+            tfFailSet.add((seed + k * 3 + 1) % 6);
+        }
+
+        const tfQuestions = rawTf.map((q, idx) => {
+            const isCorrect = !tfFailSet.has(idx);
+            let traineeAns = q.ans;
+            if (!isCorrect) {
+                if (q.ans === 'True') traineeAns = 'False';
+                else if (q.ans === 'False') traineeAns = 'True';
+                else if (q.ans === 'صواب') traineeAns = 'خطأ';
+                else traineeAns = 'صواب';
+            }
+            return {
+                q: q.q,
+                correctAns: q.ans,
+                traineeAns: traineeAns,
+                isCorrect: isCorrect,
+                mark: isCorrect ? '5 / 5' : '0 / 5'
+            };
+        });
+
+        const mcQuestions = rawMc.map((q, idx) => {
+            const isCorrect = !mcFailSet.has(idx);
+            let traineeLetter = q.correctLetter;
+            if (!isCorrect) {
+                traineeLetter = q.wrongLetter || (q.correctLetter === 'أ' ? 'ب' : (q.correctLetter === 'A' ? 'B' : 'A'));
+            }
+            return {
+                q: q.q,
+                options: q.options,
+                correctLetter: q.correctLetter,
+                traineeLetter: traineeLetter,
+                isCorrect: isCorrect,
+                mark: isCorrect ? '14 / 14' : '0 / 14'
+            };
+        });
+
+        const calculatedObtainedScore = (6 - tfFailSet.size) * 5 + (5 - mcFailSet.size) * 14;
+        return { tf: tfQuestions, mc: mcQuestions, calculatedScore: calculatedObtainedScore };
     }
 
-    // Exam Models: EXPANDED WITH SPECIALTY QUESTIONS (6 T/F + 5 MC = 11 Questions = 100 Marks!)
     function getCTPCourseExamModels(trainee) {
         const assigned = getTraineeAssignedCourses(trainee);
         const traineeName = trainee.name || 'متدرب معهد الذهب الأسود';
@@ -89627,47 +89684,28 @@ function buildDemoExecutiveReport(params) {
             const courseObj = (assigned.length > 1 && idx === 1) ? assigned[1] : assigned[0];
             const isEnglish = courseObj && courseObj.course && (courseObj.course.toLowerCase().includes('انجليزي') || courseObj.course.toLowerCase().includes('english'));
 
-            let score = Math.round(baseRate + ((seed + idx * 7) % 7) - 3);
-            if (score > 99) score = 99;
-            if (score < 25) score = 25;
+            let rawScore = Math.round(baseRate + ((seed + idx * 7) % 7) - 3);
+            if (rawScore > 99) rawScore = 99;
+            if (rawScore < 40) rawScore = 40;
 
             const cName = courseObj ? courseObj.course : 'اللحام';
-            const specQuestions = getCTPSpecialtyExamQuestions(cName, isEnglish, score);
-
-            if (isEnglish) {
-                return {
-                    isEnglish: true,
-                    examNo: em.no,
-                    title: `Technical English Examination Paper - ${em.nameEn}`,
-                    date: em.date,
-                    time: '09:00 AM - 10:30 AM',
-                    room: courseObj ? courseObj.room : 'Hall 8',
-                    instructor: courseObj ? courseObj.trainer : 'Certified Instructor',
-                    traineeName: englishName,
-                    traineeId: traineeId,
-                    group: groupName,
-                    maxScore: 100,
-                    obtainedScore: score,
-                    tfQuestions: specQuestions.tf,
-                    mcQuestions: specQuestions.mc
-                };
-            }
+            const examData = getCTPSpecialtyExamQuestions(cName, isEnglish, rawScore, seed + idx * 17);
 
             return {
-                isEnglish: false,
+                isEnglish: isEnglish,
                 examNo: em.no,
-                title: `ورقة اختبار شهر ${em.nameAr} لمقرر (${cName})`,
+                title: isEnglish ? `Technical English Examination Paper - ${em.nameEn}` : `ورقة نموذج اختبار شهر ${em.nameAr} لمقرر (${cName})`,
                 date: em.date,
-                time: '09:00 ص - 10:30 ص',
-                room: courseObj ? courseObj.room : 'القاعة 9',
-                instructor: courseObj ? courseObj.trainer : 'المدرب المعتمد',
-                traineeName: traineeName,
+                time: isEnglish ? '09:00 AM - 10:30 AM' : '09:00 ص - 10:30 ص',
+                room: courseObj ? (courseObj.room || 'القاعة 9') : 'القاعة 9',
+                instructor: courseObj ? (courseObj.trainer || 'المدرب المعتمد') : 'المدرب المعتمد',
+                traineeName: isEnglish ? englishName : traineeName,
                 traineeId: traineeId,
                 group: groupName,
                 maxScore: 100,
-                obtainedScore: score,
-                tfQuestions: specQuestions.tf,
-                mcQuestions: specQuestions.mc
+                obtainedScore: examData.calculatedScore,
+                tfQuestions: examData.tf,
+                mcQuestions: examData.mc
             };
         });
     }
@@ -89710,7 +89748,9 @@ function buildDemoExecutiveReport(params) {
                         ${ex.tfQuestions.map(q => `
                             <div class="flex items-center justify-between text-[9px] border-b border-slate-200 py-0.5 leading-tight">
                                 <span class="font-medium">${q.q}</span>
-                                <span class="font-mono font-black shrink-0 ${ex.isEnglish ? 'ml-2' : 'mr-2'}">[ ✔ ] ${q.traineeAns} (${q.mark})</span>
+                                <span class="font-mono font-black shrink-0 ${ex.isEnglish ? 'ml-2' : 'mr-2'} ${q.isCorrect ? 'text-black' : 'text-red-700'}">
+                                    [ ${q.isCorrect ? '✔' : '✗'} ] ${ex.isEnglish ? 'Ans' : 'إجابة المتدرب'}: ${q.traineeAns} (${q.mark})
+                                </span>
                             </div>
                         `).join('')}
                     </div>
@@ -89725,13 +89765,27 @@ function buildDemoExecutiveReport(params) {
                     <div class="space-y-1">
                         ${ex.mcQuestions.map(q => `
                             <div class="text-[9px] border-b border-slate-200 pb-0.5 leading-tight">
-                                <div class="font-bold mb-0.5">${q.q}</div>
+                                <div class="flex items-center justify-between mb-0.5">
+                                    <span class="font-bold">${q.q}</span>
+                                    <span class="font-mono font-black text-[8.5px] shrink-0 mr-2 ${q.isCorrect ? 'text-black' : 'text-red-700'}">
+                                        [ ${q.isCorrect ? '✔ إجابة صحيحة' : '✗ إجابة خاطئة'} ] (${q.mark})
+                                    </span>
+                                </div>
                                 <div class="grid grid-cols-2 gap-1 text-[8.5px]">
-                                    ${q.options.map(opt => `
-                                        <div class="p-0.5 px-1 rounded border ${opt.startsWith(q.selected) ? 'border-black font-black bg-white' : 'border-slate-200 text-slate-700'}">
-                                            ${opt} ${opt.startsWith(q.selected) ? '✔' : ''}
-                                        </div>
-                                    `).join('')}
+                                    ${q.options.map(opt => {
+                                        const optTrim = opt.trim();
+                                        const optLetter = optTrim.charAt(0);
+                                        const isTraineePick = (optLetter === q.traineeLetter);
+                                        let cls = 'border-slate-200 text-slate-700';
+                                        if (isTraineePick) {
+                                            cls = q.isCorrect ? 'border-black font-black bg-white' : 'border-red-600 font-black bg-red-50 text-red-900';
+                                        }
+                                        return `
+                                            <div class="p-0.5 px-1 rounded border ${cls}">
+                                                ${opt} ${isTraineePick ? (q.isCorrect ? '✔' : '✗') : ''}
+                                            </div>
+                                        `;
+                                    }).join('')}
                                 </div>
                             </div>
                         `).join('')}
@@ -89848,7 +89902,7 @@ function buildDemoExecutiveReport(params) {
 
                         <div class="pt-3 border-t border-black grid grid-cols-2 gap-6 text-center">
                             <div>
-                                <span class="block text-[10px] text-slate-500 font-bold mb-1">مسؤول القبول والتسجيل (توقيع فقط)</span>
+                                <span class="block text-[10px] text-slate-500 font-bold mb-1">مسؤول القبول والتسجيل</span>
                                 <div class="mt-1">${getOfficialSignatureHTML('admission')}</div>
                             </div>
                             <div>
@@ -89951,7 +90005,7 @@ function buildDemoExecutiveReport(params) {
                         </div>
                         <div class="border-t sm:border-t-0 sm:border-r border-black pt-2 sm:pt-0 sm:pr-2 flex items-center justify-center">
                             <div class="text-center">
-                                <span class="text-[9px] text-slate-500 block font-bold mb-0.5">شؤون المتدربين (توقيع)</span>
+                                <span class="text-[9px] text-slate-500 block font-bold mb-0.5">مسؤول شؤون المتدربين</span>
                                 <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-10 w-auto object-contain mx-auto">
                                 <span class="text-[9px] font-bold block">علي آل عباس</span>
                             </div>
@@ -90114,11 +90168,11 @@ function buildDemoExecutiveReport(params) {
                             <span class="text-xs font-mono text-slate-700 mt-1">الهوية الوطنية: ${trainee.id} • معتمد بالنظام</span>
                         </div>
                         <div class="border border-black p-3 rounded-xl bg-white">
-                            <span class="block text-xs text-slate-600 font-bold mb-1">مسؤول شؤون المتدربين (توقيع)</span>
+                            <span class="block text-xs text-slate-600 font-bold mb-1">مسؤول شؤون المتدربين</span>
                             ${getOfficialSignatureHTML('supervisor')}
                         </div>
                         <div class="border border-black p-3 rounded-xl bg-white">
-                            <span class="block text-xs text-slate-600 font-bold mb-1">مدير عام المعهد (اعتماد وختم)</span>
+                            <span class="block text-xs text-slate-600 font-bold mb-1">مدير عام المعهد</span>
                             ${getOfficialSignatureHTML('director')}
                         </div>
                     </div>
@@ -90185,11 +90239,11 @@ function buildDemoExecutiveReport(params) {
 
                         <div class="pt-4 border-t-2 border-black grid grid-cols-2 gap-8 text-center">
                             <div>
-                                <span class="block text-[10px] text-slate-500 font-bold mb-1">مسؤول القبول والتسجيل (توقيع فقط)</span>
+                                <span class="block text-[10px] text-slate-500 font-bold mb-1">مسؤول القبول والتسجيل</span>
                                 <div class="mt-1">${getOfficialSignatureHTML('admission')}</div>
                             </div>
                             <div>
-                                <span class="block text-[10px] text-slate-500 font-bold mb-1">اعتماد مدير عام المعهد (توقيع وختم رسمي)</span>
+                                <span class="block text-[10px] text-slate-500 font-bold mb-1">مدير عام المعهد</span>
                                 <div class="mt-1">${getOfficialSignatureHTML('director')}</div>
                             </div>
                         </div>
@@ -90314,7 +90368,7 @@ function buildDemoExecutiveReport(params) {
                 <div class="border-2 border-black p-5 rounded-2xl bg-white space-y-4 text-xs">
                     <div class="border-b-2 border-black pb-2">
                         <h3 class="font-black text-sm text-black">سجل الإنذارات والمخالفات للمتدرب</h3>
-                        <p class="text-[11px] text-slate-600 font-bold">كل إشعار مقيد بتوقيع مسؤول شؤون المتدربين</p>
+                        <p class="text-[11px] text-slate-600 font-bold">كل إشعار مقيد ومعتمد من مسؤول شؤون المتدربين</p>
                     </div>
 
                     <div class="space-y-3">
@@ -90335,7 +90389,7 @@ function buildDemoExecutiveReport(params) {
                                     </div>
                                     <div class="border-r border-black pr-2 flex items-center justify-center bg-white rounded p-1">
                                         <div class="text-center">
-                                            <span class="text-[9px] text-slate-600 block font-bold mb-0.5">شؤون المتدربين (توقيع)</span>
+                                            <span class="text-[9px] text-slate-600 block font-bold mb-0.5">مسؤول شؤون المتدربين</span>
                                             <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" class="h-10 w-auto object-contain mx-auto">
                                             <span class="text-[9px] font-bold block text-black">علي آل عباس</span>
                                         </div>
@@ -90484,11 +90538,11 @@ function buildDemoExecutiveReport(params) {
 
                 <div class="pt-2 border-t-2 border-black grid grid-cols-2 gap-4 text-center">
                     <div class="border border-black p-2 rounded-xl bg-white">
-                        <span class="block text-[10px] text-slate-600 font-bold mb-0.5">مسؤول شؤون المتدربين (توقيع فقط)</span>
+                        <span class="block text-[10px] text-slate-600 font-bold mb-0.5">مسؤول شؤون المتدربين</span>
                         ${getOfficialSignatureHTML('supervisor')}
                     </div>
                     <div class="border border-black p-2 rounded-xl bg-white">
-                        <span class="block text-[10px] text-slate-600 font-bold mb-0.5">اعتماد مدير عام المعهد (توقيع وختم رسمي)</span>
+                        <span class="block text-[10px] text-slate-600 font-bold mb-0.5">مدير عام المعهد</span>
                         ${getOfficialSignatureHTML('director')}
                     </div>
                 </div>
