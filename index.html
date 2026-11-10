@@ -90845,6 +90845,159 @@ function getCTPAdmissionFormData(trainee) {
     // REGISTRATION FORM SYSTEM
     // ===================================================================
 
+    
+    // ===================================================================
+    // BATCH REGISTRATION FORMS ZIP EXPORTER
+    // ===================================================================
+
+    function openBatchRegistrationExportModal() {
+        const modal = document.getElementById('batchRegExportModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            updateBatchExportCount();
+        }
+    }
+
+    function closeBatchRegistrationExportModal() {
+        const modal = document.getElementById('batchRegExportModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function updateBatchExportCount() {
+        // Can optionally update label with count
+    }
+
+    async function startBatchRegistrationFormsExport() {
+        const sel = document.getElementById('batchExportCompanySelect')?.value || 'all';
+        const progContainer = document.getElementById('batchExportProgressContainer');
+        const progBar = document.getElementById('batchExportProgressBar');
+        const statusText = document.getElementById('batchExportStatusText');
+        const percentText = document.getElementById('batchExportPercentText');
+        const startBtn = document.getElementById('startBatchExportBtn');
+
+        if (typeof JSZip === 'undefined') {
+            return showToast('مكتبة JSZip غير محملة', 'error');
+        }
+        if (typeof html2pdf === 'undefined') {
+            return showToast('مكتبة html2pdf غير محملة', 'error');
+        }
+
+        // 1. Gather target trainees
+        let targetList = [];
+        if (typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined') {
+            const allMasters = Object.values(MASTER_TRAINEE_REGISTRATION_DIRECTORY);
+            if (sel === 'all') {
+                targetList = allMasters;
+            } else if (sel === 'current') {
+                targetList = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : allMasters;
+            } else {
+                targetList = allMasters.filter(t => {
+                    const comp = String(t.company || '').toLowerCase();
+                    return comp.includes(sel.toLowerCase());
+                });
+            }
+        }
+
+        if (targetList.length === 0) {
+            return showToast('لا يوجد متدربين مطابقين للتحديد', 'warning');
+        }
+
+        if (startBtn) {
+            startBtn.disabled = true;
+            startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        if (progContainer) progContainer.classList.remove('hidden');
+
+        const zip = new JSZip();
+        const total = targetList.length;
+
+        // Hidden render container
+        let renderBox = document.getElementById('batchPdfRenderContainer');
+        if (!renderBox) {
+            renderBox = document.createElement('div');
+            renderBox.id = 'batchPdfRenderContainer';
+            renderBox.style.position = 'fixed';
+            renderBox.style.top = '-99999px';
+            renderBox.style.left = '-99999px';
+            renderBox.style.width = '800px';
+            renderBox.style.background = '#ffffff';
+            renderBox.style.zIndex = '-1000';
+            document.body.appendChild(renderBox);
+        }
+
+        try {
+            for (let i = 0; i < total; i++) {
+                const tr = targetList[i];
+                const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
+                const fileName = `${cleanId || ('trainee_' + (i + 1))}.pdf`;
+
+                const adm = getCTPAdmissionFormData(tr);
+                const seed = Math.abs(parseInt(String(tr.id || '9999').slice(-4), 10) || 555);
+                const engName = tr.nameEn || (typeof transliterateArabicName === 'function' ? transliterateArabicName(tr.name) : (tr.name || ''));
+                const regDate = getTraineeRegistrationDate(tr);
+
+                renderBox.innerHTML = buildRegistrationFormHTML(tr, adm, engName, regDate, seed);
+
+                // Update progress
+                const cur = i + 1;
+                const pct = Math.round((cur / total) * 100);
+                if (statusText) statusText.textContent = `جاري إنشاء نموذج: ${tr.name || cleanId} (${cur} من ${total})`;
+                if (percentText) percentText.textContent = `${pct}%`;
+                if (progBar) progBar.style.width = `${pct}%`;
+
+                // Render PDF Blob
+                const opt = {
+                    margin: [4, 4, 4, 4],
+                    filename: fileName,
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { scale: 1.5, useCORS: true, logging: false },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                const pdfBlob = await html2pdf().set(opt).from(renderBox.firstElementChild).output('blob');
+                zip.file(fileName, pdfBlob);
+
+                // Small delay to let browser breathe
+                await new Promise(r => setTimeout(r, 20));
+            }
+
+            if (statusText) statusText.textContent = 'جاري ضغط وحزم الملفات داخل ملف ZIP...';
+
+            const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+                if (percentText) percentText.textContent = `${Math.round(metadata.percent)}%`;
+            });
+
+            // Trigger download
+            const zipName = `نماذج_التسجيل_${sel}_${new Date().toISOString().slice(0, 10)}.zip`;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(zipBlob);
+            a.download = zipName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            showToast(`✅ تم إنشاء وتنزيل ملف الـ ZIP بنجاح! (${total} ملف PDF)`, 'success');
+            if (typeof confetti === 'function') confetti({ particleCount: 80, spread: 60 });
+
+            setTimeout(() => {
+                closeBatchRegistrationExportModal();
+                if (progContainer) progContainer.classList.add('hidden');
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }, 1200);
+
+        } catch (err) {
+            console.error('Batch Export Error:', err);
+            showToast('حدث خطأ أثناء تصدير النماذج: ' + (err.message || err), 'error');
+            if (startBtn) {
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    }
+
     // Company Contract Dates Registry for Trainee Registration Form
     function getTraineeRegistrationDate(trainee) {
         if (!trainee) return '01/01/2026';
@@ -91167,7 +91320,7 @@ function getCTPAdmissionFormData(trainee) {
                         <td style="padding:6px 10px; border:1px solid #111; text-align:center;">
                             <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
                                 <span style="font-weight:700; font-family:monospace; font-size:12px;">${regDate}</span>
-                                <span style="font-size:11px; color:#555; font-weight:700;">التوقيع: <span style="font-family:'Segoe Script', cursive, sans-serif; font-size:12px; color:#111;">${escapeHtml((trainee.name || '').split(' ')[0] || 'متدرب')}</span></span>
+                                <div style="display:flex; align-items:center; gap:6px;"><span style="font-size:11px; color:#333; font-weight:700;">التوقيع:</span><div style="width:80px; height:18px;"></div></div>
                             </div>
                         </td>
                     </tr>
@@ -91237,9 +91390,9 @@ function getCTPAdmissionFormData(trainee) {
                             </div>
                         </td>
                         <td style="padding:6px 10px; border:1px solid #111; font-weight:700; color:#333; text-align:center;">التوقيع:</td>
-                        <td style="padding:3px 10px; border:1px solid #111; text-align:center; vertical-align:middle;">
-                            <div style="display:flex; align-items:center; justify-content:center;">
-                                <img src="assets/ali_alabbas_admission_sig.png" alt="توقيع علي آل عباس" style="height:38px; max-width:130px; object-fit:contain; display:inline-block;">
+                        <td style="padding:0px 10px; border:1px solid #111; text-align:center; vertical-align:middle; position:relative; overflow:visible;">
+                            <div style="position:relative; display:inline-block; overflow:visible;">
+                                <img src="assets/ali_alabbas_blue_sig.png" alt="توقيع علي آل عباس" style="height:56px; width:auto; max-width:140px; object-fit:contain; display:inline-block; margin:-14px -18px -12px -18px; transform: rotate(-2deg); position:relative; z-index:10; pointer-events:none;">
                             </div>
                         </td>
                     </tr>
@@ -91315,6 +91468,10 @@ function getCTPAdmissionFormData(trainee) {
                         <span>🖨️</span>
                         <span>طباعة النموذج</span>
                     </button>
+                    <button onclick="openBatchRegistrationExportModal()" class="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-black px-4 py-2 rounded-xl text-sm transition cursor-pointer shadow-sm">
+                        <span>📦</span>
+                        <span>تحميل النماذج كملفات PDF مضغوطة (ZIP)</span>
+                    </button>
                 </div>
                 <button onclick="closeRegistrationFormModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer transition text-slate-700 font-bold text-lg">✕</button>
             </div>
@@ -91324,6 +91481,74 @@ function getCTPAdmissionFormData(trainee) {
             </div>
         </div>
     </div>
+
+    <!-- ==================== BATCH REGISTRATION FORMS EXPORT MODAL ==================== -->
+    <div id="batchRegExportModal" class="fixed inset-0 z-[350] flex items-center justify-center p-4 hidden no-print" style="background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);" dir="rtl">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div class="p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-amber-950 text-white flex items-center justify-between border-b border-amber-500/30">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📦</span>
+                    <div>
+                        <h3 class="text-base font-black">تصدير نماذج التسجيل (ZIP) كملفات PDF مستقلة</h3>
+                        <p class="text-[11px] text-amber-200/80">تنزيل كل نموذج كملف PDF مستقل باسم رقم هوية المتدرب</p>
+                    </div>
+                </div>
+                <button onclick="closeBatchRegistrationExportModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition cursor-pointer">✕</button>
+            </div>
+
+            <div class="p-6 space-y-5">
+                <div>
+                    <label class="block text-xs font-black text-slate-700 dark:text-slate-300 mb-2">اختر الشركة أو نطاق التصدير:</label>
+                    <select id="batchExportCompanySelect" onchange="updateBatchExportCount()" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-sm focus:ring-2 focus:ring-amber-500">
+                        <option value="all">كافة المتدربين المعتمدين (733 متدرب)</option>
+                        <option value="امانة">شركة أمانة (24 متدرب)</option>
+                        <option value="سامسونج">شركة سامسونج (175 متدرب)</option>
+                        <option value="هونداي">شركة هونداي (135 متدرب)</option>
+                        <option value="ساينبوك">شركة ساينبوك Sinopec (212 متدرب)</option>
+                        <option value="شينبو">شركة شينبو Shinbo (65 متدرب)</option>
+                        <option value="العربية">شركة العربية AIC (122 متدرب)</option>
+                        <option value="current">المتدربين المسجلين في القائمة الحالية فقط</option>
+                    </select>
+                </div>
+
+                <div class="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-1.5">
+                    <div class="font-black flex items-center gap-2">
+                        <span>💡</span>
+                        <span>مواصفات التصدير والحزم:</span>
+                    </div>
+                    <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-700 dark:text-slate-300 pr-2">
+                        <li>كل متدرب سيتم إنشاء نموذج تسجيله كملف <b>PDF</b> منفصل ومستقل.</li>
+                        <li>اسم كل ملف سيكون <b>رقم الهوية الوطنية للمتدرب</b> (مثال: <code class="font-mono bg-white dark:bg-slate-800 px-1 py-0.5 rounded border">1135102398.pdf</code>).</li>
+                        <li>التوقيع الإداري للأستاذ علي آل عباس معتمد باللون الأزرق ويمر فوق الإطار.</li>
+                        <li>توقيع المتدرب فارغ بالكامل كما هو مطلوب.</li>
+                        <li>تاريخ التسجيل مطابق لتاريخ بداية عقد الشركة.</li>
+                    </ul>
+                </div>
+
+                <!-- Progress container -->
+                <div id="batchExportProgressContainer" class="hidden space-y-2">
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                        <span id="batchExportStatusText">جاري التجهيز...</span>
+                        <span id="batchExportPercentText" class="font-mono font-black text-amber-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
+                        <div id="batchExportProgressBar" class="bg-gradient-to-r from-amber-500 to-amber-600 h-3 rounded-full transition-all duration-200" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button id="startBatchExportBtn" onclick="startBatchRegistrationFormsExport()" class="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-black text-sm shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
+                        <span>⚡</span>
+                        <span>بدء إنشاء وتنزيل ملف الـ ZIP الآن</span>
+                    </button>
+                    <button onclick="closeBatchRegistrationExportModal()" class="py-3 px-5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm transition cursor-pointer">
+                        إلغاء
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Registration Form Print Area -->
     <div id="registrationFormPrintArea" class="hidden" style="direction: rtl; font-family: 'Arial', 'Tahoma', sans-serif;">
