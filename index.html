@@ -3796,6 +3796,10 @@
                                 <span>📋</span>
                                 <span>الملف الشامل (PDF)</span>
                             </button>
+                            <button type="button" onclick="openRegistrationFormModal(document.getElementById('adminQuickTraineeIdInput')?.value);" class="bg-gradient-to-r from-slate-900 to-black hover:from-black hover:to-slate-800 text-amber-300 font-black px-4 py-3 rounded-2xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shrink-0 border border-amber-500/40" title="فتح وطباعة نموذج التسجيل الرسمي">
+                                <span>📝</span>
+                                <span>نموذج التسجيل</span>
+                            </button>
                             <button type="button" onclick="openAdminSearchedTraineeProfile()" class="gold-gradient-bg text-slate-950 hover:brightness-105 font-black px-5 py-3 rounded-2xl text-xs md:text-sm transition flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer shrink-0">
 
                                 <span>👤</span>
@@ -6824,6 +6828,10 @@
                             <span>📋</span>
                             <span>الملف الشامل (PDF)</span>
                         </button>
+                        <button type="button" onclick="openRegistrationFormModal(document.getElementById('tpOriginalId') ? document.getElementById('tpOriginalId').value : (document.getElementById('tpModalIdDisplay') ? document.getElementById('tpModalIdDisplay').innerText : ''));" class="bg-gradient-to-r from-slate-900 to-black hover:from-black hover:to-slate-900 text-amber-300 font-black p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer border border-amber-500/40" title="فتح وطباعة نموذج التسجيل الرسمي">
+                            <span>📝</span>
+                            <span>نموذج التسجيل</span>
+                        </button>
                         <button type="button" id="tpQuickCopyPhoneBtn" onclick="copyModalPhone()" class="bg-white hover:bg-amber-50 text-slate-800 font-bold p-2.5 rounded-xl text-xs transition border border-slate-200 flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
 
                             <span>📲</span>
@@ -7345,6 +7353,10 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2 self-end sm:self-center">
+                    <button type="button" onclick="openRegistrationFormModal(currentCTPTrainee ? currentCTPTrainee.id : '');" class="bg-gradient-to-r from-slate-900 to-black hover:from-black hover:to-slate-900 text-amber-300 font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm shrink-0 border border-amber-500/50" title="عرض وطباعة نموذج التسجيل الرسمي">
+                        <span>📝</span>
+                        <span>نموذج التسجيل</span>
+                    </button>
                     <button type="button" onclick="printComprehensiveTraineeDossier()" class="bg-black hover:bg-slate-800 text-white font-black px-3.5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm shrink-0 border border-slate-700">
                         <span>🖨️</span>
                         <span>طباعة الملف الشامل</span>
@@ -90790,22 +90802,108 @@ function buildDemoExecutiveReport(params) {
     // REGISTRATION FORM SYSTEM
     // ===================================================================
 
-    function openRegistrationFormModal(traineeIdOrName) {
-        let pool = [];
-        try {
-            const stored = JSON.parse(localStorage.getItem('trainees') || '[]');
-            if (Array.isArray(stored) && stored.length > 0) pool = stored;
-        } catch(e) {}
-        if (pool.length === 0 && typeof SAMPLE_TRAINEES !== 'undefined') pool = SAMPLE_TRAINEES;
+    // Company Contract Dates Registry for Trainee Registration Form
+    function getTraineeRegistrationDate(trainee) {
+        if (!trainee) return '01/01/2026';
+        const comp = String(trainee.company || '').trim().toLowerCase();
+        const grp = String(trainee.group || '').trim().toLowerCase();
+        const text = `${comp} ${grp}`;
+
+        // 1. أمانة / Amana -> 10/4/2026
+        if (text.includes('امانة') || text.includes('أمانة') || text.includes('amana')) {
+            return '10/04/2026';
+        }
+
+        // 2. سامسونج / Samsung -> 1/12/2025
+        if (text.includes('سامسونج') || text.includes('samsung')) {
+            return '01/12/2025';
+        }
+
+        // 3. هونداي / Hyundai -> 1/12/2025
+        if (text.includes('هونداي') || text.includes('hyundai') || text.includes('هيونداي')) {
+            return '01/12/2025';
+        }
+
+        // 4. اليكو / إليكو / Eleco / Elco -> 14/09/2025
+        if (text.includes('اليكو') || text.includes('إليكو') || text.includes('eleco') || text.includes('elco')) {
+            return '14/09/2025';
+        }
+
+        // 5. ساينبوك / سينوبك / Sinopec
+        if (text.includes('ساينبوك') || text.includes('سينوبك') || text.includes('sinopec')) {
+            // Group 101 to 105 -> 27/10/2025
+            // Group 106 to 113 -> 01/05/2026
+            const matchNum = text.match(/\b(10[1-9]|11[0-3]|200)\b/);
+            const grpNum = matchNum ? parseInt(matchNum[1], 10) : 0;
+            if (grpNum >= 101 && grpNum <= 105) {
+                return '27/10/2025';
+            }
+            if ((grpNum >= 106 && grpNum <= 113) || text.includes('200')) {
+                return '01/05/2026';
+            }
+            if (text.includes('101') || text.includes('102') || text.includes('103') || text.includes('104') || text.includes('105')) {
+                return '27/10/2025';
+            }
+            return '01/05/2026';
+        }
+
+        // 6. شينبو / شنبو / Shinbo -> 19/1/2026
+        if (text.includes('شينبو') || text.includes('شنبو') || text.includes('shinbo')) {
+            return '19/01/2026';
+        }
+
+        // 7. العربية AIC -> من سنة أيضا -> 15/01/2025
+        if (text.includes('العربية') || text.includes('aic')) {
+            return '15/01/2025';
+        }
+
+        // Fallback to contract info if registered in system
+        if (typeof getTraineeContractInfo === 'function') {
+            const cInfo = getTraineeContractInfo(trainee);
+            if (cInfo && cInfo.startDate) {
+                const parts = cInfo.startDate.split('-');
+                if (parts.length === 3) {
+                    return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+                }
+            }
+        }
+
+        return '01/01/2026';
+    }
+
+    function openRegistrationFormModal(traineeIdOrName = null) {
+        let pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : [];
+        if (pool.length === 0) {
+            try {
+                const stored = JSON.parse(localStorage.getItem('trainees') || '[]');
+                if (Array.isArray(stored) && stored.length > 0) pool = stored;
+            } catch(e) {}
+        }
+        if (pool.length === 0 && typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) {
+            pool = SAMPLE_TRAINEES;
+        }
 
         let selected = null;
         if (traineeIdOrName) {
             const s = String(traineeIdOrName).trim().toLowerCase();
-            selected = pool.find(t => String(t.id).trim() === s || String(t.name).toLowerCase().includes(s));
+            selected = pool.find(t => 
+                String(t.id).trim() === s || 
+                String(t.name).toLowerCase().includes(s) ||
+                (typeof cleanNationalId === 'function' && cleanNationalId(t.id) === s)
+            );
         }
-        if (!selected) selected = (typeof currentCTPTrainee !== 'undefined' && currentCTPTrainee) ? currentCTPTrainee : (pool[0] || null);
+        if (!selected && typeof currentCTPTrainee !== 'undefined' && currentCTPTrainee) {
+            selected = currentCTPTrainee;
+        }
+        if (!selected) {
+            const tpId = document.getElementById('tpOriginalId')?.value || document.getElementById('tpInputId')?.value;
+            if (tpId) {
+                selected = pool.find(t => String(t.id).trim() === String(tpId).trim());
+            }
+        }
+        if (!selected) selected = pool[0];
 
-        if (!selected) return showToast('يرجى تحديد متدرب أولاً', 'error');
+        if (!selected) return showToast('يرجى تحديد متدرب أولاً لعرض نموذج التسجيل', 'error');
 
         currentCTPTrainee = selected;
         renderRegistrationForm(selected);
@@ -90824,149 +90922,138 @@ function buildDemoExecutiveReport(params) {
         const adm = getCTPAdmissionFormData(trainee);
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
         const engName = typeof transliterateArabicName === 'function' ? transliterateArabicName(trainee.name) : (trainee.name || '');
-        const todayGreg = new Date().toLocaleDateString('ar-SA-u-nu-latn', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const regDate = getTraineeRegistrationDate(trainee);
 
-        const formHTML = buildRegistrationFormHTML(trainee, adm, engName, todayGreg, seed);
+        const formHTML = buildRegistrationFormHTML(trainee, adm, engName, regDate, seed);
         const container = document.getElementById('registrationFormContent');
         if (container) container.innerHTML = formHTML;
     }
 
-    function buildRegistrationFormHTML(trainee, adm, engName, todayGreg, seed) {
-        const hasDisease = adm.hasChronicDiseases;
+    function buildRegistrationFormHTML(trainee, adm, engName, regDate, seed) {
         const ec = adm.emergencyContact;
 
         return `
-        <div style="background:#fff; font-family: 'Arial', 'Tahoma', sans-serif; direction:rtl; color:#111;">
+        <div style="background:#fff; font-family: 'Arial', 'Tahoma', sans-serif; direction:rtl; color:#111; max-width:800px; margin:0 auto; padding-bottom:12px;">
 
-            <!-- HEADER - Black Gold Style -->
-            <div style="position:relative; overflow:hidden; background:#fff; padding: 10px 20px 0 20px; border-bottom: 3px solid #c89520;">
-                <div style="display:flex; align-items:center; gap:14px; padding-bottom:8px; position:relative; z-index:2;">
-                    <img src="assets/bgti_logo.png" alt="BGTI Logo" style="height:70px; width:auto; object-fit:contain;">
-                    <div style="line-height:1.3;">
-                        <div style="font-size:22px; font-weight:900; letter-spacing:3px; color:#111;">
-                            BLACK<span style="color:#c89520;">GOLD</span>
-                        </div>
-                        <div style="font-size:11px; letter-spacing:4px; color:#555; font-weight:600; margin-top:2px;">TRAINING INSTITUTE</div>
-                    </div>
+            <!-- HEADER: Logo on top, Golden arc beneath -->
+            <div style="background:#fff; padding: 14px 20px 4px 20px;">
+                <div style="text-align:center; margin-bottom:8px;">
+                    <img src="assets/bgti_logo.png" alt="معهد الذهب الأسود للتدريب" style="height:64px; width:auto; object-fit:contain; display:inline-block;">
                 </div>
-                <!-- Golden wave/swoosh -->
-                <div style="position:absolute; left:0; bottom:-2px; width:70%; height:60px; z-index:1; overflow:hidden;">
-                    <svg viewBox="0 0 500 60" preserveAspectRatio="none" style="width:100%;height:100%;">
-                        <path d="M500,0 Q350,80 0,20 L0,70 L500,70 Z" fill="#c89520" opacity="0.9"/>
+                <!-- Golden arc spanning gracefully beneath the logo -->
+                <div style="width:100%; height:20px; overflow:hidden;">
+                    <svg viewBox="0 0 1000 35" preserveAspectRatio="none" style="width:100%; height:100%; display:block;">
+                        <path d="M0,6 Q500,34 1000,6 L1000,14 Q500,42 0,14 Z" fill="#C5A059" />
                     </svg>
                 </div>
             </div>
 
             <!-- FORM TITLE -->
-            <div style="text-align:center; margin: 24px 20px 14px 20px;">
+            <div style="text-align:center; margin: 14px 20px 14px 20px;">
                 <h2 style="font-size:18px; font-weight:900; color:#111; margin:0; text-decoration:underline; letter-spacing:1px;">نموذج تسجيل</h2>
             </div>
 
-            <!-- MAIN FORM TABLE -->
-            <div style="margin: 0 18px 20px 18px;">
-                <table style="width:100%; border-collapse:collapse; border:2.5px solid #111; font-size:12px;">
+            <!-- MAIN FORM TABLE (Double Framed: 3.5px double #111) -->
+            <div style="margin: 0 18px 14px 18px;">
+                <table style="width:100%; border-collapse:collapse; border:3.5px double #111; font-size:12px;">
 
                     <!-- SECTION 1: Personal Info Header -->
                     <tr>
-                        <td colspan="4" style="background:#e8e8e8; font-weight:900; font-size:12px; padding:5px 10px; border:1.5px solid #111; text-align:right;">
+                        <td colspan="4" style="background:#e8e8e8; font-weight:900; font-size:12px; padding:5px 10px; border:1px solid #111; text-align:right;">
                             المعلومات الشخصية
                         </td>
                     </tr>
 
                     <!-- Row: Full Name Arabic -->
                     <tr>
-                        <td colspan="1" style="padding:5px 10px; border:1.5px solid #111; white-space:nowrap; color:#555; font-size:11px; width:22%;">اسم المتدرب الرباعي:</td>
-                        <td colspan="3" style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right;">${escapeHtml(trainee.name || '')}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap; width:22%;">اسم المتدرب الرباعي:</td>
+                        <td colspan="3" style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:right;">${escapeHtml(trainee.name || '')}</td>
                     </tr>
 
                     <!-- Row: Full Name English -->
                     <tr>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap;">الاسم باللغة الإنجليزية:</td>
-                        <td colspan="3" style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:left; direction:ltr; font-family:'Arial',sans-serif;">
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap;">الاسم باللغة الإنجليزية:</td>
+                        <td colspan="3" style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:left; direction:ltr; font-family:'Arial',sans-serif;">
                             ${escapeHtml(engName)}
                         </td>
                     </tr>
 
                     <!-- Row: ID Number -->
                     <tr>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap;">رقم بطاقة الأحوال:</td>
-                        <td colspan="3" style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right; font-family:monospace; letter-spacing:1px;">${escapeHtml(trainee.id || '')}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap;">رقم بطاقة الأحوال:</td>
+                        <td colspan="3" style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:right; font-family:monospace; font-size:13px; letter-spacing:1px;">${escapeHtml(trainee.id || '')}</td>
                     </tr>
 
                     <!-- Row: Education -->
                     <tr>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap;">المؤهل الدراسي:</td>
-                        <td colspan="3" style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.qualification)}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap;">المؤهل الدراسي:</td>
+                        <td colspan="3" style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.qualification)}</td>
                     </tr>
 
                     <!-- Row: Birth Date -->
                     <tr>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap; vertical-align:top;">تاريخ الميلاد ميلادي:</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.birthDateGreg)}</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap; text-align:center; vertical-align:middle;">
-                            <div style="font-weight:700; font-size:10px; color:#333;">تاريخ الميلاد</div>
-                            <div style="font-weight:700; font-size:10px; color:#333;">الهجري:</div>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap; vertical-align:middle;">تاريخ الميلاد ميلادي:</td>
+                        <td style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.birthDateGreg)}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap; text-align:center; vertical-align:middle; width:18%;">
+                            <div style="font-weight:700; font-size:10.5px;">تاريخ الميلاد</div>
+                            <div style="font-weight:700; font-size:10.5px;">الهجري:</div>
                         </td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.birthDateHijri)}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.birthDateHijri)}</td>
                     </tr>
 
                     <!-- Row: Phone + Email -->
                     <tr>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap; vertical-align:top;">رقم الجوال:</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right; font-family:monospace;">${escapeHtml(adm.phone)}</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:10px; white-space:nowrap; text-align:center; vertical-align:middle;">
-                            <div style="font-weight:700; color:#333;">البريد</div>
-                            <div style="font-weight:700; color:#333;">الإلكتروني:</div>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap; vertical-align:middle;">رقم الجوال:</td>
+                        <td style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:right; font-family:monospace;">${escapeHtml(adm.phone)}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:10.5px; font-weight:700; white-space:nowrap; text-align:center; vertical-align:middle;">
+                            <div style="font-weight:700;">البريد</div>
+                            <div style="font-weight:700;">الإلكتروني:</div>
                         </td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:left; direction:ltr; font-family:monospace;">${escapeHtml(adm.email)}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:left; direction:ltr; font-family:monospace;">${escapeHtml(adm.email)}</td>
                     </tr>
 
                     <!-- SECTION 2: National Address -->
                     <tr>
-                        <td colspan="4" style="background:#e8e8e8; font-weight:900; font-size:12px; padding:5px 10px; border:1.5px solid #111; text-align:right;">
+                        <td colspan="4" style="background:#e8e8e8; font-weight:900; font-size:12px; padding:5px 10px; border:1px solid #111; text-align:right;">
                             العنوان الوطني
                         </td>
                     </tr>
 
-                    <!-- Row: City + District + District Name -->
+                    <!-- Row: City + District -->
                     <tr>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap;">المدينة</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.city)}</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap; text-align:center;">الحي</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.district)}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap;">المدينة</td>
+                        <td style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.city)}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap; text-align:center;">الحي</td>
+                        <td style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.district)}</td>
                     </tr>
 
                     <!-- Row: Street + Postal Code -->
                     <tr>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap;">الشارع</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.street)}</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap; text-align:center;">الرمز البريدي</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right;">${adm.postalCode}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap;">الشارع</td>
+                        <td style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:right;">${escapeHtml(adm.street)}</td>
+                        <td style="padding:5px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap; text-align:center;">الرمز البريدي</td>
+                        <td style="padding:5px 10px; border:1px solid #111; font-weight:700; text-align:right;">${adm.postalCode}</td>
                     </tr>
 
                     <!-- SECTION 3: Health Info -->
                     <tr>
-                        <td colspan="4" style="background:#e8e8e8; font-weight:900; font-size:12px; padding:5px 10px; border:1.5px solid #111; text-align:right;">
+                        <td colspan="4" style="background:#e8e8e8; font-weight:900; font-size:12px; padding:5px 10px; border:1px solid #111; text-align:right;">
                             المعلومات الصحية
                         </td>
                     </tr>
 
-                    <!-- Row: Disease Yes/No -->
+                    <!-- Row: Disease Yes/No (Default No Checked) -->
                     <tr>
-                        <td style="padding:7px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap;">هل تعاني من أمراض</td>
-                        <td colspan="3" style="padding:7px 10px; border:1.5px solid #111;">
-                            <div style="display:flex; align-items:center; gap:30px; justify-content:flex-end; direction:rtl;">
-                                <div style="display:flex; align-items:center; gap:6px;">
+                        <td style="padding:6px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap;">هل تعاني من أمراض</td>
+                        <td colspan="3" style="padding:6px 10px; border:1px solid #111;">
+                            <div style="display:flex; align-items:center; gap:36px; justify-content:flex-end; direction:rtl;">
+                                <div style="display:flex; align-items:center; gap:8px;">
                                     <span style="font-weight:700; font-size:12px;">نعم</span>
-                                    <div style="width:18px; height:18px; border:2px solid #111; display:inline-flex; align-items:center; justify-content:center; background:#fff;">
-                                        ${hasDisease ? '<span style="font-size:14px; color:#111;">✓</span>' : ''}
-                                    </div>
+                                    <div style="width:18px; height:18px; border:1.5px solid #111; display:inline-flex; align-items:center; justify-content:center; background:#fff;"></div>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:6px;">
+                                <div style="display:flex; align-items:center; gap:8px;">
                                     <span style="font-weight:700; font-size:12px;">لا</span>
-                                    <div style="width:18px; height:18px; border:2px solid #111; display:inline-flex; align-items:center; justify-content:center; background:#fff;">
-                                        ${!hasDisease ? '<span style="font-size:14px; color:#111; transform:rotate(-10deg); display:block;">✓</span>' : ''}
-                                    </div>
+                                    <div style="width:18px; height:18px; border:1.5px solid #111; display:inline-flex; align-items:center; justify-content:center; background:#fff; font-weight:900; font-size:13px;">✓</div>
                                 </div>
                                 <div style="flex:1;"></div>
                             </div>
@@ -90975,95 +91062,102 @@ function buildDemoExecutiveReport(params) {
 
                     <!-- SECTION 4: Emergency Contact -->
                     <tr>
-                        <td colspan="4" style="background:#e8e8e8; font-weight:900; font-size:12px; padding:5px 10px; border:1.5px solid #111; text-align:right;">
+                        <td colspan="4" style="background:#e8e8e8; font-weight:900; font-size:12px; padding:5px 10px; border:1px solid #111; text-align:right;">
                             جهات اتصال الحالات الطارئة
                         </td>
                     </tr>
 
                     <!-- Row: Emergency Phone -->
                     <tr>
-                        <td style="padding:7px 10px; border:1.5px solid #111; color:#555; font-size:11px; white-space:nowrap;">
+                        <td style="padding:6px 10px; border:1px solid #111; color:#333; font-size:11px; font-weight:700; white-space:nowrap;">
                             <div>رقم</div>
                             <div>التواصل</div>
                         </td>
-                        <td colspan="3" style="padding:7px 10px; border:1.5px solid #111; font-weight:700; text-align:right; font-family:monospace;">${escapeHtml(ec.phone)}</td>
+                        <td colspan="3" style="padding:6px 10px; border:1px solid #111; font-weight:700; text-align:right; font-family:monospace; font-size:13px;">${escapeHtml(ec.phone)}</td>
                     </tr>
 
-                    <!-- Row: Trainee Signature -->
+                    <!-- Row: Trainee Signature & Registration Date (Matching Contract Start Date) -->
                     <tr>
-                        <td style="padding:5px 10px; border:2px solid #111; background:#f8f8f8; color:#555; font-size:11px; font-weight:700; white-space:nowrap;">اسم المتدرب</td>
-                        <td style="padding:5px 10px; border:2px solid #111; font-weight:700; text-align:right;">${escapeHtml(trainee.name || '')}</td>
-                        <td style="padding:5px 10px; border:2px solid #111; background:#f8f8f8; color:#555; font-size:11px; font-weight:700; text-align:center;">التاريخ</td>
-                        <td style="padding:5px 10px; border:2px solid #111; font-weight:700; text-align:center;">
-                            <span style="display:inline-block; min-width:60px; text-align:center; font-family:monospace;">${todayGreg}</span>
-                            &nbsp;&nbsp;
-                            <span style="font-size:11px; color:#666;">| التوقيع</span>
-                            &nbsp;&nbsp;
+                        <td style="padding:6px 10px; border:1px solid #111; background:#fafafa; color:#333; font-size:11px; font-weight:700; white-space:nowrap;">اسم المتدرب</td>
+                        <td style="padding:6px 10px; border:1px solid #111; font-weight:700; text-align:right;">${escapeHtml(trainee.name || '')}</td>
+                        <td style="padding:6px 10px; border:1px solid #111; background:#fafafa; color:#333; font-size:11px; font-weight:700; text-align:center;">التاريخ</td>
+                        <td style="padding:6px 10px; border:1px solid #111; text-align:center;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                                <span style="font-weight:700; font-family:monospace; font-size:12px;">${regDate}</span>
+                                <span style="font-size:11px; color:#555; font-weight:700;">التوقيع: <span style="font-family:'Segoe Script', cursive, sans-serif; font-size:12px; color:#111;">${escapeHtml((trainee.name || '').split(' ')[0] || 'متدرب')}</span></span>
+                            </div>
                         </td>
                     </tr>
 
                 </table>
 
                 <!-- Dashed separator -->
-                <div style="border-top:2px dashed #aaa; margin: 16px 0 10px 0;"></div>
+                <div style="border-top:2px dashed #888; margin: 14px 0 8px 0;"></div>
 
-                <!-- Institute Section -->
+                <!-- Institute Section Title -->
                 <div style="font-weight:900; font-size:13px; margin-bottom:6px; text-decoration:underline;">يعبأ من قبل إدارة المعهد</div>
 
-                <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:4px;">
+                <!-- Table 1: Required Documents (Double Frame, all checked) -->
+                <table style="width:100%; border-collapse:collapse; border:3.5px double #111; font-size:11px; margin-bottom:8px;">
                     <tr>
-                        <td colspan="4" style="padding:4px 10px; border:1.5px solid #111; font-weight:900;">
+                        <td colspan="4" style="padding:4px 10px; border:1px solid #111; font-weight:900; background:#f5f5f5;">
                             <span style="text-decoration:underline;">الأوراق المطلوبة:</span>
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding:5px 10px; border:1.5px solid #111; text-align:center; font-weight:700; color:#333;">الهوية الوطنية</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; text-align:center; font-weight:700; color:#333;">المؤهل الدراسي</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; text-align:center; font-weight:700; color:#333;">السيرة الذاتية</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; text-align:center; font-weight:700; color:#333;">العنوان الوطني</td>
+                        <td style="padding:5px 10px; border:1px solid #111; text-align:center; font-weight:700; color:#333; width:25%;">الهوية الوطنية</td>
+                        <td style="padding:5px 10px; border:1px solid #111; text-align:center; font-weight:700; color:#333; width:25%;">المؤهل الدراسي</td>
+                        <td style="padding:5px 10px; border:1px solid #111; text-align:center; font-weight:700; color:#333; width:25%;">السيرة الذاتية</td>
+                        <td style="padding:5px 10px; border:1px solid #111; text-align:center; font-weight:700; color:#333; width:25%;">العنوان الوطني</td>
                     </tr>
                     <tr>
-                        <td style="padding:8px 10px; border:1.5px solid #111; text-align:center;">
-                            <div style="width:16px; height:16px; border:2px solid #111; margin:0 auto;"></div>
+                        <td style="padding:6px 10px; border:1px solid #111; text-align:center;">
+                            <div style="width:16px; height:16px; border:1.5px solid #111; margin:0 auto; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px;">✓</div>
                         </td>
-                        <td style="padding:8px 10px; border:1.5px solid #111; text-align:center;">
-                            <div style="width:16px; height:16px; border:2px solid #111; margin:0 auto;"></div>
+                        <td style="padding:6px 10px; border:1px solid #111; text-align:center;">
+                            <div style="width:16px; height:16px; border:1.5px solid #111; margin:0 auto; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px;">✓</div>
                         </td>
-                        <td style="padding:8px 10px; border:1.5px solid #111; text-align:center;">
-                            <div style="width:16px; height:16px; border:2px solid #111; margin:0 auto;"></div>
+                        <td style="padding:6px 10px; border:1px solid #111; text-align:center;">
+                            <div style="width:16px; height:16px; border:1.5px solid #111; margin:0 auto; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px;">✓</div>
                         </td>
-                        <td style="padding:8px 10px; border:1.5px solid #111; text-align:center;">
-                            <div style="width:16px; height:16px; border:2px solid #111; margin:0 auto;"></div>
+                        <td style="padding:6px 10px; border:1px solid #111; text-align:center;">
+                            <div style="width:16px; height:16px; border:1.5px solid #111; margin:0 auto; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:12px;">✓</div>
                         </td>
                     </tr>
                 </table>
 
-                <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                <!-- Table 2: Admission Approval (Double Frame, Ali Al-Abbas, Signature, Matched Date) -->
+                <table style="width:100%; border-collapse:collapse; border:3.5px double #111; font-size:11px;">
                     <tr>
-                        <td colspan="4" style="padding:4px 10px; border:1.5px solid #111; font-weight:900; text-decoration:underline;">قبول طلب التسجيل</td>
+                        <td colspan="4" style="padding:4px 10px; border:1px solid #111; font-weight:900; text-decoration:underline; background:#f5f5f5;">
+                            قبول طلب التسجيل
+                        </td>
                     </tr>
                     <tr>
-                        <td colspan="2" style="padding:5px 10px; border:1.5px solid #111; font-weight:700; color:#333;">اسم مسؤول القبول</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; color:#333; text-align:center;">التاريخ</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; color:#333; text-align:center;">التوقيع</td>
+                        <td style="padding:6px 10px; border:1px solid #111; font-weight:700; color:#333; width:22%;">اسم مسؤول القبول:</td>
+                        <td style="padding:6px 10px; border:1px solid #111; font-weight:900; text-align:right;">علي آل عباس</td>
+                        <td style="padding:6px 10px; border:1px solid #111; font-weight:700; color:#333; text-align:center; width:15%;">التاريخ:</td>
+                        <td style="padding:6px 10px; border:1px solid #111; font-weight:700; text-align:center; font-family:monospace; font-size:12px;">${regDate}</td>
                     </tr>
                     <tr>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; text-align:right;" colspan="1">حالة الطلب</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; text-align:center;">
+                        <td style="padding:6px 10px; border:1px solid #111; font-weight:700; text-align:right;">حالة الطلب:</td>
+                        <td style="padding:6px 10px; border:1px solid #111; text-align:center;">
                             <div style="display:flex; align-items:center; justify-content:space-around;">
-                                <div style="display:flex; align-items:center; gap:4px;">
-                                    <span style="font-weight:700;">قبول</span>
-                                    <div style="width:14px; height:14px; border:2px solid #111;"></div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span style="font-weight:900; color:#000;">قبول</span>
+                                    <div style="width:16px; height:16px; border:1.5px solid #111; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:12px;">✓</div>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:4px;">
-                                    <span style="font-weight:700;">رفض</span>
-                                    <div style="width:14px; height:14px; border:2px solid #111;"></div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span style="font-weight:700; color:#555;">رفض</span>
+                                    <div style="width:16px; height:16px; border:1.5px solid #111; display:inline-flex; align-items:center; justify-content:center;"></div>
                                 </div>
                             </div>
                         </td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-weight:700; color:#333;">التاريخ</td>
-                        <td style="padding:5px 10px; border:1.5px solid #111; font-size:11px; color:#555; vertical-align:middle;">
-                            <span>السبب: ...............</span>
+                        <td style="padding:6px 10px; border:1px solid #111; font-weight:700; color:#333; text-align:center;">التوقيع:</td>
+                        <td style="padding:3px 10px; border:1px solid #111; text-align:center; vertical-align:middle;">
+                            <div style="display:flex; align-items:center; justify-content:center;">
+                                <img src="assets/ali_alabbas_admission_sig.png" alt="توقيع علي آل عباس" style="height:38px; max-width:130px; object-fit:contain; display:inline-block;">
+                            </div>
                         </td>
                     </tr>
                 </table>
@@ -91078,9 +91172,9 @@ function buildDemoExecutiveReport(params) {
         const adm = getCTPAdmissionFormData(trainee);
         const seed = Math.abs(parseInt(String(trainee.id || '9999').slice(-4), 10) || 555);
         const engName = typeof transliterateArabicName === 'function' ? transliterateArabicName(trainee.name) : (trainee.name || '');
-        const todayGreg = new Date().toLocaleDateString('ar-SA-u-nu-latn', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const regDate = getTraineeRegistrationDate(trainee);
 
-        const formHTML = buildRegistrationFormHTML(trainee, adm, engName, todayGreg, seed);
+        const formHTML = buildRegistrationFormHTML(trainee, adm, engName, regDate, seed);
         const printArea = document.getElementById('registrationFormPrintArea');
         if (printArea) {
             printArea.innerHTML = formHTML;
