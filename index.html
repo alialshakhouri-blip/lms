@@ -17199,7 +17199,8 @@
             isGlobal: Boolean(opts.isGlobal),
             vcSchemaVersion: 'v3_open_for_all',
             isDefaultSeed: true,
-            updatedAt: new Date().toISOString(),
+            manualOverride: false,
+            updatedAt: '2026-01-01T00:00:00.000Z',
             updatedBy: opts.updatedBy || 'النظام (متاح للجميع)'
         };
     }
@@ -19713,9 +19714,13 @@ ${details}
 
                 renderStudentDashboard();
 
+                if (typeof pullVirtualClassroomsFromCloud === 'function') pullVirtualClassroomsFromCloud(true, true);
+
             } else if (tab === 'studentCourses') {
 
                 if (typeof renderStudentCoursesPage === 'function') renderStudentCoursesPage();
+
+                if (typeof pullVirtualClassroomsFromCloud === 'function') pullVirtualClassroomsFromCloud(true, true);
 
             } else if (tab === 'studentTasks') {
 
@@ -19745,9 +19750,13 @@ ${details}
 
                 if (typeof renderVirtualClassTab === 'function') renderVirtualClassTab();
 
+                if (typeof pullVirtualClassroomsFromCloud === 'function') pullVirtualClassroomsFromCloud(true, true);
+
             } else if (tab === 'studentVirtualClass') {
 
                 if (typeof renderStudentVirtualClassTab === 'function') renderStudentVirtualClassTab();
+
+                if (typeof pullVirtualClassroomsFromCloud === 'function') pullVirtualClassroomsFromCloud(true, true);
 
             } else if (tab === 'adminReports') {
 
@@ -26584,7 +26593,7 @@ ${details}
 
         const p3 = r['الاسم الثالث'] || r['اسم الجد'] || r['third_name'] || '';
 
-        const p4 = r['الاسم الاخير'] || r['الاسم الأخير'] || r['اسم العائلة'] || r['اسم العائله'] || r['القبيلة'] || r['اللقب'] || r['last_name'] || '';
+        const p4 = r['اسم العائلة / اللقب'] || r['الاسم الاخير'] || r['الاسم الأخير'] || r['اسم العائلة'] || r['اسم العائله'] || r['القبيلة'] || r['اللقب'] || r['last_name'] || '';
 
 
 
@@ -26785,7 +26794,7 @@ ${details}
 
                 const p3 = String(r['الاسم الثالث'] || r['اسم الجد'] || r['third_name'] || '').trim();
 
-                const p4 = String(r['الاسم الاخير'] || r['الاسم الأخير'] || r['اسم العائلة'] || r['اسم العائله'] || r['القبيلة'] || r['اللقب'] || r['last_name'] || '').trim();
+                const p4 = String(r['اسم العائلة / اللقب'] || r['الاسم الاخير'] || r['الاسم الأخير'] || r['اسم العائلة'] || r['اسم العائله'] || r['القبيلة'] || r['اللقب'] || r['last_name'] || '').trim();
 
 
 
@@ -26857,7 +26866,7 @@ ${details}
 
 
 
-                const qual = String(r['المؤهل'] || r['المؤهل العلمي'] || r['المؤهل الدراسي'] || r['المؤهل التعليمي'] || r['الدرجة العلمية'] || 'غير محدد').trim();
+                const qual = String(r['المرحلة الدراسية / المؤهل'] || r['المرحلة الدراسية'] || r['المؤهل'] || r['المؤهل العلمي'] || r['المؤهل الدراسي'] || r['المؤهل التعليمي'] || r['الدرجة العلمية'] || 'غير محدد').trim();
 
                 const email = String(r['البريد الالكتروني'] || r['البريد الإلكتروني'] || r['الإيميل'] || r['الايميل'] || r['البريد'] || r['email'] || '').trim();
 
@@ -43134,8 +43143,22 @@ function openReportFromProfile() {
             return showToast('❌ مكتبة تصدير الإكسل غير محملة في المتصفح', 'error');
         }
 
-        // بناء صفوف التصدير بالأعمدة الـ 11 بالترتيب الحرفي الدقيق المعتمد للمؤسسة
-        const exportRows = exportableTrainees.map(t => {
+        // بناء مصفوفة العناوين وصفوف التصدير بالأعمدة الـ 11 من اليمين إلى اليسار (A: رقم الهوية -> K: رقم الجوال)
+        const INST_EXPORT_HEADERS = [
+            'رقم الهوية',
+            'الاسم الأول',
+            'اسم الأب',
+            'اسم الجد',
+            'اسم العائلة / اللقب',
+            'تاريخ الميلاد',
+            'الجنس',
+            'الجنسية',
+            'المرحلة الدراسية / المؤهل',
+            'البريد الإلكتروني',
+            'رقم الجوال'
+        ];
+
+        const aoaRows = exportableTrainees.map(t => {
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
             const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[t.id] || phoneDirectory[cleanId] || {}) : {});
 
@@ -43174,77 +43197,64 @@ function openReportFromProfile() {
             let rawPhone = t.phone || pDir.phone || '';
             const cleanPh = (typeof cleanPhone === 'function') ? cleanPhone(rawPhone) : String(rawPhone || '').trim();
 
-            return {
-                'رقم الجوال': cleanPh,
-                'البريد الإلكتروني': email,
-                'المؤهل': qual,
-                'الجنسية': nationality,
-                'النوع (ذكر / انثى)': normGender,
-                'تاريخ الميلاد (m/d/Y)': formattedDob,
-                'الاسم الأخير': last,
-                'الاسم الثالث': third,
-                'الاسم الثاني': second,
-                'الاسم الأول': first,
-                'رقم الهوية': cleanId
-            };
+            return [
+                cleanId,      // العمود A: رقم الهوية
+                first,        // العمود B: الاسم الأول
+                second,       // العمود C: اسم الأب
+                third,        // العمود D: اسم الجد
+                last,         // العمود E: اسم العائلة / اللقب
+                formattedDob, // العمود F: تاريخ الميلاد
+                normGender,   // العمود G: الجنس
+                nationality,  // العمود H: الجنسية
+                qual,         // العمود I: المرحلة الدراسية / المؤهل
+                email,        // العمود J: البريد الإلكتروني
+                cleanPh       // العمود K: رقم الجوال
+            ];
         });
 
         try {
-            // توليد الشيت مع الترتيب المعكوس للأعمدة وفق طلب المؤسسة
-            const ws = XLSX.utils.json_to_sheet(exportRows, {
-                header: [
-                    'رقم الجوال',
-                    'البريد الإلكتروني',
-                    'المؤهل',
-                    'الجنسية',
-                    'النوع (ذكر / انثى)',
-                    'تاريخ الميلاد (m/d/Y)',
-                    'الاسم الأخير',
-                    'الاسم الثالث',
-                    'الاسم الثاني',
-                    'الاسم الأول',
-                    'رقم الهوية'
-                ]
-            });
+            const ws = XLSX.utils.aoa_to_sheet([INST_EXPORT_HEADERS, ...aoaRows]);
 
-            // ضبط خلايا رقم الجوال (العمود 0) ورقم الهوية (العمود 10) كنصوص صريحة للحفاظ التام على الصفر باليسار
+            // ضبط خلايا رقم الهوية (العمود A = 0) ورقم الجوال (العمود K = 10) كنصوص صريحة للحفاظ التام على الأصفار البادئة
             if (ws['!ref']) {
                 const range = XLSX.utils.decode_range(ws['!ref']);
                 for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-                    const phRef = XLSX.utils.encode_cell({ c: 0, r: R });
-                    if (ws[phRef]) {
-                        ws[phRef].t = 's';
-                        ws[phRef].z = '@';
-                        ws[phRef].v = String(ws[phRef].v || '').trim();
-                    }
-                    const idRef = XLSX.utils.encode_cell({ c: 10, r: R });
+                    const idRef = XLSX.utils.encode_cell({ c: 0, r: R });
                     if (ws[idRef]) {
                         ws[idRef].t = 's';
                         ws[idRef].z = '@';
                         ws[idRef].v = String(ws[idRef].v || '').trim();
                     }
+                    const phRef = XLSX.utils.encode_cell({ c: 10, r: R });
+                    if (ws[phRef]) {
+                        ws[phRef].t = 's';
+                        ws[phRef].z = '@';
+                        ws[phRef].v = String(ws[phRef].v || '').trim();
+                    }
                 }
             }
 
-            // عرض وتنسيق مناسب لأعمدة المؤسسة
+            // عرض وتنسيق مناسب للأعمدة A..K حسب الترتيب الصحيح
             ws['!cols'] = [
-                { wch: 16 }, // رقم الجوال
-                { wch: 28 }, // البريد الإلكتروني
-                { wch: 16 }, // المؤهل
-                { wch: 14 }, // الجنسية
-                { wch: 18 }, // النوع (ذكر / انثى)
-                { wch: 22 }, // تاريخ الميلاد (m/d/Y)
-                { wch: 16 }, // الاسم الأخير
-                { wch: 16 }, // الاسم الثالث
-                { wch: 16 }, // الاسم الثاني
-                { wch: 16 }, // الاسم الأول
-                { wch: 16 }  // رقم الهوية
+                { wch: 16 }, // A: رقم الهوية
+                { wch: 16 }, // B: الاسم الأول
+                { wch: 16 }, // C: اسم الأب
+                { wch: 16 }, // D: اسم الجد
+                { wch: 18 }, // E: اسم العائلة / اللقب
+                { wch: 16 }, // F: تاريخ الميلاد
+                { wch: 14 }, // G: الجنس
+                { wch: 14 }, // H: الجنسية
+                { wch: 24 }, // I: المرحلة الدراسية / المؤهل
+                { wch: 28 }, // J: البريد الإلكتروني
+                { wch: 16 }  // K: رقم الجوال
             ];
 
-            // تفعيل اتجاه الورقة من اليمين لليسار (RTL)
-            ws['!views'] = [{ RTL: true }];
+            // تفعيل اتجاه ورقة العمل والملف من اليمين إلى اليسار (Right-To-Left / RTL)
+            ws['!views'] = [{ rightToLeft: true, RTL: true }];
 
             const wb = XLSX.utils.book_new();
+            wb.Workbook = wb.Workbook || {};
+            wb.Workbook.Views = [{ RTL: true }];
             XLSX.utils.book_append_sheet(wb, ws, 'ملف المؤسسة');
 
             const safeComp = (selectedCompany && selectedCompany !== 'ALL') ? `_${selectedCompany.replace(/[\s\/\:*?"<>|]+/g, '_')}` : '';
@@ -54555,7 +54565,7 @@ function openReportFromProfile() {
 
         _cloudPeriodicSyncTimer = setInterval(async () => {
 
-            if (isSupabaseConnected && !document.hidden && typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
+            if (!document.hidden && typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
 
                 await pullSubmissionsAndGradebooksFromSupabase(false);
 
@@ -54976,6 +54986,22 @@ function openReportFromProfile() {
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'app_sync_state' }, (payload) => {
 
                     console.log('⚡ تحديث كشف درجات/حالة عامة عبر السحابة:', payload);
+
+                    if (payload && payload.new && payload.new.key === 'sys_virtual_classrooms_v1' && payload.new.data && typeof mergeVirtualClassroomMapsByTimestamp === 'function') {
+
+                        virtualClassrooms = mergeVirtualClassroomMapsByTimestamp(virtualClassrooms, payload.new.data);
+
+                        window.virtualClassrooms = virtualClassrooms;
+
+                        localStorage.setItem('sys_vc_version_flag', typeof VC_STORAGE_VERSION !== 'undefined' ? VC_STORAGE_VERSION : 'v3_open_for_all');
+
+                        localStorage.setItem('sys_virtual_classrooms_v1', JSON.stringify(virtualClassrooms));
+
+                        if (typeof refreshVirtualClassViews === 'function') refreshVirtualClassViews();
+
+                        return;
+
+                    }
 
                     if (typeof pullSubmissionsAndGradebooksFromSupabase === 'function') {
 
@@ -57358,16 +57384,28 @@ function openReportFromProfile() {
 
 
 
-            // Merge Virtual Classrooms (القاعات الافتراضية المباشرة - دمج آمن يحفظ التفعيل للجميع)
+            // Merge Virtual Classrooms (دمج ذكي حسب الأحدث زمنياً والتعديل اليدوي حتى لا يمسح مدرب رابط مدرب آخر)
 
             if (cloudVirtualClassrooms && typeof cloudVirtualClassrooms === 'object' && Object.keys(cloudVirtualClassrooms).length > 0) {
 
-                if (typeof mergeDefaultVirtualClassrooms === 'function') {
+                const hasCloudV3 = Boolean(
+                    (cloudVirtualClassrooms._meta && cloudVirtualClassrooms._meta.schemaVersion === VC_STORAGE_VERSION) ||
+                    Object.values(cloudVirtualClassrooms).some(v => v && typeof v === 'object' && (v.vcSchemaVersion === VC_STORAGE_VERSION || v.manualOverride === true))
+                );
 
-                    const hasCloudV3 = Boolean(
-                        (cloudVirtualClassrooms._meta && cloudVirtualClassrooms._meta.schemaVersion === VC_STORAGE_VERSION) ||
-                        Object.values(cloudVirtualClassrooms).some(v => v && typeof v === 'object' && (v.vcSchemaVersion === VC_STORAGE_VERSION || v.manualOverride === true))
-                    );
+                if (typeof mergeVirtualClassroomMapsByTimestamp === 'function') {
+
+                    const localUpgraded = (typeof mergeDefaultVirtualClassrooms === 'function')
+                        ? mergeDefaultVirtualClassrooms(virtualClassrooms, false)
+                        : { ...virtualClassrooms };
+
+                    const cloudUpgraded = (typeof mergeDefaultVirtualClassrooms === 'function')
+                        ? mergeDefaultVirtualClassrooms(cloudVirtualClassrooms, !hasCloudV3)
+                        : { ...cloudVirtualClassrooms };
+
+                    virtualClassrooms = mergeVirtualClassroomMapsByTimestamp(localUpgraded, cloudUpgraded);
+
+                } else if (typeof mergeDefaultVirtualClassrooms === 'function') {
 
                     virtualClassrooms = mergeDefaultVirtualClassrooms({ ...virtualClassrooms, ...cloudVirtualClassrooms }, !hasCloudV3);
 
@@ -57377,33 +57415,17 @@ function openReportFromProfile() {
 
                 }
 
+                window.virtualClassrooms = virtualClassrooms;
+
                 localStorage.setItem('sys_vc_version_flag', typeof VC_STORAGE_VERSION !== 'undefined' ? VC_STORAGE_VERSION : 'v3_open_for_all');
 
                 localStorage.setItem('sys_virtual_classrooms_v1', JSON.stringify(virtualClassrooms));
 
                 hasChanges = true;
 
-                if (typeof renderStudentVirtualClassBanner === 'function') {
+                if (typeof refreshVirtualClassViews === 'function') {
 
-                    renderStudentVirtualClassBanner();
-
-                }
-
-                if (typeof renderStudentVirtualClassTab === 'function' && document.getElementById('tab-studentVirtualClass') && !document.getElementById('tab-studentVirtualClass').classList.contains('hidden')) {
-
-                    renderStudentVirtualClassTab();
-
-                }
-
-                if (typeof renderVirtualClassTab === 'function' && document.getElementById('tab-virtualClass') && !document.getElementById('tab-virtualClass').classList.contains('hidden')) {
-
-                    renderVirtualClassTab();
-
-                }
-
-                if (typeof updateVcLivePreview === 'function') {
-
-                    updateVcLivePreview();
+                    refreshVirtualClassViews();
 
                 }
 
@@ -57869,11 +57891,7 @@ function openReportFromProfile() {
 
                 }
 
-                if (typeof virtualClassrooms !== 'undefined' && virtualClassrooms && Object.keys(virtualClassrooms).length > 0) {
-
-                    upsertRows.push({ key: 'sys_virtual_classrooms_v1', data: virtualClassrooms, updated_at: new Date().toISOString() });
-
-                }
+                // NOTE: virtualClassrooms is synced independently via pull-merge-upsert in syncVirtualClassroomsToCloud() so bulk attendance saves never overwrite trainer links.
 
                 if (typeof archiveData !== 'undefined' && archiveData && Object.keys(archiveData).length > 0) {
 
@@ -58147,11 +58165,7 @@ function openReportFromProfile() {
 
             }
 
-            if (typeof virtualClassrooms !== 'undefined' && virtualClassrooms && Object.keys(virtualClassrooms).length > 0) {
-
-                coreUpserts.push({ key: 'sys_virtual_classrooms_v1', data: virtualClassrooms, updated_at: new Date().toISOString() });
-
-            }
+            // NOTE: virtualClassrooms is synced via syncVirtualClassroomsToCloud() with timestamp-merge to prevent cross-trainer overwrites.
 
             if (typeof archiveData !== 'undefined' && archiveData && Object.keys(archiveData).length > 0) {
 
@@ -78228,15 +78242,138 @@ function buildDemoExecutiveReport(params) {
 
 
 
-    function saveVirtualClassroomsToStorage() {
+    function normalizeVcTrainerKey(str) {
+        return String(str || '')
+            .replace(/^أ\.\s*/g, '')
+            .replace(/أ\.|إ\.|آ\./g, '')
+            .replace(/[أإآ]/g, 'ا')
+            .replace(/ة/g, 'ه')
+            .replace(/ى/g, 'ي')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase();
+    }
+    window.normalizeVcTrainerKey = normalizeVcTrainerKey;
+
+    function pickNewerVcEntry(a, b) {
+        if (!a || typeof a !== 'object') return b;
+        if (!b || typeof b !== 'object') return a;
+        const aMan = a.manualOverride === true;
+        const bMan = b.manualOverride === true;
+        if (aMan !== bMan) return bMan ? b : a;
+        const aTs = Date.parse(a.updatedAt || '') || 0;
+        const bTs = Date.parse(b.updatedAt || '') || 0;
+        if (bTs !== aTs) return bTs > aTs ? b : a;
+        // Prefer entry that has a custom/non-empty link
+        if (b.link && !a.link) return b;
+        return b;
+    }
+
+    function mergeVirtualClassroomMapsByTimestamp(mapA, mapB) {
+        const result = {};
+        const keys = new Set([
+            ...Object.keys(mapA || {}),
+            ...Object.keys(mapB || {})
+        ]);
+        keys.forEach(k => {
+            if (k === '_meta' || k === '__GLOBAL__') return;
+            const eA = mapA ? mapA[k] : null;
+            const eB = mapB ? mapB[k] : null;
+            if (!eA && !eB) return;
+            const winner = pickNewerVcEntry(eA, eB);
+            if (winner && typeof winner === 'object') {
+                result[k] = { ...winner };
+            }
+        });
+        result._meta = { schemaVersion: VC_STORAGE_VERSION, openForAll: true };
+        return result;
+    }
+    window.mergeVirtualClassroomMapsByTimestamp = mergeVirtualClassroomMapsByTimestamp;
+
+    function refreshVirtualClassViews() {
+        try {
+            if (typeof renderStudentVirtualClassBanner === 'function') renderStudentVirtualClassBanner();
+            if (typeof renderStudentVirtualClassTab === 'function' && document.getElementById('tab-studentVirtualClass') && !document.getElementById('tab-studentVirtualClass').classList.contains('hidden')) {
+                renderStudentVirtualClassTab();
+            }
+            if (typeof renderStudentCoursesPage === 'function' && document.getElementById('tab-studentCourses') && !document.getElementById('tab-studentCourses').classList.contains('hidden')) {
+                renderStudentCoursesPage();
+            }
+            if (typeof renderStudentDashboard === 'function' && document.getElementById('tab-studentDashboard') && !document.getElementById('tab-studentDashboard').classList.contains('hidden')) {
+                // Only update VC elements cleanly without resetting user scroll
+                if (typeof renderStudentVirtualClassBanner === 'function') renderStudentVirtualClassBanner();
+            }
+            if (typeof renderVirtualClassTab === 'function' && document.getElementById('tab-virtualClass') && !document.getElementById('tab-virtualClass').classList.contains('hidden')) {
+                renderVirtualClassTab();
+            }
+        } catch (e) {}
+    }
+    window.refreshVirtualClassViews = refreshVirtualClassViews;
+
+    let _lastVcPullTs = 0;
+    async function fetchLatestCloudVirtualClassrooms() {
+        // 1. Direct Supabase query for latest sys_virtual_classrooms_v1
+        if (supabaseClient && isSupabaseConnected) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('app_sync_state')
+                    .select('data')
+                    .eq('key', 'sys_virtual_classrooms_v1')
+                    .maybeSingle();
+                if (!error && data && data.data && typeof data.data === 'object') {
+                    return data.data;
+                }
+            } catch (e) {}
+        }
+        // 2. Vercel API fallback
+        try {
+            const res = await fetch('/api/submissions-sync?t=' + Date.now(), { cache: 'no-store' });
+            if (res.ok) {
+                const json = await res.json();
+                if (json && json.virtualClassrooms && typeof json.virtualClassrooms === 'object') {
+                    return json.virtualClassrooms;
+                }
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    async function pullVirtualClassroomsFromCloud(forceRender = true, forceNetwork = false) {
+        const now = Date.now();
+        if (!forceNetwork && now - _lastVcPullTs < 1500) return false;
+        _lastVcPullTs = now;
+        try {
+            const cloudVc = await fetchLatestCloudVirtualClassrooms();
+            if (!cloudVc || typeof cloudVc !== 'object' || Object.keys(cloudVc).length === 0) return false;
+            const hasCloudV3 = Boolean(
+                (cloudVc._meta && cloudVc._meta.schemaVersion === VC_STORAGE_VERSION) ||
+                Object.values(cloudVc).some(v => v && typeof v === 'object' && (v.vcSchemaVersion === VC_STORAGE_VERSION || v.manualOverride === true))
+            );
+            const cloudUpgraded = mergeDefaultVirtualClassrooms(cloudVc, !hasCloudV3);
+            const localUpgraded = mergeDefaultVirtualClassrooms(virtualClassrooms, false);
+            virtualClassrooms = mergeVirtualClassroomMapsByTimestamp(localUpgraded, cloudUpgraded);
+            window.virtualClassrooms = virtualClassrooms;
+            localStorage.setItem('sys_vc_version_flag', VC_STORAGE_VERSION);
+            localStorage.setItem('sys_virtual_classrooms_v1', JSON.stringify(virtualClassrooms));
+            if (forceRender) refreshVirtualClassViews();
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+    window.pullVirtualClassroomsFromCloud = pullVirtualClassroomsFromCloud;
+
+    function saveVirtualClassroomsToStorage(immediateCloud = false) {
 
         try {
+
+            localStorage.setItem('sys_vc_version_flag', VC_STORAGE_VERSION);
 
             localStorage.setItem('sys_virtual_classrooms_v1', JSON.stringify(virtualClassrooms));
 
             if (typeof syncVirtualClassroomsToCloud === 'function') {
 
-                syncVirtualClassroomsToCloud();
+                syncVirtualClassroomsToCloud(immediateCloud);
 
             }
 
@@ -78248,97 +78385,75 @@ function buildDemoExecutiveReport(params) {
 
     }
 
-
-
     let _syncVcCloudDebounceTimer = null;
 
-    function syncVirtualClassroomsToCloud() {
+    async function executeVcCloudSync() {
+        try {
+            if (!virtualClassrooms || typeof virtualClassrooms !== 'object') return;
+
+            // Pull latest cloud state first & merge by updatedAt/manualOverride so NO trainer overwrites another trainer!
+            const latestCloud = await fetchLatestCloudVirtualClassrooms();
+            if (latestCloud && typeof latestCloud === 'object') {
+                const hasCloudV3 = Boolean(
+                    (latestCloud._meta && latestCloud._meta.schemaVersion === VC_STORAGE_VERSION) ||
+                    Object.values(latestCloud).some(v => v && typeof v === 'object' && (v.vcSchemaVersion === VC_STORAGE_VERSION || v.manualOverride === true))
+                );
+                const cloudUpgraded = mergeDefaultVirtualClassrooms(latestCloud, !hasCloudV3);
+                const localUpgraded = mergeDefaultVirtualClassrooms(virtualClassrooms, false);
+                virtualClassrooms = mergeVirtualClassroomMapsByTimestamp(cloudUpgraded, localUpgraded);
+                window.virtualClassrooms = virtualClassrooms;
+                localStorage.setItem('sys_vc_version_flag', VC_STORAGE_VERSION);
+                localStorage.setItem('sys_virtual_classrooms_v1', JSON.stringify(virtualClassrooms));
+            }
+
+            let directOk = false;
+            if (supabaseClient && isSupabaseConnected) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('app_sync_state')
+                        .upsert({
+                            key: 'sys_virtual_classrooms_v1',
+                            data: virtualClassrooms,
+                            updated_at: new Date().toISOString()
+                        }, { onConflict: 'key' });
+                    if (!error) directOk = true;
+                } catch (e) {
+                    console.warn('Direct VC sync warning:', e);
+                }
+            }
+
+            // Always sync via Vercel API too (or fallback if direct failed) so service-role bypasses anon RLS reliably
+            try {
+                await fetch('/api/submissions-sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'sync_state',
+                        key: 'sys_virtual_classrooms_v1',
+                        data: virtualClassrooms
+                    })
+                });
+            } catch (apiErr) {
+                if (!directOk) console.warn('API VC sync error:', apiErr);
+            }
+        } catch (err) {
+            console.error('syncVirtualClassroomsToCloud error:', err);
+        }
+    }
+
+    function syncVirtualClassroomsToCloud(immediate = false) {
 
         clearTimeout(_syncVcCloudDebounceTimer);
 
-        _syncVcCloudDebounceTimer = setTimeout(async () => {
+        if (immediate) {
 
-            try {
+            executeVcCloudSync();
 
-                if (!virtualClassrooms || typeof virtualClassrooms !== 'object') return;
+            return;
 
+        }
 
-
-                // 1. Direct Supabase Client
-
-                if (supabaseClient && isSupabaseConnected) {
-
-                    try {
-
-                        const { error } = await supabaseClient
-
-                            .from('app_sync_state')
-
-                            .upsert({
-
-                                key: 'sys_virtual_classrooms_v1',
-
-                                data: virtualClassrooms,
-
-                                updated_at: new Date().toISOString()
-
-                            }, { onConflict: 'key' });
-
-                        if (!error) {
-
-                            console.log('☁️ تم مزامنة القاعات الافتراضية مع سحابة Supabase بنجاح.');
-
-                            return;
-
-                        }
-
-                    } catch (e) {
-
-                        console.warn('Direct virtual classroom sync failed, falling back to API:', e);
-
-                    }
-
-                }
-
-
-
-                // 2. Serverless API Fallback
-
-                try {
-
-                    await fetch('/api/submissions-sync', {
-
-                        method: 'POST',
-
-                        headers: { 'Content-Type': 'application/json' },
-
-                        body: JSON.stringify({
-
-                            action: 'sync_state',
-
-                            key: 'sys_virtual_classrooms_v1',
-
-                            data: virtualClassrooms
-
-                        })
-
-                    });
-
-                    console.log('☁️ تم مزامنة القاعات الافتراضية عبر API Vercel/Supabase بنجاح.');
-
-                } catch (apiErr) {
-
-                    console.warn('API virtual classroom sync error:', apiErr);
-
-                }
-
-            } catch (err) {
-
-                console.error('syncVirtualClassroomsToCloud error:', err);
-
-            }
-
-        }, 300);
+        _syncVcCloudDebounceTimer = setTimeout(executeVcCloudSync, 150);
 
     }
 
@@ -78460,87 +78575,13 @@ function buildDemoExecutiveReport(params) {
 
     window.isVcGroupMatch = isVcGroupMatch;
 
-    function getVirtualClassroomForTrainer(trainerNameOrObj, courseKey) {
-
-        if (!trainerNameOrObj && !courseKey) return null;
+    function collectMatchingVcCandidates(trainerNameOrObj, courseKey) {
 
         if (!virtualClassrooms || Object.keys(virtualClassrooms).length === 0) {
 
             loadVirtualClassrooms();
 
         }
-
-        if (trainerNameOrObj === '__GLOBAL__' || courseKey === '__GLOBAL__') {
-
-            return virtualClassrooms.__GLOBAL__ || null;
-
-        }
-
-        const trainerObj = getTrainerObj(trainerNameOrObj);
-
-        const cleanName = trainerObj ? trainerObj.name.trim() : (typeof trainerNameOrObj === 'string' ? trainerNameOrObj.replace(/^أ\.\s*/, '').trim() : '');
-
-        // 1. مفتاح مركب: اسم المدرب + مفتاح المقرر
-
-        if (cleanName && courseKey && virtualClassrooms[`${cleanName}_${courseKey}`]) {
-
-            return virtualClassrooms[`${cleanName}_${courseKey}`];
-
-        }
-
-        // 2. البحث بمفتاح المقرر مباشرة
-
-        if (courseKey && virtualClassrooms[courseKey]) {
-
-            return virtualClassrooms[courseKey];
-
-        }
-
-        // 3. البحث باسم المدرب المعتمد
-
-        if (cleanName && virtualClassrooms[cleanName]) {
-
-            return virtualClassrooms[cleanName];
-
-        }
-
-        // 4. مطابقة جزئية باسم المدرب (باستثناء __GLOBAL__ و _meta)
-
-        if (cleanName) {
-
-            for (let key in virtualClassrooms) {
-
-                if (key === '__GLOBAL__' || key === '_meta') continue;
-
-                const entry = virtualClassrooms[key];
-
-                if (!entry || typeof entry !== 'object') continue;
-
-                if (key.includes(cleanName) || cleanName.includes(key)) {
-
-                    return entry;
-
-                }
-
-            }
-
-        }
-
-        return null;
-
-    }
-
-    window.getVirtualClassroomForTrainer = getVirtualClassroomForTrainer;
-
-    function resolveVirtualClassroomForCourse(trainerNameOrObj, courseKey, studentGroup) {
-
-        if (!virtualClassrooms || Object.keys(virtualClassrooms).length === 0) {
-
-            loadVirtualClassrooms();
-
-        }
-
-        const todayStr = getTodayDateString();
 
         const trainerObj = getTrainerObj(trainerNameOrObj);
 
@@ -78550,43 +78591,139 @@ function buildDemoExecutiveReport(params) {
 
             : (typeof trainerNameOrObj === 'string' ? trainerNameOrObj.replace(/^أ\.\s*/, '').trim() : '');
 
-        const candidates = [];
+        const normTargetTrainer = normalizeVcTrainerKey(cleanName);
+
+        const normCourse = normalizeVcTrainerKey(courseKey);
+
+        const results = [];
+
+        const seen = new Set();
+
+        function pushCandidate(entry, priority) {
+
+            if (!entry || typeof entry !== 'object' || entry.isGlobal) return;
+
+            if (seen.has(entry)) return;
+
+            seen.add(entry);
+
+            results.push({ vc: entry, priority });
+
+        }
+
+        // 1. Exact composite key `${cleanName}_${courseKey}`
 
         if (cleanName && courseKey && virtualClassrooms[`${cleanName}_${courseKey}`]) {
 
-            candidates.push({ vc: virtualClassrooms[`${cleanName}_${courseKey}`], strictCourse: true });
+            pushCandidate(virtualClassrooms[`${cleanName}_${courseKey}`], 3);
 
         }
 
-        if (courseKey && virtualClassrooms[courseKey]) {
-
-            candidates.push({ vc: virtualClassrooms[courseKey], strictCourse: false });
-
-        }
+        // 2. Exact trainer key `cleanName` & normalized single-trainer keys (ignoring foreign composite keys)
 
         if (cleanName && virtualClassrooms[cleanName]) {
 
-            candidates.push({ vc: virtualClassrooms[cleanName], strictCourse: false });
+            pushCandidate(virtualClassrooms[cleanName], 2);
 
         }
 
-        if (cleanName) {
+        if (normTargetTrainer) {
 
-            for (let key in virtualClassrooms) {
+            for (const key of Object.keys(virtualClassrooms)) {
 
                 if (key === '__GLOBAL__' || key === '_meta') continue;
 
                 const entry = virtualClassrooms[key];
 
-                if (entry && typeof entry === 'object' && (key.includes(cleanName) || cleanName.includes(key))) {
+                if (!entry || typeof entry !== 'object' || entry.isGlobal) continue;
 
-                    candidates.push({ vc: entry, strictCourse: false });
+                if (key.includes('_')) {
+
+                    const prefix = normalizeVcTrainerKey(key.split('_')[0]);
+
+                    const suffix = normalizeVcTrainerKey(key.slice(key.indexOf('_') + 1));
+
+                    if (prefix === normTargetTrainer && (!normCourse || suffix === normCourse || entry.courseKey === courseKey)) {
+
+                        pushCandidate(entry, suffix === normCourse ? 3 : 2);
+
+                    }
+
+                } else {
+
+                    const normK = normalizeVcTrainerKey(key);
+
+                    const normEntryTrainer = normalizeVcTrainerKey(entry.trainerName);
+
+                    if (normK === normTargetTrainer || (normEntryTrainer && normEntryTrainer === normTargetTrainer)) {
+
+                        pushCandidate(entry, 2);
+
+                    }
 
                 }
 
             }
 
         }
+
+        // 3. Direct courseKey match ONLY when trainer matches or no trainer constraint exists
+
+        if (courseKey && virtualClassrooms[courseKey]) {
+
+            const cEntry = virtualClassrooms[courseKey];
+
+            const normCTr = normalizeVcTrainerKey(cEntry?.trainerName);
+
+            if (!normTargetTrainer || !normCTr || normCTr === normTargetTrainer || normCTr.includes(normTargetTrainer) || normTargetTrainer.includes(normCTr)) {
+
+                pushCandidate(cEntry, 1);
+
+            }
+
+        }
+
+        // 4. Sort by priority AND newest save (manualOverride + updatedAt) so trainer's latest saved link ALWAYS wins!
+
+        results.sort((a, b) => {
+
+            const aMan = a.vc.manualOverride === true ? 1 : 0;
+
+            const bMan = b.vc.manualOverride === true ? 1 : 0;
+
+            if (aMan !== bMan) return bMan - aMan;
+
+            const aTs = Date.parse(a.vc.updatedAt || '') || 0;
+
+            const bTs = Date.parse(b.vc.updatedAt || '') || 0;
+
+            if (aTs !== bTs) return bTs - aTs;
+
+            return b.priority - a.priority;
+
+        });
+
+        return results;
+
+    }
+
+    function getVirtualClassroomForTrainer(trainerNameOrObj, courseKey) {
+
+        if (!trainerNameOrObj && !courseKey) return null;
+
+        const candidates = collectMatchingVcCandidates(trainerNameOrObj, courseKey);
+
+        return candidates.length > 0 ? candidates[0].vc : null;
+
+    }
+
+    window.getVirtualClassroomForTrainer = getVirtualClassroomForTrainer;
+
+    function resolveVirtualClassroomForCourse(trainerNameOrObj, courseKey, studentGroup) {
+
+        const candidates = collectMatchingVcCandidates(trainerNameOrObj, courseKey);
+
+        const todayStr = getTodayDateString();
 
         let futureVc = null;
 
@@ -78595,8 +78732,6 @@ function buildDemoExecutiveReport(params) {
         for (const item of candidates) {
 
             const vc = item.vc;
-
-            if (!vc || typeof vc !== 'object' || vc.isGlobal) continue;
 
             if (!fallbackVc) fallbackVc = vc;
 
@@ -78655,6 +78790,10 @@ function buildDemoExecutiveReport(params) {
         let firstCourseResult = null;
 
         let activeSpecificResult = null;
+
+        let activeManualResult = null;
+
+        const allOpenSessions = [];
 
         let futureSessionResult = null;
 
@@ -78736,7 +78875,7 @@ function buildDemoExecutiveReport(params) {
 
                 };
 
-                if (isCurrentActiveLms) return openRes;
+                allOpenSessions.push(openRes); if (resolvedSpecific.vc.manualOverride === true) { const cTs = activeManualResult ? (Date.parse(activeManualResult.classroom?.updatedAt || '') || 0) : -1; const tTs = Date.parse(resolvedSpecific.vc.updatedAt || '') || 0; if (!activeManualResult || tTs > cTs) activeManualResult = openRes; } if (isCurrentActiveLms && (resolvedSpecific.vc.manualOverride === true || !activeManualResult)) return { ...openRes, allOpenSessions };
 
                 if (!activeSpecificResult) activeSpecificResult = openRes;
 
@@ -78760,7 +78899,9 @@ function buildDemoExecutiveReport(params) {
 
         }
 
-        if (activeSpecificResult) return activeSpecificResult;
+        if (activeManualResult) return { ...activeManualResult, allOpenSessions };
+
+        if (activeSpecificResult) return { ...activeSpecificResult, allOpenSessions };
 
         if (futureSessionResult) return futureSessionResult;
 
@@ -79458,29 +79599,18 @@ function buildDemoExecutiveReport(params) {
 
         });
 
-        // 3. إضافة باقي المقررات النشطة بالمعهد لتمكين المدرب/المشرف من الاختيار والربط
-        for (let k in sourceLms) {
-
-            const item = sourceLms[k];
-
-            if (!courses.some(c => c.courseKey === k)) {
-
+        // 3. لا تضاف مقررات مدربين آخرين إلى قائمة المدرب حتى لا يتداخل رابط مدرب مع مدرب آخر
+        if (courses.length === 0 && currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
+            for (let k in sourceLms) {
+                const item = sourceLms[k];
                 const trName = (item.trainerName || item.trainer || '').replace(/^أ\.\s*/, '').trim();
-
                 courses.push({
-
                     courseKey: k,
-
                     courseTitle: `${item.courseTitle || item.courseShort || k} (أ. ${trName || k})`,
-
                     room: item.room || '',
-
                     trainerName: trName || k
-
                 });
-
             }
-
         }
 
         // 4. Fallback إذا لم يتم العثور على أي مقرر
@@ -79524,15 +79654,11 @@ function buildDemoExecutiveReport(params) {
 
         const cleanTrainer = (activeVcTrainer || '').replace(/^أ\.\s*/, '').trim();
 
-        // جلب الإعدادات المسبقة الخاصة بهذا المقرر المحدد
-        const savedData = (virtualClassrooms && (
-
-            virtualClassrooms[`${cleanTrainer}_${selKey}`] || 
-
-            virtualClassrooms[selKey] || 
-
-            (virtualClassrooms[cleanTrainer] && virtualClassrooms[cleanTrainer].courseKey === selKey ? virtualClassrooms[cleanTrainer] : null)
-
+        // جلب الإعدادات المسبقة الخاصة بهذا المقرر المحدد أو قاعة المدرب المشتركة
+        const savedData = getVirtualClassroomForTrainer(cleanTrainer, selKey) || (virtualClassrooms && (
+            virtualClassrooms[`${cleanTrainer}_${selKey}`] ||
+            virtualClassrooms[selKey] ||
+            virtualClassrooms[cleanTrainer]
         )) || null;
 
         const topicInput = document.getElementById('vcMeetingTopic');
@@ -80065,6 +80191,14 @@ function buildDemoExecutiveReport(params) {
 
         let url = document.getElementById('vcMeetingUrl')?.value?.trim() || '';
 
+        if (url && /\s/.test(url)) {
+
+            const embeddedUrlMatch = url.match(/https?:\/\/[^\s]+/i);
+
+            if (embeddedUrlMatch) url = embeddedUrlMatch[0].trim();
+
+        }
+
         const topic = document.getElementById('vcMeetingTopic')?.value?.trim() || '';
 
         const passcode = document.getElementById('vcMeetingPasscode')?.value?.trim() || '';
@@ -80159,35 +80293,38 @@ function buildDemoExecutiveReport(params) {
 
         };
 
-        if (isGlobalSelection) {
+        virtualClassrooms[cleanTrainerName] = {
+            ...classroomData,
+            courseKey: ''
+        };
 
-            virtualClassrooms.__GLOBAL__ = classroomData;
-
-        } else {
-
-            // حفظ بدون حصر اسم المدرب على مقرر واحد يمنع بقية مقرراته
-
+        if (selectedCourseKey) {
             virtualClassrooms[`${cleanTrainerName}_${selectedCourseKey}`] = classroomData;
-
-            if (selectedCourseKey) {
-
+            const courseTrainer = (typeof lmsCourses !== 'undefined' && lmsCourses[selectedCourseKey])
+                ? (lmsCourses[selectedCourseKey].trainerName || lmsCourses[selectedCourseKey].trainer || '')
+                : cleanTrainerName;
+            if (!courseTrainer || normalizeVcTrainerKey(courseTrainer) === normalizeVcTrainerKey(cleanTrainerName) || normalizeVcTrainerKey(selectedCourseKey) === normalizeVcTrainerKey(cleanTrainerName)) {
                 virtualClassrooms[selectedCourseKey] = classroomData;
-
             }
-
-            virtualClassrooms[cleanTrainerName] = {
-
-                ...classroomData,
-
-                courseKey: '' // shared trainer fallback remains open across their groups
-
-            };
-
         }
+
+        // Propagate trainer's updated link cleanly across any composite keys already owned by this trainer
+        const ownCourseKeys = (typeof getCoursesForActiveVcTrainer === 'function')
+            ? getCoursesForActiveVcTrainer(cleanTrainerName)
+            : [];
+        ownCourseKeys.forEach(oc => {
+            if (oc && oc.courseKey) {
+                const cKey = oc.courseKey;
+                const compKey = `${cleanTrainerName}_${cKey}`;
+                if (cKey === selectedCourseKey || !virtualClassrooms[compKey] || !virtualClassrooms[compKey].manualOverride) {
+                    virtualClassrooms[compKey] = { ...classroomData, courseKey: cKey };
+                }
+            }
+        });
 
         virtualClassrooms._meta = { schemaVersion: VC_STORAGE_VERSION, openForAll: true };
 
-        saveVirtualClassroomsToStorage();
+        saveVirtualClassroomsToStorage(true);
 
         if (typeof enforceRoleVisibility === 'function') enforceRoleVisibility();
 
