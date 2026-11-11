@@ -13140,11 +13140,11 @@
 
                             </div>
 
-                            <h2 class="text-xl md:text-2xl font-black tracking-tight">إعداد وتصدير ملفات المؤسسة (Excel)</h2>
+                            <h2 class="text-xl md:text-2xl font-black tracking-tight">مركز التصدير الديناميكي لملفات المؤسسة والنماذج (Excel & PDF)</h2>
 
                             <p class="text-xs md:text-sm text-emerald-100/80 mt-1">
 
-                                توليد ملفات إكسل الرسمية للشعب التدريبية متضمنة تقسيم الاسم الرباعي وتنسيق الهوية وتاريخ الميلاد بدقة تامة.
+                                محرك تصدير معتمد بالهوية الرسمية (شعار معهد الذهب الأسود للتدريب + شعار المؤسسة العامة للتدريب التقني والمهني TVTC) بصيغتي Excel و PDF.
 
                             </p>
 
@@ -13296,11 +13296,11 @@
 
                             </label>
 
-                            <button type="button" id="btnExportInstitutionExcel" onclick="exportInstitutionExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs px-3.5 py-2.5 rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer border border-emerald-500" title="تصدير ملف المؤسسة بصيغة Excel المعتمدة">
+                            <button type="button" id="btnOpenInstExportModal" onclick="openInstExportModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 active:scale-95 text-white font-black text-xs px-3.5 py-2.5 rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer border border-emerald-500" title="فتح نافذة التصدير التفاعلية متعدد الصيغ (Excel و PDF و ZIP)">
 
-                                <span class="text-base">📊</span>
+                                <span class="text-base">📥</span>
 
-                                <span>تصدير Excel</span>
+                                <span>تصدير البيانات والملفات</span>
 
                             </button>
 
@@ -43434,6 +43434,1512 @@ function openReportFromProfile() {
     }
 
     window.exportInstitutionExcel = exportInstitutionExcel;
+
+    // ===================================================================
+    // ADVANCED DYNAMIC MULTI-FORMAT EXPORT ENGINE (Excel & PDF + TVTC/BGTI)
+    // ===================================================================
+    const BGTI_ENTERPRISE_MASTER = {
+        facilityName: 'معهد الذهب الأسود للتدريب',
+        facilityNameEn: 'Black Gold Training Center',
+        licenseNo: '19187335023495',
+        directorName: 'علي بشير عباس الشاخوري',
+        instructors: [
+            { full: 'ابراهيم حسن عبدرب الحسين الموسى', id: '1058320605', nationality: 'سعودي', aliases: ['ابراهيم الموسى', 'ابراهيم', 'الموسى'] },
+            { full: 'أحمد علي علي الأصيل', id: '1050127404', nationality: 'سعودي', aliases: ['احمد الاصيل', 'أحمد الأصيل', 'الاصيل', 'الأصيل'] },
+            { full: 'الامام يعقوب محمد النعمه', id: '257731678', nationality: 'سوداني', aliases: ['امام النعمه', 'إمام النعمه', 'الامام', 'النعمه', 'النعمة'] },
+            { full: 'فاضل جواد رضي الماجد', id: '1093532354', nationality: 'سعودي', aliases: ['فاضل الماجد', 'فاضل'] },
+            { full: 'قاسم جواد رضي الماجد', id: '1117628469', nationality: 'سعودي', aliases: ['قاسم الماجد', 'قاسم'] },
+            { full: 'علي عبد السلام احمد', id: '2583265257', nationality: 'مصري', aliases: ['علي عبدالسلام', 'علي عبد السلام'] },
+            { full: 'سيد احمد مرسي يوسف', id: '2611877453', nationality: 'سوداني', aliases: ['سيد مرسي', 'سيد احمد'] },
+            { full: 'رضا نايف موسى آل مطيلق', id: '1091860211', nationality: 'سعودي', aliases: ['رضا مطيلق', 'رضا', 'مطيلق'] },
+            { full: 'شرف الدين عثمان ابو فاطمة بلية', id: '2401481904', nationality: 'سوداني', aliases: ['شرف الدين', 'بلية'] }
+        ],
+        qualifyingPrograms: [
+            'المهارات الكهربائية',
+            'إدخال البيانات ومعالجة النصوص',
+            'السكرتارية',
+            'نظم التشغيل وصيانة الحاسب الآلي',
+            'مسئول السلامة والصحة المهنية'
+        ],
+        developmentalPrograms: [
+            'المبادئ الأساسية للإدارة المكتبية و السكرتارية',
+            'المهارات الأساسية في الاكسل',
+            'أساسيات الصيانة الميكانيكية',
+            'اساسيات اللحام بالقوس الكهربي'
+        ],
+        practicalCriteria: [
+            'تطبيق متطلبات السلامة والصحة المهنية.',
+            'الاستخدام السليم لمعدات الوقاية الشخصية (PPE).',
+            'اختيار الأدوات والمعدات المناسبة للمهمة.',
+            'تشغيل واستخدام الأدوات والمعدات بكفاءة وأمان.',
+            'تنفيذ خطوات العمل وفق الإجراءات الفنية المعتمدة.',
+            'تحقيق الدقة والجودة المطلوبة في الأداء العملي.',
+            'تطبيق المواصفات والمعايير الفنية ذات الصلة.',
+            'تشخيص الأخطاء والمشكلات الفنية ومعالجتها.',
+            'المحافظة على تنظيم ونظافة موقع العمل.',
+            'إنجاز المهمة ضمن الزمن المحدد.'
+        ]
+    };
+    window.BGTI_ENTERPRISE_MASTER = BGTI_ENTERPRISE_MASTER;
+
+    function normalizeEnterpriseText(str) {
+        return String(str || '')
+            .replace(/[أإآ]/g, 'ا')
+            .replace(/ة/g, 'ه')
+            .replace(/ى/g, 'ي')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase();
+    }
+
+    function resolveAccreditedInstructorFullName(rawTrainer) {
+        const clean = String(rawTrainer || '').replace(/^أ\.\s*/, '').trim();
+        if (!clean) return BGTI_ENTERPRISE_MASTER.directorName;
+        const norm = normalizeEnterpriseText(clean);
+        for (const inst of BGTI_ENTERPRISE_MASTER.instructors) {
+            if (normalizeEnterpriseText(inst.full) === norm) return inst.full;
+            if (inst.aliases.some(a => norm.includes(normalizeEnterpriseText(a)) || normalizeEnterpriseText(a).includes(norm))) {
+                return inst.full;
+            }
+        }
+        return clean;
+    }
+
+    function resolveAccreditedProgramInfo(rawSpecialty) {
+        const sp = String(rawSpecialty || '').trim();
+        const norm = normalizeEnterpriseText(sp);
+        if (!norm || norm === 'عام' || norm === 'اكثر من تخصص') {
+            return { program: 'المهارات الأساسية في الاكسل', type: 'دورة تطويرية', specialty: sp || 'تدريب فني ومهني' };
+        }
+        for (const qp of BGTI_ENTERPRISE_MASTER.qualifyingPrograms) {
+            if (norm.includes(normalizeEnterpriseText(qp))) return { program: qp, type: 'دورة تأهيلية', specialty: sp };
+        }
+        for (const dp of BGTI_ENTERPRISE_MASTER.developmentalPrograms) {
+            if (norm.includes(normalizeEnterpriseText(dp))) return { program: dp, type: 'دورة تطويرية', specialty: sp };
+        }
+        if (/لحام|weld/i.test(norm)) return { program: 'اساسيات اللحام بالقوس الكهربي', type: 'دورة تطويرية', specialty: sp };
+        if (/كهرب|electr/i.test(norm)) return { program: 'المهارات الكهربائية', type: 'دورة تأهيلية', specialty: sp };
+        if (/اكسل|excel|data|ادخال|حاسب|نصوص/i.test(norm)) return { program: 'المهارات الأساسية في الاكسل', type: 'دورة تطويرية', specialty: sp };
+        if (/صيانه|ميكانيك|انابيب|معدات|pipe|mech|scaffold|rigger/i.test(norm)) return { program: 'أساسيات الصيانة الميكانيكية', type: 'دورة تطويرية', specialty: sp };
+        if (/سلامه|hse|safety/i.test(norm)) return { program: 'مسئول السلامة والصحة المهنية', type: 'دورة تأهيلية', specialty: sp };
+        if (/سكرتار|اداره|office|admin/i.test(norm)) return { program: 'المبادئ الأساسية للإدارة المكتبية و السكرتارية', type: 'دورة تطويرية', specialty: sp };
+        return { program: sp, type: 'دورة تطويرية', specialty: sp };
+    }
+
+    function doesCompanyMatchStreamFilter(traineeCompany, selectedCompany) {
+        if (!selectedCompany || selectedCompany === 'ALL') return true;
+        const c = normalizeEnterpriseText(traineeCompany);
+        const s = normalizeEnterpriseText(selectedCompany);
+        if (!c) return false;
+        if (c === s || c.includes(s) || s.includes(c)) return true;
+        const streamGroups = [
+            ['aic', 'العربيه'],
+            ['amana', 'امانه'],
+            ['eleco', 'اليكو'],
+            ['samsung', 'سامسونج'],
+            ['sinopec', 'ساينبوك', 'سينوبك'],
+            ['shinbo', 'شينبو', 'شنبو'],
+            ['hyundai', 'هونداي', 'هيونداي']
+        ];
+        for (const keys of streamGroups) {
+            if (keys.some(k => c.includes(k)) && keys.some(k => s.includes(k))) return true;
+        }
+        return false;
+    }
+
+    function getInstFilteredTrainees() {
+        const compFilterEl = document.getElementById('instCompanyFilter');
+        const grpFilterEl = document.getElementById('instGroupFilter');
+        const selectedCompany = compFilterEl ? (compFilterEl.value || 'ALL') : 'ALL';
+        const rawGroup = grpFilterEl ? (grpFilterEl.value || 'ALL') : 'ALL';
+        const selectedGroup = (!rawGroup || rawGroup === '') ? 'ALL' : rawGroup;
+
+        const pool = getUnifiedTraineesPool();
+        let list = pool.slice();
+        if (selectedGroup !== 'ALL') {
+            list = list.filter(t => t.group && (t.group.trim() === selectedGroup.trim() || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group))));
+        }
+        if (selectedCompany !== 'ALL') {
+            list = list.filter(t => doesCompanyMatchStreamFilter(t.company, selectedCompany));
+        }
+        const activeOnly = list.filter(t => !excludedInstTraineeIds.has(t.id) && !excludedInstTraineeIds.has(cleanNationalId(t.id)));
+        return {
+            selectedCompany,
+            selectedGroup,
+            trainees: activeOnly.length > 0 ? activeOnly : list
+        };
+    }
+
+    function resolveInstGroupContractAndDates(groupName, groupTrainees, overrideStart, overrideEnd) {
+        const contracts = (typeof getStoredGroupContracts === 'function') ? getStoredGroupContracts() : [];
+        const cleanG = (typeof cleanGroupNameForMatch === 'function')
+            ? cleanGroupNameForMatch(groupName)
+            : String(groupName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        let contract = contracts.find(c => {
+            const cClean = (typeof cleanGroupNameForMatch === 'function') ? cleanGroupNameForMatch(c.group) : String(c.group || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            return cClean && cClean === cleanG;
+        }) || null;
+        if (!contract && groupTrainees && groupTrainees[0] && typeof getTraineeContractInfo === 'function') {
+            contract = getTraineeContractInfo(groupTrainees[0]);
+        }
+        const autoStart = (contract && (contract.start || contract.startDate)) || '2026-01-01';
+        let autoEnd = (contract && contract.end) || '';
+        if (!autoEnd && autoStart) {
+            const d = new Date(autoStart);
+            if (!isNaN(d.getTime())) {
+                d.setFullYear(d.getFullYear() + 1);
+                d.setDate(d.getDate() - 1);
+                autoEnd = d.toISOString().slice(0, 10);
+            }
+        }
+        const startVal = (overrideStart && String(overrideStart).trim()) ? String(overrideStart).trim() : autoStart;
+        const endVal = (overrideEnd && String(overrideEnd).trim()) ? String(overrideEnd).trim() : (autoEnd || '—');
+        const fmtDate = (iso) => {
+            if (!iso || iso === '—') return '—';
+            const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+            return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
+        };
+        return {
+            autoStart,
+            autoEnd,
+            startIso: startVal,
+            endIso: endVal,
+            startDisplay: fmtDate(startVal),
+            endDisplay: fmtDate(endVal),
+            contractSpecialty: (contract && contract.specialty) || ''
+        };
+    }
+
+    function resolveInstGroupMetadata(groupName, groupTrainees, overrideStart, overrideEnd) {
+        const dates = resolveInstGroupContractAndDates(groupName, groupTrainees, overrideStart, overrideEnd);
+        const firstT = (groupTrainees && groupTrainees[0]) || { group: groupName, company: '' };
+        let assignedCourses = [];
+        if (typeof getTraineeAssignedCourses === 'function') {
+            assignedCourses = getTraineeAssignedCourses(firstT) || [];
+        }
+        const primaryCourse = assignedCourses[0] || {};
+        const contractSpec = (dates.contractSpecialty && dates.contractSpecialty !== 'عام' && dates.contractSpecialty !== 'أكثر من تخصص') ? dates.contractSpecialty : '';
+        const preferredCourse = (contractSpec || firstT.specialty) ? (assignedCourses.find(ac => resolveAccreditedProgramInfo(ac.course).program === resolveAccreditedProgramInfo(firstT.specialty || contractSpec).program) || primaryCourse) : primaryCourse;
+        const rawSpec = firstT.specialty || contractSpec || preferredCourse.course || 'تدريب مهني';
+        const progInfo = resolveAccreditedProgramInfo(rawSpec);
+        const instructorFullName = resolveAccreditedInstructorFullName(preferredCourse.trainer || '');
+        const companyName = (firstT.company || (groupTrainees.find(t => t.company)?.company) || 'معهد الذهب الأسود للتدريب').trim();
+        const codeMatch = String(groupName || '').match(/\d+/);
+        const courseCode = codeMatch ? codeMatch[0] : '101';
+        return {
+            groupName: groupName || 'كافة الشعب',
+            companyName,
+            room: preferredCourse.room || 'القاعة المعتمدة',
+            courseCode,
+            instructorFullName,
+            accreditedProgram: progInfo.program,
+            programType: progInfo.type,
+            specialty: progInfo.specialty,
+            dates
+        };
+    }
+
+    function getInstTraineeAbsenceDisplay(t) {
+        if (!t) return '0%';
+        const rate = (typeof t.rate === 'number' && !isNaN(t.rate)) ? t.rate : (Number(t.rate));
+        if (!isNaN(rate) && rate >= 0 && rate <= 100) {
+            const absPct = Math.max(0, Math.round(100 - rate));
+            return `${absPct}%`;
+        }
+        return '0%';
+    }
+
+    let _cachedInstLogos = null;
+    async function loadInstLogoAssets() {
+        if (_cachedInstLogos && (_cachedInstLogos.bgti || _cachedInstLogos.tvtc)) return _cachedInstLogos;
+        async function fetchLogoInfo(path) {
+            try {
+                const res = await fetch(path);
+                if (res && res.ok) {
+                    const buf = await res.arrayBuffer();
+                    const bytes = new Uint8Array(buf);
+                    if (bytes.length > 24 && bytes[0] === 0x89 && bytes[1] === 0x50) {
+                        const dv = new DataView(buf);
+                        const width = dv.getUint32(16, false);
+                        const height = dv.getUint32(20, false);
+                        let bin = '';
+                        const chunk = 0x8000;
+                        for (let i = 0; i < bytes.length; i += chunk) {
+                            bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+                        }
+                        return { bytes, width, height, dataUrl: 'data:image/png;base64,' + btoa(bin) };
+                    }
+                }
+            } catch (e) {}
+            // DOM canvas fallback for file:// environments
+            try {
+                const info = await new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        try {
+                            const c = document.createElement('canvas');
+                            c.width = img.naturalWidth || 120;
+                            c.height = img.naturalHeight || 60;
+                            const ctx = c.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            const dUrl = c.toDataURL('image/png');
+                            const rawB64 = dUrl.split(',')[1] || '';
+                            const binStr = atob(rawB64);
+                            const arr = new Uint8Array(binStr.length);
+                            for (let i = 0; i < binStr.length; i++) arr[i] = binStr.charCodeAt(i);
+                            resolve({ bytes: arr, width: c.width, height: c.height, dataUrl: dUrl });
+                        } catch (ce) { resolve(null); }
+                    };
+                    img.onerror = () => resolve(null);
+                    img.src = path;
+                    setTimeout(() => resolve(null), 500);
+                });
+                if (info) return info;
+            } catch (e2) {}
+            return null;
+        }
+        const [bgti, tvtc] = await Promise.all([fetchLogoInfo('assets/bgti_logo.png'), fetchLogoInfo('assets/tvtc_logo.png')]);
+        _cachedInstLogos = { bgti, tvtc };
+        return _cachedInstLogos;
+    }
+
+    function xmlEsc(str) {
+        return String(str === null || str === undefined ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&apos;');
+    }
+
+    function xmlEscText(str) {
+        return String(str === null || str === undefined ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function excelColLetter(zeroBasedCol) {
+        let n = zeroBasedCol + 1;
+        let s = '';
+        while (n > 0) {
+            const rem = (n - 1) % 26;
+            s = String.fromCharCode(65 + rem) + s;
+            n = Math.floor((n - 1) / 26);
+        }
+        return s;
+    }
+
+    function sanitizeExcelSheetName(name, usedSet) {
+        let base = String(name || 'Sheet').replace(/[\:\\\/\?\*\[\]]+/g, '_').trim() || 'Sheet';
+        if (base.length > 31) base = base.slice(0, 31);
+        let candidate = base;
+        let n = 2;
+        while (usedSet.has(candidate)) {
+            const suf = `_${n++}`;
+            candidate = base.slice(0, 31 - suf.length) + suf;
+        }
+        usedSet.add(candidate);
+        return candidate;
+    }
+
+    async function createStyledXlsxBlob(sheetsSpec, logoAssets) {
+        if (typeof JSZip === 'undefined') {
+            throw new Error('JSZip library not loaded');
+        }
+        const zip = new JSZip();
+        const sharedStrings = [];
+        const ssIndexMap = new Map();
+        function internString(str) {
+            const key = String(str === null || str === undefined ? '' : str);
+            if (ssIndexMap.has(key)) return ssIndexMap.get(key);
+            const idx = sharedStrings.length;
+            sharedStrings.push(key);
+            ssIndexMap.set(key, idx);
+            return idx;
+        }
+
+        // Style Registry (Deduplicated fonts, fills, borders, numFmts, cellXfs)
+        const fonts = [];
+        const fontMap = new Map();
+        function regFont(opts = {}) {
+            const k = `${opts.name || 'Times New Roman'}|${opts.size || 11}|${opts.bold ? 1 : 0}|${opts.color || ''}`;
+            if (fontMap.has(k)) return fontMap.get(k);
+            const id = fonts.length;
+            fonts.push(opts);
+            fontMap.set(k, id);
+            return id;
+        }
+        regFont({ name: 'Times New Roman', size: 11, bold: false, color: '000000' });
+
+        const fills = [{ none: true }, { gray125: true }];
+        const fillMap = new Map();
+        function regFill(hex) {
+            if (!hex) return 0;
+            const norm = String(hex).replace(/^#/, '').toUpperCase();
+            if (fillMap.has(norm)) return fillMap.get(norm);
+            const id = fills.length;
+            fills.push({ rgb: 'FF' + norm });
+            fillMap.set(norm, id);
+            return id;
+        }
+
+        const borders = [{}];
+        const borderMap = new Map();
+        function regBorder(styleName) {
+            if (!styleName) return 0;
+            if (borderMap.has(styleName)) return borderMap.get(styleName);
+            const id = borders.length;
+            borders.push({ style: styleName });
+            borderMap.set(styleName, id);
+            return id;
+        }
+
+        const numFmts = [];
+        const numFmtMap = new Map();
+        function regNumFmt(code) {
+            if (!code) return 0;
+            if (code === '@') return 49;
+            if (code === '0') return 1;
+            if (code === '0%') return 9;
+            if (numFmtMap.has(code)) return numFmtMap.get(code);
+            const id = 164 + numFmts.length;
+            numFmts.push({ id, code });
+            numFmtMap.set(code, id);
+            return id;
+        }
+
+        const cellXfs = [{ fontId: 0, fillId: 0, borderId: 0, numFmtId: 0, align: {} }];
+        const xfMap = new Map();
+        function regStyle(st = {}) {
+            const fId = regFont({ name: st.fontName || 'Times New Roman', size: st.fontSize || 11, bold: Boolean(st.bold), color: st.fontColor || '000000' });
+            const flId = regFill(st.fill || '');
+            const brId = regBorder(st.border || '');
+            const nfId = regNumFmt(st.numFmt || '');
+            const align = st.align || {};
+            const k = `${fId}|${flId}|${brId}|${nfId}|${align.h || ''}|${align.v || ''}|${align.wrap ? 1 : 0}|${align.rtl ? 1 : 0}`;
+            if (xfMap.has(k)) return xfMap.get(k);
+            const id = cellXfs.length;
+            cellXfs.push({ fontId: fId, fillId: flId, borderId: brId, numFmtId: nfId, align });
+            xfMap.set(k, id);
+            return id;
+        }
+
+        const hasBgti = Boolean(logoAssets && logoAssets.bgti && logoAssets.bgti.bytes);
+        const hasTvtc = Boolean(logoAssets && logoAssets.tvtc && logoAssets.tvtc.bytes);
+        const hasAnyLogo = hasBgti || hasTvtc;
+        if (hasBgti) zip.file('xl/media/image1.png', logoAssets.bgti.bytes);
+        if (hasTvtc) zip.file('xl/media/image2.png', logoAssets.tvtc.bytes);
+
+        const usedSheetNames = new Set();
+        const sheetEntries = [];
+
+        sheetsSpec.forEach((spec, idx) => {
+            const sheetNum = idx + 1;
+            const sheetName = sanitizeExcelSheetName(spec.name, usedSheetNames);
+            const maxCol = Math.max(0, (spec.colWidths ? spec.colWidths.length - 1 : 6));
+
+            // Organize cells by row
+            const rowsMap = new Map();
+            (spec.rows || []).forEach(rObj => {
+                rowsMap.set(rObj.r, { ht: rObj.ht || 20, cells: new Map() });
+            });
+            (spec.cells || []).forEach(c => {
+                if (!rowsMap.has(c.r)) rowsMap.set(c.r, { ht: c.ht || 20, cells: new Map() });
+                const rEntry = rowsMap.get(c.r);
+                if (c.ht) rEntry.ht = c.ht;
+                rEntry.cells.set(c.c, c);
+            });
+
+            // Fill merged banner background cells so styling renders cleanly across entire merged rectangle
+            const sortedRowNums = Array.from(rowsMap.keys()).sort((a, b) => a - b);
+            let sheetRowsXml = '';
+            sortedRowNums.forEach(rNum => {
+                const rEntry = rowsMap.get(rNum);
+                const sortedCols = Array.from(rEntry.cells.keys()).sort((a, b) => a - b);
+                let cellsXml = '';
+                sortedCols.forEach(cNum => {
+                    const cell = rEntry.cells.get(cNum);
+                    const ref = `${excelColLetter(cNum)}${rNum}`;
+                    const styleIdx = regStyle(cell.style || {});
+                    if (cell.formula) {
+                        const valTag = (cell.value !== undefined && cell.value !== null && cell.value !== '') ? `<v>${xmlEscText(cell.value)}</v>` : '';
+                        const tAttr = (cell.valueType === 'str') ? ' t="str"' : '';
+                        cellsXml += `<c r="${ref}" s="${styleIdx}"${tAttr}><f>${xmlEscText(cell.formula)}</f>${valTag}</c>`;
+                    } else if (cell.type === 'n' && cell.value !== '' && cell.value !== null && cell.value !== undefined && !isNaN(Number(cell.value))) {
+                        cellsXml += `<c r="${ref}" s="${styleIdx}" t="n"><v>${Number(cell.value)}</v></c>`;
+                    } else if (cell.value !== '' && cell.value !== null && cell.value !== undefined) {
+                        const sIdx = internString(String(cell.value));
+                        cellsXml += `<c r="${ref}" s="${styleIdx}" t="s"><v>${sIdx}</v></c>`;
+                    } else {
+                        cellsXml += `<c r="${ref}" s="${styleIdx}"/>`;
+                    }
+                });
+                sheetRowsXml += `<row r="${rNum}" ht="${rEntry.ht}" customHeight="1">${cellsXml}</row>`;
+            });
+
+            let colsXml = '';
+            if (spec.colWidths && spec.colWidths.length > 0) {
+                colsXml = '<cols>' + spec.colWidths.map((w, ci) => `<col min="${ci + 1}" max="${ci + 1}" width="${w}" customWidth="1"/>`).join('') + '</cols>';
+            }
+
+            let mergesXml = '';
+            if (spec.merges && spec.merges.length > 0) {
+                mergesXml = `<mergeCells count="${spec.merges.length}">` + spec.merges.map(m => `<mergeCell ref="${m}"/>`).join('') + '</mergeCells>';
+            }
+
+            const orient = spec.landscape ? 'landscape' : 'portrait';
+            const drawingTag = (hasAnyLogo && spec.showLogos !== false) ? `<drawing r:id="rId1"/>` : '';
+            const wsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>
+  <sheetViews><sheetView rightToLeft="1" workbookViewId="0"/></sheetViews>
+  <sheetFormatPr defaultRowHeight="20"/>
+  ${colsXml}
+  <sheetData>${sheetRowsXml}</sheetData>
+  ${mergesXml}
+  <pageMargins left="0.35" right="0.35" top="0.4" bottom="0.4" header="0.2" footer="0.2"/>
+  <pageSetup paperSize="9" orientation="${orient}" fitToWidth="1" fitToHeight="0"/>
+  ${drawingTag}
+</worksheet>`;
+            zip.file(`xl/worksheets/sheet${sheetNum}.xml`, wsXml);
+
+            if (hasAnyLogo && spec.showLogos !== false) {
+                zip.file(`xl/worksheets/_rels/sheet${sheetNum}.xml.rels`,
+                    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${sheetNum}.xml"/></Relationships>`);
+
+                let drAnchors = '';
+                let drRels = '';
+                let picId = 2;
+                let rCounter = 1;
+                if (hasBgti) {
+                    const rId = `rId${rCounter++}`;
+                    drRels += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image1.png"/>`;
+                    const ar = (logoAssets.bgti.width || 160) / Math.max(1, logoAssets.bgti.height || 64);
+                    const hEmu = Math.round(58 * 9525);
+                    const wEmu = Math.min(1800000, Math.round(hEmu * ar));
+                    // Column 0 renders on FAR RIGHT in rightToLeft="1" worksheet
+                    drAnchors += `<xdr:oneCellAnchor><xdr:from><xdr:col>0</xdr:col><xdr:colOff>114300</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>85725</xdr:rowOff></xdr:from><xdr:ext cx="${wEmu}" cy="${hEmu}"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${picId++}" name="BGTI Logo"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="${rId}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`;
+                }
+                if (hasTvtc) {
+                    const rId = `rId${rCounter++}`;
+                    drRels += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image2.png"/>`;
+                    const ar = (logoAssets.tvtc.width || 64) / Math.max(1, logoAssets.tvtc.height || 64);
+                    const hEmu = Math.round(60 * 9525);
+                    const wEmu = Math.round(hEmu * ar);
+                    // Last column renders on FAR LEFT in rightToLeft="1" worksheet
+                    drAnchors += `<xdr:oneCellAnchor><xdr:from><xdr:col>${maxCol}</xdr:col><xdr:colOff>114300</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>76200</xdr:rowOff></xdr:from><xdr:ext cx="${wEmu}" cy="${hEmu}"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${picId++}" name="TVTC Logo"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="${rId}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`;
+                }
+                zip.file(`xl/drawings/drawing${sheetNum}.xml`,
+                    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${drAnchors}</xdr:wsDr>`);
+                zip.file(`xl/drawings/_rels/drawing${sheetNum}.xml.rels`,
+                    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${drRels}</Relationships>`);
+            }
+            sheetEntries.push({ sheetNum, sheetName, hasDrawing: (hasAnyLogo && spec.showLogos !== false) });
+        });
+
+        // styles.xml
+        const numFmtsXml = numFmts.length > 0 ? `<numFmts count="${numFmts.length}">${numFmts.map(nf => `<numFmt numFmtId="${nf.id}" formatCode="${xmlEsc(nf.code)}"/>`).join('')}</numFmts>` : '';
+        const fontsXml = `<fonts count="${fonts.length}">${fonts.map(f => `<font>${f.bold ? '<b/>' : ''}<sz val="${f.size || 11}"/><color rgb="FF${String(f.color || '000000').replace(/^#/, '').toUpperCase()}"/><name val="${xmlEsc(f.name || 'Times New Roman')}"/></font>`).join('')}</fonts>`;
+        const fillsXml = `<fills count="${fills.length}">${fills.map(fl => fl.none ? '<fill><patternFill patternType="none"/></fill>' : (fl.gray125 ? '<fill><patternFill patternType="gray125"/></fill>' : `<fill><patternFill patternType="solid"><fgColor rgb="${fl.rgb}"/><bgColor indexed="64"/></patternFill></fill>`)).join('')}</fills>`;
+        const bordersXml = `<borders count="${borders.length}">${borders.map(b => {
+            if (!b.style) return '<border><left/><right/><top/><bottom/><diagonal/></border>';
+            return `<border><left style="${b.style}"><color indexed="64"/></left><right style="${b.style}"><color indexed="64"/></right><top style="${b.style}"><color indexed="64"/></top><bottom style="${b.style}"><color indexed="64"/></bottom><diagonal/></border>`;
+        }).join('')}</borders>`;
+        const xfsXml = `<cellXfs count="${cellXfs.length}">${cellXfs.map(x => {
+            const al = x.align || {};
+            const hasAl = al.h || al.v || al.wrap || al.rtl;
+            const alTag = hasAl ? `<alignment${al.h ? ` horizontal="${al.h}"` : ''}${al.v ? ` vertical="${al.v}"` : ''}${al.wrap ? ' wrapText="1"' : ''}${al.rtl ? ' readingOrder="2"' : ''}/>` : '';
+            return `<xf numFmtId="${x.numFmtId}" fontId="${x.fontId}" fillId="${x.fillId}" borderId="${x.borderId}" xfId="0"${x.fontId ? ' applyFont="1"' : ''}${x.fillId ? ' applyFill="1"' : ''}${x.borderId ? ' applyBorder="1"' : ''}${x.numFmtId ? ' applyNumberFormat="1"' : ''}${hasAl ? ' applyAlignment="1"' : ''}>${alTag}</xf>`;
+        }).join('')}</cellXfs>`;
+        zip.file('xl/styles.xml',
+            `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${numFmtsXml}${fontsXml}${fillsXml}${bordersXml}<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>${xfsXml}<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`);
+
+        // sharedStrings.xml
+        const ssXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${sharedStrings.length}" uniqueCount="${sharedStrings.length}">${sharedStrings.map(s => `<si><t xml:space="preserve">${xmlEsc(s)}</t></si>`).join('')}</sst>`;
+        zip.file('xl/sharedStrings.xml', ssXml);
+
+        // workbook.xml & rels & [Content_Types].xml
+        const wbSheetsXml = sheetEntries.map(se => `<sheet name="${xmlEsc(se.sheetName)}" sheetId="${se.sheetNum}" r:id="rId${se.sheetNum}"/>`).join('');
+        zip.file('xl/workbook.xml',
+            `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView rtl="true"/></bookViews><sheets>${wbSheetsXml}</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`);
+
+        const wbRelsXml = sheetEntries.map(se => `<Relationship Id="rId${se.sheetNum}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${se.sheetNum}.xml"/>`).join('')
+            + `<Relationship Id="rId${sheetEntries.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>`
+            + `<Relationship Id="rId${sheetEntries.length + 2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>`;
+        zip.file('xl/_rels/workbook.xml.rels',
+            `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${wbRelsXml}</Relationships>`);
+
+        zip.file('_rels/.rels',
+            `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`);
+
+        const ctOverrides = sheetEntries.map(se =>
+            `<Override PartName="/xl/worksheets/sheet${se.sheetNum}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`
+            + (se.hasDrawing ? `<Override PartName="/xl/drawings/drawing${se.sheetNum}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>` : '')
+        ).join('');
+        zip.file('[Content_Types].xml',
+            `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>${ctOverrides}</Types>`);
+
+        return await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    }
+    window.createStyledXlsxBlob = createStyledXlsxBlob;
+
+    function addExcelHeaderBanner(cells, rows, merges, lastColIndex) {
+        const lastColChar = excelColLetter(lastColIndex);
+        const bannerText = `${BGTI_ENTERPRISE_MASTER.facilityName}\n${BGTI_ENTERPRISE_MASTER.facilityNameEn}\n******`;
+        const bannerStyle = {
+            fontName: 'Times New Roman',
+            fontSize: 13,
+            bold: true,
+            fontColor: '002060',
+            fill: 'DCE6F1',
+            align: { h: 'center', v: 'center', wrap: true, rtl: true }
+        };
+        for (let r = 1; r <= 3; r++) {
+            rows.push({ r, ht: 25 });
+            for (let c = 0; c <= lastColIndex; c++) {
+                cells.push({ r, c, value: (r === 1 && c === 0) ? bannerText : '', style: bannerStyle });
+            }
+        }
+        merges.push(`A1:${lastColChar}3`);
+    }
+
+    function normalizeInstExportTraineeRow(t) {
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+        const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[t.id] || phoneDirectory[cleanId] || {}) : {});
+        let first = t.first_name || pDir.first_name || t.first || '';
+        let second = t.second_name || pDir.second_name || t.second || '';
+        let third = t.third_name || pDir.third_name || t.third || '';
+        let last = t.last_name || pDir.last_name || t.last || '';
+        const fullName = t.name || pDir.name || '';
+        if ((!first || !last) && fullName && typeof splitArabicName === 'function') {
+            const parts = splitArabicName(fullName);
+            if (!first) first = parts.first;
+            if (!second) second = parts.second;
+            if (!third) third = parts.third;
+            if (!last) last = parts.last;
+        }
+        const rawDob = t.dob || pDir.dob || '';
+        const formattedDob = (typeof formatDobMdy === 'function' && rawDob) ? formatDobMdy(rawDob) : (rawDob || '01/01/2000');
+        const rawGender = t.gender || pDir.gender || '';
+        const normGender = (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(rawGender, 'ذكر') : (rawGender || 'ذكر');
+        let nationality = t.nationality || pDir.nationality || '';
+        if (!nationality) nationality = cleanId.startsWith('1') ? 'سعودي' : 'غير سعودي';
+        let qual = t.qual || pDir.qual || '';
+        if (!qual || qual === 'غير محدد') qual = 'ثانوي';
+        const email = t.email || pDir.email || `${cleanId}@tvtc.gov.sa`;
+        const rawPhone = t.phone || pDir.phone || '';
+        const cleanPh = (typeof cleanPhone === 'function') ? cleanPhone(rawPhone) : String(rawPhone || '').trim();
+        return {
+            cleanId,
+            fullName: fullName || [first, second, third, last].filter(Boolean).join(' '),
+            first, second, third, last,
+            dob: formattedDob,
+            gender: normGender,
+            nationality,
+            qual,
+            email,
+            phone: cleanPh,
+            group: (t.group || 'عام').trim(),
+            company: (t.company || '').trim(),
+            absenceDisplay: getInstTraineeAbsenceDisplay(t),
+            notes: t.notes || ''
+        };
+    }
+
+    function buildEnterpriseFileSheetsSpec(filteredTrainees, metaDates, include11Col) {
+        const grouped = new Map();
+        filteredTrainees.forEach(t => {
+            const g = (t.group || 'عام').trim();
+            if (!grouped.has(g)) grouped.set(g, []);
+            grouped.get(g).push(t);
+        });
+
+        // Sheet 1: توزيع المتدربين حسب المجموعات
+        const s1Cells = [], s1Rows = [], s1Merges = [];
+        addExcelHeaderBanner(s1Cells, s1Rows, s1Merges, 4);
+        s1Rows.push({ r: 5, ht: 28 }, { r: 6, ht: 20 }, { r: 8, ht: 30 });
+        s1Merges.push('A5:E5', 'A6:E6');
+        const s1TitleSt = { fontName: 'Times New Roman', fontSize: 14, bold: true, fontColor: '002060', fill: 'FFFFCC', align: { h: 'center', v: 'center', rtl: true } };
+        const s1SubSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '002060', fill: 'F8FAFC', align: { h: 'center', v: 'center', rtl: true } };
+        for (let c = 0; c <= 4; c++) {
+            s1Cells.push({ r: 5, c, value: c === 0 ? 'توزيع المتدربين حسب المجموعات' : '', style: s1TitleSt });
+            s1Cells.push({ r: 6, c, value: c === 0 ? `الفترة: ${metaDates.startDisplay} إلى ${metaDates.endDisplay}  |  رخصة رقم: ${BGTI_ENTERPRISE_MASTER.licenseNo}` : '', style: s1SubSt });
+        }
+        const thSt = { fontName: 'Times New Roman', fontSize: 12, bold: true, fontColor: '002060', fill: 'CCFFCC', border: 'thin', align: { h: 'center', v: 'center', wrap: true, rtl: true } };
+        const tdSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '000000', border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
+        ['#', 'الشركة', 'المجموعة', 'عدد المتدربين', 'التخصص / البرنامج المعتمد'].forEach((h, ci) => s1Cells.push({ r: 8, c: ci, value: h, style: thSt }));
+
+        let r1 = 9, seq = 1, totalCount = 0;
+        grouped.forEach((gList, gName) => {
+            const gMeta = resolveInstGroupMetadata(gName, gList, metaDates.startIso, metaDates.endIso);
+            totalCount += gList.length;
+            s1Rows.push({ r: r1, ht: 20 });
+            s1Cells.push(
+                { r: r1, c: 0, type: 'n', value: seq++, style: tdSt },
+                { r: r1, c: 1, value: gMeta.companyName, style: tdSt },
+                { r: r1, c: 2, value: gName, style: tdSt },
+                { r: r1, c: 3, type: 'n', value: gList.length, style: tdSt },
+                { r: r1, c: 4, value: gMeta.accreditedProgram, style: tdSt }
+            );
+            r1++;
+        });
+        s1Rows.push({ r: r1, ht: 22 });
+        const totSt = { ...thSt, fill: 'DCE6F1' };
+        s1Cells.push(
+            { r: r1, c: 0, value: '', style: totSt },
+            { r: r1, c: 1, value: 'الإجمالي العام', style: totSt },
+            { r: r1, c: 2, value: `${grouped.size} شعبة`, style: totSt },
+            { r: r1, c: 3, type: 'n', value: totalCount, style: totSt },
+            { r: r1, c: 4, value: `مدير المعهد: ${BGTI_ENTERPRISE_MASTER.directorName}`, style: totSt }
+        );
+
+        // Sheet 2: القائمة الإسمية للمتدربين
+        const s2Cells = [], s2Rows = [], s2Merges = [];
+        addExcelHeaderBanner(s2Cells, s2Rows, s2Merges, 6);
+        s2Rows.push({ r: 5, ht: 32 });
+        s2Merges.push('A5:G5');
+        for (let c = 0; c <= 6; c++) {
+            s2Cells.push({ r: 5, c, value: c === 0 ? "القائمة الإسمية للمتدربين\nTrainees' Name List" : '', style: { ...s1TitleSt, fill: 'FFFFCC', align: { h: 'center', v: 'center', wrap: true, rtl: true } } });
+        }
+        const s2ThSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '002060', fill: '66FF99', border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
+        const s2IdSt = { ...tdSt, bold: false, numFmt: '@' };
+        const s2NameSt = { ...tdSt, bold: false, align: { h: 'right', v: 'center', rtl: true } };
+        let r2 = 7;
+        grouped.forEach((gList, gName) => {
+            const gMeta = resolveInstGroupMetadata(gName, gList, metaDates.startIso, metaDates.endIso);
+            s2Rows.push({ r: r2, ht: 24 });
+            s2Merges.push(`A${r2}:G${r2}`);
+            const grpBarSt = { fontName: 'Times New Roman', fontSize: 12, bold: true, fontColor: '002060', fill: 'DCE6F1', border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
+            for (let c = 0; c <= 6; c++) {
+                s2Cells.push({ r: r2, c, value: c === 0 ? `${gName}  —  ${gMeta.accreditedProgram} (${gList.length} متدرب)` : '', style: grpBarSt });
+            }
+            r2++;
+            s2Rows.push({ r: r2, ht: 22 });
+            ['#', 'الهوية', 'الاسم', 'الهاتف', 'البريد الإلكتروني', 'التخصص', 'الملاحظات'].forEach((h, ci) => s2Cells.push({ r: r2, c: ci, value: h, style: s2ThSt }));
+            r2++;
+            gList.forEach((t, ti) => {
+                const nt = normalizeInstExportTraineeRow(t);
+                s2Rows.push({ r: r2, ht: 19 });
+                s2Cells.push(
+                    { r: r2, c: 0, type: 'n', value: ti + 1, style: tdSt },
+                    { r: r2, c: 1, value: nt.cleanId, style: s2IdSt },
+                    { r: r2, c: 2, value: nt.fullName, style: s2NameSt },
+                    { r: r2, c: 3, value: nt.phone || '—', style: s2IdSt },
+                    { r: r2, c: 4, value: nt.email, style: { ...tdSt, bold: false } },
+                    { r: r2, c: 5, value: gMeta.specialty, style: { ...tdSt, bold: false } },
+                    { r: r2, c: 6, value: nt.notes, style: { ...tdSt, bold: false } }
+                );
+                r2++;
+            });
+            r2++;
+        });
+
+        const sheets = [
+            { name: 'توزيع المتدربين حسب المجموعات', colWidths: [6, 22, 24, 16, 40], rows: s1Rows, cells: s1Cells, merges: s1Merges, landscape: false },
+            { name: 'القائمة الإسمية للمتدربين', colWidths: [6, 16, 34, 15, 30, 26, 20], rows: s2Rows, cells: s2Cells, merges: s2Merges, landscape: true }
+        ];
+
+        if (include11Col) {
+            const s3Cells = [], s3Rows = [], s3Merges = [];
+            addExcelHeaderBanner(s3Cells, s3Rows, s3Merges, 10);
+            s3Rows.push({ r: 5, ht: 24 });
+            const headers11 = ['رقم الهوية', 'الاسم الأول', 'اسم الأب', 'اسم الجد', 'اسم العائلة / اللقب', 'تاريخ الميلاد', 'الجنس', 'الجنسية', 'المرحلة الدراسية / المؤهل', 'البريد الإلكتروني', 'رقم الجوال'];
+            headers11.forEach((h, ci) => s3Cells.push({ r: 5, c: ci, value: h, style: { ...thSt, fill: 'DCE6F1' } }));
+            filteredTrainees.forEach((t, ti) => {
+                const nt = normalizeInstExportTraineeRow(t);
+                const rr = 6 + ti;
+                s3Rows.push({ r: rr, ht: 19 });
+                [nt.cleanId, nt.first, nt.second, nt.third, nt.last, nt.dob, nt.gender, nt.nationality, nt.qual, nt.email, nt.phone].forEach((val, ci) => {
+                    const useText = (ci === 0 || ci === 10);
+                    s3Cells.push({ r: rr, c: ci, value: val || '', style: useText ? s2IdSt : { ...tdSt, bold: false } });
+                });
+            });
+            sheets.push({
+                name: 'بيانات الرفع للمؤسسة 11 عمود',
+                colWidths: [16, 15, 15, 15, 18, 15, 12, 14, 24, 28, 16],
+                rows: s3Rows,
+                cells: s3Cells,
+                merges: s3Merges,
+                landscape: true
+            });
+        }
+        return sheets;
+    }
+
+    function buildFinalEvalSheetsSpec(filteredTrainees, overrideStart, overrideEnd) {
+        const grouped = new Map();
+        filteredTrainees.forEach(t => {
+            const g = (t.group || 'عام').trim();
+            if (!grouped.has(g)) grouped.set(g, []);
+            grouped.get(g).push(t);
+        });
+        const sheets = [];
+        const usedNames = new Set();
+        grouped.forEach((gList, gName) => {
+            const meta = resolveInstGroupMetadata(gName, gList, overrideStart, overrideEnd);
+            const cells = [], rows = [], merges = [];
+            addExcelHeaderBanner(cells, rows, merges, 4);
+            rows.push({ r: 4, ht: 30 }, { r: 6, ht: 22 }, { r: 7, ht: 22 }, { r: 8, ht: 22 }, { r: 9, ht: 22 }, { r: 10, ht: 22 }, { r: 11, ht: 30 });
+            merges.push('A4:E4', 'A6:E6', 'A7:E7', 'A8:E8', 'A9:E9', 'A10:E10');
+            const titleSt = { fontName: 'Times New Roman', fontSize: 16, bold: true, fontColor: '002060', fill: 'FFFFCC', align: { h: 'center', v: 'center', rtl: true } };
+            const metaSt = { fontName: 'Times New Roman', fontSize: 12, bold: true, fontColor: '002060', fill: 'F8FAFC', border: 'thin', align: { h: 'right', v: 'center', rtl: true } };
+            const thSt = { fontName: 'Times New Roman', fontSize: 12, bold: true, fontColor: '002060', fill: 'DCE6F1', border: 'thin', align: { h: 'center', v: 'center', wrap: true, rtl: true } };
+            const tdSt = { fontName: 'Times New Roman', fontSize: 11, bold: false, fontColor: '000000', border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
+            for (let c = 0; c <= 4; c++) {
+                cells.push({ r: 4, c, value: c === 0 ? 'جــــدول التقييـــم النهائــــي للمتدربـــين' : '', style: titleSt });
+                cells.push({ r: 6, c, value: c === 0 ? `اسم البرنامج التدريبي : ${meta.accreditedProgram}` : '', style: metaSt });
+                cells.push({ r: 7, c, value: c === 0 ? `نوع البرنامج : ${meta.programType}` : '', style: metaSt });
+                cells.push({ r: 8, c, value: c === 0 ? `رقم الدورة : ${meta.courseCode}    |    رخصة المنشأة : ${BGTI_ENTERPRISE_MASTER.licenseNo}` : '', style: metaSt });
+                cells.push({ r: 9, c, value: c === 0 ? `تاريخ البدء : ${meta.dates.startDisplay}     |     تاريخ الانتهاء : ${meta.dates.endDisplay}` : '', style: metaSt });
+                cells.push({ r: 10, c, value: c === 0 ? `المجموعة : ${gName} (${gList.length} متدرب)` : '', style: metaSt });
+            }
+            ['ع/ر', 'اسم المتدرب', 'رقم الهوية', 'نتيجة التقييم النهائي', 'الملاحظات'].forEach((h, ci) => cells.push({ r: 11, c: ci, value: h, style: thSt }));
+            gList.forEach((t, ti) => {
+                const nt = normalizeInstExportTraineeRow(t);
+                const r = 12 + ti;
+                rows.push({ r, ht: 21 });
+                cells.push(
+                    { r, c: 0, type: 'n', value: ti + 1, style: tdSt },
+                    { r, c: 1, value: nt.fullName, style: { ...tdSt, align: { h: 'right', v: 'center', rtl: true } } },
+                    { r, c: 2, value: nt.cleanId, style: { ...tdSt, numFmt: '@' } },
+                    { r, c: 3, value: t.finalGrade || '', style: tdSt },
+                    { r, c: 4, value: nt.notes, style: tdSt }
+                );
+            });
+            const fStart = 12 + gList.length + 1;
+            const signSt = { fontName: 'Times New Roman', fontSize: 12, bold: true, fontColor: '002060', align: { h: 'right', v: 'center', rtl: true } };
+            rows.push({ r: fStart, ht: 24 }, { r: fStart + 1, ht: 24 }, { r: fStart + 2, ht: 24 });
+            merges.push(`A${fStart}:E${fStart}`, `A${fStart + 1}:E${fStart + 1}`, `A${fStart + 2}:E${fStart + 2}`);
+            cells.push({ r: fStart, c: 0, value: `اسم المدرب المعتمد : ${meta.instructorFullName}`, style: signSt });
+            cells.push({ r: fStart + 1, c: 0, value: 'توقيع المدرب : .........................................          التاريخ :  ........ / ........ / ........', style: signSt });
+            cells.push({ r: fStart + 2, c: 0, value: `مدير المعهد : ${BGTI_ENTERPRISE_MASTER.directorName}     |     ${BGTI_ENTERPRISE_MASTER.facilityName}`, style: signSt });
+            sheets.push({
+                name: sanitizeExcelSheetName(grouped.size === 1 ? 'جدول التقييم النهائي' : gName, usedNames),
+                colWidths: [8, 34, 18, 22, 24],
+                rows, cells, merges, landscape: false
+            });
+        });
+        return sheets;
+    }
+
+    function buildTrainingFollowupSheetsSpec(filteredTrainees, overrideStart, overrideEnd) {
+        const grouped = new Map();
+        filteredTrainees.forEach(t => {
+            const g = (t.group || 'عام').trim();
+            if (!grouped.has(g)) grouped.set(g, []);
+            grouped.get(g).push(t);
+        });
+        const sheets = [];
+        const usedNames = new Set();
+        grouped.forEach((gList, gName) => {
+            const meta = resolveInstGroupMetadata(gName, gList, overrideStart, overrideEnd);
+            const cells = [], rows = [], merges = [];
+            addExcelHeaderBanner(cells, rows, merges, 12);
+            rows.push({ r: 5, ht: 32 }, { r: 7, ht: 22 }, { r: 8, ht: 22 }, { r: 10, ht: 22 }, { r: 11, ht: 20 });
+            merges.push('A5:M5', 'A7:D7', 'E7:M7', 'A8:D8', 'E8:I8', 'J8:M8', 'A10:A11', 'B10:B11', 'C10:C11', 'D10:D11', 'E10:L10', 'M10:M11');
+            const titleSt = { fontName: 'Times New Roman', fontSize: 15, bold: true, fontColor: '002060', fill: 'FFFFCC', align: { h: 'center', v: 'center', wrap: true, rtl: true } };
+            const metaSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '002060', fill: 'F8FAFC', border: 'thin', align: { h: 'right', v: 'center', rtl: true } };
+            const thSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '002060', fill: 'DCE6F1', border: 'thin', align: { h: 'center', v: 'center', wrap: true, rtl: true } };
+            const tdSt = { fontName: 'Times New Roman', fontSize: 11, bold: false, fontColor: '000000', border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
+            for (let c = 0; c <= 12; c++) {
+                cells.push({ r: 5, c, value: c === 0 ? 'جدول متابعة التدريب\nTraining Follow-Up' : '', style: titleSt });
+                cells.push({ r: 7, c, value: c === 0 ? `المجموعة : ${gName}` : (c === 4 ? `اسم البرنامج المعتمد : ${meta.accreditedProgram} (${meta.programType})` : ''), style: metaSt });
+                cells.push({ r: 8, c, value: c === 0 ? `التخصص : ${meta.specialty}` : (c === 4 ? `الفترة : ${meta.dates.startDisplay} إلى ${meta.dates.endDisplay}` : (c === 9 ? `المدرب : ${meta.instructorFullName}` : '')), style: metaSt });
+            }
+            const hdr10 = { 0: 'ع/ر', 1: 'الهوية', 2: 'الاسم', 3: '* نسبة الغياب', 4: 'التقيـيـــــم  الشهري', 12: 'الملاحظات' };
+            for (let c = 0; c <= 12; c++) {
+                cells.push({ r: 10, c, value: hdr10[c] || '', style: thSt });
+                cells.push({ r: 11, c, value: (c >= 4 && c <= 11) ? (c - 3) : '', type: (c >= 4 && c <= 11) ? 'n' : 's', style: thSt });
+            }
+            gList.forEach((t, ti) => {
+                const nt = normalizeInstExportTraineeRow(t);
+                const rr = 12 + ti;
+                rows.push({ r: rr, ht: 19 });
+                cells.push(
+                    { r: rr, c: 0, type: 'n', value: ti + 1, style: tdSt },
+                    { r: rr, c: 1, value: nt.cleanId, style: { ...tdSt, numFmt: '@' } },
+                    { r: rr, c: 2, value: nt.fullName, style: { ...tdSt, align: { h: 'right', v: 'center', rtl: true } } },
+                    { r: rr, c: 3, value: nt.absenceDisplay, style: tdSt }
+                );
+                for (let m = 4; m <= 12; m++) {
+                    cells.push({ r: rr, c: m, value: m === 12 ? nt.notes : '', style: tdSt });
+                }
+            });
+            const warnRow = 12 + gList.length + 1;
+            const signRow = warnRow + 2;
+            rows.push({ r: warnRow, ht: 22 }, { r: signRow, ht: 22 });
+            merges.push(`A${warnRow}:M${warnRow}`, `A${signRow}:G${signRow}`, `H${signRow}:M${signRow}`);
+            const warnSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '9C0006', fill: 'FFFFCC', border: 'thin', align: { h: 'right', v: 'center', rtl: true } };
+            for (let c = 0; c <= 12; c++) {
+                cells.push({ r: warnRow, c, value: c === 0 ? '* المتدرب الذي يتجاوز نسبة الغياب المحددة بـ 20% من مجموع مدة التدريب يُحرم من مواصلة الدورة، ويُتخذ في شأنه الإجراء الإداري المناسب وفق التنظيم المعتمد' : '', style: warnSt });
+            }
+            const signSt = { fontName: 'Times New Roman', fontSize: 12, bold: true, fontColor: '002060', align: { h: 'right', v: 'center', rtl: true } };
+            cells.push({ r: signRow, c: 0, value: `المدرب المعتمد : ${meta.instructorFullName}`, style: signSt });
+            cells.push({ r: signRow, c: 7, value: `إدارة المعهد : ${BGTI_ENTERPRISE_MASTER.directorName} (${BGTI_ENTERPRISE_MASTER.licenseNo})`, style: { ...signSt, align: { h: 'center', v: 'center', rtl: true } } });
+
+            sheets.push({
+                name: sanitizeExcelSheetName(grouped.size === 1 ? 'جدول متابعة التدريب' : gName, usedNames),
+                colWidths: [6, 16, 30, 12, 7, 7, 7, 7, 7, 7, 7, 7, 20],
+                rows, cells, merges, landscape: true
+            });
+        });
+        return sheets;
+    }
+
+    function buildPracticalCardSingleSheetSpec(trainee, overrideStart, overrideEnd, sheetTitle) {
+        const nt = normalizeInstExportTraineeRow(trainee);
+        const meta = resolveInstGroupMetadata(nt.group, [trainee], overrideStart, overrideEnd);
+        const cells = [], rows = [], merges = [];
+        addExcelHeaderBanner(cells, rows, merges, 6);
+        rows.push({ r: 5, ht: 36 }, { r: 7, ht: 20 }, { r: 8, ht: 20 }, { r: 9, ht: 20 }, { r: 10, ht: 20 }, { r: 12, ht: 24 });
+        merges.push('A5:G5', 'A7:B7', 'C7:G7', 'A8:B8', 'C8:G8', 'A9:B9', 'C9:G9', 'A10:B10', 'C10:G10', 'C12:D12', 'E12:G12');
+        const subTitleSt = { fontName: 'Times New Roman', fontSize: 13, bold: true, fontColor: '002060', fill: 'CCFFCC', border: 'medium', align: { h: 'center', v: 'center', wrap: true, rtl: true } };
+        for (let c = 0; c <= 6; c++) {
+            cells.push({ r: 5, c, value: c === 0 ? "نموذج تقييم الكفايات العملية للمتدرب\nTrainee Practical Competencies Assessment Form" : '', style: subTitleSt });
+        }
+        const metaLabelSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '002060', fill: 'CCFFCC', border: 'double', align: { h: 'center', v: 'center', rtl: true } };
+        const metaValSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '000000', fill: 'FFFFFF', border: 'double', align: { h: 'right', v: 'center', rtl: true } };
+        const metaRowsData = [
+            ['اسم المتدرب', `${nt.fullName}   (الهوية: ${nt.cleanId} | المجموعة: ${nt.group})`],
+            ['البرنامج التدريبي', `${meta.accreditedProgram} (${meta.programType})`],
+            ['الوحدة / المادة', `${meta.specialty} — من ${meta.dates.startDisplay} إلى ${meta.dates.endDisplay}`],
+            ['المهمة العملية', 'تنفيذ وتطبيق المهارات والكفايات العملية المعتمدة في التخصص']
+        ];
+        metaRowsData.forEach((pair, idx) => {
+            const rr = 7 + idx;
+            for (let c = 0; c <= 6; c++) {
+                cells.push({ r: rr, c, value: c === 0 ? pair[0] : (c === 2 ? pair[1] : ''), style: c < 2 ? metaLabelSt : metaValSt });
+            }
+        });
+        const thSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '002060', fill: 'CCFFFF', border: 'double', align: { h: 'center', v: 'center', wrap: true, rtl: true } };
+        const hdr12 = { 0: 'م', 1: 'عناصر تقييم الأداء العملي', 2: 'الدرجة /10', 4: 'الملاحظات' };
+        for (let c = 0; c <= 6; c++) cells.push({ r: 12, c, value: hdr12[c] || '', style: thSt });
+
+        const tdNumSt = { fontName: 'Times New Roman', fontSize: 11, bold: false, fontColor: '000000', border: 'double', align: { h: 'center', v: 'center', rtl: true } };
+        const tdCritSt = { fontName: 'Times New Roman', fontSize: 11, bold: false, fontColor: '000000', border: 'double', align: { h: 'right', v: 'center', wrap: true, rtl: true } };
+        BGTI_ENTERPRISE_MASTER.practicalCriteria.forEach((crit, idx) => {
+            const rr = 13 + idx;
+            rows.push({ r: rr, ht: 21 });
+            merges.push(`C${rr}:D${rr}`, `E${rr}:G${rr}`);
+            cells.push({ r: rr, c: 0, type: 'n', value: idx + 1, style: tdNumSt });
+            cells.push({ r: rr, c: 1, value: crit, style: tdCritSt });
+            for (let c = 2; c <= 6; c++) cells.push({ r: rr, c, value: '', style: tdNumSt });
+        });
+
+        // Rows 23..25: Totals & Formulas matching template 78eb7c5f
+        rows.push({ r: 23, ht: 21 }, { r: 24, ht: 21 }, { r: 25, ht: 21 });
+        merges.push('A23:B23', 'C23:D23', 'E23:G23', 'A24:B24', 'C24:D24', 'E24:G24', 'A25:B25', 'C25:D25', 'E25:G25');
+        const totLabelSt = { fontName: 'Times New Roman', fontSize: 12, bold: true, fontColor: '002060', fill: 'DCE6F1', border: 'double', align: { h: 'center', v: 'center', rtl: true } };
+        const totValSt = { ...totLabelSt, fill: 'FFFFFF', fontColor: '000000' };
+        for (let c = 0; c <= 6; c++) {
+            cells.push({ r: 23, c, value: c === 0 ? 'المجموع' : (c === 2 ? '0' : ''), formula: c === 2 ? 'SUM(C13:D22)' : '', type: c === 2 ? 'n' : 's', style: c < 2 ? totLabelSt : totValSt });
+            cells.push({ r: 24, c, value: c === 0 ? 'النسبة المئوية' : (c === 2 ? '0' : ''), formula: c === 2 ? 'C23/100' : '', type: c === 2 ? 'n' : 's', style: c < 2 ? totLabelSt : { ...totValSt, numFmt: '0%' } });
+            cells.push({
+                r: 25, c,
+                value: c === 0 ? 'التقدير' : (c === 2 ? 'يرجي تقييم المتدرب' : ''),
+                formula: c === 2 ? 'IF(C24>=0.9,"ممتاز",IF(C24>=0.8,"جيد جدًا",IF(C24>=0.7,"جيد",IF(C24>=0.6,"متوسط",IF(AND(C24<0.6,C24>0),"دون المستوى المطلوب","يرجي تقييم المتدرب ")))))' : '',
+                valueType: c === 2 ? 'str' : '',
+                style: c < 2 ? totLabelSt : totValSt
+            });
+        }
+
+        // Scale legend (rows 27..31) & Trainer / Director signature
+        const legendTiers = [
+            ['≥ 90%', 'ممتاز', '66FFFF'],
+            ['≥ 80%', 'جيد جدا', '66FF99'],
+            ['≥ 70%', 'جيد', 'CCFFCC'],
+            ['≥ 60%', 'متوسط', 'FFFFCC'],
+            ['<  60%', 'دون المستوى المطلوب', 'FF9999']
+        ];
+        merges.push('D27:G27', 'D28:G28', 'D29:G29');
+        const sigSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '002060', align: { h: 'right', v: 'center', rtl: true } };
+        legendTiers.forEach((tier, idx) => {
+            const rr = 27 + idx;
+            rows.push({ r: rr, ht: 19 });
+            const tSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '000000', fill: tier[2], border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
+            cells.push({ r: rr, c: 0, value: tier[0], style: tSt });
+            cells.push({ r: rr, c: 1, value: tier[1], style: tSt });
+            if (idx === 0) cells.push({ r: rr, c: 3, value: `اسم المدرب المعتمد : ${meta.instructorFullName}`, style: sigSt });
+            if (idx === 1) cells.push({ r: rr, c: 3, value: 'توقيع المدرب : ............................................', style: sigSt });
+            if (idx === 2) cells.push({ r: rr, c: 3, value: `مدير المعهد : ${BGTI_ENTERPRISE_MASTER.directorName}`, style: sigSt });
+        });
+
+        return {
+            name: sheetTitle || 'بطاقة التقييم العملي',
+            colWidths: [11, 42, 10, 8, 12, 10, 12],
+            rows, cells, merges, landscape: false
+        };
+    }
+
+    // ==================== PDF BRANDED HTML BUILDERS ====================
+    function buildInstPdfBrandHeaderHtml(logoAssets, titleAr, subTitleText) {
+        const bgtiSrc = (logoAssets && logoAssets.bgti && logoAssets.bgti.dataUrl) ? logoAssets.bgti.dataUrl : 'assets/bgti_logo.png';
+        const tvtcSrc = (logoAssets && logoAssets.tvtc && logoAssets.tvtc.dataUrl) ? logoAssets.tvtc.dataUrl : 'assets/tvtc_logo.png';
+        return `
+            <div style="background:#DCE6F1; border:1.5px solid #95B3D7; border-radius:8px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; direction:rtl;">
+                <div style="width:125px; display:flex; align-items:center; justify-content:flex-start;">
+                    <img src="${bgtiSrc}" alt="BGTI" style="max-height:52px; max-width:120px; width:auto; object-fit:contain; display:block;">
+                </div>
+                <div style="flex:1; text-align:center; color:#002060; font-family:'Times New Roman','Arial',sans-serif; line-height:1.4;">
+                    <div style="font-size:16px; font-weight:900;">${BGTI_ENTERPRISE_MASTER.facilityName}</div>
+                    <div style="font-size:12px; font-weight:800;">${BGTI_ENTERPRISE_MASTER.facilityNameEn}</div>
+                    <div style="font-size:11px; font-weight:800;">******</div>
+                </div>
+                <div style="width:125px; display:flex; align-items:center; justify-content:flex-end;">
+                    <img src="${tvtcSrc}" alt="TVTC" style="max-height:56px; max-width:70px; width:auto; object-fit:contain; display:block;">
+                </div>
+            </div>
+            ${titleAr ? `
+                <div style="background:#FFFFCC; border:1px solid #002060; padding:6px 10px; text-align:center; font-size:15px; font-weight:900; color:#002060; margin-bottom:8px; border-radius:4px;">
+                    ${escapeHtml(titleAr)}
+                </div>
+            ` : ''}
+            ${subTitleText ? `
+                <div style="text-align:center; font-size:10.5px; font-weight:700; color:#002060; margin-bottom:8px;">
+                    ${escapeHtml(subTitleText)}
+                </div>
+            ` : ''}
+        `;
+    }
+
+    function buildEnterpriseFilePdfHtml(filteredTrainees, metaDates, logoAssets) {
+        const grouped = new Map();
+        filteredTrainees.forEach(t => {
+            const g = (t.group || 'عام').trim();
+            if (!grouped.has(g)) grouped.set(g, []);
+            grouped.get(g).push(t);
+        });
+        let seq = 1;
+        let distRows = '';
+        let nameSections = '';
+        grouped.forEach((gList, gName) => {
+            const meta = resolveInstGroupMetadata(gName, gList, metaDates.startIso, metaDates.endIso);
+            distRows += `
+                <tr>
+                    <td style="border:1px solid #444;padding:5px;text-align:center;">${seq++}</td>
+                    <td style="border:1px solid #444;padding:5px;text-align:center;">${escapeHtml(meta.companyName)}</td>
+                    <td style="border:1px solid #444;padding:5px;text-align:center;font-weight:700;">${escapeHtml(gName)}</td>
+                    <td style="border:1px solid #444;padding:5px;text-align:center;font-weight:900;">${gList.length}</td>
+                    <td style="border:1px solid #444;padding:5px;text-align:center;">${escapeHtml(meta.accreditedProgram)}</td>
+                </tr>
+            `;
+            const tRows = gList.map((t, idx) => {
+                const nt = normalizeInstExportTraineeRow(t);
+                return `
+                    <tr>
+                        <td style="border:1px solid #555;padding:4px;text-align:center;">${idx + 1}</td>
+                        <td style="border:1px solid #555;padding:4px;text-align:center;font-family:monospace;">${escapeHtml(nt.cleanId)}</td>
+                        <td style="border:1px solid #555;padding:4px;text-align:right;font-weight:700;">${escapeHtml(nt.fullName)}</td>
+                        <td style="border:1px solid #555;padding:4px;text-align:center;font-family:monospace;">${escapeHtml(nt.phone || '—')}</td>
+                        <td style="border:1px solid #555;padding:4px;text-align:left;direction:ltr;font-family:monospace;font-size:9.5px;">${escapeHtml(nt.email)}</td>
+                        <td style="border:1px solid #555;padding:4px;text-align:center;">${escapeHtml(meta.specialty)}</td>
+                    </tr>
+                `;
+            }).join('');
+            nameSections += `
+                <div style="margin-bottom:14px; page-break-inside:avoid;">
+                    <div style="background:#DCE6F1; color:#002060; font-weight:900; font-size:11.5px; padding:5px 10px; border:1px solid #002060;">
+                        ${escapeHtml(gName)} — ${escapeHtml(meta.accreditedProgram)} (${gList.length} متدرب)
+                    </div>
+                    <table style="width:100%; border-collapse:collapse; font-size:10.5px;">
+                        <thead>
+                            <tr style="background:#CCFFCC; color:#002060; font-weight:900;">
+                                <th style="border:1px solid #555;padding:5px;width:5%;">#</th>
+                                <th style="border:1px solid #555;padding:5px;width:15%;">الهوية</th>
+                                <th style="border:1px solid #555;padding:5px;width:30%;">الاسم</th>
+                                <th style="border:1px solid #555;padding:5px;width:14%;">الهاتف</th>
+                                <th style="border:1px solid #555;padding:5px;width:22%;">البريد الإلكتروني</th>
+                                <th style="border:1px solid #555;padding:5px;width:14%;">التخصص</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tRows}</tbody>
+                    </table>
+                </div>
+            `;
+        });
+        return `
+            <div style="direction:rtl; font-family:'Times New Roman','Arial',sans-serif; color:#111;">
+                ${buildInstPdfBrandHeaderHtml(logoAssets, 'ملف المؤسسة: توزيع المتدربين والقائمة الإسمية', `الفترة التدريبية: ${metaDates.startDisplay} إلى ${metaDates.endDisplay}  •  رقم الرخصة: ${BGTI_ENTERPRISE_MASTER.licenseNo}`)}
+                <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:14px;">
+                    <thead>
+                        <tr style="background:#DCE6F1; color:#002060; font-weight:900;">
+                            <th style="border:1px solid #444;padding:6px;">#</th>
+                            <th style="border:1px solid #444;padding:6px;">الشركة</th>
+                            <th style="border:1px solid #444;padding:6px;">المجموعة</th>
+                            <th style="border:1px solid #444;padding:6px;">عدد المتدربين</th>
+                            <th style="border:1px solid #444;padding:6px;">البرنامج التدريبي المعتمد</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${distRows}
+                        <tr style="background:#FFFFCC; color:#002060; font-weight:900;">
+                            <td colspan="3" style="border:1px solid #444;padding:6px;text-align:center;">الإجمالي الكلي</td>
+                            <td style="border:1px solid #444;padding:6px;text-align:center;">${filteredTrainees.length}</td>
+                            <td style="border:1px solid #444;padding:6px;text-align:center;">مدير المعهد: ${BGTI_ENTERPRISE_MASTER.directorName}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="page-break-before:always; break-before:page;"></div>
+                ${buildInstPdfBrandHeaderHtml(logoAssets, "القائمة الإسمية للمتدربين — Trainees' Name List", '')}
+                ${nameSections}
+            </div>
+        `;
+    }
+
+    function buildFinalEvalPdfHtml(filteredTrainees, overrideStart, overrideEnd, logoAssets) {
+        const grouped = new Map();
+        filteredTrainees.forEach(t => {
+            const g = (t.group || 'عام').trim();
+            if (!grouped.has(g)) grouped.set(g, []);
+            grouped.get(g).push(t);
+        });
+        const pages = [];
+        grouped.forEach((gList, gName) => {
+            const meta = resolveInstGroupMetadata(gName, gList, overrideStart, overrideEnd);
+            const rows = gList.map((t, idx) => {
+                const nt = normalizeInstExportTraineeRow(t);
+                return `
+                    <tr>
+                        <td style="border:1px solid #333;padding:5px;text-align:center;">${idx + 1}</td>
+                        <td style="border:1px solid #333;padding:5px;text-align:right;font-weight:700;">${escapeHtml(nt.fullName)}</td>
+                        <td style="border:1px solid #333;padding:5px;text-align:center;font-family:monospace;">${escapeHtml(nt.cleanId)}</td>
+                        <td style="border:1px solid #333;padding:5px;text-align:center;">${escapeHtml(t.finalGrade || '')}</td>
+                        <td style="border:1px solid #333;padding:5px;text-align:center;">${escapeHtml(nt.notes)}</td>
+                    </tr>
+                `;
+            }).join('');
+            pages.push(`
+                <div style="direction:rtl; font-family:'Times New Roman','Arial',sans-serif; color:#111; page-break-after:always; break-after:page;">
+                    ${buildInstPdfBrandHeaderHtml(logoAssets, 'جــــدول التقييـــم النهائــــي للمتدربـــين', '')}
+                    <table style="width:100%; border-collapse:collapse; font-size:11.5px; font-weight:700; color:#002060; margin-bottom:10px; background:#F8FAFC;">
+                        <tr>
+                            <td style="border:1px solid #999;padding:5px 8px;width:55%;">اسم البرنامج التدريبي: <span style="color:#111;">${escapeHtml(meta.accreditedProgram)}</span></td>
+                            <td style="border:1px solid #999;padding:5px 8px;">نوع البرنامج: <span style="color:#111;">${escapeHtml(meta.programType)}</span></td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid #999;padding:5px 8px;">رقم الدورة: <span style="color:#111;">${escapeHtml(meta.courseCode)}</span>  |  المجموعة: <span style="color:#111;">${escapeHtml(gName)}</span></td>
+                            <td style="border:1px solid #999;padding:5px 8px;">الفترة: <span style="color:#111;">${escapeHtml(meta.dates.startDisplay)} — ${escapeHtml(meta.dates.endDisplay)}</span></td>
+                        </tr>
+                    </table>
+                    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                        <thead>
+                            <tr style="background:#DCE6F1; color:#002060; font-weight:900;">
+                                <th style="border:1px solid #333;padding:6px;width:7%;">ع/ر</th>
+                                <th style="border:1px solid #333;padding:6px;width:36%;">اسم المتدرب</th>
+                                <th style="border:1px solid #333;padding:6px;width:20%;">رقم الهوية</th>
+                                <th style="border:1px solid #333;padding:6px;width:19%;">نتيجة التقييم النهائي</th>
+                                <th style="border:1px solid #333;padding:6px;width:18%;">الملاحظات</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <div style="margin-top:16px; display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:#002060; border-top:1px dashed #666; padding-top:10px;">
+                        <div>اسم المدرب المعتمد: ${escapeHtml(meta.instructorFullName)}</div>
+                        <div>التوقيع: ......................</div>
+                        <div>مدير المعهد: ${BGTI_ENTERPRISE_MASTER.directorName}</div>
+                    </div>
+                </div>
+            `);
+        });
+        return pages.join('');
+    }
+
+    function buildTrainingFollowupPdfHtml(filteredTrainees, overrideStart, overrideEnd, logoAssets) {
+        const grouped = new Map();
+        filteredTrainees.forEach(t => {
+            const g = (t.group || 'عام').trim();
+            if (!grouped.has(g)) grouped.set(g, []);
+            grouped.get(g).push(t);
+        });
+        const pages = [];
+        grouped.forEach((gList, gName) => {
+            const meta = resolveInstGroupMetadata(gName, gList, overrideStart, overrideEnd);
+            const rows = gList.map((t, idx) => {
+                const nt = normalizeInstExportTraineeRow(t);
+                return `
+                    <tr>
+                        <td style="border:1px solid #333;padding:4px;text-align:center;">${idx + 1}</td>
+                        <td style="border:1px solid #333;padding:4px;text-align:center;font-family:monospace;">${escapeHtml(nt.cleanId)}</td>
+                        <td style="border:1px solid #333;padding:4px;text-align:right;font-weight:700;">${escapeHtml(nt.fullName)}</td>
+                        <td style="border:1px solid #333;padding:4px;text-align:center;">${escapeHtml(nt.absenceDisplay)}</td>
+                        ${[1, 2, 3, 4, 5, 6, 7, 8].map(() => '<td style="border:1px solid #333;padding:4px;"></td>').join('')}
+                        <td style="border:1px solid #333;padding:4px;">${escapeHtml(nt.notes)}</td>
+                    </tr>
+                `;
+            }).join('');
+            pages.push(`
+                <div style="direction:rtl; font-family:'Times New Roman','Arial',sans-serif; color:#111; page-break-after:always; break-after:page;">
+                    ${buildInstPdfBrandHeaderHtml(logoAssets, 'جدول متابعة التدريب — Training Follow-Up', `المجموعة: ${gName}  |  البرنامج: ${meta.accreditedProgram} (${meta.programType})  |  الفترة: ${meta.dates.startDisplay} إلى ${meta.dates.endDisplay}`)}
+                    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+                        <thead>
+                            <tr style="background:#DCE6F1; color:#002060; font-weight:900;">
+                                <th rowspan="2" style="border:1px solid #333;padding:4px;width:4%;">ع/ر</th>
+                                <th rowspan="2" style="border:1px solid #333;padding:4px;width:11%;">الهوية</th>
+                                <th rowspan="2" style="border:1px solid #333;padding:4px;width:24%;">الاسم</th>
+                                <th rowspan="2" style="border:1px solid #333;padding:4px;width:9%;">* نسبة الغياب</th>
+                                <th colspan="8" style="border:1px solid #333;padding:4px;">التقيـيـــــم الشهري</th>
+                                <th rowspan="2" style="border:1px solid #333;padding:4px;width:16%;">الملاحظات</th>
+                            </tr>
+                            <tr style="background:#DCE6F1; color:#002060; font-weight:900;">
+                                ${[1, 2, 3, 4, 5, 6, 7, 8].map(n => `<th style="border:1px solid #333;padding:3px;width:4.5%;">${n}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <div style="margin-top:8px; padding:6px 10px; background:#FFFFCC; border:1px solid #9C0006; color:#9C0006; font-size:10.5px; font-weight:800;">
+                        * المتدرب الذي يتجاوز نسبة الغياب المحددة بـ 20% من مجموع مدة التدريب يُحرم من مواصلة الدورة، ويُتخذ في شأنه الإجراء الإداري المناسب وفق التنظيم المعتمد.
+                    </div>
+                    <div style="margin-top:12px; display:flex; justify-content:space-between; font-size:11.5px; font-weight:800; color:#002060;">
+                        <div>المدرب المعتمد: ${escapeHtml(meta.instructorFullName)}</div>
+                        <div>إدارة المعهد: ${BGTI_ENTERPRISE_MASTER.directorName} (رخصة: ${BGTI_ENTERPRISE_MASTER.licenseNo})</div>
+                    </div>
+                </div>
+            `);
+        });
+        return pages.join('');
+    }
+
+    function buildPracticalCardPdfHtml(trainee, overrideStart, overrideEnd, logoAssets, withPageBreak) {
+        const nt = normalizeInstExportTraineeRow(trainee);
+        const meta = resolveInstGroupMetadata(nt.group, [trainee], overrideStart, overrideEnd);
+        const criteriaRows = BGTI_ENTERPRISE_MASTER.practicalCriteria.map((crit, idx) => `
+            <tr>
+                <td style="border:1.5px solid #111;padding:5px;text-align:center;font-weight:700;">${idx + 1}</td>
+                <td style="border:1.5px solid #111;padding:5px 8px;text-align:right;font-weight:600;">${escapeHtml(crit)}</td>
+                <td style="border:1.5px solid #111;padding:5px;text-align:center;"></td>
+                <td style="border:1.5px solid #111;padding:5px;text-align:center;"></td>
+            </tr>
+        `).join('');
+        return `
+            <div style="direction:rtl; font-family:'Times New Roman','Arial',sans-serif; color:#111; ${withPageBreak ? 'page-break-after:always; break-after:page;' : ''}">
+                ${buildInstPdfBrandHeaderHtml(logoAssets, '', '')}
+                <div style="background:#CCFFCC; border:2px solid #002060; padding:7px 10px; text-align:center; font-size:14px; font-weight:900; color:#002060; margin-bottom:10px;">
+                    نموذج تقييم الكفايات العملية للمتدرب — Trainee Practical Competencies Assessment Form
+                </div>
+                <table style="width:100%; border-collapse:collapse; border:3px double #111; font-size:11.5px; margin-bottom:10px;">
+                    <tr>
+                        <td style="background:#CCFFCC; color:#002060; font-weight:900; border:1.5px solid #111; padding:5px 8px; width:24%; text-align:center;">اسم المتدرب</td>
+                        <td style="border:1.5px solid #111; padding:5px 10px; font-weight:800;">${escapeHtml(nt.fullName)} &nbsp; (الهوية: ${escapeHtml(nt.cleanId)} | المجموعة: ${escapeHtml(nt.group)})</td>
+                    </tr>
+                    <tr>
+                        <td style="background:#CCFFCC; color:#002060; font-weight:900; border:1.5px solid #111; padding:5px 8px; text-align:center;">البرنامج التدريبي</td>
+                        <td style="border:1.5px solid #111; padding:5px 10px; font-weight:700;">${escapeHtml(meta.accreditedProgram)} (${escapeHtml(meta.programType)})</td>
+                    </tr>
+                    <tr>
+                        <td style="background:#CCFFCC; color:#002060; font-weight:900; border:1.5px solid #111; padding:5px 8px; text-align:center;">الوحدة / المادة</td>
+                        <td style="border:1.5px solid #111; padding:5px 10px; font-weight:700;">${escapeHtml(meta.specialty)} &nbsp; | &nbsp; الفترة: ${escapeHtml(meta.dates.startDisplay)} إلى ${escapeHtml(meta.dates.endDisplay)}</td>
+                    </tr>
+                    <tr>
+                        <td style="background:#CCFFCC; color:#002060; font-weight:900; border:1.5px solid #111; padding:5px 8px; text-align:center;">المهمة العملية</td>
+                        <td style="border:1.5px solid #111; padding:5px 10px; font-weight:700;">تقييم الأداء والكفايات العملية وفق المعايير المعتمدة بالورشة/المعمل</td>
+                    </tr>
+                </table>
+                <table style="width:100%; border-collapse:collapse; border:3px double #111; font-size:11px; margin-bottom:10px;">
+                    <thead>
+                        <tr style="background:#CCFFFF; color:#002060; font-weight:900;">
+                            <th style="border:1.5px solid #111;padding:6px;width:6%;">م</th>
+                            <th style="border:1.5px solid #111;padding:6px;width:54%;">عناصر تقييم الأداء العملي</th>
+                            <th style="border:1.5px solid #111;padding:6px;width:16%;">الدرجة / 10</th>
+                            <th style="border:1.5px solid #111;padding:6px;width:24%;">الملاحظات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${criteriaRows}
+                        <tr style="background:#DCE6F1; color:#002060; font-weight:900;">
+                            <td colspan="2" style="border:1.5px solid #111;padding:5px;text-align:center;">المجموع</td>
+                            <td style="border:1.5px solid #111;padding:5px;background:#fff;text-align:center;">/ 100</td>
+                            <td style="border:1.5px solid #111;padding:5px;background:#fff;"></td>
+                        </tr>
+                        <tr style="background:#DCE6F1; color:#002060; font-weight:900;">
+                            <td colspan="2" style="border:1.5px solid #111;padding:5px;text-align:center;">النسبة المئوية</td>
+                            <td style="border:1.5px solid #111;padding:5px;background:#fff;text-align:center;">%</td>
+                            <td style="border:1.5px solid #111;padding:5px;background:#fff;"></td>
+                        </tr>
+                        <tr style="background:#DCE6F1; color:#002060; font-weight:900;">
+                            <td colspan="2" style="border:1.5px solid #111;padding:5px;text-align:center;">التقدير</td>
+                            <td colspan="2" style="border:1.5px solid #111;padding:5px;background:#fff;text-align:center;">يرجى تقييم المتدرب</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-top:8px;">
+                    <table style="width:45%; border-collapse:collapse; font-size:10.5px; font-weight:800;">
+                        <tr><td style="border:1px solid #333;padding:3px 6px;background:#66FFFF;text-align:center;">≥ 90%</td><td style="border:1px solid #333;padding:3px 8px;background:#66FFFF;text-align:center;">ممتاز</td></tr>
+                        <tr><td style="border:1px solid #333;padding:3px 6px;background:#66FF99;text-align:center;">≥ 80%</td><td style="border:1px solid #333;padding:3px 8px;background:#66FF99;text-align:center;">جيد جداً</td></tr>
+                        <tr><td style="border:1px solid #333;padding:3px 6px;background:#CCFFCC;text-align:center;">≥ 70%</td><td style="border:1px solid #333;padding:3px 8px;background:#CCFFCC;text-align:center;">جيد</td></tr>
+                        <tr><td style="border:1px solid #333;padding:3px 6px;background:#FFFFCC;text-align:center;">≥ 60%</td><td style="border:1px solid #333;padding:3px 8px;background:#FFFFCC;text-align:center;">متوسط</td></tr>
+                        <tr><td style="border:1px solid #333;padding:3px 6px;background:#FF9999;text-align:center;">&lt; 60%</td><td style="border:1px solid #333;padding:3px 8px;background:#FF9999;text-align:center;">دون المستوى المطلوب</td></tr>
+                    </table>
+                    <div style="flex:1; font-size:11.5px; font-weight:800; color:#002060; line-height:2; padding-top:6px;">
+                        <div>اسم المدرب المعتمد: <span style="color:#111;">${escapeHtml(meta.instructorFullName)}</span></div>
+                        <div>توقيع المدرب: ............................................</div>
+                        <div>مدير المعهد: <span style="color:#111;">${BGTI_ENTERPRISE_MASTER.directorName}</span></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    async function renderInstHtmlToPdfBlob(htmlString, orientation) {
+        if (typeof html2pdf === 'undefined') {
+            throw new Error('مكتبة html2pdf غير محملة');
+        }
+        const prevScrollX = window.scrollX;
+        const prevScrollY = window.scrollY;
+        window.scrollTo(0, 0);
+        let host = document.getElementById('instExportPdfRenderHost');
+        if (!host) {
+            host = document.createElement('div');
+            host.id = 'instExportPdfRenderHost';
+        }
+        const renderWidth = orientation === 'landscape' ? '1040px' : '740px';
+        document.body.prepend(host);
+        host.className = '';
+        host.style.cssText = `position:relative; width:${renderWidth}; margin:0; padding:10px; background:#ffffff; direction:rtl; z-index:320; display:block; visibility:visible;`;
+        host.innerHTML = htmlString;
+        try {
+            const imgs = host.querySelectorAll('img');
+            await Promise.all(Array.from(imgs).map(img => img.complete ? Promise.resolve() : new Promise(res => { img.onload = res; img.onerror = res; setTimeout(res, 200); })));
+            await new Promise(r => setTimeout(r, 40));
+            const opt = {
+                margin: [5, 5, 5, 5],
+                filename: 'export.pdf',
+                image: { type: 'jpeg', quality: 0.96 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: orientation || 'portrait' }
+            };
+            return await html2pdf().set(opt).from(host).output('blob');
+        } finally {
+            host.className = 'hidden';
+            host.style.cssText = '';
+            host.innerHTML = '';
+            document.body.appendChild(host);
+            window.scrollTo(prevScrollX, prevScrollY);
+        }
+    }
+
+    function triggerInstBlobDownload(blob, fileName) {
+        const a = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => { try { URL.revokeObjectURL(url); } catch (e) {} }, 2500);
+    }
+
+    function openInstExportModal() {
+        const modal = document.getElementById('instExportEngineModal');
+        if (!modal) return;
+        const { selectedCompany, selectedGroup, trainees: list } = getInstFilteredTrainees();
+        const summaryEl = document.getElementById('instExpActiveFiltersSummary');
+        if (summaryEl) {
+            const compLabel = selectedCompany === 'ALL' ? 'جميع الشركات والمؤسسات' : selectedCompany;
+            const grpLabel = selectedGroup === 'ALL' ? 'جميع المجموعات والشعب (عرض شامل)' : selectedGroup;
+            summaryEl.innerHTML = `
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-black text-slate-700 dark:text-slate-200">🏢 ${escapeHtml(compLabel)}</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-black text-slate-700 dark:text-slate-200">👥 ${escapeHtml(grpLabel)}</span>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-emerald-600 text-white font-black text-[11px]">${list.length} متدرب</span>
+            `;
+        }
+        const autoDates = resolveInstGroupContractAndDates(selectedGroup, list, '', '');
+        const datesHintEl = document.getElementById('instExpAutoDatesHint');
+        if (datesHintEl) {
+            datesHintEl.textContent = `تلقائي: ${autoDates.startDisplay} ← ${autoDates.endDisplay}`;
+        }
+        const progWrap = document.getElementById('instExpProgressWrap');
+        if (progWrap) progWrap.classList.add('hidden');
+        onInstExpFormTypeChange();
+        onInstExpFormatChange();
+        onInstExpPackModeChange();
+        modal.classList.remove('hidden');
+    }
+    window.openInstExportModal = openInstExportModal;
+
+    function closeInstExportModal() {
+        const modal = document.getElementById('instExportEngineModal');
+        if (modal) modal.classList.add('hidden');
+    }
+    window.closeInstExportModal = closeInstExportModal;
+
+    function onInstExpFormTypeChange() {
+        const selected = document.querySelector('input[name="instExpFormType"]:checked')?.value || 'enterprise_file';
+        ['enterprise_file', 'final_eval', 'training_followup', 'practical_card'].forEach(t => {
+            const card = document.getElementById(`instExpTypeCard-${t}`);
+            if (!card) return;
+            card.className = (t === selected)
+                ? 'p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/30 cursor-pointer flex items-start gap-2.5 transition shadow-xs'
+                : 'p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer flex items-start gap-2.5 transition';
+        });
+        const packWrap = document.getElementById('instExpPracticalPackWrap');
+        if (packWrap) packWrap.classList.toggle('hidden', selected !== 'practical_card');
+        const col11Wrap = document.getElementById('instExp11ColOptionWrap');
+        if (col11Wrap) col11Wrap.classList.toggle('hidden', selected !== 'enterprise_file');
+    }
+    window.onInstExpFormTypeChange = onInstExpFormTypeChange;
+
+    function onInstExpFormatChange() {
+        const fmt = document.querySelector('input[name="instExpFormat"]:checked')?.value || 'xlsx';
+        const cX = document.getElementById('instExpFmtCard-xlsx');
+        const cP = document.getElementById('instExpFmtCard-pdf');
+        if (cX) cX.className = fmt === 'xlsx' ? 'p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 cursor-pointer flex items-center gap-2.5 transition shadow-xs' : 'p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer flex items-center gap-2.5 transition';
+        if (cP) cP.className = fmt === 'pdf' ? 'p-3 rounded-2xl border-2 border-rose-500 bg-rose-50/70 dark:bg-rose-950/30 cursor-pointer flex items-center gap-2.5 transition shadow-xs' : 'p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer flex items-center gap-2.5 transition';
+    }
+    window.onInstExpFormatChange = onInstExpFormatChange;
+
+    function onInstExpPackModeChange() {
+        const mode = document.querySelector('input[name="instExpPracticalPack"]:checked')?.value || 'zip';
+        const cZ = document.getElementById('instExpPackCard-zip');
+        const cM = document.getElementById('instExpPackCard-merged');
+        if (cZ) cZ.className = mode === 'zip' ? 'p-3 rounded-xl border-2 border-amber-500 bg-white dark:bg-slate-900 cursor-pointer flex items-start gap-2' : 'p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer flex items-start gap-2';
+        if (cM) cM.className = mode === 'merged' ? 'p-3 rounded-xl border-2 border-amber-500 bg-white dark:bg-slate-900 cursor-pointer flex items-start gap-2' : 'p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer flex items-start gap-2';
+    }
+    window.onInstExpPackModeChange = onInstExpPackModeChange;
+
+    async function executeInstDynamicExport(optionsOverride) {
+        const opts = optionsOverride || {};
+        const formType = opts.formType || document.querySelector('input[name="instExpFormType"]:checked')?.value || 'enterprise_file';
+        const format = opts.format || document.querySelector('input[name="instExpFormat"]:checked')?.value || 'xlsx';
+        const practicalPack = opts.practicalPack || document.querySelector('input[name="instExpPracticalPack"]:checked')?.value || 'zip';
+        const startOverride = (opts.startDate !== undefined) ? opts.startDate : (document.getElementById('instExpStartDate')?.value || '');
+        const endOverride = (opts.endDate !== undefined) ? opts.endDate : (document.getElementById('instExpEndDate')?.value || '');
+        const include11Col = (opts.include11Col !== undefined) ? Boolean(opts.include11Col) : (document.getElementById('instExpInclude11ColCheck')?.checked !== false);
+
+        const { selectedCompany, selectedGroup, trainees: list } = getInstFilteredTrainees();
+        if (!list || list.length === 0) {
+            showToast('⚠️ لا يوجد متدربون ضمن المحددات النشطة للتصدير', 'warning');
+            return null;
+        }
+
+        const btn = document.getElementById('btnStartInstDynamicExport');
+        const progWrap = document.getElementById('instExpProgressWrap');
+        const progBar = document.getElementById('instExpProgressBar');
+        const statusEl = document.getElementById('instExpStatusText');
+        const pctEl = document.getElementById('instExpPercentText');
+        const setProg = (pct, msg) => {
+            if (progWrap) progWrap.classList.remove('hidden');
+            if (progBar) progBar.style.width = `${pct}%`;
+            if (pctEl) pctEl.textContent = `${pct}%`;
+            if (statusEl && msg) statusEl.textContent = msg;
+        };
+
+        if (btn) { btn.disabled = true; btn.classList.add('opacity-60'); }
+        try {
+            setProg(15, 'جاري تحميل الشعارين المعتمدين وبيانات الدورات...');
+            const logos = await loadInstLogoAssets();
+            const metaDates = resolveInstGroupContractAndDates(selectedGroup, list, startOverride, endOverride);
+            const safeComp = (selectedCompany && selectedCompany !== 'ALL') ? `_${selectedCompany.replace(/[\s\/\:*?"<>|]+/g, '_')}` : '';
+            const safeGrp = (selectedGroup && selectedGroup !== 'ALL') ? selectedGroup.replace(/[\s\/\:*?"<>|]+/g, '_') : 'كافة_الشعب';
+            const nowStr = new Date().toISOString().slice(0, 10);
+
+            let outBlob = null;
+            let outFileName = '';
+
+            if (formType === 'practical_card') {
+                if (practicalPack === 'zip') {
+                    const zip = new JSZip();
+                    for (let i = 0; i < list.length; i++) {
+                        const tr = list[i];
+                        const nt = normalizeInstExportTraineeRow(tr);
+                        const safeName = (nt.fullName || 'trainee').replace(/[\s\/\:*?"<>|]+/g, '_').slice(0, 32);
+                        const baseName = `${nt.cleanId || ('trainee_' + (i + 1))}_${safeName}`;
+                        const pct = Math.min(92, Math.round(20 + ((i + 1) / list.length) * 70));
+                        setProg(pct, `جاري إنشاء بطاقة: ${nt.fullName} (${i + 1}/${list.length})`);
+                        if (format === 'xlsx') {
+                            const sheetSpec = buildPracticalCardSingleSheetSpec(tr, startOverride, endOverride, 'بطاقة التقييم العملي');
+                            const cardBlob = await createStyledXlsxBlob([sheetSpec], logos);
+                            zip.file(`${baseName}.xlsx`, cardBlob);
+                        } else {
+                            const cardHtml = buildPracticalCardPdfHtml(tr, startOverride, endOverride, logos, false);
+                            const pdfBlob = await renderInstHtmlToPdfBlob(cardHtml, 'portrait');
+                            zip.file(`${baseName}.pdf`, pdfBlob);
+                        }
+                    }
+                    setProg(95, 'جاري ضغط ملفات بطاقات التقييم العملي داخل أرشيف ZIP...');
+                    outBlob = await zip.generateAsync({ type: 'blob' });
+                    outFileName = `بطاقات_التقييم_العملي_${format.toUpperCase()}${safeComp}_${safeGrp}_${nowStr}.zip`;
+                } else {
+                    if (format === 'xlsx') {
+                        setProg(45, 'جاري تجميع أوراق بطاقات التقييم العملي في ملف Excel موحد...');
+                        const usedNames = new Set();
+                        const allSheets = list.map((tr, idx) => {
+                            const nt = normalizeInstExportTraineeRow(tr);
+                            const sTitle = sanitizeExcelSheetName(`${idx + 1}_${nt.cleanId || nt.fullName}`, usedNames);
+                            return buildPracticalCardSingleSheetSpec(tr, startOverride, endOverride, sTitle);
+                        });
+                        outBlob = await createStyledXlsxBlob(allSheets, logos);
+                        outFileName = `بطاقات_التقييم_العملي_مدمج${safeComp}_${safeGrp}_${nowStr}.xlsx`;
+                    } else {
+                        setProg(45, 'جاري توليد مستند PDF مدمج متعدد الصفحات...');
+                        const mergedHtml = list.map((tr, i) => buildPracticalCardPdfHtml(tr, startOverride, endOverride, logos, i < list.length - 1)).join('');
+                        outBlob = await renderInstHtmlToPdfBlob(mergedHtml, 'portrait');
+                        outFileName = `بطاقات_التقييم_العملي_مدمج${safeComp}_${safeGrp}_${nowStr}.pdf`;
+                    }
+                }
+            } else {
+                setProg(50, 'جاري بناء الملف بالهوية البصرية المعتمدة والشعارين...');
+                if (format === 'xlsx') {
+                    let sheetsSpec = [];
+                    if (formType === 'enterprise_file') {
+                        sheetsSpec = buildEnterpriseFileSheetsSpec(list, metaDates, include11Col);
+                        outFileName = `ملف_المؤسسة${safeComp}_${safeGrp}_${nowStr}.xlsx`;
+                    } else if (formType === 'final_eval') {
+                        sheetsSpec = buildFinalEvalSheetsSpec(list, startOverride, endOverride);
+                        outFileName = `جدول_التقييم_النهائي${safeComp}_${safeGrp}_${nowStr}.xlsx`;
+                    } else {
+                        sheetsSpec = buildTrainingFollowupSheetsSpec(list, startOverride, endOverride);
+                        outFileName = `جدول_متابعة_التدريب${safeComp}_${safeGrp}_${nowStr}.xlsx`;
+                    }
+                    outBlob = await createStyledXlsxBlob(sheetsSpec, logos);
+                } else {
+                    let htmlDoc = '';
+                    let orient = 'portrait';
+                    if (formType === 'enterprise_file') {
+                        htmlDoc = buildEnterpriseFilePdfHtml(list, metaDates, logos);
+                        outFileName = `ملف_المؤسسة${safeComp}_${safeGrp}_${nowStr}.pdf`;
+                    } else if (formType === 'final_eval') {
+                        htmlDoc = buildFinalEvalPdfHtml(list, startOverride, endOverride, logos);
+                        outFileName = `جدول_التقييم_النهائي${safeComp}_${safeGrp}_${nowStr}.pdf`;
+                    } else {
+                        htmlDoc = buildTrainingFollowupPdfHtml(list, startOverride, endOverride, logos);
+                        orient = 'landscape';
+                        outFileName = `جدول_متابعة_التدريب${safeComp}_${safeGrp}_${nowStr}.pdf`;
+                    }
+                    outBlob = await renderInstHtmlToPdfBlob(htmlDoc, orient);
+                }
+            }
+
+            setProg(100, `تم إنشاء ${outFileName} بنجاح!`);
+            if (!opts.skipDownload) {
+                triggerInstBlobDownload(outBlob, outFileName);
+                showToast(`✅ تم تصدير ${outFileName} لـ (${list.length}) متدرب بنجاح!`, 'success');
+                if (formType === 'enterprise_file' && typeof openInstitutionApprovalConfirmationModal === 'function') {
+                    closeInstExportModal();
+                    const approvalGroupName = (selectedGroup && selectedGroup !== 'ALL') ? selectedGroup : 'كافة الشعب المشمولة';
+                    openInstitutionApprovalConfirmationModal(approvalGroupName, list);
+                }
+            }
+            return { blob: outBlob, fileName: outFileName, count: list.length, dates: metaDates, formType, format };
+        } catch (err) {
+            console.error('Dynamic Enterprise Export Error:', err);
+            showToast('❌ تعذر التصدير: ' + (err.message || err), 'error');
+            return null;
+        } finally {
+            if (btn) { btn.disabled = false; btn.classList.remove('opacity-60'); }
+        }
+    }
+    window.executeInstDynamicExport = executeInstDynamicExport;
+    window.buildEnterpriseFileSheetsSpec = buildEnterpriseFileSheetsSpec;
+    window.buildFinalEvalSheetsSpec = buildFinalEvalSheetsSpec;
+    window.buildTrainingFollowupSheetsSpec = buildTrainingFollowupSheetsSpec;
+    window.buildPracticalCardSingleSheetSpec = buildPracticalCardSingleSheetSpec;
+    window.resolveInstGroupMetadata = resolveInstGroupMetadata;
+    window.resolveAccreditedInstructorFullName = resolveAccreditedInstructorFullName;
+    window.resolveAccreditedProgramInfo = resolveAccreditedProgramInfo;
+
 
 
 
@@ -93394,6 +94900,160 @@ function getCTPAdmissionFormData(trainee) {
     <div id="traineeDossierPrintableArea" class="hidden bg-white text-black p-6 md:p-8 space-y-6" style="direction: rtl; font-family: 'Segoe UI', Tahoma, Arial, sans-serif;">
         <!-- Filled dynamically before printing -->
     </div>
+    <!-- ==================== ENTERPRISE MULTI-FORMAT EXPORT ENGINE MODAL (Excel & PDF + TVTC/BGTI Branding) ==================== -->
+    <div id="instExportEngineModal" class="fixed inset-0 z-[360] flex items-center justify-center p-4 hidden no-print" style="background:rgba(15,23,42,0.82);backdrop-filter:blur(6px);" dir="rtl">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 dark:border-slate-700 max-h-[92vh] flex flex-col">
+            <!-- Top Modal Banner (#DCE6F1 Accent Header) -->
+            <div class="px-6 py-4 bg-[#DCE6F1] border-b-2 border-[#002060]/20 flex items-center justify-between gap-3 shrink-0">
+                <div class="flex items-center gap-3">
+                    <img src="assets/bgti_logo.png" alt="BGTI" class="h-10 w-auto object-contain">
+                    <div>
+                        <h3 class="text-base md:text-lg font-black text-[#002060]">محرك التصدير الديناميكي متعدد الصيغ</h3>
+                        <p class="text-[11px] font-bold text-[#002060]/80">معهد الذهب الأسود للتدريب (رخصة: 19187335023495) • المؤسسة العامة للتدريب التقني والمهني</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <img src="assets/tvtc_logo.png" alt="TVTC" class="h-10 w-auto object-contain">
+                    <button type="button" onclick="closeInstExportModal()" class="w-8 h-8 rounded-full bg-[#002060]/10 hover:bg-[#002060]/20 flex items-center justify-center text-[#002060] font-black transition cursor-pointer">✕</button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-5 md:p-6 space-y-5 overflow-y-auto flex-1">
+                <!-- Active Screen Filters Summary -->
+                <div id="instExpActiveFiltersSummary" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <!-- Populated dynamically when opening modal -->
+                </div>
+
+                <!-- 1. Form / Template Type Selection -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-black text-slate-800 dark:text-slate-200">1️⃣ اختر نوع النموذج المراد تصديره:</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <label class="p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/30 cursor-pointer flex items-start gap-2.5 transition" id="instExpTypeCard-enterprise_file">
+                            <input type="radio" name="instExpFormType" value="enterprise_file" checked onchange="onInstExpFormTypeChange()" class="mt-1 accent-emerald-600 cursor-pointer">
+                            <div>
+                                <div class="text-xs font-black text-slate-900 dark:text-white">📄 ملف المؤسسة</div>
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400">القائمة الإسمية + توزيع المجموعات (+ ورقة الرفع 11 حقل)</div>
+                            </div>
+                        </label>
+                        <label class="p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer flex items-start gap-2.5 transition" id="instExpTypeCard-final_eval">
+                            <input type="radio" name="instExpFormType" value="final_eval" onchange="onInstExpFormTypeChange()" class="mt-1 accent-emerald-600 cursor-pointer">
+                            <div>
+                                <div class="text-xs font-black text-slate-900 dark:text-white">📝 جدول التقييم النهائي</div>
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400">نموذج التقييم الشامل ونتائج المتدربين</div>
+                            </div>
+                        </label>
+                        <label class="p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer flex items-start gap-2.5 transition" id="instExpTypeCard-training_followup">
+                            <input type="radio" name="instExpFormType" value="training_followup" onchange="onInstExpFormTypeChange()" class="mt-1 accent-emerald-600 cursor-pointer">
+                            <div>
+                                <div class="text-xs font-black text-slate-900 dark:text-white">📊 جدول متابعة التدريب</div>
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400">كشف نسبة الغياب والتقييم الشهري (1 - 8)</div>
+                            </div>
+                        </label>
+                        <label class="p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer flex items-start gap-2.5 transition" id="instExpTypeCard-practical_card">
+                            <input type="radio" name="instExpFormType" value="practical_card" onchange="onInstExpFormTypeChange()" class="mt-1 accent-emerald-600 cursor-pointer">
+                            <div>
+                                <div class="text-xs font-black text-slate-900 dark:text-white">🎴 بطاقة تقييم الأداء العملي للمتدرب</div>
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400">نموذج فردي بـ 10 معايير وحساب التقدير التلقائي</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 2. Export Format -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-black text-slate-800 dark:text-slate-200">2️⃣ صيغة التصدير (Export Format):</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 cursor-pointer flex items-center gap-2.5 transition" id="instExpFmtCard-xlsx">
+                            <input type="radio" name="instExpFormat" value="xlsx" checked onchange="onInstExpFormatChange()" class="accent-emerald-600 cursor-pointer">
+                            <div>
+                                <div class="text-xs font-black text-slate-900 dark:text-white">🟢 جدول Excel (.xlsx)</div>
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400">مع الشعارين والتنسيق الرسمي RTL</div>
+                            </div>
+                        </label>
+                        <label class="p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer flex items-center gap-2.5 transition" id="instExpFmtCard-pdf">
+                            <input type="radio" name="instExpFormat" value="pdf" onchange="onInstExpFormatChange()" class="accent-rose-600 cursor-pointer">
+                            <div>
+                                <div class="text-xs font-black text-slate-900 dark:text-white">🔴 مستند PDF (.pdf)</div>
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400">مطبوع A4 جاهز بالهوية الرسمية</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3. Optional Date Overrides -->
+                <div class="p-4 rounded-2xl bg-blue-50/60 dark:bg-slate-800/70 border border-blue-200 dark:border-slate-700 space-y-2.5">
+                    <div class="flex items-center justify-between flex-wrap gap-1">
+                        <span class="text-xs font-black text-[#002060] dark:text-blue-300">3️⃣ تعديل التواريخ الاختياري (Date Overrides):</span>
+                        <span id="instExpAutoDatesHint" class="text-[11px] font-bold text-blue-800 dark:text-blue-200 bg-white dark:bg-slate-900 px-2.5 py-0.5 rounded-lg border border-blue-200 dark:border-slate-700">--</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">📅 تاريخ بداية التدريب (اختياري)</label>
+                            <input type="date" id="instExpStartDate" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs font-bold text-slate-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">📅 تاريخ نهاية التدريب (اختياري)</label>
+                            <input type="date" id="instExpEndDate" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs font-bold text-slate-900 dark:text-white">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">إذا تُرك الحقلان فارغين، يتم جلب تواريخ الدورة المسجلة في قاعدة البيانات تلقائياً.</p>
+                </div>
+
+                <!-- Enterprise File 11-column upload sheet toggle -->
+                <div id="instExp11ColOptionWrap" class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <label class="flex items-center gap-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                        <input type="checkbox" id="instExpInclude11ColCheck" checked class="w-4 h-4 accent-emerald-600 rounded cursor-pointer">
+                        <span>تضمين ورقة «بيانات الرفع للمؤسسة - 11 حقل (رقم الهوية → رقم الجوال)» كـ ورقة ثالثة في ملف Excel</span>
+                    </label>
+                </div>
+
+                <!-- 4. Individual Packaging Option (ONLY visible when Practical Assessment Card is chosen) -->
+                <div id="instExpPracticalPackWrap" class="hidden p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800 space-y-2.5">
+                    <label class="block text-xs font-black text-amber-950 dark:text-amber-200">4️⃣ خيار التصدير للنماذج الفردية (بطاقة التقييم العملي):</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <label class="p-3 rounded-xl border-2 border-amber-500 bg-white dark:bg-slate-900 cursor-pointer flex items-start gap-2" id="instExpPackCard-zip">
+                            <input type="radio" name="instExpPracticalPack" value="zip" checked onchange="onInstExpPackModeChange()" class="mt-0.5 accent-amber-600 cursor-pointer">
+                            <div>
+                                <div class="text-xs font-black text-slate-900 dark:text-white">📁 ملف مضغوط ZIP (.zip)</div>
+                                <div class="text-[11px] text-slate-500">ينشئ ملفاً منفصلاً لكل متدرب داخل أرشيف ZIP</div>
+                            </div>
+                        </label>
+                        <label class="p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer flex items-start gap-2" id="instExpPackCard-merged">
+                            <input type="radio" name="instExpPracticalPack" value="merged" onchange="onInstExpPackModeChange()" class="mt-0.5 accent-amber-600 cursor-pointer">
+                            <div>
+                                <div class="text-xs font-black text-slate-900 dark:text-white">📄 مستند مدمج متعدد الصفحات</div>
+                                <div class="text-[11px] text-slate-500">مستند PDF موحد بفاصل صفحات (أو أوراق Excel متعددة)</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="instExpProgressWrap" class="hidden space-y-1.5 p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-200">
+                        <span id="instExpStatusText">جاري تجهيز الملفات...</span>
+                        <span id="instExpPercentText" class="font-mono font-black text-emerald-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
+                        <div id="instExpProgressBar" class="bg-gradient-to-r from-emerald-500 to-teal-600 h-2.5 rounded-full transition-all duration-200" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-700 flex items-center gap-3 shrink-0">
+                <button type="button" id="btnStartInstDynamicExport" onclick="executeInstDynamicExport()" class="flex-1 py-3 px-5 rounded-2xl bg-gradient-to-r from-[#002060] to-blue-900 hover:from-slate-900 hover:to-[#002060] text-white font-black text-xs md:text-sm shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+                    <span>🚀</span>
+                    <span>تصدير الملف المعتمد الآن</span>
+                </button>
+                <button type="button" onclick="closeInstExportModal()" class="py-3 px-5 rounded-2xl border border-slate-300 dark:border-slate-600 hover:bg-slate-200/70 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs md:text-sm transition cursor-pointer">
+                    إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="instExportPdfRenderHost" class="hidden" style="direction:rtl;font-family:'Arial','Tahoma',sans-serif;"></div>
 </body>
 
 </html>
