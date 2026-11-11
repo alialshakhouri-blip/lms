@@ -3614,15 +3614,21 @@
 
                     <!-- Trainee Link: Student Virtual Class -->
 
-                    <button onclick="switchTab('studentVirtualClass')" id="btn-studentVirtualClass" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer">
+                    <button onclick="switchTab('studentVirtualClass')" id="btn-studentVirtualClass" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center justify-between gap-2 nav-item-inactive cursor-pointer">
 
-                        <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <span class="flex items-center gap-3">
 
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
 
-                        </svg>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
 
-                        <span class="text-xs font-bold">المحاضرة المباشرة</span>
+                            </svg>
+
+                            <span class="text-xs font-bold">التعليم عن بعد</span>
+
+                        </span>
+
+                        <span class="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">مباشر</span>
 
                     </button>
 
@@ -8875,9 +8881,17 @@
 
 
 
-                    <!-- Large iOS Toggle Switch -->
+                    <!-- Large iOS Toggle Switch & Open-for-All Action -->
 
-                    <div class="flex items-center gap-3 self-end sm:self-center shrink-0">
+                    <div class="flex items-center gap-3 self-end sm:self-center shrink-0 flex-wrap justify-end">
+
+                        <button type="button" onclick="activateVirtualClassroomForAll()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs px-3.5 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer" title="تفعيل التعليم عن بعد وجعله متاحاً لجميع المتدربين والمجموعات والمدربين">
+
+                            <span>🌐</span>
+
+                            <span>تفعيل للجميع</span>
+
+                        </button>
 
                         <span class="text-xs font-black text-slate-700 select-none" id="vcSwitchLabel">إيقاف (OFF)</span>
 
@@ -9095,17 +9109,27 @@
 
 
 
-                            <!-- Date Scope 3-Button Segmented Selector -->
+                            <!-- Date Scope 4-Button Segmented Selector -->
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
 
-                                <button type="button" onclick="setVcDateScope('today')" id="vcScopeBtn-today" class="p-3 rounded-2xl border text-xs font-black flex flex-col items-center justify-center gap-1.5 transition cursor-pointer border-blue-600 bg-blue-50 text-blue-950 shadow-2xs">
+                                <button type="button" onclick="setVcDateScope('always')" id="vcScopeBtn-always" class="p-3 rounded-2xl border text-xs font-black flex flex-col items-center justify-center gap-1.5 transition cursor-pointer border-blue-600 bg-blue-50 text-blue-950 shadow-2xs">
+
+                                    <span class="text-lg">🌐</span>
+
+                                    <span>متاح دائماً</span>
+
+                                    <span class="text-[10px] text-blue-700 font-bold">مفتوح للجميع يومياً</span>
+
+                                </button>
+
+                                <button type="button" onclick="setVcDateScope('today')" id="vcScopeBtn-today" class="p-3 rounded-2xl border text-xs font-black flex flex-col items-center justify-center gap-1.5 transition cursor-pointer border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
 
                                     <span class="text-lg">📌</span>
 
                                     <span>اليوم فقط</span>
 
-                                    <span class="text-[10px] text-blue-700 font-bold" id="vcScopeTodayLabel">تاريخ اليوم</span>
+                                    <span class="text-[10px] text-slate-500 font-bold" id="vcScopeTodayLabel">تاريخ اليوم</span>
 
                                 </button>
 
@@ -9115,7 +9139,7 @@
 
                                     <span>طوال هذا الأسبوع</span>
 
-                                    <span class="text-[10px] text-slate-500 font-bold">الأحد إلى الخميس</span>
+                                    <span class="text-[10px] text-slate-500 font-bold">كافة أيام الأسبوع</span>
 
                                 </button>
 
@@ -16839,57 +16863,65 @@
 
 
 
-    <!-- ==================== STUDENT MOBILE BOTTOM NAVIGATION (6 Core Tabs - Including Gradebook) ==================== -->
+    <!-- ==================== STUDENT MOBILE BOTTOM NAVIGATION (7 Core Tabs Including Distance Learning) ==================== -->
 
-    <nav id="studentBottomNav" class="hidden md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-1.5 px-2">
+    <nav id="studentBottomNav" class="hidden md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-1.5 px-1.5">
 
-        <div class="max-w-lg mx-auto grid grid-cols-6 gap-0.5 text-center">
+        <div class="max-w-lg mx-auto grid grid-cols-7 gap-0.5 text-center">
 
             <button type="button" onclick="switchTab('studentDashboard')" id="sbn-studentDashboard" class="flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition text-slate-500 hover:text-[#0F2942] cursor-pointer">
 
-                <span class="text-lg">🏠</span>
+                <span class="text-base sm:text-lg">🏠</span>
 
-                <span class="text-[9px] sm:text-[9.5px] font-bold mt-0.5">الرئيسية</span>
+                <span class="text-[8.5px] sm:text-[9.5px] font-bold mt-0.5 whitespace-nowrap">الرئيسية</span>
 
             </button>
 
             <button type="button" onclick="switchTab('studentCourses')" id="sbn-studentCourses" class="flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition text-slate-500 hover:text-[#0F2942] cursor-pointer">
 
-                <span class="text-lg">📚</span>
+                <span class="text-base sm:text-lg">📚</span>
 
-                <span class="text-[9px] sm:text-[9.5px] font-bold mt-0.5">المقررات</span>
+                <span class="text-[8.5px] sm:text-[9.5px] font-bold mt-0.5 whitespace-nowrap">المقررات</span>
+
+            </button>
+
+            <button type="button" onclick="switchTab('studentVirtualClass')" id="sbn-studentVirtualClass" class="flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition text-emerald-700 hover:text-emerald-900 cursor-pointer">
+
+                <span class="text-base sm:text-lg">📡</span>
+
+                <span class="text-[8.5px] sm:text-[9.5px] font-bold mt-0.5 whitespace-nowrap">عن بعد</span>
 
             </button>
 
             <button type="button" onclick="switchTab('studentTasks')" id="sbn-studentTasks" class="flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition text-slate-500 hover:text-[#0F2942] cursor-pointer">
 
-                <span class="text-lg">📝</span>
+                <span class="text-base sm:text-lg">📝</span>
 
-                <span class="text-[9px] sm:text-[9.5px] font-bold mt-0.5">المهام</span>
+                <span class="text-[8.5px] sm:text-[9.5px] font-bold mt-0.5 whitespace-nowrap">المهام</span>
 
             </button>
 
             <button type="button" onclick="switchTab('submissionsCalendar')" id="sbn-submissionsCalendar" class="flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition text-slate-500 hover:text-[#0F2942] cursor-pointer">
 
-                <span class="text-lg">📅</span>
+                <span class="text-base sm:text-lg">📅</span>
 
-                <span class="text-[9px] sm:text-[9.5px] font-bold mt-0.5">التقويم</span>
+                <span class="text-[8.5px] sm:text-[9.5px] font-bold mt-0.5 whitespace-nowrap">التقويم</span>
 
             </button>
 
             <button type="button" onclick="switchTab('studentGrades')" id="sbn-studentGrades" class="flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition text-slate-500 hover:text-[#0F2942] cursor-pointer">
 
-                <span class="text-lg">🎓</span>
+                <span class="text-base sm:text-lg">🎓</span>
 
-                <span class="text-[9px] sm:text-[9.5px] font-bold mt-0.5 whitespace-nowrap">الدرجات</span>
+                <span class="text-[8.5px] sm:text-[9.5px] font-bold mt-0.5 whitespace-nowrap">الدرجات</span>
 
             </button>
 
             <button type="button" onclick="switchTab('studentAccount')" id="sbn-studentAccount" class="flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition text-slate-500 hover:text-[#0F2942] cursor-pointer">
 
-                <span class="text-lg">👤</span>
+                <span class="text-base sm:text-lg">👤</span>
 
-                <span class="text-[9px] sm:text-[9.5px] font-bold mt-0.5">حسابي</span>
+                <span class="text-[8.5px] sm:text-[9.5px] font-bold mt-0.5 whitespace-nowrap">حسابي</span>
 
             </button>
 
@@ -17144,55 +17176,128 @@
     var virtualClassrooms = {};
     var activeVcTrainer = null;
     var currentVcPlatform = 'meet';
-    var currentVcDateScope = 'today';
-    var currentVcLockMode = 'period';
+    var currentVcDateScope = 'always';
+    var currentVcLockMode = 'allday';
+
+    const DEFAULT_VC_NOTES = 'التعليم عن بعد متاح ومفعل للجميع. يرجى الدخول بالاسم الثلاثي الصريح والالتزام بموعد المحاضرة.';
+    function buildDefaultVcRoom(opts) {
+        return {
+            platform: opts.platform || 'meet',
+            link: opts.link,
+            courseKey: opts.courseKey || opts.trainerName || '__GLOBAL__',
+            courseTitle: opts.courseTitle || 'المقرر التدريبي المعتمد',
+            trainerName: opts.trainerName || 'المدرب المعتمد',
+            topic: opts.topic,
+            time: opts.time || 'متاح طوال اليوم التدريبي (08:00 ص - 04:00 م)',
+            targetGroups: 'ALL',
+            passcode: opts.passcode || '',
+            notes: opts.notes || DEFAULT_VC_NOTES,
+            isActive: true,
+            dateScope: 'always',
+            calendarDate: '',
+            lockByPeriod: false,
+            isGlobal: Boolean(opts.isGlobal),
+            vcSchemaVersion: 'v3_open_for_all',
+            isDefaultSeed: true,
+            updatedAt: new Date().toISOString(),
+            updatedBy: opts.updatedBy || 'النظام (متاح للجميع)'
+        };
+    }
 
     var DEFAULT_VIRTUAL_CLASSROOMS = {
-        'شرف الدين': {
+        '__GLOBAL__': buildDefaultVcRoom({
+            isGlobal: true,
             platform: 'meet',
+            link: 'https://meet.google.com/bgt-anak-all',
+            courseKey: '__GLOBAL__',
+            courseTitle: 'التعليم عن بعد الموحد (جميع المقررات والتخصصات)',
+            trainerName: 'الإدارة والمدربون المعتمدون',
+            topic: 'قاعة التعليم عن بعد الموحدة (متاحة لجميع المتدربين والشعب)',
+            notes: 'هذه القاعة مفتوحة ومتاحة لجميع المتدربين وكافة المجموعات والشعب والشركات للتعليم عن بعد.',
+            updatedBy: 'إدارة المعهد'
+        }),
+        'شرف الدين': buildDefaultVcRoom({
+            trainerName: 'شرف الدين',
+            courseTitle: 'انجليزية',
             link: 'https://meet.google.com/qmv-wqzk-pbc',
             topic: 'محاضرة المصطلحات الفنية والسلامة المهنية (عن بعد)',
-            time: 'من 08:00 ص إلى 04:00 م (حسب فترات الجدول)',
-            targetGroups: 'ALL',
-            passcode: '',
             notes: 'يرجى الدخول بالاسم الثلاثي الصريح وإبقاء المايكروفون مغلقاً حتى طلب الإذن بالمداخلة.',
-            isActive: false,
-            dateScope: 'today',
-            calendarDate: '',
-            lockByPeriod: true,
-            updatedAt: new Date().toISOString(),
             updatedBy: 'أ. شرف الدين'
-        },
-        'رضا مطيلق': {
+        }),
+        'رضا مطيلق': buildDefaultVcRoom({
+            trainerName: 'رضا مطيلق',
+            courseTitle: 'اللحام',
             platform: 'zoom',
             link: 'https://zoom.us/j/9876543210',
-            topic: 'محاضرة تقنيات اللحام وقراءة المخططات (عن بعد)',
-            time: 'من 08:00 ص إلى 04:00 م (حسب فترات الجدول)',
-            targetGroups: 'ALL',
             passcode: '2026',
+            topic: 'محاضرة تقنيات اللحام وقراءة المخططات (عن بعد)',
             notes: 'الرجاء الالتزام بموعد الدخول وتجهيز دفتر الملاحظات.',
-            isActive: false,
-            dateScope: 'today',
-            calendarDate: '',
-            lockByPeriod: true,
-            updatedAt: new Date().toISOString(),
             updatedBy: 'أ. رضا مطيلق'
-        },
-        'عصام سعيد': {
-            platform: 'meet',
+        }),
+        'عصام سعيد': buildDefaultVcRoom({
+            trainerName: 'عصام سعيد',
+            courseTitle: 'الكهرباء',
             link: 'https://meet.google.com/ert-bnmk-iop',
             topic: 'محاضرة صيانة الأنظمة الكهربائية وتطبيقاتها (عن بعد)',
-            time: 'من 08:00 ص إلى 04:00 م (حسب فترات الجدول)',
-            targetGroups: 'ALL',
-            passcode: '',
             notes: 'المحاضرة تفاعلية مباشرة تشمل حل تمارين ومناقشة تقييمات الأسبوع.',
-            isActive: false,
-            dateScope: 'today',
-            calendarDate: '',
-            lockByPeriod: true,
-            updatedAt: new Date().toISOString(),
             updatedBy: 'أ. عصام سعيد'
-        }
+        }),
+        'يوسف جمال': buildDefaultVcRoom({
+            trainerName: 'يوسف جمال',
+            courseTitle: 'انجليزية',
+            link: 'https://meet.google.com/ysf-bgti-ena',
+            topic: 'محاضرة اللغة الإنجليزية التأسيسية والمتقدمة (عن بعد)',
+            updatedBy: 'أ. يوسف جمال'
+        }),
+        'علي عبدالسلام': buildDefaultVcRoom({
+            trainerName: 'علي عبدالسلام',
+            courseTitle: 'انجليزية',
+            link: 'https://meet.google.com/ali-bgti-enb',
+            topic: 'محاضرة اللغة الإنجليزية ومهارات التواصل الفني (عن بعد)',
+            updatedBy: 'أ. علي عبدالسلام'
+        }),
+        'سيد احمد': buildDefaultVcRoom({
+            trainerName: 'سيد احمد',
+            courseTitle: 'الميكانيكية',
+            link: 'https://meet.google.com/syd-bgti-mch',
+            topic: 'محاضرة التقنية الميكانيكية وأنظمة الصيانة (عن بعد)',
+            updatedBy: 'أ. سيد احمد'
+        }),
+        'فاضل الماجد': buildDefaultVcRoom({
+            trainerName: 'فاضل الماجد',
+            courseTitle: 'السلامة والصحة',
+            link: 'https://meet.google.com/fdl-bgti-hse',
+            topic: 'محاضرة السلامة والصحة المهنية ومعايير الجودة (عن بعد)',
+            updatedBy: 'أ. فاضل الماجد'
+        }),
+        'أحمد الاصيل': buildDefaultVcRoom({
+            trainerName: 'أحمد الاصيل',
+            courseTitle: 'الادارة المكتبية والسكرتارية',
+            link: 'https://meet.google.com/asl-bgti-adm',
+            topic: 'محاضرة الإدارة المكتبية والسكرتارية التنفيذية (عن بعد)',
+            updatedBy: 'أ. أحمد الاصيل'
+        }),
+        'ناجي محمد': buildDefaultVcRoom({
+            trainerName: 'ناجي محمد',
+            courseTitle: 'إنشاءات',
+            link: 'https://meet.google.com/nji-bgti-cst',
+            topic: 'محاضرة تقنيات الإنشاءات والمباني (عن بعد)',
+            updatedBy: 'أ. ناجي محمد'
+        }),
+        'إمام يعقوب': buildDefaultVcRoom({
+            trainerName: 'إمام يعقوب',
+            courseTitle: 'الحاسب الالي',
+            link: 'https://meet.google.com/imm-bgti-cma',
+            topic: 'محاضرة الحاسب الآلي والتطبيقات المكتبية (عن بعد)',
+            updatedBy: 'أ. إمام يعقوب'
+        }),
+        'قاسم الماجد': buildDefaultVcRoom({
+            trainerName: 'قاسم الماجد',
+            courseTitle: 'الحاسب الالي',
+            link: 'https://meet.google.com/qsm-bgti-cmb',
+            topic: 'محاضرة الحاسب الآلي وتطبيقاته العملية (عن بعد)',
+            updatedBy: 'أ. قاسم الماجد'
+        })
     };
     window.DEFAULT_VIRTUAL_CLASSROOMS = DEFAULT_VIRTUAL_CLASSROOMS;
     window.virtualClassrooms = virtualClassrooms;
@@ -19249,7 +19354,7 @@ ${details}
 
             } else {
 
-                const allowedAdminTabs = ['attendance', 'masterSchedule', 'settings', 'timesheet', 'archive', 'users', 'gradesSystem', 'trainerReports', 'adminReports', 'adminCertificates', 'submissionsCalendar', 'attendanceSheet', 'institutionFiles'];
+                const allowedAdminTabs = ['attendance', 'masterSchedule', 'settings', 'timesheet', 'archive', 'users', 'gradesSystem', 'trainerReports', 'adminReports', 'adminCertificates', 'submissionsCalendar', 'attendanceSheet', 'institutionFiles', 'virtualClass', 'supportTickets', 'companyDashboard'];
 
                 let candidateTab = savedTab;
 
@@ -19509,7 +19614,7 @@ ${details}
 
         if (currentUser.role === 'student') {
 
-            const sbnTabs = ['studentDashboard', 'studentCourses', 'studentTasks', 'submissionsCalendar', 'studentGrades', 'studentAccount'];
+            const sbnTabs = ['studentDashboard', 'studentCourses', 'studentVirtualClass', 'studentTasks', 'submissionsCalendar', 'studentGrades', 'studentAccount'];
 
             sbnTabs.forEach(sTab => {
 
@@ -43406,6 +43511,26 @@ function openReportFromProfile() {
 
                         <!-- Action Buttons -->
 
+                        ${(function() {
+                            const vcRes = (typeof resolveVirtualClassroomForCourse === 'function')
+                                ? resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, currentUser.group, true)
+                                : null;
+                            if (vcRes && vcRes.status === 'open' && vcRes.vc && vcRes.vc.link) {
+                                return `
+                                    <div class="flex items-center gap-2 pt-1">
+                                        <a href="${vcRes.vc.link}" target="_blank" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-2.5 px-3 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                                            <span>📡</span>
+                                            <span>دخول المحاضرة عن بعد</span>
+                                        </a>
+                                        <button type="button" onclick="switchTab('studentVirtualClass')" class="px-3 py-2.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold rounded-xl text-xs transition cursor-pointer" title="تفاصيل القاعة الافتراضية">
+                                            <span>تفاصيل</span>
+                                        </button>
+                                    </div>
+                                `;
+                            }
+                            return '';
+                        })()}
+
                         <div class="flex items-center gap-2 pt-1">
 
                             <button type="button" onclick="openStudentLmsForCourse('${c.lmsKey}', activeStudentLmsWeek)" class="w-full ${btnClass} font-black py-3 px-4 rounded-2xl text-xs md:text-sm transition duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-95">
@@ -57188,11 +57313,26 @@ function openReportFromProfile() {
 
 
 
-            // Merge Virtual Classrooms (القاعات الافتراضية المباشرة)
+            // Merge Virtual Classrooms (القاعات الافتراضية المباشرة - دمج آمن يحفظ التفعيل للجميع)
 
             if (cloudVirtualClassrooms && typeof cloudVirtualClassrooms === 'object' && Object.keys(cloudVirtualClassrooms).length > 0) {
 
-                virtualClassrooms = { ...virtualClassrooms, ...cloudVirtualClassrooms };
+                if (typeof mergeDefaultVirtualClassrooms === 'function') {
+
+                    const hasCloudV3 = Boolean(
+                        (cloudVirtualClassrooms._meta && cloudVirtualClassrooms._meta.schemaVersion === VC_STORAGE_VERSION) ||
+                        Object.values(cloudVirtualClassrooms).some(v => v && typeof v === 'object' && (v.vcSchemaVersion === VC_STORAGE_VERSION || v.manualOverride === true))
+                    );
+
+                    virtualClassrooms = mergeDefaultVirtualClassrooms({ ...virtualClassrooms, ...cloudVirtualClassrooms }, !hasCloudV3);
+
+                } else {
+
+                    virtualClassrooms = { ...DEFAULT_VIRTUAL_CLASSROOMS, ...virtualClassrooms, ...cloudVirtualClassrooms };
+
+                }
+
+                localStorage.setItem('sys_vc_version_flag', typeof VC_STORAGE_VERSION !== 'undefined' ? VC_STORAGE_VERSION : 'v3_open_for_all');
 
                 localStorage.setItem('sys_virtual_classrooms_v1', JSON.stringify(virtualClassrooms));
 
@@ -57207,6 +57347,12 @@ function openReportFromProfile() {
                 if (typeof renderStudentVirtualClassTab === 'function' && document.getElementById('tab-studentVirtualClass') && !document.getElementById('tab-studentVirtualClass').classList.contains('hidden')) {
 
                     renderStudentVirtualClassTab();
+
+                }
+
+                if (typeof renderVirtualClassTab === 'function' && document.getElementById('tab-virtualClass') && !document.getElementById('tab-virtualClass').classList.contains('hidden')) {
+
+                    renderVirtualClassTab();
 
                 }
 
@@ -77769,31 +77915,19 @@ function buildDemoExecutiveReport(params) {
 
     function isDateScopeActiveToday(vc) {
 
-        if (!vc || !vc.isActive) return false;
+        if (!vc || !vc.isActive || !vc.link) return false;
 
         const todayStr = getTodayDateString();
 
+        const scope = vc.dateScope || 'always';
 
-
-        if (vc.dateScope === 'today') {
-
-            if (!vc.calendarDate) return true;
-
-            return vc.calendarDate === todayStr;
-
-        } else if (vc.dateScope === 'week') {
-
-            const now = new Date();
-
-            const day = now.getDay();
-
-            return day >= 0 && day <= 4; // الأحد إلى الخميس
-
-        } else if (vc.dateScope === 'calendar') {
+        if (scope === 'calendar' && vc.calendarDate) {
 
             return vc.calendarDate === todayStr;
 
         }
+
+        // 'always', 'today', 'week' stay open without being blocked by stale hidden calendarDate
 
         return true;
 
@@ -77921,7 +78055,70 @@ function buildDemoExecutiveReport(params) {
 
 
 
-    const VC_STORAGE_VERSION = 'v2_default_off_course_binding';
+    const VC_STORAGE_VERSION = 'v3_open_for_all';
+
+    function cloneDefaultVirtualClassrooms() {
+        const copy = {};
+        Object.keys(DEFAULT_VIRTUAL_CLASSROOMS || {}).forEach(k => {
+            if (DEFAULT_VIRTUAL_CLASSROOMS[k] && typeof DEFAULT_VIRTUAL_CLASSROOMS[k] === 'object') {
+                copy[k] = { ...DEFAULT_VIRTUAL_CLASSROOMS[k] };
+            }
+        });
+        copy._meta = { schemaVersion: VC_STORAGE_VERSION, openForAll: true };
+        return copy;
+    }
+
+    function mergeDefaultVirtualClassrooms(savedMap, upgradeOldSeeds = false) {
+        const merged = cloneDefaultVirtualClassrooms();
+        if (!savedMap || typeof savedMap !== 'object') return merged;
+
+        Object.keys(savedMap).forEach(k => {
+            if (k === '_meta') return;
+            const entry = savedMap[k];
+            if (!entry || typeof entry !== 'object') return;
+
+            const normalizedEntry = {
+                ...entry,
+                targetGroups: entry.targetGroups || 'ALL',
+                dateScope: entry.dateScope || 'always'
+            };
+
+            if (upgradeOldSeeds && entry.vcSchemaVersion !== VC_STORAGE_VERSION && entry.manualOverride !== true) {
+                // Upgrade stale v2 default-off records so Distance Learning works out of the box,
+                // while preserving any custom meeting link the user entered!
+                const def = merged[k] || merged.__GLOBAL__;
+                if (entry.isActive === true && entry.link) {
+                    merged[k] = {
+                        ...def,
+                        ...normalizedEntry,
+                        isActive: true,
+                        vcSchemaVersion: VC_STORAGE_VERSION
+                    };
+                } else {
+                    const hasCustomLink = entry.link && def && entry.link !== def.link;
+                    merged[k] = {
+                        ...(def || {}),
+                        ...normalizedEntry,
+                        link: hasCustomLink ? entry.link : (def ? def.link : entry.link),
+                        isActive: true,
+                        dateScope: 'always',
+                        calendarDate: '',
+                        lockByPeriod: false,
+                        vcSchemaVersion: VC_STORAGE_VERSION
+                    };
+                }
+            } else {
+                merged[k] = {
+                    ...(merged[k] || {}),
+                    ...normalizedEntry
+                };
+            }
+        });
+
+        merged._meta = { schemaVersion: VC_STORAGE_VERSION, openForAll: true };
+        return merged;
+    }
+    window.mergeDefaultVirtualClassrooms = mergeDefaultVirtualClassrooms;
 
     function loadVirtualClassrooms() {
 
@@ -77931,35 +78128,45 @@ function buildDemoExecutiveReport(params) {
 
             const raw = localStorage.getItem('sys_virtual_classrooms_v1');
 
-            if (raw && isMigrated) {
+            let parsed = null;
 
-                virtualClassrooms = JSON.parse(raw);
+            if (raw) {
 
-            } else {
+                try {
 
-                virtualClassrooms = { ...DEFAULT_VIRTUAL_CLASSROOMS };
+                    parsed = JSON.parse(raw);
 
-                for (let k in virtualClassrooms) {
+                } catch (parseErr) {
 
-                    if (virtualClassrooms[k]) {
-
-                        virtualClassrooms[k].isActive = false;
-
-                    }
+                    parsed = null;
 
                 }
 
-                localStorage.setItem('sys_vc_version_flag', VC_STORAGE_VERSION);
+            }
 
-                localStorage.setItem('sys_virtual_classrooms_v1', JSON.stringify(virtualClassrooms));
+            if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+
+                virtualClassrooms = mergeDefaultVirtualClassrooms(parsed, !isMigrated);
+
+            } else {
+
+                virtualClassrooms = cloneDefaultVirtualClassrooms();
 
             }
+
+            window.virtualClassrooms = virtualClassrooms;
+
+            localStorage.setItem('sys_vc_version_flag', VC_STORAGE_VERSION);
+
+            localStorage.setItem('sys_virtual_classrooms_v1', JSON.stringify(virtualClassrooms));
 
         } catch (e) {
 
             console.error('Error loading virtual classrooms:', e);
 
-            virtualClassrooms = { ...DEFAULT_VIRTUAL_CLASSROOMS };
+            virtualClassrooms = cloneDefaultVirtualClassrooms();
+
+            window.virtualClassrooms = virtualClassrooms;
 
         }
 
@@ -78181,38 +78388,88 @@ function buildDemoExecutiveReport(params) {
 
 
 
+    function isVcGroupMatch(vc, studentGroup) {
+
+        if (!vc || !vc.targetGroups || vc.targetGroups === 'ALL') return true;
+
+        const sg = (studentGroup || '').trim();
+
+        if (!sg) return true;
+
+        return (typeof isGroupMatch === 'function' ? isGroupMatch(vc.targetGroups, sg) : false) ||
+
+               vc.targetGroups.includes(sg) ||
+
+               sg.includes(vc.targetGroups);
+
+    }
+
+    window.isVcGroupMatch = isVcGroupMatch;
+
     function getVirtualClassroomForTrainer(trainerNameOrObj, courseKey) {
 
         if (!trainerNameOrObj && !courseKey) return null;
 
-        loadVirtualClassrooms();
+        if (!virtualClassrooms || Object.keys(virtualClassrooms).length === 0) {
+
+            loadVirtualClassrooms();
+
+        }
+
+        if (trainerNameOrObj === '__GLOBAL__' || courseKey === '__GLOBAL__') {
+
+            return virtualClassrooms.__GLOBAL__ || null;
+
+        }
 
         const trainerObj = getTrainerObj(trainerNameOrObj);
 
         const cleanName = trainerObj ? trainerObj.name.trim() : (typeof trainerNameOrObj === 'string' ? trainerNameOrObj.replace(/^أ\.\s*/, '').trim() : '');
 
         // 1. مفتاح مركب: اسم المدرب + مفتاح المقرر
+
         if (cleanName && courseKey && virtualClassrooms[`${cleanName}_${courseKey}`]) {
+
             return virtualClassrooms[`${cleanName}_${courseKey}`];
+
         }
 
-        // 2. البحث باسم المدرب المعتمد
-        if (cleanName && virtualClassrooms[cleanName]) {
-            return virtualClassrooms[cleanName];
-        }
+        // 2. البحث بمفتاح المقرر مباشرة
 
-        // 3. البحث بمفتاح المقرر مباشرة
         if (courseKey && virtualClassrooms[courseKey]) {
+
             return virtualClassrooms[courseKey];
+
         }
 
-        // 4. مطابقة جزئية باسم المدرب
+        // 3. البحث باسم المدرب المعتمد
+
+        if (cleanName && virtualClassrooms[cleanName]) {
+
+            return virtualClassrooms[cleanName];
+
+        }
+
+        // 4. مطابقة جزئية باسم المدرب (باستثناء __GLOBAL__ و _meta)
+
         if (cleanName) {
+
             for (let key in virtualClassrooms) {
+
+                if (key === '__GLOBAL__' || key === '_meta') continue;
+
+                const entry = virtualClassrooms[key];
+
+                if (!entry || typeof entry !== 'object') continue;
+
                 if (key.includes(cleanName) || cleanName.includes(key)) {
-                    return virtualClassrooms[key];
+
+                    return entry;
+
                 }
+
             }
+
         }
 
         return null;
@@ -78221,7 +78478,121 @@ function buildDemoExecutiveReport(params) {
 
     window.getVirtualClassroomForTrainer = getVirtualClassroomForTrainer;
 
+    function resolveVirtualClassroomForCourse(trainerNameOrObj, courseKey, studentGroup, allowGlobalFallback = true) {
 
+        if (!virtualClassrooms || Object.keys(virtualClassrooms).length === 0) {
+
+            loadVirtualClassrooms();
+
+        }
+
+        const todayStr = getTodayDateString();
+
+        const trainerObj = getTrainerObj(trainerNameOrObj);
+
+        const cleanName = trainerObj
+
+            ? trainerObj.name.trim()
+
+            : (typeof trainerNameOrObj === 'string' ? trainerNameOrObj.replace(/^أ\.\s*/, '').trim() : '');
+
+        const candidates = [];
+
+        if (cleanName && courseKey && virtualClassrooms[`${cleanName}_${courseKey}`]) {
+
+            candidates.push({ vc: virtualClassrooms[`${cleanName}_${courseKey}`], strictCourse: true });
+
+        }
+
+        if (courseKey && virtualClassrooms[courseKey]) {
+
+            candidates.push({ vc: virtualClassrooms[courseKey], strictCourse: false });
+
+        }
+
+        if (cleanName && virtualClassrooms[cleanName]) {
+
+            candidates.push({ vc: virtualClassrooms[cleanName], strictCourse: false });
+
+        }
+
+        if (cleanName) {
+
+            for (let key in virtualClassrooms) {
+
+                if (key === '__GLOBAL__' || key === '_meta') continue;
+
+                const entry = virtualClassrooms[key];
+
+                if (entry && typeof entry === 'object' && (key.includes(cleanName) || cleanName.includes(key))) {
+
+                    candidates.push({ vc: entry, strictCourse: false });
+
+                }
+
+            }
+
+        }
+
+        let futureVc = null;
+
+        let fallbackVc = null;
+
+        for (const item of candidates) {
+
+            const vc = item.vc;
+
+            if (!vc || typeof vc !== 'object') continue;
+
+            if (!fallbackVc) fallbackVc = vc;
+
+            if (!vc.isActive || !vc.link) continue;
+
+            if (!isVcGroupMatch(vc, studentGroup)) continue;
+
+            const scope = vc.dateScope || 'always';
+
+            if (scope === 'calendar' && vc.calendarDate) {
+
+                if (vc.calendarDate > todayStr) {
+
+                    if (!futureVc) futureVc = vc;
+
+                    continue;
+
+                }
+
+                if (vc.calendarDate < todayStr) continue;
+
+            }
+
+            return { status: 'open', vc, source: 'course' };
+
+        }
+
+        if (allowGlobalFallback) {
+
+            const gVc = virtualClassrooms.__GLOBAL__;
+
+            if (gVc && gVc.isActive && gVc.link && isVcGroupMatch(gVc, studentGroup) && isDateScopeActiveToday(gVc)) {
+
+                return { status: 'open', vc: gVc, source: 'global' };
+
+            }
+
+        }
+
+        if (futureVc) {
+
+            return { status: 'future_date', vc: futureVc, source: 'future' };
+
+        }
+
+        return { status: 'offline', vc: fallbackVc, source: 'none' };
+
+    }
+
+    window.resolveVirtualClassroomForCourse = resolveVirtualClassroomForCourse;
 
     function evaluateTraineeSessionAccess(studentUser) {
 
@@ -78229,77 +78600,41 @@ function buildDemoExecutiveReport(params) {
 
         loadVirtualClassrooms();
 
-
-
-        const courses = (typeof getAllCoursesForTrainee === 'function') 
+        const rawCourses = (typeof getAllCoursesForTrainee === 'function')
 
             ? (getAllCoursesForTrainee(studentUser) || [])
 
             : [getTrainerAndCourseForTrainee(studentUser)];
 
+        const courses = (rawCourses && rawCourses.length > 0) ? rawCourses : [getTrainerAndCourseForTrainee(studentUser)];
 
-
-        if (!courses || courses.length === 0) {
-
-            const fallbackBinding = getTrainerAndCourseForTrainee(studentUser);
-
-            return {
-
-                status: 'offline',
-
-                trainerName: fallbackBinding?.trainerName || 'المدرب المعتمد',
-
-                courseTitle: fallbackBinding?.courseTitle || 'المقرر التدريبي',
-
-                room: fallbackBinding?.room || 'القاعة التدريبية',
-
-                binding: fallbackBinding
-
-            };
-
-        }
-
-
-
-        const todayStr = getTodayDateString();
-
-        let activeSessionResult = null;
-
-        let futureSessionResult = null;
+        const studentGroup = (studentUser.group || '').trim();
 
         let firstCourseResult = null;
 
+        let activeSpecificResult = null;
 
+        let futureSessionResult = null;
 
         for (const binding of courses) {
 
-            const trainerName = binding.trainerName;
+            if (!binding) continue;
 
-            const courseKey = binding.lmsKey || findCourseKeyForTrainer(binding.trainerName);
+            const trainerName = binding.trainerName || 'المدرب المعتمد';
 
-            const vc = getVirtualClassroomForTrainer(trainerName, courseKey) || 
+            const rawTr = binding.rawTrainerName || trainerName;
 
-                       getVirtualClassroomForTrainer(binding.rawTrainerName, courseKey);
-
-
-
-            // Extract schedule slot info for friendly display
+            const courseKey = binding.lmsKey || findCourseKeyForTrainer(rawTr);
 
             const slots = getTrainerScheduleSlots(trainerName);
 
-            const studentGroup = (studentUser.group || '').trim();
-
             const matchedSlots = slots.filter(s => s.groups.some(g => isGroupMatch(g, studentGroup)));
-
-
 
             let periodLabel = 'متاح الآن للبث المباشر (طوال اليوم)';
 
             let startStr = '08:00 ص';
 
             let endStr = '04:00 م';
-
-
 
             if (matchedSlots.length > 0) {
 
@@ -78315,9 +78650,9 @@ function buildDemoExecutiveReport(params) {
 
             }
 
+            const resolvedSpecific = resolveVirtualClassroomForCourse(rawTr, courseKey, studentGroup, false);
 
-
-            const currentBindingResult = {
+            const baseResult = {
 
                 status: 'offline',
 
@@ -78329,171 +78664,91 @@ function buildDemoExecutiveReport(params) {
 
                 matchedSlots,
 
-                classroom: vc,
+                classroom: resolvedSpecific.vc,
 
                 trainerName,
 
-                courseTitle: binding.courseTitle,
+                courseTitle: binding.courseTitle || 'المقرر التدريبي',
 
-                room: binding.room,
+                room: binding.room || 'القاعة التدريبية',
 
-                binding: binding
+                binding
 
             };
 
+            if (!firstCourseResult) firstCourseResult = baseResult;
 
+            if (resolvedSpecific.status === 'open' && resolvedSpecific.vc) {
 
-            if (!firstCourseResult) {
+                const isCurrentActiveLms = typeof activeStudentLmsCourse !== 'undefined' && activeStudentLmsCourse &&
 
-                firstCourseResult = currentBindingResult;
+                    (binding.lmsKey === activeStudentLmsCourse || binding.rawTrainerName === activeStudentLmsCourse);
 
-            }
+                const openRes = {
 
+                    ...baseResult,
 
+                    status: 'open',
 
-            // الشرط الأساسي: لا تظهر للمتدرب أبداً إذا لم يفعلها المدرب أو لم يكن هناك رابط
+                    isAllDay: (resolvedSpecific.vc.lockByPeriod !== true || matchedSlots.length === 0)
 
-            if (!vc || !vc.isActive || !vc.link) {
+                };
 
-                continue;
+                if (isCurrentActiveLms) return openRes;
 
-            }
+                if (!activeSpecificResult) activeSpecificResult = openRes;
 
+            } else if (resolvedSpecific.status === 'future_date' && resolvedSpecific.vc && !futureSessionResult) {
 
+                futureSessionResult = {
 
-            // التحقق من مطابقة المقرر التدريبي المحدد للقاعة مع مقرر المتدرب
+                    ...baseResult,
 
-            if (vc.courseKey) {
+                    status: 'future_date',
 
-                const bindingKey = binding.lmsKey || findCourseKeyForTrainer(binding.trainerName);
+                    scheduledDate: resolvedSpecific.vc.calendarDate,
 
-                const bindingCourse = binding.courseTitle || '';
+                    formattedDate: formatDateToArabic(resolvedSpecific.vc.calendarDate),
 
-                const isCourseMatch = (vc.courseKey === bindingKey) || 
+                    periodLabel: `مجدولة بتاريخ: ${formatDateToArabic(resolvedSpecific.vc.calendarDate)}`
 
-                                      (vc.courseKey === binding.rawTrainerName) ||
-
-                                      (vc.courseTitle && bindingCourse && (vc.courseTitle.includes(bindingCourse) || bindingCourse.includes(vc.courseTitle)));
-
-                if (!isCourseMatch) {
-
-                    continue;
-
-                }
+                };
 
             }
 
+        }
 
+        if (activeSpecificResult) return activeSpecificResult;
 
-            // التحقق من استهداف شعبة المتدرب
+        // Fallback to active Institute-wide Open Classroom (__GLOBAL__) so no trainee is stranded offline
 
-            if (vc.targetGroups && vc.targetGroups !== 'ALL') {
+        const globalRes = resolveVirtualClassroomForCourse(courses[0]?.rawTrainerName || courses[0]?.trainerName, courses[0]?.lmsKey, studentGroup, true);
 
-                const isGrpMatch = (typeof isGroupMatch === 'function' ? isGroupMatch(vc.targetGroups, studentGroup) : false) ||
+        if (globalRes && globalRes.status === 'open' && globalRes.vc) {
 
-                                   (studentGroup && (vc.targetGroups.includes(studentGroup) || studentGroup.includes(vc.targetGroups)));
+            return {
 
-                if (!isGrpMatch) {
-
-                    continue;
-
-                }
-
-            }
-
-
-
-            // التحقق من تاريخ الجدولة بالتقويم
-
-            if (vc.dateScope === 'calendar' && vc.calendarDate) {
-
-                if (vc.calendarDate > todayStr) {
-
-                    if (!futureSessionResult) {
-
-                        futureSessionResult = {
-
-                            ...currentBindingResult,
-
-                            status: 'future_date',
-
-                            scheduledDate: vc.calendarDate,
-
-                            formattedDate: formatDateToArabic(vc.calendarDate),
-
-                            periodLabel: `مجدولة بتاريخ: ${formatDateToArabic(vc.calendarDate)}`
-
-                        };
-
-                    }
-
-                    continue;
-
-                } else if (vc.calendarDate < todayStr) {
-
-                    // تاريخ منقضي
-
-                    continue;
-
-                }
-
-            }
-
-
-
-            // المحاضرة مفعلة الآن صراحة للمتدرب المربوط بهذا المقرر
-
-            const isCurrentActiveLms = activeStudentLmsCourse && 
-
-                (binding.lmsKey === activeStudentLmsCourse || binding.rawTrainerName === activeStudentLmsCourse);
-
-
-
-            const thisActiveResult = {
-
-                ...currentBindingResult,
+                ...(firstCourseResult || {}),
 
                 status: 'open',
 
-                isAllDay: (vc.lockByPeriod === false || matchedSlots.length === 0)
+                classroom: globalRes.vc,
+
+                trainerName: firstCourseResult?.trainerName || globalRes.vc.trainerName || 'إدارة المعهد',
+
+                courseTitle: firstCourseResult?.courseTitle || globalRes.vc.courseTitle || 'التعليم عن بعد الموحد',
+
+                periodLabel: firstCourseResult?.periodLabel || 'متاح الآن طوال اليوم (للجميع)',
+
+                isGlobalBroadcast: true,
+
+                isAllDay: true
 
             };
 
-
-
-            if (isCurrentActiveLms) {
-
-                return thisActiveResult;
-
-            }
-
-
-
-            if (!activeSessionResult) {
-
-                activeSessionResult = thisActiveResult;
-
-            }
-
         }
 
-
-
-        if (activeSessionResult) {
-
-            return activeSessionResult;
-
-        }
-
-
-
-        if (futureSessionResult) {
-
-            return futureSessionResult;
-
-        }
-
-
+        if (futureSessionResult) return futureSessionResult;
 
         return firstCourseResult || {
 
@@ -78510,8 +78765,6 @@ function buildDemoExecutiveReport(params) {
         };
 
     }
-
-
 
     function findStudentActiveClassroom(studentUser) {
 
@@ -78633,15 +78886,15 @@ function buildDemoExecutiveReport(params) {
 
     function setVcDateScope(scope) {
 
-        currentVcDateScope = scope;
+        currentVcDateScope = scope || 'always';
 
-        ['today', 'week', 'calendar'].forEach(s => {
+        ['always', 'today', 'week', 'calendar'].forEach(s => {
 
             const btn = document.getElementById(`vcScopeBtn-${s}`);
 
             if (btn) {
 
-                if (s === scope) {
+                if (s === currentVcDateScope) {
 
                     btn.className = 'p-3 rounded-2xl border text-xs font-black flex flex-col items-center justify-center gap-1.5 transition cursor-pointer border-blue-600 bg-blue-50 text-blue-950 shadow-2xs';
 
@@ -78655,21 +78908,35 @@ function buildDemoExecutiveReport(params) {
 
         });
 
-
-
         const scopeBadge = document.getElementById('vcDateScopeBadge');
 
         if (scopeBadge) {
 
-            if (scope === 'today') scopeBadge.innerText = 'اليوم فقط';
+            if (currentVcDateScope === 'always') scopeBadge.innerText = '🌐 متاح دائماً للجميع';
 
-            else if (scope === 'week') scopeBadge.innerText = 'طوال هذا الأسبوع';
+            else if (currentVcDateScope === 'today') scopeBadge.innerText = 'اليوم فقط';
+
+            else if (currentVcDateScope === 'week') scopeBadge.innerText = 'طوال هذا الأسبوع';
 
             else scopeBadge.innerText = 'تحديد بالتقويم';
 
         }
 
+        const calContainer = document.getElementById('vcCalendarPickerContainer');
 
+        if (calContainer) {
+
+            if (currentVcDateScope === 'calendar') {
+
+                calContainer.classList.remove('opacity-60');
+
+            } else {
+
+                calContainer.classList.add('opacity-60');
+
+            }
+
+        }
 
         updateVcDateSummaryBadge();
 
@@ -78678,8 +78945,6 @@ function buildDemoExecutiveReport(params) {
         renderVcScheduleMatrix();
 
     }
-
-
 
     function onVcCalendarDateChange(val) {
 
@@ -78690,8 +78955,6 @@ function buildDemoExecutiveReport(params) {
         renderVcScheduleMatrix();
 
     }
-
-
 
     function updateVcDateSummaryBadge() {
 
@@ -78709,15 +78972,17 @@ function buildDemoExecutiveReport(params) {
 
         if (!badge) return;
 
+        if (currentVcDateScope === 'always') {
 
+            badge.innerText = '🌐 مفتوح ومتاح يومياً للجميع بدون تقييد بتاريخ';
 
-        if (currentVcDateScope === 'today') {
+        } else if (currentVcDateScope === 'today') {
 
             badge.innerText = 'اليوم: ' + formatDateToArabic(getTodayDateString());
 
         } else if (currentVcDateScope === 'week') {
 
-            badge.innerText = 'طوال الأسبوع التدريبي (الأحد إلى الخميس)';
+            badge.innerText = 'طوال الأسبوع التدريبي';
 
         } else {
 
@@ -78728,8 +78993,6 @@ function buildDemoExecutiveReport(params) {
         }
 
     }
-
-
 
     function onVcLockModeChange(mode) {
 
@@ -78777,7 +79040,7 @@ function buildDemoExecutiveReport(params) {
 
 
 
-    function onVcToggleActive(isChecked) {
+    function onVcToggleActive(isChecked, skipSave = false) {
 
         const label = document.getElementById('vcSwitchLabel');
 
@@ -78793,8 +79056,6 @@ function buildDemoExecutiveReport(params) {
 
         if (switchEl) switchEl.checked = isChecked;
 
-
-
         if (isChecked) {
 
             if (label) label.innerText = 'مفعل (ON)';
@@ -78807,7 +79068,7 @@ function buildDemoExecutiveReport(params) {
 
             }
 
-            if (subtext) subtext.innerText = 'التدريب عن بعد مفعل ومتاح لطلابك وفق خيارات التقويم وفترات جدول الحصص.';
+            if (subtext) subtext.innerText = 'التدريب عن بعد مفعل ومتاح للمتدربين الآن.';
 
             if (masterCard) masterCard.className = 'bg-emerald-50/40 border-2 border-emerald-300 rounded-3xl p-5 md:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all';
 
@@ -78831,7 +79092,7 @@ function buildDemoExecutiveReport(params) {
 
             }
 
-            if (subtext) subtext.innerText = 'التدريب عن بعد متوقف حالياً. يظهر للمتدرب أن المحاضرة حضورية بالقاعة التدريبية.';
+            if (subtext) subtext.innerText = 'التدريب عن بعد متوقف حالياً لهذه القاعة المحددة فقط.';
 
             if (masterCard) masterCard.className = 'bg-white border-2 border-slate-200 rounded-3xl p-5 md:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all';
 
@@ -78845,47 +79106,73 @@ function buildDemoExecutiveReport(params) {
 
         }
 
+        if (!skipSave) {
 
+            const cleanTrainerName = (activeVcTrainer || '').replace(/^أ\.\s*/, '').trim();
 
-        const cleanTrainerName = (activeVcTrainer || '').replace(/^أ\.\s*/, '').trim();
+            const courseSelect = document.getElementById('vcCourseSelect');
 
-        const courseSelect = document.getElementById('vcCourseSelect');
+            const selectedCourseKey = courseSelect ? courseSelect.value : '';
 
-        const selectedCourseKey = courseSelect ? courseSelect.value : '';
+            const urlInput = document.getElementById('vcMeetingUrl');
 
+            let currentUrl = urlInput ? urlInput.value.trim() : '';
 
+            const fallbackDefault = DEFAULT_VIRTUAL_CLASSROOMS[cleanTrainerName] || DEFAULT_VIRTUAL_CLASSROOMS.__GLOBAL__;
 
-        if (cleanTrainerName) {
+            if (isChecked && !currentUrl && fallbackDefault && fallbackDefault.link) {
 
-            if (!virtualClassrooms[cleanTrainerName]) virtualClassrooms[cleanTrainerName] = {};
+                currentUrl = fallbackDefault.link;
 
-            virtualClassrooms[cleanTrainerName].isActive = isChecked;
-
-        }
-
-        if (selectedCourseKey) {
-
-            if (!virtualClassrooms[selectedCourseKey]) virtualClassrooms[selectedCourseKey] = {};
-
-            virtualClassrooms[selectedCourseKey].isActive = isChecked;
-
-            if (cleanTrainerName) {
-
-                const compKey = `${cleanTrainerName}_${selectedCourseKey}`;
-
-                if (!virtualClassrooms[compKey]) virtualClassrooms[compKey] = {};
-
-                virtualClassrooms[compKey].isActive = isChecked;
+                if (urlInput) urlInput.value = currentUrl;
 
             }
 
+            const patchFields = {
+
+                isActive: isChecked,
+
+                vcSchemaVersion: VC_STORAGE_VERSION,
+
+                manualOverride: true,
+
+                dateScope: currentVcDateScope || 'always',
+
+                targetGroups: document.getElementById('vcTargetGroups')?.value || 'ALL',
+
+                lockByPeriod: (currentVcLockMode === 'period'),
+
+                updatedAt: new Date().toISOString()
+
+            };
+
+            if (currentUrl) patchFields.link = currentUrl;
+
+            if (cleanTrainerName) {
+
+                virtualClassrooms[cleanTrainerName] = { ...(fallbackDefault || {}), ...(virtualClassrooms[cleanTrainerName] || {}), ...patchFields };
+
+            }
+
+            if (selectedCourseKey && selectedCourseKey !== cleanTrainerName) {
+
+                const compKey = cleanTrainerName ? `${cleanTrainerName}_${selectedCourseKey}` : selectedCourseKey;
+
+                virtualClassrooms[selectedCourseKey] = { ...(fallbackDefault || {}), ...(virtualClassrooms[selectedCourseKey] || {}), ...patchFields, courseKey: selectedCourseKey };
+
+                if (cleanTrainerName) {
+
+                    virtualClassrooms[compKey] = { ...(fallbackDefault || {}), ...(virtualClassrooms[compKey] || {}), ...patchFields, courseKey: selectedCourseKey };
+
+                }
+
+            }
+
+            saveVirtualClassroomsToStorage();
+
+            if (typeof enforceRoleVisibility === 'function') enforceRoleVisibility();
+
         }
-
-
-
-        saveVirtualClassroomsToStorage();
-
-        if (typeof enforceRoleVisibility === 'function') enforceRoleVisibility();
 
         updateHeaderActiveBadge(isChecked);
 
@@ -78894,8 +79181,6 @@ function buildDemoExecutiveReport(params) {
         renderVcScheduleMatrix();
 
     }
-
-
 
     function updateHeaderActiveBadge(isActive) {
 
@@ -78927,7 +79212,55 @@ function buildDemoExecutiveReport(params) {
 
         if (!container || !activeVcTrainer) return;
 
+        const selCourseKey = document.getElementById('vcCourseSelect')?.value || '';
 
+        const activeVcObj = getVirtualClassroomForTrainer(activeVcTrainer, selCourseKey);
+
+        const isTodayDateActive = isDateScopeActiveToday(activeVcObj);
+
+        const isVcActive = Boolean(activeVcObj && activeVcObj.isActive) && isTodayDateActive;
+
+        if (activeVcTrainer === '__GLOBAL__') {
+
+            container.innerHTML = MASTER_PERIOD_SLOTS.map(slot => `
+
+                <div class="p-3 rounded-2xl border transition flex items-center justify-between gap-3 ${isVcActive ? 'bg-emerald-50/70 border-emerald-400 shadow-2xs' : 'bg-slate-50 border-slate-200'}">
+
+                    <div class="flex items-center gap-3">
+
+                        <div class="w-9 h-9 rounded-xl bg-slate-900 text-amber-300 flex items-center justify-center font-mono font-black text-xs shrink-0 shadow-2xs">
+
+                            ${slot.index + 1}
+
+                        </div>
+
+                        <div class="space-y-0.5">
+
+                            <div class="flex items-center gap-2 flex-wrap">
+
+                                <span class="font-black text-xs text-slate-900">${slot.label}</span>
+
+                                ${isVcActive
+
+                                    ? '<span class="inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500 text-white">🌐 مفتوحة لجميع المجموعات</span>'
+
+                                    : '<span class="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-md">🏫 حضوري</span>'}
+
+                            </div>
+
+                            <div class="text-[11px] text-slate-600 font-bold">كافة المجموعات والشعب والتخصصات بالمعهد</div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `).join('');
+
+            return;
+
+        }
 
         const slots = getTrainerScheduleSlots(activeVcTrainer);
 
@@ -78935,27 +79268,15 @@ function buildDemoExecutiveReport(params) {
 
         const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-        const isTodayDateActive = isDateScopeActiveToday(virtualClassrooms[activeVcTrainer]);
-
-        const isVcActive = (virtualClassrooms[activeVcTrainer]?.isActive) && isTodayDateActive;
-
-
-
         container.innerHTML = slots.map(slot => {
 
             const isCurrentTimeSlot = (nowMinutes >= slot.startMinutes && nowMinutes < slot.endMinutes);
 
-            const isPastSlot = (nowMinutes >= slot.endMinutes);
-
             const isUpcomingSlot = (nowMinutes < slot.startMinutes);
-
-
 
             let statusHtml = '';
 
             let cardStyle = '';
-
-
 
             if (!isVcActive) {
 
@@ -78963,21 +79284,21 @@ function buildDemoExecutiveReport(params) {
 
                 cardStyle = 'bg-slate-50 border-slate-200';
 
-            } else if (isCurrentTimeSlot) {
+            } else if (currentVcLockMode === 'allday' || isCurrentTimeSlot) {
 
                 statusHtml = `
 
-                    <span class="inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-2xs animate-pulse">
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-2xs">
 
                         <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
 
-                        <span>🔴 جارية الآن (الرابط مفتوح)</span>
+                        <span>${isCurrentTimeSlot ? '🔴 جارية الآن (الرابط مفتوح)' : '🟢 متاحة للدخول (عن بعد)'}</span>
 
                     </span>
 
                 `;
 
-                cardStyle = 'bg-emerald-50/70 border-emerald-400 ring-2 ring-emerald-400/40 shadow-xs';
+                cardStyle = 'bg-emerald-50/70 border-emerald-400 shadow-xs';
 
             } else if (isUpcomingSlot) {
 
@@ -79009,15 +79330,11 @@ function buildDemoExecutiveReport(params) {
 
             }
 
-
-
-            const groupsBadge = slot.groups.length > 0 
+            const groupsBadge = slot.groups.length > 0
 
                 ? slot.groups.map(g => `<span class="px-2 py-0.5 rounded-md bg-white border border-slate-300 text-[11px] font-black text-slate-800 shadow-2xs">${g}</span>`).join(' ')
 
                 : `<span class="text-xs text-slate-300 font-bold">-</span>`;
-
-
 
             return `
 
@@ -79060,8 +79377,6 @@ function buildDemoExecutiveReport(params) {
         }).join('');
 
     }
-
-
 
     function getCoursesForActiveVcTrainer(trainerName) {
 
@@ -79238,12 +79553,26 @@ function buildDemoExecutiveReport(params) {
 
         }
 
-        // حالة التفعيل لهذا المقرر تحديداً (افتراضياً غير مفعل إذا لم يحفظ)
+        // حالة التفعيل لهذا المقرر تحديداً بدون إعادة حفظ سحابية تلقائية بمجرد التصفح
+
         const isActive = Boolean(savedData && savedData.isActive === true);
 
-        onVcToggleActive(isActive);
+        currentVcPlatform = (savedData && savedData.platform) || currentVcPlatform || 'meet';
+
+        selectVcPlatform(currentVcPlatform);
+
+        currentVcDateScope = (savedData && savedData.dateScope) || 'always';
+
+        setVcDateScope(currentVcDateScope);
+
+        currentVcLockMode = (savedData && savedData.lockByPeriod === true ? 'period' : 'allday');
+
+        onVcLockModeChange(currentVcLockMode);
+
+        onVcToggleActive(isActive, true);
 
         // تحديث المجموعات والشعب وعدد المتدربين للمقرر المختار
+
         updateVcCourseGroupsAndCount(selKey);
 
         onVcInputChange();
@@ -79336,9 +79665,7 @@ function buildDemoExecutiveReport(params) {
 
         loadVirtualClassrooms();
 
-
-
-        // 1. تحديد المدرب النشط
+        // 1. تحديد المدرب النشط أو القاعة الشاملة للجميع
 
         if (currentUser.role === 'trainer') {
 
@@ -79350,13 +79677,13 @@ function buildDemoExecutiveReport(params) {
 
             if (!activeVcTrainer) {
 
-                activeVcTrainer = (scheduleData && scheduleData[0]) ? scheduleData[0].name : 'رضا مطيلق';
+                activeVcTrainer = '__GLOBAL__';
 
             }
 
         }
 
-
+        const isGlobalSelection = (activeVcTrainer === '__GLOBAL__');
 
         // 2. رسم محدد المدرب في الشريط العلوي
 
@@ -79392,7 +79719,9 @@ function buildDemoExecutiveReport(params) {
 
                 selectorContainer.innerHTML = `
 
-                    <select id="vcTrainerSelect" onchange="onVcTrainerChange(this.value)" class="bg-slate-800 hover:bg-slate-700 text-white font-black text-xs px-3.5 py-2 rounded-xl border border-slate-600 focus:outline-hidden focus:border-blue-400 cursor-pointer shadow-2xs">
+                    <select id="vcTrainerSelect" onchange="onVcTrainerChange(this.value)" class="bg-slate-800 hover:bg-slate-700 text-white font-black text-xs px-3.5 py-2 rounded-xl border border-slate-600 focus:outline-hidden focus:border-blue-400 cursor-pointer shadow-2xs max-w-xs sm:max-w-sm">
+
+                        <option value="__GLOBAL__" ${isGlobalSelection ? 'selected' : ''}>🌐 القاعة العامة الشاملة (متاح للجميع - كافة المتدربين والشعب)</option>
 
                         ${trOptions}
 
@@ -79404,99 +79733,125 @@ function buildDemoExecutiveReport(params) {
 
         }
 
-
-
-        // 3. جلب المجموعات والشعب والمتدربين المربوطين بالمدرب
-
-        const linkedGroups = getGroupsForTrainer(activeVcTrainer);
-
-        const linkedTrainees = getTraineesForTrainer(activeVcTrainer);
-
-
-
-        // 2.5 تعبئة قائمة اختيار المقرر التدريبي للمحاضرة عن بعد
-
-        const availableCourses = getCoursesForActiveVcTrainer(activeVcTrainer);
-
         const courseSelect = document.getElementById('vcCourseSelect');
-
-        if (courseSelect) {
-
-            courseSelect.innerHTML = availableCourses.map(c => `
-
-                <option value="${c.courseKey}" data-title="${c.courseTitle}">📚 ${c.courseTitle} ${c.room ? '(' + c.room + ')' : ''}</option>
-
-            `).join('');
-
-        }
-
-
 
         const groupsSelect = document.getElementById('vcTargetGroups');
 
-        if (groupsSelect) {
-
-            const groupOpts = linkedGroups.map(g => `<option value="${g}">المجموعة: ${g}</option>`).join('');
-
-            groupsSelect.innerHTML = `
-
-                <option value="ALL">🌐 كافة المجموعات والشعب المعتمدة (${linkedGroups.join(', ') || 'الكل'})</option>
-
-                ${groupOpts}
-
-            `;
-
-        }
-
-
-
         const countBadge = document.getElementById('vcTraineesCountBadge');
-
-        if (countBadge) {
-
-            countBadge.innerText = `${linkedTrainees.length} متدرب مسجل`;
-
-        }
-
-
 
         const groupsTags = document.getElementById('vcLinkedGroupsTags');
 
-        if (groupsTags) {
+        if (isGlobalSelection) {
 
-            if (linkedGroups.length > 0) {
+            if (courseSelect) {
 
-                groupsTags.innerHTML = linkedGroups.map(g => `
+                courseSelect.innerHTML = `<option value="__GLOBAL__" data-title="التعليم عن بعد الموحد (جميع المقررات والتخصصات)">🌐 كافة المقررات والتخصصات بالمعهد (تغطية شاملة للجميع)</option>`;
 
-                    <span class="bg-blue-50 text-blue-900 border border-blue-200 text-xs font-black px-3 py-1 rounded-xl shadow-2xs flex items-center gap-1.5">
+            }
 
-                        <span>👥</span>
+            if (groupsSelect) {
 
-                        <span>${g}</span>
+                groupsSelect.innerHTML = `<option value="ALL">🌐 جميع المتدربين وكافة المجموعات والشعب والشركات (متاح للجميع)</option>`;
+
+            }
+
+            if (countBadge) {
+
+                const totalTr = Array.isArray(trainees) ? trainees.length : 0;
+
+                countBadge.innerText = `${totalTr} متدرب (جميع المتدربين)`;
+
+            }
+
+            if (groupsTags) {
+
+                groupsTags.innerHTML = `
+
+                    <span class="bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs font-black px-3 py-1 rounded-xl shadow-2xs flex items-center gap-1.5">
+
+                        <span>🌐</span>
+
+                        <span>شاملة لجميع المتدربين والشركات والمجموعات بالمعهد</span>
 
                     </span>
 
+                `;
+
+            }
+
+        } else {
+
+            const linkedGroups = getGroupsForTrainer(activeVcTrainer);
+
+            const linkedTrainees = getTraineesForTrainer(activeVcTrainer);
+
+            const availableCourses = getCoursesForActiveVcTrainer(activeVcTrainer);
+
+            if (courseSelect) {
+
+                courseSelect.innerHTML = availableCourses.map(c => `
+
+                    <option value="${c.courseKey}" data-title="${c.courseTitle}">📚 ${c.courseTitle} ${c.room ? '(' + c.room + ')' : ''}</option>
+
                 `).join('');
 
-            } else {
+            }
 
-                groupsTags.innerHTML = `<span class="text-xs text-slate-400 font-medium">لا توجد مجموعات مسجلة بجدول المدرب حالياً</span>`;
+            if (groupsSelect) {
+
+                const groupOpts = linkedGroups.map(g => `<option value="${g}">المجموعة: ${g}</option>`).join('');
+
+                groupsSelect.innerHTML = `
+
+                    <option value="ALL">🌐 كافة المجموعات والشعب المعتمدة (${linkedGroups.join(', ') || 'الكل'})</option>
+
+                    ${groupOpts}
+
+                `;
+
+            }
+
+            if (countBadge) {
+
+                countBadge.innerText = `${linkedTrainees.length} متدرب مسجل`;
+
+            }
+
+            if (groupsTags) {
+
+                if (linkedGroups.length > 0) {
+
+                    groupsTags.innerHTML = linkedGroups.map(g => `
+
+                        <span class="bg-blue-50 text-blue-900 border border-blue-200 text-xs font-black px-3 py-1 rounded-xl shadow-2xs flex items-center gap-1.5">
+
+                            <span>👥</span>
+
+                            <span>${g}</span>
+
+                        </span>
+
+                    `).join('');
+
+                } else {
+
+                    groupsTags.innerHTML = `<span class="text-xs text-slate-400 font-medium">متاح لجميع المجموعات والشعب (بدون تقييد)</span>`;
+
+                }
 
             }
 
         }
 
+        // 4. تعبئة الحقول بالبيانات المخزنة
 
+        const selectedCourseKey = courseSelect ? courseSelect.value : (isGlobalSelection ? '__GLOBAL__' : '');
 
-        // 4. تعبئة الحقول بالبيانات المخزنة للمدرب
-
-        const cData = getVirtualClassroomForTrainer(activeVcTrainer) || {};
+        const cData = getVirtualClassroomForTrainer(activeVcTrainer, selectedCourseKey) || DEFAULT_VIRTUAL_CLASSROOMS[activeVcTrainer] || DEFAULT_VIRTUAL_CLASSROOMS.__GLOBAL__ || {};
 
         currentVcPlatform = cData.platform || 'meet';
 
         selectVcPlatform(currentVcPlatform);
-
-
 
         const urlInput = document.getElementById('vcMeetingUrl');
 
@@ -79508,59 +79863,53 @@ function buildDemoExecutiveReport(params) {
 
         const calInput = document.getElementById('vcCalendarDate');
 
-
-
         if (urlInput) urlInput.value = cData.link || '';
 
-        if (courseSelect && cData.courseKey) {
+        if (!isGlobalSelection && courseSelect && cData.courseKey && Array.from(courseSelect.options).some(o => o.value === cData.courseKey)) {
 
             courseSelect.value = cData.courseKey;
 
         }
 
-        const selectedCourseTitle = courseSelect?.options[courseSelect.selectedIndex]?.getAttribute('data-title') || getTrainerObj(activeVcTrainer)?.course || 'التخصص';
+        const selectedCourseTitle = isGlobalSelection
+
+            ? 'التعليم عن بعد الموحد'
+
+            : (courseSelect?.options[courseSelect.selectedIndex]?.getAttribute('data-title') || getTrainerObj(activeVcTrainer)?.course || 'التخصص');
 
         if (topicInput) topicInput.value = cData.topic || (`محاضرة ${selectedCourseTitle} (عن بعد)`);
 
         if (passcodeInput) passcodeInput.value = cData.passcode || '';
 
-        if (notesInput) notesInput.value = cData.notes || 'يرجى الدخول بالاسم الثلاثي الصريح والالتزام بالوقت، وإبقاء المايكروفون مغلقاً.';
+        if (notesInput) notesInput.value = cData.notes || DEFAULT_VC_NOTES;
 
         if (calInput) calInput.value = cData.calendarDate || getTodayDateString();
 
-
-
-        if (groupsSelect && cData.targetGroups) {
+        if (groupsSelect && cData.targetGroups && Array.from(groupsSelect.options).some(o => o.value === cData.targetGroups)) {
 
             groupsSelect.value = cData.targetGroups;
 
         }
 
-
-
-        // ضبط النطاق وقفل الجدول ومفتاح التشغيل
-
-        currentVcDateScope = cData.dateScope || 'today';
+        currentVcDateScope = cData.dateScope || 'always';
 
         setVcDateScope(currentVcDateScope);
 
-
-
-        currentVcLockMode = (cData.lockByPeriod === false ? 'allday' : 'period');
+        currentVcLockMode = (cData.lockByPeriod === true ? 'period' : 'allday');
 
         onVcLockModeChange(currentVcLockMode);
 
+        if (!isGlobalSelection) {
 
+            updateVcCourseGroupsAndCount(courseSelect ? courseSelect.value : '');
 
-        updateVcCourseGroupsAndCount(courseSelect ? courseSelect.value : '');
+        }
 
-        const isActive = Boolean(cData && cData.isActive === true);
+        const isActive = (cData && typeof cData.isActive === 'boolean') ? cData.isActive : true;
 
-        onVcToggleActive(isActive);
+        onVcToggleActive(isActive, true);
 
     }
-
-
 
     function onVcTrainerChange(trainerName) {
 
@@ -79636,11 +79985,11 @@ function buildDemoExecutiveReport(params) {
 
                         <div class="flex items-center gap-2 text-xs text-blue-200 font-bold flex-wrap pt-0.5">
 
-                            <span>المدرب: <b class="text-amber-300">أ. ${activeVcTrainer}</b></span>
+                            <span>${activeVcTrainer === '__GLOBAL__' ? 'الإدارة: <b class="text-amber-300">🌐 القاعة العامة الشاملة (متاح للجميع)</b>' : `المدرب: <b class="text-amber-300">أ. ${activeVcTrainer}</b>`}</span>
 
                             <span>•</span>
 
-                            <span>🕒 النطاق: <b class="text-white">${currentVcDateScope === 'today' ? 'اليوم فقط' : (currentVcDateScope === 'week' ? 'طوال الأسبوع' : 'محدد بالتقويم')}</b></span>
+                            <span>🕒 النطاق: <b class="text-white">${currentVcDateScope === 'always' ? '🌐 متاح للجميع دائماً' : (currentVcDateScope === 'today' ? 'اليوم فقط' : (currentVcDateScope === 'week' ? 'طوال الأسبوع' : 'محدد بالتقويم'))}</b></span>
 
                         </div>
 
@@ -79748,13 +80097,11 @@ function buildDemoExecutiveReport(params) {
 
         if (!activeVcTrainer) {
 
-            showToast('يرجى تحديد المدرب أولاً', 'error');
+            showToast('يرجى تحديد المدرب أو القاعة العامة أولاً', 'error');
 
             return;
 
         }
-
-
 
         let url = document.getElementById('vcMeetingUrl')?.value?.trim() || '';
 
@@ -79766,11 +80113,13 @@ function buildDemoExecutiveReport(params) {
 
         const targetGroups = document.getElementById('vcTargetGroups')?.value || 'ALL';
 
-        const isActive = document.getElementById('vcIsActive')?.checked ?? false;
+        const isActive = document.getElementById('vcIsActive')?.checked ?? true;
 
-        const calendarDate = document.getElementById('vcCalendarDate')?.value || getTodayDateString();
+        const calendarDate = (currentVcDateScope === 'calendar')
 
+            ? (document.getElementById('vcCalendarDate')?.value || getTodayDateString())
 
+            : '';
 
         if (isActive && !url) {
 
@@ -79782,8 +80131,6 @@ function buildDemoExecutiveReport(params) {
 
         }
 
-
-
         if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
 
             url = 'https://' + url;
@@ -79794,17 +80141,23 @@ function buildDemoExecutiveReport(params) {
 
         }
 
-
+        const isGlobalSelection = (activeVcTrainer === '__GLOBAL__');
 
         const courseSelect = document.getElementById('vcCourseSelect');
 
-        const selectedCourseKey = courseSelect ? courseSelect.value : (findCourseKeyForTrainer(activeVcTrainer) || activeVcTrainer);
+        const selectedCourseKey = isGlobalSelection
 
-        const selectedCourseTitle = courseSelect?.options[courseSelect.selectedIndex]?.getAttribute('data-title') || getTrainerObj(activeVcTrainer)?.course || 'التخصص';
+            ? '__GLOBAL__'
 
+            : (courseSelect ? courseSelect.value : (findCourseKeyForTrainer(activeVcTrainer) || activeVcTrainer));
 
+        const selectedCourseTitle = isGlobalSelection
 
-        const cleanTrainerName = (activeVcTrainer || '').replace(/^أ\.\s*/, '').trim();
+            ? 'التعليم عن بعد الموحد (جميع المقررات والتخصصات)'
+
+            : (courseSelect?.options[courseSelect.selectedIndex]?.getAttribute('data-title') || getTrainerObj(activeVcTrainer)?.course || 'التخصص');
+
+        const cleanTrainerName = isGlobalSelection ? '__GLOBAL__' : (activeVcTrainer || '').replace(/^أ\.\s*/, '').trim();
 
         const classroomData = {
 
@@ -79816,7 +80169,7 @@ function buildDemoExecutiveReport(params) {
 
             courseTitle: selectedCourseTitle,
 
-            trainerName: cleanTrainerName,
+            trainerName: isGlobalSelection ? 'الإدارة والمدربون المعتمدون' : cleanTrainerName,
 
             topic: topic || (`محاضرة ${selectedCourseTitle} (عن بعد)`),
 
@@ -79824,15 +80177,21 @@ function buildDemoExecutiveReport(params) {
 
             passcode: passcode,
 
-            notes: notes || 'يرجى الدخول بالاسم الثلاثي الصريح والالتزام بالوقت، وإبقاء المايكروفون مغلقاً.',
+            notes: notes || DEFAULT_VC_NOTES,
 
             isActive: isActive,
 
-            dateScope: currentVcDateScope,
+            dateScope: currentVcDateScope || 'always',
 
             calendarDate: calendarDate,
 
             lockByPeriod: (currentVcLockMode === 'period'),
+
+            isGlobal: isGlobalSelection,
+
+            vcSchemaVersion: VC_STORAGE_VERSION,
+
+            manualOverride: true,
 
             updatedAt: new Date().toISOString(),
 
@@ -79840,18 +80199,33 @@ function buildDemoExecutiveReport(params) {
 
         };
 
-        // حفظ الإعدادات بالمفتاح المركب واسم المدرب ومفتاح المقرر
-        virtualClassrooms[cleanTrainerName] = classroomData;
+        if (isGlobalSelection) {
 
-        virtualClassrooms[`${cleanTrainerName}_${selectedCourseKey}`] = classroomData;
+            virtualClassrooms.__GLOBAL__ = classroomData;
 
-        if (selectedCourseKey) {
+        } else {
 
-            virtualClassrooms[selectedCourseKey] = classroomData;
+            // حفظ بدون حصر اسم المدرب على مقرر واحد يمنع بقية مقرراته
+
+            virtualClassrooms[`${cleanTrainerName}_${selectedCourseKey}`] = classroomData;
+
+            if (selectedCourseKey) {
+
+                virtualClassrooms[selectedCourseKey] = classroomData;
+
+            }
+
+            virtualClassrooms[cleanTrainerName] = {
+
+                ...classroomData,
+
+                courseKey: '' // shared trainer fallback remains open across their groups
+
+            };
 
         }
 
-
+        virtualClassrooms._meta = { schemaVersion: VC_STORAGE_VERSION, openForAll: true };
 
         saveVirtualClassroomsToStorage();
 
@@ -79863,11 +80237,151 @@ function buildDemoExecutiveReport(params) {
 
         renderVcScheduleMatrix();
 
-        showToast(isActive ? '✅ تم حفظ وتفعيل القاعة الافتراضية بنجاح' : '✅ تم حفظ إعدادات القاعة الافتراضية (الحالة: متوقفة)', 'success');
+        showToast(isActive ? '✅ تم حفظ وتفعيل القاعة الافتراضية للجميع بنجاح' : '✅ تم حفظ إعدادات القاعة الافتراضية', 'success');
 
     }
 
+    function activateVirtualClassroomForAll() {
 
+        loadVirtualClassrooms();
+
+        const nowIso = new Date().toISOString();
+
+        const byUser = currentUser?.name || 'إدارة المعهد';
+
+        // 1. Activate master __GLOBAL__ room
+
+        const gDef = DEFAULT_VIRTUAL_CLASSROOMS.__GLOBAL__ || {};
+
+        const gCur = virtualClassrooms.__GLOBAL__ || {};
+
+        virtualClassrooms.__GLOBAL__ = {
+
+            ...gDef,
+
+            ...gCur,
+
+            isGlobal: true,
+
+            platform: gCur.platform || gDef.platform || 'meet',
+
+            link: gCur.link || gDef.link,
+
+            targetGroups: 'ALL',
+
+            dateScope: 'always',
+
+            calendarDate: '',
+
+            lockByPeriod: false,
+
+            isActive: true,
+
+            vcSchemaVersion: VC_STORAGE_VERSION,
+
+            manualOverride: true,
+
+            updatedAt: nowIso,
+
+            updatedBy: byUser
+
+        };
+
+        // 2. Activate every trainer in scheduleData & DEFAULT_VIRTUAL_CLASSROOMS & saved keys
+
+        const allTrainerNames = new Set(Object.keys(DEFAULT_VIRTUAL_CLASSROOMS).filter(k => k !== '__GLOBAL__'));
+
+        if (typeof scheduleData !== 'undefined' && Array.isArray(scheduleData)) {
+
+            scheduleData.forEach(t => { if (t && t.name) allTrainerNames.add(t.name.trim()); });
+
+        }
+
+        allTrainerNames.forEach(trName => {
+
+            const def = DEFAULT_VIRTUAL_CLASSROOMS[trName] || {};
+
+            const cur = virtualClassrooms[trName] || {};
+
+            virtualClassrooms[trName] = {
+
+                ...def,
+
+                ...cur,
+
+                trainerName: trName,
+
+                platform: cur.platform || def.platform || 'meet',
+
+                link: cur.link || def.link || gDef.link,
+
+                topic: cur.topic || def.topic || `محاضرة (عن بعد) - أ. ${trName}`,
+
+                targetGroups: 'ALL',
+
+                dateScope: 'always',
+
+                calendarDate: '',
+
+                lockByPeriod: false,
+
+                isActive: true,
+
+                vcSchemaVersion: VC_STORAGE_VERSION,
+
+                manualOverride: true,
+
+                updatedAt: nowIso,
+
+                updatedBy: byUser
+
+            };
+
+        });
+
+        Object.keys(virtualClassrooms).forEach(k => {
+
+            if (k === '_meta') return;
+
+            const v = virtualClassrooms[k];
+
+            if (v && typeof v === 'object') {
+
+                v.isActive = true;
+
+                v.targetGroups = 'ALL';
+
+                v.dateScope = 'always';
+
+                v.calendarDate = '';
+
+                v.lockByPeriod = false;
+
+                if (!v.link) v.link = virtualClassrooms.__GLOBAL__.link;
+
+                v.vcSchemaVersion = VC_STORAGE_VERSION;
+
+                v.manualOverride = true;
+
+            }
+
+        });
+
+        virtualClassrooms._meta = { schemaVersion: VC_STORAGE_VERSION, openForAll: true };
+
+        saveVirtualClassroomsToStorage();
+
+        if (typeof enforceRoleVisibility === 'function') enforceRoleVisibility();
+
+        if (typeof renderVirtualClassTab === 'function') renderVirtualClassTab();
+
+        if (typeof renderStudentVirtualClassBanner === 'function') renderStudentVirtualClassBanner();
+
+        showToast('🌐 تم تفعيل التعليم عن بعد وجعله متاحاً لجميع المتدربين والمجموعات والمدربين بنجاح!', 'success');
+
+    }
+
+    window.activateVirtualClassroomForAll = activateVirtualClassroomForAll;
 
     function deactivateVirtualClassroom() {
 
@@ -79877,23 +80391,43 @@ function buildDemoExecutiveReport(params) {
 
         if (switchEl) switchEl.checked = false;
 
-        onVcToggleActive(false);
-
         const cleanTrainerName = (activeVcTrainer || '').replace(/^أ\.\s*/, '').trim();
 
         const courseSelect = document.getElementById('vcCourseSelect');
 
         const selectedCourseKey = courseSelect ? courseSelect.value : '';
 
-        if (virtualClassrooms[cleanTrainerName]) virtualClassrooms[cleanTrainerName].isActive = false;
+        if (virtualClassrooms[cleanTrainerName]) {
 
-        if (selectedCourseKey && virtualClassrooms[selectedCourseKey]) virtualClassrooms[selectedCourseKey].isActive = false;
+            virtualClassrooms[cleanTrainerName].isActive = false;
+
+            virtualClassrooms[cleanTrainerName].manualOverride = true;
+
+            virtualClassrooms[cleanTrainerName].vcSchemaVersion = VC_STORAGE_VERSION;
+
+        }
+
+        if (selectedCourseKey && virtualClassrooms[selectedCourseKey]) {
+
+            virtualClassrooms[selectedCourseKey].isActive = false;
+
+            virtualClassrooms[selectedCourseKey].manualOverride = true;
+
+            virtualClassrooms[selectedCourseKey].vcSchemaVersion = VC_STORAGE_VERSION;
+
+        }
 
         if (cleanTrainerName && selectedCourseKey && virtualClassrooms[`${cleanTrainerName}_${selectedCourseKey}`]) {
 
             virtualClassrooms[`${cleanTrainerName}_${selectedCourseKey}`].isActive = false;
 
+            virtualClassrooms[`${cleanTrainerName}_${selectedCourseKey}`].manualOverride = true;
+
+            virtualClassrooms[`${cleanTrainerName}_${selectedCourseKey}`].vcSchemaVersion = VC_STORAGE_VERSION;
+
         }
+
+        onVcToggleActive(false, true);
 
         saveVirtualClassroomsToStorage();
 
@@ -80032,317 +80566,603 @@ function buildDemoExecutiveReport(params) {
     window.selectStudentVcCourse = selectStudentVcCourse;
 
     function renderStudentVirtualClassTab() {
+
         if (!currentUser || currentUser.role !== 'student') return;
+
         const container = document.getElementById('studentVcContentContainer');
+
         if (!container) return;
 
         loadVirtualClassrooms();
 
+        const studentGroup = (currentUser.group || '').trim();
+
         // 1. جلب كافة المقررات المعتمدة للمتدرب
-        const rawCourses = (typeof getAllCoursesForTrainee === 'function') 
-            ? (getAllCoursesForTrainee(currentUser) || []) 
+
+        const rawCourses = (typeof getAllCoursesForTrainee === 'function')
+
+            ? (getAllCoursesForTrainee(currentUser) || [])
+
             : [];
+
         const courses = (rawCourses.length > 0) ? rawCourses : [getTrainerAndCourseForTrainee(currentUser)];
 
         // 2. تحديد المقرر المختار حالياً
+
         if (!activeStudentVcCourseKey || !courses.some(c => (c.lmsKey || c.rawTrainerName) === activeStudentVcCourseKey)) {
+
             const liveCourse = courses.find(c => {
-                const vc = getVirtualClassroomForTrainer(c.trainerName, c.lmsKey) || getVirtualClassroomForTrainer(c.rawTrainerName, c.lmsKey);
-                return Boolean(vc && vc.isActive && vc.link && (!vc.calendarDate || vc.calendarDate === getTodayDateString()));
+
+                const res = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup, true);
+
+                return Boolean(res && res.status === 'open' && res.vc);
+
             });
+
             if (liveCourse) {
+
                 activeStudentVcCourseKey = liveCourse.lmsKey || liveCourse.rawTrainerName;
+
             } else if (typeof activeStudentLmsCourse !== 'undefined' && activeStudentLmsCourse && courses.some(c => (c.lmsKey || c.rawTrainerName) === activeStudentLmsCourse)) {
+
                 activeStudentVcCourseKey = activeStudentLmsCourse;
+
             } else {
+
                 activeStudentVcCourseKey = courses[0]?.lmsKey || courses[0]?.rawTrainerName;
+
             }
+
         }
 
         const selectedCourse = courses.find(c => (c.lmsKey || c.rawTrainerName) === activeStudentVcCourseKey) || courses[0] || {};
+
         const trainerName = selectedCourse.trainerName || 'المدرب المعتمد';
+
         const courseKey = selectedCourse.lmsKey || findCourseKeyForTrainer(trainerName);
-        const vc = getVirtualClassroomForTrainer(trainerName, courseKey) || 
-                   getVirtualClassroomForTrainer(selectedCourse.rawTrainerName, courseKey);
 
-        const todayStr = getTodayDateString();
-        const studentGroup = (currentUser.group || '').trim();
+        const resolved = resolveVirtualClassroomForCourse(selectedCourse.rawTrainerName || trainerName, courseKey, studentGroup, true);
 
-        // 3. فحص حالة التدريب عن بعد لهذا المقرر المحدد
-        let isCourseLive = false;
-        let isFutureDate = false;
-        let isPassed = false;
-        let isGroupMismatch = false;
+        const vc = resolved ? resolved.vc : null;
 
-        if (vc && vc.isActive && vc.link) {
-            if (vc.targetGroups && vc.targetGroups !== 'ALL') {
-                const isGrpMatch = (typeof isGroupMatch === 'function' ? isGroupMatch(vc.targetGroups, studentGroup) : false) ||
-                                   (studentGroup && (vc.targetGroups.includes(studentGroup) || studentGroup.includes(vc.targetGroups)));
-                if (!isGrpMatch) {
-                    isGroupMismatch = true;
-                }
-            }
+        const isCourseLive = Boolean(resolved && resolved.status === 'open' && vc && vc.link);
 
-            if (!isGroupMismatch) {
-                if (vc.dateScope === 'calendar' && vc.calendarDate) {
-                    if (vc.calendarDate > todayStr) {
-                        isFutureDate = true;
-                    } else if (vc.calendarDate < todayStr) {
-                        isPassed = true;
-                    } else {
-                        isCourseLive = true;
-                    }
-                } else {
-                    isCourseLive = true;
-                }
-            }
-        }
+        const isFutureDate = Boolean(resolved && resolved.status === 'future_date' && vc);
+
+        const isGlobalRoom = Boolean(resolved && resolved.source === 'global');
 
         const pObj = (vc && vc.platform && VC_PLATFORMS[vc.platform]) ? VC_PLATFORMS[vc.platform] : VC_PLATFORMS.meet;
 
         // 4. شريط اختيار المقرر للمتدرب
+
         let courseSelectorHtml = '';
+
         if (courses.length > 0) {
+
             courseSelectorHtml = `
+
                 <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-3xl shadow-sm space-y-3">
+
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+
                         <div class="flex items-center gap-2.5">
+
                             <span class="text-xl">📚</span>
+
                             <div>
-                                <h4 class="text-xs md:text-sm font-black text-slate-900">اختر المقرر التدريبي لعرض حالة البث المباشر:</h4>
-                                <p class="text-[11px] text-slate-500 font-medium">استعراض قاعة البث أو المحاضرة الحضورية حسب مدخلات المدرب لكل مقرر</p>
+
+                                <h4 class="text-xs md:text-sm font-black text-slate-900">اختر المقرر التدريبي لعرض قاعة التعليم عن بعد:</h4>
+
+                                <p class="text-[11px] text-slate-500 font-medium">التعليم عن بعد متاح لكافة المقررات والشعب عبر قاعة المدرب أو القاعة العامة الموحدة</p>
+
                             </div>
+
                         </div>
+
                         <span class="text-[11px] font-black text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-xl self-start sm:self-auto shadow-2xs">
+
                             مقرراتك المعتمدة (${courses.length})
+
                         </span>
+
                     </div>
 
                     <div class="flex items-center gap-2.5 flex-wrap pt-1">
+
                         ${courses.map((c, idx) => {
+
                             const cKey = c.lmsKey || c.rawTrainerName;
+
                             const isSel = (cKey === activeStudentVcCourseKey);
-                            const cVc = getVirtualClassroomForTrainer(c.trainerName, c.lmsKey) || getVirtualClassroomForTrainer(c.rawTrainerName, c.lmsKey);
-                            const cLive = Boolean(cVc && cVc.isActive && cVc.link && (!cVc.calendarDate || cVc.calendarDate === todayStr));
+
+                            const cRes = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup, true);
+
+                            const cLive = Boolean(cRes && cRes.status === 'open' && cRes.vc);
+
                             const title = c.courseTitle || c.courseShort || `مقرر ${idx + 1}`;
+
                             const trName = c.trainerName || 'المدرب';
 
                             return `
+
                                 <button type="button" onclick="selectStudentVcCourse('${cKey}')" class="px-4 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2.5 cursor-pointer shadow-xs ${isSel ? 'bg-slate-900 text-amber-300 ring-2 ring-amber-400 scale-[1.02]' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'}">
+
                                     <span class="text-base">${cLive ? '📡' : '🏫'}</span>
+
                                     <span>${title}</span>
+
                                     <span class="text-[10px] font-bold opacity-80">(${trName})</span>
+
                                     ${cLive ? `
+
                                         <span class="bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse shadow-2xs">
-                                            🟢 مباشر الآن
+
+                                            🟢 متاح الآن
+
                                         </span>
+
                                     ` : `
+
                                         <span class="text-[10px] text-slate-500 font-bold bg-white px-2 py-0.5 rounded-full border border-slate-200">
+
                                             حضوري
+
                                         </span>
+
                                     `}
+
                                 </button>
+
                             `;
+
                         }).join('')}
+
                     </div>
+
                 </div>
+
             `;
+
         }
 
         // 5. بطاقة حالة المقرر المختار
+
         let cardContentHtml = '';
 
         if (isCourseLive) {
-            // حالة البث المباشر النشط (المدرب فعّل التدريب عن بعد لهذا المقرر)
+
+            const safeLinkForJs = (vc.link || '').replace(/'/g, "\\'");
+
             cardContentHtml = `
+
                 <!-- Top Trainee Header Card -->
+
                 <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-3xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+
                     <div class="flex items-center gap-4">
+
                         <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-3xl shadow-md text-white shrink-0">
+
                             ${pObj.icon}
+
                         </div>
+
                         <div class="space-y-1">
+
                             <div class="flex items-center gap-2 flex-wrap">
+
                                 <h3 class="font-black text-slate-900 text-lg md:text-xl">${currentUser.name}</h3>
-                                <span class="bg-blue-600 text-white text-xs font-black px-2.5 py-0.5 rounded-full shadow-2xs">${currentUser.group}</span>
+
+                                <span class="bg-blue-600 text-white text-xs font-black px-2.5 py-0.5 rounded-full shadow-2xs">${currentUser.group || 'شعبة معتمدة'}</span>
+
                                 <span class="bg-emerald-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-2xs animate-pulse">
-                                    🟢 التدريب عن بعد مفعل الآن للمقرر المختار
+
+                                    🟢 التعليم عن بعد متاح ومفعل الآن
+
                                 </span>
+
+                                ${isGlobalRoom ? '<span class="bg-indigo-100 text-indigo-800 border border-indigo-300 text-[10px] font-black px-2 py-0.5 rounded-full">🌐 عبر القاعة العامة للجميع</span>' : ''}
+
                             </div>
+
                             <div class="flex items-center gap-2 text-xs text-slate-500 font-medium flex-wrap pt-0.5">
-                                <span>المقرر المختار: <b class="text-amber-800 font-extrabold">${selectedCourse.courseTitle || 'التخصص'}</b></span>
+
+                                <span>المقرر المختار: <b class="text-amber-800 font-extrabold">${selectedCourse.courseTitle || vc.courseTitle || 'التخصص'}</b></span>
+
                                 <span>•</span>
+
                                 <span>المدرب المعتمد: <b class="text-indigo-700 font-black">${trainerName}</b></span>
+
                                 <span>•</span>
-                                <span>القاعة التدريبية: <b class="text-slate-700 font-bold">${selectedCourse.room || 'المعتمدة'}</b></span>
+
+                                <span>القاعة التدريبية: <b class="text-slate-700 font-bold">${selectedCourse.room || 'القاعة الافتراضية'}</b></span>
+
                             </div>
+
                         </div>
+
                     </div>
 
                     <div class="flex items-center gap-2 w-full md:w-auto flex-wrap">
+
                         <button type="button" onclick="switchTab('studentDashboard')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer">
+
                             <span>📋</span>
+
                             <span>سجل الحضور والمتابعة</span>
+
                         </button>
+
                         <button type="button" onclick="switchTab('studentLms')" class="bg-slate-900 hover:bg-black text-amber-300 font-black px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+
                             <span>📚</span>
+
                             <span>المقررات (LMS)</span>
+
                         </button>
+
                     </div>
+
                 </div>
 
                 <!-- Hero Live Meeting Card -->
+
                 <div class="bg-gradient-to-r ${pObj.bannerGradient} text-white rounded-3xl p-6 md:p-8 shadow-xl border-2 ${pObj.bannerBorder} relative overflow-hidden space-y-6">
+
                     <div class="absolute -right-16 -top-16 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
                     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/10 pb-5">
+
                         <div class="space-y-1">
+
                             <div class="flex items-center gap-2 flex-wrap">
+
                                 <span class="bg-emerald-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm animate-pulse flex items-center gap-1.5">
+
                                     <span class="w-2 h-2 rounded-full bg-white"></span>
+
                                     <span>المحاضرة المباشرة (عن بعد)</span>
+
                                 </span>
+
                                 <span class="bg-white/10 text-blue-200 border border-white/20 text-xs font-black px-3 py-1 rounded-full">
+
                                     منصة: ${pObj.name} ${pObj.icon}
+
                                 </span>
+
                             </div>
+
                             <h2 class="text-xl md:text-3xl font-black text-white pt-2 leading-snug">
-                                ${vc.topic || `محاضرة ${selectedCourse.courseTitle} (عن بعد)`}
+
+                                ${vc.topic || `محاضرة ${selectedCourse.courseTitle || ''} (عن بعد)`}
+
                             </h2>
+
                             <p class="text-xs md:text-sm text-slate-300 font-medium">
-                                بإشراف ومتابعة: <b class="text-amber-300 font-black">${trainerName}</b> • المقرر: <b class="text-white font-bold">${selectedCourse.courseTitle}</b>
+
+                                بإشراف ومتابعة: <b class="text-amber-300 font-black">${trainerName}</b> • المقرر: <b class="text-white font-bold">${selectedCourse.courseTitle || vc.courseTitle || ''}</b>
+
                             </p>
+
                         </div>
 
-                        <!-- Scheduled Time Badge -->
                         <div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl w-full md:w-auto shrink-0 space-y-1">
-                            <span class="text-[11px] text-blue-200 font-bold block">🕒 موعد وفترة حصتك:</span>
+
+                            <span class="text-[11px] text-blue-200 font-bold block">🕒 موعد وفترة الحصة:</span>
+
                             <span class="text-xs md:text-sm font-black text-white block">${selectedCourse.periodLabel || 'متاح الآن طوال اليوم'}</span>
+
                         </div>
+
                     </div>
 
-                    <!-- Passcode & Notes Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                         ${vc.passcode ? `
+
                             <div class="bg-black/30 backdrop-blur-md border border-white/15 p-4 rounded-2xl flex items-center justify-between">
+
                                 <div class="space-y-0.5">
+
                                     <span class="text-[11px] text-slate-300 font-bold block">🔑 رمز المرور السري (Passcode):</span>
+
                                     <span class="text-sm font-mono font-black text-amber-300">${vc.passcode}</span>
+
                                 </div>
+
                                 <button type="button" onclick="copyVcPasscode('${vc.passcode}')" class="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-3 py-1.5 rounded-xl border border-white/20 transition cursor-pointer">
+
                                     نسخ الرمز
+
                                 </button>
+
                             </div>
+
                         ` : ''}
 
                         <div class="bg-black/30 backdrop-blur-md border border-white/15 p-4 rounded-2xl space-y-1 ${!vc.passcode ? 'md:col-span-2' : ''}">
-                            <span class="text-[11px] text-blue-200 font-black block">💡 تعليمات وتوجيهات الحضور من المدرب:</span>
+
+                            <span class="text-[11px] text-blue-200 font-black block">💡 تعليمات وتوجيهات الحضور:</span>
+
                             <p class="text-xs text-slate-200 leading-relaxed font-medium">
-                                ${vc.notes || 'يرجى الدخول بالاسم الثلاثي الصريح والالتزام بالوقت، وإبقاء المايكروفون مغلقاً.'}
+
+                                ${vc.notes || DEFAULT_VC_NOTES}
+
                             </p>
+
                         </div>
+
                     </div>
 
-                    <!-- Large Action Buttons -->
                     <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
+
                         <a href="${vc.link}" target="_blank" class="w-full sm:flex-1 py-4 px-6 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-sm md:text-base rounded-2xl shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-3 cursor-pointer">
+
                             <span>🚀 دخول قاعة المحاضرة المباشرة الآن</span>
+
                             <span class="text-lg">👈</span>
+
                         </a>
-                        <button type="button" onclick="copyVcMeetingLink('${vc.link.replace(/'/g, "\'")}')" class="w-full sm:w-auto py-4 px-6 bg-white/15 hover:bg-white/25 text-white font-black text-sm rounded-2xl border border-white/30 transition flex items-center justify-center gap-2 cursor-pointer shadow-md">
+
+                        <button type="button" onclick="copyVcMeetingLink('${safeLinkForJs}')" class="w-full sm:w-auto py-4 px-6 bg-white/15 hover:bg-white/25 text-white font-black text-sm rounded-2xl border border-white/30 transition flex items-center justify-center gap-2 cursor-pointer shadow-md">
+
                             <span>📋</span>
+
                             <span>نسخ رابط القاعة</span>
+
                         </button>
+
                     </div>
+
                 </div>
+
             `;
+
         } else if (isFutureDate) {
-            // حالة الجدولة المستقبلية
+
             cardContentHtml = `
+
                 <div class="bg-white border border-blue-200 rounded-3xl p-6 md:p-8 shadow-sm text-center space-y-4 max-w-2xl mx-auto my-4">
+
                     <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center text-3xl mx-auto border border-blue-200">
+
                         🗓️
+
                     </div>
+
                     <div class="space-y-1.5">
+
                         <h3 class="text-lg md:text-xl font-black text-slate-900">محاضرة عن بعد مجدولة بالتقويم لمقرر (${selectedCourse.courseTitle})</h3>
+
                         <p class="text-sm font-black text-blue-900 bg-blue-50 py-2 px-4 rounded-xl inline-block border border-blue-200">
+
                             تاريخ المحاضرة القادمة: ${formatDateToArabic(vc.calendarDate)}
+
                         </p>
+
                     </div>
+
                     <div class="p-4 rounded-2xl bg-blue-50/60 border border-blue-200 text-blue-950 text-xs font-medium leading-relaxed text-right">
+
                         💡 سيفتح رابط القاعة الافتراضية تلقائياً في ذلك اليوم عند حلول موعد حصتك المجدولة وفق جدول الحصص بالمعهد بإشراف المدرب <b>${trainerName}</b>.
+
                     </div>
+
                 </div>
+
             `;
+
         } else {
-            // حالة الدراسة حضورية بالقاعة التدريبية (المدرب لم يفعل التدريب عن بعد لهذا المقرر)
+
             cardContentHtml = `
-                <!-- Top Trainee Header Card -->
+
                 <div class="bg-white border border-slate-200 p-5 md:p-6 rounded-3xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+
                     <div class="flex items-center gap-4">
+
                         <div class="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-3xl shadow-md text-amber-300 shrink-0">
+
                             🏫
+
                         </div>
+
                         <div class="space-y-1">
+
                             <div class="flex items-center gap-2 flex-wrap">
+
                                 <h3 class="font-black text-slate-900 text-lg md:text-xl">${currentUser.name}</h3>
-                                <span class="bg-slate-900 text-amber-300 text-xs font-black px-2.5 py-0.5 rounded-full border border-slate-800">${currentUser.group}</span>
+
+                                <span class="bg-slate-900 text-amber-300 text-xs font-black px-2.5 py-0.5 rounded-full border border-slate-800">${currentUser.group || ''}</span>
+
                                 <span class="bg-slate-100 text-slate-700 border border-slate-300 text-xs font-black px-2.5 py-0.5 rounded-full">
+
                                     الدراسة حضورية
+
                                 </span>
+
                             </div>
+
                             <div class="flex items-center gap-2 text-xs text-slate-500 font-medium flex-wrap pt-0.5">
+
                                 <span>المقرر المختار: <b class="text-amber-800 font-extrabold">${selectedCourse.courseTitle || 'التخصص'}</b></span>
+
                                 <span>•</span>
+
                                 <span>المدرب المعتمد: <b class="text-indigo-700 font-black">${trainerName}</b></span>
-                                <span>•</span>
-                                <span>القاعة التدريبية: <b class="text-slate-800 font-black">${selectedCourse.room || 'المعتمدة'}</b></span>
+
                             </div>
+
                         </div>
+
                     </div>
 
-                    <div class="flex items-center gap-2 w-full md:w-auto flex-wrap">
-                        <button type="button" onclick="switchTab('studentDashboard')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer">
-                            <span>📋</span>
-                            <span>سجل الحضور والمتابعة</span>
-                        </button>
-                    </div>
                 </div>
 
-                <!-- In-person Notice Card -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm text-center space-y-4 max-w-2xl mx-auto my-6">
+
                     <div class="w-20 h-20 rounded-3xl bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center text-4xl mx-auto shadow-xs">
+
                         🏫
+
                     </div>
+
                     <div class="space-y-1.5">
+
                         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-slate-100 text-slate-600 border border-slate-200 mb-1">
+
                             <span>⚪ التدريب عن بعد متوقف لهذا المقرر حالياً</span>
+
                         </div>
+
                         <h3 class="text-lg md:text-xl font-black text-slate-900">المحاضرات قائمة حضورياً بالقاعة التدريبية</h3>
-                        <p class="text-xs md:text-sm text-slate-600 leading-relaxed font-medium">
-                            تُعقد جلساتك التدريبية لمقرر (<b class="text-slate-950 font-black">${selectedCourse.courseTitle}</b>) بشكل حضوري في القاعة رقم (<b class="text-slate-950 font-black">${selectedCourse.room || 'المعتمدة بالجدول'}</b>) بإشراف المدرب <b class="text-indigo-800 font-black">${trainerName}</b>.
-                        </p>
+
                     </div>
-                    <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-amber-950 text-xs font-bold leading-relaxed text-right">
-                        💡 <b>حسب مدخلات المدرب:</b> التدريب عن بعد لمقرر (<b class="text-slate-900">${selectedCourse.courseTitle}</b>) غير مفعل في الوقت الحالي والمحاضرة حضورية بالقاعة. فور قيام المدرب (أ. ${trainerName}) بتفعيل التدريب عن بعد وإدخال رابط البث لهذا المقرر، ستظهر لك بطاقة الدخول المباشر وزر الانضمام هنا فوراً.
-                    </div>
+
                     <div class="flex items-center justify-center gap-3 pt-2 flex-wrap">
+
                         <button type="button" onclick="switchTab('studentDashboard')" class="bg-slate-900 hover:bg-black text-amber-300 font-black px-5 py-2.5 rounded-xl text-xs transition flex items-center gap-2 shadow-sm cursor-pointer">
+
                             <span>الانتقال لسجل الحضور والأداء</span>
+
                             <span>👈</span>
+
                         </button>
+
                         <button type="button" onclick="switchTab('studentLms')" class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer">
+
                             <span>المحتوى والمقررات الأكاديمية (LMS)</span>
+
                         </button>
+
                     </div>
+
                 </div>
+
             `;
+
         }
 
+        // 6. جميع القاعات الافتراضية النشطة بالمعهد (متاحة للجميع)
+
+        const seenLinks = new Set();
+
+        const openInstituteRooms = [];
+
+        const orderedKeys = ['__GLOBAL__', ...Object.keys(virtualClassrooms).filter(k => k !== '__GLOBAL__' && k !== '_meta')];
+
+        orderedKeys.forEach(k => {
+
+            const roomObj = virtualClassrooms[k];
+
+            if (!roomObj || typeof roomObj !== 'object' || !roomObj.link || !isDateScopeActiveToday(roomObj)) return;
+
+            if (!isVcGroupMatch(roomObj, studentGroup)) return;
+
+            const dedupKey = `${roomObj.link}|${roomObj.trainerName || k}`;
+
+            if (seenLinks.has(dedupKey)) return;
+
+            seenLinks.add(dedupKey);
+
+            openInstituteRooms.push({ key: k, ...roomObj });
+
+        });
+
+        const directoryHtml = openInstituteRooms.length > 0 ? `
+
+            <div class="bg-white border border-slate-200 rounded-3xl p-5 md:p-6 shadow-sm space-y-4">
+
+                <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
+
+                    <div class="flex items-center gap-2.5">
+
+                        <span class="text-xl">🌐</span>
+
+                        <div>
+
+                            <h4 class="text-sm md:text-base font-black text-slate-900">جميع القاعات الافتراضية النشطة بالمعهد (متاحة للجميع)</h4>
+
+                            <p class="text-[11px] text-slate-500 font-medium">يمكنك الانضمام مباشرة إلى القاعة العامة أو قاعة أي مدرب نشط بالمعهد</p>
+
+                        </div>
+
+                    </div>
+
+                    <span class="text-[11px] font-black bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full">
+
+                        🟢 ${openInstituteRooms.length} قاعة مفتوحة الآن
+
+                    </span>
+
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+
+                    ${openInstituteRooms.map(r => {
+
+                        const rp = VC_PLATFORMS[r.platform] || VC_PLATFORMS.meet;
+
+                        const rLabel = r.isGlobal ? '🌐 القاعة العامة الشاملة (للجميع)' : `أ. ${r.trainerName || r.key}`;
+
+                        const safeUrl = (r.link || '').replace(/'/g, "\\'");
+
+                        return `
+
+                            <div class="p-4 rounded-2xl border ${r.isGlobal ? 'border-emerald-300 bg-emerald-50/40' : 'border-slate-200 bg-slate-50/60'} flex flex-col justify-between gap-3">
+
+                                <div class="space-y-1">
+
+                                    <div class="flex items-center justify-between gap-1.5">
+
+                                        <span class="text-xs font-black text-slate-900">${rLabel}</span>
+
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${rp.badgeBg}">${rp.icon} ${rp.name}</span>
+
+                                    </div>
+
+                                    <p class="text-[11px] font-bold text-slate-600 line-clamp-2">${r.topic || r.courseTitle || 'محاضرة عن بعد'}</p>
+
+                                </div>
+
+                                <div class="flex items-center gap-2">
+
+                                    <a href="${r.link}" target="_blank" class="flex-1 text-center py-2 px-3 rounded-xl text-xs font-black bg-slate-900 hover:bg-black text-amber-300 transition cursor-pointer">
+
+                                        🚀 دخول
+
+                                    </a>
+
+                                    <button type="button" onclick="copyVcMeetingLink('${safeUrl}')" class="px-3 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition cursor-pointer" title="نسخ الرابط">
+
+                                        📋
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }).join('')}
+
+                </div>
+
+            </div>
+
+        ` : '';
+
         container.innerHTML = `
+
             ${courseSelectorHtml}
+
             ${cardContentHtml}
+
+            ${directoryHtml}
+
         `;
+
     }
 
     // ===================================================================
@@ -80703,15 +81523,15 @@ function buildDemoExecutiveReport(params) {
 
                     ${(function() {
 
-                        const courseVc = (typeof getVirtualClassroomForTrainer === 'function')
+                        const cRes = (typeof resolveVirtualClassroomForCourse === 'function')
 
-                            ? (getVirtualClassroomForTrainer(c.trainerName, c.lmsKey) || getVirtualClassroomForTrainer(c.rawTrainerName, c.lmsKey))
+                            ? resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, currentUser.group, true)
 
                             : null;
 
-                        const isVcLiveNow = Boolean(courseVc && courseVc.isActive && courseVc.link && (!courseVc.calendarDate || courseVc.calendarDate === getTodayDateString()));
+                        const courseVc = (cRes && cRes.status === 'open') ? cRes.vc : null;
 
-                        return isVcLiveNow ? `
+                        return (courseVc && courseVc.link) ? `
 
                             <a href="${courseVc.link}" target="_blank" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-3 px-4 rounded-2xl text-xs transition duration-200 shadow-md flex items-center justify-center gap-2 mb-2 animate-pulse cursor-pointer">
 
