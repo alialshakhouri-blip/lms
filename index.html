@@ -3798,11 +3798,11 @@
 
 
 
-                            <button type="button" onclick="openComprehensiveTraineePortfolioModal(document.getElementById('adminQuickTraineeIdInput')?.value);" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-4 py-3 rounded-2xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shrink-0 border border-amber-400" title="فتح وطباعة الملف الشامل للمتدرب">
+                            <button id="aqComprehensiveBtn" type="button" onclick="openComprehensiveTraineePortfolioModal(document.getElementById('adminQuickTraineeIdInput')?.value);" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-4 py-3 rounded-2xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shrink-0 border border-amber-400" title="فتح وطباعة الملف الشامل للمتدرب">
                                 <span>📋</span>
                                 <span>الملف الشامل (PDF)</span>
                             </button>
-                            <button type="button" onclick="openRegistrationFormModal(document.getElementById('adminQuickTraineeIdInput')?.value);" class="bg-gradient-to-r from-slate-900 to-black hover:from-black hover:to-slate-800 text-amber-300 font-black px-4 py-3 rounded-2xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shrink-0 border border-amber-500/40" title="فتح وطباعة نموذج التسجيل الرسمي">
+                            <button id="aqRegFormBtn" type="button" onclick="openRegistrationFormModal(document.getElementById('adminQuickTraineeIdInput')?.value);" class="bg-gradient-to-r from-slate-900 to-black hover:from-black hover:to-slate-800 text-amber-300 font-black px-4 py-3 rounded-2xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shrink-0 border border-amber-500/40" title="فتح وطباعة نموذج التسجيل الرسمي">
                                 <span>📝</span>
                                 <span>نموذج التسجيل</span>
                             </button>
@@ -6830,11 +6830,11 @@
 
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
 
-                        <button type="button" onclick="openComprehensiveTraineePortfolioModal(document.getElementById('tpOriginalId') ? document.getElementById('tpOriginalId').value : (document.getElementById('tpModalIdDisplay') ? document.getElementById('tpModalIdDisplay').innerText : ''));" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer border border-amber-400" title="الملف الشامل للمتدرب (الاختبارات، السلوك، تقويم الحضور، السلامة، الجدول، وطباعة PDF مع الشعار والختم)">
+                        <button id="tpModalComprehensiveBtn" type="button" onclick="openComprehensiveTraineePortfolioModal(document.getElementById('tpOriginalId') ? document.getElementById('tpOriginalId').value : (document.getElementById('tpModalIdDisplay') ? document.getElementById('tpModalIdDisplay').innerText : ''));" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer border border-amber-400" title="الملف الشامل للمتدرب (الاختبارات، السلوك، تقويم الحضور، السلامة، الجدول، وطباعة PDF مع الشعار والختم)">
                             <span>📋</span>
                             <span>الملف الشامل (PDF)</span>
                         </button>
-                        <button type="button" onclick="openRegistrationFormModal(document.getElementById('tpOriginalId') ? document.getElementById('tpOriginalId').value : (document.getElementById('tpModalIdDisplay') ? document.getElementById('tpModalIdDisplay').innerText : ''));" class="bg-gradient-to-r from-slate-900 to-black hover:from-black hover:to-slate-900 text-amber-300 font-black p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer border border-amber-500/40" title="فتح وطباعة نموذج التسجيل الرسمي">
+                        <button id="tpModalRegFormBtn" type="button" onclick="openRegistrationFormModal(document.getElementById('tpOriginalId') ? document.getElementById('tpOriginalId').value : (document.getElementById('tpModalIdDisplay') ? document.getElementById('tpModalIdDisplay').innerText : ''));" class="bg-gradient-to-r from-slate-900 to-black hover:from-black hover:to-slate-900 text-amber-300 font-black p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer border border-amber-500/40" title="فتح وطباعة نموذج التسجيل الرسمي">
                             <span>📝</span>
                             <span>نموذج التسجيل</span>
                         </button>
@@ -6870,7 +6870,7 @@
 
                         </button>
 
-                        <button type="button" onclick="closeTraineeProfileModal(); navigateToInstitutionFilesFromProfile();" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer" title="الانتقال المباشر لبيانات المتدرب وشعبته في ملفات المؤسسة">
+                        <button id="tpModalInstFilesBtn" type="button" onclick="closeTraineeProfileModal(); navigateToInstitutionFilesFromProfile();" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold p-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer" title="الانتقال المباشر لبيانات المتدرب وشعبته في ملفات المؤسسة">
 
                             <span>🏛️</span>
 
@@ -17205,17 +17205,6 @@
     }
 
     var DEFAULT_VIRTUAL_CLASSROOMS = {
-        '__GLOBAL__': buildDefaultVcRoom({
-            isGlobal: true,
-            platform: 'meet',
-            link: 'https://meet.google.com/bgt-anak-all',
-            courseKey: '__GLOBAL__',
-            courseTitle: 'التعليم عن بعد الموحد (جميع المقررات والتخصصات)',
-            trainerName: 'الإدارة والمدربون المعتمدون',
-            topic: 'قاعة التعليم عن بعد الموحدة (متاحة لجميع المتدربين والشعب)',
-            notes: 'هذه القاعة مفتوحة ومتاحة لجميع المتدربين وكافة المجموعات والشعب والشركات للتعليم عن بعد.',
-            updatedBy: 'إدارة المعهد'
-        }),
         'شرف الدين': buildDefaultVcRoom({
             trainerName: 'شرف الدين',
             courseTitle: 'انجليزية',
@@ -18703,74 +18692,112 @@ ${details}
 
     // Role-based UI visibility & Views routing
 
+    function isAdminOrSuperAdmin() {
+
+        return Boolean(typeof currentUser !== 'undefined' && currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin'));
+
+    }
+
+    function requireAdminOrSuperAdmin(featureLabel) {
+
+        if (isAdminOrSuperAdmin()) return true;
+
+        if (typeof showToast === 'function') {
+
+            showToast(`⛔ عذراً: "${featureLabel || 'هذه الخدمة'}" مخصصة للإدارة فقط`, 'error');
+
+        }
+
+        return false;
+
+    }
+
+    window.isAdminOrSuperAdmin = isAdminOrSuperAdmin;
+
+    window.requireAdminOrSuperAdmin = requireAdminOrSuperAdmin;
+
     function enforceRoleVisibility() {
 
         if (!currentUser) return;
 
+        const isAdminRole = isAdminOrSuperAdmin();
 
+        const btnCompanyDashboard = document.getElementById('btn-companyDashboard');
+
+        const btnTraineeDossierModal = document.getElementById('btn-traineeDossierModal');
+
+        const btnRegistrationFormModal = document.getElementById('btn-registrationFormModal');
+
+        const tpModalComprehensiveBtn = document.getElementById('tpModalComprehensiveBtn');
+
+        const tpModalRegFormBtn = document.getElementById('tpModalRegFormBtn');
+
+        const tpModalInstFilesBtn = document.getElementById('tpModalInstFilesBtn');
+
+        const aqComprehensiveBtn = document.getElementById('aqComprehensiveBtn');
+
+        const aqRegFormBtn = document.getElementById('aqRegFormBtn');
+
+        [btnCompanyDashboard, btnTraineeDossierModal, btnRegistrationFormModal, tpModalComprehensiveBtn, tpModalRegFormBtn, tpModalInstFilesBtn, aqComprehensiveBtn, aqRegFormBtn].forEach(el => {
+
+            if (!el) return;
+
+            if (isAdminRole) el.classList.remove('hidden');
+
+            else el.classList.add('hidden');
+
+        });
+
+        if (!isAdminRole) {
+
+            ['comprehensiveTraineePortfolioModal', 'registrationFormModal', 'batchRegExportModal'].forEach(mId => {
+
+                const mEl = document.getElementById(mId);
+
+                if (mEl) mEl.classList.add('hidden');
+
+            });
+
+        }
 
         const btnAttendance = document.getElementById('btn-attendance');
-
         const btnTrainerDashboard = document.getElementById('btn-trainerDashboard');
-
         const btnTrainerLms = document.getElementById('btn-trainerLms');
-
         const btnTrainerSubmissions = document.getElementById('btn-trainerSubmissions');
-
         const btnGradesSystem = document.getElementById('btn-gradesSystem');
-
         const btnMasterSchedule = document.getElementById('btn-masterSchedule');
-
         const btnSettings = document.getElementById('btn-settings');
-
         const btnTrainerReports = document.getElementById('btn-trainerReports');
-
         const btnUsers = document.getElementById('btn-users');
-
         const btnTimesheet = document.getElementById('btn-timesheet');
-
         const btnArchive = document.getElementById('btn-archive');
-
         const btnStudentDashboard = document.getElementById('btn-studentDashboard');
-
         const btnStudentCourses = document.getElementById('btn-studentCourses');
-
         const btnStudentTasks = document.getElementById('btn-studentTasks');
-
         const btnStudentAccount = document.getElementById('btn-studentAccount');
-
         const btnStudentLms = document.getElementById('btn-studentLms');
-
         const btnStudentGrades = document.getElementById('btn-studentGrades');
-
         const btnSubmissionsCalendar = document.getElementById('btn-submissionsCalendar');
-
         const btnStudentSubmissionsCalendar = document.getElementById('btn-studentSubmissionsCalendar');
-
         const btnVirtualClass = document.getElementById('btn-virtualClass');
-
         const btnStudentVirtualClass = document.getElementById('btn-studentVirtualClass');
 
-    function isAnyVirtualClassActiveForTrainee(studentUser) {
-        if (!studentUser || studentUser.role !== 'student') return false;
-        if (typeof evaluateTraineeSessionAccess !== 'function') return false;
-        try {
-            const evalResult = evaluateTraineeSessionAccess(studentUser);
-            return Boolean(evalResult && evalResult.status === 'open' && evalResult.classroom && evalResult.classroom.isActive && evalResult.classroom.link);
-        } catch(e) {
-            return false;
+        function isAnyVirtualClassActiveForTrainee(studentUser) {
+            if (!studentUser || studentUser.role !== 'student') return false;
+            if (typeof evaluateTraineeSessionAccess !== 'function') return false;
+            try {
+                const evalResult = evaluateTraineeSessionAccess(studentUser);
+                return Boolean(evalResult && evalResult.status === 'open' && evalResult.classroom && evalResult.classroom.isActive && evalResult.classroom.link);
+            } catch (e) {
+                return false;
+            }
         }
-    }
-    window.isAnyVirtualClassActiveForTrainee = isAnyVirtualClassActiveForTrainee;
+        window.isAnyVirtualClassActiveForTrainee = isAnyVirtualClassActiveForTrainee;
 
         const studentBottomNav = document.getElementById('studentBottomNav');
-
         const btnAttendanceSheet = document.getElementById('btn-attendanceSheet');
-
         const btnAdminReports = document.getElementById('btn-adminReports');
-
         const btnAdminCertificates = document.getElementById('btn-adminCertificates');
-
         const btnInstitutionFiles = document.getElementById('btn-institutionFiles');
 
         const topInstitutionFilesBtn = document.getElementById('topInstitutionFilesBtn');
@@ -18801,7 +18828,7 @@ ${details}
 
             const btnSupportTickets = document.getElementById('btn-supportTickets');
 
-            const allStaffBtns = [btnAttendance, btnTrainerDashboard, btnTrainerLms, btnTrainerSubmissions, btnGradesSystem, btnSubmissionsCalendar, btnMasterSchedule, btnSettings, btnTrainerReports, btnUsers, btnTimesheet, btnArchive, btnVirtualClass, btnAdminReports, btnAdminCertificates, btnInstitutionFiles, btnSupportTickets];
+            const allStaffBtns = [btnAttendance, btnTrainerDashboard, btnTrainerLms, btnTrainerSubmissions, btnGradesSystem, btnSubmissionsCalendar, btnMasterSchedule, btnSettings, btnTrainerReports, btnUsers, btnTimesheet, btnArchive, btnVirtualClass, btnAdminReports, btnAdminCertificates, btnInstitutionFiles, btnCompanyDashboard, btnTraineeDossierModal, btnRegistrationFormModal, btnSupportTickets];
 
             allStaffBtns.forEach(b => { if (b) b.classList.add('hidden'); });
 
@@ -18839,7 +18866,7 @@ ${details}
 
 
 
-            ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'virtualClass', 'adminReports', 'adminCertificates', 'institutionFiles', 'attendanceSheet', 'supportTickets'].forEach(tabId => {
+            ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'virtualClass', 'adminReports', 'adminCertificates', 'institutionFiles', 'companyDashboard', 'attendanceSheet', 'supportTickets'].forEach(tabId => {
 
                 const el = document.getElementById(`tab-${tabId}`);
 
@@ -18947,7 +18974,7 @@ ${details}
 
         if (currentUser.role === 'trainer') {
 
-            // إزالة وإخفاء الصفحات التي ليس للمدرب عليها صلاحية من الواجهة بالكامل:
+            // إزالة وإخفاء الصفحات والخدمات التي تخص الإدارة فقط عن المدرب:
 
             if (btnAttendance) btnAttendance.classList.add('hidden');
 
@@ -18963,6 +18990,12 @@ ${details}
 
             if (btnAdminCertificates) btnAdminCertificates.classList.add('hidden');
 
+            if (btnCompanyDashboard) btnCompanyDashboard.classList.add('hidden');
+
+            if (btnTraineeDossierModal) btnTraineeDossierModal.classList.add('hidden');
+
+            if (btnRegistrationFormModal) btnRegistrationFormModal.classList.add('hidden');
+
             const btnSuppTrainer = document.getElementById('btn-supportTickets');
 
             if (btnSuppTrainer) btnSuppTrainer.classList.add('hidden');
@@ -18971,7 +19004,7 @@ ${details}
 
             // إخفاء حاويات الصفحات غير المصرح بها
 
-            ['attendance', 'attendanceSheet', 'institutionFiles', 'settings', 'timesheet', 'users', 'archive', 'studentDashboard', 'studentLms', 'studentGrades', 'studentVirtualClass', 'adminReports', 'adminCertificates'].forEach(tabId => {
+            ['attendance', 'attendanceSheet', 'institutionFiles', 'companyDashboard', 'settings', 'timesheet', 'users', 'archive', 'studentDashboard', 'studentLms', 'studentGrades', 'studentVirtualClass', 'adminReports', 'adminCertificates'].forEach(tabId => {
 
                 const el = document.getElementById(`tab-${tabId}`);
 
@@ -34296,6 +34329,18 @@ ${details}
 
         const canManagePhone = currentUser?.role === 'superadmin' || currentUser?.role === 'admin' || currentUser?.role === 'trainer' || !currentUser?.role;
 
+        const isAdminProfileViewer = (currentUser?.role === 'superadmin' || currentUser?.role === 'admin');
+
+        ['tpModalComprehensiveBtn', 'tpModalRegFormBtn', 'tpModalInstFilesBtn'].forEach(bId => {
+
+            const el = document.getElementById(bId);
+
+            if (el) el.classList.toggle('hidden', !isAdminProfileViewer);
+
+        });
+
+
+
         const phoneContainer = document.getElementById('tpInputPhoneContainer');
 
         if (phoneContainer) {
@@ -43513,7 +43558,7 @@ function openReportFromProfile() {
 
                         ${(function() {
                             const vcRes = (typeof resolveVirtualClassroomForCourse === 'function')
-                                ? resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, currentUser.group, true)
+                                ? resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, currentUser.group)
                                 : null;
                             if (vcRes && vcRes.status === 'open' && vcRes.vc && vcRes.vc.link) {
                                 return `
@@ -78073,7 +78118,7 @@ function buildDemoExecutiveReport(params) {
         if (!savedMap || typeof savedMap !== 'object') return merged;
 
         Object.keys(savedMap).forEach(k => {
-            if (k === '_meta') return;
+            if (k === '_meta' || k === '__GLOBAL__') return;
             const entry = savedMap[k];
             if (!entry || typeof entry !== 'object') return;
 
@@ -78086,7 +78131,16 @@ function buildDemoExecutiveReport(params) {
             if (upgradeOldSeeds && entry.vcSchemaVersion !== VC_STORAGE_VERSION && entry.manualOverride !== true) {
                 // Upgrade stale v2 default-off records so Distance Learning works out of the box,
                 // while preserving any custom meeting link the user entered!
-                const def = merged[k] || merged.__GLOBAL__;
+                const def = merged[k] || {
+                    platform: 'meet',
+                    link: 'https://meet.google.com/bgt-anak-tr',
+                    topic: `محاضرة (عن بعد) - أ. ${k}`,
+                    targetGroups: 'ALL',
+                    dateScope: 'always',
+                    lockByPeriod: false,
+                    isActive: true,
+                    vcSchemaVersion: VC_STORAGE_VERSION
+                };
                 if (entry.isActive === true && entry.link) {
                     merged[k] = {
                         ...def,
@@ -78478,7 +78532,7 @@ function buildDemoExecutiveReport(params) {
 
     window.getVirtualClassroomForTrainer = getVirtualClassroomForTrainer;
 
-    function resolveVirtualClassroomForCourse(trainerNameOrObj, courseKey, studentGroup, allowGlobalFallback = true) {
+    function resolveVirtualClassroomForCourse(trainerNameOrObj, courseKey, studentGroup) {
 
         if (!virtualClassrooms || Object.keys(virtualClassrooms).length === 0) {
 
@@ -78542,7 +78596,7 @@ function buildDemoExecutiveReport(params) {
 
             const vc = item.vc;
 
-            if (!vc || typeof vc !== 'object') continue;
+            if (!vc || typeof vc !== 'object' || vc.isGlobal) continue;
 
             if (!fallbackVc) fallbackVc = vc;
 
@@ -78567,18 +78621,6 @@ function buildDemoExecutiveReport(params) {
             }
 
             return { status: 'open', vc, source: 'course' };
-
-        }
-
-        if (allowGlobalFallback) {
-
-            const gVc = virtualClassrooms.__GLOBAL__;
-
-            if (gVc && gVc.isActive && gVc.link && isVcGroupMatch(gVc, studentGroup) && isDateScopeActiveToday(gVc)) {
-
-                return { status: 'open', vc: gVc, source: 'global' };
-
-            }
 
         }
 
@@ -78719,34 +78761,6 @@ function buildDemoExecutiveReport(params) {
         }
 
         if (activeSpecificResult) return activeSpecificResult;
-
-        // Fallback to active Institute-wide Open Classroom (__GLOBAL__) so no trainee is stranded offline
-
-        const globalRes = resolveVirtualClassroomForCourse(courses[0]?.rawTrainerName || courses[0]?.trainerName, courses[0]?.lmsKey, studentGroup, true);
-
-        if (globalRes && globalRes.status === 'open' && globalRes.vc) {
-
-            return {
-
-                ...(firstCourseResult || {}),
-
-                status: 'open',
-
-                classroom: globalRes.vc,
-
-                trainerName: firstCourseResult?.trainerName || globalRes.vc.trainerName || 'إدارة المعهد',
-
-                courseTitle: firstCourseResult?.courseTitle || globalRes.vc.courseTitle || 'التعليم عن بعد الموحد',
-
-                periodLabel: firstCourseResult?.periodLabel || 'متاح الآن طوال اليوم (للجميع)',
-
-                isGlobalBroadcast: true,
-
-                isAllDay: true
-
-            };
-
-        }
 
         if (futureSessionResult) return futureSessionResult;
 
@@ -79118,7 +79132,7 @@ function buildDemoExecutiveReport(params) {
 
             let currentUrl = urlInput ? urlInput.value.trim() : '';
 
-            const fallbackDefault = DEFAULT_VIRTUAL_CLASSROOMS[cleanTrainerName] || DEFAULT_VIRTUAL_CLASSROOMS.__GLOBAL__;
+            const fallbackDefault = DEFAULT_VIRTUAL_CLASSROOMS[cleanTrainerName] || { platform: 'meet', link: 'https://meet.google.com/bgt-anak-tr', dateScope: 'always', targetGroups: 'ALL', lockByPeriod: false };
 
             if (isChecked && !currentUrl && fallbackDefault && fallbackDefault.link) {
 
@@ -79665,7 +79679,7 @@ function buildDemoExecutiveReport(params) {
 
         loadVirtualClassrooms();
 
-        // 1. تحديد المدرب النشط أو القاعة الشاملة للجميع
+        // 1. تحديد المدرب النشط
 
         if (currentUser.role === 'trainer') {
 
@@ -79675,15 +79689,13 @@ function buildDemoExecutiveReport(params) {
 
         } else {
 
-            if (!activeVcTrainer) {
+            if (!activeVcTrainer || activeVcTrainer === '__GLOBAL__') {
 
-                activeVcTrainer = '__GLOBAL__';
+                activeVcTrainer = (scheduleData && scheduleData[0]) ? scheduleData[0].name : 'شرف الدين';
 
             }
 
         }
-
-        const isGlobalSelection = (activeVcTrainer === '__GLOBAL__');
 
         // 2. رسم محدد المدرب في الشريط العلوي
 
@@ -79719,9 +79731,7 @@ function buildDemoExecutiveReport(params) {
 
                 selectorContainer.innerHTML = `
 
-                    <select id="vcTrainerSelect" onchange="onVcTrainerChange(this.value)" class="bg-slate-800 hover:bg-slate-700 text-white font-black text-xs px-3.5 py-2 rounded-xl border border-slate-600 focus:outline-hidden focus:border-blue-400 cursor-pointer shadow-2xs max-w-xs sm:max-w-sm">
-
-                        <option value="__GLOBAL__" ${isGlobalSelection ? 'selected' : ''}>🌐 القاعة العامة الشاملة (متاح للجميع - كافة المتدربين والشعب)</option>
+                    <select id="vcTrainerSelect" onchange="onVcTrainerChange(this.value)" class="bg-slate-800 hover:bg-slate-700 text-white font-black text-xs px-3.5 py-2 rounded-xl border border-slate-600 focus:outline-hidden focus:border-blue-400 cursor-pointer shadow-2xs">
 
                         ${trOptions}
 
@@ -79741,103 +79751,61 @@ function buildDemoExecutiveReport(params) {
 
         const groupsTags = document.getElementById('vcLinkedGroupsTags');
 
-        if (isGlobalSelection) {
+        const linkedGroups = getGroupsForTrainer(activeVcTrainer);
 
-            if (courseSelect) {
+        const linkedTrainees = getTraineesForTrainer(activeVcTrainer);
 
-                courseSelect.innerHTML = `<option value="__GLOBAL__" data-title="التعليم عن بعد الموحد (جميع المقررات والتخصصات)">🌐 كافة المقررات والتخصصات بالمعهد (تغطية شاملة للجميع)</option>`;
+        const availableCourses = getCoursesForActiveVcTrainer(activeVcTrainer);
 
-            }
+        if (courseSelect) {
 
-            if (groupsSelect) {
+            courseSelect.innerHTML = availableCourses.map(c => `
 
-                groupsSelect.innerHTML = `<option value="ALL">🌐 جميع المتدربين وكافة المجموعات والشعب والشركات (متاح للجميع)</option>`;
+                <option value="${c.courseKey}" data-title="${c.courseTitle}">📚 ${c.courseTitle} ${c.room ? '(' + c.room + ')' : ''}</option>
 
-            }
+            `).join('');
 
-            if (countBadge) {
+        }
 
-                const totalTr = Array.isArray(trainees) ? trainees.length : 0;
+        if (groupsSelect) {
 
-                countBadge.innerText = `${totalTr} متدرب (جميع المتدربين)`;
+            const groupOpts = linkedGroups.map(g => `<option value="${g}">المجموعة: ${g}</option>`).join('');
 
-            }
+            groupsSelect.innerHTML = `
 
-            if (groupsTags) {
+                <option value="ALL">🌐 كافة المجموعات والشعب المعتمدة (${linkedGroups.join(', ') || 'الكل'})</option>
 
-                groupsTags.innerHTML = `
+                ${groupOpts}
 
-                    <span class="bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs font-black px-3 py-1 rounded-xl shadow-2xs flex items-center gap-1.5">
+            `;
 
-                        <span>🌐</span>
+        }
 
-                        <span>شاملة لجميع المتدربين والشركات والمجموعات بالمعهد</span>
+        if (countBadge) {
+
+            countBadge.innerText = `${linkedTrainees.length} متدرب مسجل`;
+
+        }
+
+        if (groupsTags) {
+
+            if (linkedGroups.length > 0) {
+
+                groupsTags.innerHTML = linkedGroups.map(g => `
+
+                    <span class="bg-blue-50 text-blue-900 border border-blue-200 text-xs font-black px-3 py-1 rounded-xl shadow-2xs flex items-center gap-1.5">
+
+                        <span>👥</span>
+
+                        <span>${g}</span>
 
                     </span>
 
-                `;
-
-            }
-
-        } else {
-
-            const linkedGroups = getGroupsForTrainer(activeVcTrainer);
-
-            const linkedTrainees = getTraineesForTrainer(activeVcTrainer);
-
-            const availableCourses = getCoursesForActiveVcTrainer(activeVcTrainer);
-
-            if (courseSelect) {
-
-                courseSelect.innerHTML = availableCourses.map(c => `
-
-                    <option value="${c.courseKey}" data-title="${c.courseTitle}">📚 ${c.courseTitle} ${c.room ? '(' + c.room + ')' : ''}</option>
-
                 `).join('');
 
-            }
+            } else {
 
-            if (groupsSelect) {
-
-                const groupOpts = linkedGroups.map(g => `<option value="${g}">المجموعة: ${g}</option>`).join('');
-
-                groupsSelect.innerHTML = `
-
-                    <option value="ALL">🌐 كافة المجموعات والشعب المعتمدة (${linkedGroups.join(', ') || 'الكل'})</option>
-
-                    ${groupOpts}
-
-                `;
-
-            }
-
-            if (countBadge) {
-
-                countBadge.innerText = `${linkedTrainees.length} متدرب مسجل`;
-
-            }
-
-            if (groupsTags) {
-
-                if (linkedGroups.length > 0) {
-
-                    groupsTags.innerHTML = linkedGroups.map(g => `
-
-                        <span class="bg-blue-50 text-blue-900 border border-blue-200 text-xs font-black px-3 py-1 rounded-xl shadow-2xs flex items-center gap-1.5">
-
-                            <span>👥</span>
-
-                            <span>${g}</span>
-
-                        </span>
-
-                    `).join('');
-
-                } else {
-
-                    groupsTags.innerHTML = `<span class="text-xs text-slate-400 font-medium">متاح لجميع المجموعات والشعب (بدون تقييد)</span>`;
-
-                }
+                groupsTags.innerHTML = `<span class="text-xs text-slate-400 font-medium">لا توجد مجموعات مسجلة بجدول المدرب حالياً</span>`;
 
             }
 
@@ -79845,9 +79813,9 @@ function buildDemoExecutiveReport(params) {
 
         // 4. تعبئة الحقول بالبيانات المخزنة
 
-        const selectedCourseKey = courseSelect ? courseSelect.value : (isGlobalSelection ? '__GLOBAL__' : '');
+        const selectedCourseKey = courseSelect ? courseSelect.value : '';
 
-        const cData = getVirtualClassroomForTrainer(activeVcTrainer, selectedCourseKey) || DEFAULT_VIRTUAL_CLASSROOMS[activeVcTrainer] || DEFAULT_VIRTUAL_CLASSROOMS.__GLOBAL__ || {};
+        const cData = getVirtualClassroomForTrainer(activeVcTrainer, selectedCourseKey) || DEFAULT_VIRTUAL_CLASSROOMS[activeVcTrainer] || {};
 
         currentVcPlatform = cData.platform || 'meet';
 
@@ -79865,17 +79833,13 @@ function buildDemoExecutiveReport(params) {
 
         if (urlInput) urlInput.value = cData.link || '';
 
-        if (!isGlobalSelection && courseSelect && cData.courseKey && Array.from(courseSelect.options).some(o => o.value === cData.courseKey)) {
+        if (courseSelect && cData.courseKey && Array.from(courseSelect.options).some(o => o.value === cData.courseKey)) {
 
             courseSelect.value = cData.courseKey;
 
         }
 
-        const selectedCourseTitle = isGlobalSelection
-
-            ? 'التعليم عن بعد الموحد'
-
-            : (courseSelect?.options[courseSelect.selectedIndex]?.getAttribute('data-title') || getTrainerObj(activeVcTrainer)?.course || 'التخصص');
+        const selectedCourseTitle = courseSelect?.options[courseSelect.selectedIndex]?.getAttribute('data-title') || getTrainerObj(activeVcTrainer)?.course || 'التخصص';
 
         if (topicInput) topicInput.value = cData.topic || (`محاضرة ${selectedCourseTitle} (عن بعد)`);
 
@@ -79899,11 +79863,7 @@ function buildDemoExecutiveReport(params) {
 
         onVcLockModeChange(currentVcLockMode);
 
-        if (!isGlobalSelection) {
-
-            updateVcCourseGroupsAndCount(courseSelect ? courseSelect.value : '');
-
-        }
+        updateVcCourseGroupsAndCount(courseSelect ? courseSelect.value : '');
 
         const isActive = (cData && typeof cData.isActive === 'boolean') ? cData.isActive : true;
 
@@ -80249,47 +80209,9 @@ function buildDemoExecutiveReport(params) {
 
         const byUser = currentUser?.name || 'إدارة المعهد';
 
-        // 1. Activate master __GLOBAL__ room
+        delete virtualClassrooms.__GLOBAL__;
 
-        const gDef = DEFAULT_VIRTUAL_CLASSROOMS.__GLOBAL__ || {};
-
-        const gCur = virtualClassrooms.__GLOBAL__ || {};
-
-        virtualClassrooms.__GLOBAL__ = {
-
-            ...gDef,
-
-            ...gCur,
-
-            isGlobal: true,
-
-            platform: gCur.platform || gDef.platform || 'meet',
-
-            link: gCur.link || gDef.link,
-
-            targetGroups: 'ALL',
-
-            dateScope: 'always',
-
-            calendarDate: '',
-
-            lockByPeriod: false,
-
-            isActive: true,
-
-            vcSchemaVersion: VC_STORAGE_VERSION,
-
-            manualOverride: true,
-
-            updatedAt: nowIso,
-
-            updatedBy: byUser
-
-        };
-
-        // 2. Activate every trainer in scheduleData & DEFAULT_VIRTUAL_CLASSROOMS & saved keys
-
-        const allTrainerNames = new Set(Object.keys(DEFAULT_VIRTUAL_CLASSROOMS).filter(k => k !== '__GLOBAL__'));
+        const allTrainerNames = new Set(Object.keys(DEFAULT_VIRTUAL_CLASSROOMS));
 
         if (typeof scheduleData !== 'undefined' && Array.isArray(scheduleData)) {
 
@@ -80313,7 +80235,7 @@ function buildDemoExecutiveReport(params) {
 
                 platform: cur.platform || def.platform || 'meet',
 
-                link: cur.link || def.link || gDef.link,
+                link: cur.link || def.link || `https://meet.google.com/bgt-tr-${allTrainerNames.size}`,
 
                 topic: cur.topic || def.topic || `محاضرة (عن بعد) - أ. ${trName}`,
 
@@ -80326,6 +80248,8 @@ function buildDemoExecutiveReport(params) {
                 lockByPeriod: false,
 
                 isActive: true,
+
+                isGlobal: false,
 
                 vcSchemaVersion: VC_STORAGE_VERSION,
 
@@ -80341,7 +80265,7 @@ function buildDemoExecutiveReport(params) {
 
         Object.keys(virtualClassrooms).forEach(k => {
 
-            if (k === '_meta') return;
+            if (k === '_meta' || k === '__GLOBAL__') return;
 
             const v = virtualClassrooms[k];
 
@@ -80357,7 +80281,7 @@ function buildDemoExecutiveReport(params) {
 
                 v.lockByPeriod = false;
 
-                if (!v.link) v.link = virtualClassrooms.__GLOBAL__.link;
+                v.isGlobal = false;
 
                 v.vcSchemaVersion = VC_STORAGE_VERSION;
 
@@ -80377,7 +80301,7 @@ function buildDemoExecutiveReport(params) {
 
         if (typeof renderStudentVirtualClassBanner === 'function') renderStudentVirtualClassBanner();
 
-        showToast('🌐 تم تفعيل التعليم عن بعد وجعله متاحاً لجميع المتدربين والمجموعات والمدربين بنجاح!', 'success');
+        showToast('🌐 تم تفعيل القاعات الافتراضية لجميع المدربين والمقررات بنجاح!', 'success');
 
     }
 
@@ -80621,15 +80545,13 @@ function buildDemoExecutiveReport(params) {
 
         const courseKey = selectedCourse.lmsKey || findCourseKeyForTrainer(trainerName);
 
-        const resolved = resolveVirtualClassroomForCourse(selectedCourse.rawTrainerName || trainerName, courseKey, studentGroup, true);
+        const resolved = resolveVirtualClassroomForCourse(selectedCourse.rawTrainerName || trainerName, courseKey, studentGroup, false);
 
         const vc = resolved ? resolved.vc : null;
 
         const isCourseLive = Boolean(resolved && resolved.status === 'open' && vc && vc.link);
 
         const isFutureDate = Boolean(resolved && resolved.status === 'future_date' && vc);
-
-        const isGlobalRoom = Boolean(resolved && resolved.source === 'global');
 
         const pObj = (vc && vc.platform && VC_PLATFORMS[vc.platform]) ? VC_PLATFORMS[vc.platform] : VC_PLATFORMS.meet;
 
@@ -80653,7 +80575,7 @@ function buildDemoExecutiveReport(params) {
 
                                 <h4 class="text-xs md:text-sm font-black text-slate-900">اختر المقرر التدريبي لعرض قاعة التعليم عن بعد:</h4>
 
-                                <p class="text-[11px] text-slate-500 font-medium">التعليم عن بعد متاح لكافة المقررات والشعب عبر قاعة المدرب أو القاعة العامة الموحدة</p>
+                                <p class="text-[11px] text-slate-500 font-medium">دخول القاعة الافتراضية المباشرة للمقررات والمدربين المربوطين بجدولك فقط</p>
 
                             </div>
 
@@ -80675,7 +80597,7 @@ function buildDemoExecutiveReport(params) {
 
                             const isSel = (cKey === activeStudentVcCourseKey);
 
-                            const cRes = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup, true);
+                            const cRes = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup, false);
 
                             const cLive = Boolean(cRes && cRes.status === 'open' && cRes.vc);
 
@@ -80761,7 +80683,7 @@ function buildDemoExecutiveReport(params) {
 
                                 </span>
 
-                                ${isGlobalRoom ? '<span class="bg-indigo-100 text-indigo-800 border border-indigo-300 text-[10px] font-black px-2 py-0.5 rounded-full">🌐 عبر القاعة العامة للجميع</span>' : ''}
+
 
                             </div>
 
@@ -81043,123 +80965,11 @@ function buildDemoExecutiveReport(params) {
 
         }
 
-        // 6. جميع القاعات الافتراضية النشطة بالمعهد (متاحة للجميع)
-
-        const seenLinks = new Set();
-
-        const openInstituteRooms = [];
-
-        const orderedKeys = ['__GLOBAL__', ...Object.keys(virtualClassrooms).filter(k => k !== '__GLOBAL__' && k !== '_meta')];
-
-        orderedKeys.forEach(k => {
-
-            const roomObj = virtualClassrooms[k];
-
-            if (!roomObj || typeof roomObj !== 'object' || !roomObj.link || !isDateScopeActiveToday(roomObj)) return;
-
-            if (!isVcGroupMatch(roomObj, studentGroup)) return;
-
-            const dedupKey = `${roomObj.link}|${roomObj.trainerName || k}`;
-
-            if (seenLinks.has(dedupKey)) return;
-
-            seenLinks.add(dedupKey);
-
-            openInstituteRooms.push({ key: k, ...roomObj });
-
-        });
-
-        const directoryHtml = openInstituteRooms.length > 0 ? `
-
-            <div class="bg-white border border-slate-200 rounded-3xl p-5 md:p-6 shadow-sm space-y-4">
-
-                <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
-
-                    <div class="flex items-center gap-2.5">
-
-                        <span class="text-xl">🌐</span>
-
-                        <div>
-
-                            <h4 class="text-sm md:text-base font-black text-slate-900">جميع القاعات الافتراضية النشطة بالمعهد (متاحة للجميع)</h4>
-
-                            <p class="text-[11px] text-slate-500 font-medium">يمكنك الانضمام مباشرة إلى القاعة العامة أو قاعة أي مدرب نشط بالمعهد</p>
-
-                        </div>
-
-                    </div>
-
-                    <span class="text-[11px] font-black bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full">
-
-                        🟢 ${openInstituteRooms.length} قاعة مفتوحة الآن
-
-                    </span>
-
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-
-                    ${openInstituteRooms.map(r => {
-
-                        const rp = VC_PLATFORMS[r.platform] || VC_PLATFORMS.meet;
-
-                        const rLabel = r.isGlobal ? '🌐 القاعة العامة الشاملة (للجميع)' : `أ. ${r.trainerName || r.key}`;
-
-                        const safeUrl = (r.link || '').replace(/'/g, "\\'");
-
-                        return `
-
-                            <div class="p-4 rounded-2xl border ${r.isGlobal ? 'border-emerald-300 bg-emerald-50/40' : 'border-slate-200 bg-slate-50/60'} flex flex-col justify-between gap-3">
-
-                                <div class="space-y-1">
-
-                                    <div class="flex items-center justify-between gap-1.5">
-
-                                        <span class="text-xs font-black text-slate-900">${rLabel}</span>
-
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${rp.badgeBg}">${rp.icon} ${rp.name}</span>
-
-                                    </div>
-
-                                    <p class="text-[11px] font-bold text-slate-600 line-clamp-2">${r.topic || r.courseTitle || 'محاضرة عن بعد'}</p>
-
-                                </div>
-
-                                <div class="flex items-center gap-2">
-
-                                    <a href="${r.link}" target="_blank" class="flex-1 text-center py-2 px-3 rounded-xl text-xs font-black bg-slate-900 hover:bg-black text-amber-300 transition cursor-pointer">
-
-                                        🚀 دخول
-
-                                    </a>
-
-                                    <button type="button" onclick="copyVcMeetingLink('${safeUrl}')" class="px-3 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition cursor-pointer" title="نسخ الرابط">
-
-                                        📋
-
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        `;
-
-                    }).join('')}
-
-                </div>
-
-            </div>
-
-        ` : '';
-
         container.innerHTML = `
 
             ${courseSelectorHtml}
 
             ${cardContentHtml}
-
-            ${directoryHtml}
 
         `;
 
@@ -81525,7 +81335,7 @@ function buildDemoExecutiveReport(params) {
 
                         const cRes = (typeof resolveVirtualClassroomForCourse === 'function')
 
-                            ? resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, currentUser.group, true)
+                            ? resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, currentUser.group)
 
                             : null;
 
@@ -88776,6 +88586,7 @@ function buildDemoExecutiveReport(params) {
     let cdAttendanceInstance = null;
 
     function renderCompanyDashboard() {
+        if (!requireAdminOrSuperAdmin('إحصائيات الشركات')) return;
         const live = getCDLiveData();
         populateCDCompanySelect(live);
         renderCDLiveSummary(live);
@@ -88793,6 +88604,7 @@ function buildDemoExecutiveReport(params) {
     }
 
     async function refreshCompanyDashboardFromLive(showFeedback = true) {
+        if (!requireAdminOrSuperAdmin('إحصائيات الشركات')) return;
         if (typeof syncLiveAttendanceFromGoogleSheets === 'function') {
             try {
                 if (showFeedback && typeof showToast === 'function') {
@@ -91009,6 +90821,7 @@ function getCTPAdmissionFormData(trainee) {
 
     // PRINTABLE COMPREHENSIVE DOSSIER BUILDER (11 DISTINCT PAGES)
     function printComprehensiveTraineeDossier(shouldTriggerPrint = true) {
+        if (!requireAdminOrSuperAdmin('الملف الشامل للمتدرب')) return;
         if (!currentCTPTrainee) {
             return showToast('يرجى تحديد متدرب أولاً لعرض وطباعة الملف الشامل', 'error');
         }
@@ -91506,6 +91319,7 @@ function getCTPAdmissionFormData(trainee) {
 
     // Direct PDF File Download using html2pdf.js
     function downloadComprehensiveTraineeDossierPDF() {
+        if (!requireAdminOrSuperAdmin('الملف الشامل للمتدرب')) return;
         if (!currentCTPTrainee) {
             return showToast('يرجى تحديد متدرب أولاً لتنزيل الملف الشامل', 'error');
         }
@@ -91546,6 +91360,7 @@ function getCTPAdmissionFormData(trainee) {
     }
 
     function openComprehensiveTraineePortfolioModal(traineeIdOrName = null) {
+        if (!requireAdminOrSuperAdmin('الملف الشامل للمتدرب')) return;
         let pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : [];
         if (pool.length === 0) {
             try {
@@ -91796,6 +91611,7 @@ function getCTPAdmissionFormData(trainee) {
     }
 
     function openBatchRegistrationExportModal() {
+        if (!requireAdminOrSuperAdmin('نموذج التسجيل')) return;
         const selEl = document.getElementById('batchExportCompanySelect');
         if (selEl) {
             Array.from(selEl.querySelectorAll('option[data-dynamic-group="1"]')).forEach(o => o.remove());
@@ -91871,6 +91687,7 @@ function getCTPAdmissionFormData(trainee) {
     }
 
     async function startBatchRegistrationFormsExport() {
+        if (!requireAdminOrSuperAdmin('نموذج التسجيل')) return;
         const sel = document.getElementById('batchExportCompanySelect')?.value || 'all';
         const attCheck = document.getElementById('batchExportAttendanceOnlyCheck');
         const attendanceOnly = attCheck ? attCheck.checked : true;
@@ -92066,6 +91883,7 @@ function getCTPAdmissionFormData(trainee) {
     }
 
     function openRegistrationFormModal(traineeIdOrName = null) {
+        if (!requireAdminOrSuperAdmin('نموذج التسجيل')) return;
         let pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : [];
         if (pool.length === 0) {
             try {
@@ -92446,6 +92264,7 @@ function getCTPAdmissionFormData(trainee) {
     }
 
         async function downloadRegistrationFormPDF() {
+        if (!requireAdminOrSuperAdmin('نموذج التسجيل')) return;
         const trainee = window.currentRegFormTrainee || ((typeof currentCTPTrainee !== 'undefined' && currentCTPTrainee) ? currentCTPTrainee : null);
         if (!trainee) return showToast('يرجى تحديد متدرب أولاً', 'error');
 
@@ -92502,6 +92321,7 @@ function getCTPAdmissionFormData(trainee) {
     }
 
     function printRegistrationForm() {
+        if (!requireAdminOrSuperAdmin('نموذج التسجيل')) return;
         const trainee = window.currentRegFormTrainee || ((typeof currentCTPTrainee !== 'undefined' && currentCTPTrainee) ? currentCTPTrainee : null);
         if (!trainee) return showToast('يرجى تحديد متدرب أولاً', 'error');
 
