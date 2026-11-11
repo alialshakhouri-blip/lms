@@ -43258,179 +43258,10 @@ function openReportFromProfile() {
 
 
 
-    // تصدير ملف المؤسسة بصيغة Excel المعتمدة بالأعمدة الـ 11 الحرفية
+    // تصدير ملف المؤسسة بصيغة Excel المعتمدة بالأعمدة الـ 11 الحرفية (ملف واحد • ورقة واحدة فقط • RTL)
 
     function exportInstitutionExcel() {
-        const compFilterEl = document.getElementById('instCompanyFilter');
-        const grpFilterEl = document.getElementById('instGroupFilter');
-        const selectedCompany = compFilterEl ? (compFilterEl.value || 'ALL') : 'ALL';
-        const rawGroup = grpFilterEl ? (grpFilterEl.value || 'ALL') : 'ALL';
-        const selectedGroup = (!rawGroup || rawGroup === '') ? 'ALL' : rawGroup;
-
-        // جدول متدربي المؤسسة: تصدير معتمد مطابق 1:1 للتحضير المباشر
-        const pool = getUnifiedTraineesPool();
-        let groupTrainees = pool;
-        if (selectedGroup !== 'ALL') {
-            const grpFiltered = pool.filter(t => t.group && (t.group.trim() === selectedGroup.trim() || (typeof isGroupMatch === 'function' && isGroupMatch(selectedGroup, t.group))));
-            if (grpFiltered.length > 0) {
-                groupTrainees = grpFiltered;
-            }
-        }
-        if (selectedCompany !== 'ALL') {
-            const compFiltered = groupTrainees.filter(t => t.company === selectedCompany);
-            if (compFiltered.length > 0) {
-                groupTrainees = compFiltered;
-            }
-        }
-
-        if (groupTrainees.length === 0) {
-            return showToast('⚠️ لا يوجد متدربون مسجلون في كشف التحضير لتصديرهم', 'warning');
-        }
-
-        // استبعاد المتدربين المحددين يدوياً للاستبعاد (إن وجد)
-        let exportableTrainees = groupTrainees.filter(t => !excludedInstTraineeIds.has(t.id) && !excludedInstTraineeIds.has(cleanNationalId(t.id)));
-        if (exportableTrainees.length === 0) {
-            exportableTrainees = groupTrainees; // إذا كان الكل مستبعد بالخطأ، اعتماد كافة متدربي المجموعة
-        }
-
-        if (typeof XLSX === 'undefined') {
-            return showToast('❌ مكتبة تصدير الإكسل غير محملة في المتصفح', 'error');
-        }
-
-        // بناء مصفوفة العناوين وصفوف التصدير بالأعمدة الـ 11 من اليمين إلى اليسار (A: رقم الهوية -> K: رقم الجوال)
-        const INST_EXPORT_HEADERS = [
-            'رقم الهوية',
-            'الاسم الأول',
-            'اسم الأب',
-            'اسم الجد',
-            'اسم العائلة / اللقب',
-            'تاريخ الميلاد',
-            'الجنس',
-            'الجنسية',
-            'المرحلة الدراسية / المؤهل',
-            'البريد الإلكتروني',
-            'رقم الجوال'
-        ];
-
-        const aoaRows = exportableTrainees.map(t => {
-            const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
-            const pDir = (typeof phoneDirectory !== 'undefined' ? (phoneDirectory[t.id] || phoneDirectory[cleanId] || {}) : {});
-
-            let first = t.first_name || pDir.first_name || t.first || '';
-            let second = t.second_name || pDir.second_name || t.second || '';
-            let third = t.third_name || pDir.third_name || t.third || '';
-            let last = t.last_name || pDir.last_name || t.last || '';
-
-            if (!first || !last) {
-                const fullName = t.name || pDir.name || '';
-                if (fullName) {
-                    const parts = (typeof splitArabicName === 'function') ? splitArabicName(fullName) : { first: fullName, second: '', third: '', last: '' };
-                    if (!first) first = parts.first;
-                    if (!second) second = parts.second;
-                    if (!third) third = parts.third;
-                    if (!last) last = parts.last;
-                }
-            }
-
-            const rawDob = t.dob || pDir.dob || '';
-            const formattedDob = (typeof formatDobMdy === 'function' && rawDob) ? formatDobMdy(rawDob) : (rawDob || '01/01/2000');
-            const rawGender = t.gender || pDir.gender || '';
-            const normGender = (typeof normalizeGenderValue === 'function') ? normalizeGenderValue(rawGender, 'ذكر') : (rawGender || 'ذكر');
-
-            let nationality = t.nationality || pDir.nationality || '';
-            if (!nationality) {
-                if (cleanId.startsWith('1')) nationality = 'سعودي';
-                else if (cleanId.startsWith('2')) nationality = 'غير سعودي';
-                else nationality = 'سعودي';
-            }
-
-            let qual = t.qual || pDir.qual || '';
-            if (!qual || qual === 'غير محدد') qual = 'ثانوي';
-
-            const email = t.email || pDir.email || `${cleanId}@tvtc.gov.sa`;
-            let rawPhone = t.phone || pDir.phone || '';
-            const cleanPh = (typeof cleanPhone === 'function') ? cleanPhone(rawPhone) : String(rawPhone || '').trim();
-
-            return [
-                cleanId,      // العمود A: رقم الهوية
-                first,        // العمود B: الاسم الأول
-                second,       // العمود C: اسم الأب
-                third,        // العمود D: اسم الجد
-                last,         // العمود E: اسم العائلة / اللقب
-                formattedDob, // العمود F: تاريخ الميلاد
-                normGender,   // العمود G: الجنس
-                nationality,  // العمود H: الجنسية
-                qual,         // العمود I: المرحلة الدراسية / المؤهل
-                email,        // العمود J: البريد الإلكتروني
-                cleanPh       // العمود K: رقم الجوال
-            ];
-        });
-
-        try {
-            const ws = XLSX.utils.aoa_to_sheet([INST_EXPORT_HEADERS, ...aoaRows]);
-
-            // ضبط خلايا رقم الهوية (العمود A = 0) ورقم الجوال (العمود K = 10) كنصوص صريحة للحفاظ التام على الأصفار البادئة
-            if (ws['!ref']) {
-                const range = XLSX.utils.decode_range(ws['!ref']);
-                for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-                    const idRef = XLSX.utils.encode_cell({ c: 0, r: R });
-                    if (ws[idRef]) {
-                        ws[idRef].t = 's';
-                        ws[idRef].z = '@';
-                        ws[idRef].v = String(ws[idRef].v || '').trim();
-                    }
-                    const phRef = XLSX.utils.encode_cell({ c: 10, r: R });
-                    if (ws[phRef]) {
-                        ws[phRef].t = 's';
-                        ws[phRef].z = '@';
-                        ws[phRef].v = String(ws[phRef].v || '').trim();
-                    }
-                }
-            }
-
-            // عرض وتنسيق مناسب للأعمدة A..K حسب الترتيب الصحيح
-            ws['!cols'] = [
-                { wch: 16 }, // A: رقم الهوية
-                { wch: 16 }, // B: الاسم الأول
-                { wch: 16 }, // C: اسم الأب
-                { wch: 16 }, // D: اسم الجد
-                { wch: 18 }, // E: اسم العائلة / اللقب
-                { wch: 16 }, // F: تاريخ الميلاد
-                { wch: 14 }, // G: الجنس
-                { wch: 14 }, // H: الجنسية
-                { wch: 24 }, // I: المرحلة الدراسية / المؤهل
-                { wch: 28 }, // J: البريد الإلكتروني
-                { wch: 16 }  // K: رقم الجوال
-            ];
-
-            // تفعيل اتجاه ورقة العمل والملف من اليمين إلى اليسار (Right-To-Left / RTL)
-            ws['!views'] = [{ rightToLeft: true, RTL: true }];
-
-            const wb = XLSX.utils.book_new();
-            wb.Workbook = wb.Workbook || {};
-            wb.Workbook.Views = [{ RTL: true }];
-            XLSX.utils.book_append_sheet(wb, ws, 'ملف المؤسسة');
-
-            const safeComp = (selectedCompany && selectedCompany !== 'ALL') ? `_${selectedCompany.replace(/[\s\/\:*?"<>|]+/g, '_')}` : '';
-            const safeGrp = (selectedGroup && selectedGroup !== 'ALL') ? selectedGroup.replace(/[\s\/\:*?"<>|]+/g, '_') : 'كافة_الشعب';
-            const nowStr = new Date().toISOString().slice(0, 10);
-            const fileName = `ملف_المؤسسة${safeComp}_${safeGrp}_${nowStr}.xlsx`;
-
-            XLSX.writeFile(wb, fileName);
-            showToast(`✅ تم تصدير ملف المؤسسة المعتمد لـ (${exportableTrainees.length}) متدرب بنجاح!`, 'success');
-
-            // فتح نافذة تأكيد الاعتماد واحتساب الـ 4 أسابيع تلقائياً
-            const approvalGroupName = (selectedGroup && selectedGroup !== 'ALL') ? selectedGroup : 'كافة الشعب المشمولة';
-            openInstitutionApprovalConfirmationModal(approvalGroupName, exportableTrainees);
-
-        } catch (exportErr) {
-
-            console.error('Institution file export error:', exportErr);
-
-            showToast('❌ حدث خطأ أثناء إنشاء وتصدير ملف الإكسل', 'error');
-
-        }
-
+        return executeInstDynamicExport({ formType: 'enterprise_file', format: 'xlsx' });
     }
 
     window.exportInstitutionExcel = exportInstitutionExcel;
@@ -44312,8 +44143,9 @@ function openReportFromProfile() {
             return id;
         }
 
-        const hasBgti = Boolean(logoAssets && logoAssets.bgti && logoAssets.bgti.bytes);
-        const hasTvtc = Boolean(logoAssets && logoAssets.tvtc && logoAssets.tvtc.bytes);
+        const needsAnySheetLogos = sheetsSpec.some(s => s && s.showLogos !== false);
+        const hasBgti = Boolean(needsAnySheetLogos && logoAssets && logoAssets.bgti && logoAssets.bgti.bytes);
+        const hasTvtc = Boolean(needsAnySheetLogos && logoAssets && logoAssets.tvtc && logoAssets.tvtc.bytes);
         const hasAnyLogo = hasBgti || hasTvtc;
         if (hasBgti) zip.file('xl/media/image1.png', logoAssets.bgti.bytes);
         if (hasTvtc) zip.file('xl/media/image2.png', logoAssets.tvtc.bytes);
@@ -44460,7 +44292,7 @@ function openReportFromProfile() {
             + (se.hasDrawing ? `<Override PartName="/xl/drawings/drawing${se.sheetNum}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>` : '')
         ).join('');
         zip.file('[Content_Types].xml',
-            `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>${ctOverrides}</Types>`);
+            `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>${hasAnyLogo ? '<Default Extension="png" ContentType="image/png"/>' : ''}<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>${ctOverrides}</Types>`);
 
         return await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     }
@@ -44534,123 +44366,68 @@ function openReportFromProfile() {
         };
     }
 
-    // ==================== 1. ENTERPRISE FILE BUILDER (7f90fd5b 1:1) ====================
+    // ==================== 1. ENTERPRISE FILE BUILDER (1-SHEET 11-COLUMN RTL UPLOAD FORMAT) ====================
     function buildEnterpriseFileSheetsSpec(filteredTrainees, metaDates, include11Col, courseOverride) {
-        const entries = expandInstGroupEntries(filteredTrainees, metaDates.startIso, metaDates.endIso, courseOverride);
-
-        // Sheet 1: توزيع المتدربين حسب المجموعات (#D0DFE6 banner, #FFFFCC title, #D1E1D3 headers)
-        const s1Cells = [], s1Rows = [], s1Merges = [];
-        addExcelHeaderBanner(s1Cells, s1Rows, s1Merges, 4, { fill: 'D0DFE6', fontColor: '000000', rowCount: 3 });
-        s1Rows.push({ r: 5, ht: 28 }, { r: 6, ht: 20 }, { r: 8, ht: 32 });
-        s1Merges.push('A5:E5', 'A6:E6');
-        const s1TitleSt = { fontName: 'Times New Roman', fontSize: 14, bold: true, fontColor: '000000', fill: 'FFFFCC', align: { h: 'center', v: 'center', rtl: true } };
-        const s1SubSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '002060', align: { h: 'center', v: 'center', rtl: true } };
-        for (let c = 0; c <= 4; c++) {
-            s1Cells.push({ r: 5, c, value: c === 0 ? 'توزيع المتدربين حسب المجموعات' : '', style: s1TitleSt });
-            s1Cells.push({ r: 6, c, value: c === 0 ? `الفترة: ${metaDates.startDisplay} إلى ${metaDates.endDisplay}  |  رخصة رقم: ${BGTI_ENTERPRISE_MASTER.licenseNo}` : '', style: s1SubSt });
-        }
-        const thSt = { fontName: 'Times New Roman', fontSize: 12, bold: true, fontColor: '0D0D0D', fill: 'D1E1D3', border: 'thin', align: { h: 'center', v: 'center', wrap: true, rtl: true } };
-        const tdSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '000000', fill: 'FFFFFF', border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
-        ['#', 'الشركة', 'المجموعة', 'عدد المتدربين', 'التخصص'].forEach((h, ci) => s1Cells.push({ r: 8, c: ci, value: h, style: thSt }));
-
-        let r1 = 9, seq = 1, totalCount = 0;
-        entries.forEach(({ gName, gList, meta }) => {
-            totalCount += gList.length;
-            s1Rows.push({ r: r1, ht: 20 });
-            s1Cells.push(
-                { r: r1, c: 0, type: 'n', value: seq++, style: tdSt },
-                { r: r1, c: 1, value: meta.companyName, style: tdSt },
-                { r: r1, c: 2, value: gName, style: tdSt },
-                { r: r1, c: 3, type: 'n', value: gList.length, style: tdSt },
-                { r: r1, c: 4, value: meta.accreditedProgram, style: tdSt }
-            );
-            r1++;
-        });
-        s1Rows.push({ r: r1, ht: 22 });
-        const totSt = { ...thSt, fill: 'D1E1D3', fontColor: '002060' };
-        s1Cells.push(
-            { r: r1, c: 0, value: '', style: totSt },
-            { r: r1, c: 1, value: 'الإجمالي العام', style: totSt },
-            { r: r1, c: 2, value: `${entries.length} شعبة`, style: totSt },
-            { r: r1, c: 3, type: 'n', value: totalCount, style: totSt },
-            { r: r1, c: 4, value: `معهد الذهب الأسود للتدريب — رخصة: ${BGTI_ENTERPRISE_MASTER.licenseNo}`, style: totSt }
-        );
-
-        // Sheet 2: القائمة الإسمية للمتدربين (#D0DFE6 banner, #D1E1D3 title, #FBE3D6 group bar, #66FF99 table header)
-        const s2Cells = [], s2Rows = [], s2Merges = [];
-        addExcelHeaderBanner(s2Cells, s2Rows, s2Merges, 6, { fill: 'D0DFE6', fontColor: '000000', rowCount: 3 });
-        s2Rows.push({ r: 5, ht: 34 });
-        s2Merges.push('A5:G5');
-        for (let c = 0; c <= 6; c++) {
-            s2Cells.push({ r: 5, c, value: c === 0 ? "القائمة الإسمية للمتدربين\nTrainees' Name List" : '', style: { fontName: 'Times New Roman', fontSize: 15, bold: true, fontColor: '000000', fill: 'D1E1D3', align: { h: 'center', v: 'center', wrap: true, rtl: true } } });
-        }
-        const s2ThSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '0D0D0D', fill: '66FF99', border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
-        const s2IdSt = { ...tdSt, bold: false, numFmt: '@' };
-        const s2NameSt = { ...tdSt, bold: false, align: { h: 'right', v: 'center', rtl: true } };
-        let r2 = 7;
-        entries.forEach(({ gName, gList, meta }) => {
-            s2Rows.push({ r: r2, ht: 24 });
-            s2Merges.push(`A${r2}:G${r2}`);
-            const grpBarSt = { fontName: 'Times New Roman', fontSize: 13, bold: true, fontColor: '000000', fill: 'FBE3D6', border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
-            for (let c = 0; c <= 6; c++) {
-                s2Cells.push({ r: r2, c, value: c === 0 ? `${gName}  —  ${meta.accreditedProgram} (${gList.length} متدرب)` : '', style: grpBarSt });
-            }
-            r2++;
-            s2Rows.push({ r: r2, ht: 22 });
-            ['#', 'الهوية', 'الاسم', 'الهاتف', 'البريد الإلكتروني', 'التخصص', 'الملاحظات'].forEach((h, ci) => s2Cells.push({ r: r2, c: ci, value: h, style: s2ThSt }));
-            r2++;
-            gList.forEach((t, ti) => {
-                const nt = normalizeInstExportTraineeRow(t);
-                const perf = computeTraineePerformanceFromAttendance(t, meta.dates);
-                const noteText = nt.notes ? `${nt.notes} (${perf.enterpriseNote})` : perf.enterpriseNote;
-                const noteSt = (!perf.passed || perf.exceeds20Absence)
-                    ? { ...tdSt, bold: true, fontColor: '9C0006', fill: 'FFC7CE' }
-                    : { ...tdSt, bold: false };
-                s2Rows.push({ r: r2, ht: 19 });
-                s2Cells.push(
-                    { r: r2, c: 0, type: 'n', value: ti + 1, style: tdSt },
-                    { r: r2, c: 1, value: nt.cleanId, style: s2IdSt },
-                    { r: r2, c: 2, value: nt.fullName, style: s2NameSt },
-                    { r: r2, c: 3, value: nt.phone || '—', style: s2IdSt },
-                    { r: r2, c: 4, value: nt.email, style: { ...tdSt, bold: false } },
-                    { r: r2, c: 5, value: meta.specialty, style: { ...tdSt, bold: false } },
-                    { r: r2, c: 6, value: noteText, style: noteSt }
-                );
-                r2++;
-            });
-            r2++;
-        });
-
-        const sheets = [
-            { name: 'توزيع المتدربين حسب المجموعات', colWidths: [6, 22, 24, 16, 40], rows: s1Rows, cells: s1Cells, merges: s1Merges, landscape: false },
-            { name: 'القائمة الإسمية للمتدربين', colWidths: [6, 16, 34, 15, 30, 26, 20], rows: s2Rows, cells: s2Cells, merges: s2Merges, landscape: true }
+        const INST_EXPORT_HEADERS = [
+            'رقم الهوية',               // العمود A
+            'الاسم الأول',              // العمود B
+            'اسم الأب',                 // العمود C
+            'اسم الجد',                 // العمود D
+            'اسم العائلة / اللقب',      // العمود E
+            'تاريخ الميلاد',            // العمود F
+            'الجنس',                    // العمود G
+            'الجنسية',                  // العمود H
+            'المرحلة الدراسية / المؤهل', // العمود I
+            'البريد الإلكتروني',        // العمود J
+            'رقم الجوال'                // العمود K
         ];
+        const thSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '000000', fill: 'D1E1D3', border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
+        const tdSt = { fontName: 'Times New Roman', fontSize: 11, bold: false, fontColor: '000000', border: 'thin', align: { h: 'center', v: 'center', rtl: true } };
+        const textSt = { ...tdSt, numFmt: '@' };
 
-        if (include11Col) {
-            const s3Cells = [], s3Rows = [], s3Merges = [];
-            addExcelHeaderBanner(s3Cells, s3Rows, s3Merges, 10, { fill: 'D0DFE6', fontColor: '000000', rowCount: 3 });
-            s3Rows.push({ r: 5, ht: 24 });
-            const headers11 = ['رقم الهوية', 'الاسم الأول', 'اسم الأب', 'اسم الجد', 'اسم العائلة / اللقب', 'تاريخ الميلاد', 'الجنس', 'الجنسية', 'المرحلة الدراسية / المؤهل', 'البريد الإلكتروني', 'رقم الجوال'];
-            headers11.forEach((h, ci) => s3Cells.push({ r: 5, c: ci, value: h, style: { ...thSt, fill: 'D1E1D3' } }));
-            filteredTrainees.forEach((t, ti) => {
-                const nt = normalizeInstExportTraineeRow(t);
-                const rr = 6 + ti;
-                s3Rows.push({ r: rr, ht: 19 });
-                [nt.cleanId, nt.first, nt.second, nt.third, nt.last, nt.dob, nt.gender, nt.nationality, nt.qual, nt.email, nt.phone].forEach((val, ci) => {
-                    const useText = (ci === 0 || ci === 10);
-                    s3Cells.push({ r: rr, c: ci, value: val || '', style: useText ? s2IdSt : { ...tdSt, bold: false } });
+        const cells = [];
+        const rows = [{ r: 1, ht: 24 }];
+        INST_EXPORT_HEADERS.forEach((h, ci) => {
+            cells.push({ r: 1, c: ci, value: h, style: thSt });
+        });
+
+        filteredTrainees.forEach((t, ti) => {
+            const nt = normalizeInstExportTraineeRow(t);
+            const rr = 2 + ti;
+            rows.push({ r: rr, ht: 20 });
+            const rowValues = [
+                nt.cleanId,     // العمود A: رقم الهوية
+                nt.first,       // العمود B: الاسم الأول
+                nt.second,      // العمود C: اسم الأب
+                nt.third,       // العمود D: اسم الجد
+                nt.last,        // العمود E: اسم العائلة / اللقب
+                nt.dob,         // العمود F: تاريخ الميلاد
+                nt.gender,      // العمود G: الجنس
+                nt.nationality, // العمود H: الجنسية
+                nt.qual,        // العمود I: المرحلة الدراسية / المؤهل
+                nt.email,       // العمود J: البريد الإلكتروني
+                nt.phone        // العمود K: رقم الجوال
+            ];
+            rowValues.forEach((val, ci) => {
+                const isStrictText = (ci === 0 || ci === 10);
+                cells.push({
+                    r: rr,
+                    c: ci,
+                    value: String(val === null || val === undefined ? '' : val).trim(),
+                    style: isStrictText ? textSt : tdSt
                 });
             });
-            sheets.push({
-                name: 'بيانات الرفع للمؤسسة 11 عمود',
-                colWidths: [16, 15, 15, 15, 18, 15, 12, 14, 24, 28, 16],
-                rows: s3Rows,
-                cells: s3Cells,
-                merges: s3Merges,
-                landscape: true
-            });
-        }
-        return sheets;
+        });
+
+        return [{
+            name: 'ملف المؤسسة',
+            colWidths: [16, 16, 16, 16, 18, 16, 14, 14, 24, 28, 16],
+            rows,
+            cells,
+            merges: [],
+            landscape: true,
+            showLogos: false
+        }];
     }
 
     // ==================== 2. FINAL EVALUATION BUILDER (00f8fd91 / e5a90caf 1:1) ====================
@@ -45659,10 +45436,28 @@ function openReportFromProfile() {
                 ? `p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/30 cursor-pointer flex items-start gap-2.5 transition shadow-xs${spanClass}`
                 : `p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer flex items-start gap-2.5 transition${spanClass}`;
         });
+        const isEnt = (selected === 'enterprise_file');
+        const pdfRadio = document.querySelector('input[name="instExpFormat"][value="pdf"]');
+        const xlsxRadio = document.querySelector('input[name="instExpFormat"][value="xlsx"]');
+        const pdfCard = document.getElementById('instExpFmtCard-pdf');
+        const entFmtNote = document.getElementById('instExpEntOnlyXlsxNote');
+        if (pdfRadio) {
+            pdfRadio.disabled = isEnt;
+            if (isEnt && pdfRadio.checked && xlsxRadio) {
+                xlsxRadio.checked = true;
+            }
+        }
+        if (pdfCard) {
+            pdfCard.classList.toggle('opacity-40', isEnt);
+            pdfCard.classList.toggle('pointer-events-none', isEnt);
+        }
+        if (entFmtNote) entFmtNote.classList.toggle('hidden', !isEnt);
+        onInstExpFormatChange();
+
         const packWrap = document.getElementById('instExpPracticalPackWrap');
         if (packWrap) packWrap.classList.toggle('hidden', selected !== 'practical_card');
         const col11Wrap = document.getElementById('instExp11ColOptionWrap');
-        if (col11Wrap) col11Wrap.classList.toggle('hidden', selected !== 'enterprise_file');
+        if (col11Wrap) col11Wrap.classList.toggle('hidden', !isEnt);
     }
     window.onInstExpFormTypeChange = onInstExpFormTypeChange;
 
@@ -45687,7 +45482,8 @@ function openReportFromProfile() {
     async function executeInstDynamicExport(optionsOverride) {
         const opts = optionsOverride || {};
         const formType = opts.formType || document.querySelector('input[name="instExpFormType"]:checked')?.value || 'enterprise_file';
-        const format = opts.format || document.querySelector('input[name="instExpFormat"]:checked')?.value || 'xlsx';
+        const rawFormat = opts.format || document.querySelector('input[name="instExpFormat"]:checked')?.value || 'xlsx';
+        const format = (formType === 'enterprise_file') ? 'xlsx' : rawFormat;
         const practicalPack = opts.practicalPack || document.querySelector('input[name="instExpPracticalPack"]:checked')?.value || 'zip';
         const startOverride = (opts.startDate !== undefined) ? opts.startDate : (document.getElementById('instExpStartDate')?.value || '');
         const endOverride = (opts.endDate !== undefined) ? opts.endDate : (document.getElementById('instExpEndDate')?.value || '');
@@ -95844,7 +95640,7 @@ function getCTPAdmissionFormData(trainee) {
                             <input type="radio" name="instExpFormType" value="enterprise_file" checked onchange="onInstExpFormTypeChange()" class="mt-1 accent-emerald-600 cursor-pointer">
                             <div>
                                 <div class="text-xs font-black text-slate-900 dark:text-white">📄 ملف المؤسسة</div>
-                                <div class="text-[11px] text-slate-500 dark:text-slate-400">القائمة الإسمية + توزيع المجموعات (+ ورقة الرفع 11 حقل)</div>
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400">ملف Excel فقط — ورقة واحدة (11 عمود RTL: رقم الهوية ← رقم الجوال)</div>
                             </div>
                         </label>
                         <label class="p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer flex items-start gap-2.5 transition" id="instExpTypeCard-final_eval">
@@ -95906,6 +95702,7 @@ function getCTPAdmissionFormData(trainee) {
                             </div>
                         </label>
                     </div>
+                    <p id="instExpEntOnlyXlsxNote" class="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800">ℹ️ ملف المؤسسة يُصدَّر بصيغة <b>Excel (.xlsx) فقط</b> كملف واحد وورقة واحدة لضمان التوافق مع الرفع الرسمي.</p>
                 </div>
 
                 <!-- 3. Optional Date Overrides -->
@@ -95927,12 +95724,10 @@ function getCTPAdmissionFormData(trainee) {
                     <p class="text-[11px] text-slate-500 dark:text-slate-400">إذا تُرك الحقلان فارغين، يتم جلب تواريخ الدورة المسجلة في قاعدة البيانات تلقائياً.</p>
                 </div>
 
-                <!-- Enterprise File 11-column upload sheet toggle -->
-                <div id="instExp11ColOptionWrap" class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                    <label class="flex items-center gap-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-                        <input type="checkbox" id="instExpInclude11ColCheck" checked class="w-4 h-4 accent-emerald-600 rounded cursor-pointer">
-                        <span>تضمين ورقة «بيانات الرفع للمؤسسة - 11 حقل (رقم الهوية → رقم الجوال)» كـ ورقة ثالثة في ملف Excel</span>
-                    </label>
+                <!-- Enterprise File 1-Sheet 11-Column Upload Spec Notice -->
+                <div id="instExp11ColOptionWrap" class="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 space-y-1">
+                    <div class="text-xs font-black text-emerald-900 dark:text-emerald-200">✅ ملف واحد • ورقة واحدة فقط • اتجاه من اليمين لليسار (RTL) • بدون صفوف إضافية</div>
+                    <div class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 leading-relaxed">ترتيب الأعمدة A → K: رقم الهوية | الاسم الأول | اسم الأب | اسم الجد | اسم العائلة / اللقب | تاريخ الميلاد | الجنس | الجنسية | المرحلة الدراسية / المؤهل | البريد الإلكتروني | رقم الجوال</div>
                 </div>
 
                 <!-- 4. Individual Packaging Option (ONLY visible when Practical Assessment Card is chosen) -->
