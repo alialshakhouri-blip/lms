@@ -4482,6 +4482,14 @@
 
                     <div class="flex items-center gap-2 flex-wrap">
 
+                        <button type="button" id="btnCopyMyGroupsPhones" onclick="copyTrainerAllGroupPhones()" class="bg-slate-900 hover:bg-black text-amber-300 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm transition border border-amber-400/50 cursor-pointer" title="نسخ أرقام جوالات جميع متدربي مجموعاتك وشعبك المجدولة">
+
+                            <span>📲</span>
+
+                            <span>نسخ أرقام مجموعاتي</span>
+
+                        </button>
+
                         <button type="button" onclick="openTrainerLmsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm transition border border-emerald-500 cursor-pointer" title="إدارة المحتوى الأكاديمي للكورس (Canvas LMS): اختبارات، مقاطع فيديو، ملفات، وواجبات">
 
                             <span>منصة المحتوى الأكاديمي (Canvas LMS)</span>
@@ -9431,7 +9439,19 @@
 
                                 </div>
 
-                                <span id="vcTraineesCountBadge" class="text-[11px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">--</span>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+
+                                    <button type="button" id="btnVcCopyMyGroupsPhones" onclick="copyTrainerAllGroupPhones(activeVcTrainer)" class="bg-slate-900 hover:bg-black text-amber-300 font-black px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1 shadow-2xs transition cursor-pointer" title="نسخ جميع أرقام جوالات متدربي مجموعاتك">
+
+                                        <span>📲</span>
+
+                                        <span>نسخ أرقام مجموعاتي</span>
+
+                                    </button>
+
+                                    <span id="vcTraineesCountBadge" class="text-[11px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">--</span>
+
+                                </div>
 
                             </div>
 
@@ -17177,9 +17197,9 @@
     var activeVcTrainer = null;
     var currentVcPlatform = 'meet';
     var currentVcDateScope = 'always';
-    var currentVcLockMode = 'allday';
+    var currentVcLockMode = 'period';
 
-    const DEFAULT_VC_NOTES = 'التعليم عن بعد متاح ومفعل للجميع. يرجى الدخول بالاسم الثلاثي الصريح والالتزام بموعد المحاضرة.';
+    const DEFAULT_VC_NOTES = 'التعليم عن بعد متاح وفق جدول الحصص اليومي. يرجى الدخول بالاسم الثلاثي الصريح والالتزام بوقت حصتك المحدد.';
     function buildDefaultVcRoom(opts) {
         return {
             platform: opts.platform || 'meet',
@@ -17188,14 +17208,14 @@
             courseTitle: opts.courseTitle || 'المقرر التدريبي المعتمد',
             trainerName: opts.trainerName || 'المدرب المعتمد',
             topic: opts.topic,
-            time: opts.time || 'متاح طوال اليوم التدريبي (08:00 ص - 04:00 م)',
+            time: opts.time || 'من 08:00 ص إلى 04:00 م (حسب فترات الجدول)',
             targetGroups: 'ALL',
             passcode: opts.passcode || '',
             notes: opts.notes || DEFAULT_VC_NOTES,
             isActive: true,
             dateScope: 'always',
             calendarDate: '',
-            lockByPeriod: false,
+            lockByPeriod: true,
             isGlobal: Boolean(opts.isGlobal),
             vcSchemaVersion: 'v3_open_for_all',
             isDefaultSeed: true,
@@ -22986,7 +23006,9 @@ ${details}
 
         if (c1.length >= 4 && c2.length >= 4) {
 
-            if (c1.includes(c2) || c2.includes(c1)) return true;
+            const nums1 = c1.match(/\d+/g) || [];
+            const nums2 = c2.match(/\d+/g) || [];
+            if (nums1.join(',') === nums2.join(',') && (c1.includes(c2) || c2.includes(c1))) return true;
 
         }
 
@@ -24846,7 +24868,7 @@ ${details}
 
 
 
-        const tableColSpan = isSuperAdmin ? 7 : 6;
+        const tableColSpan = canSeePhone ? 7 : 6;
 
 
 
@@ -25218,7 +25240,7 @@ ${details}
 
                     </td>
 
-                    ${isSuperAdmin ? `
+                    ${canSeePhone ? `
 
                     <td class="p-3">
 
@@ -25316,7 +25338,7 @@ ${details}
 
                             </button>
 
-                            ${(isSuperAdmin && t.phone) ? `
+                            ${(canSeePhone && t.phone) ? `
 
                                 <a href="https://wa.me/966${t.phone.replace(/^0/, '')}?text=${whatsappMsg}" target="_blank" class="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 font-bold px-2 py-1 rounded text-[11px] transition">
 
@@ -25346,13 +25368,55 @@ ${details}
 
 
 
-    // نسخ أرقام جوال طلاب المجموعة في لوحة المدرب
+    // إرجاع مصفوفة المتدربين النشطة مع الرجوع تلقائياً للبيانات الافتراضية عند اللزوم
+
+    function getActiveTraineesPool() {
+
+        if (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) return trainees;
+
+        return (typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) ? SAMPLE_TRAINEES : [];
+
+    }
+
+    // استخراج أرقام الجوال الفريدة النظيفة من قائمة المتدربين
+
+    function extractUniquePhoneNumbers(traineeList) {
+
+        const unique = [];
+
+        const seen = new Set();
+
+        (traineeList || []).forEach(t => {
+
+            const raw = String(t && t.phone || '').trim();
+
+            if (!raw || raw === '-' || raw === 'غير مسجل') return;
+
+            if (!seen.has(raw)) {
+
+                seen.add(raw);
+
+                unique.push(raw);
+
+            }
+
+        });
+
+        return unique;
+
+    }
+
+    window.extractUniquePhoneNumbers = extractUniquePhoneNumbers;
+
+    // نسخ أرقام جوال طلاب المجموعة في لوحة المدرب (للمدرب والإدارة والسوبر أدمن)
 
     function copyGroupPhones() {
 
-        if (currentUser?.role !== 'superadmin') {
+        const role = currentUser?.role;
 
-            return showToast('⛔ عذراً: صلاحية عرض ونسخ أرقام الجوالات محصورة بالسوبر أدمن فقط', 'error');
+        if (role !== 'superadmin' && role !== 'admin' && role !== 'trainer') {
+
+            return showToast('⛔ هذه الميزة متاحة للمدربين والإدارة فقط', 'error');
 
         }
 
@@ -25360,29 +25424,109 @@ ${details}
 
         if (!activeGroup) return;
 
+        if (role === 'trainer') {
 
+            const trainerGroups = getGroupsForTrainer(currentUser);
 
-        const matched = trainees.filter(t => isGroupMatch(activeGroup, t.group));
+            const ownsGroup = trainerGroups.some(g => isGroupMatch(g, activeGroup) || g === activeGroup);
 
-        const phones = matched.map(t => t.phone).filter(Boolean);
+            if (!ownsGroup) {
 
+                return showToast('⛔ لا يمكنك نسخ أرقام مجموعة غير مربوطة بجدولك', 'error');
 
+            }
 
-        if (phones.length === 0) {
+        }
+
+        const pool = getActiveTraineesPool();
+
+        const matched = pool.filter(t => !isLAGroup(t.group) && (isGroupMatch(activeGroup, t.group) || t.group === activeGroup));
+
+        const uniquePhones = extractUniquePhoneNumbers(matched);
+
+        if (uniquePhones.length === 0) {
 
             return showToast(`لا توجد أرقام جوال مسجلة لطلاب شعبة (${activeGroup}).`, 'error');
 
         }
 
+        copyTextWithFallback(uniquePhones.join('\n')).then(() => {
 
-
-        navigator.clipboard.writeText(phones.join('\n')).then(() => {
-
-            showToast(`تم نسخ ${phones.length} رقم جوال لطلاب شعبة (${activeGroup}) إلى الحافظة!`, 'success');
+            showToast(`✅ تم نسخ ${uniquePhones.length} رقم جوال لطلاب شعبة (${activeGroup}) إلى الحافظة!`, 'success');
 
         });
 
     }
+
+    window.copyGroupPhones = copyGroupPhones;
+
+    // نسخ أرقام جوالات جميع المتدربين في كافة مجموعات المدرب (زر: نسخ أرقام مجموعاتي)
+
+    function copyTrainerAllGroupPhones(optionalTrainerName) {
+
+        const role = currentUser?.role;
+
+        if (role !== 'superadmin' && role !== 'admin' && role !== 'trainer') {
+
+            return showToast('⛔ هذه الميزة متاحة للمدربين والإدارة فقط', 'error');
+
+        }
+
+        let targetTrainer = null;
+
+        if (role === 'trainer') {
+
+            // إلزامي: المدرب ينسخ فقط أرقام طلاب مجموعاته المربوطة بجدوله
+
+            targetTrainer = getTrainerObj(currentUser) || getTrainerObj(currentUser?.trainerProfile || currentUser?.name);
+
+        } else {
+
+            const requested = (optionalTrainerName && optionalTrainerName !== '__GLOBAL__')
+
+                ? optionalTrainerName
+
+                : activeTrainerForDashboard;
+
+            targetTrainer = getTrainerObj(requested) || (typeof scheduleData !== 'undefined' && scheduleData[0]) || null;
+
+        }
+
+        if (!targetTrainer) {
+
+            return showToast('⚠️ تعذر تحديد ملف المدرب ومجموعاته في الجدول الحالي.', 'error');
+
+        }
+
+        const trainerGroups = getGroupsForTrainer(targetTrainer).filter(g => !isLAGroup(g));
+
+        if (trainerGroups.length === 0) {
+
+            return showToast(`لا توجد مجموعات مجدولة للمدرب أ. ${targetTrainer.name}.`, 'info');
+
+        }
+
+        const pool = getActiveTraineesPool();
+
+        const matchedTrainees = pool.filter(t => t && !isLAGroup(t.group) && trainerGroups.some(g => isGroupMatch(g, t.group) || t.group === g));
+
+        const uniquePhones = extractUniquePhoneNumbers(matchedTrainees);
+
+        if (uniquePhones.length === 0) {
+
+            return showToast(`⚠️ لا توجد أرقام جوال مسجلة لطلاب مجموعات أ. ${targetTrainer.name} حالياً.`, 'info');
+
+        }
+
+        copyTextWithFallback(uniquePhones.join('\n')).then(() => {
+
+            showToast(`✅ تم نسخ ${uniquePhones.length} رقم جوال لمتدربي مجموعات أ. ${targetTrainer.name} (${trainerGroups.length} مجموعات) بنجاح!`, 'success');
+
+        });
+
+    }
+
+    window.copyTrainerAllGroupPhones = copyTrainerAllGroupPhones;
 
 
 
@@ -25438,7 +25582,7 @@ ${details}
 
         const listText = matched.map((t, i) => `${i + 1}. ${t.name} | هوية: ${t.id} | جوال: ${t.phone || '—'} | إيميل: ${t.email || '—'}`).join('\n');
 
-        navigator.clipboard.writeText(`📋 كشف طلاب شعبة (${activeGroup}) - فرع عنك:\n${listText}`).then(() => {
+        copyTextWithFallback(`📋 كشف طلاب شعبة (${activeGroup}) - فرع عنك:\n${listText}`).then(() => {
 
             showToast(`تم نسخ كشف (${matched.length}) طالب من شعبة (${activeGroup}) كاملاً إلى الحافظة!`, 'success');
 
@@ -25458,7 +25602,7 @@ ${details}
 
         }
 
-        navigator.clipboard.writeText(phone).then(() => {
+        copyTextWithFallback(phone).then(() => {
 
             showToast(`✅ تم نسخ رقم جوال المتدرب (${name}) فردياً: ${phone}`, 'success');
 
@@ -31860,17 +32004,27 @@ ${details}
 
     function copyTextWithFallback(text) {
 
-        if (!text) return;
+        if (!text) return Promise.resolve(false);
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
 
-            navigator.clipboard.writeText(text).catch(() => legacyCopyText(text));
+            return navigator.clipboard.writeText(text)
 
-        } else {
+                .then(() => true)
 
-            legacyCopyText(text);
+                .catch(() => {
+
+                    legacyCopyText(text);
+
+                    return true;
+
+                });
 
         }
+
+        legacyCopyText(text);
+
+        return Promise.resolve(true);
 
     }
 
@@ -43575,10 +43729,28 @@ function openReportFromProfile() {
                                     <div class="flex items-center gap-2 pt-1">
                                         <a href="${vcRes.vc.link}" target="_blank" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-2.5 px-3 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
                                             <span>📡</span>
-                                            <span>دخول المحاضرة عن بعد</span>
+                                            <span>دخول المحاضرة الآن${vcRes.activeSlot ? ' (' + vcRes.activeSlot.shortLabel + ')' : ''}</span>
                                         </a>
                                         <button type="button" onclick="switchTab('studentVirtualClass')" class="px-3 py-2.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold rounded-xl text-xs transition cursor-pointer" title="تفاصيل القاعة الافتراضية">
                                             <span>تفاصيل</span>
+                                        </button>
+                                    </div>
+                                `;
+                            } else if (vcRes && vcRes.status === 'locked_upcoming' && vcRes.nextSlot) {
+                                return `
+                                    <div class="pt-1">
+                                        <button type="button" onclick="switchTab('studentVirtualClass')" class="w-full bg-amber-100 text-amber-950 border border-amber-300 font-black py-2 px-3 rounded-xl text-[11px] flex items-center justify-center gap-1.5 cursor-pointer">
+                                            <span>⏳</span>
+                                            <span>القاعة عن بعد تفتح في حصتك (${vcRes.nextSlot.label})</span>
+                                        </button>
+                                    </div>
+                                `;
+                            } else if (vcRes && vcRes.status === 'locked_ended' && vcRes.lastSlot) {
+                                return `
+                                    <div class="pt-1">
+                                        <button type="button" onclick="switchTab('studentVirtualClass')" class="w-full bg-slate-100 text-slate-600 border border-slate-300 font-bold py-2 px-3 rounded-xl text-[11px] flex items-center justify-center gap-1.5 cursor-pointer">
+                                            <span>🔒</span>
+                                            <span>انتهت حصة اليوم (${vcRes.lastSlot.shortLabel}) وأُقفل الرابط</span>
                                         </button>
                                     </div>
                                 `;
@@ -77994,15 +78166,37 @@ function buildDemoExecutiveReport(params) {
 
 
 
+    function getVcCurrentDateTime() {
+
+        if (typeof window !== 'undefined' && window.__VC_TEST_NOW__) {
+
+            return new Date(window.__VC_TEST_NOW__);
+
+        }
+
+        return new Date();
+
+    }
+
+    window.getVcCurrentDateTime = getVcCurrentDateTime;
+
     function getTrainerScheduleSlots(trainerName) {
 
         if (!trainerName) return MASTER_PERIOD_SLOTS.map(s => ({ ...s, groups: [] }));
 
         const clean = trainerName.replace(/^أ\.\s*/, '').trim();
 
-        const tr = (scheduleData || []).find(t => t.name.includes(clean) || clean.includes(t.name));
+        const normFn = typeof normalizeVcTrainerKey === 'function' ? normalizeVcTrainerKey : (x => String(x || '').trim());
 
-        
+        const nClean = normFn(clean);
+
+        const tr = (scheduleData || []).find(t => {
+
+            const nT = normFn(t.name);
+
+            return (nClean && nT === nClean) || t.name.includes(clean) || clean.includes(t.name);
+
+        });
 
         return MASTER_PERIOD_SLOTS.map(slot => {
 
@@ -78037,8 +78231,6 @@ function buildDemoExecutiveReport(params) {
         });
 
     }
-
-
 
     // DEFAULT_VIRTUAL_CLASSROOMS is initialized globally at top of script
 
@@ -78114,7 +78306,7 @@ function buildDemoExecutiveReport(params) {
 
 
 
-    const VC_STORAGE_VERSION = 'v3_open_for_all';
+    const VC_STORAGE_VERSION = 'v4_schedule_period_lock';
 
     function cloneDefaultVirtualClassrooms() {
         const copy = {};
@@ -78142,23 +78334,30 @@ function buildDemoExecutiveReport(params) {
                 dateScope: entry.dateScope || 'always'
             };
 
-            if (upgradeOldSeeds && entry.vcSchemaVersion !== VC_STORAGE_VERSION && entry.manualOverride !== true) {
-                // Upgrade stale v2 default-off records so Distance Learning works out of the box,
-                // while preserving any custom meeting link the user entered!
+            if (upgradeOldSeeds && entry.vcSchemaVersion !== VC_STORAGE_VERSION) {
                 const def = merged[k] || {
                     platform: 'meet',
                     link: 'https://meet.google.com/bgt-anak-tr',
                     topic: `محاضرة (عن بعد) - أ. ${k}`,
                     targetGroups: 'ALL',
                     dateScope: 'always',
-                    lockByPeriod: false,
+                    lockByPeriod: true,
                     isActive: true,
                     vcSchemaVersion: VC_STORAGE_VERSION
                 };
-                if (entry.isActive === true && entry.link) {
+                if (entry.manualOverride === true) {
+                    // Trainer saved custom link under pre-period-lock v3 schema: keep ALL custom fields, enable period lock default
                     merged[k] = {
                         ...def,
                         ...normalizedEntry,
+                        lockByPeriod: true,
+                        vcSchemaVersion: VC_STORAGE_VERSION
+                    };
+                } else if (entry.isActive === true && entry.link) {
+                    merged[k] = {
+                        ...def,
+                        ...normalizedEntry,
+                        lockByPeriod: true,
                         isActive: true,
                         vcSchemaVersion: VC_STORAGE_VERSION
                     };
@@ -78171,7 +78370,7 @@ function buildDemoExecutiveReport(params) {
                         isActive: true,
                         dateScope: 'always',
                         calendarDate: '',
-                        lockByPeriod: false,
+                        lockByPeriod: true,
                         vcSchemaVersion: VC_STORAGE_VERSION
                     };
                 }
@@ -78345,11 +78544,11 @@ function buildDemoExecutiveReport(params) {
         try {
             const cloudVc = await fetchLatestCloudVirtualClassrooms();
             if (!cloudVc || typeof cloudVc !== 'object' || Object.keys(cloudVc).length === 0) return false;
-            const hasCloudV3 = Boolean(
+            const hasCloudCurrent = Boolean(
                 (cloudVc._meta && cloudVc._meta.schemaVersion === VC_STORAGE_VERSION) ||
-                Object.values(cloudVc).some(v => v && typeof v === 'object' && (v.vcSchemaVersion === VC_STORAGE_VERSION || v.manualOverride === true))
+                Object.values(cloudVc).some(v => v && typeof v === 'object' && v.vcSchemaVersion === VC_STORAGE_VERSION)
             );
-            const cloudUpgraded = mergeDefaultVirtualClassrooms(cloudVc, !hasCloudV3);
+            const cloudUpgraded = mergeDefaultVirtualClassrooms(cloudVc, !hasCloudCurrent);
             const localUpgraded = mergeDefaultVirtualClassrooms(virtualClassrooms, false);
             virtualClassrooms = mergeVirtualClassroomMapsByTimestamp(localUpgraded, cloudUpgraded);
             window.virtualClassrooms = virtualClassrooms;
@@ -78394,11 +78593,11 @@ function buildDemoExecutiveReport(params) {
             // Pull latest cloud state first & merge by updatedAt/manualOverride so NO trainer overwrites another trainer!
             const latestCloud = await fetchLatestCloudVirtualClassrooms();
             if (latestCloud && typeof latestCloud === 'object') {
-                const hasCloudV3 = Boolean(
+                const hasCloudCurrent = Boolean(
                     (latestCloud._meta && latestCloud._meta.schemaVersion === VC_STORAGE_VERSION) ||
-                    Object.values(latestCloud).some(v => v && typeof v === 'object' && (v.vcSchemaVersion === VC_STORAGE_VERSION || v.manualOverride === true))
+                    Object.values(latestCloud).some(v => v && typeof v === 'object' && v.vcSchemaVersion === VC_STORAGE_VERSION)
                 );
-                const cloudUpgraded = mergeDefaultVirtualClassrooms(latestCloud, !hasCloudV3);
+                const cloudUpgraded = mergeDefaultVirtualClassrooms(latestCloud, !hasCloudCurrent);
                 const localUpgraded = mergeDefaultVirtualClassrooms(virtualClassrooms, false);
                 virtualClassrooms = mergeVirtualClassroomMapsByTimestamp(cloudUpgraded, localUpgraded);
                 window.virtualClassrooms = virtualClassrooms;
@@ -78563,13 +78762,15 @@ function buildDemoExecutiveReport(params) {
 
         const sg = (studentGroup || '').trim();
 
-        if (!sg) return true;
+        if (!sg) return false;
 
-        return (typeof isGroupMatch === 'function' ? isGroupMatch(vc.targetGroups, sg) : false) ||
+        if (typeof isGroupMatch === 'function') {
 
-               vc.targetGroups.includes(sg) ||
+            return isGroupMatch(vc.targetGroups, sg);
 
-               sg.includes(vc.targetGroups);
+        }
+
+        return vc.targetGroups.trim().toLowerCase() === sg.toLowerCase();
 
     }
 
@@ -78719,6 +78920,128 @@ function buildDemoExecutiveReport(params) {
 
     window.getVirtualClassroomForTrainer = getVirtualClassroomForTrainer;
 
+    function evaluateVcPeriodAccess(vc, trainerNameOrObj, studentGroup) {
+
+        const slots = getTrainerScheduleSlots(trainerNameOrObj);
+
+        const sg = (studentGroup || '').trim();
+
+        const matchedSlots = sg
+
+            ? slots.filter(s => s.groups.some(g => isGroupMatch(g, sg)))
+
+            : [];
+
+        if (vc && vc.lockByPeriod === false) {
+
+            return {
+
+                status: 'open',
+
+                isAllDay: true,
+
+                matchedSlots,
+
+                activeSlot: matchedSlots[0] || null,
+
+                nextSlot: null,
+
+                lastSlot: null
+
+            };
+
+        }
+
+        const now = getVcCurrentDateTime();
+
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+        if (matchedSlots.length === 0) {
+
+            return {
+
+                status: 'locked_no_slot',
+
+                isAllDay: false,
+
+                matchedSlots: [],
+
+                activeSlot: null,
+
+                nextSlot: null,
+
+                lastSlot: null
+
+            };
+
+        }
+
+        const activeSlot = matchedSlots.find(s => nowMinutes >= s.startMinutes && nowMinutes < s.endMinutes) || null;
+
+        if (activeSlot) {
+
+            return {
+
+                status: 'open',
+
+                isAllDay: false,
+
+                matchedSlots,
+
+                activeSlot,
+
+                nextSlot: null,
+
+                lastSlot: null
+
+            };
+
+        }
+
+        const nextSlot = matchedSlots.find(s => nowMinutes < s.startMinutes) || null;
+
+        if (nextSlot) {
+
+            return {
+
+                status: 'locked_upcoming',
+
+                isAllDay: false,
+
+                matchedSlots,
+
+                activeSlot: null,
+
+                nextSlot,
+
+                lastSlot: null
+
+            };
+
+        }
+
+        const lastSlot = matchedSlots[matchedSlots.length - 1] || null;
+
+        return {
+
+            status: 'locked_ended',
+
+            isAllDay: false,
+
+            matchedSlots,
+
+            activeSlot: null,
+
+            nextSlot: null,
+
+            lastSlot
+
+        };
+
+    }
+
+    window.evaluateVcPeriodAccess = evaluateVcPeriodAccess;
+
     function resolveVirtualClassroomForCourse(trainerNameOrObj, courseKey, studentGroup) {
 
         const candidates = collectMatchingVcCandidates(trainerNameOrObj, courseKey);
@@ -78726,6 +79049,14 @@ function buildDemoExecutiveReport(params) {
         const todayStr = getTodayDateString();
 
         let futureVc = null;
+
+        let lockedUpcomingRes = null;
+
+        let lockedEndedRes = null;
+
+        let lockedNoSlotRes = null;
+
+        let groupMismatchVc = null;
 
         let fallbackVc = null;
 
@@ -78737,7 +79068,13 @@ function buildDemoExecutiveReport(params) {
 
             if (!vc.isActive || !vc.link) continue;
 
-            if (!isVcGroupMatch(vc, studentGroup)) continue;
+            if (!isVcGroupMatch(vc, studentGroup)) {
+
+                if (!groupMismatchVc) groupMismatchVc = vc;
+
+                continue;
+
+            }
 
             const scope = vc.dateScope || 'always';
 
@@ -78755,13 +79092,91 @@ function buildDemoExecutiveReport(params) {
 
             }
 
-            return { status: 'open', vc, source: 'course' };
+            const periodEval = evaluateVcPeriodAccess(vc, vc.trainerName || trainerNameOrObj, studentGroup);
+
+            if (periodEval.status === 'open') {
+
+                return {
+
+                    status: 'open',
+
+                    vc,
+
+                    source: 'course',
+
+                    isAllDay: periodEval.isAllDay,
+
+                    matchedSlots: periodEval.matchedSlots,
+
+                    activeSlot: periodEval.activeSlot
+
+                };
+
+            } else if (periodEval.status === 'locked_upcoming' && !lockedUpcomingRes) {
+
+                lockedUpcomingRes = {
+
+                    status: 'locked_upcoming',
+
+                    vc,
+
+                    source: 'period_lock',
+
+                    matchedSlots: periodEval.matchedSlots,
+
+                    nextSlot: periodEval.nextSlot
+
+                };
+
+            } else if (periodEval.status === 'locked_ended' && !lockedEndedRes) {
+
+                lockedEndedRes = {
+
+                    status: 'locked_ended',
+
+                    vc,
+
+                    source: 'period_lock',
+
+                    matchedSlots: periodEval.matchedSlots,
+
+                    lastSlot: periodEval.lastSlot
+
+                };
+
+            } else if (periodEval.status === 'locked_no_slot' && !lockedNoSlotRes) {
+
+                lockedNoSlotRes = {
+
+                    status: 'locked_no_slot',
+
+                    vc,
+
+                    source: 'period_lock',
+
+                    matchedSlots: []
+
+                };
+
+            }
 
         }
+
+        if (lockedUpcomingRes) return lockedUpcomingRes;
+
+        if (lockedEndedRes) return lockedEndedRes;
+
+        if (lockedNoSlotRes) return lockedNoSlotRes;
 
         if (futureVc) {
 
             return { status: 'future_date', vc: futureVc, source: 'future' };
+
+        }
+
+        if (groupMismatchVc) {
+
+            return { status: 'group_mismatch', vc: groupMismatchVc, source: 'group_filter' };
 
         }
 
@@ -78789,13 +79204,21 @@ function buildDemoExecutiveReport(params) {
 
         let firstCourseResult = null;
 
-        let activeSpecificResult = null;
+        let activeTimedResult = null;
+
+        let activeCurrentLmsResult = null;
 
         let activeManualResult = null;
 
-        const allOpenSessions = [];
+        let activeSpecificResult = null;
+
+        let lockedUpcomingResult = null;
+
+        let lockedEndedResult = null;
 
         let futureSessionResult = null;
+
+        const allOpenSessions = [];
 
         for (const binding of courses) {
 
@@ -78807,9 +79230,9 @@ function buildDemoExecutiveReport(params) {
 
             const courseKey = binding.lmsKey || findCourseKeyForTrainer(rawTr);
 
-            const slots = getTrainerScheduleSlots(trainerName);
+            const resolvedSpecific = resolveVirtualClassroomForCourse(rawTr, courseKey, studentGroup);
 
-            const matchedSlots = slots.filter(s => s.groups.some(g => isGroupMatch(g, studentGroup)));
+            const slots = resolvedSpecific.matchedSlots || getTrainerScheduleSlots(rawTr).filter(s => s.groups.some(g => isGroupMatch(g, studentGroup)));
 
             let periodLabel = 'متاح الآن للبث المباشر (طوال اليوم)';
 
@@ -78817,13 +79240,21 @@ function buildDemoExecutiveReport(params) {
 
             let endStr = '04:00 م';
 
-            if (matchedSlots.length > 0) {
+            if (resolvedSpecific.activeSlot) {
 
-                startStr = matchedSlots[0].startStr;
+                startStr = resolvedSpecific.activeSlot.startStr;
 
-                endStr = matchedSlots[matchedSlots.length - 1].endStr;
+                endStr = resolvedSpecific.activeSlot.endStr;
 
-                periodLabel = `${startStr} إلى ${endStr}`;
+                periodLabel = resolvedSpecific.activeSlot.label;
+
+            } else if (slots.length > 0) {
+
+                startStr = slots[0].startStr;
+
+                endStr = slots[slots.length - 1].endStr;
+
+                periodLabel = slots.map(s => s.label).join(' • ');
 
             } else if (binding.periodLabel) {
 
@@ -78831,11 +79262,9 @@ function buildDemoExecutiveReport(params) {
 
             }
 
-            const resolvedSpecific = resolveVirtualClassroomForCourse(rawTr, courseKey, studentGroup, false);
-
             const baseResult = {
 
-                status: 'offline',
+                status: resolvedSpecific.status || 'offline',
 
                 periodLabel,
 
@@ -78843,7 +79272,13 @@ function buildDemoExecutiveReport(params) {
 
                 endStr,
 
-                matchedSlots,
+                matchedSlots: slots,
+
+                activeSlot: resolvedSpecific.activeSlot || null,
+
+                nextSlot: resolvedSpecific.nextSlot || null,
+
+                lastSlot: resolvedSpecific.lastSlot || null,
 
                 classroom: resolvedSpecific.vc,
 
@@ -78871,13 +79306,51 @@ function buildDemoExecutiveReport(params) {
 
                     status: 'open',
 
-                    isAllDay: (resolvedSpecific.vc.lockByPeriod !== true || matchedSlots.length === 0)
+                    isAllDay: Boolean(resolvedSpecific.isAllDay)
 
                 };
 
-                allOpenSessions.push(openRes); if (resolvedSpecific.vc.manualOverride === true) { const cTs = activeManualResult ? (Date.parse(activeManualResult.classroom?.updatedAt || '') || 0) : -1; const tTs = Date.parse(resolvedSpecific.vc.updatedAt || '') || 0; if (!activeManualResult || tTs > cTs) activeManualResult = openRes; } if (isCurrentActiveLms && (resolvedSpecific.vc.manualOverride === true || !activeManualResult)) return { ...openRes, allOpenSessions };
+                allOpenSessions.push(openRes);
+
+                if (!openRes.isAllDay && openRes.activeSlot && !activeTimedResult) {
+
+                    activeTimedResult = openRes;
+
+                }
+
+                if (isCurrentActiveLms && !activeCurrentLmsResult) {
+
+                    activeCurrentLmsResult = openRes;
+
+                }
+
+                if (resolvedSpecific.vc.manualOverride === true) {
+
+                    const cTs = activeManualResult ? (Date.parse(activeManualResult.classroom?.updatedAt || '') || 0) : -1;
+
+                    const tTs = Date.parse(resolvedSpecific.vc.updatedAt || '') || 0;
+
+                    if (!activeManualResult || tTs > cTs) activeManualResult = openRes;
+
+                }
 
                 if (!activeSpecificResult) activeSpecificResult = openRes;
+
+            } else if (resolvedSpecific.status === 'locked_upcoming' && resolvedSpecific.nextSlot) {
+
+                if (!lockedUpcomingResult || resolvedSpecific.nextSlot.startMinutes < lockedUpcomingResult.nextSlot.startMinutes) {
+
+                    lockedUpcomingResult = baseResult;
+
+                }
+
+            } else if (resolvedSpecific.status === 'locked_ended' && resolvedSpecific.lastSlot) {
+
+                if (!lockedEndedResult || resolvedSpecific.lastSlot.endMinutes > lockedEndedResult.lastSlot.endMinutes) {
+
+                    lockedEndedResult = baseResult;
+
+                }
 
             } else if (resolvedSpecific.status === 'future_date' && resolvedSpecific.vc && !futureSessionResult) {
 
@@ -78899,9 +79372,17 @@ function buildDemoExecutiveReport(params) {
 
         }
 
+        if (activeTimedResult) return { ...activeTimedResult, allOpenSessions };
+
+        if (activeCurrentLmsResult) return { ...activeCurrentLmsResult, allOpenSessions };
+
         if (activeManualResult) return { ...activeManualResult, allOpenSessions };
 
         if (activeSpecificResult) return { ...activeSpecificResult, allOpenSessions };
+
+        if (lockedUpcomingResult) return lockedUpcomingResult;
+
+        if (lockedEndedResult) return lockedEndedResult;
 
         if (futureSessionResult) return futureSessionResult;
 
@@ -78920,6 +79401,8 @@ function buildDemoExecutiveReport(params) {
         };
 
     }
+
+    window.evaluateTraineeSessionAccess = evaluateTraineeSessionAccess;
 
     function findStudentActiveClassroom(studentUser) {
 
@@ -79033,7 +79516,19 @@ function buildDemoExecutiveReport(params) {
 
         }
 
+        const targetSel = document.getElementById('vcTargetGroups');
+
+        const targetSummary = document.getElementById('vcTargetGroupsSummary');
+
+        if (targetSel && targetSummary) {
+
+            targetSummary.innerText = (!targetSel.value || targetSel.value === 'ALL') ? 'كافة المجموعات' : `شعبة: ${targetSel.value}`;
+
+        }
+
         updateVcLivePreview();
+
+        renderVcScheduleMatrix();
 
     }
 
@@ -79273,7 +79768,7 @@ function buildDemoExecutiveReport(params) {
 
             let currentUrl = urlInput ? urlInput.value.trim() : '';
 
-            const fallbackDefault = DEFAULT_VIRTUAL_CLASSROOMS[cleanTrainerName] || { platform: 'meet', link: 'https://meet.google.com/bgt-anak-tr', dateScope: 'always', targetGroups: 'ALL', lockByPeriod: false };
+            const fallbackDefault = DEFAULT_VIRTUAL_CLASSROOMS[cleanTrainerName] || { platform: 'meet', link: 'https://meet.google.com/bgt-anak-tr', dateScope: 'always', targetGroups: 'ALL', lockByPeriod: true };
 
             if (isChecked && !currentUrl && fallbackDefault && fallbackDefault.link) {
 
@@ -79419,15 +79914,23 @@ function buildDemoExecutiveReport(params) {
 
         const slots = getTrainerScheduleSlots(activeVcTrainer);
 
-        const now = new Date();
+        const now = getVcCurrentDateTime();
 
         const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+        const selectedTargetGroup = document.getElementById('vcTargetGroups')?.value || activeVcObj?.targetGroups || 'ALL';
 
         container.innerHTML = slots.map(slot => {
 
             const isCurrentTimeSlot = (nowMinutes >= slot.startMinutes && nowMinutes < slot.endMinutes);
 
             const isUpcomingSlot = (nowMinutes < slot.startMinutes);
+
+            const isGroupTargeted = (!selectedTargetGroup || selectedTargetGroup === 'ALL')
+
+                ? true
+
+                : slot.groups.some(g => (typeof isGroupMatch === 'function' ? isGroupMatch(selectedTargetGroup, g) : g === selectedTargetGroup));
 
             let statusHtml = '';
 
@@ -79438,6 +79941,12 @@ function buildDemoExecutiveReport(params) {
                 statusHtml = `<span class="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-md">🏫 حضوري</span>`;
 
                 cardStyle = 'bg-slate-50 border-slate-200';
+
+            } else if (selectedTargetGroup !== 'ALL' && !isGroupTargeted) {
+
+                statusHtml = `<span class="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-md">🔒 مستثناة (مخصص لشعبة ${selectedTargetGroup})</span>`;
+
+                cardStyle = 'bg-slate-50/60 border-slate-200 text-slate-400 opacity-75';
 
             } else if (currentVcLockMode === 'allday' || isCurrentTimeSlot) {
 
@@ -79705,15 +80214,13 @@ function buildDemoExecutiveReport(params) {
 
         setVcDateScope(currentVcDateScope);
 
-        currentVcLockMode = (savedData && savedData.lockByPeriod === true ? 'period' : 'allday');
+        currentVcLockMode = (savedData && savedData.lockByPeriod === false ? 'allday' : 'period');
+
+        updateVcCourseGroupsAndCount(selKey, savedData?.targetGroups || 'ALL');
 
         onVcLockModeChange(currentVcLockMode);
 
         onVcToggleActive(isActive, true);
-
-        // تحديث المجموعات والشعب وعدد المتدربين للمقرر المختار
-
-        updateVcCourseGroupsAndCount(selKey);
 
         onVcInputChange();
 
@@ -79723,7 +80230,7 @@ function buildDemoExecutiveReport(params) {
 
 
 
-    function updateVcCourseGroupsAndCount(courseKey) {
+    function updateVcCourseGroupsAndCount(courseKey, preferredTargetGroup) {
 
         let trainerForCourse = activeVcTrainer;
 
@@ -79741,7 +80248,7 @@ function buildDemoExecutiveReport(params) {
 
         if (groupsSelect) {
 
-            const currentVal = groupsSelect.value;
+            const currentVal = preferredTargetGroup || groupsSelect.value || 'ALL';
 
             const groupOpts = linkedGroups.map(g => `<option value="${g}">المجموعة: ${g}</option>`).join('');
 
@@ -79756,6 +80263,18 @@ function buildDemoExecutiveReport(params) {
             if (currentVal && (currentVal === 'ALL' || linkedGroups.includes(currentVal))) {
 
                 groupsSelect.value = currentVal;
+
+            } else {
+
+                groupsSelect.value = 'ALL';
+
+            }
+
+            const targetSummary = document.getElementById('vcTargetGroupsSummary');
+
+            if (targetSummary) {
+
+                targetSummary.innerText = groupsSelect.value === 'ALL' ? 'كافة المجموعات' : `شعبة: ${groupsSelect.value}`;
 
             }
 
@@ -79985,11 +80504,11 @@ function buildDemoExecutiveReport(params) {
 
         setVcDateScope(currentVcDateScope);
 
-        currentVcLockMode = (cData.lockByPeriod === true ? 'period' : 'allday');
+        currentVcLockMode = (cData.lockByPeriod === false ? 'allday' : 'period');
+
+        updateVcCourseGroupsAndCount(courseSelect ? courseSelect.value : '', cData.targetGroups || 'ALL');
 
         onVcLockModeChange(currentVcLockMode);
-
-        updateVcCourseGroupsAndCount(courseSelect ? courseSelect.value : '');
 
         const isActive = (cData && typeof cData.isActive === 'boolean') ? cData.isActive : true;
 
@@ -80029,7 +80548,7 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        const now = new Date();
+        const now = getVcCurrentDateTime();
 
         const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
@@ -80382,7 +80901,7 @@ function buildDemoExecutiveReport(params) {
 
                 calendarDate: '',
 
-                lockByPeriod: false,
+                lockByPeriod: (typeof cur.lockByPeriod === 'boolean' ? cur.lockByPeriod : (typeof def.lockByPeriod === 'boolean' ? def.lockByPeriod : true)),
 
                 isActive: true,
 
@@ -80416,7 +80935,7 @@ function buildDemoExecutiveReport(params) {
 
                 v.calendarDate = '';
 
-                v.lockByPeriod = false;
+                if (typeof v.lockByPeriod !== 'boolean') v.lockByPeriod = true;
 
                 v.isGlobal = false;
 
@@ -80654,19 +81173,30 @@ function buildDemoExecutiveReport(params) {
 
             const liveCourse = courses.find(c => {
 
-                const res = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup, true);
+                const res = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup);
 
-                return Boolean(res && res.status === 'open' && res.vc);
+                return res && res.status === 'open';
 
             });
+
+            const upcomingCourse = !liveCourse ? courses.find(c => {
+
+                const res = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup);
+
+                return res && res.status === 'locked_upcoming';
+
+            }) : null;
 
             if (liveCourse) {
 
                 activeStudentVcCourseKey = liveCourse.lmsKey || liveCourse.rawTrainerName;
 
-            } else if (typeof activeStudentLmsCourse !== 'undefined' && activeStudentLmsCourse && courses.some(c => (c.lmsKey || c.rawTrainerName) === activeStudentLmsCourse)) {
+            } else if (upcomingCourse) {
 
-                activeStudentVcCourseKey = activeStudentLmsCourse;
+                activeStudentVcCourseKey = upcomingCourse.lmsKey || upcomingCourse.rawTrainerName;
+            } else if (courses.some(c => { const r = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup); return r && r.status === 'locked_ended'; })) {
+                const endedCourse = courses.find(c => { const r = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup); return r && r.status === 'locked_ended'; });
+                activeStudentVcCourseKey = endedCourse.lmsKey || endedCourse.rawTrainerName;
 
             } else {
 
@@ -80682,15 +81212,31 @@ function buildDemoExecutiveReport(params) {
 
         const courseKey = selectedCourse.lmsKey || findCourseKeyForTrainer(trainerName);
 
-        const resolved = resolveVirtualClassroomForCourse(selectedCourse.rawTrainerName || trainerName, courseKey, studentGroup, false);
+        const resolved = resolveVirtualClassroomForCourse(selectedCourse.rawTrainerName || trainerName, courseKey, studentGroup);
 
         const vc = resolved ? resolved.vc : null;
 
-        const isCourseLive = Boolean(resolved && resolved.status === 'open' && vc && vc.link);
+        const vcStatus = resolved ? resolved.status : 'offline';
 
-        const isFutureDate = Boolean(resolved && resolved.status === 'future_date' && vc);
+        const isCourseLive = Boolean(vcStatus === 'open' && vc && vc.link);
+
+        const isFutureDate = Boolean(vcStatus === 'future_date' && vc);
+
+        const isLockedUpcoming = Boolean(vcStatus === 'locked_upcoming' && resolved.nextSlot);
+
+        const isLockedEnded = Boolean(vcStatus === 'locked_ended' && resolved.lastSlot);
+
+        const isLockedNoSlot = Boolean(vcStatus === 'locked_no_slot');
+
+        const isGroupMismatch = Boolean(vcStatus === 'group_mismatch');
 
         const pObj = (vc && vc.platform && VC_PLATFORMS[vc.platform]) ? VC_PLATFORMS[vc.platform] : VC_PLATFORMS.meet;
+
+        const studentSlotsText = (resolved && resolved.matchedSlots && resolved.matchedSlots.length > 0)
+
+            ? resolved.matchedSlots.map(s => s.label).join(' • ')
+
+            : (selectedCourse.periodLabel || 'حسب الجدول');
 
         // 4. شريط اختيار المقرر للمتدرب
 
@@ -80712,7 +81258,7 @@ function buildDemoExecutiveReport(params) {
 
                                 <h4 class="text-xs md:text-sm font-black text-slate-900">اختر المقرر التدريبي لعرض قاعة التعليم عن بعد:</h4>
 
-                                <p class="text-[11px] text-slate-500 font-medium">دخول القاعة الافتراضية المباشرة للمقررات والمدربين المربوطين بجدولك فقط</p>
+                                <p class="text-[11px] text-slate-500 font-medium">يفتح رابط القاعة تلقائياً في ساعة حصتك المحددة بجدول المعهد ويُقفل بعد انتهائها</p>
 
                             </div>
 
@@ -80734,41 +81280,47 @@ function buildDemoExecutiveReport(params) {
 
                             const isSel = (cKey === activeStudentVcCourseKey);
 
-                            const cRes = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup, false);
+                            const cRes = resolveVirtualClassroomForCourse(c.rawTrainerName || c.trainerName, c.lmsKey, studentGroup);
 
-                            const cLive = Boolean(cRes && cRes.status === 'open' && cRes.vc);
+                            const cSt = cRes ? cRes.status : 'offline';
+
+                            const cLive = Boolean(cSt === 'open' && cRes.vc);
 
                             const title = c.courseTitle || c.courseShort || `مقرر ${idx + 1}`;
 
                             const trName = c.trainerName || 'المدرب';
 
+                            let pillHtml = `<span class="text-[10px] text-slate-500 font-bold bg-white px-2 py-0.5 rounded-full border border-slate-200">حضوري</span>`;
+
+                            if (cLive) {
+
+                                pillHtml = `<span class="bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse shadow-2xs">🟢 جارية الآن${cRes.activeSlot ? ' (' + cRes.activeSlot.shortLabel + ')' : ''}</span>`;
+
+                            } else if (cSt === 'locked_upcoming' && cRes.nextSlot) {
+
+                                pillHtml = `<span class="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full">⏳ تفتح ${cRes.nextSlot.startStr}</span>`;
+
+                            } else if (cSt === 'locked_ended' && cRes.lastSlot) {
+
+                                pillHtml = `<span class="bg-slate-200 text-slate-700 border border-slate-300 text-[10px] font-black px-2 py-0.5 rounded-full">🔒 انتهت (${cRes.lastSlot.shortLabel})</span>`;
+
+                            } else if (cSt === 'locked_no_slot' || cSt === 'group_mismatch') {
+
+                                pillHtml = `<span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full">🔒 خارج الجدول</span>`;
+
+                            }
+
                             return `
 
                                 <button type="button" onclick="selectStudentVcCourse('${cKey}')" class="px-4 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2.5 cursor-pointer shadow-xs ${isSel ? 'bg-slate-900 text-amber-300 ring-2 ring-amber-400 scale-[1.02]' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'}">
 
-                                    <span class="text-base">${cLive ? '📡' : '🏫'}</span>
+                                    <span class="text-base">${cLive ? '📡' : (cSt === 'locked_upcoming' ? '⏳' : (cSt === 'locked_ended' ? '🔒' : '🏫'))}</span>
 
                                     <span>${title}</span>
 
                                     <span class="text-[10px] font-bold opacity-80">(${trName})</span>
 
-                                    ${cLive ? `
-
-                                        <span class="bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse shadow-2xs">
-
-                                            🟢 متاح الآن
-
-                                        </span>
-
-                                    ` : `
-
-                                        <span class="text-[10px] text-slate-500 font-bold bg-white px-2 py-0.5 rounded-full border border-slate-200">
-
-                                            حضوري
-
-                                        </span>
-
-                                    `}
+                                    ${pillHtml}
 
                                 </button>
 
@@ -80908,9 +81460,9 @@ function buildDemoExecutiveReport(params) {
 
                         <div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl w-full md:w-auto shrink-0 space-y-1">
 
-                            <span class="text-[11px] text-blue-200 font-bold block">🕒 موعد وفترة الحصة:</span>
+                            <span class="text-[11px] text-blue-200 font-bold block">🕒 موعد وفترة حصتك:</span>
 
-                            <span class="text-xs md:text-sm font-black text-white block">${selectedCourse.periodLabel || 'متاح الآن طوال اليوم'}</span>
+                            <span class="text-xs md:text-sm font-black text-white block">${resolved?.activeSlot ? resolved.activeSlot.label : studentSlotsText}</span>
 
                         </div>
 
@@ -80971,6 +81523,124 @@ function buildDemoExecutiveReport(params) {
                             <span>نسخ رابط القاعة</span>
 
                         </button>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        } else if (isLockedUpcoming) {
+
+            const nextS = resolved.nextSlot;
+
+            const nowD = getVcCurrentDateTime();
+
+            const remMin = Math.max(1, nextS.startMinutes - (nowD.getHours() * 60 + nowD.getMinutes()));
+
+            const remText = remMin >= 60 ? `${Math.floor(remMin / 60)} ساعة و${remMin % 60} دقيقة` : `${remMin} دقيقة`;
+
+            cardContentHtml = `
+
+                <div class="bg-white border-2 border-amber-300 rounded-3xl p-6 md:p-8 shadow-sm text-center space-y-4 max-w-2xl mx-auto my-4">
+
+                    <div class="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-3xl mx-auto border border-amber-200">
+
+                        ⏳
+
+                    </div>
+
+                    <div class="space-y-1.5">
+
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
+
+                            🔒 مقفل تلقائياً حتى موعد حصتك
+
+                        </span>
+
+                        <h3 class="text-lg md:text-xl font-black text-slate-900">القاعة الافتراضية لمقرر (${selectedCourse.courseTitle || ''}) لم تفتح بعد</h3>
+
+                        <p class="text-sm font-black text-blue-900 bg-blue-50 py-2 px-4 rounded-xl inline-block border border-blue-200">
+
+                            🕒 وقت حصتك اليوم لشعبة (${studentGroup}): ${nextS.label} (متبقي تقريباً: ${remText})
+
+                        </p>
+
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-950 text-xs font-bold leading-relaxed text-right">
+
+                        💡 حسب نظام <b>القفل التلقائي بجدول الحصص</b> للمدرب <b>${trainerName}</b>، يفتح رابط الدخول لشعبتك (${studentGroup}) تلقائياً عند الساعة <b>${nextS.startStr}</b> ويُقفل عند <b>${nextS.endStr}</b>.
+
+                    </div>
+
+                </div>
+
+            `;
+
+        } else if (isLockedEnded) {
+
+            const lastS = resolved.lastSlot;
+
+            cardContentHtml = `
+
+                <div class="bg-white border-2 border-slate-300 rounded-3xl p-6 md:p-8 shadow-sm text-center space-y-4 max-w-2xl mx-auto my-4">
+
+                    <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center text-3xl mx-auto border border-slate-200">
+
+                        🔒
+
+                    </div>
+
+                    <div class="space-y-1.5">
+
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-slate-200 text-slate-800 border border-slate-300">
+
+                            🔒 مقفلة (انتهت الحصة)
+
+                        </span>
+
+                        <h3 class="text-lg md:text-xl font-black text-slate-900">انتهى وقت حصتك في جدول اليوم لمقرر (${selectedCourse.courseTitle || ''})</h3>
+
+                        <p class="text-xs font-black text-slate-700 bg-slate-100 py-2 px-4 rounded-xl inline-block border border-slate-200">
+
+                            🕒 موعد حصتك كان: ${lastS.label} — شعبة (${studentGroup})
+
+                        </p>
+
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium leading-relaxed text-right">
+
+                        🔒 تم قفل رابط القاعة الافتراضية تلقائياً بانتهاء ساعة حصتك وفق جدول الحصص اليومي بإشراف <b>${trainerName}</b>.
+
+                    </div>
+
+                </div>
+
+            `;
+
+        } else if (isLockedNoSlot || isGroupMismatch) {
+
+            cardContentHtml = `
+
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm text-center space-y-4 max-w-2xl mx-auto my-4">
+
+                    <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center text-3xl mx-auto border border-slate-200">
+
+                        🗓️
+
+                    </div>
+
+                    <div class="space-y-1.5">
+
+                        <h3 class="text-lg md:text-xl font-black text-slate-900">لا توجد حصة مجدولة حالياً لشعبة (${studentGroup})</h3>
+
+                        <p class="text-xs text-slate-600 font-medium">
+
+                            القاعة الافتراضية للمدرب <b>${trainerName}</b> مقيدة بفترات الجدول أو لمجموعات محددة ولا توجد فترة مطابقة لشعبتك في جدول الحصص الحالي.
+
+                        </p>
 
                     </div>
 
@@ -81142,14 +81812,14 @@ function buildDemoExecutiveReport(params) {
 
 
 
-        // تظهر للمتدرب حصراً في حال تفعيل المدرب للمحاضرة عن بعد ولنفس المقرر المربوط به
+        // تظهر للمتدرب حسب حالة الجدول الزمني (مفتوحة الآن أو مجدولة بساعة محددة)
         if (evalResult && evalResult.status === 'open' && evalResult.classroom && evalResult.classroom.isActive && evalResult.classroom.link) {
 
             const vc = evalResult.classroom;
 
             const pObj = VC_PLATFORMS[vc.platform] || VC_PLATFORMS.meet;
 
-
+            const activePeriodBadge = evalResult.activeSlot ? evalResult.activeSlot.label : evalResult.periodLabel;
 
             bannerEl.className = 'block';
 
@@ -81173,7 +81843,7 @@ function buildDemoExecutiveReport(params) {
 
                                     <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
 
-                                    <span>بث مباشر عن بعد نشط الآن</span>
+                                    <span>جارية الآن (الرابط مفتوح)</span>
 
                                 </span>
 
@@ -81185,7 +81855,7 @@ function buildDemoExecutiveReport(params) {
 
                             <p class="text-xs text-slate-300 font-medium">
 
-                                🕒 فترة حصتك: <b class="text-white">${evalResult.periodLabel}</b> • المقرر: <b class="text-amber-200">${evalResult.courseTitle}</b> • المنصة: <b class="text-blue-200">${pObj.name}</b>
+                                🕒 موعد حصتك: <b class="text-white">${activePeriodBadge}</b> • المقرر: <b class="text-amber-200">${evalResult.courseTitle}</b> • المنصة: <b class="text-blue-200">${pObj.name}</b>
 
                                 ${vc.passcode ? ` • رمز المرور: <b class="text-amber-300 font-mono">${vc.passcode}</b>` : ''}
 
@@ -81194,8 +81864,6 @@ function buildDemoExecutiveReport(params) {
                         </div>
 
                     </div>
-
-
 
                     <div class="flex items-center gap-2.5 w-full md:w-auto shrink-0 flex-wrap">
 
@@ -81214,6 +81882,82 @@ function buildDemoExecutiveReport(params) {
                         </button>
 
                     </div>
+
+                </div>
+
+            `;
+
+        } else if (evalResult && evalResult.status === 'locked_upcoming' && evalResult.nextSlot) {
+
+            bannerEl.className = 'block';
+
+            bannerEl.innerHTML = `
+
+                <div class="p-4 rounded-3xl bg-amber-50 border-2 border-amber-300 shadow-sm text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+
+                    <div class="flex items-center gap-3">
+
+                        <div class="w-11 h-11 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-2xl shrink-0">⏳</div>
+
+                        <div class="space-y-0.5">
+
+                            <div class="flex items-center gap-2 flex-wrap">
+
+                                <span class="bg-amber-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full">🔒 مقفلة حتى موعد الحصة</span>
+
+                                <span class="font-black text-xs md:text-sm">${evalResult.courseTitle} (${evalResult.trainerName})</span>
+
+                            </div>
+
+                            <p class="text-xs font-bold text-amber-800">سيفتح رابط القاعة الافتراضية لشعبتك (${currentUser.group || ''}) تلقائياً الساعة <b>${evalResult.nextSlot.startStr}</b> إلى <b>${evalResult.nextSlot.endStr}</b></p>
+
+                        </div>
+
+                    </div>
+
+                    <button type="button" onclick="switchTab('studentVirtualClass')" class="bg-slate-900 hover:bg-black text-amber-300 font-black px-4 py-2 rounded-xl text-xs transition cursor-pointer shrink-0">
+
+                        جدول القاعة 📅
+
+                    </button>
+
+                </div>
+
+            `;
+
+        } else if (evalResult && evalResult.status === 'locked_ended' && evalResult.lastSlot) {
+
+            bannerEl.className = 'block';
+
+            bannerEl.innerHTML = `
+
+                <div class="p-4 rounded-3xl bg-slate-100 border border-slate-300 shadow-2xs text-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+
+                    <div class="flex items-center gap-3">
+
+                        <div class="w-11 h-11 rounded-2xl bg-white border border-slate-300 flex items-center justify-center text-2xl shrink-0">🔒</div>
+
+                        <div class="space-y-0.5">
+
+                            <div class="flex items-center gap-2 flex-wrap">
+
+                                <span class="bg-slate-700 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full">🔒 انتهت الحصة</span>
+
+                                <span class="font-black text-xs md:text-sm">${evalResult.courseTitle} (${evalResult.trainerName})</span>
+
+                            </div>
+
+                            <p class="text-xs font-medium text-slate-600">تم قفل الرابط تلقائياً بعد انتهاء موعد حصتك اليوم (${evalResult.lastSlot.label})</p>
+
+                        </div>
+
+                    </div>
+
+                    <button type="button" onclick="switchTab('studentVirtualClass')" class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer shrink-0">
+
+                        مواعيد القاعات
+
+                    </button>
 
                 </div>
 
@@ -81476,21 +82220,53 @@ function buildDemoExecutiveReport(params) {
 
                             : null;
 
-                        const courseVc = (cRes && cRes.status === 'open') ? cRes.vc : null;
+                        if (cRes && cRes.status === 'open' && cRes.vc && cRes.vc.link) {
 
-                        return (courseVc && courseVc.link) ? `
+                            return `
 
-                            <a href="${courseVc.link}" target="_blank" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-3 px-4 rounded-2xl text-xs transition duration-200 shadow-md flex items-center justify-center gap-2 mb-2 animate-pulse cursor-pointer">
+                                <a href="${cRes.vc.link}" target="_blank" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-3 px-4 rounded-2xl text-xs transition duration-200 shadow-md flex items-center justify-center gap-2 mb-2 animate-pulse cursor-pointer">
 
-                                <span>🔴</span>
+                                    <span>🔴</span>
 
-                                <span>محاضرة مباشرة عن بعد نشطة الآن (دخول البث المباشر)</span>
+                                    <span>محاضرة مباشرة عن بعد نشطة الآن${cRes.activeSlot ? ' (' + cRes.activeSlot.shortLabel + ')' : ''}</span>
 
-                                <span class="text-sm">👈</span>
+                                    <span class="text-sm">👈</span>
 
-                            </a>
+                                </a>
 
-                        ` : '';
+                            `;
+
+                        } else if (cRes && cRes.status === 'locked_upcoming' && cRes.nextSlot) {
+
+                            return `
+
+                                <button type="button" onclick="switchTab('studentVirtualClass')" class="w-full bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 font-black py-2.5 px-4 rounded-2xl text-xs transition flex items-center justify-center gap-2 mb-2 cursor-pointer">
+
+                                    <span>⏳</span>
+
+                                    <span>القاعة عن بعد تفتح الساعة ${cRes.nextSlot.startStr} (${cRes.nextSlot.shortLabel})</span>
+
+                                </button>
+
+                            `;
+
+                        } else if (cRes && cRes.status === 'locked_ended' && cRes.lastSlot) {
+
+                            return `
+
+                                <button type="button" onclick="switchTab('studentVirtualClass')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 font-bold py-2.5 px-4 rounded-2xl text-xs transition flex items-center justify-center gap-2 mb-2 cursor-pointer">
+
+                                    <span>🔒</span>
+
+                                    <span>انتهت الحصة (${cRes.lastSlot.shortLabel}) وأُقفل الرابط تلقائياً</span>
+
+                                </button>
+
+                            `;
+
+                        }
+
+                        return '';
 
                     })()}
 
