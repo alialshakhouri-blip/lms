@@ -13638,6 +13638,10 @@
                                     <input type="checkbox" id="acZipIncludeIndividualCheck" class="accent-emerald-600 cursor-pointer">
                                     <span>بطاقات فردية منفصلة لكل متدرب</span>
                                 </label>
+                                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-300 text-amber-950 font-black">
+                                    <input type="checkbox" id="acZipFillFromAttendanceCheck" class="accent-amber-600 cursor-pointer">
+                                    <span>🤖 تعبئة الدرجات والنسب والملاحظات بناءً على الحضور</span>
+                                </label>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <button type="button" onclick="downloadAllAccreditedCoursesZip('xlsx')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">📦 الكل ZIP (Excel فقط)</button>
@@ -13766,6 +13770,10 @@
 
                         <!-- Direct Export Bar for this Accredited Course -->
                         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                            <label class="flex items-center gap-2 text-xs font-black text-amber-950 bg-amber-50/90 border border-amber-200 px-3 py-2 rounded-xl cursor-pointer select-none">
+                                <input type="checkbox" id="acCourseFillFromAttendanceCheck" onchange="onToggleAcCourseFillFromAttendance(this.checked)" class="w-4 h-4 accent-amber-600 cursor-pointer">
+                                <span>🤖 تعبئة الدرجات ونسب الحضور/الغياب والملاحظات بناءً على الحضور لهذه المجموعة (الافتراضي: بدون نسب أو ملاحظات)</span>
+                            </label>
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-200">
                                 <div class="text-xs font-black text-slate-900">📦 تنزيل جميع ملفات هذه الدورة/المجموعة في ملف مضغوط واحد (ZIP):</div>
                                 <div class="flex flex-wrap items-center gap-2">
@@ -44179,39 +44187,45 @@ function openReportFromProfile() {
             attendanceDrivenScore = clamp(90, 98, attendanceRate * 0.96 + (seed % 4));
         }
 
+        const allowAutoFromAtt = (typeof activeInstExportFillFromAttendance === 'boolean')
+            ? activeInstExportFillFromAttendance
+            : Boolean(t?.fillFromAttendance);
         const explicitGrade = String(t?.finalGrade ?? '').trim();
-        const isBlankEval = Boolean(t?.blankEvaluations) && (explicitGrade === '' || isNaN(Number(explicitGrade)));
-        if (isBlankEval) {
+        const hasManualNumericGrade = Boolean(t?.manualGradeOverride) && explicitGrade !== '' && !isNaN(Number(explicitGrade));
+        const hasAnyUsableGrade = allowAutoFromAtt
+            ? true
+            : hasManualNumericGrade;
+
+        if (Boolean(t?.blankEvaluations) && !hasManualNumericGrade) {
             return {
-                isBlank: true,
-                hasData: false,
-                attendanceRate: '',
-                absencePct: '',
-                absenceDisplay: '',
-                score: '',
-                gradeLabel: 'يرجي تقييم المتدرب ',
-                passed: true,
-                isPoorAttendance: false,
-                exceeds20Absence: false,
-                criteriaScores: new Array(10).fill(''),
-                criteriaNotes: new Array(10).fill(''),
-                finalNote: '',
-                followupNote: '',
-                enterpriseNote: '',
-                monthlyScores: new Array(8).fill(''),
-                activeMonths: 0
+                isBlank: true, hasData: false, attendanceRate: '', absencePct: '', absenceDisplay: '',
+                score: '', gradeLabel: '', passed: true, isPoorAttendance: false, exceeds20Absence: false,
+                criteriaScores: new Array(10).fill(''), criteriaNotes: new Array(10).fill(''),
+                finalNote: '', followupNote: '', enterpriseNote: '',
+                monthlyScores: new Array(8).fill(''), activeMonths: 0
             };
         }
 
-        let score = attendanceDrivenScore;
-        if (explicitGrade !== '' && !isNaN(Number(explicitGrade))) {
+        if (!hasAnyUsableGrade) {
+            return {
+                isBlank: true, hasData: false, attendanceRate: '', absencePct: '', absenceDisplay: '',
+                score: '', gradeLabel: '', passed: true, isPoorAttendance: false, exceeds20Absence: false,
+                criteriaScores: new Array(10).fill(''), criteriaNotes: new Array(10).fill(''),
+                finalNote: '', followupNote: '', enterpriseNote: '',
+                monthlyScores: new Array(8).fill(''), activeMonths: 0
+            };
+        }
+
+        const manualOnlyMode = !allowAutoFromAtt && hasManualNumericGrade;
+        let score = manualOnlyMode ? clamp(0, 100, Number(explicitGrade)) : attendanceDrivenScore;
+        if (!manualOnlyMode && explicitGrade !== '' && !isNaN(Number(explicitGrade))) {
             const gNum = clamp(0, 100, Number(explicitGrade));
             score = (t?.manualGradeOverride || attendanceRate >= 75) ? gNum : Math.min(gNum, attendanceDrivenScore);
         }
 
-        const isPoorAttendance = attendanceRate < 75;
-        const exceeds20Absence = absencePct > 20;
-        const passed = score >= 60 && (t?.manualGradeOverride ? true : attendanceRate >= 75);
+        const isPoorAttendance = manualOnlyMode ? false : (attendanceRate < 75);
+        const exceeds20Absence = manualOnlyMode ? false : (absencePct > 20);
+        const passed = score >= 60 && ((manualOnlyMode || t?.manualGradeOverride) ? true : attendanceRate >= 75);
 
         let gradeLabel = 'ممتاز';
         if (score >= 90) gradeLabel = 'ممتاز';
@@ -44248,7 +44262,11 @@ function openReportFromProfile() {
         let finalNote = '';
         let followupNote = '';
         let enterpriseNote = '';
-        if (attendanceRate === 0) {
+        if (manualOnlyMode) {
+            finalNote = '';
+            followupNote = '';
+            enterpriseNote = '';
+        } else if (attendanceRate === 0) {
             finalNote = 'محروم / منقطع عن التدريب (غياب 100%)';
             followupNote = '⚠️ مفصول / منقطع (غياب 100%) — أداء صفري';
             enterpriseNote = 'فصل / انقطاع (غياب 100%)';
@@ -44282,7 +44300,7 @@ function openReportFromProfile() {
         }
         const monthlyScores = [];
         for (let m = 0; m < 8; m++) {
-            if (m < activeMonths) {
+            if (!manualOnlyMode && m < activeMonths) {
                 if (attendanceRate === 0) {
                     monthlyScores.push(0);
                 } else {
@@ -44295,10 +44313,12 @@ function openReportFromProfile() {
         }
 
         return {
-            hasData,
-            attendanceRate,
-            absencePct,
-            absenceDisplay: `${absencePct}%`,
+            isBlank: false,
+            manualOnlyMode,
+            hasData: !manualOnlyMode && hasData,
+            attendanceRate: manualOnlyMode ? '' : attendanceRate,
+            absencePct: manualOnlyMode ? '' : absencePct,
+            absenceDisplay: manualOnlyMode ? '' : `${absencePct}%`,
             score,
             gradeLabel,
             passed,
@@ -44732,7 +44752,7 @@ function openReportFromProfile() {
             group: (t.group || 'عام').trim(),
             company: (t.company || '').trim(),
             absenceDisplay: getInstTraineeAbsenceDisplay(t),
-            notes: t.notes || ''
+            notes: (typeof activeInstExportFillFromAttendance === 'boolean' && !activeInstExportFillFromAttendance && !t.manualNoteOverride) ? '' : (t.notes || '')
         };
     }
 
@@ -45110,7 +45130,7 @@ function openReportFromProfile() {
             const rowBg = isSinopecOrSaipem ? 'F6C6AD' : 'FFFFFF';
             const tdSt = { fontName: 'Times New Roman', fontSize: 11, bold: false, fontColor: '000000', fill: rowBg, border: 'double', align: { h: 'center', v: 'center', rtl: true } };
             const groupNote = res.allBlank ? '' : `متوسط الحضور: ${res.avgAttendance}% • مجتاز: ${res.passed}/${res.reg}${res.poorCount > 0 ? ` • تنبيه غياب: ${res.poorCount}` : ''}`;
-            const statusText = res.allBlank ? 'قيد التدريب' : (res.failed === 0 && res.reg > 0 ? 'مؤهل للشهادة' : `قيد المراجعة (${res.passed}/${res.reg})`);
+            const statusText = res.allBlank ? '' : (res.failed === 0 && res.reg > 0 ? 'مؤهل للشهادة' : `قيد المراجعة (${res.passed}/${res.reg})`);
             const vals = [
                 idx + 1, gName, meta.programType, meta.accreditedProgram, meta.courseCode,
                 meta.dates.startDisplay, meta.dates.endDisplay, '08:00 ص', '04:00 م',
@@ -45162,7 +45182,7 @@ function openReportFromProfile() {
                 { r: rr, c: 7, type: 'n', value: res.reg, style: tdSt },
                 { r: rr, c: 8, type: res.allBlank ? 's' : 'n', value: res.allBlank ? '' : res.examined, style: tdSt },
                 { r: rr, c: 9, type: res.allBlank ? 's' : 'n', value: res.allBlank ? '' : res.passed, style: tdSt },
-                { r: rr, c: 10, formula: `IF(I${rr}>0,J${rr}/I${rr},0)`, type: 'n', value: pctVal, style: { ...tdSt, numFmt: '0%' } },
+                { r: rr, c: 10, formula: `IF(I${rr}>0,J${rr}/I${rr},"")`, type: res.allBlank ? 's' : 'n', value: res.allBlank ? '' : pctVal, style: { ...tdSt, numFmt: '0%' } },
                 { r: rr, c: 11, value: res.allBlank ? '' : `متوسط الحضور: ${res.avgAttendance}%${res.poorCount > 0 ? ` • متعثر/غياب: ${res.poorCount}` : ' • أداء منتظم'}`, style: tdSt }
             );
         });
@@ -45242,13 +45262,28 @@ function openReportFromProfile() {
         const totSt = { fontName: 'Times New Roman', fontSize: 12, bold: true, fontColor: '000000', fill: 'FFFFFF', border: 'double', align: { h: 'center', v: 'center', rtl: true } };
         const totBadSt = { ...totSt, fontColor: '9C0006', fill: 'FFC7CE' };
         const gradeBg = perf.isBlank ? 'FFFFFF' : (perf.score >= 90 ? '66FFFF' : (perf.score >= 80 ? '66FF99' : (perf.score >= 70 ? 'CCFFCC' : (perf.score >= 60 ? 'FFFFCC' : 'FF9999'))));
+        const showAttNote = !perf.isBlank && !perf.manualOnlyMode;
         for (let c = 0; c <= 6; c++) {
-            cells.push({ r: 23, c, value: c === 0 ? 'المجموع' : (c === 2 ? (perf.isBlank ? 0 : perf.score) : (c === 4 && !perf.isBlank ? 'من 100 درجة' : '')), formula: c === 2 ? 'SUM(C13:D22)' : '', type: c === 2 ? 'n' : 's', style: (!perf.isBlank && !perf.passed && c >= 2) ? totBadSt : totSt });
-            cells.push({ r: 24, c, value: c === 0 ? 'النسبة المئوية' : (c === 2 ? (perf.isBlank ? 0 : (perf.score / 100)) : (c === 4 && !perf.isBlank ? `نسبة الحضور: ${perf.attendanceRate}% (غياب: ${perf.absencePct}%)` : '')), formula: c === 2 ? 'C23/100' : '', type: c === 2 ? 'n' : 's', style: { ...((!perf.isBlank && !perf.passed && c >= 2) ? totBadSt : totSt), numFmt: c === 2 ? '0%' : '' } });
+            cells.push({
+                r: 23, c,
+                value: c === 0 ? 'المجموع' : (c === 2 ? (perf.isBlank ? '' : perf.score) : (c === 4 && !perf.isBlank ? 'من 100 درجة' : '')),
+                formula: c === 2 ? (perf.isBlank ? 'IF(COUNT(C13:D22)=0,"",SUM(C13:D22))' : 'SUM(C13:D22)') : '',
+                type: (c === 2 && !perf.isBlank) ? 'n' : 's',
+                valueType: (c === 2 && perf.isBlank) ? 'str' : '',
+                style: (!perf.isBlank && !perf.passed && c >= 2) ? totBadSt : totSt
+            });
+            cells.push({
+                r: 24, c,
+                value: c === 0 ? 'النسبة المئوية' : (c === 2 ? (perf.isBlank ? '' : (perf.score / 100)) : (c === 4 && showAttNote ? `نسبة الحضور: ${perf.attendanceRate}% (غياب: ${perf.absencePct}%)` : '')),
+                formula: c === 2 ? (perf.isBlank ? 'IF(C23="","",C23/100)' : 'C23/100') : '',
+                type: (c === 2 && !perf.isBlank) ? 'n' : 's',
+                valueType: (c === 2 && perf.isBlank) ? 'str' : '',
+                style: { ...((!perf.isBlank && !perf.passed && c >= 2) ? totBadSt : totSt), numFmt: c === 2 ? '0%' : '' }
+            });
             cells.push({
                 r: 25, c,
-                value: c === 0 ? 'التقدير' : (c === 2 ? perf.gradeLabel : (c === 4 && !perf.isBlank ? (perf.passed ? 'مجتاز ومطابق للمعايير' : '⚠️ أداء ضعيف لتدني الحضور') : '')),
-                formula: c === 2 ? 'IF(COUNT(C13:D22)=0,"يرجي تقييم المتدرب ",IF(C24>=0.9,"ممتاز",IF(C24>=0.8,"جيد جدًا",IF(C24>=0.7,"جيد",IF(C24>=0.6,"متوسط","دون المستوى المطلوب")))))' : '',
+                value: c === 0 ? 'التقدير' : (c === 2 ? (perf.isBlank ? '' : perf.gradeLabel) : (c === 4 && !perf.isBlank ? (perf.passed ? 'مجتاز ومطابق للمعايير' : '⚠️ أداء ضعيف لتدني الحضور') : '')),
+                formula: c === 2 ? 'IF(COUNT(C13:D22)=0,"",IF(C24>=0.9,"ممتاز",IF(C24>=0.8,"جيد جدًا",IF(C24>=0.7,"جيد",IF(C24>=0.6,"متوسط","دون المستوى المطلوب")))))' : '',
                 valueType: c === 2 ? 'str' : '',
                 style: c < 2 ? totSt : (c < 4 ? { ...totSt, fill: gradeBg } : ((!perf.isBlank && !perf.passed) ? totBadSt : totSt))
             });
@@ -45652,17 +45687,17 @@ function openReportFromProfile() {
                         ${criteriaRows}
                         <tr style="background:#FFFFFF; color:#000; font-weight:900;">
                             <td colspan="2" style="border:1.5px solid #111;padding:5px;text-align:center;">المجموع</td>
-                            <td style="border:1.5px solid #111;padding:5px;text-align:center;${(!perf.isBlank && !perf.passed) ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.isBlank ? '/ 100' : `${perf.score} / 100`}</td>
+                            <td style="border:1.5px solid #111;padding:5px;text-align:center;${(!perf.isBlank && !perf.passed) ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.isBlank ? '' : `${perf.score} / 100`}</td>
                             <td style="border:1.5px solid #111;padding:5px;text-align:center;">${perf.isBlank ? '' : 'من 100 درجة'}</td>
                         </tr>
                         <tr style="background:#FFFFFF; color:#000; font-weight:900;">
                             <td colspan="2" style="border:1.5px solid #111;padding:5px;text-align:center;">النسبة المئوية</td>
-                            <td style="border:1.5px solid #111;padding:5px;text-align:center;${(!perf.isBlank && !perf.passed) ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.isBlank ? '%' : `${perf.score}%`}</td>
-                            <td style="border:1.5px solid #111;padding:5px;text-align:center;">${perf.isBlank ? '' : `نسبة الحضور: ${perf.attendanceRate}% (غياب: ${perf.absencePct}%)`}</td>
+                            <td style="border:1.5px solid #111;padding:5px;text-align:center;${(!perf.isBlank && !perf.passed) ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.isBlank ? '' : `${perf.score}%`}</td>
+                            <td style="border:1.5px solid #111;padding:5px;text-align:center;">${(perf.isBlank || perf.manualOnlyMode) ? '' : `نسبة الحضور: ${perf.attendanceRate}% (غياب: ${perf.absencePct}%)`}</td>
                         </tr>
                         <tr style="background:#FFFFFF; color:#000; font-weight:900;">
                             <td colspan="2" style="border:1.5px solid #111;padding:5px;text-align:center;">التقدير</td>
-                            <td style="border:1.5px solid #111;padding:5px;text-align:center;background:${gradeBg};">${escapeHtml(perf.gradeLabel)}</td>
+                            <td style="border:1.5px solid #111;padding:5px;text-align:center;background:${gradeBg};">${perf.isBlank ? '' : escapeHtml(perf.gradeLabel)}</td>
                             <td style="border:1.5px solid #111;padding:5px;text-align:center;${(!perf.isBlank && !perf.passed) ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.isBlank ? '' : (perf.passed ? 'مجتاز ومطابق للمعايير' : '⚠️ أداء ضعيف لتدني الحضور')}</td>
                         </tr>
                     </tbody>
@@ -45835,6 +45870,8 @@ function openReportFromProfile() {
         if (packWrap) packWrap.classList.toggle('hidden', selected !== 'practical_card');
         const col11Wrap = document.getElementById('instExp11ColOptionWrap');
         if (col11Wrap) col11Wrap.classList.toggle('hidden', !isEnt);
+        const fillAttWrap = document.getElementById('instExpFillFromAttendanceWrap');
+        if (fillAttWrap) fillAttWrap.classList.toggle('hidden', isEnt);
     }
     window.onInstExpFormTypeChange = onInstExpFormTypeChange;
 
@@ -45891,7 +45928,13 @@ function openReportFromProfile() {
             return null;
         }
 
+        const resolvedFillAtt = (opts.fillFromAttendance !== undefined)
+            ? Boolean(opts.fillFromAttendance)
+            : (explicitAccCourse && explicitAccCourse.fillFromAttendance !== undefined
+                ? Boolean(explicitAccCourse.fillFromAttendance)
+                : Boolean(document.getElementById('instExpFillFromAttendanceCheck')?.checked));
         activeInstExportAccreditedCourse = explicitAccCourse || null;
+        activeInstExportFillFromAttendance = resolvedFillAtt;
 
         const btn = document.getElementById('btnStartInstDynamicExport');
         const progWrap = document.getElementById('instExpProgressWrap');
@@ -45944,6 +45987,7 @@ function openReportFromProfile() {
                     formatMode: rawFormat,
                     includeEnterpriseUpload: true,
                     includeIndividualPractical: false,
+                    fillFromAttendance: resolvedFillAtt,
                     onProgress: setProg
                 });
                 outBlob = pkg.blob;
@@ -46046,6 +46090,7 @@ function openReportFromProfile() {
             return null;
         } finally {
             activeInstExportAccreditedCourse = null;
+            activeInstExportFillFromAttendance = null;
             if (btn) { btn.disabled = false; btn.classList.remove('opacity-60'); }
         }
     }
@@ -46068,6 +46113,7 @@ function openReportFromProfile() {
     let accreditedCoursesCache = null;
     let activeAccreditedCourseId = '';
     let activeInstExportAccreditedCourse = null;
+    let activeInstExportFillFromAttendance = null;
 
     function loadAccreditedCourses() {
         if (Array.isArray(accreditedCoursesCache)) return accreditedCoursesCache;
@@ -46168,13 +46214,15 @@ function openReportFromProfile() {
                 return isBlank ? { ...t, finalGrade: '', manualGradeOverride: false, notes: '', blankEvaluations: true } : t;
             }
             const hasManualGrade = ov.grade !== '' && ov.grade !== null && ov.grade !== undefined && !isNaN(Number(ov.grade));
+            const hasManualNote = ov.notes !== undefined && String(ov.notes).trim() !== '';
             return {
                 ...t,
                 name: ov.name || t.name,
                 finalGrade: hasManualGrade ? String(ov.grade) : (isBlank ? '' : t.finalGrade),
                 manualGradeOverride: Boolean(hasManualGrade),
+                manualNoteOverride: hasManualNote,
                 blankEvaluations: isBlank,
-                notes: isBlank ? (ov.notes || '') : ((ov.notes !== undefined && ov.notes !== '') ? ov.notes : t.notes)
+                notes: hasManualNote ? ov.notes : (isBlank ? '' : (t.notes || ''))
             };
         });
     }
@@ -46422,7 +46470,7 @@ function openReportFromProfile() {
             if (rawT.status) cur.status = rawT.status;
         };
 
-        (groupPoolTrainees || []).forEach(t => touch(t));
+        (groupPoolTrainees || []).forEach(t => touch({ ...t, notes: '' }));
         (existingCourseTrainees || []).forEach(t => touch(t));
         (portalTrainees || []).forEach(pt => touch(pt));
 
@@ -46460,6 +46508,8 @@ function openReportFromProfile() {
             daysCount: extraMeta.daysCount || (existing && existing.daysCount) || '',
             instructorFullName: (existing && existing.instructorFullName) || meta.instructorFullName || '',
             approved: Boolean(extraMeta.approved || (existing && existing.approved)),
+            fillFromAttendance: (extraMeta.fillFromAttendance !== undefined) ? Boolean(extraMeta.fillFromAttendance) : Boolean(existing && existing.fillFromAttendance),
+            blankEvaluations: (extraMeta.blankEvaluations !== undefined) ? Boolean(extraMeta.blankEvaluations) : Boolean(existing && existing.blankEvaluations),
             trainees: buildMergedCohortTrainees(groupPool, extraMeta.portalTrainees || [], existing ? existing.trainees : []),
             updatedAt: nowIso
         };
@@ -46776,15 +46826,23 @@ function openReportFromProfile() {
         const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : [];
         const poolById = new Map(pool.map(p => [cleanNationalId(p.id), p]));
 
+        const useFillAtt = Boolean(course.fillFromAttendance) && !Boolean(course.blankEvaluations);
         tbody.innerHTML = list.map((tr, idx) => {
             const cid = cleanNationalId(tr.id);
             const liveRec = poolById.get(cid) || tr;
-            const effectiveRec = course.blankEvaluations ? { ...liveRec, blankEvaluations: true, finalGrade: tr.grade || '' } : liveRec;
+            const hasManualG = tr.grade !== undefined && tr.grade !== null && String(tr.grade).trim() !== '' && !isNaN(Number(tr.grade));
+            const effectiveRec = {
+                ...liveRec,
+                fillFromAttendance: useFillAtt,
+                blankEvaluations: Boolean(course.blankEvaluations),
+                finalGrade: hasManualG ? String(tr.grade).trim() : '',
+                manualGradeOverride: hasManualG
+            };
             const perf = computeTraineePerformanceFromAttendance(effectiveRec, { startIso: course.startDate, endIso: course.endDate });
-            const attBadge = perf.isBlank
+            const attBadge = (!useFillAtt || perf.isBlank)
                 ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-slate-100 text-slate-500">—</span>'
                 : `<span class="px-2 py-0.5 rounded-md text-[10px] font-black ${perf.isPoorAttendance ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">${perf.attendanceRate}%</span>`;
-            const phText = perf.isBlank ? 'مُصفّر' : `تلقائي: ${perf.score}`;
+            const phText = useFillAtt ? `تلقائي: ${perf.score}` : 'فارغ';
             return `
                 <tr data-ac-idx="${idx}" class="hover:bg-slate-50">
                     <td class="p-2 text-center font-bold text-slate-500">${idx + 1}</td>
@@ -46837,10 +46895,12 @@ function openReportFromProfile() {
         setVal('acEditGroupName', course.groupName);
         setVal('acEditInstructor', course.instructorFullName);
 
+        const fillChk = document.getElementById('acCourseFillFromAttendanceCheck');
+        if (fillChk) fillChk.checked = Boolean(course.fillFromAttendance) && !Boolean(course.blankEvaluations);
         const blankBadge = document.getElementById('acWsBadgeBlankMode');
         const restoreBtn = document.getElementById('btnAcRestoreAutoCalc');
         if (blankBadge) blankBadge.classList.toggle('hidden', !course.blankEvaluations);
-        if (restoreBtn) restoreBtn.classList.toggle('hidden', !course.blankEvaluations);
+        if (restoreBtn) restoreBtn.classList.toggle('hidden', Boolean(course.fillFromAttendance) && !Boolean(course.blankEvaluations));
 
         renderActiveCourseTraineesRows(course);
         refreshAccreditedCoursesUI();
@@ -46949,6 +47009,7 @@ function openReportFromProfile() {
         const cur = collectEditedActiveCourseFromDom(getAccreditedCourseById(activeAccreditedCourseId));
         if (!cur) return null;
         cur.blankEvaluations = true;
+        cur.fillFromAttendance = false;
         cur.trainees = (cur.trainees || []).map(tr => ({
             ...tr,
             grade: '',
@@ -46966,28 +47027,40 @@ function openReportFromProfile() {
     window.resetActiveAccreditedCourseGradesAndRates = resetActiveAccreditedCourseGradesAndRates;
 
     function restoreActiveAccreditedCourseAutoCalc() {
-        const cur = saveActiveAccreditedCourseEdits(true);
+        return onToggleAcCourseFillFromAttendance(true, true);
+    }
+    window.restoreActiveAccreditedCourseAutoCalc = restoreActiveAccreditedCourseAutoCalc;
+
+    function onToggleAcCourseFillFromAttendance(checked, fromRestoreBtn = false) {
+        const cur = collectEditedActiveCourseFromDom(getAccreditedCourseById(activeAccreditedCourseId));
         if (!cur) return null;
-        cur.blankEvaluations = false;
+        cur.fillFromAttendance = Boolean(checked);
+        if (cur.fillFromAttendance) cur.blankEvaluations = false;
         cur.updatedAt = new Date().toISOString();
         const list = loadAccreditedCourses();
         const idx = list.findIndex(c => c.id === cur.id);
         if (idx >= 0) list[idx] = cur;
         saveAccreditedCourses(list, true);
         openAccreditedCourseWorkspace(cur.id);
-        showToast('🔄 تمت إعادة تفعيل الاحتساب التلقائي للدرجات والنسب من سجل الحضور!', 'info');
+        if (fromRestoreBtn || checked) {
+            showToast('🤖 تم تفعيل التعبئة التلقائية للدرجات والنسب والملاحظات بناءً على الحضور!', 'info');
+        } else {
+            showToast('📄 تم إيقاف التعبئة من الحضور — ستُصدَّر الملفات بدون نسب أو ملاحظات (عدا الدرجات اليدوية).', 'info');
+        }
         return cur;
     }
-    window.restoreActiveAccreditedCourseAutoCalc = restoreActiveAccreditedCourseAutoCalc;
+    window.onToggleAcCourseFillFromAttendance = onToggleAcCourseFillFromAttendance;
 
     function buildExportTraineesForAccreditedCourse(course) {
         const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : [];
         const poolById = new Map(pool.map(p => [cleanNationalId(p.id), p]));
         const isBlank = Boolean(course.blankEvaluations);
+        const fillAtt = Boolean(course.fillFromAttendance) && !isBlank;
         return (course.trainees || []).map(tr => {
             const cid = cleanNationalId(tr.id);
             const live = poolById.get(cid) || {};
             const hasManualGrade = tr.grade !== undefined && tr.grade !== null && String(tr.grade).trim() !== '' && !isNaN(Number(tr.grade));
+            const hasManualNote = tr.notes !== undefined && String(tr.notes).trim() !== '';
             return {
                 ...live,
                 ...tr,
@@ -46999,10 +47072,12 @@ function openReportFromProfile() {
                 email: tr.email || live.email || '',
                 trainer: course.instructorFullName || live.trainer || '',
                 specialty: course.courseName || live.specialty || '',
-                finalGrade: hasManualGrade ? String(tr.grade).trim() : (isBlank ? '' : (live.finalGrade || '')),
+                finalGrade: hasManualGrade ? String(tr.grade).trim() : '',
                 manualGradeOverride: hasManualGrade,
+                manualNoteOverride: hasManualNote,
                 blankEvaluations: isBlank,
-                notes: isBlank ? (tr.notes || '') : ((tr.notes !== undefined && tr.notes !== '') ? tr.notes : (live.notes || ''))
+                fillFromAttendance: fillAtt,
+                notes: hasManualNote ? String(tr.notes).trim() : ''
             };
         });
     }
@@ -47012,6 +47087,9 @@ function openReportFromProfile() {
         if (!course) return showToast('⚠️ يرجى فتح الدورة المعتمدة أولاً', 'warning');
         const customTrainees = buildExportTraineesForAccreditedCourse(course);
         if (customTrainees.length === 0) return showToast('⚠️ لا يوجد متدربون في هذه الدورة للتصدير', 'warning');
+        const fillFromAtt = (extraOpts.fillFromAttendance !== undefined)
+            ? Boolean(extraOpts.fillFromAttendance)
+            : Boolean(course.fillFromAttendance);
         return await executeInstDynamicExport({
             formType,
             format,
@@ -47023,6 +47101,7 @@ function openReportFromProfile() {
             accreditedCourseId: course.id,
             accreditedCourseObj: course,
             customTrainees,
+            fillFromAttendance: fillFromAtt,
             ...extraOpts
         });
     }
@@ -47108,6 +47187,7 @@ function openReportFromProfile() {
                 accreditedCourseId: it.accreditedCourseId || '',
                 accreditedCourseObj: it.accreditedCourseObj || null,
                 customTrainees: it.trainees,
+                fillFromAttendance: Boolean(opts.fillFromAttendance),
                 skipDownload: true
             };
 
@@ -47177,6 +47257,7 @@ function openReportFromProfile() {
                         selectedGroup: 'كافة_الشعب',
                         selectedCompany: 'ALL',
                         customTrainees: allMergedTrainees,
+                        fillFromAttendance: Boolean(opts.fillFromAttendance),
                         skipDownload: true
                     });
                     if (sumRes && sumRes.blob) {
@@ -47233,6 +47314,7 @@ function openReportFromProfile() {
                 formatMode,
                 includeEnterpriseUpload: includeUpload,
                 includeIndividualPractical: includeIndiv,
+                fillFromAttendance: (opts.fillFromAttendance !== undefined) ? Boolean(opts.fillFromAttendance) : Boolean(document.getElementById('acCourseFillFromAttendanceCheck')?.checked || course.fillFromAttendance),
                 singleFlatRoot: false,
                 onProgress: (p, m) => setAccreditedZipProgress(p, m, true)
             });
@@ -47288,6 +47370,7 @@ function openReportFromProfile() {
                 formatMode,
                 includeEnterpriseUpload: includeUpload,
                 includeIndividualPractical: includeIndiv,
+                fillFromAttendance: (opts.fillFromAttendance !== undefined) ? Boolean(opts.fillFromAttendance) : Boolean(document.getElementById('acZipFillFromAttendanceCheck')?.checked),
                 singleFlatRoot: false,
                 onProgress: (p, m) => setAccreditedZipProgress(p, m, true)
             });
@@ -97448,6 +97531,15 @@ function getCTPAdmissionFormData(trainee) {
                             </div>
                         </label>
                     </div>
+                </div>
+
+                <!-- Opt-in Attendance Fill Toggle (Default OFF: blank grades, rates & notes unless manually entered) -->
+                <div id="instExpFillFromAttendanceWrap" class="hidden p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 space-y-1">
+                    <label class="flex items-center gap-2.5 text-xs font-black text-amber-950 dark:text-amber-200 cursor-pointer select-none">
+                        <input type="checkbox" id="instExpFillFromAttendanceCheck" class="w-4 h-4 accent-amber-600 rounded cursor-pointer">
+                        <span>🤖 تعبئة الدرجات ونسب الغياب والملاحظات تلقائياً بناءً على سجل الحضور</span>
+                    </label>
+                    <p class="text-[11px] font-bold text-amber-800/80 dark:text-amber-300/80 pr-6">الوضع الافتراضي (عند عدم التحديد): تصدير ملفات نظيفة بدون نسب أو درجات أو ملاحظات تلقائية (مع الاحتفاظ بأي درجات عدّلتها يدوياً).</p>
                 </div>
 
                 <!-- Progress Bar -->
