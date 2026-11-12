@@ -13667,10 +13667,17 @@
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800" id="acWsBadgeCourseNo">رقم الدورة: --</span>
                                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-100 text-blue-800" id="acWsBadgeGroup">المجموعة: --</span>
+                                    <span class="hidden px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-300" id="acWsBadgeBlankMode">🧹 تم تصفير الدرجات والنسب (البيانات الأساسية فقط)</span>
                                 </div>
                                 <h3 class="text-base font-black text-slate-900 mt-1" id="acWsTitle">تفاصيل الدورة المعتمدة</h3>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
+                                <button type="button" id="btnAcResetGradesRates" onclick="resetActiveAccreditedCourseGradesAndRates()" class="bg-amber-50 hover:bg-amber-100 text-amber-900 font-black text-xs px-3.5 py-2 rounded-xl border border-amber-300 transition cursor-pointer" title="تصفير الدرجات والنسب والملاحظات مع إبقاء اسم الدورة ورقمها والمدرب وأسماء المتدربين وهوياتهم">
+                                    🧹 تصفير الدرجات والنسب
+                                </button>
+                                <button type="button" id="btnAcRestoreAutoCalc" onclick="restoreActiveAccreditedCourseAutoCalc()" class="hidden bg-blue-50 hover:bg-blue-100 text-blue-800 font-black text-xs px-3.5 py-2 rounded-xl border border-blue-200 transition cursor-pointer" title="إعادة احتساب الدرجات والنسب تلقائياً من الحضور">
+                                    🔄 تفعيل الاحتساب التلقائي
+                                </button>
                                 <button type="button" onclick="saveActiveAccreditedCourseEdits()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs px-4 py-2 rounded-xl shadow-xs transition cursor-pointer">
                                     💾 حفظ التعديلات
                                 </button>
@@ -44167,8 +44174,31 @@ function openReportFromProfile() {
             attendanceDrivenScore = clamp(90, 98, attendanceRate * 0.96 + (seed % 4));
         }
 
-        let score = attendanceDrivenScore;
         const explicitGrade = String(t?.finalGrade ?? '').trim();
+        const isBlankEval = Boolean(t?.blankEvaluations) && (explicitGrade === '' || isNaN(Number(explicitGrade)));
+        if (isBlankEval) {
+            return {
+                isBlank: true,
+                hasData: false,
+                attendanceRate: '',
+                absencePct: '',
+                absenceDisplay: '',
+                score: '',
+                gradeLabel: 'يرجي تقييم المتدرب ',
+                passed: true,
+                isPoorAttendance: false,
+                exceeds20Absence: false,
+                criteriaScores: new Array(10).fill(''),
+                criteriaNotes: new Array(10).fill(''),
+                finalNote: '',
+                followupNote: '',
+                enterpriseNote: '',
+                monthlyScores: new Array(8).fill(''),
+                activeMonths: 0
+            };
+        }
+
+        let score = attendanceDrivenScore;
         if (explicitGrade !== '' && !isNaN(Number(explicitGrade))) {
             const gNum = clamp(0, 100, Number(explicitGrade));
             score = (t?.manualGradeOverride || attendanceRate >= 75) ? gNum : Math.min(gNum, attendanceDrivenScore);
@@ -44288,13 +44318,15 @@ function openReportFromProfile() {
         let examined = 0, passed = 0, poorCount = 0, totalAtt = 0;
         gList.forEach(t => {
             const perf = computeTraineePerformanceFromAttendance(t, datesObj);
+            if (perf.isBlank) return;
             examined++;
-            totalAtt += perf.attendanceRate;
+            totalAtt += Number(perf.attendanceRate || 0);
             if (perf.passed) passed++;
             if (perf.isPoorAttendance || perf.exceeds20Absence) poorCount++;
         });
-        const avgAttendance = reg > 0 ? Math.round(totalAtt / reg) : 0;
-        return { reg, examined, passed, failed: Math.max(0, reg - passed), poorCount, avgAttendance };
+        const allBlank = (reg > 0 && examined === 0);
+        const avgAttendance = examined > 0 ? Math.round(totalAtt / examined) : '';
+        return { reg, examined, passed, failed: allBlank ? 0 : Math.max(0, examined - passed), poorCount, avgAttendance, allBlank };
     }
 
     let _cachedInstLogos = null;
@@ -44783,9 +44815,9 @@ function openReportFromProfile() {
         gList.forEach((t, ti) => {
             const nt = normalizeInstExportTraineeRow(t);
             const perf = computeTraineePerformanceFromAttendance(t, meta.dates);
-            const gradeDisplay = `${perf.score}% (${perf.gradeLabel})`;
-            const noteDisplay = nt.notes ? `${nt.notes} | ${perf.finalNote}` : perf.finalNote;
-            const resSt = !perf.passed ? { ...tdSt, bold: true, fontColor: '9C0006', fill: 'FFC7CE' } : { ...tdSt, bold: true };
+            const gradeDisplay = perf.isBlank ? '' : `${perf.score}% (${perf.gradeLabel})`;
+            const noteDisplay = perf.isBlank ? (nt.notes || '') : (nt.notes ? `${nt.notes} | ${perf.finalNote}` : perf.finalNote);
+            const resSt = (!perf.isBlank && !perf.passed) ? { ...tdSt, bold: true, fontColor: '9C0006', fill: 'FFC7CE' } : (perf.isBlank ? tdSt : { ...tdSt, bold: true });
             const r = 13 + ti;
             rows.push({ r, ht: 21 });
             cells.push(
@@ -44793,7 +44825,7 @@ function openReportFromProfile() {
                 { r, c: 1, value: nt.fullName, style: { ...tdSt, align: { h: 'right', v: 'center', rtl: true } } },
                 { r, c: 2, value: nt.cleanId, style: { ...tdSt, numFmt: '@' } },
                 { r, c: 3, value: gradeDisplay, style: resSt },
-                { r, c: 4, value: noteDisplay, style: !perf.passed ? { ...tdSt, fontColor: '9C0006', fill: 'FFC7CE' } : tdSt }
+                { r, c: 4, value: noteDisplay, style: (!perf.isBlank && !perf.passed) ? { ...tdSt, fontColor: '9C0006', fill: 'FFC7CE' } : tdSt }
             );
         });
         const fStart = 13 + gList.length + 1;
@@ -44852,7 +44884,7 @@ function openReportFromProfile() {
         gList.forEach((t, ti) => {
             const nt = normalizeInstExportTraineeRow(t);
             const perf = computeTraineePerformanceFromAttendance(t, meta.dates);
-            const isBad = perf.isPoorAttendance || perf.exceeds20Absence;
+            const isBad = !perf.isBlank && (perf.isPoorAttendance || perf.exceeds20Absence);
             const badSt = { ...tdSt, bold: true, fontColor: '9C0006', fill: 'FFC7CE' };
             const rr = 12 + ti;
             rows.push({ r: rr, ht: 19 });
@@ -44860,10 +44892,10 @@ function openReportFromProfile() {
                 { r: rr, c: 0, type: 'n', value: ti + 1, style: tdSt },
                 { r: rr, c: 1, value: nt.cleanId, style: { ...tdSt, numFmt: '@' } },
                 { r: rr, c: 2, value: nt.fullName, style: { ...tdSt, align: { h: 'right', v: 'center', rtl: true } } },
-                { r: rr, c: 3, value: perf.absenceDisplay, style: isBad ? badSt : tdSt }
+                { r: rr, c: 3, value: perf.isBlank ? '' : perf.absenceDisplay, style: isBad ? badSt : tdSt }
             );
             for (let m = 0; m < 8; m++) {
-                const mVal = perf.monthlyScores[m];
+                const mVal = perf.isBlank ? '' : perf.monthlyScores[m];
                 const hasVal = mVal !== '';
                 cells.push({
                     r: rr,
@@ -44873,7 +44905,7 @@ function openReportFromProfile() {
                     style: (hasVal && mVal < 60) ? badSt : tdSt
                 });
             }
-            const noteVal = nt.notes ? `${nt.notes} | ${perf.followupNote}` : perf.followupNote;
+            const noteVal = perf.isBlank ? (nt.notes || '') : (nt.notes ? `${nt.notes} | ${perf.followupNote}` : perf.followupNote);
             cells.push({ r: rr, c: 12, value: noteVal, style: isBad ? badSt : tdSt });
         });
         const warnRow = 12 + gList.length + 1;
@@ -45067,11 +45099,12 @@ function openReportFromProfile() {
             const isSinopecOrSaipem = /sinopec|saipem|سينوبك/i.test(gName);
             const rowBg = isSinopecOrSaipem ? 'F6C6AD' : 'FFFFFF';
             const tdSt = { fontName: 'Times New Roman', fontSize: 11, bold: false, fontColor: '000000', fill: rowBg, border: 'double', align: { h: 'center', v: 'center', rtl: true } };
-            const groupNote = `متوسط الحضور: ${res.avgAttendance}% • مجتاز: ${res.passed}/${res.reg}${res.poorCount > 0 ? ` • تنبيه غياب: ${res.poorCount}` : ''}`;
+            const groupNote = res.allBlank ? '' : `متوسط الحضور: ${res.avgAttendance}% • مجتاز: ${res.passed}/${res.reg}${res.poorCount > 0 ? ` • تنبيه غياب: ${res.poorCount}` : ''}`;
+            const statusText = res.allBlank ? 'قيد التدريب' : (res.failed === 0 && res.reg > 0 ? 'مؤهل للشهادة' : `قيد المراجعة (${res.passed}/${res.reg})`);
             const vals = [
                 idx + 1, gName, meta.programType, meta.accreditedProgram, meta.courseCode,
                 meta.dates.startDisplay, meta.dates.endDisplay, '08:00 ص', '04:00 م',
-                meta.instructorFullName, meta.room, gList.length, groupNote, res.failed === 0 && res.reg > 0 ? 'مؤهل للشهادة' : `قيد المراجعة (${res.passed}/${res.reg})`
+                meta.instructorFullName, meta.room, gList.length, groupNote, statusText
             ];
             vals.forEach((v, ci) => cells.push({ r: rr, c: ci, type: (ci === 0 || ci === 11) ? 'n' : 's', value: v, style: tdSt }));
         });
@@ -45117,10 +45150,10 @@ function openReportFromProfile() {
                 { r: rr, c: 5, value: meta.dates.endDisplay, style: tdSt },
                 { r: rr, c: 6, value: meta.instructorFullName, style: tdSt },
                 { r: rr, c: 7, type: 'n', value: res.reg, style: tdSt },
-                { r: rr, c: 8, type: 'n', value: res.examined, style: tdSt },
-                { r: rr, c: 9, type: 'n', value: res.passed, style: tdSt },
+                { r: rr, c: 8, type: res.allBlank ? 's' : 'n', value: res.allBlank ? '' : res.examined, style: tdSt },
+                { r: rr, c: 9, type: res.allBlank ? 's' : 'n', value: res.allBlank ? '' : res.passed, style: tdSt },
                 { r: rr, c: 10, formula: `IF(I${rr}>0,J${rr}/I${rr},0)`, type: 'n', value: pctVal, style: { ...tdSt, numFmt: '0%' } },
-                { r: rr, c: 11, value: `متوسط الحضور: ${res.avgAttendance}%${res.poorCount > 0 ? ` • متعثر/غياب: ${res.poorCount}` : ' • أداء منتظم'}`, style: tdSt }
+                { r: rr, c: 11, value: res.allBlank ? '' : `متوسط الحضور: ${res.avgAttendance}%${res.poorCount > 0 ? ` • متعثر/غياب: ${res.poorCount}` : ' • أداء منتظم'}`, style: tdSt }
             );
         });
         return {
@@ -45181,15 +45214,16 @@ function openReportFromProfile() {
             const rr = 13 + idx;
             const sc = perf.criteriaScores[idx];
             const cNote = perf.criteriaNotes[idx];
-            const isWeak = sc < 6;
+            const hasSc = !perf.isBlank && sc !== '' && sc !== null && sc !== undefined;
+            const isWeak = hasSc && Number(sc) < 6;
             rows.push({ r: rr, ht: 23 });
             merges.push(`C${rr}:D${rr}`, `E${rr}:G${rr}`);
             cells.push({ r: rr, c: 0, type: 'n', value: idx + 1, style: tdNumSt });
             cells.push({ r: rr, c: 1, value: crit, style: tdCritSt });
-            cells.push({ r: rr, c: 2, type: 'n', value: sc, style: isWeak ? { ...tdNumSt, fontColor: '9C0006', fill: 'FFC7CE' } : tdNumSt });
+            cells.push({ r: rr, c: 2, type: hasSc ? 'n' : 's', value: hasSc ? sc : '', style: isWeak ? { ...tdNumSt, fontColor: '9C0006', fill: 'FFC7CE' } : tdNumSt });
             cells.push({ r: rr, c: 3, value: '', style: isWeak ? { ...tdNumSt, fill: 'FFC7CE' } : tdNumSt });
             for (let c = 4; c <= 6; c++) {
-                cells.push({ r: rr, c, value: c === 4 ? cNote : '', style: isWeak ? { ...tdNoteSt, fontColor: '9C0006', fill: 'FFC7CE' } : tdNoteSt });
+                cells.push({ r: rr, c, value: c === 4 ? (perf.isBlank ? '' : cNote) : '', style: isWeak ? { ...tdNoteSt, fontColor: '9C0006', fill: 'FFC7CE' } : tdNoteSt });
             }
         });
 
@@ -45197,16 +45231,16 @@ function openReportFromProfile() {
         merges.push('A23:B23', 'C23:D23', 'E23:G23', 'A24:B24', 'C24:D24', 'E24:G24', 'A25:B25', 'C25:D25', 'E25:G25');
         const totSt = { fontName: 'Times New Roman', fontSize: 12, bold: true, fontColor: '000000', fill: 'FFFFFF', border: 'double', align: { h: 'center', v: 'center', rtl: true } };
         const totBadSt = { ...totSt, fontColor: '9C0006', fill: 'FFC7CE' };
-        const gradeBg = perf.score >= 90 ? '66FFFF' : (perf.score >= 80 ? '66FF99' : (perf.score >= 70 ? 'CCFFCC' : (perf.score >= 60 ? 'FFFFCC' : 'FF9999')));
+        const gradeBg = perf.isBlank ? 'FFFFFF' : (perf.score >= 90 ? '66FFFF' : (perf.score >= 80 ? '66FF99' : (perf.score >= 70 ? 'CCFFCC' : (perf.score >= 60 ? 'FFFFCC' : 'FF9999'))));
         for (let c = 0; c <= 6; c++) {
-            cells.push({ r: 23, c, value: c === 0 ? 'المجموع' : (c === 2 ? perf.score : (c === 4 ? 'من 100 درجة' : '')), formula: c === 2 ? 'SUM(C13:D22)' : '', type: c === 2 ? 'n' : 's', style: (!perf.passed && c >= 2) ? totBadSt : totSt });
-            cells.push({ r: 24, c, value: c === 0 ? 'النسبة المئوية' : (c === 2 ? (perf.score / 100) : (c === 4 ? `نسبة الحضور: ${perf.attendanceRate}% (غياب: ${perf.absencePct}%)` : '')), formula: c === 2 ? 'C23/100' : '', type: c === 2 ? 'n' : 's', style: { ...((!perf.passed && c >= 2) ? totBadSt : totSt), numFmt: c === 2 ? '0%' : '' } });
+            cells.push({ r: 23, c, value: c === 0 ? 'المجموع' : (c === 2 ? (perf.isBlank ? 0 : perf.score) : (c === 4 && !perf.isBlank ? 'من 100 درجة' : '')), formula: c === 2 ? 'SUM(C13:D22)' : '', type: c === 2 ? 'n' : 's', style: (!perf.isBlank && !perf.passed && c >= 2) ? totBadSt : totSt });
+            cells.push({ r: 24, c, value: c === 0 ? 'النسبة المئوية' : (c === 2 ? (perf.isBlank ? 0 : (perf.score / 100)) : (c === 4 && !perf.isBlank ? `نسبة الحضور: ${perf.attendanceRate}% (غياب: ${perf.absencePct}%)` : '')), formula: c === 2 ? 'C23/100' : '', type: c === 2 ? 'n' : 's', style: { ...((!perf.isBlank && !perf.passed && c >= 2) ? totBadSt : totSt), numFmt: c === 2 ? '0%' : '' } });
             cells.push({
                 r: 25, c,
-                value: c === 0 ? 'التقدير' : (c === 2 ? perf.gradeLabel : (c === 4 ? (perf.passed ? 'مجتاز ومطابق للمعايير' : '⚠️ أداء ضعيف لتدني الحضور') : '')),
+                value: c === 0 ? 'التقدير' : (c === 2 ? perf.gradeLabel : (c === 4 && !perf.isBlank ? (perf.passed ? 'مجتاز ومطابق للمعايير' : '⚠️ أداء ضعيف لتدني الحضور') : '')),
                 formula: c === 2 ? 'IF(COUNT(C13:D22)=0,"يرجي تقييم المتدرب ",IF(C24>=0.9,"ممتاز",IF(C24>=0.8,"جيد جدًا",IF(C24>=0.7,"جيد",IF(C24>=0.6,"متوسط","دون المستوى المطلوب")))))' : '',
                 valueType: c === 2 ? 'str' : '',
-                style: c < 2 ? totSt : (c < 4 ? { ...totSt, fill: gradeBg } : (!perf.passed ? totBadSt : totSt))
+                style: c < 2 ? totSt : (c < 4 ? { ...totSt, fill: gradeBg } : ((!perf.isBlank && !perf.passed) ? totBadSt : totSt))
             });
         }
 
@@ -45351,16 +45385,16 @@ function openReportFromProfile() {
         const rows = gList.map((t, idx) => {
             const nt = normalizeInstExportTraineeRow(t);
             const perf = computeTraineePerformanceFromAttendance(t, meta.dates);
-            const gradeDisplay = `${perf.score}% (${perf.gradeLabel})`;
-            const noteDisplay = nt.notes ? `${nt.notes} | ${perf.finalNote}` : perf.finalNote;
-            const badCss = !perf.passed ? 'background:#FFC7CE;color:#9C0006;font-weight:900;' : 'font-weight:700;';
+            const gradeDisplay = perf.isBlank ? '' : `${perf.score}% (${perf.gradeLabel})`;
+            const noteDisplay = perf.isBlank ? (nt.notes || '') : (nt.notes ? `${nt.notes} | ${perf.finalNote}` : perf.finalNote);
+            const badCss = (!perf.isBlank && !perf.passed) ? 'background:#FFC7CE;color:#9C0006;font-weight:900;' : 'font-weight:700;';
             return `
                 <tr>
                     <td style="border:1px solid #333;padding:5px;text-align:center;">${idx + 1}</td>
                     <td style="border:1px solid #333;padding:5px;text-align:right;font-weight:700;">${escapeHtml(nt.fullName)}</td>
                     <td style="border:1px solid #333;padding:5px;text-align:center;font-family:monospace;">${escapeHtml(nt.cleanId)}</td>
                     <td style="border:1px solid #333;padding:5px;text-align:center;${badCss}">${escapeHtml(gradeDisplay)}</td>
-                    <td style="border:1px solid #333;padding:5px;text-align:center;${!perf.passed ? 'background:#FFC7CE;color:#9C0006;' : ''}">${escapeHtml(noteDisplay)}</td>
+                    <td style="border:1px solid #333;padding:5px;text-align:center;${(!perf.isBlank && !perf.passed) ? 'background:#FFC7CE;color:#9C0006;' : ''}">${escapeHtml(noteDisplay)}</td>
                 </tr>
             `;
         }).join('');
@@ -45404,13 +45438,13 @@ function openReportFromProfile() {
         const rows = gList.map((t, idx) => {
             const nt = normalizeInstExportTraineeRow(t);
             const perf = computeTraineePerformanceFromAttendance(t, meta.dates);
-            const isBad = perf.isPoorAttendance || perf.exceeds20Absence;
+            const isBad = !perf.isBlank && (perf.isPoorAttendance || perf.exceeds20Absence);
             const badCss = isBad ? 'background:#FFC7CE;color:#9C0006;font-weight:900;' : '';
             const monthCells = perf.monthlyScores.map(mv => {
                 const mvCss = (mv !== '' && mv < 60) ? 'background:#FFC7CE;color:#9C0006;font-weight:900;' : '';
                 return `<td style="border:1px solid #333;padding:4px;text-align:center;${mvCss}">${mv !== '' ? escapeHtml(String(mv)) : ''}</td>`;
             }).join('');
-            const noteVal = nt.notes ? `${nt.notes} | ${perf.followupNote}` : perf.followupNote;
+            const noteVal = perf.isBlank ? (nt.notes || '') : (nt.notes ? `${nt.notes} | ${perf.followupNote}` : perf.followupNote);
             return `
                 <tr>
                     <td style="border:1px solid #333;padding:4px;text-align:center;">${idx + 1}</td>
@@ -45507,7 +45541,7 @@ function openReportFromProfile() {
             const res = countInstTraineeResults(gList, meta.dates);
             const pct = res.examined > 0 ? Math.round((res.passed / res.examined) * 100) : 0;
             const bg = /sinopec|saipem|سينوبك/i.test(gName) ? '#F6C6AD' : '#FFFFFF';
-            const warnCss = (res.poorCount > 0 || pct < 60) ? 'background:#FFC7CE;color:#9C0006;font-weight:900;' : 'font-weight:700;';
+            const warnCss = (!res.allBlank && (res.poorCount > 0 || pct < 60)) ? 'background:#FFC7CE;color:#9C0006;font-weight:900;' : 'font-weight:700;';
             return `
                 <tr style="background:${bg};">
                     <td style="border:1px solid #333;padding:4px;text-align:center;">${idx + 1}</td>
@@ -45518,8 +45552,8 @@ function openReportFromProfile() {
                     <td style="border:1px solid #333;padding:4px;text-align:center;">${escapeHtml(meta.dates.endDisplay)}</td>
                     <td style="border:1px solid #333;padding:4px;text-align:center;">${escapeHtml(meta.instructorFullName)}</td>
                     <td style="border:1px solid #333;padding:4px;text-align:center;">${res.reg}</td>
-                    <td style="border:1px solid #333;padding:4px;text-align:center;${res.avgAttendance < 75 ? warnCss : ''}">${res.avgAttendance}%</td>
-                    <td style="border:1px solid #333;padding:4px;text-align:center;${warnCss}">${pct}% (${res.passed}/${res.reg})</td>
+                    <td style="border:1px solid #333;padding:4px;text-align:center;${(!res.allBlank && res.avgAttendance < 75) ? warnCss : ''}">${res.allBlank ? '' : `${res.avgAttendance}%`}</td>
+                    <td style="border:1px solid #333;padding:4px;text-align:center;${warnCss}">${res.allBlank ? '' : `${pct}% (${res.passed}/${res.reg})`}</td>
                 </tr>
             `;
         }).join('');
@@ -45556,17 +45590,18 @@ function openReportFromProfile() {
         const meta = resolveInstGroupMetadata(nt.group, [trainee], overrideStart, overrideEnd, courseOverride);
         const profile = getSpecialtyPracticalProfile(meta);
         const perf = computeTraineePerformanceFromAttendance(trainee, meta.dates);
-        const gradeBg = perf.score >= 90 ? '#66FFFF' : (perf.score >= 80 ? '#66FF99' : (perf.score >= 70 ? '#CCFFCC' : (perf.score >= 60 ? '#FFFFCC' : '#FF9999')));
+        const gradeBg = perf.isBlank ? '#FFFFFF' : (perf.score >= 90 ? '#66FFFF' : (perf.score >= 80 ? '#66FF99' : (perf.score >= 70 ? '#CCFFCC' : (perf.score >= 60 ? '#FFFFCC' : '#FF9999'))));
         const criteriaRows = profile.criteria.map((crit, idx) => {
             const sc = perf.criteriaScores[idx];
             const cNote = perf.criteriaNotes[idx];
-            const badCell = sc < 6 ? 'background:#FFC7CE;color:#9C0006;font-weight:900;' : '';
+            const hasSc = !perf.isBlank && sc !== '' && sc !== null && sc !== undefined;
+            const badCell = (hasSc && Number(sc) < 6) ? 'background:#FFC7CE;color:#9C0006;font-weight:900;' : '';
             return `
                 <tr>
                     <td style="border:1.5px solid #111;padding:5px;text-align:center;font-weight:700;">${idx + 1}</td>
                     <td style="border:1.5px solid #111;padding:5px 8px;text-align:right;font-weight:600;">${escapeHtml(crit)}</td>
-                    <td style="border:1.5px solid #111;padding:5px;text-align:center;font-weight:800;${badCell}">${sc}</td>
-                    <td style="border:1.5px solid #111;padding:5px;text-align:center;font-size:10px;${badCell}">${escapeHtml(cNote)}</td>
+                    <td style="border:1.5px solid #111;padding:5px;text-align:center;font-weight:800;${badCell}">${hasSc ? sc : ''}</td>
+                    <td style="border:1.5px solid #111;padding:5px;text-align:center;font-size:10px;${badCell}">${perf.isBlank ? '' : escapeHtml(cNote)}</td>
                 </tr>
             `;
         }).join('');
@@ -45607,18 +45642,18 @@ function openReportFromProfile() {
                         ${criteriaRows}
                         <tr style="background:#FFFFFF; color:#000; font-weight:900;">
                             <td colspan="2" style="border:1.5px solid #111;padding:5px;text-align:center;">المجموع</td>
-                            <td style="border:1.5px solid #111;padding:5px;text-align:center;${!perf.passed ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.score} / 100</td>
-                            <td style="border:1.5px solid #111;padding:5px;text-align:center;">من 100 درجة</td>
+                            <td style="border:1.5px solid #111;padding:5px;text-align:center;${(!perf.isBlank && !perf.passed) ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.isBlank ? '/ 100' : `${perf.score} / 100`}</td>
+                            <td style="border:1.5px solid #111;padding:5px;text-align:center;">${perf.isBlank ? '' : 'من 100 درجة'}</td>
                         </tr>
                         <tr style="background:#FFFFFF; color:#000; font-weight:900;">
                             <td colspan="2" style="border:1.5px solid #111;padding:5px;text-align:center;">النسبة المئوية</td>
-                            <td style="border:1.5px solid #111;padding:5px;text-align:center;${!perf.passed ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.score}%</td>
-                            <td style="border:1.5px solid #111;padding:5px;text-align:center;">نسبة الحضور: ${perf.attendanceRate}% (غياب: ${perf.absencePct}%)</td>
+                            <td style="border:1.5px solid #111;padding:5px;text-align:center;${(!perf.isBlank && !perf.passed) ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.isBlank ? '%' : `${perf.score}%`}</td>
+                            <td style="border:1.5px solid #111;padding:5px;text-align:center;">${perf.isBlank ? '' : `نسبة الحضور: ${perf.attendanceRate}% (غياب: ${perf.absencePct}%)`}</td>
                         </tr>
                         <tr style="background:#FFFFFF; color:#000; font-weight:900;">
                             <td colspan="2" style="border:1.5px solid #111;padding:5px;text-align:center;">التقدير</td>
                             <td style="border:1.5px solid #111;padding:5px;text-align:center;background:${gradeBg};">${escapeHtml(perf.gradeLabel)}</td>
-                            <td style="border:1.5px solid #111;padding:5px;text-align:center;${!perf.passed ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.passed ? 'مجتاز ومطابق للمعايير' : '⚠️ أداء ضعيف لتدني الحضور'}</td>
+                            <td style="border:1.5px solid #111;padding:5px;text-align:center;${(!perf.isBlank && !perf.passed) ? 'background:#FFC7CE;color:#9C0006;' : ''}">${perf.isBlank ? '' : (perf.passed ? 'مجتاز ومطابق للمعايير' : '⚠️ أداء ضعيف لتدني الحضور')}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -46115,17 +46150,21 @@ function openReportFromProfile() {
             const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(et.id) : String(et.id || '').trim();
             if (cid) editById.set(cid, et);
         });
+        const isBlank = Boolean(acc.blankEvaluations);
         return traineesList.map(t => {
             const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
             const ov = editById.get(cid);
-            if (!ov) return t;
+            if (!ov) {
+                return isBlank ? { ...t, finalGrade: '', manualGradeOverride: false, notes: '', blankEvaluations: true } : t;
+            }
             const hasManualGrade = ov.grade !== '' && ov.grade !== null && ov.grade !== undefined && !isNaN(Number(ov.grade));
             return {
                 ...t,
                 name: ov.name || t.name,
-                finalGrade: hasManualGrade ? String(ov.grade) : t.finalGrade,
+                finalGrade: hasManualGrade ? String(ov.grade) : (isBlank ? '' : t.finalGrade),
                 manualGradeOverride: Boolean(hasManualGrade),
-                notes: (ov.notes !== undefined && ov.notes !== '') ? ov.notes : t.notes
+                blankEvaluations: isBlank,
+                notes: isBlank ? (ov.notes || '') : ((ov.notes !== undefined && ov.notes !== '') ? ov.notes : t.notes)
             };
         });
     }
@@ -46730,15 +46769,19 @@ function openReportFromProfile() {
         tbody.innerHTML = list.map((tr, idx) => {
             const cid = cleanNationalId(tr.id);
             const liveRec = poolById.get(cid) || tr;
-            const perf = computeTraineePerformanceFromAttendance(liveRec, { startIso: course.startDate, endIso: course.endDate });
-            const attColor = perf.isPoorAttendance ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800';
+            const effectiveRec = course.blankEvaluations ? { ...liveRec, blankEvaluations: true, finalGrade: tr.grade || '' } : liveRec;
+            const perf = computeTraineePerformanceFromAttendance(effectiveRec, { startIso: course.startDate, endIso: course.endDate });
+            const attBadge = perf.isBlank
+                ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-slate-100 text-slate-500">—</span>'
+                : `<span class="px-2 py-0.5 rounded-md text-[10px] font-black ${perf.isPoorAttendance ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">${perf.attendanceRate}%</span>`;
+            const phText = perf.isBlank ? 'مُصفّر' : `تلقائي: ${perf.score}`;
             return `
                 <tr data-ac-idx="${idx}" class="hover:bg-slate-50">
                     <td class="p-2 text-center font-bold text-slate-500">${idx + 1}</td>
                     <td class="p-2"><input type="text" data-ac-field="id" value="${escapeHtml(cid || tr.id || '')}" class="w-28 bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono text-xs font-bold text-slate-900"></td>
                     <td class="p-2"><input type="text" data-ac-field="name" value="${escapeHtml(tr.name || '')}" class="w-full min-w-[150px] bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-900"></td>
-                    <td class="p-2 text-center"><span class="px-2 py-0.5 rounded-md text-[10px] font-black ${attColor}">${perf.attendanceRate}%</span></td>
-                    <td class="p-2 text-center"><input type="number" min="0" max="100" data-ac-field="grade" value="${escapeHtml(tr.grade !== undefined && tr.grade !== null ? tr.grade : '')}" placeholder="تلقائي: ${perf.score}" class="w-24 bg-white border border-slate-300 rounded-lg px-2 py-1 text-center font-mono text-xs font-black text-slate-900"></td>
+                    <td class="p-2 text-center">${attBadge}</td>
+                    <td class="p-2 text-center"><input type="number" min="0" max="100" data-ac-field="grade" value="${escapeHtml(tr.grade !== undefined && tr.grade !== null ? tr.grade : '')}" placeholder="${phText}" class="w-24 bg-white border border-slate-300 rounded-lg px-2 py-1 text-center font-mono text-xs font-black text-slate-900"></td>
                     <td class="p-2"><input type="text" data-ac-field="notes" value="${escapeHtml(tr.notes || '')}" placeholder="اختياري" class="w-full min-w-[130px] bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs text-slate-700"></td>
                     <td class="p-2 text-center"><button type="button" onclick="removeTraineeRowFromActiveCourse(${idx})" class="text-rose-600 hover:text-rose-800 font-black cursor-pointer">✕</button></td>
                 </tr>
@@ -46783,6 +46826,11 @@ function openReportFromProfile() {
         setVal('acEditEndDate', course.endDate);
         setVal('acEditGroupName', course.groupName);
         setVal('acEditInstructor', course.instructorFullName);
+
+        const blankBadge = document.getElementById('acWsBadgeBlankMode');
+        const restoreBtn = document.getElementById('btnAcRestoreAutoCalc');
+        if (blankBadge) blankBadge.classList.toggle('hidden', !course.blankEvaluations);
+        if (restoreBtn) restoreBtn.classList.toggle('hidden', !course.blankEvaluations);
 
         renderActiveCourseTraineesRows(course);
         refreshAccreditedCoursesUI();
@@ -46887,9 +46935,45 @@ function openReportFromProfile() {
     }
     window.removeTraineeRowFromActiveCourse = removeTraineeRowFromActiveCourse;
 
+    function resetActiveAccreditedCourseGradesAndRates() {
+        const cur = collectEditedActiveCourseFromDom(getAccreditedCourseById(activeAccreditedCourseId));
+        if (!cur) return null;
+        cur.blankEvaluations = true;
+        cur.trainees = (cur.trainees || []).map(tr => ({
+            ...tr,
+            grade: '',
+            notes: ''
+        }));
+        cur.updatedAt = new Date().toISOString();
+        const list = loadAccreditedCourses();
+        const idx = list.findIndex(c => c.id === cur.id);
+        if (idx >= 0) list[idx] = cur;
+        saveAccreditedCourses(list, true);
+        openAccreditedCourseWorkspace(cur.id);
+        showToast('🧹 تم تصفير الدرجات والنسب والملاحظات مع الإبقاء على بيانات الدورة والمدرب وأسماء وهويات المتدربين!', 'success');
+        return cur;
+    }
+    window.resetActiveAccreditedCourseGradesAndRates = resetActiveAccreditedCourseGradesAndRates;
+
+    function restoreActiveAccreditedCourseAutoCalc() {
+        const cur = saveActiveAccreditedCourseEdits(true);
+        if (!cur) return null;
+        cur.blankEvaluations = false;
+        cur.updatedAt = new Date().toISOString();
+        const list = loadAccreditedCourses();
+        const idx = list.findIndex(c => c.id === cur.id);
+        if (idx >= 0) list[idx] = cur;
+        saveAccreditedCourses(list, true);
+        openAccreditedCourseWorkspace(cur.id);
+        showToast('🔄 تمت إعادة تفعيل الاحتساب التلقائي للدرجات والنسب من سجل الحضور!', 'info');
+        return cur;
+    }
+    window.restoreActiveAccreditedCourseAutoCalc = restoreActiveAccreditedCourseAutoCalc;
+
     function buildExportTraineesForAccreditedCourse(course) {
         const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : [];
         const poolById = new Map(pool.map(p => [cleanNationalId(p.id), p]));
+        const isBlank = Boolean(course.blankEvaluations);
         return (course.trainees || []).map(tr => {
             const cid = cleanNationalId(tr.id);
             const live = poolById.get(cid) || {};
@@ -46905,9 +46989,10 @@ function openReportFromProfile() {
                 email: tr.email || live.email || '',
                 trainer: course.instructorFullName || live.trainer || '',
                 specialty: course.courseName || live.specialty || '',
-                finalGrade: hasManualGrade ? String(tr.grade).trim() : (live.finalGrade || ''),
+                finalGrade: hasManualGrade ? String(tr.grade).trim() : (isBlank ? '' : (live.finalGrade || '')),
                 manualGradeOverride: hasManualGrade,
-                notes: (tr.notes !== undefined && tr.notes !== '') ? tr.notes : (live.notes || '')
+                blankEvaluations: isBlank,
+                notes: isBlank ? (tr.notes || '') : ((tr.notes !== undefined && tr.notes !== '') ? tr.notes : (live.notes || ''))
             };
         });
     }
