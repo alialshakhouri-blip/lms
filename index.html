@@ -41551,7 +41551,12 @@ function openReportFromProfile() {
             if (!qual || qual === 'غير محدد') qual = 'ثانوي';
 
             const phone = p.phone || item.phone || '';
-            const email = p.email || item.email || `${cId}@tvtc.gov.sa`;
+            const rawPoolEmail = String(p.email || item.email || '').trim();
+            const email = (rawPoolEmail && !/@tvtc\.gov\.sa$/i.test(rawPoolEmail))
+                ? rawPoolEmail
+                : (typeof getTraineePersonalEmail === 'function'
+                    ? getTraineePersonalEmail({ id: cId, name: fullName, email: '' })
+                    : `trainee.${cId}@gmail.com`);
 
             map.set(cId, {
                 ...item,
@@ -44706,7 +44711,12 @@ function openReportFromProfile() {
         if (!nationality) nationality = cleanId.startsWith('1') ? 'سعودي' : 'غير سعودي';
         let qual = t.qual || pDir.qual || '';
         if (!qual || qual === 'غير محدد') qual = 'ثانوي';
-        const email = t.email || pDir.email || `${cleanId}@tvtc.gov.sa`;
+        const rawExportEmail = String(t.email || pDir.email || '').trim();
+        const email = (rawExportEmail && !/@tvtc\.gov\.sa$/i.test(rawExportEmail))
+            ? rawExportEmail
+            : (typeof getTraineePersonalEmail === 'function'
+                ? getTraineePersonalEmail({ id: cleanId, name: fullName || [first, second, third, last].filter(Boolean).join(' '), email: '' })
+                : `trainee.${cleanId}@gmail.com`);
         const rawPhone = t.phone || pDir.phone || '';
         const cleanPh = (typeof cleanPhone === 'function') ? cleanPhone(rawPhone) : String(rawPhone || '').trim();
         return {
@@ -94537,7 +94547,7 @@ function buildDemoExecutiveReport(params) {
     function getTraineePersonalEmail(trainee, seed) {
         if (!trainee) return 'trainee.demo.101@gmail.com';
         const existing = String(trainee.email || '').trim();
-        if (existing && !/@(?:blackgold|bgti)\./i.test(existing)) {
+        if (existing && !/@(?:blackgold|bgti|tvtc\.gov\.sa)\b/i.test(existing)) {
             return existing;
         }
         const arName = String(trainee.name || '').trim();
