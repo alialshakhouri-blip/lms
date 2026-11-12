@@ -13216,6 +13216,22 @@
 
 
 
+                <!-- Sub-Navigation Tabs inside Institution Files -->
+                <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center gap-2">
+                    <button type="button" id="instSubTabBtn_export" onclick="switchInstSubTab('export')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 cursor-pointer bg-emerald-600 text-white shadow-sm">
+                        <span>📥</span>
+                        <span>تصدير وتدقيق ملف المؤسسة</span>
+                    </button>
+                    <button type="button" id="instSubTabBtn_courses" onclick="switchInstSubTab('courses')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        <span>🎓</span>
+                        <span>الدورات المعتمدة والربط الذكي</span>
+                        <span id="instAccreditedCoursesCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">0</span>
+                    </button>
+                </div>
+
+                <!-- SUB-VIEW 1: EXPORT & AUDIT -->
+                <div id="instSubViewExport" class="space-y-6">
+
                 <!-- Filter & Action Controls Card -->
 
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -13315,10 +13331,16 @@
                         <div class="text-[11px] text-slate-500 font-bold">
                             <span>💡 ملاحظة: عند رفع ملف الإكسل يتم فقط مطابقة وتحديث أرقام المتدربين المسجلين في كشف التحضير الصباحي حصراً.</span>
                         </div>
-                        <button type="button" onclick="if(confirm('هل أنت متأكد من مسح جميع أرقام الجوال من النظام بالكامل لإعادة رفعها من جديد؟')){ wipeAllSystemPhones(true); showToast('\u2705 تم مسح جميع أرقام الجوال من النظام بنجاح، النظام جاهز لإعادة رفع الملف!', 'success'); }" class="bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-700 font-black text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-rose-200" title="مسح كافة أرقام الجوال المسجلة لإعادة استراد ملف الأرقام النظيف">
-                            <span>🗑️</span>
-                            <span>مسح جميع أرقام الجوال (لإعادة الرفع)</span>
-                        </button>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button type="button" onclick="saveCurrentGroupToAccreditedCourses(false)" class="bg-emerald-50 hover:bg-emerald-100 active:scale-95 text-emerald-800 font-black text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-emerald-300" title="حفظ المجموعة الحالية كملف خاص في صفحة الدورات المعتمدة">
+                                <span>💾</span>
+                                <span>حفظ المجموعة في الدورات المعتمدة</span>
+                            </button>
+                            <button type="button" onclick="if(confirm('هل أنت متأكد من مسح جميع أرقام الجوال من النظام بالكامل لإعادة رفعها من جديد؟')){ wipeAllSystemPhones(true); showToast('\u2705 تم مسح جميع أرقام الجوال من النظام بنجاح، النظام جاهز لإعادة رفع الملف!', 'success'); }" class="bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-700 font-black text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-rose-200" title="مسح كافة أرقام الجوال المسجلة لإعادة استراد ملف الأرقام النظيف">
+                                <span>🗑️</span>
+                                <span>مسح جميع أرقام الجوال (لإعادة الرفع)</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Dynamic Alert / Review Banner -->
@@ -13547,6 +13569,180 @@
 
                 </div>
 
+                </div><!-- End instSubViewExport -->
+
+                <!-- SUB-VIEW 2: ACCREDITED COURSES & SMART TVTC PORTAL LINKING -->
+                <div id="instSubViewCourses" class="hidden space-y-5">
+
+                    <!-- 1. Smart TVTC Portal Paste Box -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                                <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                    <span>🤖</span>
+                                    <span>ربط ذكي من نص بوابة المؤسسة (pt-web.tvtc.gov.sa)</span>
+                                </h3>
+                                <p class="text-[11px] text-slate-500 mt-0.5">انسخ النص من صفحة تفاصيل الدورة في بوابة المؤسسة والصقه هنا — سيتم استخراج رقم الدورة وتاريخ البداية والنهاية ومطابقة الأسماء والهويات مع المجموعة تلقائياً (حتى لو كان النص من الصفحة الأولى فقط).</p>
+                            </div>
+                            <label class="flex items-center gap-1.5 text-[11px] font-bold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 cursor-pointer shrink-0">
+                                <input type="checkbox" id="tvtcUseAiApiCheck" checked class="accent-emerald-600 cursor-pointer">
+                                <span>تعزيز بـ Groq AI API عند الاتصال</span>
+                            </label>
+                        </div>
+
+                        <textarea id="tvtcPortalPasteInput" rows="5" class="w-full bg-slate-50 border border-slate-300 focus:border-emerald-600 rounded-xl p-3 text-xs font-medium text-slate-800 outline-none resize-y" placeholder="الصق هنا النص المنسوخ من صفحة تفاصيل الدورة في بوابة المؤسسة (مثال: رقم الدورة : 832108، تاريخ البدء، تاريخ الانتهاء، وجدول المتدربين)..."></textarea>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                            <div>
+                                <select id="tvtcTargetCourseSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none cursor-pointer">
+                                    <option value="">✨ ربط تلقائي ذكي (بمطابقة الهويات والمجموعة)</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2 flex flex-wrap items-center gap-2 justify-end">
+                                <button type="button" id="btnTvtcAnalyzeAndLink" onclick="analyzeAndLinkTvtcPortalText()" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer active:scale-95">
+                                    <span>🤖</span>
+                                    <span>تحليل وربط تلقائي وحفظ</span>
+                                </button>
+                                <button type="button" onclick="createBlankAccreditedCourse()" class="bg-slate-900 hover:bg-black text-white font-black text-xs px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                                    <span>➕</span>
+                                    <span>إضافة دورة يدوياً</span>
+                                </button>
+                                <button type="button" onclick="const ta=document.getElementById('tvtcPortalPasteInput');if(ta)ta.value=''; const b=document.getElementById('tvtcParseResultBanner');if(b)b.classList.add('hidden');" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-2.5 rounded-xl transition cursor-pointer">
+                                    مسح النص
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="tvtcParseResultBanner" class="hidden p-3 rounded-xl border text-xs font-bold"></div>
+                    </div>
+
+                    <!-- 2. Saved Accredited Courses List -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                <span>📚</span>
+                                <span>ملفات الدورات المعتمدة المحفوظة حسب المجموعة</span>
+                            </h3>
+                            <span id="instAccreditedCoursesHint" class="text-[11px] font-bold text-slate-500">اختر أي دورة لفتحها وتعديل البيانات أو الدرجات وتصدير النماذج</span>
+                        </div>
+                        <div id="instAccreditedCoursesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                    </div>
+
+                    <!-- 3. Active Accredited Course Workspace (Metadata + Trainees/Grades + Export) -->
+                    <div id="instAccreditedCourseWorkspace" class="hidden bg-white p-5 rounded-2xl border-2 border-emerald-500/40 shadow-md space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800" id="acWsBadgeCourseNo">رقم الدورة: --</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-100 text-blue-800" id="acWsBadgeGroup">المجموعة: --</span>
+                                </div>
+                                <h3 class="text-base font-black text-slate-900 mt-1" id="acWsTitle">تفاصيل الدورة المعتمدة</h3>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button type="button" onclick="saveActiveAccreditedCourseEdits()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs px-4 py-2 rounded-xl shadow-xs transition cursor-pointer">
+                                    💾 حفظ التعديلات
+                                </button>
+                                <button type="button" onclick="document.getElementById('instAccreditedCourseWorkspace').classList.add('hidden'); activeAccreditedCourseId = '';" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-2 rounded-xl transition cursor-pointer">
+                                    إغلاق
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Essential Editable Fields Only -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                            <div>
+                                <label class="block font-black text-slate-700 mb-1">رقم الدورة *</label>
+                                <input type="text" id="acEditCourseNumber" class="w-full bg-slate-50 border border-slate-300 focus:border-emerald-600 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none" placeholder="مثال: 832108">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block font-black text-slate-700 mb-1">اسم الدورة / البرنامج التدريبي *</label>
+                                <input type="text" id="acEditCourseName" class="w-full bg-slate-50 border border-slate-300 focus:border-emerald-600 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none" placeholder="مثال: اساسيات اللحام بالقوس الكهربي">
+                            </div>
+                            <div>
+                                <label class="block font-black text-slate-700 mb-1">نوع البرنامج</label>
+                                <select id="acEditProgramType" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none">
+                                    <option value="دورة تطويرية">دورة تطويرية</option>
+                                    <option value="دورة تأهيلية">دورة تأهيلية</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-black text-slate-700 mb-1">تاريخ البداية *</label>
+                                <input type="date" id="acEditStartDate" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-black text-slate-700 mb-1">تاريخ النهاية *</label>
+                                <input type="date" id="acEditEndDate" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-black text-slate-700 mb-1">نمط التدريب</label>
+                                <select id="acEditTrainingMode" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none">
+                                    <option value="حضوري">حضوري</option>
+                                    <option value="عن بعد">عن بعد</option>
+                                    <option value="مدمج">مدمج</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-black text-slate-700 mb-1">المجموعة المرتبطة</label>
+                                <input type="text" id="acEditGroupName" list="acGroupsDatalist" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none" placeholder="مثال: Sinopec 202">
+                                <datalist id="acGroupsDatalist"></datalist>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block font-black text-slate-700 mb-1">المدرب المعتمد</label>
+                                <input type="text" id="acEditInstructor" list="acInstructorsDatalist" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none" placeholder="اختياري (يُحدَّد تلقائياً حسب التخصص إن تُرك فارغاً)">
+                                <datalist id="acInstructorsDatalist"></datalist>
+                            </div>
+                        </div>
+
+                        <!-- Trainees & Grades Editable Table -->
+                        <div class="space-y-2">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h4 class="text-xs font-black text-slate-800">👥 بيانات ودرجات المتدربين (<span id="acEditTraineesCount">0</span> متدرب)</h4>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <button type="button" onclick="syncActiveAccreditedCourseWithGroupPool()" class="bg-blue-50 hover:bg-blue-100 text-blue-800 font-black text-[11px] px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer">
+                                        🔄 مزامنة باقي متدربي المجموعة
+                                    </button>
+                                    <button type="button" onclick="addTraineeRowToActiveAccreditedCourse()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-[11px] px-3 py-1.5 rounded-lg border border-slate-300 transition cursor-pointer">
+                                        ➕ إضافة متدرب
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                                <table class="w-full text-right text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-slate-700 font-black border-b border-slate-200">
+                                            <th class="p-2.5 text-center w-10">#</th>
+                                            <th class="p-2.5">رقم الهوية</th>
+                                            <th class="p-2.5">اسم المتدرب</th>
+                                            <th class="p-2.5 text-center">الحضور</th>
+                                            <th class="p-2.5 text-center w-28">الدرجة (0-100)</th>
+                                            <th class="p-2.5">ملاحظات</th>
+                                            <th class="p-2.5 text-center w-12">حذف</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="acEditTraineesTbody" class="divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Direct Export Bar for this Accredited Course -->
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                            <div class="text-xs font-black text-slate-900">📤 تصدير النماذج والتقارير المعتمدة لهذه الدورة (برقم الدورة والتواريخ والدرجات المعدلة):</div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" onclick="exportFromAccreditedCourse(activeAccreditedCourseId, 'final_eval', 'xlsx')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">📝 التقييم النهائي (Excel)</button>
+                                <button type="button" onclick="exportFromAccreditedCourse(activeAccreditedCourseId, 'final_eval', 'pdf')" class="bg-rose-600 hover:bg-rose-700 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">📝 التقييم النهائي (PDF)</button>
+                                <button type="button" onclick="exportFromAccreditedCourse(activeAccreditedCourseId, 'training_followup', 'xlsx')" class="bg-teal-700 hover:bg-teal-800 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">📊 متابعة التدريب (Excel)</button>
+                                <button type="button" onclick="exportFromAccreditedCourse(activeAccreditedCourseId, 'training_followup', 'pdf')" class="bg-rose-700 hover:bg-rose-800 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">📊 متابعة التدريب (PDF)</button>
+                                <button type="button" onclick="exportFromAccreditedCourse(activeAccreditedCourseId, 'practical_card', 'xlsx', { practicalPack: 'merged' })" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">🎴 التقييم العملي (Excel)</button>
+                                <button type="button" onclick="exportFromAccreditedCourse(activeAccreditedCourseId, 'practical_card', 'pdf', { practicalPack: 'merged' })" class="bg-purple-700 hover:bg-purple-800 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">🎴 التقييم العملي (PDF)</button>
+                                <button type="button" onclick="exportFromAccreditedCourse(activeAccreditedCourseId, 'courses_tracking', 'xlsx')" class="bg-amber-600 hover:bg-amber-700 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">📚 متابعة الدورات (Excel)</button>
+                                <button type="button" onclick="exportFromAccreditedCourse(activeAccreditedCourseId, 'courses_tracking', 'pdf')" class="bg-orange-700 hover:bg-orange-800 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">📚 متابعة الدورات (PDF)</button>
+                                <button type="button" onclick="openAccreditedCourseExportModal(activeAccreditedCourseId)" class="bg-slate-800 hover:bg-black text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">⚙️ نافذة التصدير الكاملة</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- End instSubViewCourses -->
+
             </div>
 
 
@@ -13597,19 +13793,22 @@
 
             </div>
 
-            <div class="flex gap-2 pt-2">
+            <div class="flex flex-col gap-2 pt-2">
 
-                <button type="button" onclick="confirmInstitutionApprovalNow()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl text-xs shadow-md transition active:scale-95 cursor-pointer">
+                <button type="button" onclick="confirmInstitutionApprovalNow()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl text-xs shadow-md transition active:scale-95 cursor-pointer">
 
-                    ✅ نعم، تم الاعتماد الرسمي
-
-                </button>
-
-                <button type="button" onclick="closeInstitutionApprovalModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition cursor-pointer">
-
-                    تصدير فقط (لاحقاً)
+                    ✅ نعم، تم الاعتماد الرسمي وحفظ الدورة
 
                 </button>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="saveExportedGroupToAccreditedCoursesOnly()" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-800 font-black py-2 rounded-xl text-xs border border-blue-200 transition cursor-pointer">
+                        💾 حفظ في الدورات المعتمدة فقط
+                    </button>
+                    <button type="button" onclick="closeInstitutionApprovalModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition cursor-pointer">
+                        تصدير فقط
+                    </button>
+                </div>
 
             </div>
 
@@ -41417,6 +41616,7 @@ function openReportFromProfile() {
 
         populateInstGroupFilter(presetGroup);
         renderInstTraineesTable();
+        if (typeof refreshAccreditedCoursesUI === 'function') refreshAccreditedCoursesUI();
     }
     window.renderInstitutionFilesTab = renderInstitutionFilesTab;
 
@@ -42002,15 +42202,38 @@ function openReportFromProfile() {
 
 
 
+        if (typeof upsertAccreditedCourseFromGroupSnapshot === 'function') {
+            upsertAccreditedCourseFromGroupSnapshot(currentExportGroupForApproval, currentExportedTraineesForApproval, { approved: true });
+        }
+
         closeInstitutionApprovalModal();
 
         renderInstTraineesTable();
+        if (typeof refreshAccreditedCoursesUI === 'function') refreshAccreditedCoursesUI();
 
-        showToast(`🏛️ تم توثيق اعتماد الشعبة (${currentExportGroupForApproval}) في المؤسسة، وبدء احتساب الـ 4 أسابيع!`, 'success');
+        showToast(`🏛️ تم توثيق اعتماد الشعبة (${currentExportGroupForApproval}) وحفظها في الدورات المعتمدة، وبدء احتساب الـ 4 أسابيع!`, 'success');
 
     }
 
     window.confirmInstitutionApprovalNow = confirmInstitutionApprovalNow;
+
+    function saveExportedGroupToAccreditedCoursesOnly() {
+        if (!currentExportGroupForApproval || currentExportedTraineesForApproval.length === 0) {
+            closeInstitutionApprovalModal();
+            return;
+        }
+        const saved = (typeof upsertAccreditedCourseFromGroupSnapshot === 'function')
+            ? upsertAccreditedCourseFromGroupSnapshot(currentExportGroupForApproval, currentExportedTraineesForApproval, { approved: false })
+            : null;
+        closeInstitutionApprovalModal();
+        if (typeof refreshAccreditedCoursesUI === 'function') refreshAccreditedCoursesUI();
+        if (saved && typeof openAccreditedCourseWorkspace === 'function') {
+            switchInstSubTab('courses');
+            openAccreditedCourseWorkspace(saved.id);
+        }
+        showToast(`💾 تم حفظ ملف المجموعة (${currentExportGroupForApproval}) في صفحة الدورات المعتمدة بنجاح!`, 'success');
+    }
+    window.saveExportedGroupToAccreditedCoursesOnly = saveExportedGroupToAccreditedCoursesOnly;
 
 
 
@@ -43429,8 +43652,11 @@ function openReportFromProfile() {
         if (!contract && groupTrainees && groupTrainees[0] && typeof getTraineeContractInfo === 'function') {
             contract = getTraineeContractInfo(groupTrainees[0]);
         }
-        const autoStart = (contract && (contract.start || contract.startDate)) || '2026-01-01';
-        let autoEnd = (contract && contract.end) || '';
+        const accCourse = (typeof getEffectiveAccreditedCourseForContext === 'function')
+            ? getEffectiveAccreditedCourseForContext(groupName, '')
+            : null;
+        const autoStart = (accCourse && accCourse.startDate) || (contract && (contract.start || contract.startDate)) || '2026-01-01';
+        let autoEnd = (accCourse && accCourse.endDate) || (contract && contract.end) || '';
         if (!autoEnd && autoStart) {
             const d = new Date(autoStart);
             if (!isNaN(d.getTime())) {
@@ -43517,12 +43743,26 @@ function openReportFromProfile() {
             preferredCourse = techCourses[0] || assignedEnriched[0];
         }
 
-        const instructorFullName = (preferredCourse && preferredCourse.fullTrainer && preferredCourse.fullTrainer !== '—')
-            ? preferredCourse.fullTrainer
-            : resolveAccreditedInstructorFullName((firstT.trainer) || '');
-        const companyName = (firstT.company || (groupTrainees.find(t => t.company)?.company) || 'معهد الذهب الأسود للتدريب').trim();
+        const accCourse = (typeof getEffectiveAccreditedCourseForContext === 'function')
+            ? getEffectiveAccreditedCourseForContext(groupName, forcedCourseName)
+            : null;
+
+        const instructorFullName = (accCourse && accCourse.instructorFullName && accCourse.instructorFullName.trim())
+            ? accCourse.instructorFullName.trim()
+            : ((preferredCourse && preferredCourse.fullTrainer && preferredCourse.fullTrainer !== '—')
+                ? preferredCourse.fullTrainer
+                : resolveAccreditedInstructorFullName((firstT.trainer) || ''));
+        const companyName = (accCourse && accCourse.companyName) || (firstT.company || (groupTrainees.find(t => t.company)?.company) || 'معهد الذهب الأسود للتدريب').trim();
         const codeMatch = String(groupName || '').match(/\d+/);
-        const courseCode = codeMatch ? codeMatch[0] : '101';
+        const courseCode = (accCourse && accCourse.courseNumber && String(accCourse.courseNumber).trim())
+            ? String(accCourse.courseNumber).trim()
+            : (codeMatch ? codeMatch[0] : '101');
+        const resolvedProgram = (accCourse && accCourse.courseName && (!forcedCourseName || normalizeEnterpriseText(accCourse.courseName) === normalizeEnterpriseText(forcedCourseName)))
+            ? accCourse.courseName
+            : progInfo.program;
+        const resolvedType = (accCourse && accCourse.programType && (!forcedCourseName || normalizeEnterpriseText(accCourse.courseName) === normalizeEnterpriseText(forcedCourseName)))
+            ? accCourse.programType
+            : progInfo.type;
 
         return {
             groupName: groupName || 'كافة الشعب',
@@ -43530,8 +43770,9 @@ function openReportFromProfile() {
             room: (preferredCourse && preferredCourse.room) || firstT.room || 'القاعة المعتمدة',
             courseCode,
             instructorFullName,
-            accreditedProgram: progInfo.program,
-            programType: progInfo.type,
+            accreditedProgram: resolvedProgram,
+            programType: resolvedType,
+            trainingMode: (accCourse && accCourse.trainingMode) || 'حضوري',
             specialty: progInfo.specialty,
             sharedCourses: assignedEnriched,
             dates
@@ -43843,12 +44084,12 @@ function openReportFromProfile() {
         const explicitGrade = String(t?.finalGrade ?? '').trim();
         if (explicitGrade !== '' && !isNaN(Number(explicitGrade))) {
             const gNum = clamp(0, 100, Number(explicitGrade));
-            score = (attendanceRate < 75) ? Math.min(gNum, attendanceDrivenScore) : gNum;
+            score = (t?.manualGradeOverride || attendanceRate >= 75) ? gNum : Math.min(gNum, attendanceDrivenScore);
         }
 
         const isPoorAttendance = attendanceRate < 75;
         const exceeds20Absence = absencePct > 20;
-        const passed = score >= 60 && attendanceRate >= 75;
+        const passed = score >= 60 && (t?.manualGradeOverride ? true : attendanceRate >= 75);
 
         let gradeLabel = 'ممتاز';
         if (score >= 90) gradeLabel = 'ممتاز';
@@ -45490,11 +45731,27 @@ function openReportFromProfile() {
         const include11Col = (opts.include11Col !== undefined) ? Boolean(opts.include11Col) : (document.getElementById('instExpInclude11ColCheck')?.checked !== false);
         const courseOverride = (opts.courseOverride !== undefined) ? opts.courseOverride : (document.getElementById('instExpCourseOverride')?.value || '');
 
-        const { selectedCompany, selectedGroup, trainees: list } = getInstFilteredTrainees();
+        const filteredCtx = getInstFilteredTrainees();
+        let selectedCompany = opts.selectedCompany || filteredCtx.selectedCompany;
+        let selectedGroup = opts.selectedGroup || filteredCtx.selectedGroup;
+        const explicitAccCourse = opts.accreditedCourseObj || (opts.accreditedCourseId && typeof getAccreditedCourseById === 'function' ? getAccreditedCourseById(opts.accreditedCourseId) : null);
+        if (explicitAccCourse && explicitAccCourse.groupName) selectedGroup = explicitAccCourse.groupName;
+        if (explicitAccCourse && explicitAccCourse.companyName) selectedCompany = explicitAccCourse.companyName;
+
+        let list = Array.isArray(opts.customTrainees) && opts.customTrainees.length > 0
+            ? opts.customTrainees.map(x => ({ ...x }))
+            : filteredCtx.trainees;
+
+        if ((!opts.customTrainees || opts.customTrainees.length === 0) && typeof mergeTraineesWithAccreditedCourseEdits === 'function') {
+            list = mergeTraineesWithAccreditedCourseEdits(list, selectedGroup, explicitAccCourse, courseOverride);
+        }
+
         if (!list || list.length === 0) {
             showToast('⚠️ لا يوجد متدربون ضمن المحددات النشطة للتصدير', 'warning');
             return null;
         }
+
+        activeInstExportAccreditedCourse = explicitAccCourse || null;
 
         const btn = document.getElementById('btnStartInstDynamicExport');
         const progWrap = document.getElementById('instExpProgressWrap');
@@ -45617,6 +45874,7 @@ function openReportFromProfile() {
             showToast('❌ تعذر التصدير: ' + (err.message || err), 'error');
             return null;
         } finally {
+            activeInstExportAccreditedCourse = null;
             if (btn) { btn.disabled = false; btn.classList.remove('opacity-60'); }
         }
     }
@@ -45631,6 +45889,931 @@ function openReportFromProfile() {
     window.resolveAccreditedProgramInfo = resolveAccreditedProgramInfo;
     window.getSpecialtyPracticalProfile = getSpecialtyPracticalProfile;
     window.computeTraineePerformanceFromAttendance = computeTraineePerformanceFromAttendance;
+
+    // ===================================================================
+    // ACCREDITED COURSES SUB-PAGE & SMART TVTC PORTAL EXTRACTOR / AUTO-LINKER
+    // ===================================================================
+    const INST_ACCREDITED_COURSES_KEY = 'sys_inst_accredited_courses_v1';
+    let accreditedCoursesCache = null;
+    let activeAccreditedCourseId = '';
+    let activeInstExportAccreditedCourse = null;
+
+    function loadAccreditedCourses() {
+        if (Array.isArray(accreditedCoursesCache)) return accreditedCoursesCache;
+        try {
+            const raw = localStorage.getItem(INST_ACCREDITED_COURSES_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    accreditedCoursesCache = parsed;
+                    return accreditedCoursesCache;
+                }
+            }
+        } catch (e) {}
+        accreditedCoursesCache = [];
+        return accreditedCoursesCache;
+    }
+
+    function saveAccreditedCourses(list, syncCloud = true) {
+        accreditedCoursesCache = Array.isArray(list) ? list : [];
+        try {
+            localStorage.setItem(INST_ACCREDITED_COURSES_KEY, JSON.stringify(accreditedCoursesCache));
+        } catch (e) {}
+        if (syncCloud && window.supabaseClient && window.isSupabaseConnected) {
+            try {
+                window.supabaseClient.from('app_sync_state').upsert([
+                    { key: INST_ACCREDITED_COURSES_KEY, data: accreditedCoursesCache, updated_at: new Date().toISOString() }
+                ], { onConflict: 'key' }).catch(() => {});
+            } catch (e) {}
+        }
+        return accreditedCoursesCache;
+    }
+
+    function mergeCloudAccreditedCourses(cloudList) {
+        if (!Array.isArray(cloudList)) return;
+        const localList = loadAccreditedCourses();
+        const byId = new Map();
+        localList.forEach(c => { if (c && c.id) byId.set(c.id, c); });
+        cloudList.forEach(cc => {
+            if (!cc || !cc.id) return;
+            const existing = byId.get(cc.id);
+            if (!existing || new Date(cc.updatedAt || 0).getTime() > new Date(existing.updatedAt || 0).getTime()) {
+                byId.set(cc.id, cc);
+            }
+        });
+        saveAccreditedCourses(Array.from(byId.values()), false);
+        if (typeof refreshAccreditedCoursesUI === 'function') refreshAccreditedCoursesUI();
+    }
+    window.mergeCloudAccreditedCourses = mergeCloudAccreditedCourses;
+
+    function getAccreditedCourseById(courseId) {
+        if (!courseId) return null;
+        return loadAccreditedCourses().find(c => c.id === courseId) || null;
+    }
+
+    function findAccreditedCourseForGroup(groupName, courseOverride) {
+        const list = loadAccreditedCourses();
+        if (!list.length || !groupName || groupName === 'ALL' || groupName === 'كافة الشعب') return null;
+        const cleanTarget = (typeof cleanGroupNameForMatch === 'function')
+            ? cleanGroupNameForMatch(groupName)
+            : String(groupName).toLowerCase().replace(/[^a-z0-9]/g, '');
+        const candidates = list.filter(c => {
+            if (!c.groupName) return false;
+            const cg = (typeof cleanGroupNameForMatch === 'function')
+                ? cleanGroupNameForMatch(c.groupName)
+                : String(c.groupName).toLowerCase().replace(/[^a-z0-9]/g, '');
+            return cg && cg === cleanTarget;
+        });
+        if (candidates.length === 0) return null;
+        if (courseOverride && courseOverride !== 'AUTO' && courseOverride !== 'ALL_SHARED') {
+            const ovNorm = normalizeEnterpriseText(courseOverride);
+            const exact = candidates.find(c =>
+                normalizeEnterpriseText(c.courseName) === ovNorm
+                || normalizeEnterpriseText(c.courseName).includes(ovNorm)
+                || ovNorm.includes(normalizeEnterpriseText(c.courseName))
+            );
+            if (exact) return exact;
+        }
+        return candidates.slice().sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))[0];
+    }
+
+    function getEffectiveAccreditedCourseForContext(groupName, courseOverride) {
+        return activeInstExportAccreditedCourse || findAccreditedCourseForGroup(groupName, courseOverride);
+    }
+
+    function mergeTraineesWithAccreditedCourseEdits(traineesList, groupName, explicitAccCourse, courseOverride) {
+        const acc = explicitAccCourse || findAccreditedCourseForGroup(groupName, courseOverride);
+        if (!acc || !Array.isArray(acc.trainees) || acc.trainees.length === 0) return traineesList;
+        const editById = new Map();
+        acc.trainees.forEach(et => {
+            const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(et.id) : String(et.id || '').trim();
+            if (cid) editById.set(cid, et);
+        });
+        return traineesList.map(t => {
+            const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+            const ov = editById.get(cid);
+            if (!ov) return t;
+            const hasManualGrade = ov.grade !== '' && ov.grade !== null && ov.grade !== undefined && !isNaN(Number(ov.grade));
+            return {
+                ...t,
+                name: ov.name || t.name,
+                finalGrade: hasManualGrade ? String(ov.grade) : t.finalGrade,
+                manualGradeOverride: Boolean(hasManualGrade),
+                notes: (ov.notes !== undefined && ov.notes !== '') ? ov.notes : t.notes
+            };
+        });
+    }
+
+    function normalizeArabicShortName(name) {
+        return String(name || '')
+            .replace(/[\u064B-\u065F\u0670]/g, '')
+            .replace(/[أإآٱ]/g, 'ا')
+            .replace(/ى/g, 'ي')
+            .replace(/ة/g, 'ه')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase();
+    }
+
+    function isTvtcPortalChromeLine(line) {
+        const t = String(line || '').trim();
+        if (!t) return true;
+        if (/^(عرض كل الخدمات|الملف الشخصي|الخدمات|متابعة الطلبات|الدعم الفني|التنبيهات|تسجيل الخروج|Home|Search|Edit|تفاصيل الدورة|الدورة التدريبية التعليمية|بيانات المتدربين|رقم الهوية|اسم المتدرب|الدرجة|تاريخ التسجيل|حالة التسجيل|طباعة الشهادة|تم اصدار الشهادة|مدفوعة|مشغل المنشأة)$/i.test(t)) return true;
+        if (/الشاخوري|جميع الحقوق محفوظة|PT-TVTC|أظهرمدخلات|أظهر مدخلات/i.test(t)) return true;
+        if (/^(سارية|منتهية|معتمدة|دورة تطويرية|دورة تأهيلية|حضوري|عن بعد|مدمج|لا|نعم|نشط|-)$/.test(t)) return true;
+        if (/^https?:\/\//i.test(t)) return true;
+        if (/^\d{4}-\d{2}-\d{2}/.test(t) || /^رقم الدورة/.test(t) || /^-?\s*(تاريخ|نمط|عدد|نوع|آخر موعد)/.test(t)) return true;
+        if (/^\d+\s*-\s*\d+\s*\/\s*\d+/.test(t) || /^\d+\s*\/\s*\d+$/.test(t)) return true;
+        return false;
+    }
+
+    function parseTvtcCoursePortalText(rawText) {
+        const text = String(rawText || '').replace(/\r\n/g, '\n').trim();
+        const urlCourseMatch = text.match(/\/program-services\/(\d{4,12})/i);
+        const noMd = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1').replace(/مشغل المنشأة/g, '');
+
+        const numMatch = noMd.match(/رقم\s*الدورة\s*[:：]?\s*(\d{4,12})/);
+        const courseNumber = (numMatch && numMatch[1]) || (urlCourseMatch && urlCourseMatch[1]) || '';
+
+        const startLblMatch = noMd.match(/-\s*تاريخ\s*البدء\s*[:：]?\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})|تاريخ\s*البدء\s*[:：]?\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})/);
+        const endLblMatch = noMd.match(/-\s*تاريخ\s*الانتهاء\s*[:：]?\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})|تاريخ\s*الانتهاء\s*[:：]?\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})/);
+        const rangeMatch = noMd.match(/(\d{4}[\/\-]\d{2}[\/\-]\d{2})\s*[-–—]\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})/);
+
+        const normDate = (d) => (d ? String(d).replace(/\//g, '-') : '');
+        const startDate = normDate((startLblMatch && (startLblMatch[1] || startLblMatch[2])) || (rangeMatch && rangeMatch[1]) || '');
+        const endDate = normDate((endLblMatch && (endLblMatch[1] || endLblMatch[2])) || (rangeMatch && rangeMatch[2]) || '');
+
+        const progTypeMatch = noMd.match(/نوع\s*البرنامج\s*[:：]?\s*(دورة\s*تطويرية|دورة\s*تأهيلية|برنامج\s*تأهيلي|برنامج\s*تطويري)/)
+            || noMd.match(/(?:^|\n)\s*(دورة\s*تطويرية|دورة\s*تأهيلية)\s*(?:\n|$)/);
+        const programType = progTypeMatch ? progTypeMatch[1].replace(/\s+/g, ' ').trim() : 'دورة تطويرية';
+
+        const modeMatch = noMd.match(/نمط\s*التدريب\s*[:：]?\s*(حضوري|عن\s*بعد|مدمج|إلكتروني)/)
+            || noMd.match(/(?:^|\n)\s*(حضوري|عن\s*بعد|مدمج)\s*(?:\n|$)/);
+        const trainingMode = modeMatch ? modeMatch[1].replace(/\s+/g, ' ').trim() : 'حضوري';
+
+        const statusMatch = noMd.match(/(?:^|\n)\s*(سارية|منتهية|معتمدة|ملغاة)\s*(?:\n|$)/);
+        const courseStatus = statusMatch ? statusMatch[1].trim() : 'سارية';
+
+        const monthsMatch = noMd.match(/عدد\s*الشهور\s*[:：]?\s*(\d+)/);
+        const daysMatch = noMd.match(/عدد\s*الأيام\s*[:：]?\s*(\d+)/);
+        const regDateMatch = noMd.match(/تاريخ\s*التسجيل\s*[:：]?\s*(\d{4}-\d{2}-\d{2})/);
+        const regDeadlineMatch = noMd.match(/آخر\s*موعد\s*للتسجيل\s*[:：]?\s*(\d{4}-\d{2}-\d{2})/);
+        const totalMatch = noMd.match(/\d+\s*-\s*\d+\s*\/\s*(\d+)/);
+
+        // Extract course name cleanly
+        const lines = noMd.split('\n').map(l => l.trim()).filter(Boolean);
+        let courseName = '';
+        const eduIdx = lines.findIndex(l => l === 'الدورة التدريبية التعليمية');
+        if (eduIdx >= 0 && lines[eduIdx + 1] && !isTvtcPortalChromeLine(lines[eduIdx + 1])) {
+            courseName = lines[eduIdx + 1];
+        }
+        if (!courseName) {
+            for (let i = 0; i < Math.min(lines.length, 18); i++) {
+                const ln = lines[i];
+                if (!/^\d{10}$/.test(ln) && !isTvtcPortalChromeLine(ln) && !/علي الشاخوري/.test(ln)) {
+                    courseName = ln;
+                    break;
+                }
+            }
+        }
+
+        // Extract trainee rows (supports both multi-line browser table copy AND single-line tabular rows)
+        const tableStart = noMd.indexOf('بيانات المتدربين');
+        const bodyLines = (tableStart >= 0 ? noMd.slice(tableStart) : noMd)
+            .split('\n').map(l => l.trim()).filter(Boolean);
+
+        const extractedTrainees = [];
+        const seenIds = new Set();
+        for (let i = 0; i < bodyLines.length; i++) {
+            const line = bodyLines[i];
+            const idMatch = line.match(/^([12]\d{9})(?:\s+(.*))?$/);
+            if (!idMatch) continue;
+            const nid = idMatch[1];
+            if (seenIds.has(nid)) continue;
+            seenIds.add(nid);
+
+            let name = '';
+            let grade = '';
+            let regDate = '';
+            let regStatus = 'نشط';
+
+            const inlineRest = (idMatch[2] || '').trim();
+            if (inlineRest) {
+                const tabParts = inlineRest.split(/\t+|\s{2,}/).map(s => s.trim()).filter(Boolean);
+                tabParts.forEach(part => {
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(part)) { if (!regDate) regDate = part; }
+                    else if (/^(نشط|منسحب|موقوف|مكتمل)$/.test(part)) { regStatus = part; }
+                    else if (/^\d{1,3}(\.\d+)?$/.test(part) && Number(part) <= 100) { grade = part; }
+                    else if (part === '-' || part === 'لا' || part === 'نعم') { /* skip empty grade/flags */ }
+                    else if (!name && /[\u0600-\u06FFa-zA-Z]/.test(part) && !/الشاخوري/.test(part)) { name = part; }
+                });
+            }
+
+            if (!name) {
+                for (let j = i + 1; j < Math.min(bodyLines.length, i + 9); j++) {
+                    const nxt = bodyLines[j];
+                    if (/^[12]\d{9}(?:\s|$)/.test(nxt) || /جميع الحقوق محفوظة|أظهرمدخلات|^\d+-\d+\/\d+/.test(nxt)) break;
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(nxt)) { if (!regDate) regDate = nxt; continue; }
+                    if (/^(نشط|منسحب|موقوف|مكتمل)$/.test(nxt)) { regStatus = nxt; continue; }
+                    if (/^(لا|نعم|-|Edit)$/.test(nxt)) continue;
+                    if (/^\d{1,3}(\.\d+)?$/.test(nxt) && Number(nxt) <= 100) {
+                        if (grade === '') grade = nxt;
+                        continue;
+                    }
+                    if (!name && !isTvtcPortalChromeLine(nxt) && /[\u0600-\u06FFa-zA-Z]{2,}/.test(nxt)) {
+                        name = nxt;
+                    }
+                }
+            }
+
+            extractedTrainees.push({
+                id: nid,
+                name: name || `متدرب ${nid}`,
+                grade,
+                regDate,
+                status: regStatus
+            });
+        }
+
+        return {
+            courseNumber,
+            courseName,
+            programType,
+            trainingMode,
+            courseStatus,
+            startDate,
+            endDate,
+            monthsCount: monthsMatch ? monthsMatch[1] : '',
+            daysCount: daysMatch ? daysMatch[1] : '',
+            regDate: regDateMatch ? regDateMatch[1] : '',
+            regDeadline: regDeadlineMatch ? regDeadlineMatch[1] : '',
+            portalTotalCount: totalMatch ? Number(totalMatch[1]) : extractedTrainees.length,
+            trainees: extractedTrainees
+        };
+    }
+    window.parseTvtcCoursePortalText = parseTvtcCoursePortalText;
+
+    function resolveBestGroupMatchForPortalTrainees(parsedTrainees) {
+        const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : [];
+        if (!parsedTrainees || parsedTrainees.length === 0) return { groupName: '', companyName: '', groupPool: [], matchScore: 0, matchedBy: 'none' };
+
+        const portalIdSet = new Set(parsedTrainees.map(t => cleanNationalId(t.id)).filter(Boolean));
+        const byGroup = new Map();
+        pool.forEach(t => {
+            const g = String(t.group || '').trim();
+            if (!g) return;
+            if (!byGroup.has(g)) byGroup.set(g, []);
+            byGroup.get(g).push(t);
+        });
+
+        let bestGrp = '';
+        let bestHits = 0;
+        let matchedBy = 'id';
+        byGroup.forEach((gList, gName) => {
+            let hits = 0;
+            gList.forEach(gt => {
+                const cid = cleanNationalId(gt.id);
+                if (cid && portalIdSet.has(cid)) hits++;
+            });
+            if (hits > bestHits) {
+                bestHits = hits;
+                bestGrp = gName;
+            }
+        });
+
+        // Secondary: Arabic short-name overlap if IDs were absent in local pool
+        if (bestHits === 0) {
+            const portalNames = parsedTrainees.map(pt => normalizeArabicShortName(pt.name)).filter(Boolean);
+            let bestNameHits = 0;
+            byGroup.forEach((gList, gName) => {
+                let nHits = 0;
+                const gNormNames = gList.map(gt => normalizeArabicShortName(gt.name));
+                portalNames.forEach(pn => {
+                    const pWords = pn.split(' ').filter(Boolean);
+                    if (pWords.length >= 2 && gNormNames.some(gn => gn.includes(pWords[0]) && gn.includes(pWords[pWords.length - 1]))) {
+                        nHits++;
+                    }
+                });
+                if (nHits > bestNameHits) {
+                    bestNameHits = nHits;
+                    bestGrp = gName;
+                }
+            });
+            if (bestNameHits >= 2) {
+                bestHits = bestNameHits;
+                matchedBy = 'name';
+            } else {
+                bestGrp = '';
+            }
+        }
+
+        const matchedList = bestGrp ? (byGroup.get(bestGrp) || []) : [];
+        const comp = (matchedList[0] && matchedList[0].company) || (bestGrp && typeof detectCompanyFromGroup === 'function' ? detectCompanyFromGroup(bestGrp) : '') || 'معهد الذهب الأسود للتدريب';
+        return { groupName: bestGrp, companyName: comp, groupPool: matchedList, matchScore: bestHits, matchedBy };
+    }
+
+    function buildMergedCohortTrainees(groupPoolTrainees, portalTrainees, existingCourseTrainees) {
+        const byId = new Map();
+        const order = [];
+        const touch = (rawT, defaults = {}) => {
+            const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(rawT.id) : String(rawT.id || '').trim();
+            if (!cid) return;
+            if (!byId.has(cid)) {
+                order.push(cid);
+                byId.set(cid, {
+                    id: cid,
+                    name: rawT.name || '',
+                    group: rawT.group || defaults.group || '',
+                    company: rawT.company || defaults.company || '',
+                    phone: rawT.phone || '',
+                    email: rawT.email || '',
+                    grade: '',
+                    notes: '',
+                    regDate: '',
+                    status: 'نشط'
+                });
+            }
+            const cur = byId.get(cid);
+            if (rawT.name && (!cur.name || rawT.name.length > cur.name.length)) cur.name = rawT.name;
+            if (rawT.group && !cur.group) cur.group = rawT.group;
+            if (rawT.company && !cur.company) cur.company = rawT.company;
+            if (rawT.phone && !cur.phone) cur.phone = rawT.phone;
+            if (rawT.email && !cur.email) cur.email = rawT.email;
+            if (rawT.grade !== undefined && rawT.grade !== null && String(rawT.grade).trim() !== '' && String(rawT.grade).trim() !== '-') {
+                cur.grade = String(rawT.grade).trim();
+            }
+            if (rawT.notes) cur.notes = rawT.notes;
+            if (rawT.regDate) cur.regDate = rawT.regDate;
+            if (rawT.status) cur.status = rawT.status;
+        };
+
+        (groupPoolTrainees || []).forEach(t => touch(t));
+        (existingCourseTrainees || []).forEach(t => touch(t));
+        (portalTrainees || []).forEach(pt => touch(pt));
+
+        return order.map(cid => byId.get(cid));
+    }
+
+    function upsertAccreditedCourseFromGroupSnapshot(groupName, snapshotTrainees, extraMeta = {}) {
+        const cleanG = (typeof cleanGroupNameForMatch === 'function')
+            ? cleanGroupNameForMatch(groupName)
+            : String(groupName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const list = loadAccreditedCourses();
+        const groupPool = (snapshotTrainees && snapshotTrainees.length > 0)
+            ? snapshotTrainees
+            : (typeof getUnifiedTraineesPool === 'function' ? getUnifiedTraineesPool().filter(t => t.group && cleanGroupNameForMatch(t.group) === cleanG) : []);
+
+        const meta = resolveInstGroupMetadata(groupName, groupPool, extraMeta.startDate || '', extraMeta.endDate || '', extraMeta.courseName || '');
+        let existing = null;
+        if (extraMeta.courseId) existing = list.find(c => c.id === extraMeta.courseId);
+        if (!existing && extraMeta.courseNumber) existing = list.find(c => String(c.courseNumber || '').trim() === String(extraMeta.courseNumber).trim());
+        if (!existing && cleanG) existing = list.find(c => cleanGroupNameForMatch(c.groupName) === cleanG);
+
+        const nowIso = new Date().toISOString();
+        const record = {
+            id: (existing && existing.id) || `ac_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+            groupName: (groupName && groupName !== 'ALL') ? groupName : ((existing && existing.groupName) || ''),
+            companyName: extraMeta.companyName || (existing && existing.companyName) || meta.companyName,
+            courseNumber: extraMeta.courseNumber || (existing && existing.courseNumber) || '',
+            courseName: extraMeta.courseName || (existing && existing.courseName) || meta.accreditedProgram,
+            programType: extraMeta.programType || (existing && existing.programType) || meta.programType || 'دورة تطويرية',
+            trainingMode: extraMeta.trainingMode || (existing && existing.trainingMode) || 'حضوري',
+            courseStatus: extraMeta.courseStatus || (existing && existing.courseStatus) || 'سارية',
+            startDate: extraMeta.startDate || (existing && existing.startDate) || meta.dates.startIso || '',
+            endDate: extraMeta.endDate || (existing && existing.endDate) || meta.dates.endIso || '',
+            monthsCount: extraMeta.monthsCount || (existing && existing.monthsCount) || '',
+            daysCount: extraMeta.daysCount || (existing && existing.daysCount) || '',
+            instructorFullName: (existing && existing.instructorFullName) || meta.instructorFullName || '',
+            approved: Boolean(extraMeta.approved || (existing && existing.approved)),
+            trainees: buildMergedCohortTrainees(groupPool, extraMeta.portalTrainees || [], existing ? existing.trainees : []),
+            updatedAt: nowIso
+        };
+
+        const idx = list.findIndex(c => c.id === record.id);
+        if (idx >= 0) list[idx] = record;
+        else list.unshift(record);
+        saveAccreditedCourses(list, true);
+
+        // Sync group contract dates & specialty if group linked
+        if (record.groupName && typeof getStoredGroupContracts === 'function' && typeof saveStoredGroupContracts === 'function') {
+            const contracts = getStoredGroupContracts();
+            const cg = cleanGroupNameForMatch(record.groupName);
+            const cIdx = contracts.findIndex(c => cleanGroupNameForMatch(c.group) === cg);
+            const contractPatch = {
+                company: record.companyName || detectCompanyFromGroup(record.groupName),
+                companyAr: typeof getCompanyArabicName === 'function' ? getCompanyArabicName(record.companyName || detectCompanyFromGroup(record.groupName)) : record.companyName,
+                group: record.groupName,
+                specialty: record.courseName,
+                courseCode: record.courseNumber || '',
+                start: record.startDate || '',
+                end: record.endDate || '',
+                note: record.courseNumber ? `دورة معتمدة رقم ${record.courseNumber}` : ''
+            };
+            if (cIdx >= 0) contracts[cIdx] = { ...contracts[cIdx], ...contractPatch };
+            else contracts.push(contractPatch);
+            saveStoredGroupContracts(contracts);
+        }
+
+        return record;
+    }
+    window.upsertAccreditedCourseFromGroupSnapshot = upsertAccreditedCourseFromGroupSnapshot;
+
+    function saveCurrentGroupToAccreditedCourses(approvedFlag) {
+        const { selectedCompany, selectedGroup, trainees: list } = getInstFilteredTrainees();
+        if (!selectedGroup || selectedGroup === 'ALL' || !list || list.length === 0) {
+            return showToast('⚠️ يرجى اختيار المجموعة أولاً لحفظها في الدورات المعتمدة', 'warning');
+        }
+        const saved = upsertAccreditedCourseFromGroupSnapshot(selectedGroup, list, {
+            companyName: selectedCompany !== 'ALL' ? selectedCompany : '',
+            approved: Boolean(approvedFlag)
+        });
+        refreshAccreditedCoursesUI();
+        switchInstSubTab('courses');
+        openAccreditedCourseWorkspace(saved.id);
+        showToast(`✅ تم حفظ المجموعة (${selectedGroup}) في صفحة الدورات المعتمدة (${saved.trainees.length} متدرب)!`, 'success');
+        return saved;
+    }
+    window.saveCurrentGroupToAccreditedCourses = saveCurrentGroupToAccreditedCourses;
+
+    function createBlankAccreditedCourse() {
+        const { selectedGroup, trainees: list } = getInstFilteredTrainees();
+        const useGrp = (selectedGroup && selectedGroup !== 'ALL') ? selectedGroup : '';
+        const saved = upsertAccreditedCourseFromGroupSnapshot(useGrp, useGrp ? list : [], {
+            courseName: 'دورة تدريبية جديدة',
+            programType: 'دورة تطويرية',
+            trainingMode: 'حضوري',
+            startDate: new Date().toISOString().slice(0, 10),
+            endDate: ''
+        });
+        refreshAccreditedCoursesUI();
+        openAccreditedCourseWorkspace(saved.id);
+        return saved;
+    }
+    window.createBlankAccreditedCourse = createBlankAccreditedCourse;
+
+    async function analyzeAndLinkTvtcPortalText() {
+        const ta = document.getElementById('tvtcPortalPasteInput');
+        const rawText = (ta ? ta.value : '').trim();
+        if (!rawText || rawText.length < 15) {
+            return showToast('⚠️ يرجى لصق النص المنسوخ من بوابة المؤسسة أولاً', 'warning');
+        }
+        const btn = document.getElementById('btnTvtcAnalyzeAndLink');
+        if (btn) { btn.disabled = true; btn.classList.add('opacity-60'); }
+        try {
+            // 1. Instant local deterministic extraction
+            let parsed = parseTvtcCoursePortalText(rawText);
+            let usedAiApi = false;
+
+            // 2. Optional Groq AI Cloud refinement when enabled & reachable
+            const useAiEl = document.getElementById('tvtcUseAiApiCheck');
+            const shouldTryAi = Boolean(useAiEl ? useAiEl.checked : false) && navigator.onLine !== false && typeof executeAiGenerationRequest === 'function';
+            if (shouldTryAi) {
+                try {
+                    const aiRes = await executeAiGenerationRequest({ action: 'parse_tvtc_course', rawText: rawText.slice(0, 12000) }, '', 7000);
+                    if (aiRes && aiRes.success && aiRes.data && typeof aiRes.data === 'object') {
+                        const ad = aiRes.data;
+                        usedAiApi = true;
+                        if (!parsed.courseNumber && ad.courseNumber) parsed.courseNumber = String(ad.courseNumber).trim();
+                        if (!parsed.courseName && ad.courseName) parsed.courseName = String(ad.courseName).trim();
+                        if (!parsed.startDate && ad.startDate) parsed.startDate = String(ad.startDate).trim();
+                        if (!parsed.endDate && ad.endDate) parsed.endDate = String(ad.endDate).trim();
+                        if (!parsed.programType && ad.programType) parsed.programType = String(ad.programType).trim();
+                        if (!parsed.trainingMode && ad.trainingMode) parsed.trainingMode = String(ad.trainingMode).trim();
+                        if (parsed.trainees.length === 0 && Array.isArray(ad.trainees)) {
+                            parsed.trainees = ad.trainees.map(t => ({
+                                id: cleanNationalId(t.id),
+                                name: String(t.name || '').trim(),
+                                grade: (t.grade && t.grade !== '-') ? String(t.grade).trim() : '',
+                                regDate: String(t.regDate || '').trim(),
+                                status: String(t.status || 'نشط').trim()
+                            })).filter(t => t.id);
+                        }
+                    }
+                } catch (aiErr) { /* silent resilient fallback to local parser */ }
+            }
+
+            // 3. Automatic target matching (Saved Courses first -> Group Pool match)
+            const manualTarget = document.getElementById('tvtcTargetCourseSelect')?.value || '';
+            const allSaved = loadAccreditedCourses();
+            let targetCourseId = '';
+            let matchedGroupName = '';
+            let matchedCompany = '';
+            let groupPool = [];
+            let matchInfoText = '';
+
+            if (manualTarget.startsWith('course:')) {
+                targetCourseId = manualTarget.slice(7);
+                const mc = getAccreditedCourseById(targetCourseId);
+                if (mc) {
+                    matchedGroupName = mc.groupName;
+                    matchedCompany = mc.companyName;
+                    matchInfoText = `ربط يدوي بالدورة المحفوظة (${mc.groupName || mc.courseName})`;
+                }
+            } else if (manualTarget.startsWith('group:')) {
+                matchedGroupName = manualTarget.slice(6);
+                matchInfoText = `ربط يدوي بالشعبة (${matchedGroupName})`;
+            }
+
+            if (!targetCourseId && !matchedGroupName) {
+                const portalIdSet = new Set(parsed.trainees.map(t => cleanNationalId(t.id)).filter(Boolean));
+                let bestSaved = null;
+                let bestSavedHits = 0;
+                allSaved.forEach(sc => {
+                    let hits = 0;
+                    (sc.trainees || []).forEach(st => {
+                        if (portalIdSet.has(cleanNationalId(st.id))) hits++;
+                    });
+                    if (hits > bestSavedHits) {
+                        bestSavedHits = hits;
+                        bestSaved = sc;
+                    }
+                });
+                const grpMatch = resolveBestGroupMatchForPortalTrainees(parsed.trainees);
+                if (bestSaved && bestSavedHits >= grpMatch.matchScore) {
+                    targetCourseId = bestSaved.id;
+                    matchedGroupName = bestSaved.groupName || grpMatch.groupName;
+                    matchedCompany = bestSaved.companyName || grpMatch.companyName;
+                    groupPool = grpMatch.groupPool;
+                    matchInfoText = `تم التطابق التلقائي مع الملف المحفوظ «${bestSaved.groupName || bestSaved.courseName}» (${bestSavedHits} هوية متطابقة)`;
+                } else if (grpMatch.groupName) {
+                    matchedGroupName = grpMatch.groupName;
+                    matchedCompany = grpMatch.companyName;
+                    groupPool = grpMatch.groupPool;
+                    matchInfoText = `تم الربط التلقائي مع مجموعة «${grpMatch.groupName}» (مطابقة ${grpMatch.matchScore} متدرب من أصل ${parsed.trainees.length}، واستيراد كامل كشف الشعبة: ${grpMatch.groupPool.length} متدرب)`;
+                } else {
+                    matchInfoText = `تم حفظ دورة جديدة مستقلة بالبيانات المستخرجة (${parsed.trainees.length} متدرب من النص)`;
+                }
+            } else if (matchedGroupName) {
+                groupPool = getUnifiedTraineesPool().filter(t => t.group && cleanGroupNameForMatch(t.group) === cleanGroupNameForMatch(matchedGroupName));
+            }
+
+            const savedRecord = upsertAccreditedCourseFromGroupSnapshot(matchedGroupName, groupPool, {
+                courseId: targetCourseId,
+                companyName: matchedCompany,
+                courseNumber: parsed.courseNumber,
+                courseName: parsed.courseName,
+                programType: parsed.programType,
+                trainingMode: parsed.trainingMode,
+                courseStatus: parsed.courseStatus,
+                startDate: parsed.startDate,
+                endDate: parsed.endDate,
+                monthsCount: parsed.monthsCount,
+                daysCount: parsed.daysCount,
+                portalTrainees: parsed.trainees
+            });
+
+            const banner = document.getElementById('tvtcParseResultBanner');
+            if (banner) {
+                banner.className = 'p-3.5 rounded-xl border text-xs font-bold bg-emerald-50 border-emerald-300 text-emerald-950 space-y-1';
+                banner.innerHTML = `
+                    <div>✅ <b>تم التحليل والربط والحفظ بنجاح${usedAiApi ? ' (Groq AI + التحليل المباشر)' : ''}:</b> ${escapeHtml(matchInfoText)}</div>
+                    <div class="text-[11px] text-emerald-800">رقم الدورة: <span class="font-mono font-black">${escapeHtml(savedRecord.courseNumber || 'غير محدد')}</span> • الدورة: <b>${escapeHtml(savedRecord.courseName)}</b> (${escapeHtml(savedRecord.programType)} • ${escapeHtml(savedRecord.trainingMode)}) • من <b>${escapeHtml(savedRecord.startDate || '--')}</b> إلى <b>${escapeHtml(savedRecord.endDate || '--')}</b> • إجمالي المتدربين المرتبطين: <b>${savedRecord.trainees.length}</b></div>
+                `;
+                banner.classList.remove('hidden');
+            }
+
+            refreshAccreditedCoursesUI();
+            openAccreditedCourseWorkspace(savedRecord.id);
+            showToast(`✅ تم ربط الدورة رقم ${savedRecord.courseNumber || '--'} وحفظ (${savedRecord.trainees.length}) متدرب بنجاح!`, 'success');
+            return savedRecord;
+        } finally {
+            if (btn) { btn.disabled = false; btn.classList.remove('opacity-60'); }
+        }
+    }
+    window.analyzeAndLinkTvtcPortalText = analyzeAndLinkTvtcPortalText;
+
+    function switchInstSubTab(subName) {
+        const expView = document.getElementById('instSubViewExport');
+        const crsView = document.getElementById('instSubViewCourses');
+        const btnExp = document.getElementById('instSubTabBtn_export');
+        const btnCrs = document.getElementById('instSubTabBtn_courses');
+        const isCourses = (subName === 'courses');
+        if (expView) expView.classList.toggle('hidden', isCourses);
+        if (crsView) crsView.classList.toggle('hidden', !isCourses);
+        if (btnExp) btnExp.className = !isCourses
+            ? 'flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 cursor-pointer bg-emerald-600 text-white shadow-sm'
+            : 'flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200';
+        if (btnCrs) btnCrs.className = isCourses
+            ? 'flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 cursor-pointer bg-emerald-600 text-white shadow-sm'
+            : 'flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200';
+        if (isCourses) refreshAccreditedCoursesUI();
+    }
+    window.switchInstSubTab = switchInstSubTab;
+
+    function refreshAccreditedCoursesUI() {
+        const list = loadAccreditedCourses();
+        const badge = document.getElementById('instAccreditedCoursesCountBadge');
+        if (badge) badge.textContent = String(list.length);
+
+        const targetSel = document.getElementById('tvtcTargetCourseSelect');
+        if (targetSel) {
+            const prevVal = targetSel.value;
+            let opts = '<option value="">✨ ربط تلقائي ذكي (بمطابقة الهويات والمجموعة)</option>';
+            list.forEach(c => {
+                opts += `<option value="course:${escapeHtml(c.id)}">📚 ${escapeHtml(c.groupName || c.courseName)} — رقم: ${escapeHtml(c.courseNumber || '--')}</option>`;
+            });
+            const grpSet = new Set();
+            if (typeof getUnifiedTraineesPool === 'function') {
+                getUnifiedTraineesPool().forEach(t => { if (t.group) grpSet.add(String(t.group).trim()); });
+            }
+            Array.from(grpSet).sort().forEach(g => {
+                opts += `<option value="group:${escapeHtml(g)}">👥 شعبة: ${escapeHtml(g)}</option>`;
+            });
+            targetSel.innerHTML = opts;
+            if (prevVal && Array.from(targetSel.options).some(o => o.value === prevVal)) targetSel.value = prevVal;
+        }
+
+        const dlGrp = document.getElementById('acGroupsDatalist');
+        if (dlGrp && typeof getUnifiedTraineesPool === 'function') {
+            const gs = Array.from(new Set(getUnifiedTraineesPool().map(t => String(t.group || '').trim()).filter(Boolean))).sort();
+            dlGrp.innerHTML = gs.map(g => `<option value="${escapeHtml(g)}">`).join('');
+        }
+        const dlInst = document.getElementById('acInstructorsDatalist');
+        if (dlInst) {
+            dlInst.innerHTML = (BGTI_ENTERPRISE_MASTER.instructors || []).map(n => `<option value="${escapeHtml(n)}">`).join('');
+        }
+
+        const grid = document.getElementById('instAccreditedCoursesList');
+        if (!grid) return;
+        if (list.length === 0) {
+            grid.innerHTML = `<div class="col-span-full p-6 rounded-2xl bg-slate-50 border border-dashed border-slate-300 text-center text-xs font-bold text-slate-500">لا توجد دورات معتمدة محفوظة بعد. احفظ أي مجموعة بعد تصدير ملف المؤسسة أو الصق نص بوابة المؤسسة أعلاه ليتم إنشاؤها وربطها تلقائياً.</div>`;
+            return;
+        }
+        grid.innerHTML = list.map(c => {
+            const isSel = c.id === activeAccreditedCourseId;
+            return `
+                <div class="p-4 rounded-2xl border-2 ${isSel ? 'border-emerald-500 bg-emerald-50/40' : 'border-slate-200 bg-slate-50/50'} space-y-2 transition">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-emerald-600 text-white font-mono">دورة #${escapeHtml(c.courseNumber || 'بانتظار الرقم')}</span>
+                                ${c.groupName ? `<span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-blue-100 text-blue-800">${escapeHtml(c.groupName)}</span>` : ''}
+                            </div>
+                            <h4 class="text-xs font-black text-slate-900 mt-1.5">${escapeHtml(c.courseName || 'دورة تدريبية')}</h4>
+                        </div>
+                    </div>
+                    <div class="text-[11px] font-bold text-slate-600 space-y-0.5">
+                        <div>📅 ${escapeHtml(c.startDate || '--')} ← ${escapeHtml(c.endDate || '--')}</div>
+                        <div>🏷️ ${escapeHtml(c.programType || 'دورة تطويرية')} • ${escapeHtml(c.trainingMode || 'حضوري')} • 👥 ${c.trainees ? c.trainees.length : 0} متدرب</div>
+                    </div>
+                    <div class="flex items-center gap-2 pt-1">
+                        <button type="button" onclick="openAccreditedCourseWorkspace('${escapeHtml(c.id)}')" class="flex-1 bg-slate-900 hover:bg-black text-white font-black text-[11px] py-2 rounded-xl transition cursor-pointer">
+                            📂 فتح وتعديل / تصدير
+                        </button>
+                        <button type="button" onclick="deleteAccreditedCourse('${escapeHtml(c.id)}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-[11px] px-3 py-2 rounded-xl border border-rose-200 transition cursor-pointer" title="حذف">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    window.refreshAccreditedCoursesUI = refreshAccreditedCoursesUI;
+
+    function deleteAccreditedCourse(courseId) {
+        if (!courseId || !confirm('هل تريد حذف سجل هذه الدورة المعتمدة؟')) return;
+        const next = loadAccreditedCourses().filter(c => c.id !== courseId);
+        saveAccreditedCourses(next, true);
+        if (activeAccreditedCourseId === courseId) {
+            activeAccreditedCourseId = '';
+            const wsEl = document.getElementById('instAccreditedCourseWorkspace');
+            if (wsEl) wsEl.classList.add('hidden');
+        }
+        refreshAccreditedCoursesUI();
+    }
+    window.deleteAccreditedCourse = deleteAccreditedCourse;
+
+    function renderActiveCourseTraineesRows(course) {
+        const tbody = document.getElementById('acEditTraineesTbody');
+        const cntEl = document.getElementById('acEditTraineesCount');
+        if (!tbody || !course) return;
+        const list = course.trainees || [];
+        if (cntEl) cntEl.textContent = String(list.length);
+        const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : [];
+        const poolById = new Map(pool.map(p => [cleanNationalId(p.id), p]));
+
+        tbody.innerHTML = list.map((tr, idx) => {
+            const cid = cleanNationalId(tr.id);
+            const liveRec = poolById.get(cid) || tr;
+            const perf = computeTraineePerformanceFromAttendance(liveRec, { startIso: course.startDate, endIso: course.endDate });
+            const attColor = perf.isPoorAttendance ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800';
+            return `
+                <tr data-ac-idx="${idx}" class="hover:bg-slate-50">
+                    <td class="p-2 text-center font-bold text-slate-500">${idx + 1}</td>
+                    <td class="p-2"><input type="text" data-ac-field="id" value="${escapeHtml(cid || tr.id || '')}" class="w-28 bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono text-xs font-bold text-slate-900"></td>
+                    <td class="p-2"><input type="text" data-ac-field="name" value="${escapeHtml(tr.name || '')}" class="w-full min-w-[150px] bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-900"></td>
+                    <td class="p-2 text-center"><span class="px-2 py-0.5 rounded-md text-[10px] font-black ${attColor}">${perf.attendanceRate}%</span></td>
+                    <td class="p-2 text-center"><input type="number" min="0" max="100" data-ac-field="grade" value="${escapeHtml(tr.grade !== undefined && tr.grade !== null ? tr.grade : '')}" placeholder="تلقائي: ${perf.score}" class="w-24 bg-white border border-slate-300 rounded-lg px-2 py-1 text-center font-mono text-xs font-black text-slate-900"></td>
+                    <td class="p-2"><input type="text" data-ac-field="notes" value="${escapeHtml(tr.notes || '')}" placeholder="اختياري" class="w-full min-w-[130px] bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs text-slate-700"></td>
+                    <td class="p-2 text-center"><button type="button" onclick="removeTraineeRowFromActiveCourse(${idx})" class="text-rose-600 hover:text-rose-800 font-black cursor-pointer">✕</button></td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function openAccreditedCourseWorkspace(courseId) {
+        const course = getAccreditedCourseById(courseId);
+        if (!course) return;
+        activeAccreditedCourseId = course.id;
+        const wsEl = document.getElementById('instAccreditedCourseWorkspace');
+        if (wsEl) wsEl.classList.remove('hidden');
+
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+        const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v || ''; };
+
+        setTxt('acWsBadgeCourseNo', `رقم الدورة: ${course.courseNumber || 'بانتظار الإدخال'}`);
+        setTxt('acWsBadgeGroup', `المجموعة: ${course.groupName || 'غير مربوطة'}`);
+        setTxt('acWsTitle', `${course.courseName || 'دورة معتمدة'}`);
+
+        setVal('acEditCourseNumber', course.courseNumber);
+        setVal('acEditCourseName', course.courseName);
+        setVal('acEditProgramType', course.programType || 'دورة تطويرية');
+        setVal('acEditTrainingMode', course.trainingMode || 'حضوري');
+        setVal('acEditStartDate', course.startDate);
+        setVal('acEditEndDate', course.endDate);
+        setVal('acEditGroupName', course.groupName);
+        setVal('acEditInstructor', course.instructorFullName);
+
+        renderActiveCourseTraineesRows(course);
+        refreshAccreditedCoursesUI();
+    }
+    window.openAccreditedCourseWorkspace = openAccreditedCourseWorkspace;
+
+    function collectEditedActiveCourseFromDom(course) {
+        if (!course) return null;
+        const val = (id) => (document.getElementById(id)?.value || '').trim();
+        const rows = Array.from(document.querySelectorAll('#acEditTraineesTbody tr[data-ac-idx]'));
+        const updatedTrainees = rows.map((trEl, idx) => {
+            const orig = (course.trainees && course.trainees[idx]) || {};
+            const getF = (f) => (trEl.querySelector(`[data-ac-field="${f}"]`)?.value || '').trim();
+            return {
+                ...orig,
+                id: cleanNationalId(getF('id') || orig.id),
+                name: getF('name') || orig.name,
+                grade: getF('grade'),
+                notes: getF('notes')
+            };
+        }).filter(t => t.id || t.name);
+
+        return {
+            ...course,
+            courseNumber: val('acEditCourseNumber'),
+            courseName: val('acEditCourseName') || course.courseName,
+            programType: val('acEditProgramType') || 'دورة تطويرية',
+            trainingMode: val('acEditTrainingMode') || 'حضوري',
+            startDate: val('acEditStartDate'),
+            endDate: val('acEditEndDate'),
+            groupName: val('acEditGroupName'),
+            instructorFullName: val('acEditInstructor'),
+            trainees: updatedTrainees,
+            updatedAt: new Date().toISOString()
+        };
+    }
+
+    function saveActiveAccreditedCourseEdits(silent = false) {
+        const cur = getAccreditedCourseById(activeAccreditedCourseId);
+        if (!cur) return null;
+        const updated = collectEditedActiveCourseFromDom(cur);
+        const list = loadAccreditedCourses();
+        const idx = list.findIndex(c => c.id === updated.id);
+        if (idx >= 0) list[idx] = updated;
+        else list.unshift(updated);
+        saveAccreditedCourses(list, true);
+
+        if (updated.groupName && typeof getStoredGroupContracts === 'function' && typeof saveStoredGroupContracts === 'function') {
+            const contracts = getStoredGroupContracts();
+            const cg = cleanGroupNameForMatch(updated.groupName);
+            const cIdx = contracts.findIndex(c => cleanGroupNameForMatch(c.group) === cg);
+            const cPatch = { group: updated.groupName, specialty: updated.courseName, courseCode: updated.courseNumber, start: updated.startDate, end: updated.endDate };
+            if (cIdx >= 0) contracts[cIdx] = { ...contracts[cIdx], ...cPatch };
+            else contracts.push(cPatch);
+            saveStoredGroupContracts(contracts);
+        }
+
+        openAccreditedCourseWorkspace(updated.id);
+        if (!silent) showToast(`💾 تم حفظ تعديلات الدورة (${updated.courseNumber || updated.courseName}) والدرجات بنجاح!`, 'success');
+        return updated;
+    }
+    window.saveActiveAccreditedCourseEdits = saveActiveAccreditedCourseEdits;
+
+    function syncActiveAccreditedCourseWithGroupPool() {
+        const cur = saveActiveAccreditedCourseEdits(true);
+        if (!cur || !cur.groupName) return showToast('⚠️ يرجى تحديد اسم المجموعة المرتبطة أولاً', 'warning');
+        const cleanG = cleanGroupNameForMatch(cur.groupName);
+        const groupPool = getUnifiedTraineesPool().filter(t => t.group && cleanGroupNameForMatch(t.group) === cleanG);
+        if (groupPool.length === 0) return showToast(`⚠️ لم يتم العثور على متدربين في المجموعة (${cur.groupName})`, 'warning');
+        cur.trainees = buildMergedCohortTrainees(groupPool, [], cur.trainees);
+        const list = loadAccreditedCourses();
+        const idx = list.findIndex(c => c.id === cur.id);
+        if (idx >= 0) list[idx] = cur;
+        saveAccreditedCourses(list, true);
+        openAccreditedCourseWorkspace(cur.id);
+        showToast(`🔄 تمت مزامنة جميع متدربي (${cur.groupName}) — الإجمالي الآن ${cur.trainees.length} متدرب!`, 'success');
+    }
+    window.syncActiveAccreditedCourseWithGroupPool = syncActiveAccreditedCourseWithGroupPool;
+
+    function addTraineeRowToActiveAccreditedCourse() {
+        const cur = saveActiveAccreditedCourseEdits(true);
+        if (!cur) return;
+        cur.trainees = cur.trainees || [];
+        cur.trainees.push({ id: '', name: '', group: cur.groupName || '', company: cur.companyName || '', grade: '', notes: '' });
+        const list = loadAccreditedCourses();
+        const idx = list.findIndex(c => c.id === cur.id);
+        if (idx >= 0) list[idx] = cur;
+        saveAccreditedCourses(list, true);
+        openAccreditedCourseWorkspace(cur.id);
+    }
+    window.addTraineeRowToActiveAccreditedCourse = addTraineeRowToActiveAccreditedCourse;
+
+    function removeTraineeRowFromActiveCourse(idx) {
+        const cur = saveActiveAccreditedCourseEdits(true);
+        if (!cur || !Array.isArray(cur.trainees)) return;
+        cur.trainees.splice(idx, 1);
+        const list = loadAccreditedCourses();
+        const cIdx = list.findIndex(c => c.id === cur.id);
+        if (cIdx >= 0) list[cIdx] = cur;
+        saveAccreditedCourses(list, true);
+        openAccreditedCourseWorkspace(cur.id);
+    }
+    window.removeTraineeRowFromActiveCourse = removeTraineeRowFromActiveCourse;
+
+    function buildExportTraineesForAccreditedCourse(course) {
+        const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : [];
+        const poolById = new Map(pool.map(p => [cleanNationalId(p.id), p]));
+        return (course.trainees || []).map(tr => {
+            const cid = cleanNationalId(tr.id);
+            const live = poolById.get(cid) || {};
+            const hasManualGrade = tr.grade !== undefined && tr.grade !== null && String(tr.grade).trim() !== '' && !isNaN(Number(tr.grade));
+            return {
+                ...live,
+                ...tr,
+                id: cid || tr.id,
+                name: tr.name || live.name || '',
+                group: course.groupName || tr.group || live.group || 'عام',
+                company: course.companyName || tr.company || live.company || 'معهد الذهب الأسود للتدريب',
+                phone: tr.phone || live.phone || '',
+                email: tr.email || live.email || '',
+                trainer: course.instructorFullName || live.trainer || '',
+                specialty: course.courseName || live.specialty || '',
+                finalGrade: hasManualGrade ? String(tr.grade).trim() : (live.finalGrade || ''),
+                manualGradeOverride: hasManualGrade,
+                notes: (tr.notes !== undefined && tr.notes !== '') ? tr.notes : (live.notes || '')
+            };
+        });
+    }
+
+    async function exportFromAccreditedCourse(courseId, formType, format, extraOpts = {}) {
+        const course = saveActiveAccreditedCourseEdits(true) || getAccreditedCourseById(courseId);
+        if (!course) return showToast('⚠️ يرجى فتح الدورة المعتمدة أولاً', 'warning');
+        const customTrainees = buildExportTraineesForAccreditedCourse(course);
+        if (customTrainees.length === 0) return showToast('⚠️ لا يوجد متدربون في هذه الدورة للتصدير', 'warning');
+        return await executeInstDynamicExport({
+            formType,
+            format,
+            startDate: course.startDate || '',
+            endDate: course.endDate || '',
+            courseOverride: course.courseName || '',
+            selectedGroup: course.groupName || 'كافة الشعب',
+            selectedCompany: course.companyName || 'ALL',
+            accreditedCourseId: course.id,
+            accreditedCourseObj: course,
+            customTrainees,
+            ...extraOpts
+        });
+    }
+    window.exportFromAccreditedCourse = exportFromAccreditedCourse;
+
+    function openAccreditedCourseExportModal(courseId) {
+        const course = saveActiveAccreditedCourseEdits(true) || getAccreditedCourseById(courseId);
+        if (!course) return;
+        const grpSel = document.getElementById('instGroupFilter');
+        if (grpSel && course.groupName) {
+            if (!Array.from(grpSel.options).some(o => o.value === course.groupName)) {
+                const o = document.createElement('option');
+                o.value = course.groupName; o.textContent = course.groupName;
+                grpSel.appendChild(o);
+            }
+            grpSel.value = course.groupName;
+        }
+        openInstExportModal();
+        const sIn = document.getElementById('instExpStartDate');
+        const eIn = document.getElementById('instExpEndDate');
+        if (sIn && course.startDate) sIn.value = course.startDate;
+        if (eIn && course.endDate) eIn.value = course.endDate;
+        const cSel = document.getElementById('instExpCourseOverride');
+        if (cSel && course.courseName) {
+            if (!Array.from(cSel.options).some(o => o.value === course.courseName)) {
+                const opt = document.createElement('option');
+                opt.value = course.courseName;
+                opt.textContent = `${course.courseName} (دورة #${course.courseNumber || '--'})`;
+                cSel.appendChild(opt);
+            }
+            cSel.value = course.courseName;
+        }
+        const feRadio = document.querySelector('input[name="instExpFormType"][value="training_followup"]');
+        if (feRadio) { feRadio.checked = true; onInstExpFormTypeChange(); }
+    }
+    window.openAccreditedCourseExportModal = openAccreditedCourseExportModal;
 
 
 
@@ -58840,6 +60023,10 @@ function openReportFromProfile() {
 
                     cloudArchiveData = stateMap['sys_archive_data_v1'] || null;
 
+                    if (stateMap['sys_inst_accredited_courses_v1'] && Array.isArray(stateMap['sys_inst_accredited_courses_v1']) && typeof mergeCloudAccreditedCourses === 'function') {
+                        mergeCloudAccreditedCourses(stateMap['sys_inst_accredited_courses_v1']);
+                    }
+
 
 
                     // Pull Courses & Tombstones from app_sync_state
@@ -60291,6 +61478,13 @@ function openReportFromProfile() {
 
                     upsertRows.push({ key: 'sys_trainee_gradebooks_v1', data: traineeGradebooks, updated_at: new Date().toISOString() });
 
+                }
+
+                if (typeof loadAccreditedCourses === 'function') {
+                    const acList = loadAccreditedCourses();
+                    if (Array.isArray(acList) && acList.length > 0) {
+                        upsertRows.push({ key: 'sys_inst_accredited_courses_v1', data: acList, updated_at: new Date().toISOString() });
+                    }
                 }
 
 

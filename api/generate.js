@@ -2261,6 +2261,71 @@ async function handleExecutiveReport(req, res, startTime) {
     data: generatedData
   });
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  TVTC PORTAL ACCREDITED COURSE EXTRACTOR (Structured JSON via Groq AI)
+// ══════════════════════════════════════════════════════════════════════════════
+async function handleParseTvtcCourse(req, res, startTime) {
+  const rawText = String(req.body?.rawText || '').trim();
+  if (!rawText || rawText.length < 10) {
+    return res.status(400).json({ success: false, error: 'النص المدخل قصير جداً للتحليل.' });
+  }
+  const rawApiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || '';
+  const apiKey = rawApiKey.trim().replace(/^["']|["']$/g, '');
+  const hasValidKey = Boolean(apiKey && apiKey !== 'YOUR_GROQ_API_KEY_HERE' && apiKey.length > 15);
+  if (!hasValidKey) {
+    return res.status(400).json({ success: false, error: 'GROQ_API_KEY غير مهيأ على الخادم.' });
+  }
+
+  const prompt = `استخرج بيانات الدورة المعتمدة والمتدربين بدقة من النص المنسوخ التالي من بوابة المؤسسة العامة للتدريب التقني والمهني (pt-web.tvtc.gov.sa) وأعد JSON فقط بدون أي نص إضافي:
+{
+  "courseNumber": "رقم الدورة بالأرقام فقط مثل 832108",
+  "courseName": "اسم الدورة التدريبية الدقيق مثل اساسيات اللحام بالقوس الكهربي",
+  "programType": "دورة تطويرية أو دورة تأهيلية",
+  "trainingMode": "حضوري أو عن بعد أو مدمج",
+  "courseStatus": "سارية أو منتهية",
+  "startDate": "YYYY-MM-DD",
+  "endDate": "YYYY-MM-DD",
+  "monthsCount": "رقم عدد الشهور أو فارغ",
+  "daysCount": "رقم عدد الأيام أو فارغ",
+  "regDate": "YYYY-MM-DD أو فارغ",
+  "regDeadline": "YYYY-MM-DD أو فارغ",
+  "trainees": [
+    { "id": "رقم الهوية المكون من 10 أرقام", "name": "اسم المتدرب", "grade": "الدرجة رقم أو فارغ", "regDate": "YYYY-MM-DD", "status": "حالة التسجيل" }
+  ]
+}
+
+تنبيه مهم: لا تُضف مشغّل المنشأة أو اسم المدير أو نصوص القوائم الجانبية ضمن المدربين أو المتدربين.
+
+النص المنسوخ:
+---
+${rawText.slice(0, 12000)}
+---`;
+
+  const groqCall = await callGroqChatCompletion({
+    prompt,
+    systemPrompt: 'أنت محلل بيانات رسمي تستخرج الحقول بدقة 100% من نصوص بوابة المؤسسة العامة للتدريب التقني والمهني بصيغة JSON صالحة فقط.',
+    apiKey,
+    model: AI_CONFIG.primaryModel,
+    temperature: 0.1
+  });
+
+  const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
+  if (groqCall.data && typeof groqCall.data === 'object') {
+    return res.status(200).json({
+      success: true,
+      source: 'groq_cloud',
+      model: groqCall.model,
+      processing_time_seconds: parseFloat(durationSec),
+      data: groqCall.data
+    });
+  }
+  return res.status(502).json({
+    success: false,
+    error: (groqCall.errors && groqCall.errors[0]) || 'تعذر استخراج JSON من الذكاء الاصطناعي'
+  });
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 //  MAIN HANDLER (Vercel Serverless Entrypoint)
 // ══════════════════════════════════════════════════════════════════════════════
@@ -2324,6 +2389,11 @@ export default async function handler(req, res) {
   // Route: Dedicated Assignment Generation
   if (req.body && (req.body.action === 'generate_assignment' || req.body.targetComponent === 'assignment')) {
     return handleDedicatedAssignmentGeneration(req, res, startTime);
+  }
+
+  // Route: TVTC Portal Accredited Course Parser
+  if (req.body && req.body.action === 'parse_tvtc_course') {
+    return handleParseTvtcCourse(req, res, startTime);
   }
 
   try {
