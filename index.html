@@ -13688,7 +13688,8 @@
                             </div>
                             <div class="sm:col-span-2">
                                 <label class="block font-black text-slate-700 mb-1">اسم الدورة / البرنامج التدريبي *</label>
-                                <input type="text" id="acEditCourseName" class="w-full bg-slate-50 border border-slate-300 focus:border-emerald-600 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none" placeholder="مثال: اساسيات اللحام بالقوس الكهربي">
+                                <input type="text" id="acEditCourseName" list="acOfficialProgramsDatalist" oninput="onAcEditCourseNameChanged()" class="w-full bg-slate-50 border border-slate-300 focus:border-emerald-600 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none" placeholder="اختر من البرامج الـ 9 المعتمدة أو اكتب اسم الدورة">
+                                <datalist id="acOfficialProgramsDatalist"></datalist>
                             </div>
                             <div>
                                 <label class="block font-black text-slate-700 mb-1">نوع البرنامج</label>
@@ -43547,6 +43548,17 @@ function openReportFromProfile() {
             { full: 'رضا نايف موسى آل مطيلق', id: '1091860211', nationality: 'سعودي', aliases: ['رضا مطيلق', 'رضا', 'مطيلق'] },
             { full: 'شرف الدين عثمان ابو فاطمة بلية', id: '2401481904', nationality: 'سوداني', aliases: ['شرف الدين', 'بلية'] }
         ],
+        officialPrograms: [
+            { no: 1, name: 'المهارات الكهربائية', ownership: 'خاص', mode: 'حضوري', type: 'دورة تأهيلية' },
+            { no: 2, name: 'إدخال البيانات ومعالجة النصوص', ownership: 'جاهزة', mode: 'حضوري', type: 'دورة تأهيلية' },
+            { no: 3, name: 'السكرتارية', ownership: 'جاهزة', mode: 'حضوري', type: 'دورة تأهيلية' },
+            { no: 4, name: 'نظم التشغيل وصيانة الحاسب الآلي', ownership: 'جاهزة', mode: 'حضوري', type: 'دورة تأهيلية' },
+            { no: 5, name: 'مسئول السلامة والصحة المهنية', ownership: 'خاص', mode: 'حضوري', type: 'دورة تأهيلية' },
+            { no: 6, name: 'المبادئ الأساسية للإدارة المكتبية و السكرتارية', ownership: 'خاص', mode: 'حضوري', type: 'دورة تطويرية' },
+            { no: 7, name: 'المهارات الاساسية في الاكسل', ownership: 'خاص', mode: 'حضوري', type: 'دورة تطويرية' },
+            { no: 8, name: 'أساسيات الصيانة الميكانيكية', ownership: 'خاص', mode: 'حضوري', type: 'دورة تطويرية' },
+            { no: 9, name: 'اساسيات اللحام بالقوس الكهربي', ownership: 'خاص', mode: 'حضوري', type: 'دورة تطويرية' }
+        ],
         qualifyingPrograms: [
             'المهارات الكهربائية',
             'إدخال البيانات ومعالجة النصوص',
@@ -43558,7 +43570,7 @@ function openReportFromProfile() {
         ],
         developmentalPrograms: [
             'المبادئ الأساسية للإدارة المكتبية و السكرتارية',
-            'المهارات الأساسية في الاكسل',
+            'المهارات الاساسية في الاكسل',
             'أساسيات الصيانة الميكانيكية',
             'اساسيات اللحام بالقوس الكهربي',
             'مقدمة في التشييد والبناء',
@@ -43611,25 +43623,35 @@ function openReportFromProfile() {
         const sp = String(rawSpecialty || '').trim();
         const norm = normalizeEnterpriseText(sp);
         if (!norm || norm === 'عام' || norm === 'اكثر من تخصص') {
-            return { program: 'المهارات الأساسية في الاكسل', type: 'دورة تطويرية', specialty: sp || 'تدريب فني ومهني', isEnglish: false };
+            return { program: 'المهارات الاساسية في الاكسل', type: 'دورة تطويرية', specialty: sp || 'تدريب فني ومهني', isEnglish: false };
         }
-        for (const qp of BGTI_ENTERPRISE_MASTER.qualifyingPrograms) {
-            if (norm.includes(normalizeEnterpriseText(qp))) {
-                return { program: qp, type: 'دورة تأهيلية', specialty: sp, isEnglish: isEnglishCourseName(qp) };
+        const sortedOfficial = (BGTI_ENTERPRISE_MASTER.officialPrograms || [])
+            .slice()
+            .sort((a, b) => normalizeEnterpriseText(b.name).length - normalizeEnterpriseText(a.name).length);
+        for (const op of sortedOfficial) {
+            const opN = normalizeEnterpriseText(op.name);
+            if (norm === opN || norm.includes(opN)) {
+                return { program: op.name, type: op.type, mode: op.mode, ownership: op.ownership, specialty: sp, isEnglish: isEnglishCourseName(op.name) };
             }
         }
-        for (const dp of BGTI_ENTERPRISE_MASTER.developmentalPrograms) {
-            if (norm.includes(normalizeEnterpriseText(dp))) {
-                return { program: dp, type: 'دورة تطويرية', specialty: sp, isEnglish: isEnglishCourseName(dp) };
+        const combinedLegacy = [
+            ...BGTI_ENTERPRISE_MASTER.qualifyingPrograms.map(name => ({ name, type: 'دورة تأهيلية' })),
+            ...BGTI_ENTERPRISE_MASTER.developmentalPrograms.map(name => ({ name, type: 'دورة تطويرية' }))
+        ].sort((a, b) => normalizeEnterpriseText(b.name).length - normalizeEnterpriseText(a.name).length);
+        for (const item of combinedLegacy) {
+            const itemN = normalizeEnterpriseText(item.name);
+            if (norm === itemN || norm.includes(itemN)) {
+                return { program: item.name, type: item.type, specialty: sp, isEnglish: isEnglishCourseName(item.name) };
             }
         }
+        if (/نظم\s*التشغيل|صيانه\s*الحاسب/i.test(norm)) return { program: 'نظم التشغيل وصيانة الحاسب الآلي', type: 'دورة تأهيلية', specialty: sp, isEnglish: false };
         if (/لحام|weld/i.test(norm)) return { program: 'اساسيات اللحام بالقوس الكهربي', type: 'دورة تطويرية', specialty: sp, isEnglish: false };
         if (/كهرب|electr/i.test(norm)) return { program: 'المهارات الكهربائية', type: 'دورة تأهيلية', specialty: sp, isEnglish: false };
         if (/انابيب|pipe/i.test(norm)) return { program: 'المهارات الأساسية في تمديد الأنابيب', type: 'دورة تأهيلية', specialty: sp, isEnglish: false };
+        if (/حاسب|ادخال|بيانات|نصوص|data|computer/i.test(norm)) return { program: 'إدخال البيانات ومعالجة النصوص', type: 'دورة تأهيلية', specialty: sp, isEnglish: false };
         if (/صيانه|ميكانيك|معدات|mech|scaffold|rigger/i.test(norm)) return { program: 'أساسيات الصيانة الميكانيكية', type: 'دورة تطويرية', specialty: sp, isEnglish: false };
         if (/انشاءات|تشييد|بناء|const/i.test(norm)) return { program: 'مقدمة في التشييد والبناء', type: 'دورة تطويرية', specialty: sp, isEnglish: false };
-        if (/اكسل|excel/i.test(norm)) return { program: 'المهارات الأساسية في الاكسل', type: 'دورة تطويرية', specialty: sp, isEnglish: false };
-        if (/حاسب|ادخال|بيانات|نصوص|data|computer/i.test(norm)) return { program: 'إدخال البيانات ومعالجة النصوص', type: 'دورة تأهيلية', specialty: sp, isEnglish: false };
+        if (/اكسل|excel/i.test(norm)) return { program: 'المهارات الاساسية في الاكسل', type: 'دورة تطويرية', specialty: sp, isEnglish: false };
         if (/سلامه|hse|safety/i.test(norm)) return { program: 'مسئول السلامة والصحة المهنية', type: 'دورة تأهيلية', specialty: sp, isEnglish: false };
         if (/سكرتار|اداره|office|admin/i.test(norm)) return { program: 'المبادئ الأساسية للإدارة المكتبية و السكرتارية', type: 'دورة تطويرية', specialty: sp, isEnglish: false };
         if (/انجليز|english|communication/i.test(norm)) return { program: 'Effective communication skills in English', type: 'دورة تطويرية', specialty: 'اللغة الإنجليزية', isEnglish: true };
@@ -44051,10 +44073,35 @@ function openReportFromProfile() {
         }
     };
 
+    BGTI_SPECIALTY_PRACTICAL_PROFILES.computer_maintenance = {
+        unitName: 'وحدة نظم التشغيل وتجميع وصيانة مكونات الحاسب الآلي (OS & Hardware)',
+        practicalTask: 'فك وتجميع مكونات الحاسب الداخلية وتثبيت نظام التشغيل والتعريفات وتشخيص أعطال العتاد والبرمجيات',
+        units: [
+            ['السلامة الكهربائية ومكافحة الكهرباء الساكنة (ESD)', 'تطبيق قواعد تفريغ الشحنات وحماية اللوحة الأم والمعالج'],
+            ['مكونات الحاسب المادية (Motherboard / CPU / RAM / Storage)', 'تمييز وفحص وتركيب مكونات وحدة النظام ومزود الطاقة'],
+            ['تثبيت وتهيئة أنظمة التشغيل والتعريفات (Windows / BIOS)', 'ضبط إعدادات الإقلاع وتقسيم الأقراص وتثبيت التعريفات الأساسية'],
+            ['تشخيص الأعطال المادية والبرمجية وإصلاحها', 'استخدام أدوات الفحص ومعالجة أعطال الإقلاع والذاكرة والحرارة'],
+            ['الوقاية الدورية والشبكات الأساسية والتقييم العملي', 'تنظيف المكونات وضبط الشبكة والنسخ الاحتياطي النهائي']
+        ],
+        criteria: [
+            'تطبيق احتياطات السلامة ومنع التفريغ الكهروستاتيكي (ESD) قبل لمس المكونات.',
+            'فك وتجميع مكونات الحاسب الداخلية (اللوحة الأم، المعالج، الذاكرة، القرص) بدقة.',
+            'فحص مزود الطاقة (PSU) وتوصيل كوابل الطاقة والبيانات بالصورة الصحيحة.',
+            'ضبط إعدادات الـ BIOS / UEFI وترتيب وسائط الإقلاع (Boot Order).',
+            'تهيئة وتقسيم الأقراص (Partitions) وتثبيت نظام التشغيل دون أخطاء.',
+            'تثبيت تعريفات الأجهزة الأساسية (Drivers) وتحديثات النظام والتأكد من استقرارها.',
+            'تشخيص أعطال العتاد الشائعة (صوت الصفارات، ارتفاع الحرارة، عطل الذاكرة) عملياً.',
+            'استخدام أدوات الصيانة البرمجية وفحص سلامة القرص واستعادة النظام.',
+            'إعداد الاتصال الشبكي المحلي والتحقق من أداء الجهاز بعد الصيانة.',
+            'إنجاز الصيانة خلال الزمن المحدد وإعادة أدوات الورشة مرتبة.'
+        ]
+    };
+
     function getSpecialtyPracticalProfile(progInfoOrMeta) {
         const refText = normalizeEnterpriseText(
             (progInfoOrMeta && (progInfoOrMeta.accreditedProgram || progInfoOrMeta.specialty || progInfoOrMeta.program || '')) || ''
         );
+        if (/نظم\s*التشغيل|صيانه\s*الحاسب|تجميع\s*الحاسب/i.test(refText)) return BGTI_SPECIALTY_PRACTICAL_PROFILES.computer_maintenance;
         if (/لحام|weld/i.test(refText)) return BGTI_SPECIALTY_PRACTICAL_PROFILES.welding;
         if (/كهرب|electr/i.test(refText)) return BGTI_SPECIALTY_PRACTICAL_PROFILES.electrical;
         if (/انابيب|pipe/i.test(refText)) return BGTI_SPECIALTY_PRACTICAL_PROFILES.piping;
@@ -46609,7 +46656,16 @@ function openReportFromProfile() {
         }
         const dlInst = document.getElementById('acInstructorsDatalist');
         if (dlInst) {
-            dlInst.innerHTML = (BGTI_ENTERPRISE_MASTER.instructors || []).map(n => `<option value="${escapeHtml(n)}">`).join('');
+            dlInst.innerHTML = (BGTI_ENTERPRISE_MASTER.instructors || []).map(n => {
+                const full = typeof n === 'string' ? n : (n && n.full) || '';
+                return full ? `<option value="${escapeHtml(full)}">` : '';
+            }).join('');
+        }
+        const dlProgs = document.getElementById('acOfficialProgramsDatalist');
+        if (dlProgs) {
+            dlProgs.innerHTML = (BGTI_ENTERPRISE_MASTER.officialPrograms || []).map(op =>
+                `<option value="${escapeHtml(op.name)}">${escapeHtml(op.type)} • ${escapeHtml(op.mode)} (${escapeHtml(op.ownership)})</option>`
+            ).join('');
         }
 
         const grid = document.getElementById('instAccreditedCoursesList');
@@ -46689,6 +46745,21 @@ function openReportFromProfile() {
             `;
         }).join('');
     }
+
+    function onAcEditCourseNameChanged() {
+        const nameVal = (document.getElementById('acEditCourseName')?.value || '').trim();
+        if (!nameVal) return;
+        const info = resolveAccreditedProgramInfo(nameVal);
+        const typeSel = document.getElementById('acEditProgramType');
+        const modeSel = document.getElementById('acEditTrainingMode');
+        if (typeSel && info.type && Array.from(typeSel.options).some(o => o.value === info.type)) {
+            typeSel.value = info.type;
+        }
+        if (modeSel && info.mode && Array.from(modeSel.options).some(o => o.value === info.mode)) {
+            modeSel.value = info.mode;
+        }
+    }
+    window.onAcEditCourseNameChanged = onAcEditCourseNameChanged;
 
     function openAccreditedCourseWorkspace(courseId) {
         const course = getAccreditedCourseById(courseId);
