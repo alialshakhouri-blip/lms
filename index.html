@@ -44863,8 +44863,8 @@ function openReportFromProfile() {
         rows.push({ r: fStart, ht: 26 }, { r: fStart + 1, ht: 24 }, { r: fStart + 2, ht: 26 });
         merges.push(`A${fStart}:C${fStart}`, `A${fStart + 1}:C${fStart + 1}`, `A${fStart + 2}:C${fStart + 2}`);
         cells.push({ r: fStart, c: 0, value: `اسم المدرب : ${meta.instructorFullName}`, style: signSt });
-        cells.push({ r: fStart + 1, c: 0, value: 'التوقيع: ...................................', style: signSt });
-        cells.push({ r: fStart + 2, c: 0, value: 'التاريخ: ........ / ........ / ..........', style: signSt });
+        cells.push({ r: fStart + 1, c: 0, value: 'التوقيع', style: signSt });
+        cells.push({ r: fStart + 2, c: 0, value: 'التاريخ', style: signSt });
         return {
             name: sheetTitle,
             colWidths: [8, 32, 20, 18, 22],
@@ -45305,7 +45305,7 @@ function openReportFromProfile() {
             cells.push({ r: rr, c: 0, value: tier[0], style: tSt });
             cells.push({ r: rr, c: 1, value: tier[1], style: tSt });
             if (idx === 0) cells.push({ r: rr, c: 3, value: `اسم المدرب : ${meta.instructorFullName}`, style: sigSt });
-            if (idx === 1) cells.push({ r: rr, c: 3, value: 'توقيع المدرب : ............................................', style: sigSt });
+            if (idx === 1) cells.push({ r: rr, c: 3, value: 'توقيع المدرب', style: sigSt });
         });
 
         return {
@@ -45449,9 +45449,9 @@ function openReportFromProfile() {
                 <div style="font-size:13px; font-weight:800; color:#000; line-height:1.9; margin:8px 4px 10px 4px;">
                     <div>اسم البرنامج التدريبي : ${escapeHtml(meta.accreditedProgram)}</div>
                     <div>نوع البرنامج : ${escapeHtml(meta.programType)}</div>
-                    <div>رقم الدورة : ${escapeHtml(meta.courseCode)}</div>
-                    <div>تاريخ البدء : ${escapeHtml(meta.dates.startDisplay)} &nbsp;&nbsp;&nbsp;&nbsp; تاريخ الانتهاء : ${escapeHtml(meta.dates.endDisplay)}</div>
-                    <div>المجموعة : ${escapeHtml(gName)}</div>
+                    <div>رقم الدورة : <bdi dir="ltr">${escapeHtml(meta.courseCode)}</bdi></div>
+                    <div>تاريخ البدء : <bdi dir="ltr">${escapeHtml(meta.dates.startDisplay)}</bdi> &nbsp;&nbsp;&nbsp;&nbsp; تاريخ الانتهاء : <bdi dir="ltr">${escapeHtml(meta.dates.endDisplay)}</bdi></div>
+                    <div>المجموعة : <bdi dir="ltr">${escapeHtml(gName)}</bdi></div>
                 </div>
                 <table style="width:100%; border-collapse:collapse; font-size:11px;">
                     <thead>
@@ -45465,10 +45465,10 @@ function openReportFromProfile() {
                     </thead>
                     <tbody>${rows}</tbody>
                 </table>
-                <div style="margin-top:18px; font-size:13px; font-weight:800; color:#000; line-height:2;">
+                <div style="margin-top:18px; font-size:13px; font-weight:800; color:#000; line-height:2.2;">
                     <div>اسم المدرب : ${escapeHtml(meta.instructorFullName)}</div>
-                    <div>التوقيع: ...................................</div>
-                    <div>التاريخ: ........ / ........ / ..........</div>
+                    <div>التوقيع</div>
+                    <div>التاريخ</div>
                 </div>
             </div>
         `;
@@ -45659,7 +45659,12 @@ function openReportFromProfile() {
                 <table style="width:100%; border-collapse:collapse; border:3px double #111; font-size:11.5px; margin-bottom:10px;">
                     <tr>
                         <td style="background:#CCFFCC; color:#000; font-weight:900; border:1.5px solid #111; padding:5px 8px; width:24%; text-align:center;">اسم المتدرب</td>
-                        <td style="border:1.5px solid #111; padding:5px 10px; font-weight:800;">${escapeHtml(nt.fullName)} &nbsp; (الهوية: ${escapeHtml(nt.cleanId)} | المجموعة: ${escapeHtml(nt.group)})</td>
+                        <td style="border:1.5px solid #111; padding:5px 10px; font-weight:800;">
+                            <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px;">
+                                <span>${escapeHtml(nt.fullName)}</span>
+                                <span style="font-size:10.5px; font-weight:800; color:#1e293b;">الهوية: <bdi dir="ltr">${escapeHtml(nt.cleanId)}</bdi> &nbsp;|&nbsp; المجموعة: <bdi dir="ltr">${escapeHtml(nt.group)}</bdi></span>
+                            </div>
+                        </td>
                     </tr>
                     <tr>
                         <td style="background:#CCFFCC; color:#000; font-weight:900; border:1.5px solid #111; padding:5px 8px; text-align:center;">البرنامج التدريبي</td>
@@ -45667,7 +45672,10 @@ function openReportFromProfile() {
                     </tr>
                     <tr>
                         <td style="background:#CCFFCC; color:#000; font-weight:900; border:1.5px solid #111; padding:5px 8px; text-align:center;">الوحدة / المادة</td>
-                        <td style="border:1.5px solid #111; padding:5px 10px; font-weight:700;">${escapeHtml(profile.unitName)} &nbsp; | &nbsp; الفترة: ${escapeHtml(meta.dates.startDisplay)} إلى ${escapeHtml(meta.dates.endDisplay)}</td>
+                        <td style="border:1.5px solid #111; padding:5px 10px; font-weight:700;">
+                            <div>${escapeHtml(profile.unitName)}</div>
+                            <div style="font-size:10.5px; font-weight:700; color:#334155; margin-top:2px;">الفترة: <bdi dir="ltr">${escapeHtml(meta.dates.startDisplay)}</bdi> إلى <bdi dir="ltr">${escapeHtml(meta.dates.endDisplay)}</bdi></div>
+                        </td>
                     </tr>
                     <tr>
                         <td style="background:#CCFFCC; color:#000; font-weight:900; border:1.5px solid #111; padding:5px 8px; text-align:center;">المهمة العملية</td>
@@ -45710,19 +45718,212 @@ function openReportFromProfile() {
                         <tr><td style="border:1px solid #333;padding:3px 6px;background:#FFFFCC;text-align:center;">≥ 60%</td><td style="border:1px solid #333;padding:3px 8px;background:#FFFFCC;text-align:center;">متوسط</td></tr>
                         <tr><td style="border:1px solid #333;padding:3px 6px;background:#FF9999;text-align:center;">&lt; 60%</td><td style="border:1px solid #333;padding:3px 8px;background:#FF9999;text-align:center;">دون المستوى المطلوب</td></tr>
                     </table>
-                    <div style="flex:1; font-size:12px; font-weight:800; color:#000; line-height:2.2; padding-top:8px;">
+                    <div style="flex:1; font-size:12.5px; font-weight:800; color:#000; line-height:2.4; padding-top:8px; padding-right:10px;">
                         <div>اسم المدرب : ${escapeHtml(meta.instructorFullName)}</div>
-                        <div>توقيع المدرب : ............................................</div>
+                        <div>توقيع المدرب</div>
                     </div>
                 </div>
             </div>
         `;
     }
 
+    function splitInstPdfHtmlIntoPageNodes(htmlString) {
+        const temp = document.createElement('div');
+        temp.innerHTML = htmlString;
+        const pageChunks = [];
+
+        Array.from(temp.children).forEach(child => {
+            const hasInternalBeforeBreak = Array.from(child.children).some(sub => {
+                const st = (sub.getAttribute('style') || '').toLowerCase();
+                return st.includes('page-break-before') || st.includes('break-before');
+            });
+            if (hasInternalBeforeBreak) {
+                const outerStyle = child.getAttribute('style') || '';
+                let curGroup = document.createElement('div');
+                curGroup.setAttribute('style', outerStyle);
+                Array.from(child.children).forEach(sub => {
+                    const st = (sub.getAttribute('style') || '').toLowerCase();
+                    if (st.includes('page-break-before') || st.includes('break-before')) {
+                        if (curGroup.children.length > 0) pageChunks.push(curGroup);
+                        curGroup = document.createElement('div');
+                        curGroup.setAttribute('style', outerStyle);
+                    } else {
+                        curGroup.appendChild(sub.cloneNode(true));
+                    }
+                });
+                if (curGroup.children.length > 0) pageChunks.push(curGroup);
+            } else {
+                const cloned = child.cloneNode(true);
+                cloned.style.pageBreakAfter = '';
+                cloned.style.breakAfter = '';
+                cloned.style.pageBreakBefore = '';
+                cloned.style.breakBefore = '';
+                pageChunks.push(cloned);
+            }
+        });
+
+        if (pageChunks.length === 0) {
+            const fallbackDiv = document.createElement('div');
+            fallbackDiv.innerHTML = htmlString;
+            pageChunks.push(fallbackDiv);
+        }
+        return pageChunks;
+    }
+
+    async function ensureInlineDataUrlImages(rootEl) {
+        const imgs = Array.from(rootEl.querySelectorAll('img'));
+        await Promise.all(imgs.map(img => new Promise(resolve => {
+            const finish = () => {
+                try {
+                    const src = img.getAttribute('src') || '';
+                    if (src && !src.startsWith('data:') && img.naturalWidth > 0) {
+                        const c = document.createElement('canvas');
+                        c.width = img.naturalWidth;
+                        c.height = img.naturalHeight;
+                        c.getContext('2d').drawImage(img, 0, 0);
+                        img.setAttribute('src', c.toDataURL('image/png'));
+                    }
+                } catch (e) {}
+                resolve();
+            };
+            if (img.complete) finish();
+            else {
+                img.onload = finish;
+                img.onerror = resolve;
+                setTimeout(resolve, 250);
+            }
+        })));
+    }
+
     async function renderInstHtmlToPdfBlob(htmlString, orientation) {
         if (typeof html2pdf === 'undefined') {
             throw new Error('مكتبة html2pdf غير محملة');
         }
+        const isLandscape = (orientation === 'landscape');
+        const orient = isLandscape ? 'landscape' : 'portrait';
+        const renderWidth = isLandscape ? 1040 : 740;
+        const pageWmm = isLandscape ? 297 : 210;
+        const pageHmm = isLandscape ? 210 : 297;
+        const marginMm = 5;
+        const usableWmm = pageWmm - marginMm * 2;
+        const usableHmm = pageHmm - marginMm * 2;
+        const maxPagePxH = Math.floor(renderWidth * (usableHmm / usableWmm));
+        const renderScale = 2;
+
+        // Primary path: Native Browser SVG <foreignObject> -> Canvas -> jsPDF (Zero RTL Bidi scramble or dot/letter overlap)
+        try {
+            const pageNodes = splitInstPdfHtmlIntoPageNodes(htmlString);
+            const probeHost = document.createElement('div');
+            probeHost.style.cssText = `position:fixed; left:-99999px; top:0; width:${renderWidth}px; background:#ffffff; z-index:-1;`;
+            document.body.appendChild(probeHost);
+
+            const emptySeed = document.createElement('div');
+            const doc = await html2pdf().set({ jsPDF: { unit: 'mm', format: 'a4', orientation: orient } }).from(emptySeed).toPdf().get('pdf');
+            let firstPageUsed = false;
+
+            try {
+                for (let pi = 0; pi < pageNodes.length; pi++) {
+                    const wrap = document.createElement('div');
+                    wrap.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+                    wrap.style.cssText = `width:${renderWidth}px; padding:10px; box-sizing:border-box; background:#ffffff; color:#000000; direction:rtl; font-family:'Times New Roman','Arial',sans-serif;`;
+                    wrap.appendChild(pageNodes[pi]);
+                    probeHost.innerHTML = '';
+                    probeHost.appendChild(wrap);
+
+                    await ensureInlineDataUrlImages(wrap);
+                    const totalH = Math.max(100, Math.ceil(wrap.scrollHeight) + 6);
+
+                    // Collect safe horizontal split boundaries (table rows + block containers)
+                    const wrapRect = wrap.getBoundingClientRect();
+                    const breakYSet = new Set([0, totalH]);
+                    wrap.querySelectorAll('tr, table, div').forEach(el => {
+                        const r = el.getBoundingClientRect();
+                        const bot = Math.round(r.bottom - wrapRect.top);
+                        if (bot > 20 && bot < totalH) breakYSet.add(bot);
+                    });
+                    const safeBreaks = Array.from(breakYSet).sort((a, b) => a - b);
+
+                    const serialized = new XMLSerializer().serializeToString(wrap);
+                    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${renderWidth}" height="${totalH}"><foreignObject x="0" y="0" width="${renderWidth}" height="${totalH}">${serialized}</foreignObject></svg>`;
+                    const svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+
+                    const svgImg = new Image();
+                    await new Promise((resolve, reject) => {
+                        svgImg.onload = resolve;
+                        svgImg.onerror = reject;
+                        svgImg.src = svgUrl;
+                    });
+
+                    const fullCanvas = document.createElement('canvas');
+                    fullCanvas.width = renderWidth * renderScale;
+                    fullCanvas.height = totalH * renderScale;
+                    const fCtx = fullCanvas.getContext('2d');
+                    fCtx.fillStyle = '#FFFFFF';
+                    fCtx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
+                    fCtx.scale(renderScale, renderScale);
+                    fCtx.drawImage(svgImg, 0, 0);
+
+                    const slices = [];
+                    if (totalH <= maxPagePxH) {
+                        slices.push({ y: 0, h: totalH });
+                    } else {
+                        let curY = 0;
+                        while (curY < totalH - 4) {
+                            const limit = curY + maxPagePxH;
+                            if (limit >= totalH) {
+                                slices.push({ y: curY, h: totalH - curY });
+                                break;
+                            }
+                            let cut = -1;
+                            for (let bi = safeBreaks.length - 1; bi >= 0; bi--) {
+                                if (safeBreaks[bi] > curY + 60 && safeBreaks[bi] <= limit) {
+                                    cut = safeBreaks[bi];
+                                    break;
+                                }
+                            }
+                            if (cut <= curY) cut = limit;
+                            slices.push({ y: curY, h: cut - curY });
+                            curY = cut;
+                        }
+                    }
+
+                    for (let si = 0; si < slices.length; si++) {
+                        const sl = slices[si];
+                        const sliceCanvas = document.createElement('canvas');
+                        sliceCanvas.width = renderWidth * renderScale;
+                        sliceCanvas.height = Math.max(2, Math.ceil(sl.h * renderScale));
+                        const sCtx = sliceCanvas.getContext('2d');
+                        sCtx.fillStyle = '#FFFFFF';
+                        sCtx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+                        sCtx.drawImage(
+                            fullCanvas,
+                            0, Math.floor(sl.y * renderScale), fullCanvas.width, sliceCanvas.height,
+                            0, 0, sliceCanvas.width, sliceCanvas.height
+                        );
+
+                        if (firstPageUsed) doc.addPage('a4', orient);
+                        firstPageUsed = true;
+
+                        let drawWmm = usableWmm;
+                        let drawHmm = drawWmm * (sl.h / renderWidth);
+                        if (drawHmm > usableHmm) {
+                            const k = usableHmm / drawHmm;
+                            drawHmm *= k;
+                            drawWmm *= k;
+                        }
+                        const offsetXmm = marginMm + (usableWmm - drawWmm) / 2;
+                        const jpgData = sliceCanvas.toDataURL('image/jpeg', 0.96);
+                        doc.addImage(jpgData, 'JPEG', offsetXmm, marginMm, drawWmm, drawHmm, undefined, 'FAST');
+                    }
+                }
+                return doc.output('blob');
+            } finally {
+                document.body.removeChild(probeHost);
+            }
+        } catch (svgErr) {
+            console.warn('SVG foreignObject PDF fallback to html2pdf:', svgErr);
+        }
+
         const prevScrollX = window.scrollX;
         const prevScrollY = window.scrollY;
         window.scrollTo(0, 0);
@@ -45731,10 +45932,9 @@ function openReportFromProfile() {
             host = document.createElement('div');
             host.id = 'instExportPdfRenderHost';
         }
-        const renderWidth = orientation === 'landscape' ? '1040px' : '740px';
         document.body.prepend(host);
         host.className = '';
-        host.style.cssText = `position:relative; width:${renderWidth}; margin:0; padding:10px; background:#ffffff; direction:rtl; z-index:320; display:block; visibility:visible;`;
+        host.style.cssText = `position:relative; width:${renderWidth}px; margin:0; padding:10px; box-sizing:border-box; background:#ffffff; direction:rtl; z-index:320; display:block; visibility:visible;`;
         host.innerHTML = htmlString;
         try {
             const imgs = host.querySelectorAll('img');
@@ -45745,7 +45945,7 @@ function openReportFromProfile() {
                 filename: 'export.pdf',
                 image: { type: 'jpeg', quality: 0.96 },
                 html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: orientation || 'portrait' }
+                jsPDF: { unit: 'mm', format: 'a4', orientation: orient }
             };
             return await html2pdf().set(opt).from(host).output('blob');
         } finally {
