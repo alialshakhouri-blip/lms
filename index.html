@@ -43605,15 +43605,17 @@ function openReportFromProfile() {
         facilityNameEn: 'Black Gold Training Center',
         licenseNo: '19187335023495',
         instructors: [
-            { full: 'ابراهيم حسن عبدرب الحسين الموسى', id: '1058320605', nationality: 'سعودي', aliases: ['ابراهيم الموسى', 'ابراهيم', 'الموسى'] },
-            { full: 'أحمد علي علي الأصيل', id: '1050127404', nationality: 'سعودي', aliases: ['احمد الاصيل', 'أحمد الأصيل', 'الاصيل', 'الأصيل'] },
-            { full: 'الامام يعقوب محمد النعمه', id: '257731678', nationality: 'سوداني', aliases: ['امام النعمه', 'إمام النعمه', 'الامام', 'النعمه', 'النعمة'] },
-            { full: 'فاضل جواد رضي الماجد', id: '1093532354', nationality: 'سعودي', aliases: ['فاضل الماجد', 'فاضل'] },
-            { full: 'قاسم جواد رضي الماجد', id: '1117628469', nationality: 'سعودي', aliases: ['قاسم الماجد', 'قاسم'] },
-            { full: 'علي عبد السلام احمد', id: '2583265257', nationality: 'مصري', aliases: ['علي عبدالسلام', 'علي عبد السلام'] },
-            { full: 'سيد احمد مرسي يوسف', id: '2611877453', nationality: 'سوداني', aliases: ['سيد مرسي', 'سيد احمد'] },
-            { full: 'رضا نايف موسى آل مطيلق', id: '1091860211', nationality: 'سعودي', aliases: ['رضا مطيلق', 'رضا', 'مطيلق'] },
-            { full: 'شرف الدين عثمان ابو فاطمة بلية', id: '2401481904', nationality: 'سوداني', aliases: ['شرف الدين', 'بلية'] }
+            { full: 'عصام سعيد', tvtcFull: 'ابراهيم حسن عبدرب الحسين الموسى', id: '1058320605', nationality: 'سعودي', aliases: ['عصام سعيد', 'عصام', 'ابراهيم حسن عبدرب الحسين الموسى', 'ابراهيم الموسى', 'ابراهيم', 'الموسى'], specialty: 'الكهرباء', defaultProgram: 'المهارات الكهربائية' },
+            { full: 'أحمد علي علي الأصيل', id: '1050127404', nationality: 'سعودي', aliases: ['احمد الاصيل', 'أحمد الأصيل', 'أحمد الاصيل', 'الاصيل', 'الأصيل'], specialty: 'الادارة المكتبية والسكرتارية', defaultProgram: 'المبادئ الأساسية للإدارة المكتبية و السكرتارية' },
+            { full: 'الامام يعقوب محمد النعمه', id: '257731678', nationality: 'سوداني', aliases: ['إمام يعقوب', 'امام يعقوب', 'يعقوب', 'امام النعمه', 'إمام النعمه', 'الامام', 'النعمه', 'النعمة', 'امام', 'إمام'], specialty: 'الحاسب الالي', defaultProgram: 'المهارات الاساسية في الاكسل' },
+            { full: 'فاضل جواد رضي الماجد', id: '1093532354', nationality: 'سعودي', aliases: ['فاضل الماجد', 'فاضل'], specialty: 'السلامة والصحة', defaultProgram: 'مسئول السلامة والصحة المهنية' },
+            { full: 'قاسم جواد رضي الماجد', id: '1117628469', nationality: 'سعودي', aliases: ['قاسم الماجد', 'قاسم'], specialty: 'الحاسب الالي', defaultProgram: 'إدخال البيانات ومعالجة النصوص' },
+            { full: 'علي عبد السلام احمد', id: '2583265257', nationality: 'مصري', aliases: ['علي عبدالسلام', 'علي عبد السلام', 'علي'], specialty: 'انجليزية', defaultProgram: 'Effective communication skills in English' },
+            { full: 'سيد احمد مرسي يوسف', id: '2611877453', nationality: 'سوداني', aliases: ['سيد مرسي', 'سيد احمد', 'سيد'], specialty: 'الميكانيكية', defaultProgram: 'أساسيات الصيانة الميكانيكية' },
+            { full: 'رضا نايف موسى آل مطيلق', id: '1091860211', nationality: 'سعودي', aliases: ['رضا مطيلق', 'رضا', 'مطيلق'], specialty: 'اللحام', defaultProgram: 'اساسيات اللحام بالقوس الكهربي' },
+            { full: 'شرف الدين عثمان ابو فاطمة بلية', id: '2401481904', nationality: 'سوداني', aliases: ['شرف الدين', 'بلية', 'شرف'], specialty: 'انجليزية', defaultProgram: 'Effective communication skills in English' },
+            { full: 'يوسف جمال', id: '259100000', nationality: 'مصري', aliases: ['يوسف جمال', 'يوسف'], specialty: 'انجليزية', defaultProgram: 'Effective communication skills in English' },
+            { full: 'ناجي محمد', id: '258200000', nationality: 'مصري', aliases: ['ناجي محمد', 'ناجي'], specialty: 'إنشاءات', defaultProgram: 'مقدمة في التشييد والبناء' }
         ],
         officialPrograms: [
             { no: 1, name: 'المهارات الكهربائية', ownership: 'خاص', mode: 'حضوري', type: 'دورة تأهيلية' },
@@ -43658,6 +43660,143 @@ function openReportFromProfile() {
         ]
     };
     window.BGTI_ENTERPRISE_MASTER = BGTI_ENTERPRISE_MASTER;
+
+    // ===================================================================
+    // BGTI SPECIALTY DOMAINS & SHARED-COURSE INTELLIGENT ROUTER
+    // ===================================================================
+    const BGTI_SPECIALTY_DOMAINS = {
+        electricity: {
+            domain: 'electricity',
+            label: 'الكهرباء',
+            keywords: ['كهرب', 'electr', 'تمديد', 'انشائيه'],
+            primaryProgram: 'المهارات الكهربائية',
+            programType: 'دورة تأهيلية',
+            defaultTrainer: 'عصام سعيد',
+            trainers: ['عصام سعيد', 'عصام', 'ابراهيم حسن عبدرب الحسين الموسى', 'ابراهيم الموسى', 'ابراهيم', 'الموسى']
+        },
+        computer_excel: {
+            domain: 'computer_excel',
+            label: 'الحاسب الآلي ونظم المعلومات والأوفيس',
+            keywords: ['اكسل', 'excel', 'حاسب', 'كمبيوتر', 'بيانات', 'نصوص', 'نظم التشغيل', 'صيانه الحاسب', 'computer', 'data', 'it', 'برمج'],
+            primaryProgram: 'المهارات الاساسية في الاكسل',
+            programType: 'دورة تطويرية',
+            defaultTrainer: 'الامام يعقوب محمد النعمه',
+            trainers: ['الامام يعقوب محمد النعمه', 'إمام يعقوب', 'امام يعقوب', 'إمام النعمه', 'امام النعمه', 'إمام', 'امام', 'قاسم جواد رضي الماجد', 'قاسم الماجد', 'قاسم']
+        },
+        welding: {
+            domain: 'welding',
+            label: 'اللحام',
+            keywords: ['لحام', 'weld', 'قوس'],
+            primaryProgram: 'اساسيات اللحام بالقوس الكهربي',
+            programType: 'دورة تطويرية',
+            defaultTrainer: 'رضا نايف موسى آل مطيلق',
+            trainers: ['رضا نايف موسى آل مطيلق', 'رضا مطيلق', 'رضا', 'مطيلق']
+        },
+        mechanical: {
+            domain: 'mechanical',
+            label: 'الميكانيكا والصيانة',
+            keywords: ['ميكانيك', 'صيانه ميكانيكيه', 'mech', 'معدات'],
+            primaryProgram: 'أساسيات الصيانة الميكانيكية',
+            programType: 'دورة تطويرية',
+            defaultTrainer: 'سيد احمد مرسي يوسف',
+            trainers: ['سيد احمد مرسي يوسف', 'سيد احمد', 'سيد مرسي', 'سيد']
+        },
+        safety: {
+            domain: 'safety',
+            label: 'السلامة والصحة المهنية',
+            keywords: ['سلامه', 'صحه', 'hse', 'safety', 'وقايه', 'osha'],
+            primaryProgram: 'مسئول السلامة والصحة المهنية',
+            programType: 'دورة تأهيلية',
+            defaultTrainer: 'فاضل جواد رضي الماجد',
+            trainers: ['فاضل جواد رضي الماجد', 'فاضل الماجد', 'فاضل']
+        },
+        admin: {
+            domain: 'admin',
+            label: 'الإدارة المكتبية والسكرتارية',
+            keywords: ['سكرتار', 'اداره مكتبيه', 'office', 'admin', 'ادارة'],
+            primaryProgram: 'المبادئ الأساسية للإدارة المكتبية و السكرتارية',
+            programType: 'دورة تطويرية',
+            defaultTrainer: 'أحمد علي علي الأصيل',
+            trainers: ['أحمد علي علي الأصيل', 'أحمد الأصيل', 'احمد الاصيل', 'أحمد الاصيل', 'الاصيل', 'الأصيل']
+        },
+        english: {
+            domain: 'english',
+            label: 'اللغة الإنجليزية',
+            keywords: ['انجليز', 'إنجليز', 'english', 'communication'],
+            primaryProgram: 'Effective communication skills in English',
+            programType: 'دورة تطويرية',
+            defaultTrainer: 'علي عبد السلام احمد',
+            trainers: ['شرف الدين عثمان ابو فاطمة بلية', 'شرف الدين', 'بلية', 'علي عبد السلام احمد', 'علي عبدالسلام', 'يوسف جمال']
+        },
+        construction: {
+            domain: 'construction',
+            label: 'التشييد والبناء',
+            keywords: ['انشاء', 'تشييد', 'بناء', 'const'],
+            primaryProgram: 'مقدمة في التشييد والبناء',
+            programType: 'دورة تطويرية',
+            defaultTrainer: 'ناجي محمد',
+            trainers: ['ناجي محمد', 'ناجي']
+        }
+    };
+    window.BGTI_SPECIALTY_DOMAINS = BGTI_SPECIALTY_DOMAINS;
+
+    function getDomainFromCourseOrSpecialty(str) {
+        if (!str) return null;
+        const norm = normalizeEnterpriseText(str);
+        if (/كهرب|electr/i.test(norm)) return 'electricity';
+        if (/اكسل|excel|حاسب|كمبيوتر|بيانات|نصوص|نظم\s*التشغيل|صيانه\s*الحاسب|data|it/i.test(norm)) return 'computer_excel';
+        if (/لحام|weld|قوس/i.test(norm)) return 'welding';
+        if (/ميكانيك|صيانه|mech/i.test(norm)) return 'mechanical';
+        if (/سلامه|صحه|hse|safety|وقايه|osha/i.test(norm)) return 'safety';
+        if (/سكرتار|اداره|office|admin/i.test(norm)) return 'admin';
+        if (/انجليز|english|communication/i.test(norm)) return 'english';
+        if (/انشاء|تشييد|بناء|const/i.test(norm)) return 'construction';
+        return null;
+    }
+    window.getDomainFromCourseOrSpecialty = getDomainFromCourseOrSpecialty;
+
+    function getDomainFromTrainer(trainerName) {
+        if (!trainerName) return null;
+        const norm = normalizeEnterpriseText(trainerName);
+        for (const [domKey, domObj] of Object.entries(BGTI_SPECIALTY_DOMAINS)) {
+            for (const tr of domObj.trainers) {
+                const trNorm = normalizeEnterpriseText(tr);
+                if (norm === trNorm || norm.includes(trNorm) || trNorm.includes(norm)) {
+                    return domKey;
+                }
+            }
+        }
+        return null;
+    }
+    window.getDomainFromTrainer = getDomainFromTrainer;
+
+    function isTrainerCompatibleWithCourse(trainerName, courseName) {
+        if (!trainerName || !courseName) return true;
+        const tDom = getDomainFromTrainer(trainerName);
+        const cDom = getDomainFromCourseOrSpecialty(courseName);
+        if (!tDom || !cDom) return true; // Can't definitively disqualify if domain unknown
+        return tDom === cDom;
+    }
+    window.isTrainerCompatibleWithCourse = isTrainerCompatibleWithCourse;
+
+    function getDefaultTrainerForCourse(courseName) {
+        const dom = getDomainFromCourseOrSpecialty(courseName);
+        if (dom && BGTI_SPECIALTY_DOMAINS[dom]) {
+            return BGTI_SPECIALTY_DOMAINS[dom].defaultTrainer;
+        }
+        return null;
+    }
+    window.getDefaultTrainerForCourse = getDefaultTrainerForCourse;
+
+    function getDefaultProgramForTrainer(trainerName) {
+        const dom = getDomainFromTrainer(trainerName);
+        if (dom && BGTI_SPECIALTY_DOMAINS[dom]) {
+            const d = BGTI_SPECIALTY_DOMAINS[dom];
+            return { program: d.primaryProgram, type: d.programType, specialty: d.label };
+        }
+        return null;
+    }
+    window.getDefaultProgramForTrainer = getDefaultProgramForTrainer;
 
     function normalizeEnterpriseText(str) {
         return String(str || '')
@@ -43819,18 +43958,28 @@ function openReportFromProfile() {
         if (typeof getTraineeAssignedCourses === 'function') {
             rawAssigned = getTraineeAssignedCourses(firstT) || [];
         }
-        // Enrich & sort technical/vocational courses BEFORE English
-        const seenProg = new Set();
+
+        // Enrich shared courses with domain & official instructor info
+        const seenKey = new Set();
         const assignedEnriched = [];
         rawAssigned.forEach(ac => {
+            const cDom = getDomainFromCourseOrSpecialty(ac.course);
             const pInfo = resolveAccreditedProgramInfo(ac.course);
             const fullTr = resolveAccreditedInstructorFullName(ac.trainer || '');
             const key = `${pInfo.program}|${fullTr}`;
-            if (!seenProg.has(key)) {
-                seenProg.add(key);
-                assignedEnriched.push({ ...ac, progInfo: pInfo, fullTrainer: fullTr, isEnglish: pInfo.isEnglish });
+            if (!seenKey.has(key)) {
+                seenKey.add(key);
+                assignedEnriched.push({
+                    ...ac,
+                    progInfo: pInfo,
+                    fullTrainer: fullTr,
+                    domain: cDom,
+                    isEnglish: pInfo.isEnglish
+                });
             }
         });
+
+        // Technical courses before English
         assignedEnriched.sort((a, b) => (a.isEnglish === b.isEnglish ? 0 : (a.isEnglish ? 1 : -1)));
         const techCourses = assignedEnriched.filter(ac => !ac.isEnglish);
 
@@ -43840,23 +43989,43 @@ function openReportFromProfile() {
         let preferredCourse = null;
         let progInfo = null;
 
+        // 1. Direct or domain matching if forcedCourseName is requested
         if (forcedCourseName && forcedCourseName !== 'AUTO' && forcedCourseName !== 'ALL_SHARED') {
             const forcedNorm = normalizeEnterpriseText(forcedCourseName);
+            const forcedDomain = getDomainFromCourseOrSpecialty(forcedCourseName);
+
+            // Exact or substring match in assigned shared courses
             preferredCourse = assignedEnriched.find(ac =>
                 normalizeEnterpriseText(ac.course) === forcedNorm
                 || normalizeEnterpriseText(ac.progInfo.program) === forcedNorm
                 || normalizeEnterpriseText(ac.progInfo.program).includes(forcedNorm)
                 || normalizeEnterpriseText(ac.course).includes(forcedNorm)
             ) || null;
+
+            // Domain match within shared courses (e.g. forced is Excel -> match Computer/Imam)
+            if (!preferredCourse && forcedDomain) {
+                preferredCourse = assignedEnriched.find(ac => {
+                    const acDom = ac.domain || getDomainFromCourseOrSpecialty(ac.course) || getDomainFromCourseOrSpecialty(ac.progInfo.program);
+                    return acDom === forcedDomain;
+                }) || null;
+            }
+
             progInfo = preferredCourse ? preferredCourse.progInfo : resolveAccreditedProgramInfo(forcedCourseName);
         }
 
+        // 2. If no forced course, resolve from specialty or top technical course
         if (!progInfo) {
             const candidateSpec = explicitTraineeSpec || explicitContractSpec;
             if (candidateSpec && !isEnglishCourseName(candidateSpec)) {
-                const specProg = resolveAccreditedProgramInfo(candidateSpec);
-                preferredCourse = techCourses.find(ac => ac.progInfo.program === specProg.program) || techCourses[0] || null;
-                progInfo = specProg;
+                const candDom = getDomainFromCourseOrSpecialty(candidateSpec);
+                if (candDom) {
+                    preferredCourse = techCourses.find(ac => ac.domain === candDom) || null;
+                }
+                if (!preferredCourse) {
+                    const specProg = resolveAccreditedProgramInfo(candidateSpec);
+                    preferredCourse = techCourses.find(ac => ac.progInfo.program === specProg.program) || techCourses[0] || null;
+                }
+                progInfo = preferredCourse ? preferredCourse.progInfo : resolveAccreditedProgramInfo(candidateSpec);
             } else if (techCourses.length > 0) {
                 preferredCourse = techCourses[0];
                 progInfo = preferredCourse.progInfo;
@@ -43868,19 +44037,49 @@ function openReportFromProfile() {
             }
         }
 
-        if (!preferredCourse && assignedEnriched.length > 0) {
-            preferredCourse = techCourses[0] || assignedEnriched[0];
+        // Align progInfo with preferredCourse domain to prevent electricity-Excel mismatch
+        if (preferredCourse && preferredCourse.domain) {
+            const prefDomObj = BGTI_SPECIALTY_DOMAINS[preferredCourse.domain];
+            if (prefDomObj && (!forcedCourseName || forcedCourseName === 'AUTO' || forcedCourseName === 'ALL_SHARED')) {
+                progInfo = {
+                    program: prefDomObj.primaryProgram,
+                    type: prefDomObj.programType,
+                    specialty: prefDomObj.label,
+                    isEnglish: preferredCourse.domain === 'english'
+                };
+            }
         }
 
         const accCourse = (typeof getEffectiveAccreditedCourseForContext === 'function')
             ? getEffectiveAccreditedCourseForContext(groupName, forcedCourseName)
             : null;
 
-        const instructorFullName = (accCourse && accCourse.instructorFullName && accCourse.instructorFullName.trim())
-            ? accCourse.instructorFullName.trim()
-            : ((preferredCourse && preferredCourse.fullTrainer && preferredCourse.fullTrainer !== '—')
-                ? preferredCourse.fullTrainer
-                : resolveAccreditedInstructorFullName((firstT.trainer) || ''));
+        // Resolve instructor with strict specialty compatibility check
+        let instructorFullName = '';
+        if (accCourse && accCourse.instructorFullName && accCourse.instructorFullName.trim() && accCourse.instructorFullName.trim() !== '—') {
+            const cand = accCourse.instructorFullName.trim();
+            if (isTrainerCompatibleWithCourse(cand, progInfo.program)) {
+                instructorFullName = cand;
+            }
+        }
+
+        if (!instructorFullName) {
+            if (preferredCourse && preferredCourse.fullTrainer && preferredCourse.fullTrainer !== '—') {
+                if (isTrainerCompatibleWithCourse(preferredCourse.fullTrainer, progInfo.program)) {
+                    instructorFullName = preferredCourse.fullTrainer;
+                }
+            }
+        }
+
+        if (!instructorFullName) {
+            const defTr = getDefaultTrainerForCourse(progInfo.program);
+            if (defTr) {
+                instructorFullName = defTr;
+            } else {
+                instructorFullName = resolveAccreditedInstructorFullName(firstT.trainer || '');
+            }
+        }
+
         const companyName = (accCourse && accCourse.companyName) || (firstT.company || (groupTrainees.find(t => t.company)?.company) || 'معهد الذهب الأسود للتدريب').trim();
         const codeMatch = String(groupName || '').match(/\d+/);
         const courseCode = (accCourse && accCourse.courseNumber && String(accCourse.courseNumber).trim())
@@ -46370,6 +46569,20 @@ function openReportFromProfile() {
                 const parsed = JSON.parse(raw);
                 if (Array.isArray(parsed)) {
                     accreditedCoursesCache = parsed;
+                    // Self-healing: heal any course where instructor doesn't match specialty (e.g. Essam on Excel)
+                    let healed = false;
+                    accreditedCoursesCache.forEach(c => {
+                        if (c && c.courseName && c.instructorFullName) {
+                            if (!isTrainerCompatibleWithCourse(c.instructorFullName, c.courseName)) {
+                                const properTr = getCourseEffectiveTrainer({ ...c, instructorFullName: '' });
+                                if (properTr && properTr !== 'مدرب غير محدد') {
+                                    c.instructorFullName = properTr;
+                                    healed = true;
+                                }
+                            }
+                        }
+                    });
+                    if (healed) saveAccreditedCourses(accreditedCoursesCache, false);
                     return accreditedCoursesCache;
                 }
             }
@@ -46737,7 +46950,12 @@ function openReportFromProfile() {
         let existing = null;
         if (extraMeta.courseId) existing = list.find(c => c.id === extraMeta.courseId);
         if (!existing && extraMeta.courseNumber) existing = list.find(c => String(c.courseNumber || '').trim() === String(extraMeta.courseNumber).trim());
-        if (!existing && cleanG) existing = list.find(c => cleanGroupNameForMatch(c.groupName) === cleanG);
+        if (!existing && cleanG) {
+            existing = list.find(c => cleanGroupNameForMatch(c.groupName) === cleanG && (
+                !extraMeta.courseName
+                || normalizeEnterpriseText(c.courseName) === normalizeEnterpriseText(extraMeta.courseName)
+            ));
+        }
 
         const nowIso = new Date().toISOString();
         const record = {
@@ -46988,22 +47206,36 @@ function openReportFromProfile() {
 
     function getCourseEffectiveTrainer(c) {
         if (!c) return 'مدرب غير محدد';
+        const cName = c.courseName || '';
         const raw = (c.instructorFullName || '').trim();
+
+        // 1. If explicit trainer is set and compatible with course specialty
         if (raw && raw !== '—') {
-            if (typeof resolveAccreditedInstructorFullName === 'function') {
-                return resolveAccreditedInstructorFullName(raw);
+            const full = (typeof resolveAccreditedInstructorFullName === 'function')
+                ? resolveAccreditedInstructorFullName(raw)
+                : raw;
+            if (isTrainerCompatibleWithCourse(full, cName)) {
+                return full;
             }
-            return raw;
         }
+
+        // 2. Resolve from group shared courses matching the course domain
         if (c.groupName && typeof resolveInstGroupMetadata === 'function') {
             try {
-                const meta = resolveInstGroupMetadata(c.groupName, c.trainees || [], c.startDate, c.endDate, c.courseName);
+                const meta = resolveInstGroupMetadata(c.groupName, c.trainees || [], c.startDate, c.endDate, cName);
                 if (meta && meta.instructorFullName && meta.instructorFullName.trim() && meta.instructorFullName !== '—') {
-                    return meta.instructorFullName.trim();
+                    if (isTrainerCompatibleWithCourse(meta.instructorFullName, cName)) {
+                        return meta.instructorFullName.trim();
+                    }
                 }
             } catch (e) {}
         }
-        return 'مدرب غير محدد';
+
+        // 3. Fallback to default trainer for this course domain (e.g. Excel -> Imam, Electricity -> Essam)
+        const defTrainer = getDefaultTrainerForCourse(cName);
+        if (defTrainer) return defTrainer;
+
+        return raw || 'مدرب غير محدد';
     }
     window.getCourseEffectiveTrainer = getCourseEffectiveTrainer;
 
