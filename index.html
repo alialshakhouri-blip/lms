@@ -13616,20 +13616,58 @@
                         <div id="tvtcParseResultBanner" class="hidden p-3 rounded-xl border text-xs font-bold"></div>
                     </div>
 
-                    <!-- 2. Saved Accredited Courses List & All-Groups ZIP Export -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                        <div class="flex items-center justify-between gap-2 flex-wrap">
-                            <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
-                                <span>📚</span>
-                                <span>ملفات الدورات المعتمدة المحفوظة حسب المجموعة</span>
-                            </h3>
-                            <span id="instAccreditedCoursesHint" class="text-[11px] font-bold text-slate-500">اختر أي دورة لفتحها وتعديل البيانات أو الدرجات، أو نزّل حزمة شاملة ZIP لكل المجموعات</span>
+                    <!-- 2. Saved Accredited Courses List & Bulk ZIP Export -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
+                            <div>
+                                <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                    <span>📚</span>
+                                    <span id="instAccreditedCoursesHeading">ملفات الدورات المعتمدة المحفوظة</span>
+                                    <span id="instAccreditedCoursesCountBadge2" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800 font-mono">0</span>
+                                </h3>
+                                <p id="instAccreditedCoursesHint" class="text-[11px] font-bold text-slate-500 mt-0.5">فرز واستعراض الدورات المعتمدة إما حسب المجموعة أو حسب المدرب، مع إمكانية استعراض وتحميل حزم كل مدرب أو كل مجموعة</p>
+                            </div>
+
+                            <!-- Sorting Mode Segment: By Group vs By Trainer -->
+                            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-black">
+                                <button type="button" id="acViewModeBtn_group" onclick="setAccreditedCoursesViewMode('group')" class="px-3.5 py-1.5 rounded-lg transition cursor-pointer bg-white text-slate-900 shadow-xs flex items-center gap-1.5">
+                                    <span>👥</span>
+                                    <span>حسب المجموعة</span>
+                                </button>
+                                <button type="button" id="acViewModeBtn_trainer" onclick="setAccreditedCoursesViewMode('trainer')" class="px-3.5 py-1.5 rounded-lg transition cursor-pointer text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+                                    <span>👨‍🏫</span>
+                                    <span>حسب المدرب</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter & Quick Search Controls -->
+                        <div class="flex flex-wrap items-center justify-between gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                            <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+                                <div class="relative flex-1 min-w-[200px]">
+                                    <input type="text" id="acSearchQueryInput" oninput="onAccreditedFilterOrSearchChanged()" placeholder="🔍 بحث سريع (اسم الدورة، رقمها، المجموعة، اسم المدرب)..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-emerald-600">
+                                </div>
+                                <div class="min-w-[220px]">
+                                    <select id="acFilterSelect" onchange="onAccreditedFilterOrSearchChanged()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none cursor-pointer focus:border-emerald-600">
+                                        <option value="ALL">🌟 كافة المجموعات (عرض الكل)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="resetAccreditedCoursesFilters()" class="text-[11px] font-bold text-slate-600 hover:text-slate-900 px-3 py-2 rounded-xl bg-slate-200/70 hover:bg-slate-200 transition cursor-pointer flex items-center gap-1">
+                                    <span>🔄</span>
+                                    <span>إعادة ضبط التصفية</span>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Bulk All-Courses ZIP Actions Strip -->
-                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+                        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100/60 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                             <div class="flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-700">
-                                <span class="font-black text-slate-900">📦 تنزيل شامل لجميع الدورات المحفوظة (كل مجموعة بمجلدها):</span>
+                                <span class="font-black text-slate-900 flex items-center gap-1.5" id="acBulkZipTitle">
+                                    <span>📦</span>
+                                    <span id="acBulkZipTitleText">تنزيل شامل لجميع الدورات المحفوظة (كل مجموعة بمجلدها):</span>
+                                </span>
                                 <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
                                     <input type="checkbox" id="acZipIncludeUploadCheck" checked class="accent-emerald-600 cursor-pointer">
                                     <span>تضمين ورقة الرفع (11 عمود)</span>
@@ -13644,9 +13682,18 @@
                                 </label>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <button type="button" onclick="downloadAllAccreditedCoursesZip('xlsx')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">📦 الكل ZIP (Excel فقط)</button>
-                                <button type="button" onclick="downloadAllAccreditedCoursesZip('pdf')" class="bg-rose-600 hover:bg-rose-700 text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">📦 الكل ZIP (PDF فقط)</button>
-                                <button type="button" onclick="downloadAllAccreditedCoursesZip('both')" class="bg-slate-900 hover:bg-black text-white font-black text-[11px] px-3 py-2 rounded-xl transition cursor-pointer">📦 الكل ZIP (Excel + PDF)</button>
+                                <button type="button" onclick="downloadAllAccreditedCoursesZip('xlsx')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[11px] px-3.5 py-2 rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5">
+                                    <span>📊</span>
+                                    <span id="acBtnBulkXlsxText">الكل ZIP (Excel فقط)</span>
+                                </button>
+                                <button type="button" onclick="downloadAllAccreditedCoursesZip('pdf')" class="bg-rose-600 hover:bg-rose-700 text-white font-black text-[11px] px-3.5 py-2 rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5">
+                                    <span>📄</span>
+                                    <span id="acBtnBulkPdfText">الكل ZIP (PDF فقط)</span>
+                                </button>
+                                <button type="button" onclick="downloadAllAccreditedCoursesZip('both')" class="bg-slate-900 hover:bg-black text-white font-black text-[11px] px-3.5 py-2 rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5">
+                                    <span>📦</span>
+                                    <span id="acBtnBulkBothText">الكل ZIP (Excel + PDF)</span>
+                                </button>
                             </div>
                         </div>
 
@@ -46925,11 +46972,97 @@ function openReportFromProfile() {
     }
     window.switchInstSubTab = switchInstSubTab;
 
+    let accreditedCoursesViewMode = 'group'; // 'group' | 'trainer'
+    let accreditedCoursesFilter = 'ALL';
+    let accreditedCoursesSearchQuery = '';
+
+    function escapeJsString(str) {
+        return String(str || '')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '&quot;')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '');
+    }
+    window.escapeJsString = escapeJsString;
+
+    function getCourseEffectiveTrainer(c) {
+        if (!c) return 'مدرب غير محدد';
+        const raw = (c.instructorFullName || '').trim();
+        if (raw && raw !== '—') {
+            if (typeof resolveAccreditedInstructorFullName === 'function') {
+                return resolveAccreditedInstructorFullName(raw);
+            }
+            return raw;
+        }
+        if (c.groupName && typeof resolveInstGroupMetadata === 'function') {
+            try {
+                const meta = resolveInstGroupMetadata(c.groupName, c.trainees || [], c.startDate, c.endDate, c.courseName);
+                if (meta && meta.instructorFullName && meta.instructorFullName.trim() && meta.instructorFullName !== '—') {
+                    return meta.instructorFullName.trim();
+                }
+            } catch (e) {}
+        }
+        return 'مدرب غير محدد';
+    }
+    window.getCourseEffectiveTrainer = getCourseEffectiveTrainer;
+
+    function setAccreditedCoursesViewMode(mode) {
+        accreditedCoursesViewMode = (mode === 'trainer') ? 'trainer' : 'group';
+        accreditedCoursesFilter = 'ALL';
+        refreshAccreditedCoursesUI();
+    }
+    window.setAccreditedCoursesViewMode = setAccreditedCoursesViewMode;
+
+    function onAccreditedFilterOrSearchChanged() {
+        const sInput = document.getElementById('acSearchQueryInput');
+        const fSel = document.getElementById('acFilterSelect');
+        accreditedCoursesSearchQuery = sInput ? sInput.value.trim().toLowerCase() : '';
+        accreditedCoursesFilter = fSel ? fSel.value : 'ALL';
+        renderAccreditedCoursesGridOnly();
+    }
+    window.onAccreditedFilterOrSearchChanged = onAccreditedFilterOrSearchChanged;
+
+    function resetAccreditedCoursesFilters() {
+        accreditedCoursesFilter = 'ALL';
+        accreditedCoursesSearchQuery = '';
+        const sInput = document.getElementById('acSearchQueryInput');
+        const fSel = document.getElementById('acFilterSelect');
+        if (sInput) sInput.value = '';
+        if (fSel) fSel.value = 'ALL';
+        renderAccreditedCoursesGridOnly();
+    }
+    window.resetAccreditedCoursesFilters = resetAccreditedCoursesFilters;
+
     function refreshAccreditedCoursesUI() {
         const list = loadAccreditedCourses();
         const badge = document.getElementById('instAccreditedCoursesCountBadge');
         if (badge) badge.textContent = String(list.length);
+        const badge2 = document.getElementById('instAccreditedCoursesCountBadge2');
+        if (badge2) badge2.textContent = `${list.length} دورات`;
 
+        // Update View Mode buttons styling
+        const btnGrp = document.getElementById('acViewModeBtn_group');
+        const btnTrn = document.getElementById('acViewModeBtn_trainer');
+        if (btnGrp && btnTrn) {
+            const isTrainer = (accreditedCoursesViewMode === 'trainer');
+            btnGrp.className = !isTrainer
+                ? 'px-3.5 py-1.5 rounded-lg transition cursor-pointer bg-white text-slate-900 shadow-xs flex items-center gap-1.5'
+                : 'px-3.5 py-1.5 rounded-lg transition cursor-pointer text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+            btnTrn.className = isTrainer
+                ? 'px-3.5 py-1.5 rounded-lg transition cursor-pointer bg-white text-slate-900 shadow-xs flex items-center gap-1.5'
+                : 'px-3.5 py-1.5 rounded-lg transition cursor-pointer text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+        }
+
+        // Update bulk zip labels based on mode
+        const bulkTitleText = document.getElementById('acBulkZipTitleText');
+        if (bulkTitleText) {
+            bulkTitleText.textContent = (accreditedCoursesViewMode === 'trainer')
+                ? 'تنزيل شامل لجميع الدورات المحفوظة (مجلد لكل مدرب يحتوي على دوراته ومجموعاته):'
+                : 'تنزيل شامل لجميع الدورات المحفوظة (كل مجموعة بمجلدها):';
+        }
+
+        // Populate Target course select
         const targetSel = document.getElementById('tvtcTargetCourseSelect');
         if (targetSel) {
             const prevVal = targetSel.value;
@@ -46948,6 +47081,7 @@ function openReportFromProfile() {
             if (prevVal && Array.from(targetSel.options).some(o => o.value === prevVal)) targetSel.value = prevVal;
         }
 
+        // Datalists
         const dlGrp = document.getElementById('acGroupsDatalist');
         if (dlGrp && typeof getUnifiedTraineesPool === 'function') {
             const gs = Array.from(new Set(getUnifiedTraineesPool().map(t => String(t.group || '').trim()).filter(Boolean))).sort();
@@ -46967,42 +47101,219 @@ function openReportFromProfile() {
             ).join('');
         }
 
-        const grid = document.getElementById('instAccreditedCoursesList');
-        if (!grid) return;
-        if (list.length === 0) {
-            grid.innerHTML = `<div class="col-span-full p-6 rounded-2xl bg-slate-50 border border-dashed border-slate-300 text-center text-xs font-bold text-slate-500">لا توجد دورات معتمدة محفوظة بعد. احفظ أي مجموعة بعد تصدير ملف المؤسسة أو الصق نص بوابة المؤسسة أعلاه ليتم إنشاؤها وربطها تلقائياً.</div>`;
-            return;
+        // Populate Filter Select based on active mode
+        const fSel = document.getElementById('acFilterSelect');
+        if (fSel) {
+            let fOpts = '';
+            if (accreditedCoursesViewMode === 'trainer') {
+                const trainerCounts = new Map();
+                list.forEach(c => {
+                    const tr = getCourseEffectiveTrainer(c);
+                    trainerCounts.set(tr, (trainerCounts.get(tr) || 0) + 1);
+                });
+                fOpts = `<option value="ALL">🌟 كافة المدربين (${trainerCounts.size} مدرب)</option>`;
+                Array.from(trainerCounts.entries()).sort((a, b) => a[0].localeCompare(b[0], 'ar')).forEach(([tr, cnt]) => {
+                    fOpts += `<option value="${escapeHtml(tr)}">👨‍🏫 ${escapeHtml(tr)} (${cnt} دورة)</option>`;
+                });
+            } else {
+                const groupCounts = new Map();
+                list.forEach(c => {
+                    const g = c.groupName ? String(c.groupName).trim() : 'شعب عامة';
+                    groupCounts.set(g, (groupCounts.get(g) || 0) + 1);
+                });
+                fOpts = `<option value="ALL">🌟 كافة المجموعات (${groupCounts.size} مجموعة)</option>`;
+                Array.from(groupCounts.entries()).sort((a, b) => a[0].localeCompare(b[0], 'ar')).forEach(([grp, cnt]) => {
+                    fOpts += `<option value="${escapeHtml(grp)}">👥 ${escapeHtml(grp)} (${cnt} دورة)</option>`;
+                });
+            }
+            fSel.innerHTML = fOpts;
+            if (accreditedCoursesFilter && Array.from(fSel.options).some(o => o.value === accreditedCoursesFilter)) {
+                fSel.value = accreditedCoursesFilter;
+            } else {
+                accreditedCoursesFilter = 'ALL';
+                fSel.value = 'ALL';
+            }
         }
-        grid.innerHTML = list.map(c => {
-            const isSel = c.id === activeAccreditedCourseId;
-            return `
-                <div class="p-4 rounded-2xl border-2 ${isSel ? 'border-emerald-500 bg-emerald-50/40' : 'border-slate-200 bg-slate-50/50'} space-y-2 transition">
-                    <div class="flex items-start justify-between gap-2">
-                        <div>
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-emerald-600 text-white font-mono">دورة #${escapeHtml(c.courseNumber || 'بانتظار الرقم')}</span>
-                                ${c.groupName ? `<span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-blue-100 text-blue-800">${escapeHtml(c.groupName)}</span>` : ''}
-                            </div>
-                            <h4 class="text-xs font-black text-slate-900 mt-1.5">${escapeHtml(c.courseName || 'دورة تدريبية')}</h4>
-                        </div>
-                    </div>
-                    <div class="text-[11px] font-bold text-slate-600 space-y-0.5">
-                        <div>📅 ${escapeHtml(c.startDate || '--')} ← ${escapeHtml(c.endDate || '--')}</div>
-                        <div>🏷️ ${escapeHtml(c.programType || 'دورة تطويرية')} • ${escapeHtml(c.trainingMode || 'حضوري')} • 👥 ${c.trainees ? c.trainees.length : 0} متدرب</div>
-                    </div>
-                    <div class="flex items-center gap-2 pt-1">
-                        <button type="button" onclick="openAccreditedCourseWorkspace('${escapeHtml(c.id)}')" class="flex-1 bg-slate-900 hover:bg-black text-white font-black text-[11px] py-2 rounded-xl transition cursor-pointer">
-                            📂 فتح وتعديل / تصدير
-                        </button>
-                        <button type="button" onclick="deleteAccreditedCourse('${escapeHtml(c.id)}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-[11px] px-3 py-2 rounded-xl border border-rose-200 transition cursor-pointer" title="حذف">
-                            🗑️
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
+
+        renderAccreditedCoursesGridOnly();
     }
     window.refreshAccreditedCoursesUI = refreshAccreditedCoursesUI;
+
+    function renderAccreditedCoursesGridOnly() {
+        const grid = document.getElementById('instAccreditedCoursesList');
+        if (!grid) return;
+        const list = loadAccreditedCourses();
+
+        if (list.length === 0) {
+            grid.innerHTML = `<div class="col-span-full p-8 rounded-2xl bg-slate-50 border border-dashed border-slate-300 text-center text-xs font-bold text-slate-500 space-y-2">
+                <div class="text-3xl">📚</div>
+                <div>لا توجد دورات معتمدة محفوظة بعد.</div>
+                <div class="text-[11px] text-slate-400">احفظ أي مجموعة بعد تصدير ملف المؤسسة أو الصق نص بوابة المؤسسة أعلاه ليتم إنشاؤها وربطها تلقائياً.</div>
+            </div>`;
+            return;
+        }
+
+        // Apply filters
+        let filtered = list.slice();
+        if (accreditedCoursesSearchQuery) {
+            const q = accreditedCoursesSearchQuery;
+            filtered = filtered.filter(c => {
+                const effTrainer = getCourseEffectiveTrainer(c).toLowerCase();
+                const grp = String(c.groupName || '').toLowerCase();
+                const cName = String(c.courseName || '').toLowerCase();
+                const cNum = String(c.courseNumber || '').toLowerCase();
+                const hasTrainee = (c.trainees || []).some(t => String(t.name || '').toLowerCase().includes(q) || String(t.id || '').includes(q));
+                return effTrainer.includes(q) || grp.includes(q) || cName.includes(q) || cNum.includes(q) || hasTrainee;
+            });
+        }
+        if (accreditedCoursesFilter && accreditedCoursesFilter !== 'ALL') {
+            if (accreditedCoursesViewMode === 'trainer') {
+                filtered = filtered.filter(c => getCourseEffectiveTrainer(c) === accreditedCoursesFilter);
+            } else {
+                filtered = filtered.filter(c => (c.groupName || 'شعب عامة') === accreditedCoursesFilter);
+            }
+        }
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div class="col-span-full p-8 rounded-2xl bg-amber-50/60 border border-amber-200 text-center text-xs font-bold text-amber-900 space-y-2">
+                <div class="text-2xl">🔍</div>
+                <div>لا توجد دورات معتمدة مطابقة لمعايير البحث أو التصفية المختارة.</div>
+                <div><button type="button" onclick="resetAccreditedCoursesFilters()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg transition cursor-pointer">إلغاء التصفية وإظهار كافة الدورات</button></div>
+            </div>`;
+            return;
+        }
+
+        // Render based on mode: 'trainer' vs 'group'
+        if (accreditedCoursesViewMode === 'trainer') {
+            const byTrainer = new Map();
+            filtered.forEach(c => {
+                const tr = getCourseEffectiveTrainer(c);
+                if (!byTrainer.has(tr)) byTrainer.set(tr, []);
+                byTrainer.get(tr).push(c);
+            });
+
+            let html = '';
+            Array.from(byTrainer.entries()).sort((a, b) => a[0].localeCompare(b[0], 'ar')).forEach(([trName, courses]) => {
+                const totalTrainees = courses.reduce((sum, c) => sum + (c.trainees ? c.trainees.length : 0), 0);
+                const groupNames = Array.from(new Set(courses.map(c => c.groupName).filter(Boolean)));
+                html += `
+                    <div class="col-span-full bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-700 space-y-3 mt-1">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-500/30 border border-indigo-400/30 flex items-center justify-center text-2xl shrink-0 shadow-inner">
+                                    👨‍🏫
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-sm sm:text-base font-black text-white">${escapeHtml(trName)}</h4>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono">${courses.length} دورات</span>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono">${totalTrainees} متدرب</span>
+                                    </div>
+                                    <div class="text-[11px] font-bold text-slate-300 mt-1 flex items-center gap-2 flex-wrap">
+                                        <span>الشعب التدريبية:</span>
+                                        <span class="text-amber-300 font-mono">${escapeHtml(groupNames.join(' ، ') || 'شعب عامة')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-[11px] font-bold text-slate-400 hidden lg:inline">تحميل ملفات المدرب:</span>
+                                <button type="button" onclick="downloadTrainerCoursesZip('${escapeJsString(trName)}', 'xlsx')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[11px] px-3 py-1.5 rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5" title="تنزيل حزمة دورات المدرب ${escapeHtml(trName)} بصيغة Excel">
+                                    <span>📊</span>
+                                    <span>ZIP (Excel)</span>
+                                </button>
+                                <button type="button" onclick="downloadTrainerCoursesZip('${escapeJsString(trName)}', 'pdf')" class="bg-rose-600 hover:bg-rose-700 text-white font-black text-[11px] px-3 py-1.5 rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5" title="تنزيل حزمة دورات المدرب ${escapeHtml(trName)} بصيغة PDF">
+                                    <span>📄</span>
+                                    <span>ZIP (PDF)</span>
+                                </button>
+                                <button type="button" onclick="downloadTrainerCoursesZip('${escapeJsString(trName)}', 'both')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[11px] px-3 py-1.5 rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5" title="تنزيل حزمة دورات المدرب ${escapeHtml(trName)} كاملة (Excel + PDF)">
+                                    <span>📦</span>
+                                    <span>ZIP شامل</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                courses.forEach(c => {
+                    const isSel = c.id === activeAccreditedCourseId;
+                    html += `
+                        <div class="p-4 rounded-2xl border-2 ${isSel ? 'border-emerald-500 bg-emerald-50/40 shadow-sm' : 'border-slate-200 bg-slate-50/50 hover:bg-white'} space-y-2.5 transition flex flex-col justify-between">
+                            <div class="space-y-2">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-emerald-600 text-white font-mono">دورة #${escapeHtml(c.courseNumber || 'بانتظار الرقم')}</span>
+                                        ${c.groupName ? `<span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-blue-100 text-blue-800">👥 ${escapeHtml(c.groupName)}</span>` : ''}
+                                    </div>
+                                </div>
+                                <h4 class="text-xs font-black text-slate-900 leading-snug">${escapeHtml(c.courseName || 'دورة تدريبية')}</h4>
+                                <div class="text-[11px] font-bold text-slate-600 space-y-0.5">
+                                    <div>📅 ${escapeHtml(c.startDate || '--')} ← ${escapeHtml(c.endDate || '--')}</div>
+                                    <div>🏷️ ${escapeHtml(c.programType || 'دورة تطويرية')} • ${escapeHtml(c.trainingMode || 'حضوري')} • 👥 ${c.trainees ? c.trainees.length : 0} متدرب</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 pt-2 border-t border-slate-200/60">
+                                <button type="button" onclick="openAccreditedCourseWorkspace('${escapeHtml(c.id)}')" class="flex-1 bg-slate-900 hover:bg-black text-white font-black text-[11px] py-2 rounded-xl transition cursor-pointer shadow-xs flex items-center justify-center gap-1.5">
+                                    <span>📂</span>
+                                    <span>استعراض وتعديل</span>
+                                </button>
+                                <button type="button" onclick="downloadSingleAccreditedCourseZip('${escapeHtml(c.id)}', 'both')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-black text-[11px] px-2.5 py-2 rounded-xl border border-emerald-300 transition cursor-pointer" title="تنزيل حزمة الدورة ZIP (Excel + PDF)">
+                                    📦 ZIP
+                                </button>
+                                <button type="button" onclick="deleteAccreditedCourse('${escapeHtml(c.id)}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-[11px] px-2.5 py-2 rounded-xl border border-rose-200 transition cursor-pointer" title="حذف الدورة">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            grid.innerHTML = html;
+        } else {
+            // Group View
+            grid.innerHTML = filtered.map(c => {
+                const isSel = c.id === activeAccreditedCourseId;
+                const effTrainer = getCourseEffectiveTrainer(c);
+                return `
+                    <div class="p-4 rounded-2xl border-2 ${isSel ? 'border-emerald-500 bg-emerald-50/40 shadow-sm' : 'border-slate-200 bg-slate-50/50 hover:bg-white'} space-y-2.5 transition flex flex-col justify-between">
+                        <div class="space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-emerald-600 text-white font-mono">دورة #${escapeHtml(c.courseNumber || 'بانتظار الرقم')}</span>
+                                    ${c.groupName ? `<span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-blue-100 text-blue-800">👥 ${escapeHtml(c.groupName)}</span>` : ''}
+                                </div>
+                            </div>
+                            <h4 class="text-xs font-black text-slate-900 leading-snug">${escapeHtml(c.courseName || 'دورة تدريبية')}</h4>
+                            <div class="text-[11px] font-bold text-slate-600 space-y-1 bg-white p-2 rounded-xl border border-slate-200/70">
+                                <div class="flex items-center gap-1.5 text-indigo-950 font-black">
+                                    <span>👨‍🏫 المدرب:</span>
+                                    <span class="text-indigo-700">${escapeHtml(effTrainer)}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-slate-500 text-[10px]">
+                                    <span>📅 ${escapeHtml(c.startDate || '--')} ← ${escapeHtml(c.endDate || '--')}</span>
+                                    <span>👥 ${c.trainees ? c.trainees.length : 0} متدرب</span>
+                                </div>
+                                <div class="text-[10px] text-slate-400">🏷️ ${escapeHtml(c.programType || 'دورة تطويرية')} • ${escapeHtml(c.trainingMode || 'حضوري')}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 pt-2 border-t border-slate-200/60">
+                            <button type="button" onclick="openAccreditedCourseWorkspace('${escapeHtml(c.id)}')" class="flex-1 bg-slate-900 hover:bg-black text-white font-black text-[11px] py-2 rounded-xl transition cursor-pointer shadow-xs flex items-center justify-center gap-1.5">
+                                <span>📂</span>
+                                <span>استعراض وتعديل</span>
+                            </button>
+                            <button type="button" onclick="downloadSingleAccreditedCourseZip('${escapeHtml(c.id)}', 'both')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-black text-[11px] px-2.5 py-2 rounded-xl border border-emerald-300 transition cursor-pointer" title="تنزيل حزمة الدورة ZIP (Excel + PDF)">
+                                📦 ZIP
+                            </button>
+                            <button type="button" onclick="deleteAccreditedCourse('${escapeHtml(c.id)}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-[11px] px-2.5 py-2 rounded-xl border border-rose-200 transition cursor-pointer" title="حذف الدورة">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+    window.renderAccreditedCoursesGridOnly = renderAccreditedCoursesGridOnly;
 
     function deleteAccreditedCourse(courseId) {
         if (!courseId || !confirm('هل تريد حذف سجل هذه الدورة المعتمدة؟')) return;
@@ -47093,7 +47404,8 @@ function openReportFromProfile() {
         setVal('acEditStartDate', course.startDate);
         setVal('acEditEndDate', course.endDate);
         setVal('acEditGroupName', course.groupName);
-        setVal('acEditInstructor', course.instructorFullName);
+        const effTr = getCourseEffectiveTrainer(course);
+        setVal('acEditInstructor', course.instructorFullName || (effTr !== 'مدرب غير محدد' ? effTr : ''));
 
         const fillChk = document.getElementById('acCourseFillFromAttendanceCheck');
         if (fillChk) fillChk.checked = Boolean(course.fillFromAttendance) && !Boolean(course.blankEvaluations);
@@ -47365,16 +47677,22 @@ function openReportFromProfile() {
         for (let i = 0; i < items.length; i++) {
             const it = items[i];
             const basePct = Math.round((i / items.length) * 85);
-            const rawFolderName = sanitizeZipPathPart(
+            const rawCourseFolderName = sanitizeZipPathPart(
                 `${String(i + 1).padStart(2, '0')}_${it.groupName || it.courseName || 'دورة'}${it.courseNumber ? `_${it.courseNumber}` : ''}`,
                 `Course_${i + 1}`
             );
-            let folderName = rawFolderName;
-            let suffix = 2;
-            while (usedFolders.has(folderName.toLowerCase())) {
-                folderName = `${rawFolderName}_${suffix++}`;
+            let folderName = rawCourseFolderName;
+            if (opts.groupByTrainer) {
+                const trFolder = sanitizeZipPathPart(it.trainerName ? `المدرب_${it.trainerName}` : 'مدرب_غير_محدد', 'trainer');
+                folderName = `${trFolder}/${rawCourseFolderName}`;
             }
-            usedFolders.add(folderName.toLowerCase());
+            let candidateFolder = folderName;
+            let suffix = 2;
+            while (usedFolders.has(candidateFolder.toLowerCase())) {
+                candidateFolder = `${folderName}_${suffix++}`;
+            }
+            usedFolders.add(candidateFolder.toLowerCase());
+            folderName = candidateFolder;
             const rootDir = (items.length === 1 && opts.singleFlatRoot) ? zip : zip.folder(folderName);
             const writtenFiles = [];
 
@@ -47504,6 +47822,7 @@ function openReportFromProfile() {
                 companyName: course.companyName || 'ALL',
                 courseNumber: course.courseNumber || '',
                 courseName: course.courseName || '',
+                trainerName: getCourseEffectiveTrainer(course),
                 startDate: course.startDate || '',
                 endDate: course.endDate || '',
                 courseOverride: course.courseName || '',
@@ -47535,12 +47854,15 @@ function openReportFromProfile() {
     }
     window.downloadSingleAccreditedCourseZip = downloadSingleAccreditedCourseZip;
 
-    async function downloadAllAccreditedCoursesZip(formatMode = 'xlsx', opts = {}) {
+    async function downloadTrainerCoursesZip(trainerName, formatMode = 'both', opts = {}) {
+        if (!trainerName) return showToast('⚠️ يرجى تحديد اسم المدرب', 'warning');
         if (activeAccreditedCourseId) saveActiveAccreditedCourseEdits(true);
         const allCourses = loadAccreditedCourses();
-        if (!allCourses || allCourses.length === 0) {
-            return showToast('⚠️ لا توجد دورات معتمدة محفوظة بعد للتنزيل الشامل', 'warning');
+        const trainerCourses = allCourses.filter(c => getCourseEffectiveTrainer(c) === trainerName);
+        if (!trainerCourses || trainerCourses.length === 0) {
+            return showToast(`⚠️ لا توجد دورات معتمدة محفوظة للمدرب (${trainerName})`, 'warning');
         }
+
         const includeUpload = (opts.includeEnterpriseUpload !== undefined)
             ? Boolean(opts.includeEnterpriseUpload)
             : (document.getElementById('acZipIncludeUploadCheck')?.checked !== false);
@@ -47548,11 +47870,88 @@ function openReportFromProfile() {
             ? Boolean(opts.includeIndividualPractical)
             : Boolean(document.getElementById('acZipIncludeIndividualCheck')?.checked);
 
-        const items = allCourses.map(c => ({
+        const items = trainerCourses.map(c => ({
             groupName: c.groupName || c.courseName || 'دورة',
             companyName: c.companyName || 'ALL',
             courseNumber: c.courseNumber || '',
             courseName: c.courseName || '',
+            trainerName: trainerName,
+            startDate: c.startDate || '',
+            endDate: c.endDate || '',
+            courseOverride: c.courseName || '',
+            accreditedCourseId: c.id,
+            accreditedCourseObj: c,
+            trainees: buildExportTraineesForAccreditedCourse(c)
+        })).filter(it => it.trainees.length > 0);
+
+        if (items.length === 0) {
+            return showToast(`⚠️ دورات المدرب (${trainerName}) لا تحتوي على متدربين حالياً`, 'warning');
+        }
+
+        try {
+            setAccreditedZipProgress(10, `جاري تجميع حزمة ملفات المدرب: ${trainerName}...`, true);
+            const pkg = await buildInstBundleZipArchive(items, {
+                formatMode,
+                includeEnterpriseUpload: includeUpload,
+                includeIndividualPractical: includeIndiv,
+                fillFromAttendance: (opts.fillFromAttendance !== undefined) ? Boolean(opts.fillFromAttendance) : Boolean(document.getElementById('acZipFillFromAttendanceCheck')?.checked),
+                singleFlatRoot: items.length === 1,
+                onProgress: (p, m) => setAccreditedZipProgress(p, m, true)
+            });
+
+            const safeTrainer = sanitizeZipPathPart(trainerName, 'trainer');
+            const nowStr = new Date().toISOString().slice(0, 10);
+            const fmtSuffix = formatMode === 'xlsx' ? '_Excel' : (formatMode === 'pdf' ? '_PDF' : '_شامل');
+            const fileName = `ملفات_دورات_المدرب_${safeTrainer}${fmtSuffix}_${nowStr}.zip`;
+            if (!opts.skipDownload) {
+                triggerInstBlobDownload(pkg.blob, fileName);
+                showToast(`✅ تم تنزيل حزمة دورات المدرب (${trainerName}) كأرشيف ZIP بنجاح!`, 'success');
+            }
+            return { ...pkg, fileName };
+        } catch (err) {
+            console.error('Trainer Courses ZIP Error:', err);
+            showToast('❌ تعذر إنشاء حزمة المدرب: ' + (err.message || err), 'error');
+            return null;
+        }
+    }
+    window.downloadTrainerCoursesZip = downloadTrainerCoursesZip;
+
+    async function downloadAllAccreditedCoursesZip(formatMode = 'xlsx', opts = {}) {
+        if (activeAccreditedCourseId) saveActiveAccreditedCourseEdits(true);
+        const allCourses = loadAccreditedCourses();
+        if (!allCourses || allCourses.length === 0) {
+            return showToast('⚠️ لا توجد دورات معتمدة محفوظة بعد للتنزيل الشامل', 'warning');
+        }
+
+        // If in Trainer mode and a specific trainer is selected in dropdown, download that trainer's courses
+        if (accreditedCoursesViewMode === 'trainer' && accreditedCoursesFilter && accreditedCoursesFilter !== 'ALL') {
+            return downloadTrainerCoursesZip(accreditedCoursesFilter, formatMode, opts);
+        }
+
+        // If in Group mode and a specific group is selected, filter courses
+        let targetCourses = allCourses;
+        if (accreditedCoursesViewMode === 'group' && accreditedCoursesFilter && accreditedCoursesFilter !== 'ALL') {
+            targetCourses = allCourses.filter(c => (c.groupName || 'شعب عامة') === accreditedCoursesFilter);
+            if (targetCourses.length === 0) {
+                return showToast(`⚠️ لا توجد دورات معتمدة محفوظة للشعبة (${accreditedCoursesFilter})`, 'warning');
+            }
+        }
+
+        const includeUpload = (opts.includeEnterpriseUpload !== undefined)
+            ? Boolean(opts.includeEnterpriseUpload)
+            : (document.getElementById('acZipIncludeUploadCheck')?.checked !== false);
+        const includeIndiv = (opts.includeIndividualPractical !== undefined)
+            ? Boolean(opts.includeIndividualPractical)
+            : Boolean(document.getElementById('acZipIncludeIndividualCheck')?.checked);
+
+        const isTrainerMode = (accreditedCoursesViewMode === 'trainer') || Boolean(opts.groupByTrainer);
+
+        const items = targetCourses.map(c => ({
+            groupName: c.groupName || c.courseName || 'دورة',
+            companyName: c.companyName || 'ALL',
+            courseNumber: c.courseNumber || '',
+            courseName: c.courseName || '',
+            trainerName: getCourseEffectiveTrainer(c),
             startDate: c.startDate || '',
             endDate: c.endDate || '',
             courseOverride: c.courseName || '',
@@ -47570,15 +47969,20 @@ function openReportFromProfile() {
                 formatMode,
                 includeEnterpriseUpload: includeUpload,
                 includeIndividualPractical: includeIndiv,
+                groupByTrainer: isTrainerMode,
                 fillFromAttendance: (opts.fillFromAttendance !== undefined) ? Boolean(opts.fillFromAttendance) : Boolean(document.getElementById('acZipFillFromAttendanceCheck')?.checked),
-                singleFlatRoot: false,
+                singleFlatRoot: items.length === 1,
                 onProgress: (p, m) => setAccreditedZipProgress(p, m, true)
             });
             const nowStr = new Date().toISOString().slice(0, 10);
-            const fileName = `جميع_الدورات_والمجموعات_الشاملة_${nowStr}.zip`;
+            const fmtSuffix = formatMode === 'xlsx' ? '_Excel' : (formatMode === 'pdf' ? '_PDF' : '_شامل');
+            const prefix = isTrainerMode
+                ? 'جميع_الدورات_المعتمدة_حسب_المدربين'
+                : ((accreditedCoursesFilter && accreditedCoursesFilter !== 'ALL') ? `دورات_المجموعة_${sanitizeZipPathPart(accreditedCoursesFilter, 'group')}` : 'جميع_الدورات_والمجموعات_الشاملة');
+            const fileName = `${prefix}${fmtSuffix}_${nowStr}.zip`;
             if (!opts.skipDownload) {
                 triggerInstBlobDownload(pkg.blob, fileName);
-                showToast(`✅ تم تنزيل حزمة (${items.length}) دورات ومجموعات كاملة كأرشيف ZIP بنجاح!`, 'success');
+                showToast(`✅ تم تنزيل حزمة (${items.length}) دورات كاملة كأرشيف ZIP بنجاح!`, 'success');
             }
             return { ...pkg, fileName };
         } catch (err) {
