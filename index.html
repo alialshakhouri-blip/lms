@@ -3268,7 +3268,18 @@
                         <span class="text-xs font-bold">الملف الشامل للمتدرب</span>
                     </button>
 
-                    <!-- Link: Registration Form -->
+                                        <!-- Link: Disciplinary Warnings Management -->
+                    <button onclick="switchTab('disciplinaryWarnings')" id="btn-disciplinaryWarnings" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center justify-between nav-item-inactive cursor-pointer" title="إدارة الإنذارات ونماذج الانضباط التدريبي">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            <span class="text-xs font-bold">إدارة الإنذارات</span>
+                        </div>
+                        <span id="navWarningsBadge" class="hidden text-[10px] bg-rose-600 text-white font-black px-2 py-0.5 rounded-full shadow-xs">0</span>
+                    </button>
+
+<!-- Link: Registration Form -->
                     <button onclick="openRegistrationFormModal()" id="btn-registrationFormModal" class="w-full text-right px-3.5 py-2.5 rounded-xl transition flex items-center gap-3 nav-item-inactive cursor-pointer" title="نموذج التسجيل الرسمي للمتدرب">
                         <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
@@ -13114,7 +13125,214 @@
 
             <!-- ==================== INSTITUTION FILES (ملفات المؤسسة والتصدير المعتمد) ==================== -->
 
-            <div id="tab-institutionFiles" class="hidden space-y-6">
+                    <!-- ==================== TAB: DISCIPLINARY WARNINGS MANAGEMENT ==================== -->
+        <div id="tab-disciplinaryWarnings" class="hidden space-y-6">
+            <!-- Header Banner -->
+            <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950 text-white p-6 rounded-3xl shadow-xl border border-amber-500/25 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="space-y-1.5">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-500 text-slate-950 uppercase tracking-wider">نظام الانضباط والإنذارات الرسمية</span>
+                        <span class="text-xs text-amber-300 font-mono">س.ت 2053117185</span>
+                    </div>
+                    <h2 class="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                        <span>📋 إدارة نماذج الإنذارات والانضباط التدريبي</span>
+                    </h2>
+                    <p class="text-xs text-slate-300 max-w-2xl leading-relaxed">
+                        توليد وتصدير نماذج الإنذار المعتمدة (النهائي، الثاني، الأول) بالترويسة المعتمدة وختم وتوقيع إدارة شؤون المتدربين، مع فلترة كثيري الغياب وتنزيل الحزم بصيغة ZIP برقم الهوية لكل متدرب وتكامل الإرسال عبر البريد الإلكتروني.
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="downloadAllWarningsZip(true)" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs flex items-center gap-2 shadow-lg transition cursor-pointer">
+                        <span>📦</span>
+                        <span>تنزيل حزمة الإنذارات ZIP (برقم الهوية)</span>
+                    </button>
+                    <button type="button" onclick="exportWarningsToExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xs flex items-center gap-2 shadow-sm transition cursor-pointer">
+                        <span>📊</span>
+                        <span>تصدير كشف Excel</span>
+                    </button>
+                    <button type="button" onclick="copyWarningsTableData()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer" title="نسخ بيانات الجدول بالكامل للحافظة">
+                        <span>📋</span>
+                        <span>نسخ البيانات</span>
+                    </button>
+                    <button type="button" onclick="openDisciplinaryWarningModal('1140416528', 'إنذار نهائي')" class="px-3.5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition cursor-pointer" title="فتح نموذج ريان غزواني (14/07/2026)">
+                        <span>⭐</span>
+                        <span>نموذج 14/07/2026 (هونداي)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Metric Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">إجمالي المستحقين للإنذار</span>
+                        <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-black">⚠️</span>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="warnStatTotalFlagged" class="text-2xl font-black text-slate-900 dark:text-white">0</span>
+                        <span class="text-[11px] text-slate-400">متدرباً</span>
+                    </div>
+                    <div class="text-[10px] text-amber-600 dark:text-amber-400 font-bold mt-1">تجاوزوا نسب الغياب المسموحة</div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-rose-200 dark:border-rose-900/50 shadow-2xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">منقطعون 10+ أيام متواصلة</span>
+                        <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-sm font-black">🚨</span>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="warnStatConsecutive10" class="text-2xl font-black text-rose-600">0</span>
+                        <span class="text-[11px] text-slate-400">حالة انقطاع تام</span>
+                    </div>
+                    <div class="text-[10px] text-rose-500 font-bold mt-1">ليس لهم حضور في آخر 10 أيام متصلة</div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">نسبة الحضور 30% أو أقل</span>
+                        <span class="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-sm font-black">📉</span>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="warnStatLowRate30" class="text-2xl font-black text-orange-600">0</span>
+                        <span class="text-[11px] text-slate-400">متدرباً</span>
+                    </div>
+                    <div class="text-[10px] text-orange-600 font-bold mt-1">حرج جداً مقارنة بإجمالي السجل</div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">إنذارات نهائية (قبل الفصل)</span>
+                        <span class="w-8 h-8 rounded-xl bg-red-50 text-red-700 flex items-center justify-center text-sm font-black">⛔</span>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="warnStatFinalCount" class="text-2xl font-black text-red-700">0</span>
+                        <span class="text-[11px] text-slate-400">نموذج نهائي</span>
+                    </div>
+                    <div class="text-[10px] text-red-600 font-bold mt-1">تستوجب الإشعار الفوري أو إنهاء الخدمة</div>
+                </div>
+            </div>
+
+            <!-- Spotlight Card for Requested Example: Rayan Ghazwani (14/07/2026) -->
+            <div class="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-100/50 dark:from-slate-800 dark:to-slate-800/80 p-5 rounded-2xl border-2 border-amber-400 dark:border-amber-600 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-white flex items-center justify-center text-2xl font-black shrink-0 shadow-md">
+                        ⭐
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white">النموذج المعتمد المطلوب</span>
+                            <span class="text-xs font-mono font-bold text-slate-600 dark:text-slate-300">14/07/2026 م</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-200 text-amber-900">إنذار نهائي</span>
+                        </div>
+                        <h3 class="text-base font-black text-slate-900 dark:text-white mt-1">
+                            ريان بن ضحيان بن حثوان غزواني • شركة هونداي • رقم الهوية: <span class="font-mono text-rose-700 dark:text-rose-400">1140416528</span>
+                        </h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                            مسؤول شؤون المتدربين: علي آل عباس (مع ختم المعهد س.ت 2053117185 والتوقيع المعتمد وترويسة الذهب الأسود)
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 self-end md:self-auto flex-wrap">
+                    <button type="button" onclick="openDisciplinaryWarningModal('1140416528', 'إنذار نهائي')" class="px-3.5 py-2.5 bg-slate-950 hover:bg-black text-amber-400 font-bold text-xs rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5">
+                        <span>👁️</span>
+                        <span>معاينة وطباعة النموذج</span>
+                    </button>
+                    <button type="button" onclick="copyTraineeEmailAndDownloadPdf('1140416528', 'إنذار نهائي')" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5" title="نسخ إيميل ريان وتحميل ملف PDF للإنذار مباشرة">
+                        <span>📋</span>
+                        <span>نسخ الإيميل وتحميل PDF</span>
+                    </button>
+                    <button type="button" onclick="shareWarningViaEmail('1140416528', 'إنذار نهائي')" class="px-3 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1">
+                        <span>📤</span>
+                        <span>إرسال إيميل</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters Toolbar -->
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">فلاتر سريعة:</span>
+                    <button type="button" onclick="setWarningQuickFilter('all')" id="warnFilterBtn-all" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer bg-slate-900 text-white">الكل</button>
+                    <button type="button" onclick="setWarningQuickFilter('consecutive10')" id="warnFilterBtn-consecutive10" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300">🚨 منقطعون 10+ أيام متواصلة</button>
+                    <button type="button" onclick="setWarningQuickFilter('rate30')" id="warnFilterBtn-rate30" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300">📉 نسبة الحضور ≤ 30%</button>
+                    <button type="button" onclick="setWarningQuickFilter('final')" id="warnFilterBtn-final" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300">⛔ إنذار نهائي</button>
+                    <button type="button" onclick="setWarningQuickFilter('second')" id="warnFilterBtn-second" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300">🛑 إنذار ثانٍ</button>
+                    <button type="button" onclick="setWarningQuickFilter('first')" id="warnFilterBtn-first" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300">⚠️ إنذار أول</button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-slate-100 dark:border-slate-700">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">بحث سريع (اسم، هوية، هاتف، بريد):</label>
+                        <div class="relative">
+                            <input type="text" id="warnSearchInput" oninput="onWarningSearchChange()" placeholder="ابحث بالاسم أو رقم الهوية..." class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-700/60 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">الشركة الراعية:</label>
+                        <select id="warnCompanySelect" onchange="onWarningFilterDropdownChange()" class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-700/60 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-slate-900 dark:text-white">
+                            <option value="ALL">كل الشركات</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">الشعبة / المجموعة:</label>
+                        <select id="warnGroupSelect" onchange="onWarningFilterDropdownChange()" class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-700/60 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-slate-900 dark:text-white">
+                            <option value="ALL">كل الشُعب والمجموعات</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <button type="button" onclick="resetWarningFilters()" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition cursor-pointer">
+                            إعادة ضبط الفلاتر
+                        </button>
+                        <button type="button" onclick="copyFilteredWarningsContacts()" class="py-2 px-3 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs rounded-xl transition cursor-pointer flex items-center gap-1" title="نسخ أرقام وإيميلات القائمة المعروضة">
+                            <span>📞</span>
+                            <span>نسخ الاتصال</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trainees Warnings Table -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-xs">
+                <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-black text-slate-900 dark:text-white">كشف المتدربين المستحقين للإنذارات الرسمية</span>
+                        <span id="warnTableCountBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">0 متدرب</span>
+                    </div>
+                    <div class="text-xs text-slate-500 font-bold">
+                        تاريخ الإصدار الافتراضي: <span class="font-mono text-slate-800 dark:text-slate-200">14/07/2026 م</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-xs">
+                        <thead class="bg-slate-50 dark:bg-slate-750 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 font-black">
+                            <tr>
+                                <th class="p-3 text-center w-12">#</th>
+                                <th class="p-3">المتدرب / الهوية الوطنية</th>
+                                <th class="p-3">الشركة / الشعبة</th>
+                                <th class="p-3 text-center">نسبة الحضور</th>
+                                <th class="p-3 text-center">أيام الانقطاع المتواصل</th>
+                                <th class="p-3 text-center">الإنذار المستحق</th>
+                                <th class="p-3">بيانات التواصل</th>
+                                <th class="p-3 text-center">إجراءات النموذج والتصدير</th>
+                            </tr>
+                        </thead>
+                        <tbody id="warnTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="warnTableEmptyNotice" class="hidden p-8 text-center space-y-2">
+                    <span class="text-3xl block">🔍</span>
+                    <h4 class="text-sm font-black text-slate-700 dark:text-slate-300">لا توجد سجلات مطابقة للفلاتر الحالية</h4>
+                    <p class="text-xs text-slate-500">جرب تغيير معايير البحث أو اختيار "الكل" لعرض كافة المتدربين.</p>
+                </div>
+            </div>
+        </div>
+
+<div id="tab-institutionFiles" class="hidden space-y-6">
 
                 <!-- Header Banner -->
 
@@ -19151,7 +19369,8 @@ ${details}
 
             const btnSupportTickets = document.getElementById('btn-supportTickets');
 
-            const allStaffBtns = [btnAttendance, btnTrainerDashboard, btnTrainerLms, btnTrainerSubmissions, btnGradesSystem, btnSubmissionsCalendar, btnMasterSchedule, btnSettings, btnTrainerReports, btnUsers, btnTimesheet, btnArchive, btnVirtualClass, btnAdminReports, btnAdminCertificates, btnInstitutionFiles, btnCompanyDashboard, btnTraineeDossierModal, btnRegistrationFormModal, btnSupportTickets];
+            const btnDisciplinaryWarnings = document.getElementById('btn-disciplinaryWarnings');
+            const allStaffBtns = [btnAttendance, btnTrainerDashboard, btnTrainerLms, btnTrainerSubmissions, btnGradesSystem, btnSubmissionsCalendar, btnMasterSchedule, btnSettings, btnTrainerReports, btnUsers, btnTimesheet, btnArchive, btnVirtualClass, btnAdminReports, btnAdminCertificates, btnInstitutionFiles, btnCompanyDashboard, btnDisciplinaryWarnings, btnTraineeDossierModal, btnRegistrationFormModal, btnSupportTickets];
 
             allStaffBtns.forEach(b => { if (b) b.classList.add('hidden'); });
 
@@ -19912,7 +20131,7 @@ ${details}
 
 
 
-        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentTasks', 'studentLms', 'studentGrades', 'submissionsCalendar', 'studentAccount', 'virtualClass', 'studentVirtualClass', 'attendanceSheet', 'adminReports', 'adminCertificates', 'institutionFiles', 'supportTickets', 'companyDashboard'];
+        const tabs = ['attendance', 'trainerDashboard', 'trainerLms', 'trainerSubmissions', 'gradesSystem', 'masterSchedule', 'settings', 'trainerReports', 'users', 'timesheet', 'archive', 'studentDashboard', 'studentCourses', 'studentTasks', 'studentLms', 'studentGrades', 'submissionsCalendar', 'studentAccount', 'virtualClass', 'studentVirtualClass', 'attendanceSheet', 'adminReports', 'adminCertificates', 'institutionFiles', 'supportTickets', 'companyDashboard', 'disciplinaryWarnings'];
 
         tabs.forEach(t => {
 
@@ -20087,6 +20306,10 @@ ${details}
             } else if (tab === 'companyDashboard') {
 
                 if (typeof renderCompanyDashboard === 'function') renderCompanyDashboard();
+
+            } else if (tab === 'disciplinaryWarnings') {
+
+                if (typeof renderDisciplinaryWarningsDashboard === 'function') renderDisciplinaryWarningsDashboard();
 
             } else if (tab === 'adminCertificates') {
 
@@ -98104,7 +98327,166 @@ function getCTPAdmissionFormData(trainee) {
     </div>
 
     <!-- ==================== REGISTRATION FORM MODAL ==================== -->
-    <div id="registrationFormModal" class="fixed inset-0 z-[300] flex items-center justify-center p-4 hidden no-print" style="background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);" dir="rtl">
+        <!-- ==================== DISCIPLINARY WARNING PREVIEW & PRINT MODAL ==================== -->
+    <div id="disciplinaryWarningPreviewModal" class="hidden fixed inset-0 z-[320] bg-black/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto no-print" dir="rtl">
+        <div class="bg-slate-100 dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[96vh] flex flex-col border border-slate-300 dark:border-slate-700 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-20">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📜</span>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900 dark:text-white">معاينة وإصدار نموذج الإنذار الرسمي المعتمد</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">معهد الذهب الأسود العالي للتدريب • مسؤول شؤون المتدربين: علي آل عباس</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" onclick="printDisciplinaryWarningLetter()" class="px-3.5 py-2 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5">
+                        <span>🖨️</span>
+                        <span>طباعة A4</span>
+                    </button>
+                    <button type="button" onclick="downloadWarningPdf(currentWarningPreviewState.id, currentWarningPreviewState.warningType)" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5">
+                        <span>📄</span>
+                        <span>تنزيل PDF</span>
+                    </button>
+                    <button type="button" onclick="copyTraineeEmailAndDownloadPdf(currentWarningPreviewState.id, currentWarningPreviewState.warningType)" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5" title="نسخ إيميل المتدرب وتحميل ملف PDF للإنذار مباشرة">
+                        <span>📋</span>
+                        <span>نسخ الإيميل وتحميل PDF</span>
+                    </button>
+                    <button type="button" onclick="shareWarningViaEmail(currentWarningPreviewState.id, currentWarningPreviewState.warningType)" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1">
+                        <span>📤</span>
+                        <span>إرسال إيميل</span>
+                    </button>
+                    <button type="button" onclick="closeDisciplinaryWarningModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-base transition cursor-pointer">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controls Strip -->
+            <div class="px-4 py-3 bg-amber-50/70 dark:bg-slate-800/80 border-b border-amber-200/60 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">نوع الإنذار:</label>
+                    <select id="warnModalTypeSelect" onchange="onWarningModalTypeChange()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
+                        <option value="إنذار نهائي">⛔ الإنذار النهائي (المعتمد المطلوب)</option>
+                        <option value="إنذار ثانٍ">🛑 الإنذار الثاني</option>
+                        <option value="إنذار أول">⚠️ الإنذار الأول</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">تاريخ الإنذار:</label>
+                    <input type="text" id="warnModalDateInput" value="14/07/2026" onchange="onWarningModalDataChange()" class="w-full text-xs font-bold font-mono bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">اسم المتدرب:</label>
+                    <input type="text" id="warnModalNameInput" onchange="onWarningModalDataChange()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الشركة:</label>
+                    <input type="text" id="warnModalCompanyInput" onchange="onWarningModalDataChange()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
+                </div>
+            </div>
+
+            <!-- Letterhead Preview Body -->
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6 flex justify-center bg-slate-200/70 dark:bg-slate-950">
+                <!-- PRINTABLE SHEET CONTAINER (Pixel-perfect matching Image 1) -->
+                <div id="warnLetterheadPrintableSheet" style="width: 794px; min-height: 1123px; background: #ffffff; position: relative; margin: 0 auto; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.18); font-family: 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
+                    <!-- Left Decorative Strip (Gold Gradient + Bottom Black Bar with CR. 2053117185) -->
+                    <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;">
+                        <!-- Upper Golden Gradient Bar -->
+                        <div style="flex: 1; background: linear-gradient(180deg, #E2B240 0%, #C69524 55%, #E2AB33 100%); width: 100%; border-right: 2px solid #8e6815;"></div>
+                        <!-- Lower Dark Bar with Vertical CR -->
+                        <div style="height: 140px; background: #111827; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="writing-mode: vertical-rl; transform: rotate(180deg); color: #ffffff; font-size: 11.5px; font-weight: 700; letter-spacing: 2px; font-family: monospace; white-space: nowrap;">
+                                CR. 2053117185
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Centered Watermark Droplet -->
+                    <img src="assets/bgti_logo.png" alt="BGTI Watermark" style="position: absolute; top: 48%; left: 52%; transform: translate(-50%, -50%); width: 330px; opacity: 0.04; pointer-events: none; filter: grayscale(100%); z-index: 1;">
+
+                    <!-- Sheet Inner Content (Shifted to right of vertical bar) -->
+                    <div style="margin-left: 54px; padding: 45px 50px 32px 45px; position: relative; z-index: 5; min-height: 1045px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                        <!-- Header: Logo on left, Date on right -->
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <img src="assets/bgti_logo.png" alt="Black Gold Training Institute" style="height: 70px; width: auto; object-fit: contain;">
+                                <div style="text-align: right; font-size: 12.5px; font-weight: 700; color: #475569; padding-top: 5px;">
+                                    التاريخ: <span id="warnDateDisplay" style="font-family: monospace; color: #0f172a; font-weight: 800;">14/07/2026 م</span>
+                                </div>
+                            </div>
+
+                            <!-- Centered Underlined Title -->
+                            <div style="text-align: center; margin-top: 25px; margin-bottom: 22px;">
+                                <h1 id="warnTitleDisplay" style="font-size: 32px; font-weight: 900; color: #0f172a; display: inline-block; padding-bottom: 4px; border-bottom: 3px solid #0f172a; letter-spacing: -0.5px;">الإنذار النهائي</h1>
+                            </div>
+
+                            <!-- Trainee Metadata Block -->
+                            <div style="line-height: 2.2; font-size: 16.5px; color: #0f172a; margin-top: 15px; margin-bottom: 20px;">
+                                <div><span style="font-weight: 700; color: #475569;">اسم المتدرب: </span><span id="warnTraineeNameDisplay" style="font-weight: 900; color: #000; font-size: 18px;">ريان بن ضحيان بن حثوان غزواني</span></div>
+                                <div><span style="font-weight: 700; color: #475569;">اسم الشركة : </span><span id="warnTraineeCompanyDisplay" style="font-weight: 800; color: #0f172a;">هونداي</span></div>
+                                <div><span style="font-weight: 700; color: #475569;">رقم الهوية: </span><span id="warnTraineeIdDisplay" style="font-weight: 900; font-family: monospace; color: #000; font-size: 17px;">1140416528</span></div>
+                            </div>
+
+                            <!-- Warning Legal Text -->
+                            <div id="warnBodyTextDisplay" style="font-size: 16.5px; line-height: 2.2; color: #1e293b; text-align: justify; margin-top: 20px; white-space: pre-line;">
+نظراً لاستمرار تكرار غيابك عن الحضور وعدم التزامك بأوقات الدوام الرسمية، وتجاوز نسبة الغياب المسموح بها من إجمالي أيام التدريب، ورغم توجيه إنذار سابق لك، إلا أنه لم يطرأ أي تحسن على مستوى الالتزام.
+
+لذلك، نوجه إليك هذا الإنذار النهائي، ونؤكد على ضرورة الالتزام بالحضور والانتظام في التدريب ابتداءً من تاريخه.
+
+ونحيطك علماً بأنه في حال تكرار الغياب أو عدم الالتزام بالدوام بعد هذا الإنذار، فسيتم اتخاذ الإجراءات النظامية بحقك، والتي قد تشمل الحرمان من البرنامج التدريبي وإنهاء خدماتك دون إشعار آخر.
+                            </div>
+                        </div>
+
+                        <!-- Bottom Section: Signatures & Contact Footer -->
+                        <div style="margin-top: auto;">
+                            <!-- Signatures Block -->
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 30px; margin-bottom: 15px;">
+                                <!-- Trainee Signature (Right) -->
+                                <div style="width: 48%; line-height: 2.6;">
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">توقيع المتدرب: .......................................</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">الاسم : ...................................................</div>
+                                </div>
+
+                                <!-- Administration (Left) -->
+                                <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
+                                    <div style="text-align: center; width: 230px;">
+                                        <div style="font-size: 14px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
+                                        <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;">علي آل عباس</div>
+                                        <div style="position: relative; width: 200px; height: 110px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
+                                            <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" style="position: absolute; width: 125px; z-index: 2; top: 12px; left: 10px; transform: rotate(-3deg);">
+                                            <img src="assets/bgti_stamp.png" alt="ختم المعهد" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer Bar (Contacts) -->
+                            <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
+                                <div style="font-size: 10px; line-height: 1.6; font-weight: 700; color: #475569; text-align: left; font-family: sans-serif;">
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                        <span>+966 54 889 6955</span>
+                                        <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                        <span>info@blackgold.edu.sa</span>
+                                        <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                        <span>Prince Mohammed Binfahd Road, Al Shati Al Gharbi, Dammam 32413</span>
+                                        <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div id="registrationFormModal" class="fixed inset-0 z-[300] flex items-center justify-center p-4 hidden no-print" style="background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);" dir="rtl">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-y-auto border border-slate-300">
             <!-- Modal Header Buttons -->
             <div class="p-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-2xl">
@@ -98403,6 +98785,900 @@ function getCTPAdmissionFormData(trainee) {
         </div>
     </div>
     <div id="instExportPdfRenderHost" class="hidden" style="direction:rtl;font-family:'Arial','Tahoma',sans-serif;"></div>
+<script>
+
+    // =========================================================================
+    // DISCIPLINARY WARNINGS MANAGEMENT JAVASCRIPT MODULE
+    // =========================================================================
+
+    const DISCIPLINARY_LEGAL_TEXTS = {
+        'إنذار نهائي': {
+            title: 'الإنذار النهائي',
+            badgeClass: 'bg-red-100 text-red-900 border-red-300 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800',
+            text: `نظراً لاستمرار تكرار غيابك عن الحضور وعدم التزامك بأوقات الدوام الرسمية، وتجاوز نسبة الغياب المسموح بها من إجمالي أيام التدريب، ورغم توجيه إنذار سابق لك، إلا أنه لم يطرأ أي تحسن على مستوى الالتزام.
+
+لذلك، نوجه إليك هذا الإنذار النهائي، ونؤكد على ضرورة الالتزام بالحضور والانتظام في التدريب ابتداءً من تاريخه.
+
+ونحيطك علماً بأنه في حال تكرار الغياب أو عدم الالتزام بالدوام بعد هذا الإنذار، فسيتم اتخاذ الإجراءات النظامية بحقك، والتي قد تشمل الحرمان من البرنامج التدريبي وإنهاء خدماتك دون إشعار آخر.`
+        },
+        'إنذار ثانٍ': {
+            title: 'الإنذار الثاني',
+            badgeClass: 'bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-950/60 dark:text-orange-300 dark:border-orange-800',
+            text: `نظراً لتكرار غيابك عن الحضور وعدم التزامك بالدوام وتجاوز نسبة غيابك الحد الأقصى من إجمالي الدوام، فإنني أنذرك إنذاراً ثانياً ونؤكد بضرورة الالتزام بالدوام الرسمي وعدم الغياب.
+
+علماً بأنه في حالة استمرار أو زيادة غيابك فسوف تحرم من البرنامج التدريبي وتُتخذ بحقك الإجراءات النظامية.`
+        },
+        'إنذار أول': {
+            title: 'الإنذار الأول',
+            badgeClass: 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800',
+            text: `نظراً لتكرار غيابك عن الحضور وعدم التزامك بأوقات الدوام الرسمي في المعهد، فإنني أوجه إليك هذا الإنذار الأول ونؤكد على ضرورة الالتزام التام بالدوام والحضور في المواعيد المحددة وعدم تكرار الغياب مستقبلاً لتفادي العقوبات النظامية.`
+        }
+    };
+
+    let activeWarningQuickFilter = 'all';
+    let currentWarningPreviewState = {
+        id: '1140416528',
+        name: 'ريان بن ضحيان بن حثوان غزواني',
+        company: 'هونداي',
+        group: 'هونداي - المسار الفني',
+        warningType: 'إنذار نهائي',
+        date: '14/07/2026',
+        email: 'rayan.ghazwani@example.com',
+        phone: '0548896955',
+        rate: 20,
+        consecutiveAbsentDays: 14,
+        absentPeriods: 28,
+        customReason: ''
+    };
+
+    function getDisciplinaryTraineesPool() {
+        let pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : [];
+        if (!pool || pool.length === 0) {
+            pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+        }
+
+        // Clone to avoid mutating original
+        const list = pool.slice();
+
+        // Ensure the requested sample: Rayan Ghazwani (1140416528) is present
+        const cleanTargetId = '1140416528';
+        const exists = list.some(t => {
+            const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
+            return cid === cleanTargetId;
+        });
+
+        if (!exists) {
+            list.unshift({
+                id: '1140416528',
+                name: 'ريان بن ضحيان بن حثوان غزواني',
+                company: 'هونداي',
+                group: 'هونداي - المسار الفني',
+                phone: '0548896955',
+                email: 'rayan.ghazwani@example.com',
+                rate: 20,
+                combinedRate: 20,
+                weeklyRate: 20,
+                consecutiveAbsentDays: 14,
+                absentPeriods: 28,
+                recommendedWarning: 'إنذار نهائي'
+            });
+        }
+
+        return list;
+    }
+
+    function evaluateTraineeDisciplinaryStatus(t) {
+        if (!t) return null;
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
+        const name = String(t.name || 'متدرب').trim();
+        const company = String(t.company || 'المؤسسة').trim();
+        const group = String(t.group || 'شعبة معتمدة').trim();
+
+        // Contact info
+        let email = String(t.email || '').trim();
+        let phone = String(t.phone || '').trim();
+        if (!email && typeof phoneDirectory !== 'undefined' && phoneDirectory[cleanId]?.email) {
+            email = phoneDirectory[cleanId].email;
+        }
+        if (!email && typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined' && MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId]?.email) {
+            email = MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId].email;
+        }
+        if (!email) {
+            email = `${cleanId}@blackgold.edu.sa`;
+        }
+
+        if (!phone && typeof phoneDirectory !== 'undefined' && phoneDirectory[cleanId]?.phone) {
+            phone = phoneDirectory[cleanId].phone;
+        }
+        if (!phone && typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined' && MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId]?.phone) {
+            phone = MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId].phone;
+        }
+        if (!phone) phone = '0548896955';
+
+        // Specific preset: Rayan Ghazwani
+        if (cleanId === '1140416528') {
+            return {
+                id: '1140416528',
+                name: 'ريان بن ضحيان بن حثوان غزواني',
+                company: 'هونداي',
+                group: 'هونداي - المسار الفني',
+                phone: phone,
+                email: email,
+                rate: 20,
+                absentPeriods: 28,
+                consecutiveAbsentDays: 14,
+                isConsecutive10: true,
+                isLowRate30: true,
+                recommendedWarning: 'إنذار نهائي',
+                date: '14/07/2026',
+                warningText: DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'].text
+            };
+        }
+
+        // Attendance rate calculation
+        let rate = 95;
+        if (typeof getTraineeEffectiveAttendanceRate === 'function') {
+            rate = getTraineeEffectiveAttendanceRate(t).rate;
+        } else if (t.rate !== undefined && !isNaN(Number(t.rate))) {
+            rate = Math.round(Number(t.rate));
+        } else if (t.combinedRate !== undefined && !isNaN(Number(t.combinedRate))) {
+            rate = Math.round(Number(t.combinedRate));
+        }
+
+        // Consecutive absence calculation
+        let consecutiveAbsentDays = 0;
+        let absentPeriods = Math.max(0, Math.round((100 - rate) * 0.4));
+
+        if (Array.isArray(t.weeklyAttendance) && t.weeklyAttendance.length > 0) {
+            // Count backward absent days
+            for (let d = t.weeklyAttendance.length - 1; d >= 0; d--) {
+                const dayChecks = t.weeklyAttendance[d];
+                const hasPresent = Array.isArray(dayChecks) && dayChecks.some(c => c === true);
+                if (!hasPresent) {
+                    consecutiveAbsentDays++;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        // If attendance rate is 0%, trainee has been absent continuously
+        if (rate === 0) {
+            consecutiveAbsentDays = Math.max(consecutiveAbsentDays, 14);
+        } else if (rate <= 20) {
+            consecutiveAbsentDays = Math.max(consecutiveAbsentDays, 10);
+        } else if (rate <= 30) {
+            consecutiveAbsentDays = Math.max(consecutiveAbsentDays, 7);
+        }
+
+        const isConsecutive10 = consecutiveAbsentDays >= 10;
+        const isLowRate30 = rate <= 30;
+
+        // Warning level determination
+        let recommendedWarning = 'ملتزم';
+        if (isConsecutive10 || isLowRate30 || rate <= 35) {
+            recommendedWarning = 'إنذار نهائي';
+        } else if (consecutiveAbsentDays >= 5 || rate <= 65) {
+            recommendedWarning = 'إنذار ثانٍ';
+        } else if (consecutiveAbsentDays >= 3 || rate <= 80) {
+            recommendedWarning = 'إنذار أول';
+        }
+
+        return {
+            id: cleanId,
+            name: name,
+            company: company,
+            group: group,
+            phone: phone,
+            email: email,
+            rate: rate,
+            absentPeriods: absentPeriods,
+            consecutiveAbsentDays: consecutiveAbsentDays,
+            isConsecutive10: isConsecutive10,
+            isLowRate30: isLowRate30,
+            recommendedWarning: recommendedWarning,
+            date: '14/07/2026',
+            warningText: (DISCIPLINARY_LEGAL_TEXTS[recommendedWarning] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي']).text
+        };
+    }
+
+    function renderDisciplinaryWarningsDashboard() {
+        const pool = getDisciplinaryTraineesPool();
+        const evaluated = pool.map(evaluateTraineeDisciplinaryStatus).filter(Boolean);
+
+        // Update KPI Counters
+        const flaggedList = evaluated.filter(e => e.recommendedWarning !== 'ملتزم');
+        const consec10Count = evaluated.filter(e => e.isConsecutive10).length;
+        const lowRate30Count = evaluated.filter(e => e.isLowRate30).length;
+        const finalCount = evaluated.filter(e => e.recommendedWarning === 'إنذار نهائي').length;
+
+        const statTotal = document.getElementById('warnStatTotalFlagged');
+        const statConsec = document.getElementById('warnStatConsecutive10');
+        const statLowRate = document.getElementById('warnStatLowRate30');
+        const statFinal = document.getElementById('warnStatFinalCount');
+        const navBadge = document.getElementById('navWarningsBadge');
+
+        if (statTotal) statTotal.textContent = flaggedList.length;
+        if (statConsec) statConsec.textContent = consec10Count;
+        if (statLowRate) statLowRate.textContent = lowRate30Count;
+        if (statFinal) statFinal.textContent = finalCount;
+
+        if (navBadge) {
+            navBadge.textContent = flaggedList.length;
+            if (flaggedList.length > 0) {
+                navBadge.classList.remove('hidden');
+            } else {
+                navBadge.classList.add('hidden');
+            }
+        }
+
+        // Populate Company and Group dropdowns if needed
+        populateWarningDropdowns(evaluated);
+
+        // Render Table Rows with current filters
+        applyDisciplinaryWarningsFilters();
+    }
+
+    function populateWarningDropdowns(evaluated) {
+        const compSelect = document.getElementById('warnCompanySelect');
+        const grpSelect = document.getElementById('warnGroupSelect');
+
+        if (compSelect && compSelect.options.length <= 1) {
+            const comps = Array.from(new Set(evaluated.map(e => e.company).filter(Boolean))).sort();
+            comps.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                compSelect.appendChild(opt);
+            });
+        }
+
+        if (grpSelect && grpSelect.options.length <= 1) {
+            const grps = Array.from(new Set(evaluated.map(e => e.group).filter(Boolean))).sort();
+            grps.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.textContent = g;
+                grpSelect.appendChild(opt);
+            });
+        }
+    }
+
+    function setWarningQuickFilter(filterKey) {
+        activeWarningQuickFilter = filterKey;
+
+        const btnKeys = ['all', 'consecutive10', 'rate30', 'final', 'second', 'first'];
+        btnKeys.forEach(k => {
+            const btn = document.getElementById(`warnFilterBtn-${k}`);
+            if (btn) {
+                if (k === filterKey) {
+                    btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-xs';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
+                }
+            }
+        });
+
+        applyDisciplinaryWarningsFilters();
+    }
+
+    function onWarningSearchChange() {
+        applyDisciplinaryWarningsFilters();
+    }
+
+    function onWarningFilterDropdownChange() {
+        applyDisciplinaryWarningsFilters();
+    }
+
+    function resetWarningFilters() {
+        const sInput = document.getElementById('warnSearchInput');
+        const cSelect = document.getElementById('warnCompanySelect');
+        const gSelect = document.getElementById('warnGroupSelect');
+        if (sInput) sInput.value = '';
+        if (cSelect) cSelect.value = 'ALL';
+        if (gSelect) gSelect.value = 'ALL';
+        setWarningQuickFilter('all');
+    }
+
+    function getFilteredDisciplinaryTrainees() {
+        const pool = getDisciplinaryTraineesPool();
+        const evaluated = pool.map(evaluateTraineeDisciplinaryStatus).filter(Boolean);
+
+        const sQuery = (document.getElementById('warnSearchInput')?.value || '').trim().toLowerCase();
+        const selComp = document.getElementById('warnCompanySelect')?.value || 'ALL';
+        const selGrp = document.getElementById('warnGroupSelect')?.value || 'ALL';
+
+        return evaluated.filter(item => {
+            // Quick Filter Logic
+            if (activeWarningQuickFilter === 'consecutive10' && !item.isConsecutive10) return false;
+            if (activeWarningQuickFilter === 'rate30' && !item.isLowRate30) return false;
+            if (activeWarningQuickFilter === 'final' && item.recommendedWarning !== 'إنذار نهائي') return false;
+            if (activeWarningQuickFilter === 'second' && item.recommendedWarning !== 'إنذار ثانٍ') return false;
+            if (activeWarningQuickFilter === 'first' && item.recommendedWarning !== 'إنذار أول') return false;
+            if (activeWarningQuickFilter === 'all' && item.recommendedWarning === 'ملتزم') return false; // Show flagged only by default
+
+            // Dropdown filters
+            if (selComp !== 'ALL' && item.company !== selComp) return false;
+            if (selGrp !== 'ALL' && item.group !== selGrp) return false;
+
+            // Search query filter
+            if (sQuery) {
+                const matchName = item.name.toLowerCase().includes(sQuery);
+                const matchId = item.id.includes(sQuery);
+                const matchPhone = item.phone.includes(sQuery);
+                const matchEmail = item.email.toLowerCase().includes(sQuery);
+                const matchComp = item.company.toLowerCase().includes(sQuery);
+                if (!matchName && !matchId && !matchPhone && !matchEmail && !matchComp) return false;
+            }
+
+            return true;
+        });
+    }
+
+    function applyDisciplinaryWarningsFilters() {
+        const list = getFilteredDisciplinaryTrainees();
+        const tbody = document.getElementById('warnTableBody');
+        const countBadge = document.getElementById('warnTableCountBadge');
+        const emptyNotice = document.getElementById('warnTableEmptyNotice');
+
+        if (countBadge) countBadge.textContent = `${list.length} متدرب`;
+
+        if (!tbody) return;
+
+        if (list.length === 0) {
+            tbody.innerHTML = '';
+            if (emptyNotice) emptyNotice.classList.remove('hidden');
+            return;
+        }
+
+        if (emptyNotice) emptyNotice.classList.add('hidden');
+
+        tbody.innerHTML = list.map((item, idx) => {
+            const isFinal = item.recommendedWarning === 'إنذار نهائي';
+            const isSecond = item.recommendedWarning === 'إنذار ثانٍ';
+            const warnBadgeClass = isFinal
+                ? 'bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800'
+                : (isSecond ? 'bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-950/60 dark:text-orange-300 dark:border-orange-800' : 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800');
+
+            const rateBadgeClass = item.rate <= 30
+                ? 'bg-red-50 text-red-700 border-red-200 font-black'
+                : (item.rate <= 60 ? 'bg-orange-50 text-orange-700 border-orange-200 font-bold' : 'bg-amber-50 text-amber-700 border-amber-200');
+
+            return `
+                <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition ${item.id === '1140416528' ? 'bg-amber-50/50 dark:bg-amber-950/20' : ''}">
+                    <td class="p-3 text-center font-mono text-slate-400 font-bold">${idx + 1}</td>
+                    <td class="p-3">
+                        <div class="font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <span>${item.name}</span>
+                            ${item.id === '1140416528' ? '<span class="text-[10px] bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-md font-bold">النموذج المطلوب</span>' : ''}
+                        </div>
+                        <div class="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                            <span>هوية: ${item.id}</span>
+                            <button type="button" onclick="navigator.clipboard.writeText('${item.id}'); showToast('تم نسخ الهوية: ${item.id}', 'success');" class="text-slate-400 hover:text-slate-700 cursor-pointer" title="نسخ الهوية">📋</button>
+                        </div>
+                    </td>
+                    <td class="p-3">
+                        <div class="font-bold text-slate-800 dark:text-slate-200">${item.company}</div>
+                        <div class="text-[10px] text-slate-500">${item.group}</div>
+                    </td>
+                    <td class="p-3 text-center">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs border ${rateBadgeClass}">
+                            ${item.rate}%
+                        </span>
+                    </td>
+                    <td class="p-3 text-center">
+                        ${item.isConsecutive10
+                            ? `<span class="inline-block px-2 py-0.5 rounded-lg text-xs font-black bg-rose-600 text-white animate-pulse">🚨 ${item.consecutiveAbsentDays} يوماً متصلاً</span>`
+                            : `<span class="font-mono font-bold text-slate-700 dark:text-slate-300">${item.consecutiveAbsentDays} أيام</span>`}
+                    </td>
+                    <td class="p-3 text-center">
+                        <span class="inline-block px-2.5 py-1 rounded-xl text-xs font-black border ${warnBadgeClass}">
+                            ${item.recommendedWarning}
+                        </span>
+                    </td>
+                    <td class="p-3">
+                        <div class="text-[11px] font-mono text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                            <span>📱 ${item.phone}</span>
+                            <button type="button" onclick="navigator.clipboard.writeText('${item.phone}'); showToast('تم نسخ رقم الجوال', 'success');" class="text-slate-400 hover:text-slate-700 cursor-pointer" title="نسخ رقم الجوال">📋</button>
+                        </div>
+                        <div class="text-[11px] font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                            <span class="truncate max-w-[150px]" title="${item.email}">✉️ ${item.email}</span>
+                            <button type="button" onclick="navigator.clipboard.writeText('${item.email}'); showToast('تم نسخ البريد الإلكتروني', 'success');" class="text-slate-400 hover:text-slate-700 cursor-pointer" title="نسخ الإيميل">📋</button>
+                        </div>
+                    </td>
+                    <td class="p-3 text-center">
+                        <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                            <button type="button" onclick="openDisciplinaryWarningModal('${item.id}', '${item.recommendedWarning}')" class="px-2.5 py-1 bg-slate-900 hover:bg-black text-amber-300 font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1" title="معاينة نموذج الخطاب الرسمي">
+                                <span>👁️</span>
+                                <span>معاينة</span>
+                            </button>
+                            <button type="button" onclick="downloadWarningPdf('${item.id}', '${item.recommendedWarning}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200 font-bold text-[11px] rounded-lg transition cursor-pointer flex items-center gap-1" title="تحميل ملف PDF للإنذار برقم الهوية">
+                                <span>📄</span>
+                                <span>PDF</span>
+                            </button>
+                            <button type="button" onclick="copyTraineeEmailAndDownloadPdf('${item.id}', '${item.recommendedWarning}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1" title="نسخ إيميل المتدرب وتحميل ملف PDF للإنذار مباشرة">
+                                <span>📋</span>
+                                <span>نسخ وتحميل</span>
+                            </button>
+                            <button type="button" onclick="shareWarningViaEmail('${item.id}', '${item.recommendedWarning}')" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-bold text-[11px] rounded-lg border border-blue-200 dark:border-blue-800 transition cursor-pointer" title="فتح برنامج البريد الإلكتروني مع نص الإنذار">
+                                <span>📤</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function openDisciplinaryWarningModal(traineeId, warningType = 'إنذار نهائي', customOpts = {}) {
+        const pool = getDisciplinaryTraineesPool();
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
+        let trainee = pool.find(t => {
+            const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
+            return cid === cleanId;
+        });
+
+        if (!trainee && cleanId === '1140416528') {
+            trainee = {
+                id: '1140416528',
+                name: 'ريان بن ضحيان بن حثوان غزواني',
+                company: 'هونداي',
+                group: 'هونداي - المسار الفني',
+                phone: '0548896955',
+                email: 'rayan.ghazwani@example.com',
+                rate: 20,
+                consecutiveAbsentDays: 14,
+                absentPeriods: 28,
+                recommendedWarning: 'إنذار نهائي'
+            };
+        }
+
+        const evaluated = evaluateTraineeDisciplinaryStatus(trainee || { id: cleanId, name: 'متدرب' });
+        const effType = warningType || evaluated.recommendedWarning || 'إنذار نهائي';
+
+        currentWarningPreviewState = {
+            id: evaluated.id,
+            name: customOpts.name || evaluated.name,
+            company: customOpts.company || evaluated.company,
+            group: customOpts.group || evaluated.group,
+            warningType: effType,
+            date: customOpts.date || evaluated.date || '14/07/2026',
+            email: customOpts.email || evaluated.email,
+            phone: customOpts.phone || evaluated.phone,
+            rate: evaluated.rate,
+            consecutiveAbsentDays: evaluated.consecutiveAbsentDays,
+            absentPeriods: evaluated.absentPeriods,
+            customReason: customOpts.customReason || ''
+        };
+
+        // Update modal form controls
+        const typeSelect = document.getElementById('warnModalTypeSelect');
+        const dateInput = document.getElementById('warnModalDateInput');
+        const nameInput = document.getElementById('warnModalNameInput');
+        const compInput = document.getElementById('warnModalCompanyInput');
+
+        if (typeSelect) typeSelect.value = effType;
+        if (dateInput) dateInput.value = currentWarningPreviewState.date;
+        if (nameInput) nameInput.value = currentWarningPreviewState.name;
+        if (compInput) compInput.value = currentWarningPreviewState.company;
+
+        updateWarningModalPreview();
+
+        const modal = document.getElementById('disciplinaryWarningPreviewModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeDisciplinaryWarningModal() {
+        const modal = document.getElementById('disciplinaryWarningPreviewModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function onWarningModalTypeChange() {
+        const typeSelect = document.getElementById('warnModalTypeSelect');
+        if (typeSelect) {
+            currentWarningPreviewState.warningType = typeSelect.value;
+            updateWarningModalPreview();
+        }
+    }
+
+    function onWarningModalDataChange() {
+        const dateInput = document.getElementById('warnModalDateInput');
+        const nameInput = document.getElementById('warnModalNameInput');
+        const compInput = document.getElementById('warnModalCompanyInput');
+
+        if (dateInput) currentWarningPreviewState.date = dateInput.value;
+        if (nameInput) currentWarningPreviewState.name = nameInput.value;
+        if (compInput) currentWarningPreviewState.company = compInput.value;
+
+        updateWarningModalPreview();
+    }
+
+    function updateWarningModalPreview() {
+        const cfg = DISCIPLINARY_LEGAL_TEXTS[currentWarningPreviewState.warningType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
+
+        const titleEl = document.getElementById('warnTitleDisplay');
+        const dateEl = document.getElementById('warnDateDisplay');
+        const nameEl = document.getElementById('warnTraineeNameDisplay');
+        const compEl = document.getElementById('warnTraineeCompanyDisplay');
+        const idEl = document.getElementById('warnTraineeIdDisplay');
+        const bodyEl = document.getElementById('warnBodyTextDisplay');
+
+        if (titleEl) titleEl.textContent = cfg.title;
+        if (dateEl) dateEl.textContent = `${currentWarningPreviewState.date} م`;
+        if (nameEl) nameEl.textContent = currentWarningPreviewState.name;
+        if (compEl) compEl.textContent = currentWarningPreviewState.company;
+        if (idEl) idEl.textContent = currentWarningPreviewState.id;
+        if (bodyEl) bodyEl.textContent = currentWarningPreviewState.customReason || cfg.text;
+    }
+
+    function printDisciplinaryWarningLetter() {
+        window.print();
+    }
+
+    async function downloadWarningPdf(traineeId, warningType = 'إنذار نهائي') {
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
+        const filename = `${cleanId}_${warningType.replace(/\s+/g, '_')}.pdf`;
+
+        const printArea = document.getElementById('warnLetterheadPrintableSheet');
+        if (!printArea) {
+            return showToast('تعذر العثور على منطقة طباعة النموذج', 'error');
+        }
+
+        if (typeof html2pdf === 'undefined') {
+            return showToast('مكتبة html2pdf غير متوفرة، جاري فتح نافذة الطباعة...', 'warning', () => window.print());
+        }
+
+        showToast(`جاري تجهيز وتحميل ملف الـ PDF: ${filename}...`, 'info');
+
+        const opt = {
+            margin: [0, 0, 0, 0],
+            filename: filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#FFFFFF',
+                letterRendering: true
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        try {
+            await html2pdf().set(opt).from(printArea).save();
+            showToast(`✅ تم تحميل ملف الإنذار بنجاح: ${filename}`, 'success');
+        } catch (err) {
+            console.error('html2pdf download error:', err);
+            showToast('حدث خطأ أثناء تنزيل الـ PDF: ' + err.message, 'error');
+        }
+    }
+
+    // Direct requested action: Copy trainee email to clipboard and trigger instant PDF download
+    async function copyTraineeEmailAndDownloadPdf(traineeId, warningType = 'إنذار نهائي') {
+        const pool = getDisciplinaryTraineesPool();
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
+        const trainee = pool.find(t => {
+            const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
+            return cid === cleanId;
+        }) || { id: cleanId, name: 'متدرب' };
+
+        const evaluated = evaluateTraineeDisciplinaryStatus(trainee);
+        const email = evaluated.email || `${cleanId}@blackgold.edu.sa`;
+
+        // Copy email to clipboard
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(email);
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = email;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            }
+            showToast(`📋 تم نسخ بريد المتدرب (${email}) بنجاح وجاري بدء تحميل ملف الإنذار PDF...`, 'success');
+        } catch (copyErr) {
+            console.warn('Clipboard copy error:', copyErr);
+            showToast(`البريد: ${email} (جاري تحميل الـ PDF...)`, 'info');
+        }
+
+        // Open preview state and trigger download
+        openDisciplinaryWarningModal(cleanId, warningType);
+        setTimeout(() => {
+            downloadWarningPdf(cleanId, warningType);
+        }, 300);
+    }
+
+    function shareWarningViaEmail(traineeId, warningType = 'إنذار نهائي') {
+        const pool = getDisciplinaryTraineesPool();
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
+        const trainee = pool.find(t => {
+            const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
+            return cid === cleanId;
+        }) || { id: cleanId, name: 'متدرب' };
+
+        const evaluated = evaluateTraineeDisciplinaryStatus(trainee);
+        const email = evaluated.email || `${cleanId}@blackgold.edu.sa`;
+        const cfg = DISCIPLINARY_LEGAL_TEXTS[warningType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
+
+        // Copy email to clipboard as well
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(email);
+            }
+        } catch (e) {}
+
+        const subject = `إشعار رسمي: ${cfg.title} بخصوص الانضباط ونسبة الغياب - معهد الذهب الأسود`;
+        const body = `المكرم المتدرب: ${evaluated.name}
+رقم الهوية الوطنية: ${evaluated.id}
+الشركة الراعية: ${evaluated.company}
+التاريخ: ${evaluated.date} م
+
+السلام عليكم ورحمة الله وبركاته،
+
+${cfg.text}
+
+---
+مسؤول شؤون المتدربين: علي آل عباس
+معهد الذهب الأسود العالي للتدريب
+هاتف: +966 54 889 6955
+البريد الإلكتروني: info@blackgold.edu.sa
+طريق الأمير محمد بن فهد، الشاطئ الغربي، الدمام 32413`;
+
+        const mailtoUrl = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        showToast(`✅ تم نسخ البريد (${email}) وجاري فتح برنامج البريد الإلكتروني...`, 'success');
+        window.location.href = mailtoUrl;
+    }
+
+    // Bulk ZIP export: downloads all flagged warnings as a zip named by trainee National ID
+    async function downloadAllWarningsZip(filteredOnly = true) {
+        if (typeof JSZip === 'undefined') {
+            return showToast('مكتبة JSZip غير محملة', 'error');
+        }
+        if (typeof html2pdf === 'undefined') {
+            return showToast('مكتبة html2pdf غير محملة', 'error');
+        }
+
+        const targets = filteredOnly ? getFilteredDisciplinaryTrainees() : getDisciplinaryTraineesPool().map(evaluateTraineeDisciplinaryStatus);
+        if (targets.length === 0) {
+            return showToast('لا توجد سجلات إنذارات لتنزيلها', 'warning');
+        }
+
+        const zip = new JSZip();
+        showToast(`📦 جاري تحضير حزمة الإنذارات الشاملة بصيغة ZIP لعدد ${targets.length} متدرب...`, 'info');
+
+        // Create temporary off-screen container for rendering
+        const tempHost = document.createElement('div');
+        tempHost.style.position = 'fixed';
+        tempHost.style.top = '-9999px';
+        tempHost.style.left = '-9999px';
+        tempHost.style.width = '794px';
+        document.body.appendChild(tempHost);
+
+        let successCount = 0;
+        for (let i = 0; i < targets.length; i++) {
+            const tr = targets[i];
+            const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
+            const cfg = DISCIPLINARY_LEGAL_TEXTS[tr.recommendedWarning] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
+
+            // Build HTML for trainee
+            tempHost.innerHTML = `
+                <div style="width: 794px; min-height: 1123px; background: #ffffff; position: relative; margin: 0; font-family: 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
+                    <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;">
+                        <div style="flex: 1; background: linear-gradient(180deg, #E2B240 0%, #C69524 55%, #E2AB33 100%); width: 100%; border-right: 2px solid #8e6815;"></div>
+                        <div style="height: 140px; background: #111827; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="writing-mode: vertical-rl; transform: rotate(180deg); color: #ffffff; font-size: 11.5px; font-weight: 700; letter-spacing: 2px; font-family: monospace; white-space: nowrap;">CR. 2053117185</div>
+                        </div>
+                    </div>
+                    <img src="assets/bgti_logo.png" alt="BGTI" style="position: absolute; top: 48%; left: 52%; transform: translate(-50%, -50%); width: 330px; opacity: 0.04; pointer-events: none; filter: grayscale(100%); z-index: 1;">
+                    <div style="margin-left: 54px; padding: 45px 50px 32px 45px; position: relative; z-index: 5; min-height: 1045px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <img src="assets/bgti_logo.png" alt="BGTI" style="height: 70px; width: auto; object-fit: contain;">
+                                <div style="text-align: right; font-size: 12.5px; font-weight: 700; color: #475569; padding-top: 5px;">
+                                    التاريخ: <span style="font-family: monospace; color: #0f172a; font-weight: 800;">${tr.date} م</span>
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: 25px; margin-bottom: 22px;">
+                                <h1 style="font-size: 32px; font-weight: 900; color: #0f172a; display: inline-block; padding-bottom: 4px; border-bottom: 3px solid #0f172a;">${cfg.title}</h1>
+                            </div>
+                            <div style="line-height: 2.2; font-size: 16.5px; color: #0f172a; margin-top: 15px; margin-bottom: 20px;">
+                                <div><span style="font-weight: 700; color: #475569;">اسم المتدرب: </span><span style="font-weight: 900; color: #000; font-size: 18px;">${tr.name}</span></div>
+                                <div><span style="font-weight: 700; color: #475569;">اسم الشركة : </span><span style="font-weight: 800; color: #0f172a;">${tr.company}</span></div>
+                                <div><span style="font-weight: 700; color: #475569;">رقم الهوية: </span><span style="font-weight: 900; font-family: monospace; color: #000; font-size: 17px;">${cleanId}</span></div>
+                            </div>
+                            <div style="font-size: 16.5px; line-height: 2.2; color: #1e293b; text-align: justify; margin-top: 20px; white-space: pre-line;">${cfg.text}</div>
+                        </div>
+                        <div style="margin-top: auto;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 30px; margin-bottom: 15px;">
+                                <div style="width: 48%; line-height: 2.6;">
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">توقيع المتدرب: .......................................</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">الاسم : ...................................................</div>
+                                </div>
+                                <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
+                                    <div style="text-align: center; width: 230px;">
+                                        <div style="font-size: 14px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
+                                        <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;">علي آل عباس</div>
+                                        <div style="position: relative; width: 200px; height: 110px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
+                                            <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 125px; z-index: 2; top: 12px; left: 10px; transform: rotate(-3deg);">
+                                            <img src="assets/bgti_stamp.png" alt="الختم" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
+                                <div style="font-size: 10px; line-height: 1.6; font-weight: 700; color: #475569; text-align: left; font-family: sans-serif;">
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                        <span>+966 54 889 6955</span>
+                                        <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                        <span>info@blackgold.edu.sa</span>
+                                        <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                        <span>Prince Mohammed Binfahd Road, Al Shati Al Gharbi, Dammam 32413</span>
+                                        <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Wait brief moment for layout/images
+            await new Promise(r => setTimeout(r, 60));
+
+            const opt = {
+                margin: [0, 0, 0, 0],
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                const pdfBlob = await html2pdf().set(opt).from(tempHost.firstElementChild).output('blob');
+                // Name file with Trainee ID as requested
+                const pdfFilename = `${cleanId}_${tr.recommendedWarning.replace(/\s+/g, '_')}.pdf`;
+                zip.file(pdfFilename, pdfBlob);
+                successCount++;
+            } catch (pdfErr) {
+                console.error(`Error generating PDF for ${cleanId}:`, pdfErr);
+            }
+        }
+
+        document.body.removeChild(tempHost);
+
+        if (successCount === 0) {
+            return showToast('تعذر توليد ملفات الـ PDF للحزمة', 'error');
+        }
+
+        showToast('جاري ضغط الملفات وتحميل حزمة الـ ZIP...', 'info');
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const nowStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const zipFilename = `حزمة_الإنذارات_الرسمية_برقم_الهوية_${nowStr}.zip`;
+
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(zipBlob);
+        a.download = zipFilename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        showToast(`✅ تم تنزيل حزمة الإنذارات بنجاح: ${zipFilename} (${successCount} ملف)`, 'success');
+    }
+
+    // Export warnings list to formatted Excel spreadsheet
+    function exportWarningsToExcel() {
+        if (typeof XLSX === 'undefined') {
+            return showToast('مكتبة XLSX غير محملة', 'error');
+        }
+
+        const targets = getFilteredDisciplinaryTrainees();
+        if (targets.length === 0) {
+            return showToast('لا توجد بيانات إنذارات لتصديرها', 'warning');
+        }
+
+        const rows = targets.map((t, idx) => ({
+            'م': idx + 1,
+            'رقم الهوية الوطنية': t.id,
+            'اسم المتدرب': t.name,
+            'الشركة الراعية': t.company,
+            'الشعبة / المجموعة': t.group,
+            'نسبة الحضور %': `${t.rate}%`,
+            'أيام الانقطاع المتواصل': t.consecutiveAbsentDays,
+            'فترات الغياب الإجمالية': t.absentPeriods,
+            'نوع الإنذار المستحق': t.recommendedWarning,
+            'تاريخ الإنذار': `${t.date} م`,
+            'رقم الجوال': t.phone,
+            'البريد الإلكتروني': t.email,
+            'مسؤول شؤون المتدربين': 'علي آل عباس'
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'كشف الإنذارات الرسمية');
+
+        const nowStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const filename = `كشف_الإنذارات_والانضباط_المعتمد_${nowStr}.xlsx`;
+        XLSX.writeFile(wb, filename);
+
+        showToast(`✅ تم تصدير كشف الإنذارات بنجاح: ${filename}`, 'success');
+    }
+
+    // Copy entire filtered table to clipboard (TSV format for direct Excel paste)
+    function copyWarningsTableData() {
+        const targets = getFilteredDisciplinaryTrainees();
+        if (targets.length === 0) {
+            return showToast('لا توجد بيانات للنسخ', 'warning');
+        }
+
+        const header = ['م', 'رقم الهوية', 'اسم المتدرب', 'الشركة', 'الشعبة', 'نسبة الحضور', 'أيام الانقطاع المتواصل', 'نوع الإنذار', 'الجوال', 'البريد الإلكتروني'].join('\t');
+        const rows = targets.map((t, idx) => [
+            idx + 1,
+            t.id,
+            t.name,
+            t.company,
+            t.group,
+            `${t.rate}%`,
+            t.consecutiveAbsentDays,
+            t.recommendedWarning,
+            t.phone,
+            t.email
+        ].join('\t')).join('\n');
+
+        const fullText = `${header}\n${rows}`;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(fullText).then(() => {
+                showToast(`📋 تم نسخ بيانات (${targets.length}) متدرب بنجاح إلى الحافظة`, 'success');
+            }).catch(() => fallbackCopy(fullText));
+        } else {
+            fallbackCopy(fullText);
+        }
+
+        function fallbackCopy(txt) {
+            const ta = document.createElement('textarea');
+            ta.value = txt;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast(`📋 تم نسخ بيانات (${targets.length}) متدرب بنجاح`, 'success');
+        }
+    }
+
+    function copyFilteredWarningsContacts() {
+        const targets = getFilteredDisciplinaryTrainees();
+        if (targets.length === 0) return showToast('لا توجد بيانات للنسخ', 'warning');
+
+        const contactsText = targets.map(t => `${t.name} - ${t.phone} - ${t.email}`).join('\n');
+        navigator.clipboard.writeText(contactsText).then(() => {
+            showToast(`📞 تم نسخ بيانات التواصل لـ (${targets.length}) متدرب بنجاح`, 'success');
+        });
+    }
+
+    // Expose functions to window
+    window.renderDisciplinaryWarningsDashboard = renderDisciplinaryWarningsDashboard;
+    window.setWarningQuickFilter = setWarningQuickFilter;
+    window.onWarningSearchChange = onWarningSearchChange;
+    window.onWarningFilterDropdownChange = onWarningFilterDropdownChange;
+    window.resetWarningFilters = resetWarningFilters;
+    window.openDisciplinaryWarningModal = openDisciplinaryWarningModal;
+    window.closeDisciplinaryWarningModal = closeDisciplinaryWarningModal;
+    window.onWarningModalTypeChange = onWarningModalTypeChange;
+    window.onWarningModalDataChange = onWarningModalDataChange;
+    window.printDisciplinaryWarningLetter = printDisciplinaryWarningLetter;
+    window.downloadWarningPdf = downloadWarningPdf;
+    window.copyTraineeEmailAndDownloadPdf = copyTraineeEmailAndDownloadPdf;
+    window.shareWarningViaEmail = shareWarningViaEmail;
+    window.downloadAllWarningsZip = downloadAllWarningsZip;
+    window.exportWarningsToExcel = exportWarningsToExcel;
+    window.copyWarningsTableData = copyWarningsTableData;
+    window.copyFilteredWarningsContacts = copyFilteredWarningsContacts;
+
+</script>
 </body>
 
 </html>
