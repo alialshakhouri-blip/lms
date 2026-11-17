@@ -58,10 +58,22 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
-      return res.status(response.status).json({
-        error: `Google Sheets responded with HTTP status ${response.status}`,
-        url: targetUrl
+      // Fallback: If web publication failed (e.g. 401 Unauthorized or 403), try the master sheet export URL directly
+      const fallbackDocUrl = `https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/export?format=${format}`;
+      const fbRes = await fetch(fallbackDocUrl, {
+        redirect: 'follow',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
       });
+      if (fbRes.ok) {
+        response = fbRes;
+      } else {
+        return res.status(response.status).json({
+          error: `Google Sheets responded with HTTP status ${response.status}`,
+          url: targetUrl
+        });
+      }
     }
 
     let arrayBuffer = await response.arrayBuffer();

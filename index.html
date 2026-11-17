@@ -2251,7 +2251,7 @@
 
         <div class="space-y-2.5">
 
-            <a id="downloadSheetBtn" href="https://docs.google.com/spreadsheets/d/e/2PACX-1vTNTmulOawbWzqcws5J66Bn-MljRwMC9Mluag64wUCU1PjXMb3L9jyX1fO079e6ppp5epjL-PNzyAlS/pub?output=xlsx" target="_blank" class="block w-full gold-gradient-bg text-slate-950 font-extrabold p-3.5 rounded-xl text-center text-xs transition shadow-md hover:brightness-105">
+            <a id="downloadSheetBtn" href="https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/export?format=xlsx" target="_blank" class="block w-full gold-gradient-bg text-slate-950 font-extrabold p-3.5 rounded-xl text-center text-xs transition shadow-md hover:brightness-105">
 
                 1️⃣ اضغط هنا لتحميل ملف الإكسل المحدث من قوقل شيت مباشرة ⬇️
 
@@ -19055,7 +19055,15 @@ ${details}
 
         const link = document.getElementById('downloadSheetBtn');
 
-        if (link && url) link.href = url;
+        let downloadUrl = url;
+
+        if (!downloadUrl || downloadUrl.includes('2PACX-1vTNTmulOawbWzqcws5J66Bn-MljRwMC9Mluag64wUCU1PjXMb3L9jyX1fO079e6ppp5epjL-PNzyAlS')) {
+
+            downloadUrl = 'https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/export?format=xlsx';
+
+        }
+
+        if (link && downloadUrl) link.href = downloadUrl;
 
         document.getElementById('fallbackModal').classList.remove('hidden');
 
@@ -29664,9 +29672,10 @@ ${details}
 
         let url = (localStorage.getItem('sys_sheet_url_v9') || '').trim();
 
-        if (!url) {
+        // الترقية التلقائية: إذا كان الرابط فارغاً أو يحتوي على الرابط المنتهي (2PACX) الذي يرجع 401 Unauthorized من قوقل، يتم نقله تلقائياً للرابط المعتمد الفعال
+        if (!url || url.includes('2PACX-1vTNTmulOawbWzqcws5J66Bn-MljRwMC9Mluag64wUCU1PjXMb3L9jyX1fO079e6ppp5epjL-PNzyAlS')) {
 
-            url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTNTmulOawbWzqcws5J66Bn-MljRwMC9Mluag64wUCU1PjXMb3L9jyX1fO079e6ppp5epjL-PNzyAlS/pubhtml';
+            url = DEFAULT_LIVE_SHEET_URL;
 
             localStorage.setItem('sys_sheet_url_v9', url);
 
@@ -29726,11 +29735,18 @@ ${details}
 
         const input = document.getElementById('modalLiveSheetUrlInput');
 
-        const url = (input ? input.value : '').trim();
+        let url = (input ? input.value : '').trim();
 
         if (!url) return showToast('يرجى إدخال رابط Google Sheets', 'error');
 
+        // إذا أدخل المستخدم الرابط القديم المنتهي، نقوم بتصحيحه تلقائياً للرابط المباشر
+        if (url.includes('2PACX-1vTNTmulOawbWzqcws5J66Bn-MljRwMC9Mluag64wUCU1PjXMb3L9jyX1fO079e6ppp5epjL-PNzyAlS')) {
 
+            url = DEFAULT_LIVE_SHEET_URL;
+
+            if (input) input.value = url;
+
+        }
 
         localStorage.setItem('sys_sheet_url_v9', url);
 
@@ -29750,7 +29766,7 @@ ${details}
 
         let downloadUrl = exportUrl;
 
-        if (downloadUrl && downloadUrl.includes('2PACX-1vTNTmulOawbWzqcws5J66Bn-MljRwMC9Mluag64wUCU1PjXMb3L9jyX1fO079e6ppp5epjL-PNzyAlS')) {
+        if (!downloadUrl || downloadUrl.includes('2PACX-1vTNTmulOawbWzqcws5J66Bn-MljRwMC9Mluag64wUCU1PjXMb3L9jyX1fO079e6ppp5epjL-PNzyAlS')) {
 
             downloadUrl = 'https://docs.google.com/spreadsheets/d/1L_q5UaZ8s5ALTRdAxsDVJgldpfunRajOLYGEIfnkNlc/export?format=xlsx';
 
@@ -29759,6 +29775,14 @@ ${details}
         if (dlBtn && downloadUrl) {
 
             dlBtn.onclick = () => window.open(downloadUrl, '_blank');
+
+        }
+
+        const fallbackDownloadBtn = document.getElementById('downloadSheetBtn');
+
+        if (fallbackDownloadBtn && downloadUrl) {
+
+            fallbackDownloadBtn.href = downloadUrl;
 
         }
 
@@ -30573,7 +30597,17 @@ ${details}
 
     function saveSheetUrl() {
 
-        const val = (document.getElementById('sheetUrlInput')?.value || '').trim();
+        let val = (document.getElementById('sheetUrlInput')?.value || '').trim();
+
+        if (val.includes('2PACX-1vTNTmulOawbWzqcws5J66Bn-MljRwMC9Mluag64wUCU1PjXMb3L9jyX1fO079e6ppp5epjL-PNzyAlS')) {
+
+            val = DEFAULT_LIVE_SHEET_URL;
+
+            const inputEl = document.getElementById('sheetUrlInput');
+
+            if (inputEl) inputEl.value = val;
+
+        }
 
         localStorage.setItem('sys_sheet_url_v9', val);
 
@@ -37787,11 +37821,25 @@ function openReportFromProfile() {
 
             async () => {
 
-                const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(exportUrl)}`;
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(exportUrl)}`;
 
                 const r = await fetch(proxyUrl, { cache: 'no-store' });
 
                 if (!r.ok) throw new Error(`Proxy 2 error ${r.status}`);
+
+                return await r.arrayBuffer();
+
+            },
+
+            // 5. البروكسي العالمي الاحتياطي CodeTabs
+
+            async () => {
+
+                const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(exportUrl)}`;
+
+                const r = await fetch(proxyUrl, { cache: 'no-store' });
+
+                if (!r.ok) throw new Error(`Proxy 3 error ${r.status}`);
 
                 return await r.arrayBuffer();
 
