@@ -47171,13 +47171,12 @@ function openReportFromProfile() {
 
         const meta = resolveInstGroupMetadata(groupName, groupPool, extraMeta.startDate || '', extraMeta.endDate || '', extraMeta.courseName || '');
         let existing = null;
-        if (extraMeta.courseId) existing = list.find(c => c.id === extraMeta.courseId);
-        if (!existing && extraMeta.courseNumber) existing = list.find(c => String(c.courseNumber || '').trim() === String(extraMeta.courseNumber).trim());
-        if (!existing && cleanG) {
-            existing = list.find(c => cleanGroupNameForMatch(c.groupName) === cleanG && (
-                !extraMeta.courseName
-                || normalizeEnterpriseText(c.courseName) === normalizeEnterpriseText(extraMeta.courseName)
-            ));
+        if (!extraMeta.forceNew) {
+            if (extraMeta.courseId) existing = list.find(c => c.id === extraMeta.courseId);
+            if (!existing && extraMeta.courseNumber) existing = list.find(c => c.courseNumber && String(c.courseNumber || '').trim() === String(extraMeta.courseNumber).trim());
+            if (!existing && extraMeta.courseName && cleanG) {
+                existing = list.find(c => cleanGroupNameForMatch(c.groupName) === cleanG && c.courseName && normalizeEnterpriseText(c.courseName) === normalizeEnterpriseText(extraMeta.courseName));
+            }
         }
 
         const nowIso = new Date().toISOString();
@@ -47249,10 +47248,13 @@ function openReportFromProfile() {
     window.saveCurrentGroupToAccreditedCourses = saveCurrentGroupToAccreditedCourses;
 
     function createBlankAccreditedCourse() {
-        const { selectedGroup, trainees: list } = getInstFilteredTrainees();
+        const { selectedGroup, selectedCompany, trainees: list } = (typeof getInstFilteredTrainees === 'function') ? getInstFilteredTrainees() : { selectedGroup: '', selectedCompany: '', trainees: [] };
         const useGrp = (selectedGroup && selectedGroup !== 'ALL') ? selectedGroup : '';
+        const curCount = loadAccreditedCourses().length;
         const saved = upsertAccreditedCourseFromGroupSnapshot(useGrp, useGrp ? list : [], {
-            courseName: 'دورة تدريبية جديدة',
+            forceNew: true,
+            courseName: `دورة معتمدة جديدة (${curCount + 1})`,
+            companyName: (selectedCompany && selectedCompany !== 'ALL') ? selectedCompany : '',
             programType: 'دورة تطويرية',
             trainingMode: 'حضوري',
             startDate: new Date().toISOString().slice(0, 10),
@@ -47260,6 +47262,7 @@ function openReportFromProfile() {
         });
         refreshAccreditedCoursesUI();
         openAccreditedCourseWorkspace(saved.id);
+        showToast(`➕ تم إنشاء دورة معتمدة جديدة بنجاح (الإجمالي الآن ${loadAccreditedCourses().length} دورات)`, 'success');
         return saved;
     }
     window.createBlankAccreditedCourse = createBlankAccreditedCourse;
@@ -47305,7 +47308,7 @@ function openReportFromProfile() {
                 } catch (aiErr) { /* silent resilient fallback to local parser */ }
             }
 
-            // 3. Automatic target matching (Saved Courses first -> Group Pool match)
+            // 3. Automatic target matching (Smart Linking & independent course preservation)
             const manualTarget = document.getElementById('tvtcTargetCourseSelect')?.value || '';
             const allSaved = loadAccreditedCourses();
             let targetCourseId = '';
@@ -47313,55 +47316,57 @@ function openReportFromProfile() {
             let matchedCompany = '';
             let groupPool = [];
             let matchInfoText = '';
+            const forceNewAlways = (manualTarget === '__NEW_ALWAYS__');
 
-            if (manualTarget.startsWith('course:')) {
+            if (!forceNewAlways && manualTarget.startsWith('course:')) {
                 targetCourseId = manualTarget.slice(7);
                 const mc = getAccreditedCourseById(targetCourseId);
                 if (mc) {
                     matchedGroupName = mc.groupName;
                     matchedCompany = mc.companyName;
-                    matchInfoText = `ربط يدوي بالدورة المحفوظة (${mc.groupName || mc.courseName})`;
+                    matchInfoText = `تحديث يدوي للدورة المحفوظة (${mc.groupName || mc.courseName})`;
                 }
-            } else if (manualTarget.startsWith('group:')) {
+            } else if (!forceNewAlways && manualTarget.startsWith('group:')) {
                 matchedGroupName = manualTarget.slice(6);
                 matchInfoText = `ربط يدوي بالشعبة (${matchedGroupName})`;
             }
 
-            if (!targetCourseId && !matchedGroupName) {
-                const portalIdSet = new Set(parsed.trainees.map(t => cleanNationalId(t.id)).filter(Boolean));
-                let bestSaved = null;
-                let bestSavedHits = 0;
-                allSaved.forEach(sc => {
-                    let hits = 0;
-                    (sc.trainees || []).forEach(st => {
-                        if (portalIdSet.has(cleanNationalId(st.id))) hits++;
-                    });
-                    if (hits > bestSavedHits) {
-                        bestSavedHits = hits;
-                        bestSaved = sc;
+            // Only update an existing course if the user specifically chose it OR if the EXACT courseNumber already exists!
+            if (!targetCourseId) {
+                if (!forceNewAlways && parsed.courseNumber) {
+                    const cleanPNum = String(parsed.courseNumber).trim();
+                    const existingByNum = allSaved.find(c => c.courseNumber && String(c.courseNumber || '').trim() === cleanPNum);
+                    if (existingByNum) {
+                        targetCourseId = existingByNum.id;
+                        matchedGroupName = existingByNum.groupName || matchedGroupName;
+                        matchedCompany = existingByNum.companyName || matchedCompany;
+                        matchInfoText = `تحديث بيانات الدورة المحفوظة رقم ${cleanPNum} (${existingByNum.groupName || existingByNum.courseName})`;
                     }
-                });
-                const grpMatch = resolveBestGroupMatchForPortalTrainees(parsed.trainees);
-                if (bestSaved && bestSavedHits >= grpMatch.matchScore) {
-                    targetCourseId = bestSaved.id;
-                    matchedGroupName = bestSaved.groupName || grpMatch.groupName;
-                    matchedCompany = bestSaved.companyName || grpMatch.companyName;
-                    groupPool = grpMatch.groupPool;
-                    matchInfoText = `تم التطابق التلقائي مع الملف المحفوظ «${bestSaved.groupName || bestSaved.courseName}» (${bestSavedHits} هوية متطابقة)`;
-                } else if (grpMatch.groupName) {
-                    matchedGroupName = grpMatch.groupName;
-                    matchedCompany = grpMatch.companyName;
-                    groupPool = grpMatch.groupPool;
-                    matchInfoText = `تم الربط التلقائي مع مجموعة «${grpMatch.groupName}» (مطابقة ${grpMatch.matchScore} متدرب من أصل ${parsed.trainees.length}، واستيراد كامل كشف الشعبة: ${grpMatch.groupPool.length} متدرب)`;
-                } else {
-                    matchInfoText = `تم حفظ دورة جديدة مستقلة بالبيانات المستخرجة (${parsed.trainees.length} متدرب من النص)`;
                 }
-            } else if (matchedGroupName) {
+
+                // If no matching courseNumber, match group cohort to pull company & trainees, BUT PRESERVE AS A NEW INDEPENDENT COURSE!
+                if (!matchedGroupName) {
+                    const grpMatch = resolveBestGroupMatchForPortalTrainees(parsed.trainees);
+                    if (grpMatch.groupName) {
+                        matchedGroupName = grpMatch.groupName;
+                        matchedCompany = grpMatch.companyName;
+                        groupPool = grpMatch.groupPool;
+                        if (!targetCourseId) {
+                            matchInfoText = `تم ربط الشعبة «${grpMatch.groupName}» وحفظ كدورة جديدة برقم (${parsed.courseNumber || 'غير محدد'}) واستيراد كشف المتدربين (${grpMatch.groupPool.length || parsed.trainees.length})`;
+                        }
+                    } else {
+                        matchInfoText = `تم حفظ دورة جديدة مستقلة بالبيانات المستخرجة (${parsed.trainees.length} متدرب من النص)`;
+                    }
+                }
+            }
+
+            if (matchedGroupName && (!groupPool || groupPool.length === 0)) {
                 groupPool = getUnifiedTraineesPool().filter(t => t.group && cleanGroupNameForMatch(t.group) === cleanGroupNameForMatch(matchedGroupName));
             }
 
             const savedRecord = upsertAccreditedCourseFromGroupSnapshot(matchedGroupName, groupPool, {
                 courseId: targetCourseId,
+                forceNew: forceNewAlways || !targetCourseId,
                 companyName: matchedCompany,
                 courseNumber: parsed.courseNumber,
                 courseName: parsed.courseName,
@@ -47521,9 +47526,10 @@ function openReportFromProfile() {
         const targetSel = document.getElementById('tvtcTargetCourseSelect');
         if (targetSel) {
             const prevVal = targetSel.value;
-            let opts = '<option value="">✨ ربط تلقائي ذكي (بمطابقة الهويات والمجموعة)</option>';
+            let opts = '<option value="">✨ ربط ذكي تلقائي (إنشاء دورة جديدة ما لم يتطابق رقم الدورة)</option>';
+            opts += '<option value="__NEW_ALWAYS__">➕ حفظ كدورة جديدة مستقلة دائماً (دون تعديل أي دورة سابقة)</option>';
             list.forEach(c => {
-                opts += `<option value="course:${escapeHtml(c.id)}">📚 ${escapeHtml(c.groupName || c.courseName)} — رقم: ${escapeHtml(c.courseNumber || '--')}</option>`;
+                opts += `<option value="course:${escapeHtml(c.id)}">🔄 تحديث الدورة: ${escapeHtml(c.groupName || c.courseName)} — رقم: ${escapeHtml(c.courseNumber || '--')}</option>`;
             });
             const grpSet = new Set();
             if (typeof getUnifiedTraineesPool === 'function') {
@@ -47925,6 +47931,7 @@ function openReportFromProfile() {
             saveStoredGroupContracts(contracts);
         }
 
+        refreshAccreditedCoursesUI();
         openAccreditedCourseWorkspace(updated.id);
         if (!silent) showToast(`💾 تم حفظ تعديلات الدورة (${updated.courseNumber || updated.courseName}) والدرجات بنجاح!`, 'success');
         return updated;
