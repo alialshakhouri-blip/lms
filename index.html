@@ -47731,7 +47731,10 @@ function openReportFromProfile() {
             try {
                 const meta = resolveInstGroupMetadata(c.groupName, c.trainees || [], c.startDate, c.endDate, cName);
                 if (meta && meta.instructorFullName && meta.instructorFullName.trim() && meta.instructorFullName !== '—') {
-                    return meta.instructorFullName.trim();
+                    const candTr = meta.instructorFullName.trim();
+                    if (!cName || typeof isTrainerCompatibleWithCourse !== 'function' || isTrainerCompatibleWithCourse(candTr, cName)) {
+                        return candTr;
+                    }
                 }
             } catch (e) {}
         }
@@ -48144,7 +48147,6 @@ function openReportFromProfile() {
         setVal('acEditStartDate', course.startDate);
         setVal('acEditEndDate', course.endDate);
         setVal('acEditGroupName', course.groupName);
-        const effTr = getCourseEffectiveTrainer(course);
         setVal('acEditInstructor', course.instructorFullName || (effTr !== 'مدرب غير محدد' ? effTr : ''));
 
         const fillChk = document.getElementById('acCourseFillFromAttendanceCheck');
@@ -98806,6 +98808,53 @@ function getCTPAdmissionFormData(trainee) {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TRAINER SPECIFIC SCHEDULE PREVIEW & PRINT MODAL ==================== -->
+    <div id="trainerSchedulePreviewModal" class="hidden fixed inset-0 z-[325] bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto" dir="rtl">
+        <div class="bg-slate-900 border border-amber-500/40 rounded-3xl shadow-2xl max-w-5xl w-full max-h-[96vh] flex flex-col overflow-hidden text-white my-auto">
+            <!-- Modal Header (no-print) -->
+            <div class="no-print p-4 sm:p-5 bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950/40 border-b border-amber-500/30 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center text-xl shadow-inner font-black">📅</span>
+                    <div>
+                        <h3 id="modalTrainerScheduleTitle" class="text-base sm:text-lg font-black text-amber-400">معاينة الجدول الدراسي المعتمد للمدرب</h3>
+                        <p class="text-xs text-slate-300">نموذج رسمي عالي الدقة بحجم A4 متضمن الختم والتوقيع والطاقة الاستيعابية</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeTrainerScheduleModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-500/40 flex items-center justify-center transition font-black text-lg">✕</button>
+            </div>
+
+            <!-- Toolbar Controls (no-print) -->
+            <div class="no-print p-3 sm:p-4 bg-slate-950/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <label class="font-bold text-slate-300">المدرب:</label>
+                    <select id="modalTrainerScheduleSelect" onchange="onModalTrainerDropdownChanged()" class="bg-slate-900 text-amber-300 border border-amber-500/40 rounded-xl px-3 py-1.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs">
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" onclick="printTrainerSchedule()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+                        <span>🖨️</span>
+                        <span>طباعة</span>
+                    </button>
+                    <button type="button" onclick="downloadActiveTrainerSchedulePdf()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold transition flex items-center gap-1.5 shadow-md">
+                        <span>📥</span>
+                        <span>تحميل PDF</span>
+                    </button>
+                    <button type="button" onclick="downloadAllTrainersSchedulesZip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition flex items-center gap-1.5 shadow-md">
+                        <span>📦</span>
+                        <span>تحميل الكل (ZIP)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Sheet Host -->
+            <div class="p-3 sm:p-6 overflow-y-auto overflow-x-auto bg-slate-950/60 flex justify-center items-start flex-1 min-h-[450px]">
+                <div id="trainerSchedulePrintableHost" class="w-full flex justify-center">
+                    <!-- buildTrainerScheduleHtml(trainerObj) injected here -->
                 </div>
             </div>
         </div>
