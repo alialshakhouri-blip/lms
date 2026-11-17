@@ -2026,6 +2026,35 @@
                 print-color-adjust: exact !important;
             }
 
+            /* Disciplinary Warning letterhead print isolation */
+            body.printing-warning > *:not(#disciplinaryWarningPreviewModal) {
+                display: none !important;
+            }
+            body.printing-warning #disciplinaryWarningPreviewModal {
+                display: block !important;
+                visibility: visible !important;
+                position: static !important;
+                background: #FFFFFF !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            body.printing-warning #disciplinaryWarningPreviewModal .no-print,
+            body.printing-warning #disciplinaryWarningPreviewModal > div > div:first-child,
+            body.printing-warning #disciplinaryWarningPreviewModal > div > div:nth-child(2) {
+                display: none !important;
+            }
+            body.printing-warning #warnLetterheadPrintableSheet {
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                page-break-inside: avoid !important;
+            }
+
             #certificatePrintableArea {
                 position: fixed !important;
                 left: 0 !important;
@@ -2935,6 +2964,14 @@
 
                         <span>ملفات المؤسسة</span>
 
+                    </button>
+
+                    <!-- Disciplinary Warnings Button in Header (نماذج الإنذارات) -->
+                    <button id="topDisciplinaryWarningsBtn" onclick="switchTab('disciplinaryWarnings')" class="group header-action-btn font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 border cursor-pointer shadow-sm backdrop-blur-xs text-amber-300 border-amber-500/40 hover:border-amber-400" title="إدارة الإنذارات ونماذج الانضباط التدريبي">
+                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <span>إدارة الإنذارات</span>
                     </button>
 
                 </div>
@@ -13936,6 +13973,7 @@
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800" id="acWsBadgeCourseNo">رقم الدورة: --</span>
                                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-100 text-blue-800" id="acWsBadgeGroup">المجموعة: --</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-indigo-100 text-indigo-800" id="acWsBadgeTrainer">المدرب: --</span>
                                     <span class="hidden px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-300" id="acWsBadgeBlankMode">🧹 تم تصفير الدرجات والنسب (البيانات الأساسية فقط)</span>
                                 </div>
                                 <h3 class="text-base font-black text-slate-900 mt-1" id="acWsTitle">تفاصيل الدورة المعتمدة</h3>
@@ -19350,6 +19388,7 @@ ${details}
         const btnInstitutionFiles = document.getElementById('btn-institutionFiles');
 
         const topInstitutionFilesBtn = document.getElementById('topInstitutionFilesBtn');
+        const topDisciplinaryWarningsBtn = document.getElementById('topDisciplinaryWarningsBtn');
 
         const attendanceSheetInstFilesBtn = document.getElementById('attendanceSheetInstFilesBtn');
 
@@ -19433,6 +19472,7 @@ ${details}
             if (topLiveSheetSettingsBtn) topLiveSheetSettingsBtn.classList.add('hidden');
 
             if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.add('hidden');
+            if (topDisciplinaryWarningsBtn) topDisciplinaryWarningsBtn.classList.add('hidden');
 
             if (attendanceSheetInstFilesBtn) attendanceSheetInstFilesBtn.classList.add('hidden');
 
@@ -19589,6 +19629,7 @@ ${details}
             if (btnInstitutionFiles) btnInstitutionFiles.classList.add('hidden');
 
             if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.add('hidden');
+            if (topDisciplinaryWarningsBtn) topDisciplinaryWarningsBtn.classList.add('hidden');
 
             if (attendanceSheetInstFilesBtn) attendanceSheetInstFilesBtn.classList.add('hidden');
             if (btnAttendanceSheet) btnAttendanceSheet.classList.add('hidden');
@@ -19646,6 +19687,7 @@ ${details}
             if (btnInstitutionFiles) btnInstitutionFiles.classList.remove('hidden');
 
             if (topInstitutionFilesBtn) topInstitutionFilesBtn.classList.remove('hidden');
+            if (topDisciplinaryWarningsBtn) topDisciplinaryWarningsBtn.classList.remove('hidden');
 
             if (attendanceSheetInstFilesBtn) attendanceSheetInstFilesBtn.classList.remove('hidden');
 
@@ -43948,17 +43990,17 @@ function openReportFromProfile() {
         facilityNameEn: 'Black Gold Training Center',
         licenseNo: '19187335023495',
         instructors: [
-            { full: 'عصام سعيد', tvtcFull: 'ابراهيم حسن عبدرب الحسين الموسى', id: '1058320605', nationality: 'سعودي', aliases: ['عصام سعيد', 'عصام', 'ابراهيم حسن عبدرب الحسين الموسى', 'ابراهيم الموسى', 'ابراهيم', 'الموسى'], specialty: 'الكهرباء', defaultProgram: 'المهارات الكهربائية' },
-            { full: 'أحمد علي علي الأصيل', id: '1050127404', nationality: 'سعودي', aliases: ['احمد الاصيل', 'أحمد الأصيل', 'أحمد الاصيل', 'الاصيل', 'الأصيل'], specialty: 'الادارة المكتبية والسكرتارية', defaultProgram: 'المبادئ الأساسية للإدارة المكتبية و السكرتارية' },
-            { full: 'الامام يعقوب محمد النعمه', id: '257731678', nationality: 'سوداني', aliases: ['إمام يعقوب', 'امام يعقوب', 'يعقوب', 'امام النعمه', 'إمام النعمه', 'الامام', 'النعمه', 'النعمة', 'امام', 'إمام'], specialty: 'الحاسب الالي', defaultProgram: 'المهارات الاساسية في الاكسل' },
-            { full: 'فاضل جواد رضي الماجد', id: '1093532354', nationality: 'سعودي', aliases: ['فاضل الماجد', 'فاضل'], specialty: 'السلامة والصحة', defaultProgram: 'مسئول السلامة والصحة المهنية' },
-            { full: 'قاسم جواد رضي الماجد', id: '1117628469', nationality: 'سعودي', aliases: ['قاسم الماجد', 'قاسم'], specialty: 'الحاسب الالي', defaultProgram: 'إدخال البيانات ومعالجة النصوص' },
-            { full: 'علي عبد السلام احمد', id: '2583265257', nationality: 'مصري', aliases: ['علي عبدالسلام', 'علي عبد السلام', 'علي'], specialty: 'انجليزية', defaultProgram: 'Effective communication skills in English' },
-            { full: 'سيد احمد مرسي يوسف', id: '2611877453', nationality: 'سوداني', aliases: ['سيد مرسي', 'سيد احمد', 'سيد'], specialty: 'الميكانيكية', defaultProgram: 'أساسيات الصيانة الميكانيكية' },
-            { full: 'رضا نايف موسى آل مطيلق', id: '1091860211', nationality: 'سعودي', aliases: ['رضا مطيلق', 'رضا', 'مطيلق'], specialty: 'اللحام', defaultProgram: 'اساسيات اللحام بالقوس الكهربي' },
-            { full: 'شرف الدين عثمان ابو فاطمة بلية', id: '2401481904', nationality: 'سوداني', aliases: ['شرف الدين', 'بلية', 'شرف'], specialty: 'انجليزية', defaultProgram: 'Effective communication skills in English' },
-            { full: 'يوسف جمال', id: '259100000', nationality: 'مصري', aliases: ['يوسف جمال', 'يوسف'], specialty: 'انجليزية', defaultProgram: 'Effective communication skills in English' },
-            { full: 'ناجي محمد', id: '258200000', nationality: 'مصري', aliases: ['ناجي محمد', 'ناجي'], specialty: 'إنشاءات', defaultProgram: 'مقدمة في التشييد والبناء' }
+            { full: 'عصام سعيد السيد', tvtcFull: 'ابراهيم حسن عبدرب الحسين الموسى', id: '1058320605', nationality: 'سعودي', aliases: ['عصام السيد', 'عصام سعيد', 'عصام', 'السيد', 'ابراهيم حسن عبدرب الحسين الموسى', 'ابراهيم الموسى', 'ابراهيم', 'الموسى', 'كهرباء'], specialty: 'الكهرباء', defaultProgram: 'المهارات الكهربائية' },
+            { full: 'رضا نايف موسى آل مطيلق', id: '1091860211', nationality: 'سعودي', aliases: ['رضا مطيلق', 'رضا آل مطيلق', 'رضا نايف', 'رضا', 'مطيلق', 'لحام', 'اللحام'], specialty: 'اللحام', defaultProgram: 'اساسيات اللحام بالقوس الكهربي' },
+            { full: 'سيد احمد مرسي يوسف', id: '2611877453', nationality: 'سوداني', aliases: ['احمد مرسي', 'أحمد مرسي', 'مرسي', 'سيد احمد مرسي', 'سيد احمد', 'سيد مرسي', 'سيد', 'ميكانيكا', 'ميكانيكة'], specialty: 'الميكانيكا والصيانة', defaultProgram: 'أساسيات الصيانة الميكانيكية' },
+            { full: 'فاضل جواد رضي الماجد', id: '1093532354', nationality: 'سعودي', aliases: ['فاضل سفيتي', 'فاضل سيفتي', 'فاضل الماجد', 'فاضل', 'سفيتي', 'سيفتي', 'سلامة', 'صحة مهنية'], specialty: 'السلامة والصحة المهنية (سفيتي)', defaultProgram: 'مسئول السلامة والصحة المهنية' },
+            { full: 'قاسم جواد رضي الماجد', id: '1117628469', nationality: 'سعودي', aliases: ['قاسم حاسب', 'قاسم الماجد', 'قاسم', 'حاسب'], specialty: 'الحاسب الآلي', defaultProgram: 'إدخال البيانات ومعالجة النصوص' },
+            { full: 'الامام يعقوب محمد النعمه', id: '257731678', nationality: 'سوداني', aliases: ['امام حاسب', 'إمام حاسب', 'امام اكسل', 'إمام يعقوب', 'امام يعقوب', 'يعقوب', 'امام النعمه', 'إمام النعمه', 'الامام', 'النعمه', 'النعمة', 'امام', 'إمام', 'اكسل'], specialty: 'الحاسب الآلي ونظم المعلومات والأوفيس', defaultProgram: 'المهارات الاساسية في الاكسل' },
+            { full: 'أحمد علي علي الأصيل', id: '1050127404', nationality: 'سعودي', aliases: ['احمد الاصيل', 'أحمد الأصيل', 'أحمد الاصيل', 'الاصيل', 'الأصيل', 'ادارة', 'سكرتارية'], specialty: 'الادارة المكتبية والسكرتارية', defaultProgram: 'المبادئ الأساسية للإدارة المكتبية و السكرتارية' },
+            { full: 'علي عبد السلام احمد', id: '2583265257', nationality: 'مصري', aliases: ['علي عبدالسلام', 'علي عبد السلام', 'علي', 'انجليزي'], specialty: 'اللغة الإنجليزية', defaultProgram: 'Effective communication skills in English' },
+            { full: 'شرف الدين عثمان ابو فاطمة بلية', id: '2401481904', nationality: 'سوداني', aliases: ['شرف الدين', 'بلية', 'شرف الدين بلية', 'شرف'], specialty: 'اللغة الإنجليزية', defaultProgram: 'Effective communication skills in English' },
+            { full: 'يوسف جمال', id: '259100000', nationality: 'مصري', aliases: ['يوسف جمال', 'يوسف'], specialty: 'اللغة الإنجليزية', defaultProgram: 'Effective communication skills in English' },
+            { full: 'ناجي محمد', id: '258200000', nationality: 'مصري', aliases: ['ناجي محمد', 'ناجي', 'تشييد', 'بناء'], specialty: 'التشييد والبناء', defaultProgram: 'مقدمة في التشييد والبناء' }
         ],
         officialPrograms: [
             { no: 1, name: 'المهارات الكهربائية', ownership: 'خاص', mode: 'حضوري', type: 'دورة تأهيلية' },
@@ -44014,8 +44056,8 @@ function openReportFromProfile() {
             keywords: ['كهرب', 'electr', 'تمديد', 'انشائيه'],
             primaryProgram: 'المهارات الكهربائية',
             programType: 'دورة تأهيلية',
-            defaultTrainer: 'عصام سعيد',
-            trainers: ['عصام سعيد', 'عصام', 'ابراهيم حسن عبدرب الحسين الموسى', 'ابراهيم الموسى', 'ابراهيم', 'الموسى']
+            defaultTrainer: 'عصام سعيد السيد',
+            trainers: ['عصام سعيد السيد', 'عصام السيد', 'عصام سعيد', 'عصام', 'السيد', 'ابراهيم حسن عبدرب الحسين الموسى', 'ابراهيم الموسى', 'ابراهيم']
         },
         computer_excel: {
             domain: 'computer_excel',
@@ -44024,7 +44066,7 @@ function openReportFromProfile() {
             primaryProgram: 'المهارات الاساسية في الاكسل',
             programType: 'دورة تطويرية',
             defaultTrainer: 'الامام يعقوب محمد النعمه',
-            trainers: ['الامام يعقوب محمد النعمه', 'إمام يعقوب', 'امام يعقوب', 'إمام النعمه', 'امام النعمه', 'إمام', 'امام', 'قاسم جواد رضي الماجد', 'قاسم الماجد', 'قاسم']
+            trainers: ['الامام يعقوب محمد النعمه', 'امام حاسب', 'إمام حاسب', 'امام اكسل', 'إمام يعقوب', 'امام يعقوب', 'إمام النعمه', 'امام النعمه', 'إمام', 'امام', 'قاسم جواد رضي الماجد', 'قاسم حاسب', 'قاسم الماجد', 'قاسم']
         },
         welding: {
             domain: 'welding',
@@ -44033,34 +44075,34 @@ function openReportFromProfile() {
             primaryProgram: 'اساسيات اللحام بالقوس الكهربي',
             programType: 'دورة تطويرية',
             defaultTrainer: 'رضا نايف موسى آل مطيلق',
-            trainers: ['رضا نايف موسى آل مطيلق', 'رضا مطيلق', 'رضا', 'مطيلق']
+            trainers: ['رضا نايف موسى آل مطيلق', 'رضا مطيلق', 'رضا آل مطيلق', 'رضا نايف', 'رضا', 'مطيلق']
         },
         mechanical: {
             domain: 'mechanical',
             label: 'الميكانيكا والصيانة',
-            keywords: ['ميكانيك', 'صيانه ميكانيكيه', 'mech', 'معدات'],
+            keywords: ['ميكانيك', 'صيانه', 'صيانة', 'mech', 'معدات', 'تشغيل وصيانه'],
             primaryProgram: 'أساسيات الصيانة الميكانيكية',
             programType: 'دورة تطويرية',
             defaultTrainer: 'سيد احمد مرسي يوسف',
-            trainers: ['سيد احمد مرسي يوسف', 'سيد احمد', 'سيد مرسي', 'سيد']
+            trainers: ['سيد احمد مرسي يوسف', 'احمد مرسي', 'أحمد مرسي', 'سيد احمد مرسي', 'سيد مرسي', 'مرسي', 'سيد احمد', 'سيد']
         },
         safety: {
             domain: 'safety',
-            label: 'السلامة والصحة المهنية',
-            keywords: ['سلامه', 'صحه', 'hse', 'safety', 'وقايه', 'osha'],
+            label: 'السلامة والصحة المهنية (سفيتي)',
+            keywords: ['سلامه', 'سلامة', 'صحه', 'صحة', 'hse', 'safety', 'وقايه', 'وقاية', 'osha', 'سفيتي', 'سيفتي'],
             primaryProgram: 'مسئول السلامة والصحة المهنية',
             programType: 'دورة تأهيلية',
             defaultTrainer: 'فاضل جواد رضي الماجد',
-            trainers: ['فاضل جواد رضي الماجد', 'فاضل الماجد', 'فاضل']
+            trainers: ['فاضل جواد رضي الماجد', 'فاضل سفيتي', 'فاضل سيفتي', 'فاضل الماجد', 'فاضل', 'سفيتي', 'سيفتي']
         },
         admin: {
             domain: 'admin',
             label: 'الإدارة المكتبية والسكرتارية',
-            keywords: ['سكرتار', 'اداره مكتبيه', 'office', 'admin', 'ادارة'],
+            keywords: ['سكرتار', 'اداره مكتبيه', 'office', 'admin', 'ادارة', 'اداره'],
             primaryProgram: 'المبادئ الأساسية للإدارة المكتبية و السكرتارية',
             programType: 'دورة تطويرية',
             defaultTrainer: 'أحمد علي علي الأصيل',
-            trainers: ['أحمد علي علي الأصيل', 'أحمد الأصيل', 'احمد الاصيل', 'أحمد الاصيل', 'الاصيل', 'الأصيل']
+            trainers: ['أحمد علي علي الأصيل', 'أحمد الأصيل', 'احمد الاصيل', 'الأصيل', 'الاصيل']
         },
         english: {
             domain: 'english',
@@ -44069,7 +44111,7 @@ function openReportFromProfile() {
             primaryProgram: 'Effective communication skills in English',
             programType: 'دورة تطويرية',
             defaultTrainer: 'علي عبد السلام احمد',
-            trainers: ['شرف الدين عثمان ابو فاطمة بلية', 'شرف الدين', 'بلية', 'علي عبد السلام احمد', 'علي عبدالسلام', 'يوسف جمال']
+            trainers: ['علي عبد السلام احمد', 'علي عبدالسلام', 'علي', 'شرف الدين عثمان ابو فاطمة بلية', 'شرف الدين', 'بلية', 'يوسف جمال']
         },
         construction: {
             domain: 'construction',
@@ -44397,13 +44439,11 @@ function openReportFromProfile() {
             ? getEffectiveAccreditedCourseForContext(groupName, forcedCourseName)
             : null;
 
-        // Resolve instructor with strict specialty compatibility check
+        // Resolve instructor with priority to accredited course trainer
         let instructorFullName = '';
         if (accCourse && accCourse.instructorFullName && accCourse.instructorFullName.trim() && accCourse.instructorFullName.trim() !== '—') {
             const cand = accCourse.instructorFullName.trim();
-            if (isTrainerCompatibleWithCourse(cand, progInfo.program)) {
-                instructorFullName = cand;
-            }
+            instructorFullName = (typeof resolveAccreditedInstructorFullName === 'function') ? resolveAccreditedInstructorFullName(cand) : cand;
         }
 
         if (!instructorFullName) {
@@ -46912,10 +46952,10 @@ function openReportFromProfile() {
                 const parsed = JSON.parse(raw);
                 if (Array.isArray(parsed) && parsed.length > 0) {
                     accreditedCoursesCache = parsed;
-                    // Self-healing: heal any course where instructor doesn't match specialty (e.g. Essam on Excel)
+                    // Self-healing: heal any course where instructor doesn't match specialty (e.g. Essam on Excel) EXCEPT if manually assigned
                     let healed = false;
                     accreditedCoursesCache.forEach(c => {
-                        if (c && c.courseName && c.instructorFullName) {
+                        if (c && c.courseName && c.instructorFullName && !c.manuallyAssignedTrainer) {
                             if (!isTrainerCompatibleWithCourse(c.instructorFullName, c.courseName)) {
                                 const properTr = getCourseEffectiveTrainer({ ...c, instructorFullName: '' });
                                 if (properTr && properTr !== 'مدرب غير محدد') {
@@ -47608,14 +47648,11 @@ function openReportFromProfile() {
         const cName = c.courseName || '';
         const raw = (c.instructorFullName || '').trim();
 
-        // 1. If explicit trainer is set and compatible with course specialty
-        if (raw && raw !== '—') {
-            const full = (typeof resolveAccreditedInstructorFullName === 'function')
+        // 1. Explicit trainer set (manually assigned or directly loaded) ALWAYS takes top precedence
+        if (raw && raw !== '—' && raw !== 'مدرب غير محدد') {
+            return (typeof resolveAccreditedInstructorFullName === 'function')
                 ? resolveAccreditedInstructorFullName(raw)
                 : raw;
-            if (isTrainerCompatibleWithCourse(full, cName)) {
-                return full;
-            }
         }
 
         // 2. Resolve from group shared courses matching the course domain
@@ -47623,9 +47660,7 @@ function openReportFromProfile() {
             try {
                 const meta = resolveInstGroupMetadata(c.groupName, c.trainees || [], c.startDate, c.endDate, cName);
                 if (meta && meta.instructorFullName && meta.instructorFullName.trim() && meta.instructorFullName !== '—') {
-                    if (isTrainerCompatibleWithCourse(meta.instructorFullName, cName)) {
-                        return meta.instructorFullName.trim();
-                    }
+                    return meta.instructorFullName.trim();
                 }
             } catch (e) {}
         }
@@ -48027,6 +48062,8 @@ function openReportFromProfile() {
 
         setTxt('acWsBadgeCourseNo', `رقم الدورة: ${course.courseNumber || 'بانتظار الإدخال'}`);
         setTxt('acWsBadgeGroup', `المجموعة: ${course.groupName || 'غير مربوطة'}`);
+        const effTr = getCourseEffectiveTrainer(course);
+        setTxt('acWsBadgeTrainer', `المدرب: ${course.instructorFullName || (effTr !== 'مدرب غير محدد' ? effTr : 'غير محدد')}`);
         setTxt('acWsTitle', `${course.courseName || 'دورة معتمدة'}`);
 
         setVal('acEditCourseNumber', course.courseNumber);
@@ -48067,6 +48104,11 @@ function openReportFromProfile() {
             };
         }).filter(t => t.id || t.name);
 
+        const rawInstructor = val('acEditInstructor');
+        const resolvedInstructor = (rawInstructor && typeof resolveAccreditedInstructorFullName === 'function')
+            ? resolveAccreditedInstructorFullName(rawInstructor)
+            : rawInstructor;
+
         return {
             ...course,
             courseNumber: val('acEditCourseNumber'),
@@ -48076,7 +48118,8 @@ function openReportFromProfile() {
             startDate: val('acEditStartDate'),
             endDate: val('acEditEndDate'),
             groupName: val('acEditGroupName'),
-            instructorFullName: val('acEditInstructor'),
+            instructorFullName: resolvedInstructor || rawInstructor,
+            manuallyAssignedTrainer: Boolean(rawInstructor && rawInstructor !== '—' && rawInstructor !== 'مدرب غير محدد'),
             trainees: updatedTrainees,
             updatedAt: new Date().toISOString()
         };
@@ -48096,7 +48139,14 @@ function openReportFromProfile() {
             const contracts = getStoredGroupContracts();
             const cg = cleanGroupNameForMatch(updated.groupName);
             const cIdx = contracts.findIndex(c => cleanGroupNameForMatch(c.group) === cg);
-            const cPatch = { group: updated.groupName, specialty: updated.courseName, courseCode: updated.courseNumber, start: updated.startDate, end: updated.endDate };
+            const cPatch = { 
+                group: updated.groupName, 
+                specialty: updated.courseName, 
+                courseCode: updated.courseNumber, 
+                start: updated.startDate, 
+                end: updated.endDate,
+                instructor: updated.instructorFullName
+            };
             if (cIdx >= 0) contracts[cIdx] = { ...contracts[cIdx], ...cPatch };
             else contracts.push(cPatch);
             saveStoredGroupContracts(contracts);
@@ -48104,7 +48154,7 @@ function openReportFromProfile() {
 
         refreshAccreditedCoursesUI();
         openAccreditedCourseWorkspace(updated.id);
-        if (!silent) showToast(`💾 تم حفظ تعديلات الدورة (${updated.courseNumber || updated.courseName}) والدرجات بنجاح!`, 'success');
+        if (!silent) showToast(`💾 تم حفظ تعديلات الدورة والمدرب (${updated.instructorFullName || 'غير محدد'}) بنجاح!`, 'success');
         return updated;
     }
     window.saveActiveAccreditedCourseEdits = saveActiveAccreditedCourseEdits;
@@ -98542,26 +98592,52 @@ function getCTPAdmissionFormData(trainee) {
             </div>
 
             <!-- Controls Strip -->
-            <div class="px-4 py-3 bg-amber-50/70 dark:bg-slate-800/80 border-b border-amber-200/60 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 text-xs">
-                <div>
-                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">نوع الإنذار:</label>
-                    <select id="warnModalTypeSelect" onchange="onWarningModalTypeChange()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
-                        <option value="إنذار نهائي">⛔ الإنذار النهائي (المعتمد المطلوب)</option>
-                        <option value="إنذار ثانٍ">🛑 الإنذار الثاني</option>
-                        <option value="إنذار أول">⚠️ الإنذار الأول</option>
-                    </select>
+            <div class="px-4 py-3 bg-amber-50/70 dark:bg-slate-800/80 border-b border-amber-200/60 dark:border-slate-700 space-y-2 text-xs">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">نوع الإنذار:</label>
+                        <select id="warnModalTypeSelect" onchange="onWarningModalTypeChange()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
+                            <option value="إنذار نهائي">⛔ الإنذار النهائي (المعتمد المطلوب)</option>
+                            <option value="إنذار ثانٍ">🛑 الإنذار الثاني</option>
+                            <option value="إنذار أول">⚠️ الإنذار الأول</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">تاريخ الإنذار:</label>
+                        <input type="text" id="warnModalDateInput" value="14/07/2026" oninput="onWarningModalDataChange()" class="w-full text-xs font-bold font-mono bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">اسم المتدرب:</label>
+                        <input type="text" id="warnModalNameInput" oninput="onWarningModalDataChange()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الشركة:</label>
+                        <input type="text" id="warnModalCompanyInput" oninput="onWarningModalDataChange()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
+                    </div>
                 </div>
-                <div>
-                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">تاريخ الإنذار:</label>
-                    <input type="text" id="warnModalDateInput" value="14/07/2026" onchange="onWarningModalDataChange()" class="w-full text-xs font-bold font-mono bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">اسم المتدرب:</label>
-                    <input type="text" id="warnModalNameInput" onchange="onWarningModalDataChange()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الشركة:</label>
-                    <input type="text" id="warnModalCompanyInput" onchange="onWarningModalDataChange()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-amber-200/50 dark:border-slate-700/60 items-center">
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">المسؤول / الموقّع:</label>
+                        <select id="warnModalSignatorySelect" onchange="updateWarningModalPreview()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
+                            <option value="student_affairs">علي آل عباس (مسؤول شؤون المتدربين)</option>
+                            <option value="director">علي آل عباس (مدير المعهد)</option>
+                            <option value="general_director">مدير عام المعهد</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-4 pt-4 sm:pt-2">
+                        <label class="flex items-center gap-1.5 cursor-pointer font-bold text-slate-800 dark:text-slate-200">
+                            <input type="checkbox" id="warnModalShowStampCheck" checked onchange="updateWarningModalPreview()" class="rounded text-amber-600">
+                            <span>ختم المعهد الرسمي</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer font-bold text-slate-800 dark:text-slate-200">
+                            <input type="checkbox" id="warnModalShowSigCheck" checked onchange="updateWarningModalPreview()" class="rounded text-amber-600">
+                            <span>التوقيع المعتمد</span>
+                        </label>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-[11px] text-slate-500 font-mono">س.ت 2053117185 • فرع عنك</span>
+                    </div>
                 </div>
             </div>
 
@@ -98630,11 +98706,11 @@ function getCTPAdmissionFormData(trainee) {
                                 <!-- Administration (Left) -->
                                 <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
                                     <div style="text-align: center; width: 230px;">
-                                        <div style="font-size: 14px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
-                                        <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;">علي آل عباس</div>
+                                        <div style="font-size: 14px; font-weight: 900; color: #0f172a;" id="warnSignatoryRoleDisplay">مسؤول شؤون المتدربين</div>
+                                        <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;" id="warnSignatoryNameDisplay">علي آل عباس</div>
                                         <div style="position: relative; width: 200px; height: 110px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
-                                            <img src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" style="position: absolute; width: 125px; z-index: 2; top: 12px; left: 10px; transform: rotate(-3deg);">
-                                            <img src="assets/bgti_stamp.png" alt="ختم المعهد" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
+                                            <img id="warnSignatorySigImg" src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" style="position: absolute; width: 125px; z-index: 2; top: 12px; left: 10px; transform: rotate(-3deg);">
+                                            <img id="warnSignatoryStampImg" src="assets/bgti_stamp.png" alt="ختم المعهد" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
                                         </div>
                                     </div>
                                 </div>
@@ -99487,23 +99563,90 @@ function getCTPAdmissionFormData(trainee) {
         if (compEl) compEl.textContent = currentWarningPreviewState.company;
         if (idEl) idEl.textContent = currentWarningPreviewState.id;
         if (bodyEl) bodyEl.textContent = currentWarningPreviewState.customReason || cfg.text;
+
+        const sigRoleEl = document.getElementById('warnSignatoryRoleDisplay');
+        const sigNameEl = document.getElementById('warnSignatoryNameDisplay');
+        const sigImgEl = document.getElementById('warnSignatorySigImg');
+        const stampImgEl = document.getElementById('warnSignatoryStampImg');
+
+        const signatoryVal = document.getElementById('warnModalSignatorySelect')?.value || 'student_affairs';
+        if (sigRoleEl && sigNameEl) {
+            if (signatoryVal === 'director') {
+                sigRoleEl.textContent = 'مدير المعهد';
+                sigNameEl.textContent = 'علي آل عباس';
+            } else if (signatoryVal === 'general_director') {
+                sigRoleEl.textContent = 'مدير عام المعهد';
+                sigNameEl.textContent = '';
+            } else {
+                sigRoleEl.textContent = 'مسؤول شؤون المتدربين';
+                sigNameEl.textContent = 'علي آل عباس';
+            }
+        }
+
+        const showStamp = document.getElementById('warnModalShowStampCheck')?.checked ?? true;
+        const showSig = document.getElementById('warnModalShowSigCheck')?.checked ?? true;
+        if (stampImgEl) stampImgEl.style.display = showStamp ? 'block' : 'none';
+        if (sigImgEl) sigImgEl.style.display = showSig ? 'block' : 'none';
     }
 
     function printDisciplinaryWarningLetter() {
+        document.body.classList.add('printing-warning');
         window.print();
+        setTimeout(() => {
+            document.body.classList.remove('printing-warning');
+        }, 1200);
     }
 
     async function downloadWarningPdf(traineeId, warningType = 'إنذار نهائي') {
+        const pool = getDisciplinaryTraineesPool();
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
-        const filename = `${cleanId}_${warningType.replace(/\s+/g, '_')}.pdf`;
+        let trainee = pool.find(t => {
+            const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
+            return cid === cleanId;
+        });
 
+        if (!trainee && cleanId === '1140416528') {
+            trainee = {
+                id: '1140416528',
+                name: 'ريان بن ضحيان بن حثوان غزواني',
+                company: 'هونداي',
+                group: 'هونداي - المسار الفني',
+                phone: '0548896955',
+                email: 'rayan.ghazwani@example.com',
+                rate: 20,
+                consecutiveAbsentDays: 14,
+                absentPeriods: 28,
+                recommendedWarning: 'إنذار نهائي'
+            };
+        }
+
+        const evaluated = evaluateTraineeDisciplinaryStatus(trainee || { id: cleanId, name: 'متدرب' });
+        const effType = warningType || evaluated.recommendedWarning || 'إنذار نهائي';
+
+        currentWarningPreviewState = {
+            id: evaluated.id,
+            name: evaluated.name,
+            company: evaluated.company,
+            group: evaluated.group,
+            warningType: effType,
+            date: evaluated.date || '14/07/2026',
+            email: evaluated.email,
+            phone: evaluated.phone,
+            rate: evaluated.rate,
+            consecutiveAbsentDays: evaluated.consecutiveAbsentDays,
+            absentPeriods: evaluated.absentPeriods,
+            customReason: ''
+        };
+        updateWarningModalPreview();
+
+        const filename = `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`;
         const printArea = document.getElementById('warnLetterheadPrintableSheet');
         if (!printArea) {
             return showToast('تعذر العثور على منطقة طباعة النموذج', 'error');
         }
 
         if (typeof html2pdf === 'undefined') {
-            return showToast('مكتبة html2pdf غير متوفرة، جاري فتح نافذة الطباعة...', 'warning', () => window.print());
+            return showToast('مكتبة html2pdf غير متوفرة، جاري فتح نافذة الطباعة...', 'warning', () => printDisciplinaryWarningLetter());
         }
 
         showToast(`جاري تجهيز وتحميل ملف الـ PDF: ${filename}...`, 'info');
@@ -99534,10 +99677,14 @@ function getCTPAdmissionFormData(trainee) {
     async function copyTraineeEmailAndDownloadPdf(traineeId, warningType = 'إنذار نهائي') {
         const pool = getDisciplinaryTraineesPool();
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
-        const trainee = pool.find(t => {
+        let trainee = pool.find(t => {
             const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
             return cid === cleanId;
         }) || { id: cleanId, name: 'متدرب' };
+
+        if (!trainee.email && cleanId === '1140416528') {
+            trainee.email = 'rayan.ghazwani@example.com';
+        }
 
         const evaluated = evaluateTraineeDisciplinaryStatus(trainee);
         const email = evaluated.email || `${cleanId}@blackgold.edu.sa`;
@@ -99561,23 +99708,21 @@ function getCTPAdmissionFormData(trainee) {
         }
 
         // Open preview state and trigger download
-        openDisciplinaryWarningModal(cleanId, warningType);
-        setTimeout(() => {
-            downloadWarningPdf(cleanId, warningType);
-        }, 300);
+        await downloadWarningPdf(cleanId, warningType);
     }
 
-    function shareWarningViaEmail(traineeId, warningType = 'إنذار نهائي') {
+    async function shareWarningViaEmail(traineeId, warningType = 'إنذار نهائي') {
         const pool = getDisciplinaryTraineesPool();
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
-        const trainee = pool.find(t => {
+        let trainee = pool.find(t => {
             const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
             return cid === cleanId;
         }) || { id: cleanId, name: 'متدرب' };
 
         const evaluated = evaluateTraineeDisciplinaryStatus(trainee);
         const email = evaluated.email || `${cleanId}@blackgold.edu.sa`;
-        const cfg = DISCIPLINARY_LEGAL_TEXTS[warningType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
+        const effType = warningType || evaluated.recommendedWarning || 'إنذار نهائي';
+        const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
 
         // Copy email to clipboard as well
         try {
@@ -99602,6 +99747,50 @@ ${cfg.text}
 هاتف: +966 54 889 6955
 البريد الإلكتروني: info@blackgold.edu.sa
 طريق الأمير محمد بن فهد، الشاطئ الغربي، الدمام 32413`;
+
+        // Check Web Share API with file support
+        const printArea = document.getElementById('warnLetterheadPrintableSheet');
+        if (navigator.canShare && printArea && typeof html2pdf !== 'undefined') {
+            try {
+                currentWarningPreviewState = {
+                    id: evaluated.id,
+                    name: evaluated.name,
+                    company: evaluated.company,
+                    group: evaluated.group,
+                    warningType: effType,
+                    date: evaluated.date || '14/07/2026',
+                    email: evaluated.email,
+                    phone: evaluated.phone,
+                    rate: evaluated.rate,
+                    consecutiveAbsentDays: evaluated.consecutiveAbsentDays,
+                    absentPeriods: evaluated.absentPeriods,
+                    customReason: ''
+                };
+                updateWarningModalPreview();
+
+                const opt = {
+                    margin: [0, 0, 0, 0],
+                    filename: `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                const pdfBlob = await html2pdf().set(opt).from(printArea).output('blob');
+                const pdfFile = new File([pdfBlob], `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`, { type: 'application/pdf' });
+
+                if (navigator.canShare({ files: [pdfFile] })) {
+                    await navigator.share({
+                        title: subject,
+                        text: body,
+                        files: [pdfFile]
+                    });
+                    showToast(`✅ تمت مشاركة نموذج الإنذار بنجاح!`, 'success');
+                    return;
+                }
+            } catch (shareErr) {
+                console.log('Web share aborted or unsupported, falling back to mailto:', shareErr);
+            }
+        }
 
         const mailtoUrl = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         showToast(`✅ تم نسخ البريد (${email}) وجاري فتح برنامج البريد الإلكتروني...`, 'success');
