@@ -2055,6 +2055,36 @@
                 page-break-inside: avoid !important;
             }
 
+            /* Trainer Schedule Individual Print Isolation */
+            body.printing-trainer-schedule > *:not(#trainerSchedulePreviewModal) {
+                display: none !important;
+            }
+            body.printing-trainer-schedule #trainerSchedulePreviewModal {
+                display: block !important;
+                visibility: visible !important;
+                position: static !important;
+                background: #FFFFFF !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            body.printing-trainer-schedule #trainerSchedulePreviewModal .no-print,
+            body.printing-trainer-schedule #trainerSchedulePreviewModal > div > div:first-child,
+            body.printing-trainer-schedule #trainerSchedulePreviewModal > div > div:nth-child(2) {
+                display: none !important;
+            }
+            body.printing-trainer-schedule #trainerSchedulePrintableSheet {
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                page-break-inside: avoid !important;
+            }
+
+
             #certificatePrintableArea {
                 position: fixed !important;
                 left: 0 !important;
@@ -5041,6 +5071,43 @@
                 </div>
 
 
+
+                <!-- ==================== TRAINER SPECIFIC SCHEDULE EXPORT & PRINT TOOLBAR ==================== -->
+                <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-amber-950 p-4 sm:p-5 rounded-3xl border border-amber-500/30 shadow-lg text-white flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-slate-950 uppercase">طباعة وتصدير جداول المدربين</span>
+                            <span class="text-xs text-amber-300 font-bold">نموذج معتمد بدقة A4</span>
+                            <span class="text-[11px] text-slate-400 font-mono">س.ت 2053117185</span>
+                        </div>
+                        <h4 class="text-sm sm:text-base font-black text-white flex items-center gap-1.5">
+                            <span>👨‍🏫 استعراض وطباعة جدول كل مدرب بشكل احترافي مع الشعار والطاقة والطلاب</span>
+                        </h4>
+                        <p class="text-[11px] text-slate-300 max-w-2xl leading-relaxed">
+                            اختر أي مدرب من القائمة المنسدلة لمعاينة وتصدير جدوله الفردي المعتمد مع الشعار والطاقة الاستيعابية والمقاعد الشاغرة وقائمة المتدربين، أو اضغط زر تنزيل الحزمة لتوليد ملفات PDF لجميع المدربين مضغوطة في ملف ZIP واحد.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                        <div class="min-w-[200px] sm:min-w-[240px]">
+                            <select id="masterScheduleTrainerSelect" onchange="onMasterScheduleTrainerDropdownChanged()" class="w-full text-xs font-black bg-slate-950 text-amber-300 border border-amber-400/60 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer shadow-xs">
+                                <option value="">-- اختر المدرب لطباعة جدوله --</option>
+                            </select>
+                        </div>
+                        <button type="button" onclick="openSelectedTrainerScheduleModal()" class="px-3.5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-md transition cursor-pointer" title="معاينة وطباعة جدول المدرب المختار">
+                            <span>👁️</span>
+                            <span>معاينة وطباعة</span>
+                        </button>
+                        <button type="button" onclick="downloadSelectedTrainerSchedulePdf()" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-md transition cursor-pointer" title="تنزيل جدول المدرب المختار كملف PDF">
+                            <span>📄</span>
+                            <span>تنزيل PDF</span>
+                        </button>
+                        <button type="button" onclick="downloadAllTrainersSchedulesZip()" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-xl text-xs flex items-center gap-2 shadow-lg transition cursor-pointer" title="تنزيل جميع جداول المدربين كملفات PDF مستقلة داخل حزمة مضغوطة ZIP">
+                            <span>📦</span>
+                            <span>تنزيل جميع الجداول (ZIP)</span>
+                        </button>
+                    </div>
+                </div>
 
                 <!-- Live Capacity & Vacancies Dynamic Stats Banner -->
 
@@ -26663,6 +26730,10 @@ ${details}
 
             `;
 
+        }
+
+        if (typeof populateMasterScheduleTrainerDropdown === 'function') {
+            populateMasterScheduleTrainerDropdown();
         }
 
     }
@@ -100044,6 +100115,628 @@ ${cfg.text}
     window.exportWarningsToExcel = exportWarningsToExcel;
     window.copyWarningsTableData = copyWarningsTableData;
     window.copyFilteredWarningsContacts = copyFilteredWarningsContacts;
+
+
+    // =========================================================================
+    // TRAINER SPECIFIC SCHEDULE PRINT, PDF & BULK ZIP MODULE
+    // =========================================================================
+
+    let activeSelectedTrainerScheduleName = '';
+
+    const SCHEDULE_PERIOD_TIMES = [
+        { id: 1, label: '08:00 - 09:00 ص', short: '8:00 - 9:00' },
+        { id: 2, label: '09:00 - 10:00 ص', short: '9:00 - 10:00' },
+        { id: 3, label: '10:00 - 11:00 ص', short: '10:00 - 11:00' },
+        { id: 4, label: '11:00 - 12:00 م', short: '11:00 - 12:00' },
+        { id: 5, label: '12:00 - 01:00 م', short: '12:00 - 1:00' },
+        { id: 6, label: '01:00 - 02:00 م', short: '1:00 - 2:00' },
+        { id: 7, label: '02:00 - 03:00 م', short: '2:00 - 3:00' },
+        { id: 8, label: '03:00 - 04:00 م', short: '3:00 - 4:00' }
+    ];
+
+    function getTrainerEnrolledTraineesList(trainerObj) {
+        if (!trainerObj || !Array.isArray(trainerObj.rows)) return [];
+        const allGroups = [];
+        trainerObj.rows.forEach(row => {
+            row.forEach(cell => {
+                if (typeof extractGroupsFromCell === 'function') {
+                    extractGroupsFromCell(cell).forEach(g => {
+                        if (!allGroups.includes(g)) allGroups.push(g);
+                    });
+                }
+            });
+        });
+
+        const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : []);
+        const matchingTrainees = [];
+        const seenIds = new Set();
+
+        pool.forEach(tr => {
+            const trId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
+            if (!trId || seenIds.has(trId)) return;
+
+            const grpMatch = allGroups.some(g => (typeof isGroupMatch === 'function' ? isGroupMatch(g, tr.group) : false) || tr.group === g);
+            const nameMatch = tr.trainer && (tr.trainer.includes(trainerObj.name) || trainerObj.name.includes(tr.trainer));
+            if (grpMatch || nameMatch) {
+                seenIds.add(trId);
+                matchingTrainees.push(tr);
+            }
+        });
+
+        return matchingTrainees;
+    }
+
+    function buildTrainerScheduleHtml(trainerObj) {
+        if (!trainerObj) return '<div class="p-8 text-center text-red-500 font-bold">لا توجد بيانات لهذا المدرب</div>';
+
+        const trainerName = trainerObj.name || 'مدرب معتمد';
+        const courseName = trainerObj.course || 'دورة تدريبية معتمدة';
+        const roomName = trainerObj.room || 'القاعة المعتمدة';
+        const capacity = trainerObj.capacity || 15;
+
+        const enrolledTrainees = getTrainerEnrolledTraineesList(trainerObj);
+
+        // Gather all groups in schedule
+        const distinctGroups = [];
+        trainerObj.rows.forEach(row => {
+            row.forEach(cell => {
+                if (typeof extractGroupsFromCell === 'function') {
+                    extractGroupsFromCell(cell).forEach(g => {
+                        if (!distinctGroups.includes(g)) distinctGroups.push(g);
+                    });
+                }
+            });
+        });
+
+        // Calculate hours and period metrics
+        let totalActiveHours = 0;
+        let totalVacanciesSum = 0;
+
+        const periodMetrics = [];
+        for (let col = 0; col < 8; col++) {
+            const hourAllGroups = [];
+            for (let r = 0; r < trainerObj.rows.length; r++) {
+                if (typeof extractGroupsFromCell === 'function') {
+                    extractGroupsFromCell(trainerObj.rows[r][col]).forEach(g => {
+                        if (!hourAllGroups.includes(g)) hourAllGroups.push(g);
+                    });
+                }
+            }
+
+            if (hourAllGroups.length === 0) {
+                periodMetrics.push({
+                    hasGroups: false,
+                    groups: [],
+                    enrolled: 0,
+                    vacant: capacity,
+                    statusText: 'فترة راحة / شاغرة',
+                    statusClass: 'background:#f8fafc; color:#94a3b8;'
+                });
+                continue;
+            }
+
+            totalActiveHours++;
+            const isAllLA = (typeof isLAGroup === 'function') ? hourAllGroups.every(g => isLAGroup(g)) : false;
+
+            let enrolledCount = 0;
+            let vacantSeats = 0;
+
+            if (isAllLA) {
+                vacantSeats = (typeof getLAVacancyForCell === 'function') ? getLAVacancyForCell(hourAllGroups, capacity) : capacity;
+                enrolledCount = Math.max(0, capacity - vacantSeats);
+            } else {
+                const pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : ((typeof trainees !== 'undefined' && Array.isArray(trainees)) ? trainees : []);
+                enrolledCount = hourAllGroups.reduce((sum, g) => {
+                    const isLA = (typeof isLAGroup === 'function') ? isLAGroup(g) : false;
+                    if (isLA) return sum;
+                    const c = pool.filter(tr => (typeof isGroupMatch === 'function' ? isGroupMatch(g, tr.group) : false) || tr.group === g).length;
+                    return sum + c;
+                }, 0);
+                vacantSeats = Math.max(0, capacity - enrolledCount);
+            }
+
+            totalVacanciesSum += vacantSeats;
+
+            let statusText = '🔒 مكتملة';
+            let statusClass = 'background:#f1f5f9; color:#334155; font-weight:800;';
+            if (vacantSeats > 0) {
+                statusText = `🟢 شاغر (${vacantSeats})`;
+                statusClass = 'background:#ecfdf5; color:#065f46; font-weight:900;';
+            } else if (enrolledCount > capacity) {
+                statusText = `🚨 فوق الحد (+${enrolledCount - capacity})`;
+                statusClass = 'background:#fef2f2; color:#991b1b; font-weight:900;';
+            }
+
+            periodMetrics.push({
+                hasGroups: true,
+                groups: hourAllGroups,
+                enrolled: enrolledCount,
+                vacant: vacantSeats,
+                statusText,
+                statusClass
+            });
+        }
+
+        // Build 8 Period Rows HTML
+        const periodRowsHtml = periodMetrics.map((p, idx) => {
+            const timeInfo = SCHEDULE_PERIOD_TIMES[idx] || { label: `فترة ${idx + 1}` };
+            const groupsHtml = p.hasGroups 
+                ? p.groups.map(g => `<span style="display:inline-block; background:#fffbeb; color:#78350f; border:1px solid #fde68a; font-weight:800; padding:2px 7px; border-radius:6px; font-size:10px; margin:1px 2px;">${g}</span>`).join(' ')
+                : `<span style="color:#94a3b8; font-weight:700;">—</span>`;
+
+            return `
+                <tr style="border-bottom:1px solid #e2e8f0; height:34px;">
+                    <td style="padding:5px 6px; border-left:1px solid #e2e8f0; font-weight:800; color:#64748b; font-family:monospace; background:#fafafa;">${idx + 1}</td>
+                    <td style="padding:5px 8px; border-left:1px solid #e2e8f0; font-weight:800; color:#0f172a; font-family:monospace; font-size:10.5px; white-space:nowrap;">${timeInfo.label}</td>
+                    <td style="padding:5px 10px; border-left:1px solid #e2e8f0; text-align:right;">${groupsHtml}</td>
+                    <td style="padding:5px 8px; border-left:1px solid #e2e8f0; font-weight:900; color:${p.enrolled > 0 ? '#0f172a' : '#94a3b8'}; font-family:monospace;">${p.enrolled}</td>
+                    <td style="padding:5px 8px; border-left:1px solid #e2e8f0; font-weight:900; color:${p.vacant > 0 ? '#059669' : '#94a3b8'}; font-family:monospace;">${p.vacant}</td>
+                    <td style="padding:5px 8px; font-size:10px; ${p.statusClass}">${p.statusText}</td>
+                </tr>
+            `;
+        }).join('');
+
+        // Trainees Roster Table HTML
+        let traineesRosterTableHtml = '';
+        if (enrolledTrainees.length === 0) {
+            traineesRosterTableHtml = `
+                <div style="padding:14px; text-align:center; color:#64748b; font-size:11px; font-weight:700;">
+                    لا يوجد متدربون مسكنون حالياً في شُعب هذا المدرب في سجل الحضور المباشر
+                </div>
+            `;
+        } else {
+            // Group count summary badges
+            const groupCounts = {};
+            enrolledTrainees.forEach(t => {
+                const g = t.group || 'أخرى';
+                groupCounts[g] = (groupCounts[g] || 0) + 1;
+            });
+            const groupBadgesHtml = Object.entries(groupCounts).map(([g, cnt]) => `
+                <span style="display:inline-flex; align-items:center; gap:4px; background:#f1f5f9; border:1px solid #cbd5e1; padding:2px 8px; border-radius:9999px; font-size:10px; font-weight:800; color:#1e293b; margin:2px 3px;">
+                    <span>${g}</span>
+                    <b style="background:#e2e8f0; padding:1px 5px; border-radius:9999px; font-family:monospace;">${cnt}</b>
+                </span>
+            `).join('');
+
+            // Trainees list (compact 2-column format if more than 10 trainees)
+            const rowsLimit = enrolledTrainees.slice(0, 24);
+            const traineesRowsHtml = rowsLimit.map((t, i) => `
+                <tr style="border-bottom:1px solid #f1f5f9; height:24px;">
+                    <td style="padding:2px 4px; border-left:1px solid #f1f5f9; text-align:center; font-family:monospace; color:#94a3b8; font-weight:700;">${i + 1}</td>
+                    <td style="padding:2px 6px; border-left:1px solid #f1f5f9; font-weight:800; color:#0f172a; white-space:nowrap;">${t.name}</td>
+                    <td style="padding:2px 6px; border-left:1px solid #f1f5f9; font-family:monospace; color:#475569; font-size:10px; text-align:center;">${t.id}</td>
+                    <td style="padding:2px 6px; border-left:1px solid #f1f5f9; color:#475569; font-weight:700;">${t.company || '—'}</td>
+                    <td style="padding:2px 6px; color:#b45309; font-weight:800; text-align:center;">${t.group || '—'}</td>
+                </tr>
+            `).join('');
+
+            traineesRosterTableHtml = `
+                <div style="margin-bottom:6px; display:flex; flex-wrap:wrap; gap:3px; align-items:center;">
+                    <span style="font-size:10px; font-weight:800; color:#475569; margin-left:4px;">توزيع الشُعب:</span>
+                    ${groupBadgesHtml}
+                </div>
+                <div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+                        <thead>
+                            <tr style="background:#f8fafc; border-bottom:1px solid #cbd5e1; font-weight:900; color:#334155; text-align:right;">
+                                <th style="padding:4px 6px; border-left:1px solid #e2e8f0; width:28px; text-align:center;">#</th>
+                                <th style="padding:4px 6px; border-left:1px solid #e2e8f0;">اسم المتدرب</th>
+                                <th style="padding:4px 6px; border-left:1px solid #e2e8f0; width:95px; text-align:center;">رقم الهوية الوطنية</th>
+                                <th style="padding:4px 6px; border-left:1px solid #e2e8f0; width:100px;">الشركة الراعية</th>
+                                <th style="padding:4px 6px; width:90px; text-align:center;">الشعبة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${traineesRowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+                ${enrolledTrainees.length > 24 ? `<div style="font-size:9.5px; color:#64748b; font-weight:700; text-align:center; margin-top:3px;">(تم عرض أول 24 متدرباً من أصل ${enrolledTrainees.length} متدرب مسجل)</div>` : ''}
+            `;
+        }
+
+        const dateStr = '14/07/2026';
+
+        return `
+            <div id="trainerSchedulePrintableSheet" style="width:794px; min-height:1123px; background:#ffffff; position:relative; margin:0 auto; box-shadow:0 15px 35px -5px rgba(0,0,0,0.18); font-family:'Tajawal','Cairo',sans-serif; overflow:hidden; box-sizing:border-box; text-align:right; direction:rtl;" dir="rtl">
+                <!-- Left Decorative Strip (Gold Gradient + Bottom Dark Bar with CR. 2053117185) -->
+                <div style="position:absolute; top:0; bottom:0; left:0; width:44px; display:flex; flex-direction:column; justify-content:space-between; z-index:10;">
+                    <div style="flex:1; background:linear-gradient(180deg, #E2B240 0%, #C69524 55%, #E2AB33 100%); width:100%; border-right:2px solid #8e6815;"></div>
+                    <div style="height:130px; background:#111827; width:100%; display:flex; align-items:center; justify-content:center; position:relative;">
+                        <div style="writing-mode:vertical-rl; transform:rotate(180deg); color:#ffffff; font-size:11px; font-weight:700; letter-spacing:2px; font-family:monospace; white-space:nowrap;">
+                            CR. 2053117185
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Centered Watermark Droplet -->
+                <img src="assets/bgti_logo.png" alt="BGTI" style="position:absolute; top:48%; left:52%; transform:translate(-50%, -50%); width:330px; opacity:0.035; pointer-events:none; filter:grayscale(100%); z-index:1;">
+
+                <!-- Inner Content -->
+                <div style="margin-left:48px; padding:34px 42px 26px 36px; position:relative; z-index:5; min-height:1063px; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box;">
+                    <div>
+                        <!-- Header: Logo, Title, Metadata -->
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:12px; border-bottom:2px solid #C69524;">
+                            <div style="display:flex; align-items:center; gap:14px;">
+                                <img src="assets/bgti_logo.png" alt="BGTI" style="height:62px; width:auto; object-fit:contain;">
+                                <div>
+                                    <div style="font-size:15px; font-weight:900; color:#0f172a; letter-spacing:-0.3px;">معهد الذهب الأسود العالي للتدريب</div>
+                                    <div style="font-size:11.5px; font-weight:700; color:#C69524; letter-spacing:0.5px;">Black Gold Training Institute • فرع عنك</div>
+                                    <div style="font-size:10px; font-weight:700; color:#64748b; margin-top:2px;">س.ت: 2053117185 | ترخيص المؤسسة: 19187335023495</div>
+                                </div>
+                            </div>
+                            <div style="text-align:left; font-size:11px; font-weight:700; color:#475569; line-height:1.6;">
+                                <div>العام التدريبي: <span style="font-weight:800; color:#0f172a;">1447 - 1448 هـ / 2026 م</span></div>
+                                <div>تاريخ الإصدار: <span style="font-weight:800; color:#0f172a; font-family:monospace;">${dateStr} م</span></div>
+                                <div>حالة الاعتماد: <span style="background:#ecfdf5; color:#065f46; font-weight:800; padding:1px 6px; border-radius:4px; border:1px solid #a7f3d0;">جدول رسمي معتمد</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Title Header -->
+                        <div style="text-align:center; margin-top:14px; margin-bottom:12px;">
+                            <div style="display:inline-block; background:#0f172a; color:#E2B240; font-size:14px; font-weight:900; padding:5px 22px; border-radius:9999px; letter-spacing:0.5px; box-shadow:0 2px 6px rgba(0,0,0,0.12);">
+                                الجدول الدراسي والتشغيلي المعتمد للمدرب
+                            </div>
+                        </div>
+
+                        <!-- Trainer Profile Cards (4 KPI Cards) -->
+                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:9px; margin-bottom:12px;">
+                            <!-- Card 1: Trainer -->
+                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-top:3px solid #C69524; border-radius:10px; padding:8px 10px;">
+                                <div style="font-size:10px; font-weight:700; color:#64748b;">المدرب المعتمد</div>
+                                <div style="font-size:12.5px; font-weight:900; color:#0f172a; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${trainerName}</div>
+                                <div style="font-size:9.5px; font-weight:700; color:#b45309; margin-top:1px;">كادر التدريب الفني</div>
+                            </div>
+                            <!-- Card 2: Course -->
+                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-top:3px solid #0f172a; border-radius:10px; padding:8px 10px;">
+                                <div style="font-size:10px; font-weight:700; color:#64748b;">المادة / التخصص</div>
+                                <div style="font-size:12.5px; font-weight:900; color:#0f172a; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${courseName}</div>
+                                <div style="font-size:9.5px; font-weight:700; color:#475569; margin-top:1px;">دورة تطويرية معتمدة</div>
+                            </div>
+                            <!-- Card 3: Room -->
+                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-top:3px solid #2563eb; border-radius:10px; padding:8px 10px;">
+                                <div style="font-size:10px; font-weight:700; color:#64748b;">القاعة / الورشة</div>
+                                <div style="font-size:12.5px; font-weight:900; color:#1e40af; margin-top:2px;">${roomName}</div>
+                                <div style="font-size:9.5px; font-weight:700; color:#475569; margin-top:1px;">معمل مجهز تقنياً</div>
+                            </div>
+                            <!-- Card 4: Capacity & Enrolled -->
+                            <div style="background:#fefce8; border:1px solid #fef08a; border-top:3px solid #eab308; border-radius:10px; padding:8px 10px;">
+                                <div style="font-size:10px; font-weight:700; color:#854d0e;">الطاقة والمقاعد</div>
+                                <div style="font-size:12.5px; font-weight:900; color:#713f12; margin-top:2px; display:flex; justify-content:space-between; align-items:baseline;">
+                                    <span>${capacity} مقعداً</span>
+                                    <span style="font-size:10px; color:#047857; font-weight:800;">${enrolledTrainees.length} متدرباً</span>
+                                </div>
+                                <div style="font-size:9.5px; font-weight:700; color:#854d0e; margin-top:1px;">الساعات: ${totalActiveHours} أسبوعياً</div>
+                            </div>
+                        </div>
+
+                        <!-- Hours Table (8 periods: 8:00 - 16:00) -->
+                        <div style="margin-bottom:12px; border:1px solid #cbd5e1; border-radius:10px; overflow:hidden;">
+                            <div style="background:#0f172a; color:#ffffff; padding:6px 10px; font-size:11px; font-weight:800; display:flex; justify-content:space-between; align-items:center;">
+                                <span>🕒 جدول الحصص والفترات الأسبوعية وتوزيع المجموعات بالساعة</span>
+                                <span style="font-size:10px; color:#E2B240; font-weight:700;">8 فترات تدريبية (8:00 ص - 4:00 م)</span>
+                            </div>
+                            <table style="width:100%; border-collapse:collapse; text-align:center; font-size:10.5px;">
+                                <thead>
+                                    <tr style="background:#f1f5f9; color:#334155; font-weight:800; border-bottom:1px solid #cbd5e1;">
+                                        <th style="padding:6px 4px; border-left:1px solid #cbd5e1; width:34px;">م</th>
+                                        <th style="padding:6px 6px; border-left:1px solid #cbd5e1; width:100px;">الفترة / الوقت</th>
+                                        <th style="padding:6px 8px; border-left:1px solid #cbd5e1;">الشُعب والمجموعات المسكنة</th>
+                                        <th style="padding:6px 6px; border-left:1px solid #cbd5e1; width:75px;">الطلاب</th>
+                                        <th style="padding:6px 6px; border-left:1px solid #cbd5e1; width:75px;">الشاغر</th>
+                                        <th style="padding:6px 8px; width:95px;">حالة الاستيعاب</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${periodRowsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Enrolled Cohorts & Trainees Summary -->
+                        <div style="margin-bottom:10px; border:1px solid #cbd5e1; border-radius:10px; overflow:hidden;">
+                            <div style="background:#f8fafc; border-bottom:1px solid #cbd5e1; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:11px; font-weight:800; color:#0f172a;">👥 كشف المتدربين المسجلين لدى المدرب (${enrolledTrainees.length} متدرباً)</span>
+                                <span style="font-size:9.5px; color:#475569; font-weight:700;">المجموعات: ${distinctGroups.join(' • ') || 'غير محدد'}</span>
+                            </div>
+                            <div style="padding:6px 8px;">
+                                ${traineesRosterTableHtml}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Signatures & Seal Block -->
+                    <div style="margin-top:auto; padding-top:6px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; padding-top:10px; border-top:1px solid #cbd5e1; margin-bottom:8px;">
+                            <!-- Trainer Signature (Right) -->
+                            <div style="width:32%; text-align:center; line-height:1.7;">
+                                <div style="font-size:11px; font-weight:800; color:#0f172a;">توقيع المدرب المعتمد</div>
+                                <div style="font-size:10.5px; font-weight:700; color:#475569; margin-top:1px;">${trainerName}</div>
+                                <div style="font-size:10.5px; color:#94a3b8; margin-top:20px;">التوقيع: ............................</div>
+                            </div>
+
+                            <!-- Academic Affairs (Center) -->
+                            <div style="width:32%; text-align:center; line-height:1.7;">
+                                <div style="font-size:11px; font-weight:800; color:#0f172a;">الشؤون التعليمية والتدريبية</div>
+                                <div style="font-size:10.5px; font-weight:700; color:#475569; margin-top:1px;">معهد الذهب الأسود للتدريب</div>
+                                <div style="font-size:10.5px; color:#94a3b8; margin-top:20px;">الاعتماد: ............................</div>
+                            </div>
+
+                            <!-- Director & Official Stamp (Left) -->
+                            <div style="width:34%; text-align:center; line-height:1.7;">
+                                <div style="font-size:11px; font-weight:800; color:#0f172a;">اعتماد مدير المعهد</div>
+                                <div style="font-size:10.5px; font-weight:800; color:#1e293b; margin-top:1px;">علي آل عباس</div>
+                                <div style="position:relative; width:170px; height:70px; margin:2px auto 0 auto; display:flex; align-items:center; justify-content:center;">
+                                    <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position:absolute; width:95px; z-index:2; top:10px; left:10px; transform:rotate(-3deg);">
+                                    <img src="assets/bgti_stamp.png" alt="الختم الرسمي" style="position:absolute; width:75px; z-index:1; top:0px; right:12px; opacity:0.94;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Strip -->
+                        <div style="border-top:1px solid #e2e8f0; padding-top:6px; display:flex; justify-content:space-between; align-items:center; font-size:9px; font-weight:700; color:#64748b; font-family:sans-serif;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <span>📞 +966 54 889 6955</span>
+                                <span>✉️ info@blackgold.edu.sa</span>
+                            </div>
+                            <div>
+                                <span>📍 Prince Mohammed Binfahd Road, Al Shati Al Gharbi, Dammam 32413</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function populateMasterScheduleTrainerDropdown() {
+        const topSel = document.getElementById('masterScheduleTrainerSelect');
+        const modalSel = document.getElementById('modalTrainerScheduleSelect');
+
+        if (!Array.isArray(scheduleData) || scheduleData.length === 0) return;
+
+        const populateOptions = (sel) => {
+            if (!sel) return;
+            const curVal = sel.value;
+            sel.innerHTML = '<option value="">-- اختر المدرب لطباعة جدوله --</option>';
+            scheduleData.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.name;
+                opt.textContent = `${t.name} - ${t.course} (${t.room || 'قاعة'} • ${t.capacity} مقعد)`;
+                sel.appendChild(opt);
+            });
+            if (curVal && Array.from(sel.options).some(o => o.value === curVal)) {
+                sel.value = curVal;
+            } else if (activeSelectedTrainerScheduleName && Array.from(sel.options).some(o => o.value === activeSelectedTrainerScheduleName)) {
+                sel.value = activeSelectedTrainerScheduleName;
+            }
+        };
+
+        populateOptions(topSel);
+        populateOptions(modalSel);
+    }
+
+    function onMasterScheduleTrainerDropdownChanged() {
+        const sel = document.getElementById('masterScheduleTrainerSelect');
+        if (sel && sel.value) {
+            activeSelectedTrainerScheduleName = sel.value;
+        }
+    }
+
+    function onModalTrainerDropdownChanged() {
+        const sel = document.getElementById('modalTrainerScheduleSelect');
+        if (sel && sel.value) {
+            openTrainerSchedulePrintModal(sel.value);
+        }
+    }
+
+    function openSelectedTrainerScheduleModal() {
+        const sel = document.getElementById('masterScheduleTrainerSelect');
+        let trainerName = sel ? sel.value : '';
+        if (!trainerName && Array.isArray(scheduleData) && scheduleData.length > 0) {
+            trainerName = scheduleData[0].name;
+            if (sel) sel.value = trainerName;
+        }
+        if (!trainerName) return showToast('يرجى اختيار مدرب أولاً', 'warning');
+        openTrainerSchedulePrintModal(trainerName);
+    }
+
+    function openTrainerSchedulePrintModal(trainerName) {
+        if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
+            return showToast('لا توجد بيانات جداول متاحة', 'warning');
+        }
+
+        const t = scheduleData.find(item => item.name === trainerName) || scheduleData[0];
+        if (!t) return showToast('تعذر العثور على جدول هذا المدرب', 'error');
+
+        activeSelectedTrainerScheduleName = t.name;
+
+        // Render sheet HTML into host
+        const host = document.getElementById('trainerSchedulePrintableHost');
+        if (host) {
+            host.innerHTML = buildTrainerScheduleHtml(t);
+        }
+
+        // Update modal title and selects
+        const titleEl = document.getElementById('modalTrainerScheduleTitle');
+        if (titleEl) titleEl.textContent = `معاينة الجدول الدراسي المعتمد: ${t.name} (${t.course})`;
+
+        const modalSel = document.getElementById('modalTrainerScheduleSelect');
+        if (modalSel) {
+            populateMasterScheduleTrainerDropdown();
+            modalSel.value = t.name;
+        }
+        const topSel = document.getElementById('masterScheduleTrainerSelect');
+        if (topSel) topSel.value = t.name;
+
+        const modal = document.getElementById('trainerSchedulePreviewModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeTrainerScheduleModal() {
+        const modal = document.getElementById('trainerSchedulePreviewModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function printTrainerSchedule() {
+        document.body.classList.add('printing-trainer-schedule');
+        window.print();
+        setTimeout(() => {
+            document.body.classList.remove('printing-trainer-schedule');
+        }, 1200);
+    }
+
+    async function downloadActiveTrainerSchedulePdf() {
+        if (!activeSelectedTrainerScheduleName) {
+            const sel = document.getElementById('modalTrainerScheduleSelect') || document.getElementById('masterScheduleTrainerSelect');
+            if (sel && sel.value) activeSelectedTrainerScheduleName = sel.value;
+        }
+        await downloadTrainerSchedulePdf(activeSelectedTrainerScheduleName);
+    }
+
+    async function downloadSelectedTrainerSchedulePdf() {
+        const sel = document.getElementById('masterScheduleTrainerSelect');
+        let trainerName = sel ? sel.value : '';
+        if (!trainerName && Array.isArray(scheduleData) && scheduleData.length > 0) {
+            trainerName = scheduleData[0].name;
+        }
+        if (!trainerName) return showToast('يرجى اختيار مدرب أولاً', 'warning');
+        await downloadTrainerSchedulePdf(trainerName);
+    }
+
+    async function downloadTrainerSchedulePdf(trainerName) {
+        if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
+            return showToast('لا توجد بيانات جداول', 'warning');
+        }
+
+        const t = scheduleData.find(item => item.name === trainerName) || scheduleData[0];
+        if (!t) return showToast('تعذر العثور على جدول هذا المدرب', 'error');
+
+        // Ensure host is rendered
+        let printArea = document.getElementById('trainerSchedulePrintableSheet');
+        if (!printArea || activeSelectedTrainerScheduleName !== t.name) {
+            const host = document.getElementById('trainerSchedulePrintableHost');
+            if (host) {
+                host.innerHTML = buildTrainerScheduleHtml(t);
+                printArea = document.getElementById('trainerSchedulePrintableSheet');
+            }
+        }
+
+        if (!printArea) return showToast('تعذر تجهيز منطقة طباعة الجدول', 'error');
+
+        if (typeof html2pdf === 'undefined') {
+            return showToast('مكتبة html2pdf غير محملة، جاري فتح الطباعة...', 'warning', () => printTrainerSchedule());
+        }
+
+        const safeName = (t.name || 'مدرب').replace(/[/\\?%*:|"<>]/g, '_');
+        const filename = `جدول_المدرب_${safeName}.pdf`;
+
+        showToast(`جاري تجهيز وتحميل ملف الـ PDF: ${filename}...`, 'info');
+
+        const opt = {
+            margin: [0, 0, 0, 0],
+            filename: filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#FFFFFF',
+                letterRendering: true
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        try {
+            await html2pdf().set(opt).from(printArea).save();
+            showToast(`✅ تم تحميل جدول المدرب (${t.name}) بنجاح!`, 'success');
+        } catch (err) {
+            console.error('PDF error:', err);
+            showToast('حدث خطأ أثناء تنزيل الـ PDF: ' + err.message, 'error');
+        }
+    }
+
+    // Bulk ZIP export: downloads all trainers' schedules as separate individual PDFs inside a ZIP
+    async function downloadAllTrainersSchedulesZip() {
+        if (typeof JSZip === 'undefined') {
+            return showToast('مكتبة JSZip غير محملة', 'error');
+        }
+        if (typeof html2pdf === 'undefined') {
+            return showToast('مكتبة html2pdf غير محملة', 'error');
+        }
+        if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
+            return showToast('لا توجد بيانات جداول للمدربين', 'warning');
+        }
+
+        const zip = new JSZip();
+        showToast(`📦 جاري تحضير وطباعة حزمة جداول المدربين (${scheduleData.length} مدرب)...`, 'info');
+
+        // Create temporary off-screen container for rendering
+        const tempHost = document.createElement('div');
+        tempHost.style.position = 'fixed';
+        tempHost.style.top = '-9999px';
+        tempHost.style.left = '-9999px';
+        tempHost.style.width = '794px';
+        document.body.appendChild(tempHost);
+
+        let successCount = 0;
+        for (let i = 0; i < scheduleData.length; i++) {
+            const t = scheduleData[i];
+            const safeName = (t.name || `مدرب_${i+1}`).replace(/[/\\?%*:|"<>]/g, '_');
+            const pdfFilename = `جدول_المدرب_${safeName}.pdf`;
+
+            tempHost.innerHTML = buildTrainerScheduleHtml(t);
+            await new Promise(r => setTimeout(r, 60));
+
+            const opt = {
+                margin: [0, 0, 0, 0],
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                const pdfBlob = await html2pdf().set(opt).from(tempHost.firstElementChild).output('blob');
+                zip.file(pdfFilename, pdfBlob);
+                successCount++;
+            } catch (err) {
+                console.error(`Error generating schedule PDF for ${t.name}:`, err);
+            }
+        }
+
+        document.body.removeChild(tempHost);
+
+        if (successCount === 0) {
+            return showToast('تعذر توليد ملفات جداول المدربين', 'error');
+        }
+
+        showToast('جاري ضغط الملفات وتحميل حزمة الجداول ZIP...', 'info');
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const nowStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const zipFilename = `جداول_المدربين_المعتمدة_ZIP_${nowStr}.zip`;
+
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(zipBlob);
+        a.download = zipFilename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        showToast(`✅ تم تنزيل حزمة الجداول بنجاح: ${zipFilename} (${successCount} ملف PDF)`, 'success');
+    }
+
+    // Expose Trainer Schedule functions to window
+    window.populateMasterScheduleTrainerDropdown = populateMasterScheduleTrainerDropdown;
+    window.onMasterScheduleTrainerDropdownChanged = onMasterScheduleTrainerDropdownChanged;
+    window.onModalTrainerDropdownChanged = onModalTrainerDropdownChanged;
+    window.openSelectedTrainerScheduleModal = openSelectedTrainerScheduleModal;
+    window.openTrainerSchedulePrintModal = openTrainerSchedulePrintModal;
+    window.closeTrainerScheduleModal = closeTrainerScheduleModal;
+    window.printTrainerSchedule = printTrainerSchedule;
+    window.downloadSelectedTrainerSchedulePdf = downloadSelectedTrainerSchedulePdf;
+    window.downloadActiveTrainerSchedulePdf = downloadActiveTrainerSchedulePdf;
+    window.downloadTrainerSchedulePdf = downloadTrainerSchedulePdf;
+    window.downloadAllTrainersSchedulesZip = downloadAllTrainersSchedulesZip;
+
 
 </script>
 </body>
