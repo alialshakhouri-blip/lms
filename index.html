@@ -28480,6 +28480,94 @@ ${details}
 
     } catch(e) { archiveData = {}; }
 
+    // دالة تخزين آمنة ومقاومة للحد الأقصى للمساحة (LocalStorage Quota Safeguard)
+    function saveArchiveDataSafe(dataToSave = archiveData, forceCompact = false) {
+        if (!dataToSave || typeof dataToSave !== 'object') return;
+        
+        // 1. محاولة الحفظ الكامل إذا لم يكن هناك إجبار للضغط
+        if (!forceCompact) {
+            try {
+                localStorage.setItem('sys_attendance_archive_v1', JSON.stringify(dataToSave));
+                return;
+            } catch (quotaErr) {
+                console.warn('⚠️ تجاوز الحد الأقصى للمساحة (LocalStorage Quota) في أرشيف الحضور، جاري ضغط السجل التراكمي وتفريغ المساحة...', quotaErr);
+            }
+        }
+
+        // 2. الضغط الذكي - المستوى 1: الاحتفاظ بالإجماليات التراكمية مع آخر أسبوعين فقط من تاريخ الأسابيع
+        try {
+            const compact = {};
+            for (const k in dataToSave) {
+                const it = dataToSave[k];
+                if (!it) continue;
+                const wh = it.weeksHistory || {};
+                const whKeys = Object.keys(wh);
+                const compactWh = {};
+                whKeys.slice(-2).forEach(wk => { compactWh[wk] = wh[wk]; });
+                compact[k] = {
+                    id: it.id,
+                    name: it.name,
+                    company: it.company,
+                    group: it.group,
+                    phone: it.phone,
+                    totalPeriods: it.totalPeriods,
+                    attendedPeriods: it.attendedPeriods,
+                    attendanceRate: it.attendanceRate,
+                    sheetsCount: it.sheetsCount,
+                    statusLabel: it.statusLabel,
+                    statusClass: it.statusClass,
+                    weeksHistory: compactWh
+                };
+            }
+            localStorage.setItem('sys_attendance_archive_v1', JSON.stringify(compact));
+            console.log('✅ تم ضغط أرشيف الحضور وتوفير مساحة التخزين بنجاح (المستوى 1).');
+            return;
+        } catch (e1) {
+            console.warn('⚠️ ما زالت المساحة ممتلئة، تطبيق الضغط النهائي (المستوى 2)...', e1);
+        }
+
+        // 3. الضغط الذكي - المستوى 2: ملخص الحضور التراكمي فقط دون سجل الأسابيع المفصلة
+        try {
+            const minimal = {};
+            for (const k in dataToSave) {
+                const it = dataToSave[k];
+                if (!it) continue;
+                minimal[k] = {
+                    id: it.id,
+                    name: it.name,
+                    company: it.company,
+                    group: it.group,
+                    phone: it.phone,
+                    totalPeriods: it.totalPeriods,
+                    attendedPeriods: it.attendedPeriods,
+                    attendanceRate: it.attendanceRate,
+                    sheetsCount: it.sheetsCount,
+                    statusLabel: it.statusLabel,
+                    statusClass: it.statusClass
+                };
+            }
+            localStorage.setItem('sys_attendance_archive_v1', JSON.stringify(minimal));
+            console.log('✅ تم حفظ ملخص الأرشيف التراكمي بنجاح وتفادي أي تعليق في التخزين (المستوى 2).');
+            return;
+        } catch (e2) {
+            console.warn('⚠️ تعذر تخزين الأرشيف في localStorage، حذف المفتاح لحماية النظام من الانهيار والإبقاء على البيانات بالذاكرة والسحابة...', e2);
+        }
+
+        try {
+            localStorage.removeItem('sys_attendance_archive_v1');
+        } catch (e3) {}
+    }
+    window.saveArchiveDataSafe = saveArchiveDataSafe;
+
+    // فحص تلقائي ذاتي عند بدء التشغيل: إذا كان الأرشيف ضخماً جداً (> 1.2MB) نقوم بضغطه فوراً لمنع أخطاء Quota
+    try {
+        const _rawArch = localStorage.getItem('sys_attendance_archive_v1');
+        if (_rawArch && _rawArch.length > 1200000) {
+            console.log('⚡ فحص وقائي: تنظيف وضغط أرشيف الحضور التراكمي لتفريغ مساحة الذاكرة...');
+            saveArchiveDataSafe(archiveData, true);
+        }
+    } catch(e) {}
+
 
 
     function getArchiveStatusInfo(rate) {
@@ -28553,31 +28641,7 @@ ${details}
         function finalizeArchiveImport() {
             clearTimeout(safetyTimer);
             try {
-                try {
-                    localStorage.setItem('sys_attendance_archive_v1', JSON.stringify(archiveData));
-                } catch (quotaErr) {
-                    console.warn('LocalStorage quota exceeded for archive, saving compact version:', quotaErr);
-                    try {
-                        const compact = {};
-                        for (const k in archiveData) {
-                            const it = archiveData[k];
-                            compact[k] = {
-                                id: it.id,
-                                name: it.name,
-                                company: it.company,
-                                group: it.group,
-                                phone: it.phone,
-                                totalPeriods: it.totalPeriods,
-                                attendedPeriods: it.attendedPeriods,
-                                attendanceRate: it.attendanceRate,
-                                sheetsCount: it.sheetsCount,
-                                statusLabel: it.statusLabel,
-                                statusClass: it.statusClass
-                            };
-                        }
-                        localStorage.setItem('sys_attendance_archive_v1', JSON.stringify(compact));
-                    } catch (e2) {}
-                }
+                saveArchiveDataSafe(archiveData);
 
                 linkArchiveWithTrainees();
 
@@ -28858,17 +28922,25 @@ ${details}
 
         if (archiveUpdated) {
 
-            localStorage.setItem('sys_attendance_archive_v1', JSON.stringify(archiveData));
+            saveArchiveDataSafe(archiveData);
 
             if (typeof syncArchiveDataToCloud === 'function') {
 
-                syncArchiveDataToCloud();
+                try { syncArchiveDataToCloud(); } catch(e) {}
 
             }
 
         }
 
-        localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+        try {
+
+            localStorage.setItem('sys_trainees_v9', JSON.stringify(trainees));
+
+        } catch (lsTraineesErr) {
+
+            console.warn('⚠️ تعذر حفظ sys_trainees_v9 في localStorage بسبب المساحة:', lsTraineesErr);
+
+        }
 
     }
 
@@ -46833,12 +46905,12 @@ function openReportFromProfile() {
     let activeInstExportFillFromAttendance = null;
 
     function loadAccreditedCourses() {
-        if (Array.isArray(accreditedCoursesCache)) return accreditedCoursesCache;
+        if (Array.isArray(accreditedCoursesCache) && accreditedCoursesCache.length > 0) return accreditedCoursesCache;
         try {
             const raw = localStorage.getItem(INST_ACCREDITED_COURSES_KEY);
             if (raw) {
                 const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed)) {
+                if (Array.isArray(parsed) && parsed.length > 0) {
                     accreditedCoursesCache = parsed;
                     // Self-healing: heal any course where instructor doesn't match specialty (e.g. Essam on Excel)
                     let healed = false;
@@ -46858,7 +46930,7 @@ function openReportFromProfile() {
                 }
             }
         } catch (e) {}
-        accreditedCoursesCache = [];
+        if (!Array.isArray(accreditedCoursesCache)) accreditedCoursesCache = [];
         return accreditedCoursesCache;
     }
 
@@ -46866,19 +46938,32 @@ function openReportFromProfile() {
         accreditedCoursesCache = Array.isArray(list) ? list : [];
         try {
             localStorage.setItem(INST_ACCREDITED_COURSES_KEY, JSON.stringify(accreditedCoursesCache));
-        } catch (e) {}
+        } catch (e) {
+            console.warn('⚠️ تجاوز الحد الأقصى للمساحة (LocalStorage) عند حفظ الدورات، جاري تفريغ مساحة وحفظها مجدداً...', e);
+            try {
+                if (typeof saveArchiveDataSafe === 'function') saveArchiveDataSafe(archiveData, true);
+                localStorage.setItem(INST_ACCREDITED_COURSES_KEY, JSON.stringify(accreditedCoursesCache));
+            } catch (e2) {
+                console.error('❌ تعذر حفظ الدورات المعتمدة في localStorage حتى بعد الضغط:', e2);
+            }
+        }
         if (syncCloud && window.supabaseClient && window.isSupabaseConnected) {
             try {
                 window.supabaseClient.from('app_sync_state').upsert([
                     { key: INST_ACCREDITED_COURSES_KEY, data: accreditedCoursesCache, updated_at: new Date().toISOString() }
-                ], { onConflict: 'key' }).catch(() => {});
+                ], { onConflict: 'key' }).then(({ error }) => {
+                    if (error) console.warn('Supabase upsert accredited courses warning:', error);
+                    else console.log('✅ تم حفظ الدورات المعتمدة في السحابة بنجاح');
+                }).catch(err => {
+                    console.warn('⚠️ خطأ في حفظ الدورات في السحابة:', err);
+                });
             } catch (e) {}
         }
         return accreditedCoursesCache;
     }
 
     function mergeCloudAccreditedCourses(cloudList) {
-        if (!Array.isArray(cloudList)) return;
+        if (!Array.isArray(cloudList) || cloudList.length === 0) return;
         const localList = loadAccreditedCourses();
         const byId = new Map();
         localList.forEach(c => { if (c && c.id) byId.set(c.id, c); });
@@ -46982,20 +47067,39 @@ function openReportFromProfile() {
     }
 
     function parseTvtcCoursePortalText(rawText) {
-        const text = String(rawText || '').replace(/\r\n/g, '\n').trim();
-        const urlCourseMatch = text.match(/\/program-services\/(\d{4,12})/i);
+        // 1. تحويل وتوحيد الأرقام المشرقية (الهندية) إلى إنجليزية فوراً قبل أي معالجة
+        const text = (typeof convertArabicToAsciiDigits === 'function') 
+            ? convertArabicToAsciiDigits(String(rawText || '').replace(/\r\n/g, '\n')).trim() 
+            : String(rawText || '').replace(/\r\n/g, '\n').trim();
+        const urlCourseMatch = text.match(/\/program-services\/(\d{4,12})/i)
+            || text.match(/\/(?:courses?|programs?)\/(\d{4,12})/i);
         const noMd = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1').replace(/مشغل المنشأة/g, '');
 
-        const numMatch = noMd.match(/رقم\s*الدورة\s*[:：]?\s*(\d{4,12})/);
+        // 2. استخراج رقم الدورة بعدة صيغ مرنة
+        const numMatch = noMd.match(/رقم\s*(?:الدورة|البرنامج)?\s*[:：]?\s*(\d{4,12})/)
+            || noMd.match(/(?:الدورة|البرنامج)\s*رقم\s*[:：]?\s*(\d{4,12})/)
+            || noMd.match(/رمز\s*(?:الدورة|البرنامج)\s*[:：]?\s*(\d{4,12})/)
+            || noMd.match(/كود\s*(?:الدورة|البرنامج)\s*[:：]?\s*(\d{4,12})/)
+            || noMd.match(/(?:course|program)(?:_?id|_?no|_?num|number)?\s*[:=]?\s*(\d{4,12})/i);
         const courseNumber = (numMatch && numMatch[1]) || (urlCourseMatch && urlCourseMatch[1]) || '';
 
-        const startLblMatch = noMd.match(/-\s*تاريخ\s*البدء\s*[:：]?\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})|تاريخ\s*البدء\s*[:：]?\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})/);
-        const endLblMatch = noMd.match(/-\s*تاريخ\s*الانتهاء\s*[:：]?\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})|تاريخ\s*الانتهاء\s*[:：]?\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})/);
-        const rangeMatch = noMd.match(/(\d{4}[\/\-]\d{2}[\/\-]\d{2})\s*[-–—]\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})/);
+        // 3. دالة تحويل التواريخ مهما كانت صيغتها (YYYY/MM/DD أو DD/MM/YYYY) إلى ISO
+        const parseAnyDateToIso = (dStr) => {
+            if (!dStr) return '';
+            const s = String(dStr).trim().replace(/\//g, '-');
+            const isoM = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (isoM) return `${isoM[1]}-${isoM[2].padStart(2, '0')}-${isoM[3].padStart(2, '0')}`;
+            const saM = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+            if (saM) return `${saM[3]}-${saM[2].padStart(2, '0')}-${saM[1].padStart(2, '0')}`;
+            return s;
+        };
 
-        const normDate = (d) => (d ? String(d).replace(/\//g, '-') : '');
-        const startDate = normDate((startLblMatch && (startLblMatch[1] || startLblMatch[2])) || (rangeMatch && rangeMatch[1]) || '');
-        const endDate = normDate((endLblMatch && (endLblMatch[1] || endLblMatch[2])) || (rangeMatch && rangeMatch[2]) || '');
+        const startLblMatch = noMd.match(/(?:تاريخ\s*(?:البدء|البداية)|من\s*تاريخ)\s*[:：]?\s*(\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4})/);
+        const endLblMatch = noMd.match(/(?:تاريخ\s*(?:الانتهاء|النهاية)|إلى\s*تاريخ|الى\s*تاريخ)\s*[:：]?\s*(\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4})/);
+        const rangeMatch = noMd.match(/(\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4})\s*[-–—]\s*(\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4})/);
+
+        const startDate = parseAnyDateToIso((startLblMatch && startLblMatch[1]) || (rangeMatch && rangeMatch[1]) || '');
+        const endDate = parseAnyDateToIso((endLblMatch && endLblMatch[1]) || (rangeMatch && rangeMatch[2]) || '');
 
         const progTypeMatch = noMd.match(/نوع\s*البرنامج\s*[:：]?\s*(دورة\s*تطويرية|دورة\s*تأهيلية|برنامج\s*تأهيلي|برنامج\s*تطويري)/)
             || noMd.match(/(?:^|\n)\s*(دورة\s*تطويرية|دورة\s*تأهيلية)\s*(?:\n|$)/);
@@ -47010,8 +47114,8 @@ function openReportFromProfile() {
 
         const monthsMatch = noMd.match(/عدد\s*الشهور\s*[:：]?\s*(\d+)/);
         const daysMatch = noMd.match(/عدد\s*الأيام\s*[:：]?\s*(\d+)/);
-        const regDateMatch = noMd.match(/تاريخ\s*التسجيل\s*[:：]?\s*(\d{4}-\d{2}-\d{2})/);
-        const regDeadlineMatch = noMd.match(/آخر\s*موعد\s*للتسجيل\s*[:：]?\s*(\d{4}-\d{2}-\d{2})/);
+        const regDateMatch = noMd.match(/تاريخ\s*التسجيل\s*[:：]?\s*(\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4})/);
+        const regDeadlineMatch = noMd.match(/آخر\s*موعد\s*للتسجيل\s*[:：]?\s*(\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4})/);
         const totalMatch = noMd.match(/\d+\s*-\s*\d+\s*\/\s*(\d+)/);
 
         // Extract course name cleanly
@@ -47031,8 +47135,13 @@ function openReportFromProfile() {
             }
         }
 
-        // Extract trainee rows (supports both multi-line browser table copy AND single-line tabular rows)
-        const tableStart = noMd.indexOf('بيانات المتدربين');
+        // Extract trainee rows (supports multi-line copy, TSV tabular rows with row index, etc.)
+        let tableStart = noMd.indexOf('بيانات المتدربين');
+        if (tableStart < 0) tableStart = noMd.indexOf('جدول المتدربين');
+        if (tableStart < 0) tableStart = noMd.indexOf('قائمة المتدربين');
+        if (tableStart < 0) tableStart = noMd.indexOf('المتدربون');
+        if (tableStart < 0) tableStart = noMd.indexOf('المتدربين');
+
         const bodyLines = (tableStart >= 0 ? noMd.slice(tableStart) : noMd)
             .split('\n').map(l => l.trim()).filter(Boolean);
 
@@ -47040,7 +47149,8 @@ function openReportFromProfile() {
         const seenIds = new Set();
         for (let i = 0; i < bodyLines.length; i++) {
             const line = bodyLines[i];
-            const idMatch = line.match(/^([12]\d{9})(?:\s+(.*))?$/);
+            // مطابقة رقم الهوية الوطنية (10 أرقام تبدأ بـ 1 أو 2) في أي موضع من السطر
+            const idMatch = line.match(/(?:^|\D)([12]\d{9})(?:\D|$)/);
             if (!idMatch) continue;
             const nid = idMatch[1];
             if (seenIds.has(nid)) continue;
@@ -47051,26 +47161,31 @@ function openReportFromProfile() {
             let regDate = '';
             let regStatus = 'نشط';
 
-            const inlineRest = (idMatch[2] || '').trim();
-            if (inlineRest) {
-                const tabParts = inlineRest.split(/\t+|\s{2,}/).map(s => s.trim()).filter(Boolean);
-                tabParts.forEach(part => {
-                    if (/^\d{4}-\d{2}-\d{2}$/.test(part)) { if (!regDate) regDate = part; }
-                    else if (/^(نشط|منسحب|موقوف|مكتمل)$/.test(part)) { regStatus = part; }
-                    else if (/^\d{1,3}(\.\d+)?$/.test(part) && Number(part) <= 100) { grade = part; }
-                    else if (part === '-' || part === 'لا' || part === 'نعم') { /* skip empty grade/flags */ }
-                    else if (!name && /[\u0600-\u06FFa-zA-Z]/.test(part) && !/الشاخوري/.test(part)) { name = part; }
-                });
-            }
+            // تجزئة السطر بالتاب أو المسافات المتعددة
+            const cells = line.split(/\t+|\s{2,}/).map(s => s.trim()).filter(Boolean);
+            cells.forEach(part => {
+                if (/^\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4}$/.test(part)) {
+                    if (!regDate) regDate = parseAnyDateToIso(part);
+                } else if (/^(نشط|منسحب|موقوف|مكتمل)$/.test(part)) {
+                    regStatus = part;
+                } else if (/^\d{1,3}(\.\d+)?$/.test(part) && Number(part) <= 100 && part !== nid && part.length <= 3) {
+                    grade = part;
+                } else if (part === '-' || part === 'لا' || part === 'نعم' || part === 'سعودي' || part === 'Edit') {
+                    // تجاهل الحقول الثابتة
+                } else if (!name && !part.includes(nid) && /[\u0600-\u06FFa-zA-Z]{2,}/.test(part) && !/الشاخوري|الذهب الأسود/i.test(part)) {
+                    name = part;
+                }
+            });
 
+            // إذا لم يكن الاسم في نفس السطر، نبحث في الأسطر التالية له
             if (!name) {
                 for (let j = i + 1; j < Math.min(bodyLines.length, i + 9); j++) {
                     const nxt = bodyLines[j];
-                    if (/^[12]\d{9}(?:\s|$)/.test(nxt) || /جميع الحقوق محفوظة|أظهرمدخلات|^\d+-\d+\/\d+/.test(nxt)) break;
-                    if (/^\d{4}-\d{2}-\d{2}$/.test(nxt)) { if (!regDate) regDate = nxt; continue; }
+                    if (/(?:^|\D)[12]\d{9}(?:\D|$)/.test(nxt) || /جميع الحقوق محفوظة|أظهرمدخلات|^\d+-\d+\/\d+/.test(nxt)) break;
+                    if (/^\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4}$/.test(nxt)) { if (!regDate) regDate = parseAnyDateToIso(nxt); continue; }
                     if (/^(نشط|منسحب|موقوف|مكتمل)$/.test(nxt)) { regStatus = nxt; continue; }
-                    if (/^(لا|نعم|-|Edit)$/.test(nxt)) continue;
-                    if (/^\d{1,3}(\.\d+)?$/.test(nxt) && Number(nxt) <= 100) {
+                    if (/^(لا|نعم|-|Edit|سعودي)$/.test(nxt)) continue;
+                    if (/^\d{1,3}(\.\d+)?$/.test(nxt) && Number(nxt) <= 100 && nxt.length <= 3) {
                         if (grade === '') grade = nxt;
                         continue;
                     }
@@ -47099,8 +47214,8 @@ function openReportFromProfile() {
             endDate,
             monthsCount: monthsMatch ? monthsMatch[1] : '',
             daysCount: daysMatch ? daysMatch[1] : '',
-            regDate: regDateMatch ? regDateMatch[1] : '',
-            regDeadline: regDeadlineMatch ? regDeadlineMatch[1] : '',
+            regDate: regDateMatch ? parseAnyDateToIso(regDateMatch[1]) : '',
+            regDeadline: regDeadlineMatch ? parseAnyDateToIso(regDeadlineMatch[1]) : '',
             portalTotalCount: totalMatch ? Number(totalMatch[1]) : extractedTrainees.length,
             trainees: extractedTrainees
         };
@@ -47437,6 +47552,14 @@ function openReportFromProfile() {
                 `;
                 banner.classList.remove('hidden');
             }
+
+            // إعادة تعيين الفلاتر والبحث إلى ALL لضمان ظهور الدورة الجديدة فوراً أمام المستخدم
+            accreditedCoursesFilter = 'ALL';
+            accreditedCoursesSearchQuery = '';
+            const fSel = document.getElementById('acCoursesFilterSelect');
+            if (fSel) fSel.value = 'ALL';
+            const sInp = document.getElementById('acCoursesSearchInput');
+            if (sInp) sInp.value = '';
 
             refreshAccreditedCoursesUI();
             openAccreditedCourseWorkspace(savedRecord.id);
@@ -62686,7 +62809,7 @@ function openReportFromProfile() {
 
                     archiveData = cloudArchiveData;
 
-                    localStorage.setItem('sys_attendance_archive_v1', JSON.stringify(archiveData));
+                    saveArchiveDataSafe(archiveData);
 
                     hasChanges = true;
 
