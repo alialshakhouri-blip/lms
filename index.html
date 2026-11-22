@@ -98793,9 +98793,17 @@ function getCTPAdmissionFormData(trainee) {
                                 </div>
                             </div>
 
-                            <!-- Centered Underlined Title -->
-                            <div style="text-align: center; margin-top: 22px; margin-bottom: 20px;">
-                                <h1 id="warnTitleDisplay" style="font-size: 30px; font-weight: 900; color: #0f172a; display: inline-block; padding-bottom: 4px; border-bottom: 3px solid #0f172a; margin: 0; letter-spacing: normal; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif;">الإنذار النهائي</h1>
+                            <!-- Centered Title / Document Type Badge (Compact, formal, immune to reverse text rendering) -->
+                            <div style="text-align: center; margin-top: 14px; margin-bottom: 18px; direction: rtl;">
+                                <table align="center" style="margin: 0 auto; border-collapse: collapse; direction: rtl; text-align: center;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="border: 2px solid #0f172a; border-radius: 8px; padding: 5px 26px; background: #f8fafc; text-align: center; direction: rtl;">
+                                                <span id="warnTitleDisplay" style="font-size: 17px; font-weight: 900; color: #0f172a; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; letter-spacing: 0; direction: rtl; unicode-bidi: isolate; display: inline-block;">الإنذار النهائي</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
 
                             <!-- Trainee Metadata Block (2-column table immune to bidi/colon reversal) -->
@@ -99254,6 +99262,42 @@ function getCTPAdmissionFormData(trainee) {
     };
 
     let activeWarningQuickFilter = 'all';
+    let userSelectedWarningTypes = {};
+
+    function getWarningBadgeClass(wType) {
+        if (wType === 'إنذار نهائي') return 'bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800';
+        if (wType === 'إنذار ثانٍ') return 'bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-950/60 dark:text-orange-300 dark:border-orange-800';
+        return 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800';
+    }
+
+    function onWarningRowTypeChange(traineeId, newType) {
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
+        userSelectedWarningTypes[cleanId] = newType;
+        userSelectedWarningTypes[traineeId] = newType;
+
+        const sel = document.getElementById('warnRowType_' + traineeId) || document.getElementById('warnRowType_' + cleanId);
+        if (sel) {
+            sel.value = newType;
+            sel.className = `text-xs font-black px-2.5 py-1.5 rounded-xl border cursor-pointer transition shadow-2xs ${getWarningBadgeClass(newType)}`;
+        }
+
+        if (currentWarningPreviewState && (currentWarningPreviewState.id === traineeId || currentWarningPreviewState.id === cleanId)) {
+            currentWarningPreviewState.warningType = newType;
+            const modalSelect = document.getElementById('warnModalTypeSelect');
+            if (modalSelect) modalSelect.value = newType;
+            updateWarningModalPreview();
+        }
+    }
+
+    function getEffectiveWarningType(traineeId, fallback = 'إنذار نهائي') {
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
+        if (userSelectedWarningTypes[cleanId]) return userSelectedWarningTypes[cleanId];
+        if (userSelectedWarningTypes[traineeId]) return userSelectedWarningTypes[traineeId];
+        const el = document.getElementById('warnRowType_' + traineeId) || document.getElementById('warnRowType_' + cleanId);
+        if (el && el.value) return el.value;
+        return fallback;
+    }
+
     let currentWarningPreviewState = {
         id: '1140416528',
         name: 'ريان بن ضحيان بن حثوان غزواني',
@@ -99270,23 +99314,55 @@ function getCTPAdmissionFormData(trainee) {
     };
 
     function getDisciplinaryTraineesPool() {
-        let pool = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : [];
-        if (!pool || pool.length === 0) {
-            pool = (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) ? trainees : (typeof SAMPLE_TRAINEES !== 'undefined' ? SAMPLE_TRAINEES : []);
+        const poolMap = new Map();
+
+        // 1. [SHEET PRIORITY] جلب المتدربين مباشرة من كشف التحضير الحي (trainees أو التخزين المحلي)
+        let liveSheetList = [];
+        if (typeof trainees !== 'undefined' && Array.isArray(trainees) && trainees.length > 0) {
+            liveSheetList = trainees;
+        } else {
+            try {
+                const storedT = JSON.parse(localStorage.getItem('sys_trainees_v9') || '[]');
+                if (Array.isArray(storedT) && storedT.length > 0) liveSheetList = storedT;
+            } catch (e) {}
         }
 
-        // Clone to avoid mutating original
-        const list = pool.slice();
-
-        // Ensure the requested sample: Rayan Ghazwani (1140416528) is present
-        const cleanTargetId = '1140416528';
-        const exists = list.some(t => {
+        liveSheetList.forEach(t => {
             const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
-            return cid === cleanTargetId;
+            if (cid) poolMap.set(cid, { ...t, id: cid });
         });
 
-        if (!exists) {
-            list.unshift({
+        // 2. إثراء السجلات من مصفوفة التجمع الشامل getUnifiedTraineesPool لحفظ بيانات التواصل
+        const unified = (typeof getUnifiedTraineesPool === 'function') ? getUnifiedTraineesPool() : [];
+        unified.forEach(u => {
+            const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(u.id) : String(u.id || '').replace(/\D/g, '');
+            if (cid) {
+                if (poolMap.has(cid)) {
+                    const existing = poolMap.get(cid);
+                    poolMap.set(cid, {
+                        ...u,
+                        ...existing,
+                        phone: existing.phone || u.phone,
+                        email: existing.email || u.email
+                    });
+                } else {
+                    poolMap.set(cid, { ...u, id: cid });
+                }
+            }
+        });
+
+        // 3. دعم نموذج العينة SAMPLE_TRAINEES كاحتياطي فقط في حال خلو النظام تماماً
+        if (poolMap.size === 0 && typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) {
+            SAMPLE_TRAINEES.forEach(st => {
+                const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(st.id) : String(st.id || '').replace(/\D/g, '');
+                if (cid) poolMap.set(cid, { ...st, id: cid });
+            });
+        }
+
+        // 4. التأكد من وجود المتدرب المطلوب ريان غزواني (1140416528)
+        const cleanTargetId = '1140416528';
+        if (!poolMap.has(cleanTargetId)) {
+            poolMap.set(cleanTargetId, {
                 id: '1140416528',
                 name: 'ريان بن ضحيان بن حثوان غزواني',
                 company: 'هونداي',
@@ -99302,7 +99378,7 @@ function getCTPAdmissionFormData(trainee) {
             });
         }
 
-        return list;
+        return Array.from(poolMap.values());
     }
 
     function evaluateTraineeDisciplinaryStatus(t) {
@@ -99333,54 +99409,135 @@ function getCTPAdmissionFormData(trainee) {
         }
         if (!phone) phone = '0548896955';
 
-        // Specific preset: Rayan Ghazwani
-        if (cleanId === '1140416528') {
-            return {
-                id: '1140416528',
-                name: 'ريان بن ضحيان بن حثوان غزواني',
-                company: 'هونداي',
-                group: 'هونداي - المسار الفني',
-                phone: phone,
-                email: email,
-                rate: 20,
-                absentPeriods: 28,
-                consecutiveAbsentDays: 14,
-                isConsecutive10: true,
-                isLowRate30: true,
-                recommendedWarning: 'إنذار نهائي',
-                date: '14/07/2026',
-                warningText: DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'].text
-            };
+        // 1. [AUTHORITATIVE LIVE SHEET LOOKUP] مطابقة المتدرب مع كشف التحضير الحي (trainees و التخزين المحلي)
+        let liveT = null;
+        if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+            liveT = trainees.find(x => ((typeof cleanNationalId === 'function') ? cleanNationalId(x.id) : String(x.id || '').replace(/\D/g, '')) === cleanId);
+        }
+        if (!liveT) {
+            try {
+                const storedT = JSON.parse(localStorage.getItem('sys_trainees_v9') || '[]');
+                if (Array.isArray(storedT)) {
+                    liveT = storedT.find(x => ((typeof cleanNationalId === 'function') ? cleanNationalId(x.id) : String(x.id || '').replace(/\D/g, '')) === cleanId);
+                }
+            } catch (e) {}
         }
 
-        // Attendance rate calculation
-        let rate = 95;
-        if (typeof getTraineeEffectiveAttendanceRate === 'function') {
-            rate = getTraineeEffectiveAttendanceRate(t).rate;
-        } else if (t.rate !== undefined && !isNaN(Number(t.rate))) {
-            rate = Math.round(Number(t.rate));
-        } else if (t.combinedRate !== undefined && !isNaN(Number(t.combinedRate))) {
-            rate = Math.round(Number(t.combinedRate));
+        // 2. مطابقة المتدرب مع سجل الأرشيف التراكمي (archiveData و التخزين المحلي)
+        let arch = null;
+        if (typeof archiveData !== 'undefined' && archiveData && (archiveData[cleanId] || (t.id && archiveData[t.id]))) {
+            arch = archiveData[cleanId] || archiveData[t.id];
+        } else {
+            try {
+                const storedArch = JSON.parse(localStorage.getItem('sys_attendance_archive_v1') || '{}');
+                if (storedArch && (storedArch[cleanId] || (t.id && storedArch[t.id]))) {
+                    arch = storedArch[cleanId] || storedArch[t.id];
+                }
+            } catch (e) {}
         }
 
-        // Consecutive absence calculation
+        const effectiveT = liveT || t;
+
+        // 3. احتساب نسبة الحضور الحقيقية وبيانات الغياب مباشرة من كشف التحضير
+        let rate = null;
+        let absentPeriods = 0;
+        let totalPeriods = 0;
+        let attendedPeriods = 0;
         let consecutiveAbsentDays = 0;
-        let absentPeriods = Math.max(0, Math.round((100 - rate) * 0.4));
 
-        if (Array.isArray(t.weeklyAttendance) && t.weeklyAttendance.length > 0) {
-            // Count backward absent days
-            for (let d = t.weeklyAttendance.length - 1; d >= 0; d--) {
-                const dayChecks = t.weeklyAttendance[d];
-                const hasPresent = Array.isArray(dayChecks) && dayChecks.some(c => c === true);
-                if (!hasPresent) {
-                    consecutiveAbsentDays++;
-                } else {
+        // الأولوية 1: سجل الأرشيف المعتمد إن وُجد وكانت النسبة محسوبة
+        if (arch && arch.attendanceRate !== undefined && arch.attendanceRate !== null && !isNaN(Number(arch.attendanceRate))) {
+            rate = Math.round(Number(arch.attendanceRate));
+            totalPeriods = Number(arch.totalPeriods) || 0;
+            attendedPeriods = Number(arch.attendedPeriods) || 0;
+            absentPeriods = Math.max(0, totalPeriods - attendedPeriods);
+        }
+
+        // الأولوية 2: خصائص النسبة المباشرة في كشف التحضير (combinedRate أو rate أو weeklyRate)
+        if (rate === null) {
+            const candidateRates = [effectiveT.combinedRate, effectiveT.rate, effectiveT.weeklyRate, effectiveT.archiveRate, t.combinedRate, t.rate, t.weeklyRate];
+            for (const cr of candidateRates) {
+                if (cr !== undefined && cr !== null && String(cr).trim() !== '' && !isNaN(Number(cr))) {
+                    rate = Math.round(Number(cr));
                     break;
                 }
             }
         }
 
-        // If attendance rate is 0%, trainee has been absent continuously
+        // الأولوية 3: تحليل مصفوفة أيام وأسابيع التحضير الفعلية
+        const weeklyAtt = effectiveT.weeklyAttendance || t.weeklyAttendance || (arch && arch.weeksHistory && Object.values(arch.weeksHistory)[0]?.daysChecks);
+        if (Array.isArray(weeklyAtt) && weeklyAtt.length > 0) {
+            let weekTot = 0;
+            let weekAtt = 0;
+            let streak = 0;
+            let streakActive = true;
+
+            for (let d = weeklyAtt.length - 1; d >= 0; d--) {
+                const daySlots = weeklyAtt[d];
+                let dayHasPresent = false;
+                if (Array.isArray(daySlots)) {
+                    daySlots.forEach(slot => {
+                        weekTot++;
+                        const isPres = (slot === true || slot === 'present' || slot === 'حاضر' || slot === 1);
+                        if (isPres) {
+                            weekAtt++;
+                            dayHasPresent = true;
+                        }
+                    });
+                } else if (typeof daySlots === 'object' && daySlots !== null) {
+                    ['p1', 'p2'].forEach(pKey => {
+                        if (daySlots[pKey] !== undefined) {
+                            weekTot++;
+                            const isPres = (daySlots[pKey] === true || daySlots[pKey] === 'present' || daySlots[pKey] === 'حاضر');
+                            if (isPres) {
+                                weekAtt++;
+                                dayHasPresent = true;
+                            }
+                        }
+                    });
+                }
+
+                if (streakActive) {
+                    if (!dayHasPresent) {
+                        streak++;
+                    } else {
+                        streakActive = false;
+                    }
+                }
+            }
+
+            consecutiveAbsentDays = streak;
+
+            if (rate === null && weekTot > 0) {
+                rate = Math.round((weekAtt / weekTot) * 100);
+            }
+            if (totalPeriods === 0 && weekTot > 0) {
+                totalPeriods = weekTot;
+                attendedPeriods = weekAtt;
+                absentPeriods = Math.max(0, weekTot - weekAtt);
+            }
+        }
+
+        // الأولوية 4: فحص دالة احتساب الحضور الشاملة
+        if (rate === null && typeof getTraineeEffectiveAttendanceRate === 'function') {
+            const eff = getTraineeEffectiveAttendanceRate(effectiveT);
+            if (eff && eff.hasData) {
+                rate = eff.rate;
+            }
+        }
+
+        // القيمة الافتراضية إذا لم يتوفر أي سجل
+        if (rate === null) {
+            rate = 100;
+        }
+
+        if (absentPeriods === 0 && totalPeriods === 0 && rate < 100) {
+            totalPeriods = 30;
+            absentPeriods = Math.max(0, Math.round(totalPeriods * (1 - (rate / 100))));
+            attendedPeriods = totalPeriods - absentPeriods;
+        }
+
+        // ضبط أيام الانقطاع المتصلة بناءً على نسبة الحضور الحقيقية
         if (rate === 0) {
             consecutiveAbsentDays = Math.max(consecutiveAbsentDays, 14);
         } else if (rate <= 20) {
@@ -99411,6 +99568,8 @@ function getCTPAdmissionFormData(trainee) {
             email: email,
             rate: rate,
             absentPeriods: absentPeriods,
+            totalPeriods: totalPeriods,
+            attendedPeriods: attendedPeriods,
             consecutiveAbsentDays: consecutiveAbsentDays,
             isConsecutive10: isConsecutive10,
             isLowRate30: isLowRate30,
@@ -99572,11 +99731,10 @@ function getCTPAdmissionFormData(trainee) {
         if (emptyNotice) emptyNotice.classList.add('hidden');
 
         tbody.innerHTML = list.map((item, idx) => {
-            const isFinal = item.recommendedWarning === 'إنذار نهائي';
-            const isSecond = item.recommendedWarning === 'إنذار ثانٍ';
-            const warnBadgeClass = isFinal
-                ? 'bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800'
-                : (isSecond ? 'bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-950/60 dark:text-orange-300 dark:border-orange-800' : 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800');
+            const chosenWarning = (typeof getEffectiveWarningType === 'function')
+                ? getEffectiveWarningType(item.id, item.recommendedWarning)
+                : (item.recommendedWarning || 'إنذار نهائي');
+            const warnBadgeClass = getWarningBadgeClass(chosenWarning);
 
             const rateBadgeClass = item.rate <= 30
                 ? 'bg-red-50 text-red-700 border-red-200 font-black'
@@ -99610,9 +99768,11 @@ function getCTPAdmissionFormData(trainee) {
                             : `<span class="font-mono font-bold text-slate-700 dark:text-slate-300">${item.consecutiveAbsentDays} أيام</span>`}
                     </td>
                     <td class="p-3 text-center">
-                        <span class="inline-block px-2.5 py-1 rounded-xl text-xs font-black border ${warnBadgeClass}">
-                            ${item.recommendedWarning}
-                        </span>
+                        <select id="warnRowType_${item.id}" onchange="onWarningRowTypeChange('${item.id}', this.value)" class="text-xs font-black px-2.5 py-1.5 rounded-xl border cursor-pointer transition shadow-2xs ${warnBadgeClass}">
+                            <option value="إنذار أول" ${chosenWarning === 'إنذار أول' ? 'selected' : ''}>⚠️ الإنذار الأول</option>
+                            <option value="إنذار ثانٍ" ${chosenWarning === 'إنذار ثانٍ' ? 'selected' : ''}>🛑 الإنذار الثاني</option>
+                            <option value="إنذار نهائي" ${chosenWarning === 'إنذار نهائي' ? 'selected' : ''}>⛔ الإنذار النهائي</option>
+                        </select>
                     </td>
                     <td class="p-3">
                         <div class="text-[11px] font-mono text-slate-700 dark:text-slate-300 flex items-center gap-1">
@@ -99626,19 +99786,19 @@ function getCTPAdmissionFormData(trainee) {
                     </td>
                     <td class="p-3 text-center">
                         <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                            <button type="button" onclick="openDisciplinaryWarningModal('${item.id}', '${item.recommendedWarning}')" class="px-2.5 py-1 bg-slate-900 hover:bg-black text-amber-300 font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1" title="معاينة نموذج الخطاب الرسمي">
+                            <button type="button" onclick="openDisciplinaryWarningModal('${item.id}', getEffectiveWarningType('${item.id}', '${item.recommendedWarning}'))" class="px-2.5 py-1 bg-slate-900 hover:bg-black text-amber-300 font-bold text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1" title="معاينة نموذج الخطاب الرسمي">
                                 <span>👁️</span>
                                 <span>معاينة</span>
                             </button>
-                            <button type="button" onclick="downloadWarningPdf('${item.id}', '${item.recommendedWarning}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200 font-bold text-[11px] rounded-lg transition cursor-pointer flex items-center gap-1" title="تحميل ملف PDF للإنذار برقم الهوية">
+                            <button type="button" onclick="downloadWarningPdf('${item.id}', getEffectiveWarningType('${item.id}', '${item.recommendedWarning}'))" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200 font-bold text-[11px] rounded-lg transition cursor-pointer flex items-center gap-1" title="تحميل ملف PDF للإنذار المحدد">
                                 <span>📄</span>
                                 <span>PDF</span>
                             </button>
-                            <button type="button" onclick="copyTraineeEmailAndDownloadPdf('${item.id}', '${item.recommendedWarning}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1" title="نسخ إيميل المتدرب وتحميل ملف PDF للإنذار مباشرة">
+                            <button type="button" onclick="copyTraineeEmailAndDownloadPdf('${item.id}', getEffectiveWarningType('${item.id}', '${item.recommendedWarning}'))" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[11px] rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1" title="نسخ إيميل المتدرب وتحميل ملف PDF للإنذار المحدد">
                                 <span>📋</span>
                                 <span>نسخ وتحميل</span>
                             </button>
-                            <button type="button" onclick="shareWarningViaEmail('${item.id}', '${item.recommendedWarning}')" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-bold text-[11px] rounded-lg border border-blue-200 dark:border-blue-800 transition cursor-pointer" title="فتح برنامج البريد الإلكتروني مع نص الإنذار">
+                            <button type="button" onclick="shareWarningViaEmail('${item.id}', getEffectiveWarningType('${item.id}', '${item.recommendedWarning}'))" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-bold text-[11px] rounded-lg border border-blue-200 dark:border-blue-800 transition cursor-pointer" title="فتح برنامج البريد الإلكتروني مع نص الإنذار">
                                 <span>📤</span>
                             </button>
                         </div>
@@ -99656,23 +99816,11 @@ function getCTPAdmissionFormData(trainee) {
             return cid === cleanId;
         });
 
-        if (!trainee && cleanId === '1140416528') {
-            trainee = {
-                id: '1140416528',
-                name: 'ريان بن ضحيان بن حثوان غزواني',
-                company: 'هونداي',
-                group: 'هونداي - المسار الفني',
-                phone: '0548896955',
-                email: 'rayan.ghazwani@example.com',
-                rate: 20,
-                consecutiveAbsentDays: 14,
-                absentPeriods: 28,
-                recommendedWarning: 'إنذار نهائي'
-            };
-        }
-
         const evaluated = evaluateTraineeDisciplinaryStatus(trainee || { id: cleanId, name: 'متدرب' });
-        const effType = warningType || evaluated.recommendedWarning || 'إنذار نهائي';
+        const effType = warningType || (typeof getEffectiveWarningType === 'function' ? getEffectiveWarningType(cleanId, evaluated.recommendedWarning) : evaluated.recommendedWarning) || 'إنذار نهائي';
+
+        userSelectedWarningTypes[cleanId] = effType;
+        userSelectedWarningTypes[traineeId] = effType;
 
         currentWarningPreviewState = {
             id: evaluated.id,
@@ -99715,6 +99863,14 @@ function getCTPAdmissionFormData(trainee) {
         const typeSelect = document.getElementById('warnModalTypeSelect');
         if (typeSelect) {
             currentWarningPreviewState.warningType = typeSelect.value;
+            if (currentWarningPreviewState.id) {
+                userSelectedWarningTypes[currentWarningPreviewState.id] = typeSelect.value;
+                const rowSel = document.getElementById('warnRowType_' + currentWarningPreviewState.id);
+                if (rowSel) {
+                    rowSel.value = typeSelect.value;
+                    rowSel.className = `text-xs font-black px-2.5 py-1.5 rounded-xl border cursor-pointer transition shadow-2xs ${getWarningBadgeClass(typeSelect.value)}`;
+                }
+            }
             updateWarningModalPreview();
         }
     }
@@ -99792,40 +99948,27 @@ function getCTPAdmissionFormData(trainee) {
             return cid === cleanId;
         });
 
-        if (!trainee && cleanId === '1140416528') {
-            trainee = {
-                id: '1140416528',
-                name: 'ريان بن ضحيان بن حثوان غزواني',
-                company: 'هونداي',
-                group: 'هونداي - المسار الفني',
-                phone: '0548896955',
-                email: 'rayan.ghazwani@example.com',
-                rate: 20,
-                consecutiveAbsentDays: 14,
-                absentPeriods: 28,
-                recommendedWarning: 'إنذار نهائي'
-            };
-        }
-
         const evaluated = evaluateTraineeDisciplinaryStatus(trainee || { id: cleanId, name: 'متدرب' });
-        const effType = warningType || evaluated.recommendedWarning || 'إنذار نهائي';
+        const effType = warningType || (typeof getEffectiveWarningType === 'function' ? getEffectiveWarningType(cleanId, evaluated.recommendedWarning) : evaluated.recommendedWarning) || 'إنذار نهائي';
 
-        if (!currentWarningPreviewState || currentWarningPreviewState.id !== cleanId) {
-            currentWarningPreviewState = {
-                id: evaluated.id,
-                name: evaluated.name,
-                company: evaluated.company,
-                group: evaluated.group,
-                warningType: effType,
-                date: evaluated.date || '14/07/2026',
-                email: evaluated.email,
-                phone: evaluated.phone,
-                rate: evaluated.rate,
-                consecutiveAbsentDays: evaluated.consecutiveAbsentDays,
-                absentPeriods: evaluated.absentPeriods,
-                customReason: ''
-            };
-        }
+        userSelectedWarningTypes[cleanId] = effType;
+
+        currentWarningPreviewState = {
+            id: evaluated.id,
+            name: evaluated.name,
+            company: evaluated.company,
+            group: evaluated.group,
+            warningType: effType,
+            date: evaluated.date || '14/07/2026',
+            email: evaluated.email,
+            phone: evaluated.phone,
+            rate: evaluated.rate,
+            consecutiveAbsentDays: evaluated.consecutiveAbsentDays,
+            absentPeriods: evaluated.absentPeriods,
+            customReason: ''
+        };
+        const modalTypeSelect = document.getElementById('warnModalTypeSelect');
+        if (modalTypeSelect) modalTypeSelect.value = effType;
         updateWarningModalPreview();
 
         const filename = `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`;
@@ -99846,9 +99989,12 @@ function getCTPAdmissionFormData(trainee) {
         clone.id = 'warnLetterheadPrintableSheet_export';
         clone.style.margin = '0';
         clone.style.boxShadow = 'none';
+        clone.setAttribute('dir', 'rtl');
+        clone.style.direction = 'rtl';
 
         const host = document.createElement('div');
         host.id = 'warningPdfExportHost';
+        host.setAttribute('dir', 'rtl');
         host.style.position = 'fixed';
         host.style.top = '0';
         host.style.left = '0';
@@ -99858,6 +100004,7 @@ function getCTPAdmissionFormData(trainee) {
         host.style.background = '#FFFFFF';
         host.style.margin = '0';
         host.style.padding = '0';
+        host.style.direction = 'rtl';
         host.style.overflow = 'hidden';
         host.appendChild(clone);
         document.body.appendChild(host);
@@ -99895,7 +100042,7 @@ function getCTPAdmissionFormData(trainee) {
     }
 
     // Direct requested action: Copy trainee email to clipboard and trigger instant PDF download
-    async function copyTraineeEmailAndDownloadPdf(traineeId, warningType = 'إنذار نهائي') {
+    async function copyTraineeEmailAndDownloadPdf(traineeId, warningType) {
         const pool = getDisciplinaryTraineesPool();
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
         let trainee = pool.find(t => {
@@ -99903,12 +100050,9 @@ function getCTPAdmissionFormData(trainee) {
             return cid === cleanId;
         }) || { id: cleanId, name: 'متدرب' };
 
-        if (!trainee.email && cleanId === '1140416528') {
-            trainee.email = 'rayan.ghazwani@example.com';
-        }
-
         const evaluated = evaluateTraineeDisciplinaryStatus(trainee);
         const email = evaluated.email || `${cleanId}@blackgold.edu.sa`;
+        const effType = warningType || (typeof getEffectiveWarningType === 'function' ? getEffectiveWarningType(cleanId, evaluated.recommendedWarning) : evaluated.recommendedWarning) || 'إنذار نهائي';
 
         // Copy email to clipboard
         try {
@@ -99929,10 +100073,10 @@ function getCTPAdmissionFormData(trainee) {
         }
 
         // Open preview state and trigger download
-        await downloadWarningPdf(cleanId, warningType);
+        await downloadWarningPdf(cleanId, effType);
     }
 
-    async function shareWarningViaEmail(traineeId, warningType = 'إنذار نهائي') {
+    async function shareWarningViaEmail(traineeId, warningType) {
         const pool = getDisciplinaryTraineesPool();
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
         let trainee = pool.find(t => {
@@ -99942,7 +100086,7 @@ function getCTPAdmissionFormData(trainee) {
 
         const evaluated = evaluateTraineeDisciplinaryStatus(trainee);
         const email = evaluated.email || `${cleanId}@blackgold.edu.sa`;
-        const effType = warningType || evaluated.recommendedWarning || 'إنذار نهائي';
+        const effType = warningType || (typeof getEffectiveWarningType === 'function' ? getEffectiveWarningType(cleanId, evaluated.recommendedWarning) : evaluated.recommendedWarning) || 'إنذار نهائي';
         const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
 
         // Copy email to clipboard as well
@@ -100082,7 +100226,8 @@ ${cfg.text}
         for (let i = 0; i < targets.length; i++) {
             const tr = targets[i];
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
-            const cfg = DISCIPLINARY_LEGAL_TEXTS[tr.recommendedWarning] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
+            const effType = (typeof getEffectiveWarningType === 'function') ? getEffectiveWarningType(tr.id, tr.recommendedWarning) : (tr.recommendedWarning || 'إنذار نهائي');
+            const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
 
             // Build HTML for trainee (pixel-perfect table layout, no bidi reversing, exact fit)
             tempHost.innerHTML = `
@@ -100102,8 +100247,17 @@ ${cfg.text}
                                     <span style="font-weight: 700; color: #475569;">التاريخ:&nbsp;</span><span style="font-weight: 800; color: #0f172a; direction: ltr; unicode-bidi: isolate; display: inline-block;">${tr.date} م</span>
                                 </div>
                             </div>
-                            <div style="text-align: center; margin-top: 22px; margin-bottom: 20px;">
-                                <h1 style="font-size: 30px; font-weight: 900; color: #0f172a; display: inline-block; padding-bottom: 4px; border-bottom: 3px solid #0f172a; margin: 0; letter-spacing: normal; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif;">${cfg.title}</h1>
+                            <!-- Centered Title / Document Type Badge (Compact, formal, immune to reverse text rendering) -->
+                            <div style="text-align: center; margin-top: 14px; margin-bottom: 18px; direction: rtl;">
+                                <table align="center" style="margin: 0 auto; border-collapse: collapse; direction: rtl; text-align: center;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="border: 2px solid #0f172a; border-radius: 8px; padding: 5px 26px; background: #f8fafc; text-align: center; direction: rtl;">
+                                                <span style="font-size: 17px; font-weight: 900; color: #0f172a; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; letter-spacing: 0; direction: rtl; unicode-bidi: isolate; display: inline-block;">${cfg.title}</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                             <table style="width: 100%; border-collapse: collapse; margin-top: 14px; margin-bottom: 18px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
                                 <tbody>
@@ -100173,8 +100327,8 @@ ${cfg.text}
 
             try {
                 const pdfBlob = await html2pdf().set(opt).from(tempHost.firstElementChild).output('blob');
-                // Name file with Trainee ID as requested
-                const pdfFilename = `${cleanId}_${tr.recommendedWarning.replace(/\s+/g, '_')}.pdf`;
+                // Name file with Trainee ID and selected warning type
+                const pdfFilename = `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`;
                 zip.file(pdfFilename, pdfBlob);
                 successCount++;
             } catch (pdfErr) {
@@ -100223,7 +100377,7 @@ ${cfg.text}
             'نسبة الحضور %': `${t.rate}%`,
             'أيام الانقطاع المتواصل': t.consecutiveAbsentDays,
             'فترات الغياب الإجمالية': t.absentPeriods,
-            'نوع الإنذار المستحق': t.recommendedWarning,
+            'نوع الإنذار المعتمد': (typeof getEffectiveWarningType === 'function') ? getEffectiveWarningType(t.id, t.recommendedWarning) : t.recommendedWarning,
             'تاريخ الإنذار': `${t.date} م`,
             'رقم الجوال': t.phone,
             'البريد الإلكتروني': t.email,
@@ -100257,7 +100411,7 @@ ${cfg.text}
             t.group,
             `${t.rate}%`,
             t.consecutiveAbsentDays,
-            t.recommendedWarning,
+            (typeof getEffectiveWarningType === 'function') ? getEffectiveWarningType(t.id, t.recommendedWarning) : t.recommendedWarning,
             t.phone,
             t.email
         ].join('\t')).join('\n');
@@ -100303,6 +100457,8 @@ ${cfg.text}
     window.closeDisciplinaryWarningModal = closeDisciplinaryWarningModal;
     window.onWarningModalTypeChange = onWarningModalTypeChange;
     window.onWarningModalDataChange = onWarningModalDataChange;
+    window.onWarningRowTypeChange = onWarningRowTypeChange;
+    window.getEffectiveWarningType = getEffectiveWarningType;
     window.printDisciplinaryWarningLetter = printDisciplinaryWarningLetter;
     window.downloadWarningPdf = downloadWarningPdf;
     window.copyTraineeEmailAndDownloadPdf = copyTraineeEmailAndDownloadPdf;
