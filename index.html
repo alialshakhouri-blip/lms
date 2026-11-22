@@ -98970,8 +98970,8 @@ function getCTPAdmissionFormData(trainee) {
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
                                 <!-- Trainee Signature (Right) -->
                                 <div style="width: 48%; line-height: 2.5;">
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب :</div>
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع :</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب <span id="warnTraineeSigNameDisplay" style="font-weight: 800; color: #000;">ريان بن ضحيان بن حثوان غزواني</span></div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع</div>
                                 </div>
 
                                 <!-- Administration (Left) -->
@@ -100030,10 +100030,12 @@ function getCTPAdmissionFormData(trainee) {
         const compEl = document.getElementById('warnTraineeCompanyDisplay');
         const idEl = document.getElementById('warnTraineeIdDisplay');
         const bodyEl = document.getElementById('warnBodyTextDisplay');
+        const sigTraineeNameEl = document.getElementById('warnTraineeSigNameDisplay');
 
         if (titleEl) titleEl.textContent = cfg.title;
         if (dateEl) dateEl.textContent = `${currentWarningPreviewState.date} م`;
         if (nameEl) nameEl.textContent = currentWarningPreviewState.name;
+        if (sigTraineeNameEl) sigTraineeNameEl.textContent = currentWarningPreviewState.name;
         if (compEl) compEl.textContent = currentWarningPreviewState.company;
         if (idEl) idEl.textContent = currentWarningPreviewState.id;
         if (bodyEl) bodyEl.textContent = currentWarningPreviewState.customReason || cfg.text;
@@ -100499,8 +100501,8 @@ ${cfg.text}
                         <div style="margin-top: auto;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
                                 <div style="width: 48%; line-height: 2.5;">
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب :</div>
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع :</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب <span style="font-weight: 800; color: #000;">${tr.name}</span></div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع</div>
                                 </div>
                                 <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
                                     <div style="text-align: center; width: 230px;">
@@ -100835,8 +100837,8 @@ ${cfg.text}
                     <div style="margin-top: auto;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
                             <div style="width: 48%; line-height: 2.5;">
-                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب :</div>
-                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع :</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب <span style="font-weight: 800; color: #000;">${evaluated.name}</span></div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع</div>
                             </div>
                             <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
                                 <div style="text-align: center; width: 230px;">
@@ -100995,8 +100997,8 @@ ${cfg.text}
                         <div style="margin-top: auto;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
                                 <div style="width: 48%; line-height: 2.5;">
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب :</div>
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع :</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب <span style="font-weight: 800; color: #000;">${tr.name}</span></div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع</div>
                                 </div>
                                 <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
                                     <div style="text-align: center; width: 230px;">
