@@ -212,7 +212,7 @@
 
     <!-- خط المراعي Almarai -->
 
-    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <style>
 
@@ -2027,6 +2027,16 @@
             }
 
             /* Disciplinary Warning letterhead print isolation */
+            body.printing-warning {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #FFFFFF !important;
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
             body.printing-warning > *:not(#disciplinaryWarningPreviewModal) {
                 display: none !important;
             }
@@ -2041,18 +2051,52 @@
                 box-shadow: none !important;
                 width: 100% !important;
                 max-width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
             }
             body.printing-warning #disciplinaryWarningPreviewModal .no-print,
             body.printing-warning #disciplinaryWarningPreviewModal > div > div:first-child,
             body.printing-warning #disciplinaryWarningPreviewModal > div > div:nth-child(2) {
                 display: none !important;
             }
-            body.printing-warning #warnLetterheadPrintableSheet {
+            body.printing-warning #disciplinaryWarningPreviewModal > div {
+                display: block !important;
+                background: #FFFFFF !important;
+                border: none !important;
                 box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
                 max-width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            body.printing-warning #disciplinaryWarningPreviewModal > div > div:nth-child(3) {
+                display: block !important;
+                background: #FFFFFF !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow: visible !important;
+            }
+            body.printing-warning #warnLetterheadPrintableSheet {
+                box-shadow: none !important;
+                margin: 0 auto !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: 0 !important;
+                height: auto !important;
                 page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                box-sizing: border-box !important;
+            }
+            body.printing-warning #warnLetterheadPrintableSheet .warn-sheet-inner {
+                min-height: 0 !important;
+                padding: 24px 38px 20px 32px !important;
             }
 
             /* Trainer Schedule Individual Print Isolation */
@@ -98699,7 +98743,7 @@ function getCTPAdmissionFormData(trainee) {
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">المسؤول / الموقّع:</label>
                         <select id="warnModalSignatorySelect" onchange="updateWarningModalPreview()" class="w-full text-xs font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white">
                             <option value="student_affairs">علي آل عباس (مسؤول شؤون المتدربين)</option>
-                            <option value="director">علي آل عباس (مدير المعهد)</option>
+                            <option value="director">علي الشاخوري (مدير المعهد)</option>
                             <option value="general_director">مدير عام المعهد</option>
                         </select>
                     </div>
@@ -98722,14 +98766,14 @@ function getCTPAdmissionFormData(trainee) {
             <!-- Letterhead Preview Body -->
             <div class="flex-1 overflow-y-auto p-4 sm:p-6 flex justify-center bg-slate-200/70 dark:bg-slate-950">
                 <!-- PRINTABLE SHEET CONTAINER (Pixel-perfect matching Image 1) -->
-                <div id="warnLetterheadPrintableSheet" style="width: 794px; min-height: 1123px; background: #ffffff; position: relative; margin: 0 auto; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.18); font-family: 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
+                <div id="warnLetterheadPrintableSheet" style="width: 794px; min-height: 1120px; max-height: 1122px; background: #ffffff; position: relative; margin: 0 auto; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.18); font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
                     <!-- Left Decorative Strip (Gold Gradient + Bottom Black Bar with CR. 2053117185) -->
                     <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;">
                         <!-- Upper Golden Gradient Bar -->
                         <div style="flex: 1; background: linear-gradient(180deg, #E2B240 0%, #C69524 55%, #E2AB33 100%); width: 100%; border-right: 2px solid #8e6815;"></div>
                         <!-- Lower Dark Bar with Vertical CR -->
                         <div style="height: 140px; background: #111827; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
-                            <div style="writing-mode: vertical-rl; transform: rotate(180deg); color: #ffffff; font-size: 11.5px; font-weight: 700; letter-spacing: 2px; font-family: monospace; white-space: nowrap;">
+                            <div style="transform: rotate(-90deg); color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 2px; font-family: monospace; white-space: nowrap;">
                                 CR. 2053117185
                             </div>
                         </div>
@@ -98739,30 +98783,41 @@ function getCTPAdmissionFormData(trainee) {
                     <img src="assets/bgti_logo.png" alt="BGTI Watermark" style="position: absolute; top: 48%; left: 52%; transform: translate(-50%, -50%); width: 330px; opacity: 0.04; pointer-events: none; filter: grayscale(100%); z-index: 1;">
 
                     <!-- Sheet Inner Content (Shifted to right of vertical bar) -->
-                    <div style="margin-left: 54px; padding: 45px 50px 32px 45px; position: relative; z-index: 5; min-height: 1045px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
-                        <!-- Header: Logo on left, Date on right -->
+                    <div class="warn-sheet-inner" style="margin-left: 54px; padding: 38px 45px 28px 40px; position: relative; z-index: 5; height: 100%; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                        <!-- Header: Logo on right (in RTL), Date on left -->
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <img src="assets/bgti_logo.png" alt="Black Gold Training Institute" style="height: 70px; width: auto; object-fit: contain;">
-                                <div style="text-align: right; font-size: 12.5px; font-weight: 700; color: #475569; padding-top: 5px;">
-                                    التاريخ: <span id="warnDateDisplay" style="font-family: monospace; color: #0f172a; font-weight: 800;">14/07/2026 م</span>
+                                <div style="text-align: left; direction: rtl; font-size: 13px; font-weight: 700; color: #475569; padding-top: 5px;">
+                                    <span style="font-weight: 700; color: #475569;">التاريخ:&nbsp;</span><span id="warnDateDisplay" style="font-weight: 800; color: #0f172a; direction: ltr; unicode-bidi: isolate; display: inline-block;">14/07/2026 م</span>
                                 </div>
                             </div>
 
                             <!-- Centered Underlined Title -->
-                            <div style="text-align: center; margin-top: 25px; margin-bottom: 22px;">
-                                <h1 id="warnTitleDisplay" style="font-size: 32px; font-weight: 900; color: #0f172a; display: inline-block; padding-bottom: 4px; border-bottom: 3px solid #0f172a; letter-spacing: -0.5px;">الإنذار النهائي</h1>
+                            <div style="text-align: center; margin-top: 22px; margin-bottom: 20px;">
+                                <h1 id="warnTitleDisplay" style="font-size: 30px; font-weight: 900; color: #0f172a; display: inline-block; padding-bottom: 4px; border-bottom: 3px solid #0f172a; margin: 0; letter-spacing: normal; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif;">الإنذار النهائي</h1>
                             </div>
 
-                            <!-- Trainee Metadata Block -->
-                            <div style="line-height: 2.2; font-size: 16.5px; color: #0f172a; margin-top: 15px; margin-bottom: 20px;">
-                                <div><span style="font-weight: 700; color: #475569;">اسم المتدرب: </span><span id="warnTraineeNameDisplay" style="font-weight: 900; color: #000; font-size: 18px;">ريان بن ضحيان بن حثوان غزواني</span></div>
-                                <div><span style="font-weight: 700; color: #475569;">اسم الشركة : </span><span id="warnTraineeCompanyDisplay" style="font-weight: 800; color: #0f172a;">هونداي</span></div>
-                                <div><span style="font-weight: 700; color: #475569;">رقم الهوية: </span><span id="warnTraineeIdDisplay" style="font-weight: 900; font-family: monospace; color: #000; font-size: 17px;">1140416528</span></div>
-                            </div>
+                            <!-- Trainee Metadata Block (2-column table immune to bidi/colon reversal) -->
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 14px; margin-bottom: 18px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب:</td>
+                                        <td style="font-weight: 900; color: #000; font-size: 18px; vertical-align: middle;" id="warnTraineeNameDisplay">ريان بن ضحيان بن حثوان غزواني</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة:</td>
+                                        <td style="font-weight: 800; color: #0f172a; font-size: 16.5px; vertical-align: middle;" id="warnTraineeCompanyDisplay">هونداي</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية:</td>
+                                        <td style="font-weight: 900; color: #000; font-size: 17px; vertical-align: middle;"><span id="warnTraineeIdDisplay" style="direction: ltr; unicode-bidi: isolate; display: inline-block;">1140416528</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
                             <!-- Warning Legal Text -->
-                            <div id="warnBodyTextDisplay" style="font-size: 16.5px; line-height: 2.2; color: #1e293b; text-align: justify; margin-top: 20px; white-space: pre-line;">
+                            <div id="warnBodyTextDisplay" style="font-size: 16px; line-height: 2.1; color: #1e293b; text-align: justify; margin-top: 16px; white-space: pre-line;">
 نظراً لاستمرار تكرار غيابك عن الحضور وعدم التزامك بأوقات الدوام الرسمية، وتجاوز نسبة الغياب المسموح بها من إجمالي أيام التدريب، ورغم توجيه إنذار سابق لك، إلا أنه لم يطرأ أي تحسن على مستوى الالتزام.
 
 لذلك، نوجه إليك هذا الإنذار النهائي، ونؤكد على ضرورة الالتزام بالحضور والانتظام في التدريب ابتداءً من تاريخه.
@@ -98774,9 +98829,9 @@ function getCTPAdmissionFormData(trainee) {
                         <!-- Bottom Section: Signatures & Contact Footer -->
                         <div style="margin-top: auto;">
                             <!-- Signatures Block -->
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 30px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
                                 <!-- Trainee Signature (Right) -->
-                                <div style="width: 48%; line-height: 2.6;">
+                                <div style="width: 48%; line-height: 2.5;">
                                     <div style="font-size: 14px; font-weight: 700; color: #0f172a;">توقيع المتدرب: .......................................</div>
                                     <div style="font-size: 14px; font-weight: 700; color: #0f172a;">الاسم : ...................................................</div>
                                 </div>
@@ -98786,8 +98841,8 @@ function getCTPAdmissionFormData(trainee) {
                                     <div style="text-align: center; width: 230px;">
                                         <div style="font-size: 14px; font-weight: 900; color: #0f172a;" id="warnSignatoryRoleDisplay">مسؤول شؤون المتدربين</div>
                                         <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;" id="warnSignatoryNameDisplay">علي آل عباس</div>
-                                        <div style="position: relative; width: 200px; height: 110px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
-                                            <img id="warnSignatorySigImg" src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" style="position: absolute; width: 125px; z-index: 2; top: 12px; left: 10px; transform: rotate(-3deg);">
+                                        <div style="position: relative; width: 200px; height: 105px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
+                                            <img id="warnSignatorySigImg" src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" style="position: absolute; width: 125px; z-index: 2; top: 10px; left: 10px; transform: rotate(-3deg);">
                                             <img id="warnSignatoryStampImg" src="assets/bgti_stamp.png" alt="ختم المعهد" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
                                         </div>
                                     </div>
@@ -99702,13 +99757,16 @@ function getCTPAdmissionFormData(trainee) {
         if (sigRoleEl && sigNameEl) {
             if (signatoryVal === 'director') {
                 sigRoleEl.textContent = 'مدير المعهد';
-                sigNameEl.textContent = 'علي آل عباس';
+                sigNameEl.textContent = 'علي الشاخوري';
+                if (sigImgEl) sigImgEl.src = 'assets/ali_alshakhouri_sig.png';
             } else if (signatoryVal === 'general_director') {
                 sigRoleEl.textContent = 'مدير عام المعهد';
                 sigNameEl.textContent = '';
+                if (sigImgEl) sigImgEl.src = 'assets/ali_alshakhouri_sig.png';
             } else {
                 sigRoleEl.textContent = 'مسؤول شؤون المتدربين';
                 sigNameEl.textContent = 'علي آل عباس';
+                if (sigImgEl) sigImgEl.src = 'assets/ali_alabbas_sig.png';
             }
         }
 
@@ -99752,25 +99810,27 @@ function getCTPAdmissionFormData(trainee) {
         const evaluated = evaluateTraineeDisciplinaryStatus(trainee || { id: cleanId, name: 'متدرب' });
         const effType = warningType || evaluated.recommendedWarning || 'إنذار نهائي';
 
-        currentWarningPreviewState = {
-            id: evaluated.id,
-            name: evaluated.name,
-            company: evaluated.company,
-            group: evaluated.group,
-            warningType: effType,
-            date: evaluated.date || '14/07/2026',
-            email: evaluated.email,
-            phone: evaluated.phone,
-            rate: evaluated.rate,
-            consecutiveAbsentDays: evaluated.consecutiveAbsentDays,
-            absentPeriods: evaluated.absentPeriods,
-            customReason: ''
-        };
+        if (!currentWarningPreviewState || currentWarningPreviewState.id !== cleanId) {
+            currentWarningPreviewState = {
+                id: evaluated.id,
+                name: evaluated.name,
+                company: evaluated.company,
+                group: evaluated.group,
+                warningType: effType,
+                date: evaluated.date || '14/07/2026',
+                email: evaluated.email,
+                phone: evaluated.phone,
+                rate: evaluated.rate,
+                consecutiveAbsentDays: evaluated.consecutiveAbsentDays,
+                absentPeriods: evaluated.absentPeriods,
+                customReason: ''
+            };
+        }
         updateWarningModalPreview();
 
         const filename = `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`;
-        const printArea = document.getElementById('warnLetterheadPrintableSheet');
-        if (!printArea) {
+        const sheet = document.getElementById('warnLetterheadPrintableSheet');
+        if (!sheet) {
             return showToast('تعذر العثور على منطقة طباعة النموذج', 'error');
         }
 
@@ -99780,6 +99840,30 @@ function getCTPAdmissionFormData(trainee) {
 
         showToast(`جاري تجهيز وتحميل ملف الـ PDF: ${filename}...`, 'info');
 
+        // Isolation Host: Clones the updated sheet into a clean root-level container at (0, 0)
+        // Completely eliminates the 214px offset bug caused by modal headers and scroll positions!
+        const clone = sheet.cloneNode(true);
+        clone.id = 'warnLetterheadPrintableSheet_export';
+        clone.style.margin = '0';
+        clone.style.boxShadow = 'none';
+
+        const host = document.createElement('div');
+        host.id = 'warningPdfExportHost';
+        host.style.position = 'fixed';
+        host.style.top = '0';
+        host.style.left = '0';
+        host.style.width = '794px';
+        host.style.height = '1122px';
+        host.style.zIndex = '999999';
+        host.style.background = '#FFFFFF';
+        host.style.margin = '0';
+        host.style.padding = '0';
+        host.style.overflow = 'hidden';
+        host.appendChild(clone);
+        document.body.appendChild(host);
+
+        await new Promise(r => setTimeout(r, 80));
+
         const opt = {
             margin: [0, 0, 0, 0],
             filename: filename,
@@ -99787,17 +99871,26 @@ function getCTPAdmissionFormData(trainee) {
             html2canvas: {
                 scale: 2,
                 useCORS: true,
-                backgroundColor: '#FFFFFF'
+                backgroundColor: '#FFFFFF',
+                scrollX: 0,
+                scrollY: 0,
+                x: 0,
+                y: 0,
+                windowWidth: 794
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         try {
-            await html2pdf().set(opt).from(printArea).save();
+            await html2pdf().set(opt).from(clone).save();
             showToast(`✅ تم تحميل ملف الإنذار بنجاح: ${filename}`, 'success');
         } catch (err) {
             console.error('html2pdf download error:', err);
             showToast('حدث خطأ أثناء تنزيل الـ PDF: ' + err.message, 'error');
+        } finally {
+            if (host.parentNode) {
+                host.parentNode.removeChild(host);
+            }
         }
     }
 
@@ -99877,33 +99970,57 @@ ${cfg.text}
 طريق الأمير محمد بن فهد، الشاطئ الغربي، الدمام 32413`;
 
         // Check Web Share API with file support
-        const printArea = document.getElementById('warnLetterheadPrintableSheet');
-        if (navigator.canShare && printArea && typeof html2pdf !== 'undefined') {
+        const sheet = document.getElementById('warnLetterheadPrintableSheet');
+        if (navigator.canShare && sheet && typeof html2pdf !== 'undefined') {
+            let host = null;
             try {
-                currentWarningPreviewState = {
-                    id: evaluated.id,
-                    name: evaluated.name,
-                    company: evaluated.company,
-                    group: evaluated.group,
-                    warningType: effType,
-                    date: evaluated.date || '14/07/2026',
-                    email: evaluated.email,
-                    phone: evaluated.phone,
-                    rate: evaluated.rate,
-                    consecutiveAbsentDays: evaluated.consecutiveAbsentDays,
-                    absentPeriods: evaluated.absentPeriods,
-                    customReason: ''
-                };
+                if (!currentWarningPreviewState || currentWarningPreviewState.id !== cleanId) {
+                    currentWarningPreviewState = {
+                        id: evaluated.id,
+                        name: evaluated.name,
+                        company: evaluated.company,
+                        group: evaluated.group,
+                        warningType: effType,
+                        date: evaluated.date || '14/07/2026',
+                        email: evaluated.email,
+                        phone: evaluated.phone,
+                        rate: evaluated.rate,
+                        consecutiveAbsentDays: evaluated.consecutiveAbsentDays,
+                        absentPeriods: evaluated.absentPeriods,
+                        customReason: ''
+                    };
+                }
                 updateWarningModalPreview();
+
+                const clone = sheet.cloneNode(true);
+                clone.id = 'warnLetterheadPrintableSheet_share';
+                clone.style.margin = '0';
+                clone.style.boxShadow = 'none';
+
+                host = document.createElement('div');
+                host.style.position = 'fixed';
+                host.style.top = '0';
+                host.style.left = '0';
+                host.style.width = '794px';
+                host.style.height = '1122px';
+                host.style.zIndex = '999999';
+                host.style.background = '#FFFFFF';
+                host.style.margin = '0';
+                host.style.padding = '0';
+                host.style.overflow = 'hidden';
+                host.appendChild(clone);
+                document.body.appendChild(host);
+
+                await new Promise(r => setTimeout(r, 80));
 
                 const opt = {
                     margin: [0, 0, 0, 0],
                     filename: `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.95 },
-                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
+                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollX: 0, scrollY: 0, x: 0, y: 0, windowWidth: 794 },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
-                const pdfBlob = await html2pdf().set(opt).from(printArea).output('blob');
+                const pdfBlob = await html2pdf().set(opt).from(clone).output('blob');
                 const pdfFile = new File([pdfBlob], `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`, { type: 'application/pdf' });
 
                 if (navigator.canShare({ files: [pdfFile] })) {
@@ -99917,6 +100034,10 @@ ${cfg.text}
                 }
             } catch (shareErr) {
                 console.log('Web share aborted or unsupported, falling back to mailto:', shareErr);
+            } finally {
+                if (host && host.parentNode) {
+                    host.parentNode.removeChild(host);
+                }
             }
         }
 
@@ -99944,10 +100065,17 @@ ${cfg.text}
 
         // Create temporary off-screen container for rendering
         const tempHost = document.createElement('div');
+        tempHost.id = 'warningZipExportHost';
         tempHost.style.position = 'fixed';
-        tempHost.style.top = '-9999px';
-        tempHost.style.left = '-9999px';
+        tempHost.style.top = '0';
+        tempHost.style.left = '0';
         tempHost.style.width = '794px';
+        tempHost.style.height = '1122px';
+        tempHost.style.zIndex = '999999';
+        tempHost.style.background = '#FFFFFF';
+        tempHost.style.margin = '0';
+        tempHost.style.padding = '0';
+        tempHost.style.overflow = 'hidden';
         document.body.appendChild(tempHost);
 
         let successCount = 0;
@@ -99956,37 +100084,48 @@ ${cfg.text}
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
             const cfg = DISCIPLINARY_LEGAL_TEXTS[tr.recommendedWarning] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
 
-            // Build HTML for trainee
+            // Build HTML for trainee (pixel-perfect table layout, no bidi reversing, exact fit)
             tempHost.innerHTML = `
-                <div style="width: 794px; min-height: 1123px; background: #ffffff; position: relative; margin: 0; font-family: 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
+                <div style="width: 794px; min-height: 1120px; max-height: 1122px; background: #ffffff; position: relative; margin: 0; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
                     <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;">
                         <div style="flex: 1; background: linear-gradient(180deg, #E2B240 0%, #C69524 55%, #E2AB33 100%); width: 100%; border-right: 2px solid #8e6815;"></div>
                         <div style="height: 140px; background: #111827; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
-                            <div style="writing-mode: vertical-rl; transform: rotate(180deg); color: #ffffff; font-size: 11.5px; font-weight: 700; letter-spacing: 2px; font-family: monospace; white-space: nowrap;">CR. 2053117185</div>
+                            <div style="transform: rotate(-90deg); color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 2px; font-family: monospace; white-space: nowrap;">CR. 2053117185</div>
                         </div>
                     </div>
                     <img src="assets/bgti_logo.png" alt="BGTI" style="position: absolute; top: 48%; left: 52%; transform: translate(-50%, -50%); width: 330px; opacity: 0.04; pointer-events: none; filter: grayscale(100%); z-index: 1;">
-                    <div style="margin-left: 54px; padding: 45px 50px 32px 45px; position: relative; z-index: 5; min-height: 1045px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                    <div class="warn-sheet-inner" style="margin-left: 54px; padding: 38px 45px 28px 40px; position: relative; z-index: 5; height: 100%; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <img src="assets/bgti_logo.png" alt="BGTI" style="height: 70px; width: auto; object-fit: contain;">
-                                <div style="text-align: right; font-size: 12.5px; font-weight: 700; color: #475569; padding-top: 5px;">
-                                    التاريخ: <span style="font-family: monospace; color: #0f172a; font-weight: 800;">${tr.date} م</span>
+                                <div style="text-align: left; direction: rtl; font-size: 13px; font-weight: 700; color: #475569; padding-top: 5px;">
+                                    <span style="font-weight: 700; color: #475569;">التاريخ:&nbsp;</span><span style="font-weight: 800; color: #0f172a; direction: ltr; unicode-bidi: isolate; display: inline-block;">${tr.date} م</span>
                                 </div>
                             </div>
-                            <div style="text-align: center; margin-top: 25px; margin-bottom: 22px;">
-                                <h1 style="font-size: 32px; font-weight: 900; color: #0f172a; display: inline-block; padding-bottom: 4px; border-bottom: 3px solid #0f172a;">${cfg.title}</h1>
+                            <div style="text-align: center; margin-top: 22px; margin-bottom: 20px;">
+                                <h1 style="font-size: 30px; font-weight: 900; color: #0f172a; display: inline-block; padding-bottom: 4px; border-bottom: 3px solid #0f172a; margin: 0; letter-spacing: normal; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif;">${cfg.title}</h1>
                             </div>
-                            <div style="line-height: 2.2; font-size: 16.5px; color: #0f172a; margin-top: 15px; margin-bottom: 20px;">
-                                <div><span style="font-weight: 700; color: #475569;">اسم المتدرب: </span><span style="font-weight: 900; color: #000; font-size: 18px;">${tr.name}</span></div>
-                                <div><span style="font-weight: 700; color: #475569;">اسم الشركة : </span><span style="font-weight: 800; color: #0f172a;">${tr.company}</span></div>
-                                <div><span style="font-weight: 700; color: #475569;">رقم الهوية: </span><span style="font-weight: 900; font-family: monospace; color: #000; font-size: 17px;">${cleanId}</span></div>
-                            </div>
-                            <div style="font-size: 16.5px; line-height: 2.2; color: #1e293b; text-align: justify; margin-top: 20px; white-space: pre-line;">${cfg.text}</div>
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 14px; margin-bottom: 18px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب:</td>
+                                        <td style="font-weight: 900; color: #000; font-size: 18px; vertical-align: middle;">${tr.name}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة:</td>
+                                        <td style="font-weight: 800; color: #0f172a; font-size: 16.5px; vertical-align: middle;">${tr.company}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية:</td>
+                                        <td style="font-weight: 900; color: #000; font-size: 17px; vertical-align: middle;"><span style="direction: ltr; unicode-bidi: isolate; display: inline-block;">${cleanId}</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div style="font-size: 16px; line-height: 2.1; color: #1e293b; text-align: justify; margin-top: 16px; white-space: pre-line;">${cfg.text}</div>
                         </div>
                         <div style="margin-top: auto;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 30px; margin-bottom: 15px;">
-                                <div style="width: 48%; line-height: 2.6;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
+                                <div style="width: 48%; line-height: 2.5;">
                                     <div style="font-size: 14px; font-weight: 700; color: #0f172a;">توقيع المتدرب: .......................................</div>
                                     <div style="font-size: 14px; font-weight: 700; color: #0f172a;">الاسم : ...................................................</div>
                                 </div>
@@ -99994,8 +100133,8 @@ ${cfg.text}
                                     <div style="text-align: center; width: 230px;">
                                         <div style="font-size: 14px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
                                         <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;">علي آل عباس</div>
-                                        <div style="position: relative; width: 200px; height: 110px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
-                                            <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 125px; z-index: 2; top: 12px; left: 10px; transform: rotate(-3deg);">
+                                        <div style="position: relative; width: 200px; height: 105px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
+                                            <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 125px; z-index: 2; top: 10px; left: 10px; transform: rotate(-3deg);">
                                             <img src="assets/bgti_stamp.png" alt="الختم" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
                                         </div>
                                     </div>
@@ -100028,7 +100167,7 @@ ${cfg.text}
             const opt = {
                 margin: [0, 0, 0, 0],
                 image: { type: 'jpeg', quality: 0.95 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollX: 0, scrollY: 0, x: 0, y: 0, windowWidth: 794 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
