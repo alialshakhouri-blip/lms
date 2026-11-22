@@ -98914,7 +98914,7 @@ function getCTPAdmissionFormData(trainee) {
             <!-- Letterhead Preview Body -->
             <div class="flex-1 overflow-y-auto p-4 sm:p-6 flex justify-center bg-slate-200/70 dark:bg-slate-950">
                 <!-- PRINTABLE SHEET CONTAINER (Pixel-perfect matching Image 1) -->
-                <div id="warnLetterheadPrintableSheet" style="width: 794px; min-height: 1120px; max-height: 1122px; background: #ffffff; position: relative; margin: 0 auto; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.18); font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
+                <div id="warnLetterheadPrintableSheet" style="width: 794px; height: 1122px; min-height: 1122px; max-height: 1122px; background: #ffffff; position: relative; margin: 0 auto; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.18); font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
                     <!-- Left Decorative Strip (Gold Gradient + Bottom Black Bar with CR. 2053117185) -->
                     <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;">
                         <!-- Upper Golden Gradient Bar -->
@@ -98931,7 +98931,7 @@ function getCTPAdmissionFormData(trainee) {
                     <img src="assets/bgti_logo.png" alt="BGTI Watermark" style="position: absolute; top: 48%; left: 52%; transform: translate(-50%, -50%); width: 330px; opacity: 0.04; pointer-events: none; filter: grayscale(100%); z-index: 1;">
 
                     <!-- Sheet Inner Content (Shifted to right of vertical bar) -->
-                    <div class="warn-sheet-inner" style="margin-left: 54px; padding: 38px 45px 28px 40px; position: relative; z-index: 5; height: 100%; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                    <div class="warn-sheet-inner" style="margin-left: 54px; padding: 36px 45px 24px 40px; position: relative; z-index: 5; height: 1122px; min-height: 1122px; max-height: 1122px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
                         <!-- Header: Logo on right (in RTL), Date on left -->
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -98939,26 +98939,31 @@ function getCTPAdmissionFormData(trainee) {
                                 <table style="border-collapse: collapse; direction: rtl; margin-top: 5px;">
                                     <tbody>
                                         <tr>
-                                            <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ:</td>
+                                            <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ</td>
                                             <td style="font-size: 13px; font-weight: 800; color: #0f172a; white-space: nowrap; vertical-align: middle; direction: ltr; text-align: left;"><span id="warnDateDisplay">14/07/2026 م</span></td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
 
+                            <!-- Warning Title Frame (Rendered as raster canvas image to eliminate text reversal) -->
+                            <div style="text-align: center; margin: 16px auto 12px auto;">
+                                <img id="warnTitleCanvasImg" src="" alt="عنوان الإنذار" style="width: 240px; height: 46px; margin: 0 auto; display: block; border: 0;">
+                            </div>
+
                             <!-- Trainee Metadata Block (2-column table immune to bidi/colon reversal) -->
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 24px; margin-bottom: 22px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 16px; margin-bottom: 20px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
                                 <tbody>
                                     <tr>
-                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب:</td>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب</td>
                                         <td style="font-weight: 900; color: #000; font-size: 18px; vertical-align: middle;" id="warnTraineeNameDisplay">ريان بن ضحيان بن حثوان غزواني</td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة:</td>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة</td>
                                         <td style="font-weight: 800; color: #0f172a; font-size: 16.5px; vertical-align: middle;" id="warnTraineeCompanyDisplay">هونداي</td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية:</td>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية</td>
                                         <td style="font-weight: 900; color: #000; font-size: 17px; vertical-align: middle;"><span id="warnTraineeIdDisplay" style="direction: ltr; unicode-bidi: isolate; display: inline-block;">1140416528</span></td>
                                     </tr>
                                 </tbody>
@@ -98975,30 +98980,30 @@ function getCTPAdmissionFormData(trainee) {
                         </div>
 
                         <!-- Bottom Section: Signatures & Contact Footer -->
-                        <div style="margin-top: auto;">
+                        <div style="margin-top: auto; padding-top: 35px;">
                             <!-- Signatures Block -->
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px;">
                                 <!-- Trainee Signature (Right) -->
-                                <div style="width: 48%; line-height: 2.5;">
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب <span id="warnTraineeSigNameDisplay" style="font-weight: 800; color: #000;">ريان بن ضحيان بن حثوان غزواني</span></div>
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع</div>
+                                <div style="width: 48%; line-height: 2.8; padding-bottom: 6px;">
+                                    <div style="font-size: 14.5px; font-weight: 700; color: #0f172a;">اسم المتدرب <span id="warnTraineeSigNameDisplay" style="font-weight: 800; color: #000;">ريان بن ضحيان بن حثوان غزواني</span></div>
+                                    <div style="font-size: 14.5px; font-weight: 700; color: #0f172a; margin-top: 4px;">التوقيع</div>
                                 </div>
 
                                 <!-- Administration (Left) -->
                                 <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
                                     <div style="text-align: center; width: 230px;">
-                                        <div style="font-size: 14px; font-weight: 900; color: #0f172a;" id="warnSignatoryRoleDisplay">مسؤول شؤون المتدربين</div>
-                                        <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;" id="warnSignatoryNameDisplay">علي آل عباس</div>
-                                        <div style="position: relative; width: 200px; height: 105px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
-                                            <img id="warnSignatorySigImg" src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" style="position: absolute; width: 125px; z-index: 2; top: 10px; left: 10px; transform: rotate(-3deg);">
-                                            <img id="warnSignatoryStampImg" src="assets/bgti_stamp.png" alt="ختم المعهد" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
+                                        <div style="font-size: 14.5px; font-weight: 900; color: #0f172a;" id="warnSignatoryRoleDisplay">مسؤول شؤون المتدربين</div>
+                                        <div style="font-size: 13.5px; font-weight: 800; color: #1e293b; margin-top: 3px;" id="warnSignatoryNameDisplay">علي آل عباس</div>
+                                        <div style="position: relative; width: 200px; height: 110px; margin: 6px auto 0 auto; display: flex; align-items: center; justify-content: center;">
+                                            <img id="warnSignatorySigImg" src="assets/ali_alabbas_sig.png" alt="توقيع علي آل عباس" style="position: absolute; width: 130px; z-index: 2; top: 12px; left: 10px; transform: rotate(-3deg);">
+                                            <img id="warnSignatoryStampImg" src="assets/bgti_stamp.png" alt="ختم المعهد" style="position: absolute; width: 110px; z-index: 1; top: 2px; right: 10px; opacity: 0.94;">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Footer Bar (Contacts) -->
-                            <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
+                            <div style="border-top: 1px solid #e2e8f0; margin-top: 14px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
                                 <div style="font-size: 10px; line-height: 1.6; font-weight: 700; color: #475569; text-align: left; font-family: sans-serif;">
                                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                                         <span>info@blackgold.edu.sa</span>
@@ -99394,6 +99399,11 @@ function getCTPAdmissionFormData(trainee) {
             title: 'الإنذار الأول',
             badgeClass: 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800',
             text: `نظراً لتكرار غيابك عن الحضور وعدم التزامك بأوقات الدوام الرسمي في المعهد، فإنني أوجه إليك هذا الإنذار الأول ونؤكد على ضرورة الالتزام التام بالدوام والحضور في المواعيد المحددة وعدم تكرار الغياب مستقبلاً لتفادي العقوبات النظامية.`
+        },
+        'إشعار تنبيه': {
+            title: 'إشعار تنبيه بالانضباط',
+            badgeClass: 'bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800',
+            text: `نظراً لملاحظة تكرار التأخر أو الغياب في بعض الأيام، نود لفت انتباهك إلى أهمية الالتزام الكامل بالحضور والانضباط وفق اللوائح المعتمدة لتجنب اتخاذ أي إجراءات نظامية مستقبلاً.`
         }
     };
 
@@ -100172,6 +100182,7 @@ function getCTPAdmissionFormData(trainee) {
     function updateWarningModalPreview() {
         const cfg = DISCIPLINARY_LEGAL_TEXTS[currentWarningPreviewState.warningType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
 
+        const titleImgEl = document.getElementById('warnTitleCanvasImg');
         const titleEl = document.getElementById('warnTitleDisplay');
         const dateEl = document.getElementById('warnDateDisplay');
         const nameEl = document.getElementById('warnTraineeNameDisplay');
@@ -100180,6 +100191,7 @@ function getCTPAdmissionFormData(trainee) {
         const bodyEl = document.getElementById('warnBodyTextDisplay');
         const sigTraineeNameEl = document.getElementById('warnTraineeSigNameDisplay');
 
+        if (titleImgEl) titleImgEl.src = getWarningTitleCanvasDataUrl(cfg.title || currentWarningPreviewState.warningType);
         if (titleEl) titleEl.textContent = cfg.title;
         if (dateEl) dateEl.textContent = `${currentWarningPreviewState.date} م`;
         if (nameEl) nameEl.textContent = currentWarningPreviewState.name;
@@ -100216,20 +100228,20 @@ function getCTPAdmissionFormData(trainee) {
         if (sigImgEl) sigImgEl.style.display = showSig ? 'block' : 'none';
     }
 
-    function createWarningTitleCanvasImage(titleText) {
+    function getWarningTitleCanvasDataUrl(titleText) {
         const text = String(titleText || 'الإنذار النهائي').trim();
         const canvas = document.createElement('canvas');
         const scale = 2;
-        const badgeW = 220;
-        const badgeH = 42;
+        const badgeW = 240;
+        const badgeH = 46;
         canvas.width = badgeW * scale;
         canvas.height = badgeH * scale;
 
         const ctx = canvas.getContext('2d');
         ctx.scale(scale, scale);
 
-        // Rounded badge background
-        const x = 2, y = 2, w = badgeW - 4, h = badgeH - 4, r = 8;
+        // Frame: Outer rounded rectangle with double border
+        const x = 3, y = 3, w = badgeW - 6, h = badgeH - 6, r = 8;
         ctx.beginPath();
         ctx.moveTo(x + r, y);
         ctx.lineTo(x + w - r, y);
@@ -100242,26 +100254,49 @@ function getCTPAdmissionFormData(trainee) {
         ctx.quadraticCurveTo(x, y, x + r, y);
         ctx.closePath();
 
-        ctx.fillStyle = '#f8fafc';
+        ctx.fillStyle = '#FFFFFF';
         ctx.fill();
-        ctx.strokeStyle = '#0f172a';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 2.2;
         ctx.stroke();
 
-        // Native 2D canvas text shaper guarantees flawless Arabic RTL ligatures
-        ctx.fillStyle = '#0f172a';
-        ctx.font = '900 17px "Almarai", "Cairo", "Tajawal", "Segoe UI", sans-serif';
+        // Inner prestige golden border line
+        const ix = 6.5, iy = 6.5, iw = badgeW - 13, ih = badgeH - 13, ir = 5;
+        ctx.beginPath();
+        ctx.moveTo(ix + ir, iy);
+        ctx.lineTo(ix + iw - ir, iy);
+        ctx.quadraticCurveTo(ix + iw, iy, ix + iw, iy + ir);
+        ctx.lineTo(ix + iw, iy + ih - ir);
+        ctx.quadraticCurveTo(ix + iw, iy + ih, ix + iw - ir, iy + ih);
+        ctx.lineTo(ix + ir, iy + ih);
+        ctx.quadraticCurveTo(ix, iy + ih, ix, iy + ih - ir);
+        ctx.lineTo(ix, iy + ir);
+        ctx.quadraticCurveTo(ix, iy, ix + ir, iy);
+        ctx.closePath();
+        ctx.strokeStyle = '#D97706'; // Golden amber
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Native 2D canvas text shaper guarantees flawless Arabic RTL ligatures (never reversed)
+        ctx.fillStyle = '#0F172A';
+        ctx.font = '900 18px "Almarai", "Cairo", "Tajawal", "Segoe UI", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.direction = 'rtl';
         ctx.fillText(text, badgeW / 2, badgeH / 2 + 1);
 
+        return canvas.toDataURL('image/png');
+    }
+
+    function createWarningTitleCanvasImage(titleText) {
+        const text = String(titleText || 'الإنذار النهائي').trim();
         const img = document.createElement('img');
-        img.src = canvas.toDataURL('image/png');
-        img.style.width = badgeW + 'px';
-        img.style.height = badgeH + 'px';
+        img.src = getWarningTitleCanvasDataUrl(text);
+        img.style.width = '240px';
+        img.style.height = '46px';
         img.style.display = 'block';
         img.style.margin = '0 auto';
+        img.style.border = '0';
         img.alt = text;
         return img;
     }
@@ -100326,21 +100361,16 @@ function getCTPAdmissionFormData(trainee) {
         clone.setAttribute('dir', 'rtl');
         clone.style.direction = 'rtl';
 
-        // Title badge completely removed as requested
-        const titleContainer = clone.querySelector('#warnTitleContainer') || clone.querySelector('#warnTitleDisplay')?.closest('div');
-        if (titleContainer) {
-            titleContainer.remove();
-        }
-
         const host = document.createElement('div');
         host.id = 'warningPdfExportHost';
         host.setAttribute('dir', 'rtl');
-        host.style.position = 'absolute';
+        host.style.position = 'fixed';
         host.style.top = '0';
         host.style.left = '0';
         host.style.width = '794px';
         host.style.height = '1122px';
-        host.style.zIndex = '999999';
+        host.style.zIndex = '-9999';
+        host.style.pointerEvents = 'none';
         host.style.background = '#FFFFFF';
         host.style.margin = '0';
         host.style.padding = '0';
@@ -100348,11 +100378,6 @@ function getCTPAdmissionFormData(trainee) {
         host.style.overflow = 'hidden';
         host.appendChild(clone);
         document.body.appendChild(host);
-
-        // Bulletproof fix for cut-off / scroll offset: save and scroll window to (0, 0)
-        const savedScrollX = window.scrollX || window.pageXOffset || 0;
-        const savedScrollY = window.scrollY || window.pageYOffset || 0;
-        window.scrollTo(0, 0);
 
         await new Promise(r => setTimeout(r, 60));
 
@@ -100375,8 +100400,7 @@ function getCTPAdmissionFormData(trainee) {
             // Render exact 1-page canvas
             const canvas = await html2pdf().set(opt).from(clone).toCanvas().get('canvas');
 
-            // Restore scroll and remove host immediately
-            window.scrollTo(savedScrollX, savedScrollY);
+            // Remove host immediately
             if (host.parentNode) host.parentNode.removeChild(host);
 
             // Create single-page jsPDF doc and place image at exact (0, 0, 210, 297)
@@ -100390,7 +100414,6 @@ function getCTPAdmissionFormData(trainee) {
             showToast(`✅ تم تحميل ملف الإنذار بنجاح: ${filename}`, 'success');
         } catch (err) {
             console.error('html2pdf download error:', err);
-            window.scrollTo(savedScrollX, savedScrollY);
             if (host.parentNode) host.parentNode.removeChild(host);
             showToast('حدث خطأ أثناء تنزيل الـ PDF: ' + err.message, 'error');
         }
@@ -100578,38 +100601,54 @@ ${cfg.text}
         const zip = new JSZip();
         showToast(`📦 جاري تحضير حزمة الإنذارات الشاملة بصيغة ZIP لعدد ${targets.length} متدرب...`, 'info');
 
-        // Create temporary off-screen container for rendering
+        // Create temporary off-screen container for rendering (hidden behind viewport without preview flash)
         const tempHost = document.createElement('div');
         tempHost.id = 'warningZipExportHost';
-        tempHost.style.position = 'absolute';
+        tempHost.style.position = 'fixed';
         tempHost.style.top = '0';
         tempHost.style.left = '0';
         tempHost.style.width = '794px';
         tempHost.style.height = '1122px';
-        tempHost.style.zIndex = '999999';
+        tempHost.style.zIndex = '-9999';
+        tempHost.style.pointerEvents = 'none';
+        tempHost.style.opacity = '1';
         tempHost.style.background = '#FFFFFF';
         tempHost.style.margin = '0';
         tempHost.style.padding = '0';
         tempHost.style.overflow = 'hidden';
         document.body.appendChild(tempHost);
 
-        const savedScrollX = window.scrollX || window.pageXOffset || 0;
-        const savedScrollY = window.scrollY || window.pageYOffset || 0;
-        window.scrollTo(0, 0);
-
         let successCount = 0;
+        const allRecords = [];
+
         for (let i = 0; i < targets.length; i++) {
             const tr = targets[i];
-            tr.name = resolveTraineeName(tr, tr.id);
-            tr.company = resolveTraineeCompany(tr, tr.id);
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
+            tr.name = resolveTraineeName(tr, cleanId);
+            tr.company = resolveTraineeCompany(tr, cleanId);
             const effType = (typeof getEffectiveWarningType === 'function') ? getEffectiveWarningType(tr.id, tr.recommendedWarning) : (tr.recommendedWarning || 'إنذار نهائي');
             const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
             const effDate = tr.date || getTodayWarningDate();
 
+            const orderNum = String(i + 1).padStart(2, '0');
+            const pdfFilename = `${orderNum}_${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`;
+            const trEmail = String(tr.email || (typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined' && MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId]?.email) || (typeof phoneDirectory !== 'undefined' && phoneDirectory[cleanId]?.email) || `${cleanId}@blackgold.edu.sa`).trim();
+
+            allRecords.push({
+                order: i + 1,
+                orderNum: orderNum,
+                id: cleanId,
+                name: tr.name,
+                company: tr.company,
+                warningType: effType,
+                date: effDate,
+                email: trEmail,
+                filename: pdfFilename
+            });
+
             // Build HTML for trainee (pixel-perfect table layout, no bidi reversing, exact fit)
             tempHost.innerHTML = `
-                <div style="width: 794px; min-height: 1120px; max-height: 1122px; background: #ffffff; position: relative; margin: 0; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
+                <div style="width: 794px; height: 1122px; min-height: 1122px; max-height: 1122px; background: #ffffff; position: relative; margin: 0; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
                     <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;">
                         <div style="flex: 1; background: linear-gradient(180deg, #E2B240 0%, #C69524 55%, #E2AB33 100%); width: 100%; border-right: 2px solid #8e6815;"></div>
                         <div style="height: 140px; background: #111827; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
@@ -100617,55 +100656,61 @@ ${cfg.text}
                         </div>
                     </div>
                     <img src="assets/bgti_logo.png" alt="BGTI" style="position: absolute; top: 48%; left: 52%; transform: translate(-50%, -50%); width: 330px; opacity: 0.04; pointer-events: none; filter: grayscale(100%); z-index: 1;">
-                    <div class="warn-sheet-inner" style="margin-left: 54px; padding: 38px 45px 28px 40px; position: relative; z-index: 5; height: 100%; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                    <div class="warn-sheet-inner" style="margin-left: 54px; padding: 36px 45px 24px 40px; position: relative; z-index: 5; height: 1122px; min-height: 1122px; max-height: 1122px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <img src="assets/bgti_logo.png" alt="BGTI" style="height: 70px; width: auto; object-fit: contain;">
                                 <table style="border-collapse: collapse; direction: rtl; margin-top: 5px;">
                                     <tbody>
                                         <tr>
-                                            <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ:</td>
+                                            <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ</td>
                                             <td style="font-size: 13px; font-weight: 800; color: #0f172a; white-space: nowrap; vertical-align: middle; direction: ltr; text-align: left;">${effDate} م</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 24px; margin-bottom: 22px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
+
+                            <!-- Warning Title Frame (Rendered as raster canvas image to eliminate text reversal) -->
+                            <div style="text-align: center; margin: 16px auto 12px auto;">
+                                <img src="${getWarningTitleCanvasDataUrl(cfg.title || effType)}" alt="${effType}" style="width: 240px; height: 46px; margin: 0 auto; display: block; border: 0;">
+                            </div>
+
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 16px; margin-bottom: 20px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
                                 <tbody>
                                     <tr>
-                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب:</td>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب</td>
                                         <td style="font-weight: 900; color: #000; font-size: 18px; vertical-align: middle;">${tr.name}</td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة:</td>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة</td>
                                         <td style="font-weight: 800; color: #0f172a; font-size: 16.5px; vertical-align: middle;">${tr.company}</td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية:</td>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية</td>
                                         <td style="font-weight: 900; color: #000; font-size: 17px; vertical-align: middle;"><span style="direction: ltr; unicode-bidi: isolate; display: inline-block;">${cleanId}</span></td>
                                     </tr>
                                 </tbody>
                             </table>
                             <div style="font-size: 16px; line-height: 2.1; color: #1e293b; text-align: justify; margin-top: 16px; white-space: pre-line;">${cfg.text}</div>
                         </div>
-                        <div style="margin-top: auto;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
-                                <div style="width: 48%; line-height: 2.5;">
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب <span style="font-weight: 800; color: #000;">${tr.name}</span></div>
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع</div>
+                        <div style="margin-top: auto; padding-top: 35px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px;">
+                                <div style="width: 48%; line-height: 2.8; padding-bottom: 6px;">
+                                    <div style="font-size: 14.5px; font-weight: 700; color: #0f172a;">اسم المتدرب <span style="font-weight: 800; color: #000;">${tr.name}</span></div>
+                                    <div style="font-size: 14.5px; font-weight: 700; color: #0f172a; margin-top: 4px;">التوقيع</div>
                                 </div>
                                 <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
                                     <div style="text-align: center; width: 230px;">
-                                        <div style="font-size: 14px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
-                                        <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;">علي آل عباس</div>
-                                        <div style="position: relative; width: 200px; height: 105px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
-                                            <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 125px; z-index: 2; top: 10px; left: 10px; transform: rotate(-3deg);">
-                                            <img src="assets/bgti_stamp.png" alt="الختم" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
+                                        <div style="font-size: 14.5px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
+                                        <div style="font-size: 13.5px; font-weight: 800; color: #1e293b; margin-top: 3px;">علي آل عباس</div>
+                                        <div style="position: relative; width: 200px; height: 110px; margin: 6px auto 0 auto; display: flex; align-items: center; justify-content: center;">
+                                            <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 130px; z-index: 2; top: 12px; left: 10px; transform: rotate(-3deg);">
+                                            <img src="assets/bgti_stamp.png" alt="الختم" style="position: absolute; width: 110px; z-index: 1; top: 2px; right: 10px; opacity: 0.94;">
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
+                            <div style="border-top: 1px solid #e2e8f0; margin-top: 14px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
                                 <div style="font-size: 10px; line-height: 1.6; font-weight: 700; color: #475569; text-align: left; font-family: sans-serif;">
                                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                                         <span>info@blackgold.edu.sa</span>
@@ -100697,8 +100742,6 @@ ${cfg.text}
                 doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
                 const pdfBlob = doc.output('blob');
 
-                // Name file with Trainee ID and selected warning type
-                const pdfFilename = `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`;
                 zip.file(pdfFilename, pdfBlob);
                 successCount++;
             } catch (pdfErr) {
@@ -100706,8 +100749,38 @@ ${cfg.text}
             }
         }
 
-        window.scrollTo(savedScrollX, savedScrollY);
-        document.body.removeChild(tempHost);
+        // Include email lists in the exact same order as the PDFs
+        const emailsPlain = allRecords.map(r => r.email).join('\r\n');
+        zip.file('emails.txt', emailsPlain);
+        zip.file('قائمة_الإيميلات_بالترتيب.txt', emailsPlain);
+
+        const emailsComma = allRecords.map(r => r.email).join(', ');
+        zip.file('قائمة_الإيميلات_مفصولة_بفاصلة.txt', emailsComma);
+
+        let summaryText = `دليل المتدربين والبريد الإلكتروني مرتب حسب تسلسل ملفات الإنذار في الحزمة\r\n`;
+        summaryText += `========================================================================================\r\n`;
+        summaryText += `تاريخ التصدير: ${getTodayWarningDate()} م | إجمالي الملفات: ${allRecords.length} ملف\r\n`;
+        summaryText += `المعهد: معهد الذهب الأسود للتدريب - الدمام - فرع 3\r\n`;
+        summaryText += `========================================================================================\r\n\r\n`;
+        allRecords.forEach(r => {
+            summaryText += `[${r.orderNum}] ${r.name}\r\n`;
+            summaryText += `     رقم الهوية: ${r.id}\r\n`;
+            summaryText += `     الشركة الراعية: ${r.company}\r\n`;
+            summaryText += `     نوع الإنذار: ${r.warningType}\r\n`;
+            summaryText += `     البريد الإلكتروني: ${r.email}\r\n`;
+            summaryText += `     ملف الـ PDF المرفق: ${r.filename}\r\n`;
+            summaryText += `----------------------------------------------------------------------------------------\r\n`;
+        });
+        summaryText += `\r\nجميع الإيميلات مجمعة للإرسال المباشر (نسخ ولصق):\r\n${emailsComma}\r\n`;
+        zip.file('دليل_المتدربين_والإيميلات.txt', summaryText);
+
+        let csvContent = '\uFEFFم,رقم الهوية,اسم المتدرب,الشركة الراعية,نوع الإنذار,البريد الإلكتروني,اسم ملف الإنذار المرفق\r\n';
+        allRecords.forEach(r => {
+            csvContent += `"${r.order}","${r.id}","${r.name}","${r.company}","${r.warningType}","${r.email}","${r.filename}"\r\n`;
+        });
+        zip.file('سجل_الإنذارات_والإيميلات.csv', csvContent);
+
+        if (tempHost.parentNode) document.body.removeChild(tempHost);
 
         if (successCount === 0) {
             return showToast('تعذر توليد ملفات الـ PDF للحزمة', 'error');
@@ -100941,12 +101014,14 @@ ${cfg.text}
         showToast(`جاري تجهيز وتنزيل ملف PDF: ${filename}...`, 'info');
 
         const tempHost = document.createElement('div');
-        tempHost.style.position = 'absolute';
+        tempHost.style.position = 'fixed';
         tempHost.style.top = '0';
         tempHost.style.left = '0';
         tempHost.style.width = '794px';
         tempHost.style.height = '1122px';
-        tempHost.style.zIndex = '999999';
+        tempHost.style.zIndex = '-9999';
+        tempHost.style.pointerEvents = 'none';
+        tempHost.style.opacity = '1';
         tempHost.style.background = '#FFFFFF';
         tempHost.style.margin = '0';
         tempHost.style.padding = '0';
@@ -100954,7 +101029,7 @@ ${cfg.text}
         document.body.appendChild(tempHost);
 
         tempHost.innerHTML = `
-            <div style="width: 794px; min-height: 1120px; max-height: 1122px; background: #ffffff; position: relative; margin: 0; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
+            <div style="width: 794px; height: 1122px; min-height: 1122px; max-height: 1122px; background: #ffffff; position: relative; margin: 0; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
                 <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;">
                     <div style="flex: 1; background: linear-gradient(180deg, #E2B240 0%, #C69524 55%, #E2AB33 100%); width: 100%; border-right: 2px solid #8e6815;"></div>
                     <div style="height: 140px; background: #111827; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
@@ -100962,55 +101037,61 @@ ${cfg.text}
                     </div>
                 </div>
                 <img src="assets/bgti_logo.png" alt="BGTI" style="position: absolute; top: 48%; left: 52%; transform: translate(-50%, -50%); width: 330px; opacity: 0.04; pointer-events: none; filter: grayscale(100%); z-index: 1;">
-                <div class="warn-sheet-inner" style="margin-left: 54px; padding: 38px 45px 28px 40px; position: relative; z-index: 5; height: 100%; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                <div class="warn-sheet-inner" style="margin-left: 54px; padding: 36px 45px 24px 40px; position: relative; z-index: 5; height: 1122px; min-height: 1122px; max-height: 1122px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
                     <div>
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <img src="assets/bgti_logo.png" alt="BGTI" style="height: 70px; width: auto; object-fit: contain;">
                             <table style="border-collapse: collapse; direction: rtl; margin-top: 5px;">
                                 <tbody>
                                     <tr>
-                                        <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ:</td>
+                                        <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ</td>
                                         <td style="font-size: 13px; font-weight: 800; color: #0f172a; white-space: nowrap; vertical-align: middle; direction: ltr; text-align: left;">${effDate} م</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 24px; margin-bottom: 22px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
+
+                        <!-- Warning Title Frame (Rendered as raster canvas image to eliminate text reversal) -->
+                        <div style="text-align: center; margin: 16px auto 12px auto;">
+                            <img src="${getWarningTitleCanvasDataUrl(cfg.title || effType)}" alt="${effType}" style="width: 240px; height: 46px; margin: 0 auto; display: block; border: 0;">
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 16px; margin-bottom: 20px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
                             <tbody>
                                 <tr>
-                                    <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب:</td>
+                                    <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب</td>
                                     <td style="font-weight: 900; color: #000; font-size: 18px; vertical-align: middle;">${evaluated.name}</td>
                                 </tr>
                                 <tr>
-                                    <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة:</td>
+                                    <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة</td>
                                     <td style="font-weight: 800; color: #0f172a; font-size: 16.5px; vertical-align: middle;">${evaluated.company}</td>
                                 </tr>
                                 <tr>
-                                    <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية:</td>
+                                    <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية</td>
                                     <td style="font-weight: 900; color: #000; font-size: 17px; vertical-align: middle;"><span style="direction: ltr; unicode-bidi: isolate; display: inline-block;">${cleanId}</span></td>
                                 </tr>
                             </tbody>
                         </table>
                         <div style="font-size: 16px; line-height: 2.1; color: #1e293b; text-align: justify; margin-top: 16px; white-space: pre-line;">${cfg.text}</div>
                     </div>
-                    <div style="margin-top: auto;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
-                            <div style="width: 48%; line-height: 2.5;">
-                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب <span style="font-weight: 800; color: #000;">${evaluated.name}</span></div>
-                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع</div>
+                    <div style="margin-top: auto; padding-top: 35px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px;">
+                            <div style="width: 48%; line-height: 2.8; padding-bottom: 6px;">
+                                <div style="font-size: 14.5px; font-weight: 700; color: #0f172a;">اسم المتدرب <span style="font-weight: 800; color: #000;">${evaluated.name}</span></div>
+                                <div style="font-size: 14.5px; font-weight: 700; color: #0f172a; margin-top: 4px;">التوقيع</div>
                             </div>
                             <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
                                 <div style="text-align: center; width: 230px;">
-                                    <div style="font-size: 14px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
-                                    <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;">علي آل عباس</div>
-                                    <div style="position: relative; width: 200px; height: 105px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
-                                        <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 125px; z-index: 2; top: 10px; left: 10px; transform: rotate(-3deg);">
-                                        <img src="assets/bgti_stamp.png" alt="الختم" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
+                                    <div style="font-size: 14.5px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
+                                    <div style="font-size: 13.5px; font-weight: 800; color: #1e293b; margin-top: 3px;">علي آل عباس</div>
+                                    <div style="position: relative; width: 200px; height: 110px; margin: 6px auto 0 auto; display: flex; align-items: center; justify-content: center;">
+                                        <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 130px; z-index: 2; top: 12px; left: 10px; transform: rotate(-3deg);">
+                                        <img src="assets/bgti_stamp.png" alt="الختم" style="position: absolute; width: 110px; z-index: 1; top: 2px; right: 10px; opacity: 0.94;">
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
+                        <div style="border-top: 1px solid #e2e8f0; margin-top: 14px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
                             <div style="font-size: 10px; line-height: 1.6; font-weight: 700; color: #475569; text-align: left; font-family: sans-serif;">
                                 <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                                     <span>info@blackgold.edu.sa</span>
@@ -101026,10 +101107,6 @@ ${cfg.text}
                 </div>
             </div>
         `;
-
-        const savedScrollX = window.scrollX || window.pageXOffset || 0;
-        const savedScrollY = window.scrollY || window.pageYOffset || 0;
-        window.scrollTo(0, 0);
 
         await new Promise(r => setTimeout(r, 60));
 
@@ -101049,7 +101126,6 @@ ${cfg.text}
             console.error('Download error:', err);
             showToast('حدث خطأ أثناء تنزيل الـ PDF: ' + err.message, 'error');
         } finally {
-            window.scrollTo(savedScrollX, savedScrollY);
             if (tempHost.parentNode) tempHost.parentNode.removeChild(tempHost);
         }
     }
@@ -101079,34 +101155,51 @@ ${cfg.text}
         const zip = new JSZip();
 
         const tempHost = document.createElement('div');
-        tempHost.style.position = 'absolute';
+        tempHost.style.position = 'fixed';
         tempHost.style.top = '0';
         tempHost.style.left = '0';
         tempHost.style.width = '794px';
         tempHost.style.height = '1122px';
-        tempHost.style.zIndex = '999999';
+        tempHost.style.zIndex = '-9999';
+        tempHost.style.pointerEvents = 'none';
+        tempHost.style.opacity = '1';
         tempHost.style.background = '#FFFFFF';
         tempHost.style.margin = '0';
         tempHost.style.padding = '0';
         tempHost.style.overflow = 'hidden';
         document.body.appendChild(tempHost);
 
-        const savedScrollX = window.scrollX || window.pageXOffset || 0;
-        const savedScrollY = window.scrollY || window.pageYOffset || 0;
-        window.scrollTo(0, 0);
-
         let successCount = 0;
         const opt = {
             html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollX: 0, scrollY: 0, x: 0, y: 0, width: 794, height: 1122, windowWidth: 794 }
         };
 
+        const batchRecords = [];
+
         for (let i = 0; i < total; i++) {
             const tr = currentQuickBatchTrainees[i];
-            tr.name = resolveTraineeName(tr, tr.id);
-            tr.company = resolveTraineeCompany(tr, tr.id);
+            const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
+            tr.name = resolveTraineeName(tr, cleanId);
+            tr.company = resolveTraineeCompany(tr, cleanId);
             const effType = tr.warningType || 'إنذار نهائي';
             const effDate = tr.date || getTodayWarningDate();
             const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
+
+            const orderNum = String(i + 1).padStart(2, '0');
+            const pdfFilename = `${orderNum}_${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`;
+            const trEmail = String(tr.email || (typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined' && MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId]?.email) || (typeof phoneDirectory !== 'undefined' && phoneDirectory[cleanId]?.email) || `${cleanId}@blackgold.edu.sa`).trim();
+
+            batchRecords.push({
+                order: i + 1,
+                orderNum: orderNum,
+                id: cleanId,
+                name: tr.name,
+                company: tr.company,
+                warningType: effType,
+                date: effDate,
+                email: trEmail,
+                filename: pdfFilename
+            });
 
             const currentPct = Math.round((i / total) * 100);
             if (progressBar) progressBar.style.width = `${currentPct}%`;
@@ -101116,7 +101209,7 @@ ${cfg.text}
             await new Promise(r => setTimeout(r, 40));
 
             tempHost.innerHTML = `
-                <div style="width: 794px; min-height: 1120px; max-height: 1122px; background: #ffffff; position: relative; margin: 0; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
+                <div style="width: 794px; height: 1122px; min-height: 1122px; max-height: 1122px; background: #ffffff; position: relative; margin: 0; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
                     <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;">
                         <div style="flex: 1; background: linear-gradient(180deg, #E2B240 0%, #C69524 55%, #E2AB33 100%); width: 100%; border-right: 2px solid #8e6815;"></div>
                         <div style="height: 140px; background: #111827; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
@@ -101124,55 +101217,61 @@ ${cfg.text}
                         </div>
                     </div>
                     <img src="assets/bgti_logo.png" alt="BGTI" style="position: absolute; top: 48%; left: 52%; transform: translate(-50%, -50%); width: 330px; opacity: 0.04; pointer-events: none; filter: grayscale(100%); z-index: 1;">
-                    <div class="warn-sheet-inner" style="margin-left: 54px; padding: 38px 45px 28px 40px; position: relative; z-index: 5; height: 100%; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                    <div class="warn-sheet-inner" style="margin-left: 54px; padding: 36px 45px 24px 40px; position: relative; z-index: 5; height: 1122px; min-height: 1122px; max-height: 1122px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <img src="assets/bgti_logo.png" alt="BGTI" style="height: 70px; width: auto; object-fit: contain;">
                                 <table style="border-collapse: collapse; direction: rtl; margin-top: 5px;">
                                     <tbody>
                                         <tr>
-                                            <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ:</td>
+                                            <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ</td>
                                             <td style="font-size: 13px; font-weight: 800; color: #0f172a; white-space: nowrap; vertical-align: middle; direction: ltr; text-align: left;">${effDate} م</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 24px; margin-bottom: 22px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
+
+                            <!-- Warning Title Frame (Rendered as raster canvas image to eliminate text reversal) -->
+                            <div style="text-align: center; margin: 16px auto 12px auto;">
+                                <img src="${getWarningTitleCanvasDataUrl(cfg.title || effType)}" alt="${effType}" style="width: 240px; height: 46px; margin: 0 auto; display: block; border: 0;">
+                            </div>
+
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 16px; margin-bottom: 20px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
                                 <tbody>
                                     <tr>
-                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب:</td>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب</td>
                                         <td style="font-weight: 900; color: #000; font-size: 18px; vertical-align: middle;">${tr.name}</td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة:</td>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة</td>
                                         <td style="font-weight: 800; color: #0f172a; font-size: 16.5px; vertical-align: middle;">${tr.company}</td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية:</td>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية</td>
                                         <td style="font-weight: 900; color: #000; font-size: 17px; vertical-align: middle;"><span style="direction: ltr; unicode-bidi: isolate; display: inline-block;">${tr.id}</span></td>
                                     </tr>
                                 </tbody>
                             </table>
                             <div style="font-size: 16px; line-height: 2.1; color: #1e293b; text-align: justify; margin-top: 16px; white-space: pre-line;">${cfg.text}</div>
                         </div>
-                        <div style="margin-top: auto;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
-                                <div style="width: 48%; line-height: 2.5;">
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب <span style="font-weight: 800; color: #000;">${tr.name}</span></div>
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع</div>
+                        <div style="margin-top: auto; padding-top: 35px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px;">
+                                <div style="width: 48%; line-height: 2.8; padding-bottom: 6px;">
+                                    <div style="font-size: 14.5px; font-weight: 700; color: #0f172a;">اسم المتدرب <span style="font-weight: 800; color: #000;">${tr.name}</span></div>
+                                    <div style="font-size: 14.5px; font-weight: 700; color: #0f172a; margin-top: 4px;">التوقيع</div>
                                 </div>
                                 <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
                                     <div style="text-align: center; width: 230px;">
-                                        <div style="font-size: 14px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
-                                        <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;">علي آل عباس</div>
-                                        <div style="position: relative; width: 200px; height: 105px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
-                                            <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 125px; z-index: 2; top: 10px; left: 10px; transform: rotate(-3deg);">
-                                            <img src="assets/bgti_stamp.png" alt="الختم" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
+                                        <div style="font-size: 14.5px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
+                                        <div style="font-size: 13.5px; font-weight: 800; color: #1e293b; margin-top: 3px;">علي آل عباس</div>
+                                        <div style="position: relative; width: 200px; height: 110px; margin: 6px auto 0 auto; display: flex; align-items: center; justify-content: center;">
+                                            <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 130px; z-index: 2; top: 12px; left: 10px; transform: rotate(-3deg);">
+                                            <img src="assets/bgti_stamp.png" alt="الختم" style="position: absolute; width: 110px; z-index: 1; top: 2px; right: 10px; opacity: 0.94;">
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
+                            <div style="border-top: 1px solid #e2e8f0; margin-top: 14px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
                                 <div style="font-size: 10px; line-height: 1.6; font-weight: 700; color: #475569; text-align: left; font-family: sans-serif;">
                                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                                         <span>info@blackgold.edu.sa</span>
@@ -101199,7 +101298,6 @@ ${cfg.text}
                 doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
                 const pdfBlob = doc.output('blob');
 
-                const pdfFilename = `${tr.id}_${effType.replace(/\s+/g, '_')}.pdf`;
                 zip.file(pdfFilename, pdfBlob);
                 successCount++;
             } catch (err) {
@@ -101207,11 +101305,41 @@ ${cfg.text}
             }
         }
 
+        // Include email lists in the exact same order as the PDFs
+        const emailsPlain = batchRecords.map(r => r.email).join('\r\n');
+        zip.file('emails.txt', emailsPlain);
+        zip.file('قائمة_الإيميلات_بالترتيب.txt', emailsPlain);
+
+        const emailsComma = batchRecords.map(r => r.email).join(', ');
+        zip.file('قائمة_الإيميلات_مفصولة_بفاصلة.txt', emailsComma);
+
+        let summaryText = `دليل المتدربين والبريد الإلكتروني مرتب حسب تسلسل ملفات الإنذار في الحزمة\r\n`;
+        summaryText += `========================================================================================\r\n`;
+        summaryText += `تاريخ التصدير: ${getTodayWarningDate()} م | إجمالي الملفات: ${batchRecords.length} ملف\r\n`;
+        summaryText += `المعهد: معهد الذهب الأسود للتدريب - الدمام - فرع 3\r\n`;
+        summaryText += `========================================================================================\r\n\r\n`;
+        batchRecords.forEach(r => {
+            summaryText += `[${r.orderNum}] ${r.name}\r\n`;
+            summaryText += `     رقم الهوية: ${r.id}\r\n`;
+            summaryText += `     الشركة الراعية: ${r.company}\r\n`;
+            summaryText += `     نوع الإنذار: ${r.warningType}\r\n`;
+            summaryText += `     البريد الإلكتروني: ${r.email}\r\n`;
+            summaryText += `     ملف الـ PDF المرفق: ${r.filename}\r\n`;
+            summaryText += `----------------------------------------------------------------------------------------\r\n`;
+        });
+        summaryText += `\r\nجميع الإيميلات مجمعة للإرسال المباشر (نسخ ولصق):\r\n${emailsComma}\r\n`;
+        zip.file('دليل_المتدربين_والإيميلات.txt', summaryText);
+
+        let csvContent = '\uFEFFم,رقم الهوية,اسم المتدرب,الشركة الراعية,نوع الإنذار,البريد الإلكتروني,اسم ملف الإنذار المرفق\r\n';
+        batchRecords.forEach(r => {
+            csvContent += `"${r.order}","${r.id}","${r.name}","${r.company}","${r.warningType}","${r.email}","${r.filename}"\r\n`;
+        });
+        zip.file('سجل_الإنذارات_والإيميلات.csv', csvContent);
+
         if (progressBar) progressBar.style.width = '100%';
         if (progressPercent) progressPercent.textContent = '100%';
-        if (progressStatus) progressStatus.textContent = `تم توليد ${successCount} ملف بنجاح! جاري ضغط وتحميل ملف الـ ZIP...`;
+        if (progressStatus) progressStatus.textContent = `تم توليد ${successCount} ملف بنجاح مع إدراج قوائم الإيميلات! جاري ضغط وتحميل حزمة الـ ZIP...`;
 
-        window.scrollTo(savedScrollX, savedScrollY);
         if (tempHost.parentNode) tempHost.parentNode.removeChild(tempHost);
 
         try {
