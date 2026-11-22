@@ -27418,26 +27418,31 @@ ${details}
 
     function detectCompany(sheetName) {
 
-        const s = (sheetName || '').toUpperCase();
+        const raw = String(sheetName || '').trim();
+        const s = raw.toUpperCase();
 
-        if (s.includes('SAMSUNG')) return 'سامسونج (Samsung)';
+        if (s.includes('SAMSUNG') || s.includes('سامسونج')) return 'سامسونج (Samsung)';
 
-        if (s.includes('HYUNDAI')) return 'هونداي (Hyundai)';
+        if (s.includes('HYUNDAI') || s.includes('هونداي') || s.includes('هيونداي')) return 'هونداي (Hyundai)';
 
         if (s.includes('SINOPEC') || s.includes('سينوبك') || s.includes('ساينبوك')) {
             if (/(?:^|\D)2\d{2}(?:\D|$)/.test(s)) return 'ساينبوك 200 (Sinopec 200)';
             return 'ساينبوك 100 (Sinopec 100)';
         }
 
-        if (s.includes('SHINBO')) return 'شينبو (Shinbo)';
+        if (s.includes('SHINBO') || s.includes('شينبو')) return 'شينبو (Shinbo)';
 
-        if (s.includes('ELECO')) return 'إليكو (Eleco)';
+        if (s.includes('ELECO') || s.includes('إليكو') || s.includes('اليكو')) return 'إليكو (Eleco)';
 
-        if (s.includes('AMANA')) return 'أمانة (Amana)';
+        if (s.includes('AMANA') || s.includes('أمانة') || s.includes('امانة')) return 'أمانة (Amana)';
 
         if (s.includes('AIC') || s.includes('العربية') || s.includes('الحديدية')) return 'AIC';
 
-        return sheetName.trim();
+        if (/^(البيانات|بيانات|قاعدة البيانات|شيت البيانات|ورقة|ورقة1|ورقة 1|ورقة عمل|صفحة|صفحة1|sheet|sheet1|sheet 1|data)$/i.test(raw)) {
+            return '';
+        }
+
+        return raw;
 
     }
 
@@ -36554,23 +36559,28 @@ function openReportFromProfile() {
 
     function detectCompanyFromSheetName(name) {
 
-        const n = String(name || '').toUpperCase().trim();
+        const raw = String(name || '').trim();
+        const n = raw.toUpperCase();
 
-        if (n.includes('SAMSUNG')) return 'Samsung';
+        if (n.includes('SAMSUNG') || n.includes('سامسونج')) return 'Samsung';
 
-        if (n.includes('SINOPEC')) return 'Sinopec';
+        if (n.includes('SINOPEC') || n.includes('سينوبك') || n.includes('ساينبوك')) return 'Sinopec';
 
-        if (n.includes('HYUNDAI')) return 'HYUNDAI';
+        if (n.includes('HYUNDAI') || n.includes('هونداي') || n.includes('هيونداي')) return 'HYUNDAI';
 
-        if (n.includes('SHINBO') || n.includes('SHIBO')) return 'Shinbo';
+        if (n.includes('SHINBO') || n.includes('SHIBO') || n.includes('شينبو')) return 'Shinbo';
 
-        if (n.includes('AMANA')) return 'Amana';
+        if (n.includes('AMANA') || n.includes('أمانة') || n.includes('امانة')) return 'Amana';
 
-        if (n.includes('AIC')) return 'AIC';
+        if (n.includes('AIC') || n.includes('العربية')) return 'AIC';
 
-        if (n.includes('ELECO')) return 'Eleco';
+        if (n.includes('ELECO') || n.includes('إليكو') || n.includes('اليكو')) return 'Eleco';
 
-        return name || 'غير محدد';
+        if (/^(البيانات|بيانات|قاعدة البيانات|شيت البيانات|ورقة|ورقة1|ورقة 1|ورقة عمل|صفحة|صفحة1|sheet|sheet1|data)$/i.test(raw)) {
+            return '';
+        }
+
+        return raw || 'غير محدد';
 
     }
 
@@ -99447,6 +99457,111 @@ function getCTPAdmissionFormData(trainee) {
         customReason: ''
     };
 
+    function isGenericCompanyPlaceholder(val) {
+        if (!val) return true;
+        const s = String(val).trim();
+        if (!s) return true;
+        return /^(البيانات|بيانات|قاعدة البيانات|شيت البيانات|ورقة|ورقة1|ورقة 1|ورقة عمل|صفحة|صفحة1|sheet|sheet1|sheet 1|data|المؤسسة|غير محدد|غير معروف|أخرى|اخرى|عام|null|undefined|-|none|default)$/i.test(s);
+    }
+
+    function resolveTraineeName(t, targetId) {
+        const cleanId = (typeof cleanNationalId === 'function') 
+            ? cleanNationalId(targetId || (t && t.id)) 
+            : String(targetId || (t && t.id) || '').replace(/\D/g, '');
+
+        if (cleanId && typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined' && MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId]?.name) {
+            const masterName = String(MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId].name).trim();
+            if (masterName && !masterName.startsWith('متدرب بدون')) return masterName;
+        }
+
+        const candidateName = String((t && t.name) || '').trim();
+        if (candidateName && !candidateName.startsWith('متدرب (') && !candidateName.startsWith('متدرب بدون') && candidateName !== 'متدرب') {
+            return candidateName;
+        }
+
+        if (cleanId && typeof phoneDirectory !== 'undefined' && phoneDirectory[cleanId]?.name) {
+            const dirName = String(phoneDirectory[cleanId].name).trim();
+            if (dirName && !dirName.startsWith('متدرب')) return dirName;
+        }
+
+        return candidateName || (cleanId ? `متدرب (${cleanId})` : 'متدرب');
+    }
+
+    function resolveTraineeCompany(t, targetId) {
+        const cleanId = (typeof cleanNationalId === 'function') 
+            ? cleanNationalId(targetId || (t && t.id)) 
+            : String(targetId || (t && t.id) || '').replace(/\D/g, '');
+
+        // 1. Authoritative registry directory (733 trainees)
+        if (cleanId && typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined' && MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId]) {
+            const reg = MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId];
+            if (reg && reg.company && !isGenericCompanyPlaceholder(reg.company)) {
+                return String(reg.company).trim();
+            }
+        }
+
+        // 2. Candidate company on object if valid
+        if (t && t.company && !isGenericCompanyPlaceholder(t.company)) {
+            return String(t.company).trim();
+        }
+
+        // 3. phoneDirectory
+        if (cleanId && typeof phoneDirectory !== 'undefined' && phoneDirectory[cleanId]) {
+            const dirComp = phoneDirectory[cleanId].company;
+            if (dirComp && !isGenericCompanyPlaceholder(dirComp)) {
+                return String(dirComp).trim();
+            }
+        }
+
+        // 4. Live trainees list in memory / localStorage
+        let liveList = [];
+        if (typeof trainees !== 'undefined' && Array.isArray(trainees)) {
+            liveList = trainees;
+        } else {
+            try {
+                const storedT = JSON.parse(localStorage.getItem('sys_trainees_v9') || '[]');
+                if (Array.isArray(storedT)) liveList = storedT;
+            } catch (e) {}
+        }
+        if (cleanId && liveList.length > 0) {
+            const match = liveList.find(x => ((typeof cleanNationalId === 'function') ? cleanNationalId(x.id) : String(x.id || '').replace(/\D/g, '')) === cleanId);
+            if (match && match.company && !isGenericCompanyPlaceholder(match.company)) {
+                return String(match.company).trim();
+            }
+            if (match && match.group && typeof detectCompanyFromGroup === 'function') {
+                const compFromGrp = detectCompanyFromGroup(match.group);
+                if (compFromGrp && compFromGrp !== 'أخرى' && !isGenericCompanyPlaceholder(compFromGrp)) {
+                    return (typeof getCompanyArabicName === 'function') ? getCompanyArabicName(compFromGrp) : compFromGrp;
+                }
+            }
+        }
+
+        // 5. Group or district detection
+        const grp = (t && (t.group || t.district || t.section)) || '';
+        if (grp && typeof detectCompanyFromGroup === 'function') {
+            const compFromGrp = detectCompanyFromGroup(grp);
+            if (compFromGrp && compFromGrp !== 'أخرى' && !isGenericCompanyPlaceholder(compFromGrp)) {
+                return (typeof getCompanyArabicName === 'function') ? getCompanyArabicName(compFromGrp) : compFromGrp;
+            }
+        }
+        if (grp && typeof detectCompany === 'function') {
+            const dc = detectCompany(grp);
+            if (dc && !isGenericCompanyPlaceholder(dc)) {
+                return dc;
+            }
+        }
+
+        // 6. archiveData
+        if (cleanId && typeof archiveData !== 'undefined' && archiveData && archiveData[cleanId]) {
+            const archComp = archiveData[cleanId].company;
+            if (archComp && !isGenericCompanyPlaceholder(archComp)) {
+                return String(archComp).trim();
+            }
+        }
+
+        return 'معهد الذهب الأسود';
+    }
+
     function getDisciplinaryTraineesPool() {
         const poolMap = new Map();
 
@@ -99463,7 +99578,11 @@ function getCTPAdmissionFormData(trainee) {
 
         liveSheetList.forEach(t => {
             const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
-            if (cid) poolMap.set(cid, { ...t, id: cid });
+            if (cid) {
+                const cName = resolveTraineeName(t, cid);
+                const cComp = resolveTraineeCompany(t, cid);
+                poolMap.set(cid, { ...t, id: cid, name: cName, company: cComp });
+            }
         });
 
         // 2. إثراء السجلات من مصفوفة التجمع الشامل getUnifiedTraineesPool لحفظ بيانات التواصل
@@ -99473,14 +99592,20 @@ function getCTPAdmissionFormData(trainee) {
             if (cid) {
                 if (poolMap.has(cid)) {
                     const existing = poolMap.get(cid);
+                    const cName = resolveTraineeName(existing, cid) || resolveTraineeName(u, cid);
+                    const cComp = resolveTraineeCompany(existing, cid) || resolveTraineeCompany(u, cid);
                     poolMap.set(cid, {
                         ...u,
                         ...existing,
+                        name: cName,
+                        company: cComp,
                         phone: existing.phone || u.phone,
                         email: existing.email || u.email
                     });
                 } else {
-                    poolMap.set(cid, { ...u, id: cid });
+                    const cName = resolveTraineeName(u, cid);
+                    const cComp = resolveTraineeCompany(u, cid);
+                    poolMap.set(cid, { ...u, id: cid, name: cName, company: cComp });
                 }
             }
         });
@@ -99489,7 +99614,11 @@ function getCTPAdmissionFormData(trainee) {
         if (poolMap.size === 0 && typeof SAMPLE_TRAINEES !== 'undefined' && Array.isArray(SAMPLE_TRAINEES)) {
             SAMPLE_TRAINEES.forEach(st => {
                 const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(st.id) : String(st.id || '').replace(/\D/g, '');
-                if (cid) poolMap.set(cid, { ...st, id: cid });
+                if (cid) {
+                    const cName = resolveTraineeName(st, cid);
+                    const cComp = resolveTraineeCompany(st, cid);
+                    poolMap.set(cid, { ...st, id: cid, name: cName, company: cComp });
+                }
             });
         }
 
@@ -99499,7 +99628,7 @@ function getCTPAdmissionFormData(trainee) {
             poolMap.set(cleanTargetId, {
                 id: '1140416528',
                 name: 'ريان بن ضحيان بن حثوان غزواني',
-                company: 'هونداي',
+                company: 'هونداي (Hyundai)',
                 group: 'هونداي - المسار الفني',
                 phone: '',
                 email: 'rayan.ghazwani@example.com',
@@ -99512,14 +99641,20 @@ function getCTPAdmissionFormData(trainee) {
             });
         }
 
+        // ضمان نهائي أن جميع المتدربين تم تطهير أسمائهم وشركاتهم من أي تسمية افتراضية كالبيانات
+        for (const [cid, tr] of poolMap.entries()) {
+            tr.name = resolveTraineeName(tr, cid);
+            tr.company = resolveTraineeCompany(tr, cid);
+        }
+
         return Array.from(poolMap.values());
     }
 
     function evaluateTraineeDisciplinaryStatus(t) {
         if (!t) return null;
         const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
-        const name = String(t.name || 'متدرب').trim();
-        const company = String(t.company || 'المؤسسة').trim();
+        const name = resolveTraineeName(t, cleanId);
+        const company = resolveTraineeCompany(t, cleanId);
         const group = String(t.group || 'شعبة معتمدة').trim();
 
         // Contact info
@@ -99950,19 +100085,32 @@ function getCTPAdmissionFormData(trainee) {
             return cid === cleanId;
         });
 
+        if (!trainee && typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined' && MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId]) {
+            const reg = MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId];
+            trainee = {
+                id: cleanId,
+                name: reg.name,
+                company: reg.company || 'ساينبوك (Sinopec)',
+                group: reg.district || 'المسار التدريبي'
+            };
+        }
+
         const evaluated = evaluateTraineeDisciplinaryStatus(trainee || { id: cleanId, name: 'متدرب' });
         const effType = warningType || (typeof getEffectiveWarningType === 'function' ? getEffectiveWarningType(cleanId, evaluated.recommendedWarning) : evaluated.recommendedWarning) || 'إنذار نهائي';
 
         userSelectedWarningTypes[cleanId] = effType;
         userSelectedWarningTypes[traineeId] = effType;
 
+        const resolvedName = resolveTraineeName(trainee, cleanId) || customOpts.name || evaluated.name;
+        const resolvedComp = resolveTraineeCompany(trainee, cleanId) || customOpts.company || evaluated.company;
+
         currentWarningPreviewState = {
             id: evaluated.id,
-            name: customOpts.name || evaluated.name,
-            company: customOpts.company || evaluated.company,
+            name: resolvedName,
+            company: resolvedComp,
             group: customOpts.group || evaluated.group,
             warningType: effType,
-            date: customOpts.date || evaluated.date || '14/07/2026',
+            date: customOpts.date || evaluated.date || getTodayWarningDate(),
             email: customOpts.email || evaluated.email,
             phone: customOpts.phone || evaluated.phone,
             rate: evaluated.rate,
@@ -100452,6 +100600,8 @@ ${cfg.text}
         let successCount = 0;
         for (let i = 0; i < targets.length; i++) {
             const tr = targets[i];
+            tr.name = resolveTraineeName(tr, tr.id);
+            tr.company = resolveTraineeCompany(tr, tr.id);
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
             const effType = (typeof getEffectiveWarningType === 'function') ? getEffectiveWarningType(tr.id, tr.recommendedWarning) : (tr.recommendedWarning || 'إنذار نهائي');
             const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
@@ -100652,8 +100802,8 @@ ${cfg.text}
             if (!trainee) {
                 trainee = {
                     id: cid,
-                    name: `متدرب (${cid})`,
-                    company: 'المؤسسة',
+                    name: resolveTraineeName(null, cid),
+                    company: resolveTraineeCompany(null, cid),
                     group: 'المسار التدريبي',
                     rate: 20,
                     consecutiveAbsentDays: 10,
@@ -100661,11 +100811,18 @@ ${cfg.text}
                 };
             }
 
+            // Guarantee real company and name (strictly eliminate 'البيانات' or generic placeholders)
+            trainee.name = resolveTraineeName(trainee, cid);
+            trainee.company = resolveTraineeCompany(trainee, cid);
+
             const evaluated = evaluateTraineeDisciplinaryStatus(trainee);
             const chosenType = userSelectedWarningTypes[cid] || 'إنذار نهائي';
 
             return {
                 ...evaluated,
+                id: cid,
+                name: resolveTraineeName(evaluated, cid),
+                company: resolveTraineeCompany(evaluated, cid),
                 warningType: chosenType,
                 date: dateToday
             };
@@ -100774,6 +100931,8 @@ ${cfg.text}
         }
 
         const evaluated = evaluateTraineeDisciplinaryStatus(trainee || { id: cleanId, name: 'متدرب' });
+        evaluated.name = resolveTraineeName(evaluated, cleanId);
+        evaluated.company = resolveTraineeCompany(evaluated, cleanId);
         const effType = warningType || 'إنذار نهائي';
         const effDate = customDate || getTodayWarningDate();
         const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
@@ -100943,6 +101102,8 @@ ${cfg.text}
 
         for (let i = 0; i < total; i++) {
             const tr = currentQuickBatchTrainees[i];
+            tr.name = resolveTraineeName(tr, tr.id);
+            tr.company = resolveTraineeCompany(tr, tr.id);
             const effType = tr.warningType || 'إنذار نهائي';
             const effDate = tr.date || getTodayWarningDate();
             const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
