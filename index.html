@@ -98788,13 +98788,18 @@ function getCTPAdmissionFormData(trainee) {
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <img src="assets/bgti_logo.png" alt="Black Gold Training Institute" style="height: 70px; width: auto; object-fit: contain;">
-                                <div style="text-align: left; direction: rtl; font-size: 13px; font-weight: 700; color: #475569; padding-top: 5px;">
-                                    <span style="font-weight: 700; color: #475569;">التاريخ:&nbsp;</span><span id="warnDateDisplay" style="font-weight: 800; color: #0f172a; direction: ltr; unicode-bidi: isolate; display: inline-block;">14/07/2026 م</span>
-                                </div>
+                                <table style="border-collapse: collapse; direction: rtl; margin-top: 5px;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ:</td>
+                                            <td style="font-size: 13px; font-weight: 800; color: #0f172a; white-space: nowrap; vertical-align: middle; direction: ltr; text-align: left;"><span id="warnDateDisplay">14/07/2026 م</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
 
                             <!-- Centered Title / Document Type Badge (Compact, formal, immune to reverse text rendering) -->
-                            <div style="text-align: center; margin-top: 14px; margin-bottom: 18px; direction: rtl;">
+                            <div id="warnTitleContainer" style="text-align: center; margin-top: 14px; margin-bottom: 18px; direction: rtl;">
                                 <table align="center" style="margin: 0 auto; border-collapse: collapse; direction: rtl; text-align: center;">
                                     <tbody>
                                         <tr>
@@ -98860,10 +98865,6 @@ function getCTPAdmissionFormData(trainee) {
                             <!-- Footer Bar (Contacts) -->
                             <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
                                 <div style="font-size: 10px; line-height: 1.6; font-weight: 700; color: #475569; text-align: left; font-family: sans-serif;">
-                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
-                                        <span>+966 54 889 6955</span>
-                                        <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
-                                    </div>
                                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                                         <span>info@blackgold.edu.sa</span>
                                         <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
@@ -99306,7 +99307,7 @@ function getCTPAdmissionFormData(trainee) {
         warningType: 'إنذار نهائي',
         date: '14/07/2026',
         email: 'rayan.ghazwani@example.com',
-        phone: '0548896955',
+        phone: '',
         rate: 20,
         consecutiveAbsentDays: 14,
         absentPeriods: 28,
@@ -99367,7 +99368,7 @@ function getCTPAdmissionFormData(trainee) {
                 name: 'ريان بن ضحيان بن حثوان غزواني',
                 company: 'هونداي',
                 group: 'هونداي - المسار الفني',
-                phone: '0548896955',
+                phone: '',
                 email: 'rayan.ghazwani@example.com',
                 rate: 20,
                 combinedRate: 20,
@@ -99407,7 +99408,7 @@ function getCTPAdmissionFormData(trainee) {
         if (!phone && typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined' && MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId]?.phone) {
             phone = MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId].phone;
         }
-        if (!phone) phone = '0548896955';
+        if (!phone) phone = '-';
 
         // 1. [AUTHORITATIVE LIVE SHEET LOOKUP] مطابقة المتدرب مع كشف التحضير الحي (trainees و التخزين المحلي)
         let liveT = null;
@@ -99932,6 +99933,56 @@ function getCTPAdmissionFormData(trainee) {
         if (sigImgEl) sigImgEl.style.display = showSig ? 'block' : 'none';
     }
 
+    function createWarningTitleCanvasImage(titleText) {
+        const text = String(titleText || 'الإنذار النهائي').trim();
+        const canvas = document.createElement('canvas');
+        const scale = 2;
+        const badgeW = 220;
+        const badgeH = 42;
+        canvas.width = badgeW * scale;
+        canvas.height = badgeH * scale;
+
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+
+        // Rounded badge background
+        const x = 2, y = 2, w = badgeW - 4, h = badgeH - 4, r = 8;
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.fill();
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Native 2D canvas text shaper guarantees flawless Arabic RTL ligatures
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '900 17px "Almarai", "Cairo", "Tajawal", "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.direction = 'rtl';
+        ctx.fillText(text, badgeW / 2, badgeH / 2 + 1);
+
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        img.style.width = badgeW + 'px';
+        img.style.height = badgeH + 'px';
+        img.style.display = 'block';
+        img.style.margin = '0 auto';
+        img.alt = text;
+        return img;
+    }
+
     function printDisciplinaryWarningLetter() {
         document.body.classList.add('printing-warning');
         window.print();
@@ -99984,7 +100035,7 @@ function getCTPAdmissionFormData(trainee) {
         showToast(`جاري تجهيز وتحميل ملف الـ PDF: ${filename}...`, 'info');
 
         // Isolation Host: Clones the updated sheet into a clean root-level container at (0, 0)
-        // Completely eliminates the 214px offset bug caused by modal headers and scroll positions!
+        // Completely eliminates the scroll offset and clipping bug
         const clone = sheet.cloneNode(true);
         clone.id = 'warnLetterheadPrintableSheet_export';
         clone.style.margin = '0';
@@ -99992,10 +100043,17 @@ function getCTPAdmissionFormData(trainee) {
         clone.setAttribute('dir', 'rtl');
         clone.style.direction = 'rtl';
 
+        // Bulletproof fix for reversed title: replace text title with rendered canvas image
+        const titleContainer = clone.querySelector('#warnTitleContainer') || clone.querySelector('#warnTitleDisplay')?.closest('div');
+        if (titleContainer) {
+            titleContainer.innerHTML = '';
+            titleContainer.appendChild(createWarningTitleCanvasImage(effType));
+        }
+
         const host = document.createElement('div');
         host.id = 'warningPdfExportHost';
         host.setAttribute('dir', 'rtl');
-        host.style.position = 'fixed';
+        host.style.position = 'absolute';
         host.style.top = '0';
         host.style.left = '0';
         host.style.width = '794px';
@@ -100009,12 +100067,14 @@ function getCTPAdmissionFormData(trainee) {
         host.appendChild(clone);
         document.body.appendChild(host);
 
-        await new Promise(r => setTimeout(r, 80));
+        // Bulletproof fix for cut-off / scroll offset: save and scroll window to (0, 0)
+        const savedScrollX = window.scrollX || window.pageXOffset || 0;
+        const savedScrollY = window.scrollY || window.pageYOffset || 0;
+        window.scrollTo(0, 0);
+
+        await new Promise(r => setTimeout(r, 60));
 
         const opt = {
-            margin: [0, 0, 0, 0],
-            filename: filename,
-            image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
                 scale: 2,
                 useCORS: true,
@@ -100023,21 +100083,34 @@ function getCTPAdmissionFormData(trainee) {
                 scrollY: 0,
                 x: 0,
                 y: 0,
+                width: 794,
+                height: 1122,
                 windowWidth: 794
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }
         };
 
         try {
-            await html2pdf().set(opt).from(clone).save();
+            // Render exact 1-page canvas
+            const canvas = await html2pdf().set(opt).from(clone).toCanvas().get('canvas');
+
+            // Restore scroll and remove host immediately
+            window.scrollTo(savedScrollX, savedScrollY);
+            if (host.parentNode) host.parentNode.removeChild(host);
+
+            // Create single-page jsPDF doc and place image at exact (0, 0, 210, 297)
+            const emptySeed = document.createElement('div');
+            const doc = await html2pdf().set({ jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(emptySeed).toPdf().get('pdf');
+
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+            doc.save(filename);
+
             showToast(`✅ تم تحميل ملف الإنذار بنجاح: ${filename}`, 'success');
         } catch (err) {
             console.error('html2pdf download error:', err);
+            window.scrollTo(savedScrollX, savedScrollY);
+            if (host.parentNode) host.parentNode.removeChild(host);
             showToast('حدث خطأ أثناء تنزيل الـ PDF: ' + err.message, 'error');
-        } finally {
-            if (host.parentNode) {
-                host.parentNode.removeChild(host);
-            }
         }
     }
 
@@ -100109,7 +100182,6 @@ ${cfg.text}
 ---
 مسؤول شؤون المتدربين: علي آل عباس
 معهد الذهب الأسود العالي للتدريب
-هاتف: +966 54 889 6955
 البريد الإلكتروني: info@blackgold.edu.sa
 طريق الأمير محمد بن فهد، الشاطئ الغربي، الدمام 32413`;
 
@@ -100141,8 +100213,15 @@ ${cfg.text}
                 clone.style.margin = '0';
                 clone.style.boxShadow = 'none';
 
+                // Bulletproof fix for reversed title: replace text title with rendered canvas image
+                const titleContainer = clone.querySelector('#warnTitleContainer') || clone.querySelector('#warnTitleDisplay')?.closest('div');
+                if (titleContainer) {
+                    titleContainer.innerHTML = '';
+                    titleContainer.appendChild(createWarningTitleCanvasImage(effType));
+                }
+
                 host = document.createElement('div');
-                host.style.position = 'fixed';
+                host.style.position = 'absolute';
                 host.style.top = '0';
                 host.style.left = '0';
                 host.style.width = '794px';
@@ -100155,16 +100234,27 @@ ${cfg.text}
                 host.appendChild(clone);
                 document.body.appendChild(host);
 
-                await new Promise(r => setTimeout(r, 80));
+                const savedScrollX = window.scrollX || window.pageXOffset || 0;
+                const savedScrollY = window.scrollY || window.pageYOffset || 0;
+                window.scrollTo(0, 0);
+
+                await new Promise(r => setTimeout(r, 60));
 
                 const opt = {
-                    margin: [0, 0, 0, 0],
-                    filename: `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`,
-                    image: { type: 'jpeg', quality: 0.95 },
-                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollX: 0, scrollY: 0, x: 0, y: 0, windowWidth: 794 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollX: 0, scrollY: 0, x: 0, y: 0, width: 794, height: 1122, windowWidth: 794 }
                 };
-                const pdfBlob = await html2pdf().set(opt).from(clone).output('blob');
+                const canvas = await html2pdf().set(opt).from(clone).toCanvas().get('canvas');
+
+                window.scrollTo(savedScrollX, savedScrollY);
+                if (host && host.parentNode) host.parentNode.removeChild(host);
+                host = null;
+
+                const emptySeed = document.createElement('div');
+                const doc = await html2pdf().set({ jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(emptySeed).toPdf().get('pdf');
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+
+                const pdfBlob = doc.output('blob');
                 const pdfFile = new File([pdfBlob], `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`, { type: 'application/pdf' });
 
                 if (navigator.canShare({ files: [pdfFile] })) {
@@ -100210,7 +100300,7 @@ ${cfg.text}
         // Create temporary off-screen container for rendering
         const tempHost = document.createElement('div');
         tempHost.id = 'warningZipExportHost';
-        tempHost.style.position = 'fixed';
+        tempHost.style.position = 'absolute';
         tempHost.style.top = '0';
         tempHost.style.left = '0';
         tempHost.style.width = '794px';
@@ -100222,12 +100312,18 @@ ${cfg.text}
         tempHost.style.overflow = 'hidden';
         document.body.appendChild(tempHost);
 
+        const savedScrollX = window.scrollX || window.pageXOffset || 0;
+        const savedScrollY = window.scrollY || window.pageYOffset || 0;
+        window.scrollTo(0, 0);
+
         let successCount = 0;
         for (let i = 0; i < targets.length; i++) {
             const tr = targets[i];
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
             const effType = (typeof getEffectiveWarningType === 'function') ? getEffectiveWarningType(tr.id, tr.recommendedWarning) : (tr.recommendedWarning || 'إنذار نهائي');
             const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
+
+            const titleImg = createWarningTitleCanvasImage(effType);
 
             // Build HTML for trainee (pixel-perfect table layout, no bidi reversing, exact fit)
             tempHost.innerHTML = `
@@ -100243,21 +100339,18 @@ ${cfg.text}
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <img src="assets/bgti_logo.png" alt="BGTI" style="height: 70px; width: auto; object-fit: contain;">
-                                <div style="text-align: left; direction: rtl; font-size: 13px; font-weight: 700; color: #475569; padding-top: 5px;">
-                                    <span style="font-weight: 700; color: #475569;">التاريخ:&nbsp;</span><span style="font-weight: 800; color: #0f172a; direction: ltr; unicode-bidi: isolate; display: inline-block;">${tr.date} م</span>
-                                </div>
-                            </div>
-                            <!-- Centered Title / Document Type Badge (Compact, formal, immune to reverse text rendering) -->
-                            <div style="text-align: center; margin-top: 14px; margin-bottom: 18px; direction: rtl;">
-                                <table align="center" style="margin: 0 auto; border-collapse: collapse; direction: rtl; text-align: center;">
+                                <table style="border-collapse: collapse; direction: rtl; margin-top: 5px;">
                                     <tbody>
                                         <tr>
-                                            <td style="border: 2px solid #0f172a; border-radius: 8px; padding: 5px 26px; background: #f8fafc; text-align: center; direction: rtl;">
-                                                <span style="font-size: 17px; font-weight: 900; color: #0f172a; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; letter-spacing: 0; direction: rtl; unicode-bidi: isolate; display: inline-block;">${cfg.title}</span>
-                                            </td>
+                                            <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ:</td>
+                                            <td style="font-size: 13px; font-weight: 800; color: #0f172a; white-space: nowrap; vertical-align: middle; direction: ltr; text-align: left;">${tr.date} م</td>
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                            <!-- Centered Title / Document Type Badge (Rendered as Image, 100% immune to reverse text rendering) -->
+                            <div style="text-align: center; margin-top: 14px; margin-bottom: 18px; direction: rtl;">
+                                ${titleImg.outerHTML}
                             </div>
                             <table style="width: 100%; border-collapse: collapse; margin-top: 14px; margin-bottom: 18px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
                                 <tbody>
@@ -100297,10 +100390,6 @@ ${cfg.text}
                             <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
                                 <div style="font-size: 10px; line-height: 1.6; font-weight: 700; color: #475569; text-align: left; font-family: sans-serif;">
                                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
-                                        <span>+966 54 889 6955</span>
-                                        <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
-                                    </div>
-                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                                         <span>info@blackgold.edu.sa</span>
                                         <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
                                     </div>
@@ -100319,14 +100408,17 @@ ${cfg.text}
             await new Promise(r => setTimeout(r, 60));
 
             const opt = {
-                margin: [0, 0, 0, 0],
-                image: { type: 'jpeg', quality: 0.95 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollX: 0, scrollY: 0, x: 0, y: 0, windowWidth: 794 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollX: 0, scrollY: 0, x: 0, y: 0, width: 794, height: 1122, windowWidth: 794 }
             };
 
             try {
-                const pdfBlob = await html2pdf().set(opt).from(tempHost.firstElementChild).output('blob');
+                const canvas = await html2pdf().set(opt).from(tempHost.firstElementChild).toCanvas().get('canvas');
+                const dummy = document.createElement('div');
+                const doc = await html2pdf().set({ jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(dummy).toPdf().get('pdf');
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+                const pdfBlob = doc.output('blob');
+
                 // Name file with Trainee ID and selected warning type
                 const pdfFilename = `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`;
                 zip.file(pdfFilename, pdfBlob);
@@ -100336,6 +100428,7 @@ ${cfg.text}
             }
         }
 
+        window.scrollTo(savedScrollX, savedScrollY);
         document.body.removeChild(tempHost);
 
         if (successCount === 0) {
@@ -100705,7 +100798,6 @@ ${cfg.text}
                         <!-- Footer Strip -->
                         <div style="border-top:1px solid #e2e8f0; padding-top:8px; display:flex; justify-content:space-between; align-items:center; font-size:9.5px; font-weight:700; color:#64748b; font-family:sans-serif;">
                             <div style="display:flex; gap:12px; align-items:center;">
-                                <span>📞 +966 54 889 6955</span>
                                 <span>✉️ tvtc@blackgold.edu.sa</span>
                             </div>
                             <div>
