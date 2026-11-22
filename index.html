@@ -13318,7 +13318,52 @@
                 </div>
             </div>
 
-            <!-- KPI Metric Cards -->
+            <!-- QUICK NATIONAL ID WARNING ISSUANCE CARD (TOP PRIORITY) -->
+            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 p-6 rounded-3xl border-2 border-amber-500/60 shadow-xl text-white space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center text-2xl font-black shrink-0 shadow-lg">
+                            ⚡
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-slate-950">إصدار فوري بالهويات</span>
+                                <span class="text-xs font-bold text-amber-300">تحليل تلقائي للسجلات وكشوف الحضور</span>
+                            </div>
+                            <h2 class="text-lg font-black text-white mt-0.5">
+                                إصدار الإنذارات بأرقام الهويات المحددة (تنزيل حزمة ZIP أو فردي)
+                            </h2>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button type="button" onclick="loadSampleQuickWarningIds()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5" title="لصق قائمة الـ 12 هوية النموذجية">
+                            <span>📋</span>
+                            <span>تجربة قائمة الـ 12 هوية</span>
+                        </button>
+                        <button type="button" onclick="clearQuickWarningIds()" class="px-3 py-2 bg-slate-800 hover:bg-rose-950 text-slate-300 hover:text-rose-300 border border-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+                            مسح
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-300">
+                        أدخل أو الصق أرقام الهويات الوطنية (كل هوية في سطر، أو مفصولة بمسافات أو فواصل):
+                    </label>
+                    <textarea id="quickWarningIdsInput" rows="4" placeholder="مثال:&#10;1125508224&#10;1123640003&#10;1137195499&#10;1136913520&#10;..." class="w-full text-xs font-mono font-bold bg-slate-950/80 border border-slate-700 focus:border-amber-400 rounded-2xl p-3 text-amber-300 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition"></textarea>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+                    <div class="text-xs text-slate-400 flex items-center gap-2">
+                        <span>💡</span>
+                        <span>يتم استخراج الاسم والشركة ونسب الغياب وتجهيز خيارات الإنذار والتاريخ مع شريط تقدم مباشر.</span>
+                    </div>
+                    <button type="button" onclick="analyzeAndOpenQuickWarningBatch()" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-black rounded-2xl text-sm shadow-xl transition transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2">
+                        <span>⚡</span>
+                        <span>تحليل الهويات وتجهيز الإنذارات</span>
+                    </button>
+                </div>
+            </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xs">
                     <div class="flex items-center justify-between">
@@ -98677,7 +98722,100 @@ function getCTPAdmissionFormData(trainee) {
     </div>
 
     <!-- ==================== REGISTRATION FORM MODAL ==================== -->
-        <!-- ==================== DISCIPLINARY WARNING PREVIEW & PRINT MODAL ==================== -->
+    <!-- ==================== QUICK WARNING BATCH MODAL (POPUP) ==================== -->
+    <div id="quickWarningBatchModal" class="hidden fixed inset-0 z-[330] bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto no-print" dir="rtl">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black text-lg shadow-md">
+                        ⚡
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-white flex items-center gap-2">
+                            <span>تجهيز حزمة الإنذارات الرسمية</span>
+                            <span id="quickBatchCountBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black">0 متدرب</span>
+                        </h3>
+                        <p class="text-xs text-slate-300 mt-0.5">تم استخراج وتحليل السجلات من قاعدة بيانات المتدربين وكشوف الحضور</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeQuickWarningBatchModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer text-lg font-bold">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Global Batch Options Bar -->
+            <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نوع الإنذار المطلوب للدفعة:</label>
+                    <select id="quickBatchWarningTypeSelect" class="w-full text-xs font-black bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-slate-900 dark:text-white cursor-pointer shadow-2xs">
+                        <option value="إنذار نهائي" selected>⛔ الإنذار النهائي</option>
+                        <option value="إنذار ثانٍ">🛑 الإنذار الثاني</option>
+                        <option value="إنذار أول">⚠️ الإنذار الأول</option>
+                        <option value="إشعار تنبيه">ℹ️ إشعار تنبيه</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">تاريخ إصدار الإنذار (تاريخ اليوم):</label>
+                    <input type="text" id="quickBatchDateInput" class="w-full text-xs font-black bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-slate-900 dark:text-white" value="">
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="applyQuickBatchTypeToAll()" class="w-full py-2 px-3 bg-slate-900 hover:bg-black dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold text-xs rounded-xl transition cursor-pointer shadow-xs">
+                        تطبيق النوع والتاريخ على الكل
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Bar Area (Shown during download) -->
+            <div id="quickBatchProgressArea" class="hidden p-4 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800/60 transition space-y-2">
+                <div class="flex items-center justify-between text-xs font-black text-amber-950 dark:text-amber-200">
+                    <span id="quickBatchProgressStatus">جاري تجهيز ملفات الـ PDF...</span>
+                    <span id="quickBatchProgressPercent" class="font-mono text-sm">0%</span>
+                </div>
+                <div class="w-full h-3.5 bg-amber-200/60 dark:bg-amber-900/60 rounded-full overflow-hidden p-0.5">
+                    <div id="quickBatchProgressBarFill" class="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full transition-all duration-150" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- Trainees Analyzed List Table -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <table class="w-full text-right text-xs border-collapse">
+                    <thead class="sticky top-0 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+                        <tr>
+                            <th class="p-2.5 text-center w-10">#</th>
+                            <th class="p-2.5">رقم الهوية</th>
+                            <th class="p-2.5">اسم المتدرب</th>
+                            <th class="p-2.5">الشركة الراعية</th>
+                            <th class="p-2.5 text-center">نسبة الحضور</th>
+                            <th class="p-2.5 text-center">نوع الإنذار المخصص</th>
+                            <th class="p-2.5 text-center">تنزيل مباشر</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quickBatchTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                        <!-- Populated dynamically by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Modal Footer Controls -->
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="text-xs text-slate-500 dark:text-slate-400">
+                    معهد الذهب الأسود - الدمام - فرع 3 • بدون نقاط في خانة التوقيع • بدون ترويسة عنوان بارزة
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button type="button" onclick="closeQuickWarningBatchModal()" class="flex-1 sm:flex-none px-4 py-2.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl transition cursor-pointer">
+                        إغلاق
+                    </button>
+                    <button type="button" id="quickBatchDownloadZipBtn" onclick="startQuickBatchZipDownload()" class="flex-1 sm:flex-none px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-lg transition cursor-pointer flex items-center justify-center gap-2">
+                        <span>📦</span>
+                        <span>بدء تنزيل حزمة الإنذارات (ZIP)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== DISCIPLINARY WARNING PREVIEW & PRINT MODAL ==================== -->
     <div id="disciplinaryWarningPreviewModal" class="hidden fixed inset-0 z-[320] bg-black/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto no-print" dir="rtl">
         <div class="bg-slate-100 dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[96vh] flex flex-col border border-slate-300 dark:border-slate-700 overflow-hidden">
             <!-- Modal Header -->
@@ -98798,21 +98936,8 @@ function getCTPAdmissionFormData(trainee) {
                                 </table>
                             </div>
 
-                            <!-- Centered Title / Document Type Badge (Compact, formal, immune to reverse text rendering) -->
-                            <div id="warnTitleContainer" style="text-align: center; margin-top: 14px; margin-bottom: 18px; direction: rtl;">
-                                <table align="center" style="margin: 0 auto; border-collapse: collapse; direction: rtl; text-align: center;">
-                                    <tbody>
-                                        <tr>
-                                            <td style="border: 2px solid #0f172a; border-radius: 8px; padding: 5px 26px; background: #f8fafc; text-align: center; direction: rtl;">
-                                                <span id="warnTitleDisplay" style="font-size: 17px; font-weight: 900; color: #0f172a; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; letter-spacing: 0; direction: rtl; unicode-bidi: isolate; display: inline-block;">الإنذار النهائي</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
                             <!-- Trainee Metadata Block (2-column table immune to bidi/colon reversal) -->
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 14px; margin-bottom: 18px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 24px; margin-bottom: 22px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
                                 <tbody>
                                     <tr>
                                         <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب:</td>
@@ -98845,8 +98970,8 @@ function getCTPAdmissionFormData(trainee) {
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
                                 <!-- Trainee Signature (Right) -->
                                 <div style="width: 48%; line-height: 2.5;">
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">توقيع المتدرب: .......................................</div>
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">الاسم : ...................................................</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب :</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع :</div>
                                 </div>
 
                                 <!-- Administration (Left) -->
@@ -98870,7 +98995,7 @@ function getCTPAdmissionFormData(trainee) {
                                         <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
                                     </div>
                                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
-                                        <span>Prince Mohammed Binfahd Road, Al Shati Al Gharbi, Dammam 32413</span>
+                                        <span>معهد الذهب الأسود - الدمام - فرع 3</span>
                                         <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
                                     </div>
                                 </div>
@@ -99299,13 +99424,21 @@ function getCTPAdmissionFormData(trainee) {
         return fallback;
     }
 
+    function getTodayWarningDate() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
     let currentWarningPreviewState = {
         id: '1140416528',
         name: 'ريان بن ضحيان بن حثوان غزواني',
         company: 'هونداي',
         group: 'هونداي - المسار الفني',
         warningType: 'إنذار نهائي',
-        date: '14/07/2026',
+        date: getTodayWarningDate(),
         email: 'rayan.ghazwani@example.com',
         phone: '',
         rate: 20,
@@ -99575,7 +99708,7 @@ function getCTPAdmissionFormData(trainee) {
             isConsecutive10: isConsecutive10,
             isLowRate30: isLowRate30,
             recommendedWarning: recommendedWarning,
-            date: '14/07/2026',
+            date: (t && t.date) || getTodayWarningDate(),
             warningText: (DISCIPLINARY_LEGAL_TEXTS[recommendedWarning] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي']).text
         };
     }
@@ -100010,7 +100143,7 @@ function getCTPAdmissionFormData(trainee) {
             company: evaluated.company,
             group: evaluated.group,
             warningType: effType,
-            date: evaluated.date || '14/07/2026',
+            date: evaluated.date || getTodayWarningDate(),
             email: evaluated.email,
             phone: evaluated.phone,
             rate: evaluated.rate,
@@ -100043,11 +100176,10 @@ function getCTPAdmissionFormData(trainee) {
         clone.setAttribute('dir', 'rtl');
         clone.style.direction = 'rtl';
 
-        // Bulletproof fix for reversed title: replace text title with rendered canvas image
+        // Title badge completely removed as requested
         const titleContainer = clone.querySelector('#warnTitleContainer') || clone.querySelector('#warnTitleDisplay')?.closest('div');
         if (titleContainer) {
-            titleContainer.innerHTML = '';
-            titleContainer.appendChild(createWarningTitleCanvasImage(effType));
+            titleContainer.remove();
         }
 
         const host = document.createElement('div');
@@ -100183,7 +100315,7 @@ ${cfg.text}
 مسؤول شؤون المتدربين: علي آل عباس
 معهد الذهب الأسود العالي للتدريب
 البريد الإلكتروني: info@blackgold.edu.sa
-طريق الأمير محمد بن فهد، الشاطئ الغربي، الدمام 32413`;
+معهد الذهب الأسود - الدمام - فرع 3`;
 
         // Check Web Share API with file support
         const sheet = document.getElementById('warnLetterheadPrintableSheet');
@@ -100197,7 +100329,7 @@ ${cfg.text}
                         company: evaluated.company,
                         group: evaluated.group,
                         warningType: effType,
-                        date: evaluated.date || '14/07/2026',
+                        date: evaluated.date || getTodayWarningDate(),
                         email: evaluated.email,
                         phone: evaluated.phone,
                         rate: evaluated.rate,
@@ -100213,11 +100345,10 @@ ${cfg.text}
                 clone.style.margin = '0';
                 clone.style.boxShadow = 'none';
 
-                // Bulletproof fix for reversed title: replace text title with rendered canvas image
+                // Title badge completely removed as requested
                 const titleContainer = clone.querySelector('#warnTitleContainer') || clone.querySelector('#warnTitleDisplay')?.closest('div');
                 if (titleContainer) {
-                    titleContainer.innerHTML = '';
-                    titleContainer.appendChild(createWarningTitleCanvasImage(effType));
+                    titleContainer.remove();
                 }
 
                 host = document.createElement('div');
@@ -100322,8 +100453,7 @@ ${cfg.text}
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(tr.id) : String(tr.id || '').replace(/\D/g, '');
             const effType = (typeof getEffectiveWarningType === 'function') ? getEffectiveWarningType(tr.id, tr.recommendedWarning) : (tr.recommendedWarning || 'إنذار نهائي');
             const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
-
-            const titleImg = createWarningTitleCanvasImage(effType);
+            const effDate = tr.date || getTodayWarningDate();
 
             // Build HTML for trainee (pixel-perfect table layout, no bidi reversing, exact fit)
             tempHost.innerHTML = `
@@ -100343,16 +100473,12 @@ ${cfg.text}
                                     <tbody>
                                         <tr>
                                             <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ:</td>
-                                            <td style="font-size: 13px; font-weight: 800; color: #0f172a; white-space: nowrap; vertical-align: middle; direction: ltr; text-align: left;">${tr.date} م</td>
+                                            <td style="font-size: 13px; font-weight: 800; color: #0f172a; white-space: nowrap; vertical-align: middle; direction: ltr; text-align: left;">${effDate} م</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- Centered Title / Document Type Badge (Rendered as Image, 100% immune to reverse text rendering) -->
-                            <div style="text-align: center; margin-top: 14px; margin-bottom: 18px; direction: rtl;">
-                                ${titleImg.outerHTML}
-                            </div>
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 14px; margin-bottom: 18px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 24px; margin-bottom: 22px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
                                 <tbody>
                                     <tr>
                                         <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب:</td>
@@ -100373,8 +100499,8 @@ ${cfg.text}
                         <div style="margin-top: auto;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
                                 <div style="width: 48%; line-height: 2.5;">
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">توقيع المتدرب: .......................................</div>
-                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">الاسم : ...................................................</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب :</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع :</div>
                                 </div>
                                 <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
                                     <div style="text-align: center; width: 230px;">
@@ -100394,7 +100520,7 @@ ${cfg.text}
                                         <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
                                     </div>
                                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
-                                        <span>Prince Mohammed Binfahd Road, Al Shati Al Gharbi, Dammam 32413</span>
+                                        <span>معهد الذهب الأسود - الدمام - فرع 3</span>
                                         <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
                                     </div>
                                 </div>
@@ -100449,6 +100575,513 @@ ${cfg.text}
 
         showToast(`✅ تم تنزيل حزمة الإنذارات بنجاح: ${zipFilename} (${successCount} ملف)`, 'success');
     }
+
+    // ==================== QUICK BATCH WARNINGS BY NATIONAL IDS ====================
+    let currentQuickBatchTrainees = [];
+
+    function loadSampleQuickWarningIds() {
+        const sampleIds = [
+            '1125508224',
+            '1123640003',
+            '1137195499',
+            '1136913520',
+            '1118277076',
+            '1138714900',
+            '1139834376',
+            '1124418078',
+            '1135664793',
+            '1075576353',
+            '1141834992',
+            '1125474765'
+        ];
+        const el = document.getElementById('quickWarningIdsInput');
+        if (el) {
+            el.value = sampleIds.join('\n');
+            showToast('📋 تم إدراج أرقام الهويات الـ 12 بنجاح!', 'info');
+        }
+    }
+
+    function clearQuickWarningIds() {
+        const el = document.getElementById('quickWarningIdsInput');
+        if (el) el.value = '';
+    }
+
+    function analyzeAndOpenQuickWarningBatch() {
+        const rawText = document.getElementById('quickWarningIdsInput')?.value || '';
+        if (!rawText.trim()) {
+            return showToast('يرجى إدخال أرقام الهويات أولاً لتحليلها', 'warning');
+        }
+
+        // Extract 10-digit national IDs
+        const matched = rawText.match(/\b\d{10}\b/g) || [];
+        const uniqueIds = Array.from(new Set(matched));
+
+        if (uniqueIds.length === 0) {
+            return showToast('لم يتم العثور على أرقام هويات صالحة (10 أرقام)', 'error');
+        }
+
+        const pool = getDisciplinaryTraineesPool();
+        const dateToday = getTodayWarningDate();
+
+        currentQuickBatchTrainees = uniqueIds.map((cid) => {
+            // Find in pool
+            let trainee = pool.find(p => {
+                const pid = (typeof cleanNationalId === 'function') ? cleanNationalId(p.id) : String(p.id || '').replace(/\D/g, '');
+                return pid === cid;
+            });
+
+            // If not found in pool, search MASTER_TRAINEE_REGISTRATION_DIRECTORY directly
+            if (!trainee && typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined' && MASTER_TRAINEE_REGISTRATION_DIRECTORY[cid]) {
+                const reg = MASTER_TRAINEE_REGISTRATION_DIRECTORY[cid];
+                trainee = {
+                    id: cid,
+                    name: reg.name,
+                    company: reg.company || 'ساينبوك (Sinopec)',
+                    group: reg.district || 'المسار التدريبي',
+                    phone: reg.phone || '',
+                    email: reg.email || `${cid}@blackgold.edu.sa`,
+                    rate: 25,
+                    consecutiveAbsentDays: 12,
+                    recommendedWarning: 'إنذار نهائي'
+                };
+            }
+
+            // Fallback object
+            if (!trainee) {
+                trainee = {
+                    id: cid,
+                    name: `متدرب (${cid})`,
+                    company: 'المؤسسة',
+                    group: 'المسار التدريبي',
+                    rate: 20,
+                    consecutiveAbsentDays: 10,
+                    recommendedWarning: 'إنذار نهائي'
+                };
+            }
+
+            const evaluated = evaluateTraineeDisciplinaryStatus(trainee);
+            const chosenType = userSelectedWarningTypes[cid] || 'إنذار نهائي';
+
+            return {
+                ...evaluated,
+                warningType: chosenType,
+                date: dateToday
+            };
+        });
+
+        // Set inputs in modal
+        const countBadge = document.getElementById('quickBatchCountBadge');
+        if (countBadge) countBadge.textContent = `${currentQuickBatchTrainees.length} متدرب`;
+
+        const dateInput = document.getElementById('quickBatchDateInput');
+        if (dateInput) dateInput.value = dateToday;
+
+        const typeSelect = document.getElementById('quickBatchWarningTypeSelect');
+        if (typeSelect) typeSelect.value = 'إنذار نهائي';
+
+        const progressArea = document.getElementById('quickBatchProgressArea');
+        if (progressArea) progressArea.classList.add('hidden');
+
+        renderQuickBatchTable();
+
+        const modal = document.getElementById('quickWarningBatchModal');
+        if (modal) modal.classList.remove('hidden');
+
+        showToast(`✅ تم استخراج وتحليل ${currentQuickBatchTrainees.length} متدرب بنجاح!`, 'success');
+    }
+
+    function renderQuickBatchTable() {
+        const tbody = document.getElementById('quickBatchTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = currentQuickBatchTrainees.map((tr, idx) => {
+            return `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                    <td class="p-2.5 text-center font-mono text-slate-400 font-bold">${idx + 1}</td>
+                    <td class="p-2.5 font-mono font-black text-slate-900 dark:text-white">${tr.id}</td>
+                    <td class="p-2.5 font-bold text-slate-900 dark:text-white">${tr.name}</td>
+                    <td class="p-2.5 text-slate-600 dark:text-slate-300 font-bold">${tr.company}</td>
+                    <td class="p-2.5 text-center">
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-black ${tr.rate <= 30 ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}">
+                            ${tr.rate}% (${tr.consecutiveAbsentDays} يوم)
+                        </span>
+                    </td>
+                    <td class="p-2.5 text-center">
+                        <select onchange="updateQuickBatchTraineeType('${tr.id}', this.value)" class="text-xs font-black px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white cursor-pointer">
+                            <option value="إنذار نهائي" ${tr.warningType === 'إنذار نهائي' ? 'selected' : ''}>⛔ إنذار نهائي</option>
+                            <option value="إنذار ثانٍ" ${tr.warningType === 'إنذار ثانٍ' ? 'selected' : ''}>🛑 إنذار ثانٍ</option>
+                            <option value="إنذار أول" ${tr.warningType === 'إنذار أول' ? 'selected' : ''}>⚠️ إنذار أول</option>
+                            <option value="إشعار تنبيه" ${tr.warningType === 'إشعار تنبيه' ? 'selected' : ''}>ℹ️ إشعار تنبيه</option>
+                        </select>
+                    </td>
+                    <td class="p-2.5 text-center">
+                        <button type="button" onclick="downloadSingleWarningPdfDirect('${tr.id}', '${tr.warningType}', '${tr.date}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[11px] rounded-lg transition cursor-pointer flex items-center gap-1 mx-auto" title="تنزيل مباشر لملف PDF بدون معاينة">
+                            <span>📄</span>
+                            <span>تنزيل PDF</span>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function updateQuickBatchTraineeType(id, type) {
+        const item = currentQuickBatchTrainees.find(t => t.id === id);
+        if (item) item.warningType = type;
+        userSelectedWarningTypes[id] = type;
+    }
+
+    function applyQuickBatchTypeToAll() {
+        const type = document.getElementById('quickBatchWarningTypeSelect')?.value || 'إنذار نهائي';
+        const dateVal = document.getElementById('quickBatchDateInput')?.value || getTodayWarningDate();
+        currentQuickBatchTrainees.forEach(t => {
+            t.warningType = type;
+            t.date = dateVal;
+            userSelectedWarningTypes[t.id] = type;
+        });
+        renderQuickBatchTable();
+        showToast(`تم تطبيق نوع الإنذار (${type}) والتاريخ على جميع المتدربين`, 'info');
+    }
+
+    function closeQuickWarningBatchModal() {
+        const modal = document.getElementById('quickWarningBatchModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    // Direct single warning download without modal preview
+    async function downloadSingleWarningPdfDirect(traineeId, warningType = 'إنذار نهائي', customDate = null) {
+        if (typeof html2pdf === 'undefined') {
+            return showToast('مكتبة html2pdf غير محملة', 'error');
+        }
+
+        const pool = getDisciplinaryTraineesPool();
+        const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(traineeId) : String(traineeId || '').replace(/\D/g, '');
+        let trainee = pool.find(t => {
+            const cid = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').replace(/\D/g, '');
+            return cid === cleanId;
+        });
+
+        if (!trainee && typeof MASTER_TRAINEE_REGISTRATION_DIRECTORY !== 'undefined' && MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId]) {
+            const reg = MASTER_TRAINEE_REGISTRATION_DIRECTORY[cleanId];
+            trainee = {
+                id: cleanId,
+                name: reg.name,
+                company: reg.company || 'ساينبوك (Sinopec)',
+                group: reg.district || 'المسار التدريبي'
+            };
+        }
+
+        const evaluated = evaluateTraineeDisciplinaryStatus(trainee || { id: cleanId, name: 'متدرب' });
+        const effType = warningType || 'إنذار نهائي';
+        const effDate = customDate || getTodayWarningDate();
+        const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
+
+        const filename = `${cleanId}_${effType.replace(/\s+/g, '_')}.pdf`;
+        showToast(`جاري تجهيز وتنزيل ملف PDF: ${filename}...`, 'info');
+
+        const tempHost = document.createElement('div');
+        tempHost.style.position = 'absolute';
+        tempHost.style.top = '0';
+        tempHost.style.left = '0';
+        tempHost.style.width = '794px';
+        tempHost.style.height = '1122px';
+        tempHost.style.zIndex = '999999';
+        tempHost.style.background = '#FFFFFF';
+        tempHost.style.margin = '0';
+        tempHost.style.padding = '0';
+        tempHost.style.overflow = 'hidden';
+        document.body.appendChild(tempHost);
+
+        tempHost.innerHTML = `
+            <div style="width: 794px; min-height: 1120px; max-height: 1122px; background: #ffffff; position: relative; margin: 0; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
+                <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;">
+                    <div style="flex: 1; background: linear-gradient(180deg, #E2B240 0%, #C69524 55%, #E2AB33 100%); width: 100%; border-right: 2px solid #8e6815;"></div>
+                    <div style="height: 140px; background: #111827; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <div style="transform: rotate(-90deg); color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 2px; font-family: monospace; white-space: nowrap;">CR. 2053117185</div>
+                    </div>
+                </div>
+                <img src="assets/bgti_logo.png" alt="BGTI" style="position: absolute; top: 48%; left: 52%; transform: translate(-50%, -50%); width: 330px; opacity: 0.04; pointer-events: none; filter: grayscale(100%); z-index: 1;">
+                <div class="warn-sheet-inner" style="margin-left: 54px; padding: 38px 45px 28px 40px; position: relative; z-index: 5; height: 100%; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <img src="assets/bgti_logo.png" alt="BGTI" style="height: 70px; width: auto; object-fit: contain;">
+                            <table style="border-collapse: collapse; direction: rtl; margin-top: 5px;">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ:</td>
+                                        <td style="font-size: 13px; font-weight: 800; color: #0f172a; white-space: nowrap; vertical-align: middle; direction: ltr; text-align: left;">${effDate} م</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 24px; margin-bottom: 22px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب:</td>
+                                    <td style="font-weight: 900; color: #000; font-size: 18px; vertical-align: middle;">${evaluated.name}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة:</td>
+                                    <td style="font-weight: 800; color: #0f172a; font-size: 16.5px; vertical-align: middle;">${evaluated.company}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية:</td>
+                                    <td style="font-weight: 900; color: #000; font-size: 17px; vertical-align: middle;"><span style="direction: ltr; unicode-bidi: isolate; display: inline-block;">${cleanId}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="font-size: 16px; line-height: 2.1; color: #1e293b; text-align: justify; margin-top: 16px; white-space: pre-line;">${cfg.text}</div>
+                    </div>
+                    <div style="margin-top: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
+                            <div style="width: 48%; line-height: 2.5;">
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب :</div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع :</div>
+                            </div>
+                            <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
+                                <div style="text-align: center; width: 230px;">
+                                    <div style="font-size: 14px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
+                                    <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;">علي آل عباس</div>
+                                    <div style="position: relative; width: 200px; height: 105px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
+                                        <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 125px; z-index: 2; top: 10px; left: 10px; transform: rotate(-3deg);">
+                                        <img src="assets/bgti_stamp.png" alt="الختم" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
+                            <div style="font-size: 10px; line-height: 1.6; font-weight: 700; color: #475569; text-align: left; font-family: sans-serif;">
+                                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                    <span>info@blackgold.edu.sa</span>
+                                    <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
+                                </div>
+                                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                    <span>معهد الذهب الأسود - الدمام - فرع 3</span>
+                                    <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const savedScrollX = window.scrollX || window.pageXOffset || 0;
+        const savedScrollY = window.scrollY || window.pageYOffset || 0;
+        window.scrollTo(0, 0);
+
+        await new Promise(r => setTimeout(r, 60));
+
+        const opt = {
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollX: 0, scrollY: 0, x: 0, y: 0, width: 794, height: 1122, windowWidth: 794 }
+        };
+
+        try {
+            const canvas = await html2pdf().set(opt).from(tempHost.firstElementChild).toCanvas().get('canvas');
+            const dummy = document.createElement('div');
+            const doc = await html2pdf().set({ jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(dummy).toPdf().get('pdf');
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+            doc.save(filename);
+            showToast(`✅ تم تنزيل ملف الإنذار بنجاح: ${filename}`, 'success');
+        } catch (err) {
+            console.error('Download error:', err);
+            showToast('حدث خطأ أثناء تنزيل الـ PDF: ' + err.message, 'error');
+        } finally {
+            window.scrollTo(savedScrollX, savedScrollY);
+            if (tempHost.parentNode) tempHost.parentNode.removeChild(tempHost);
+        }
+    }
+
+    // Batch download with live animated progress bar and percentage
+    async function startQuickBatchZipDownload() {
+        if (!currentQuickBatchTrainees || currentQuickBatchTrainees.length === 0) {
+            return showToast('لا توجد بيانات للتحميل', 'warning');
+        }
+        if (typeof JSZip === 'undefined') {
+            return showToast('مكتبة JSZip غير محملة', 'error');
+        }
+        if (typeof html2pdf === 'undefined') {
+            return showToast('مكتبة html2pdf غير محملة', 'error');
+        }
+
+        const progressArea = document.getElementById('quickBatchProgressArea');
+        const progressBar = document.getElementById('quickBatchProgressBarFill');
+        const progressPercent = document.getElementById('quickBatchProgressPercent');
+        const progressStatus = document.getElementById('quickBatchProgressStatus');
+        const downloadBtn = document.getElementById('quickBatchDownloadZipBtn');
+
+        if (progressArea) progressArea.classList.remove('hidden');
+        if (downloadBtn) downloadBtn.disabled = true;
+
+        const total = currentQuickBatchTrainees.length;
+        const zip = new JSZip();
+
+        const tempHost = document.createElement('div');
+        tempHost.style.position = 'absolute';
+        tempHost.style.top = '0';
+        tempHost.style.left = '0';
+        tempHost.style.width = '794px';
+        tempHost.style.height = '1122px';
+        tempHost.style.zIndex = '999999';
+        tempHost.style.background = '#FFFFFF';
+        tempHost.style.margin = '0';
+        tempHost.style.padding = '0';
+        tempHost.style.overflow = 'hidden';
+        document.body.appendChild(tempHost);
+
+        const savedScrollX = window.scrollX || window.pageXOffset || 0;
+        const savedScrollY = window.scrollY || window.pageYOffset || 0;
+        window.scrollTo(0, 0);
+
+        let successCount = 0;
+        const opt = {
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', scrollX: 0, scrollY: 0, x: 0, y: 0, width: 794, height: 1122, windowWidth: 794 }
+        };
+
+        for (let i = 0; i < total; i++) {
+            const tr = currentQuickBatchTrainees[i];
+            const effType = tr.warningType || 'إنذار نهائي';
+            const effDate = tr.date || getTodayWarningDate();
+            const cfg = DISCIPLINARY_LEGAL_TEXTS[effType] || DISCIPLINARY_LEGAL_TEXTS['إنذار نهائي'];
+
+            const currentPct = Math.round((i / total) * 100);
+            if (progressBar) progressBar.style.width = `${currentPct}%`;
+            if (progressPercent) progressPercent.textContent = `${currentPct}%`;
+            if (progressStatus) progressStatus.textContent = `جاري معالجة المتدرب ${i + 1} من ${total}: ${tr.name}...`;
+
+            await new Promise(r => setTimeout(r, 40));
+
+            tempHost.innerHTML = `
+                <div style="width: 794px; min-height: 1120px; max-height: 1122px; background: #ffffff; position: relative; margin: 0; font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif; overflow: hidden; box-sizing: border-box; text-align: right; direction: rtl;" dir="rtl">
+                    <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;">
+                        <div style="flex: 1; background: linear-gradient(180deg, #E2B240 0%, #C69524 55%, #E2AB33 100%); width: 100%; border-right: 2px solid #8e6815;"></div>
+                        <div style="height: 140px; background: #111827; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="transform: rotate(-90deg); color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 2px; font-family: monospace; white-space: nowrap;">CR. 2053117185</div>
+                        </div>
+                    </div>
+                    <img src="assets/bgti_logo.png" alt="BGTI" style="position: absolute; top: 48%; left: 52%; transform: translate(-50%, -50%); width: 330px; opacity: 0.04; pointer-events: none; filter: grayscale(100%); z-index: 1;">
+                    <div class="warn-sheet-inner" style="margin-left: 54px; padding: 38px 45px 28px 40px; position: relative; z-index: 5; height: 100%; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <img src="assets/bgti_logo.png" alt="BGTI" style="height: 70px; width: auto; object-fit: contain;">
+                                <table style="border-collapse: collapse; direction: rtl; margin-top: 5px;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="font-size: 13px; font-weight: 700; color: #475569; padding-left: 6px; white-space: nowrap; vertical-align: middle;">التاريخ:</td>
+                                            <td style="font-size: 13px; font-weight: 800; color: #0f172a; white-space: nowrap; vertical-align: middle; direction: ltr; text-align: left;">${effDate} م</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 24px; margin-bottom: 22px; font-size: 16px; line-height: 2.2; direction: rtl; text-align: right;">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم المتدرب:</td>
+                                        <td style="font-weight: 900; color: #000; font-size: 18px; vertical-align: middle;">${tr.name}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">اسم الشركة:</td>
+                                        <td style="font-weight: 800; color: #0f172a; font-size: 16.5px; vertical-align: middle;">${tr.company}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 110px; font-weight: 700; color: #475569; white-space: nowrap; vertical-align: middle;">رقم الهوية:</td>
+                                        <td style="font-weight: 900; color: #000; font-size: 17px; vertical-align: middle;"><span style="direction: ltr; unicode-bidi: isolate; display: inline-block;">${tr.id}</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div style="font-size: 16px; line-height: 2.1; color: #1e293b; text-align: justify; margin-top: 16px; white-space: pre-line;">${cfg.text}</div>
+                        </div>
+                        <div style="margin-top: auto;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 25px; margin-bottom: 12px;">
+                                <div style="width: 48%; line-height: 2.5;">
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">اسم المتدرب :</div>
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">التوقيع :</div>
+                                </div>
+                                <div style="width: 48%; text-align: left; display: flex; flex-direction: column; align-items: flex-end;">
+                                    <div style="text-align: center; width: 230px;">
+                                        <div style="font-size: 14px; font-weight: 900; color: #0f172a;">مسؤول شؤون المتدربين</div>
+                                        <div style="font-size: 13px; font-weight: 800; color: #1e293b; margin-top: 2px;">علي آل عباس</div>
+                                        <div style="position: relative; width: 200px; height: 105px; margin: 4px auto 0 auto; display: flex; align-items: center; justify-content: center;">
+                                            <img src="assets/ali_alabbas_sig.png" alt="التوقيع" style="position: absolute; width: 125px; z-index: 2; top: 10px; left: 10px; transform: rotate(-3deg);">
+                                            <img src="assets/bgti_stamp.png" alt="الختم" style="position: absolute; width: 105px; z-index: 1; top: 0px; right: 10px; opacity: 0.94;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 10px; display: flex; justify-content: flex-end; align-items: center;">
+                                <div style="font-size: 10px; line-height: 1.6; font-weight: 700; color: #475569; text-align: left; font-family: sans-serif;">
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                        <span>info@blackgold.edu.sa</span>
+                                        <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                        <span>معهد الذهب الأسود - الدمام - فرع 3</span>
+                                        <span style="display: inline-block; width: 8px; height: 8px; background: #C69524; border-radius: 2px;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            await new Promise(r => setTimeout(r, 50));
+
+            try {
+                const canvas = await html2pdf().set(opt).from(tempHost.firstElementChild).toCanvas().get('canvas');
+                const dummy = document.createElement('div');
+                const doc = await html2pdf().set({ jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(dummy).toPdf().get('pdf');
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                doc.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+                const pdfBlob = doc.output('blob');
+
+                const pdfFilename = `${tr.id}_${effType.replace(/\s+/g, '_')}.pdf`;
+                zip.file(pdfFilename, pdfBlob);
+                successCount++;
+            } catch (err) {
+                console.error(`Error for ${tr.id}:`, err);
+            }
+        }
+
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressPercent) progressPercent.textContent = '100%';
+        if (progressStatus) progressStatus.textContent = `تم توليد ${successCount} ملف بنجاح! جاري ضغط وتحميل ملف الـ ZIP...`;
+
+        window.scrollTo(savedScrollX, savedScrollY);
+        if (tempHost.parentNode) tempHost.parentNode.removeChild(tempHost);
+
+        try {
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const nowStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const zipFilename = `حزمة_الإنذارات_النهائية_بالهويات_${nowStr}.zip`;
+
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(zipBlob);
+            a.download = zipFilename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            showToast(`✅ تم تنزيل حزمة الإنذارات بنجاح: ${zipFilename} (${successCount} ملف)`, 'success');
+        } catch (err) {
+            console.error('ZIP generation error:', err);
+            showToast('حدث خطأ أثناء ضغط ملفات الـ ZIP: ' + err.message, 'error');
+        } finally {
+            if (downloadBtn) downloadBtn.disabled = false;
+        }
+    }
+
+    // Expose helpers globally
+    window.loadSampleQuickWarningIds = loadSampleQuickWarningIds;
+    window.clearQuickWarningIds = clearQuickWarningIds;
+    window.analyzeAndOpenQuickWarningBatch = analyzeAndOpenQuickWarningBatch;
+    window.renderQuickBatchTable = renderQuickBatchTable;
+    window.updateQuickBatchTraineeType = updateQuickBatchTraineeType;
+    window.applyQuickBatchTypeToAll = applyQuickBatchTypeToAll;
+    window.closeQuickWarningBatchModal = closeQuickWarningBatchModal;
+    window.downloadSingleWarningPdfDirect = downloadSingleWarningPdfDirect;
+    window.startQuickBatchZipDownload = startQuickBatchZipDownload;
 
     // Export warnings list to formatted Excel spreadsheet
     function exportWarningsToExcel() {
