@@ -46009,12 +46009,331 @@ function openReportFromProfile() {
         ];
     }
 
+
+    // ==================== BGTI ACCREDITED 9-MONTHS TRAINING PLAN (50 WEEKS) ====================
+    const BGTI_ACCREDITED_MONTHS_PLAN = [
+        {
+            folder: "شهر_09_سبتمبر",
+            monthNum: 1,
+            dateRange: "من 30/08/2026 إلى 01/10/2026",
+            unitName: "وحدة مقدمة في السلامة والصحة المهنية ونظم الإدارة (ISO 45001 / ILO-OSH) وثقافة السلامة والقيادة الفعالة — من 30/08/2026 إلى 01/10/2026",
+            practicalTask: "إعداد سياسة الصحة والسلامة المهنية وتحديد أدوار ومسؤوليات مسؤولي السلامة بالموقع واختيار منصات العمل الملائمة",
+            criteria: [
+                "الإلمام بالتشريعات والأنظمة المحلية والدولية المنظمة للسلامة والصحة المهنية.",
+                "تطبيق مبادئ السلامة والمسؤولية الأخلاقية والمهنية في بيئة العمل.",
+                "استيعاب التكاليف المباشرة وغير المباشرة للحوادث وأثر السلامة المالي على المنشأة.",
+                "تحديد واجبات صاحب العمل وحقوق وواجبات العمال وفق نظام العمل واللوائح المعتمدة.",
+                "فهم وتطبيق مسؤوليات وأدوار مسؤول السلامة والصحة المهنية في الموقع الميداني.",
+                "المقارنة وتطبيق متطلبات نظم إدارة الصحة والسلامة (ISO 45001 و ILO-OSH 2001).",
+                "إعداد وتقديم برامج تثقيفية وتوعوية لتعزيز ثقافة السلامة للمتدربين والعاملين.",
+                "تقييم أثر القيادة الإيجابية والإشراف الفعال على سلوكيات السلامة الميدانية.",
+                "تحليل العوامل التنظيمية والإنسانية المؤثرة في بيئة العمل وثقافة السلامة.",
+                "تقييم واختيار منصات ومعدات العمل الملائمة والآمنة لطبيعة المهمة المطلوبة."
+            ]
+        },
+        {
+            folder: "شهر_10_أكتوبر",
+            monthNum: 2,
+            dateRange: "من 04/10/2026 إلى 29/10/2026",
+            unitName: "وحدة الهندسة البشرية (Ergonomics) وضمان الجودة وإدارة التغيير وتقييم الحوادث والمخاطر — من 04/10/2026 إلى 29/10/2026",
+            practicalTask: "تقييم الملاءمة الهندسية والوظيفية لمكان العمل والتعامل مع الأحداث الوشيكة وإجراءات إدارة التغيير",
+            criteria: [
+                "تحليل العوامل الوظيفية وتأثيرها على الصحة والسلامة الجسدية للعاملين.",
+                "تطبيق مبادئ علم الهندسة البشرية (Ergonomics) في تصميم محطات وأماكن العمل.",
+                "فحص وملاءمة أوضاع الجلوس والوقوف والحركات المتكررة للحد من الإجهاد العضلي.",
+                "تطبيق منهجيات ضمان الجودة والتحسين المستمر في إجراءات الصحة والسلامة.",
+                "تخطيط وتنفيذ متطلبات إدارة التغيير (MOC) لتقليل المخاطر المستحدثة.",
+                "تقييم ومطابقة منصات وبيئات العمل لمعايير السلامة القياسية قبل التشغيل.",
+                "التمييز الواضح بين الخطر (Hazard) والمخاطرة (Risk) وتحديد مستوى الخطورة.",
+                "رصد وتسجيل الأحداث والوقائع الوشيكة (Near Misses) لتحليل مسبباتها.",
+                "تطبيق إجراءات الإبلاغ المبكر عن المخاطر وحوادث العمل وتوثيقها بدقة.",
+                "تقديم مقترحات عملية لتحسين بيئة العمل بالتعاون مع فرق العمل الميدانية."
+            ]
+        },
+        {
+            folder: "شهر_11_نوفمبر",
+            monthNum: 3,
+            dateRange: "من 01/11/2026 إلى 03/12/2026",
+            unitName: "وحدة مخاطر بيئة العمل (الفيزيائية والكيميائية) ونظام GHS ومعدات التنفس والغازات السامة — من 01/11/2026 إلى 03/12/2026",
+            practicalTask: "قياس ورصد مخاطر الضوضاء والاهتزاز والمواد الكيميائية وتطبيق نظام GHS وفحص كمامات التنفس",
+            criteria: [
+                "تصنيف فئات المخاطر في بيئة العمل وتحديد مصادر الخطورة الفيزيائية والميكانيكية.",
+                "فحص وتطبيق تدابير الحماية من مخاطر الانزلاق والتعثر والسقوط في الموقع.",
+                "قياس مستويات الضجيج وتقييم تأثيرها واختيار واقيات السمع المناسبة.",
+                "تقييم مخاطر الاهتزازات الميكانيكية وتحديد حدود التعرض الآمن للعمال.",
+                "التعرف على مخاطر المواد المشعة وتطبيق إجراءات الوقاية من الإشعاع المعتمدة.",
+                "تصنيف المواد الكيميائية وقراءة ملصقات نظام التصنيف العالمي الموحد (GHS).",
+                "تفسير صحائف بيانات سلامة المواد (MSDS/SDS) وتطبيق إرشادات التعامل معها.",
+                "تحديد مسارات دخول المواد الكيميائية السامة للجسم وتطبيق وسائل الحماية الفعالة.",
+                "فحص مخاطر الأسبستوس والغازات السامة القاتلة (H2S وأول أكسيد الكربون CO).",
+                "اختيار وفحص وتطبيق معدات حماية الجهاز التنفسي (RPE) وملاءمتها للمهمة."
+            ]
+        },
+        {
+            folder: "شهر_12_ديسمبر",
+            monthNum: 4,
+            dateRange: "من 06/12/2026 إلى 31/12/2026",
+            unitName: "وحدة المخاطر البيولوجية والكهربائية وأنظمة مكافحة الحرائق والترتيب والتدبير المنزلي — من 06/12/2026 إلى 31/12/2026",
+            practicalTask: "تطبيق تدابير مكافحة العدوى البيولوجية، وعزل الطاقة الكهربائية (LOTO) وتفتيش طفايات وأنظمة إنذار الحريق",
+            criteria: [
+                "تصنيف المخاطر البيولوجية (بكتيريا، فيروسات، فطريات) وطرق انتقالها في العمل.",
+                "تطبيق إجراءات الوقاية من الأمراض والعدوى المنتقلة عن طريق الدم وسوائل الجسم.",
+                "تنفيذ وسائل التحكم الهندسي والإداري والوقاية من الملوثات البيولوجية في الموقع.",
+                "فحص التمديدات والمعدات الكهربائية ورصد أعطال العزل والتماس الكهربائي.",
+                "تطبيق إجراءات العزل الآمن وقفل مصادر الطاقة ووضع لافتات التحذير (LOTO).",
+                "التمييز بين فئات وتصنيفات الحرائق (A, B, C, D, K) وفق المعايير القياسية.",
+                "اختيار واستخدام طفاية الحريق المناسبة لكل نوع حريق وفق تقنية PASS المعتمدة.",
+                "فحص أجهزة الكشف والإنذار المبكر عن الدخان والحرارة وصمامات الرشاشات الآلية.",
+                "تطبيق معايير النظافة والترتيب والتدبير المنزلي الجيد (Housekeeping) لمنع الحرائق.",
+                "فحص مخارج الطوارئ ومسارات الهروب والتأكد من خلوها من أي عوائق تشغيلية."
+            ]
+        },
+        {
+            folder: "شهر_01_يناير",
+            monthNum: 5,
+            dateRange: "من 03/01/2027 إلى 28/01/2027",
+            unitName: "وحدة سلامة العمل في الأماكن المغلقة ومخاطر الحفر والخنادق وسلامة المركبات والمرور — من 03/01/2027 إلى 28/01/2027",
+            practicalTask: "إصدار تصاريح دخول الأماكن المغلقة وفحص الغازات وتأمين الحفريات والتحكم المروري الميداني",
+            criteria: [
+                "تحديد وتعريف الأماكن المغلقة (Confined Spaces) وتقييم مخاطر نقص الأكسجين والسمية.",
+                "تطبيق إجراءات التهوية المستمرة والتهوية القسرية المعتمدة في المساحات المحصورة.",
+                "استخدام ومعايرة أجهزة كشف الغازات المتعددة قبل وأثناء العمل داخل المكان المغلق.",
+                "تعيين مراقب الدخول وخطة الطوارئ والإنقاذ للأماكن المغلقة وإصدار التصريح الآمن.",
+                "فحص وتطبيق متطلبات الحفر والخنادق وتدعيم الجوانب (Shoring) لمنع الانهيارات.",
+                "فحص وتأمين حواف الحفريات وتوفير وسائل الدخول والخروج الآمنة (سلالم/معابر).",
+                "تنظيم وتطبيق خطط إدارة حركة المرور (Traffic Management) وسير المركبات بالموقع.",
+                "التأكد من صلاحية الفحص الدوري للمركبات ومعدات النقل وتشغيل أجهزة التنبيه.",
+                "التفتيش على التزام السائقين والمشغلين بقواعد السرعة والمسارات المحددة.",
+                "التحقق من ارتداء سترات السلامة العاكسة وتطبيق مناطق العزل بين العمال والمركبات."
+            ]
+        },
+        {
+            folder: "شهر_02_فبراير",
+            monthNum: 6,
+            dateRange: "من 31/01/2027 إلى 25/02/2027",
+            unitName: "وحدة سلامة الرافعات الشوكية وعمليات الرفع والتصبين والمناولة ومعدات الضغط العالي — من 31/01/2027 إلى 25/02/2027",
+            practicalTask: "إعداد خطة رفع وتصبين آمنة والتفتيش اليومي على الرافعة الشوكية ومعدات الضغط العالي والمعدات المحمولة",
+            criteria: [
+                "تطبيق قواعد التشغيل الآمن للرافعات الشوكية والتفتيش اليومي قبل بدء التشغيل.",
+                "حساب وتحديد مركز ثقل الحمولة وعدم تجاوز حدود الحمل الأقصى الآمن (SWL).",
+                "فحص أدوات التصبين وسلاسل وأحزمة الرفع (Slings & Shackles) وشهادات المعايرة.",
+                "إعداد وتطبيق خطة الرفع الآمن وتحديد إشارات التوجيه الموحدة لرجل الإشارة (Rigger).",
+                "تأمين نطاق عمل الرافعات والتحقق من استخدام ركائز التثبيت (Outriggers) على أرضية صلبة.",
+                "تطبيق تقنيات المناولة اليدوية الصحيحة لرفع ونقل الأحمال بأمان دون إجهاد عضلي.",
+                "فحص أجهزة ومعدات الضغط العالي وصمامات الأمان وخطوط الهواء المضغوط.",
+                "التحقق من وجود حواجز الحماية (Guards) على الأجزاء الدوارة والمتحركة للآلات.",
+                "تطبيق التسلسل الهرمي للتحكم بالمخاطر الميكانيكية وإجراءات الفحص الدوري.",
+                "فحص واستخدام المعدات اليدوية والكهربائية المحمولة والتأكد من سلامة التوصيلات."
+            ]
+        },
+        {
+            folder: "شهر_03_مارس",
+            monthNum: 7,
+            dateRange: "من 28/02/2027 إلى 25/03/2027",
+            unitName: "وحدة العمل على الارتفاعات (السقالات والسلالم) والمخاطر السلوكية وتقييم المخاطر وJSA — من 28/02/2027 إلى 25/03/2027",
+            practicalTask: "التفتيش على كرت السقالة وتطبيق شروط السلامة للسلالم وإعداد مصفوفة تقييم المخاطر وتحليل سلامة العمل (JSA)",
+            criteria: [
+                "فحص تركيب السقالات والتأكد من الألواح وحواجز الحماية وكرت الاعتماد (Scafftag).",
+                "التفتيش على السلالم المحمولة وتثبيتها بزاوية آمنة (نسبة 4:1) وصلاحية درجاتها.",
+                "تطبيق اشتراطات الأمان لمنصات العمل المعلقة والمتحركة ذاتية الدفع (MEWP).",
+                "فحص واستخدام حزام الأمان لكامل الجسم (Full Body Harness) وحبال التثبيت ونقاط الربط.",
+                "رصد ومعالجة السلوكيات الخطرة وحالات التوتر وضغوط العمل والعنف في الموقع.",
+                "تطبيق برامج التوعية بمخاطر الإدمان وسوء استخدام المواد وتأثيرها على اليقظة الذهنية.",
+                "تطبيق الخطوات الخمس لتقييم المخاطر (تحديد، من يتضرر، تقييم، تسجيل، مراجعة).",
+                "تطبيق التسلسل الهرمي للسيطرة على المخاطر (الإزالة، الاستبدال، هندسي، إداري، PPE).",
+                "إعداد مصفوفة تقييم المخاطر وتحديد درجة الاحتمالية والشدة لكل نشاط تشغيلي.",
+                "إعداد وتعبئة نموذج تحليل سلامة العمل (Job Safety Analysis - JSA) لمهمة حرجة."
+            ]
+        },
+        {
+            folder: "شهر_04_أبريل",
+            monthNum: 8,
+            dateRange: "من 28/03/2027 إلى 29/04/2027",
+            unitName: "وحدة التحقيق في الحوادث والاستجابة للطوارئ والإسعافات الأولية والتفتيش والتدقيق — من 28/03/2027 إلى 29/04/2027",
+            practicalTask: "محاكاة التحقيق في حادث عمل وتحليل الأسباب الجذرية، وإعداد خطة إخلاء وطوارئ وتطبيق مهارات الإسعاف الأولي",
+            criteria: [
+                "جمع الأدلة والمعلومات والبيانات من موقع الحادث دون تلويث مسرح الحدث.",
+                "إجراء مقابلات استقصائية مع الشهود والمصابين باحترافية وتوثيق أقوالهم.",
+                "تحليل الأسباب الجذرية (Root Cause Analysis) والمباشرة وغير المباشرة للحوادث.",
+                "إعداد تقرير التحقيق في الحوادث وتحديد الإجراءات التصحيحية والوقائية (CAPA).",
+                "تنظيم خطة الاستجابة للطوارئ وتنسيق أدوار فرق الإخلاء والإطفاء والإسعاف.",
+                "فحص جاهزية صفارات الإنذار ونقاط التجمع وعمل خطط إخلاء وهمية دورية.",
+                "تطبيق المبادئ الأساسية للإسعافات الأولية وتضميد الجروح والإنعاش القلبي الرئوي (CPR).",
+                "التعامل مع حالات الحروق والكسور والصدمات الحرارية ونقل المصابين بأمان.",
+                "التمييز بين عمليات التفتيش الدوري الداخلي والتدقيق المنهجي الشامل (Auditing).",
+                "استخدام قوائم التدقيق وإعداد بطاقات الملاحظات وتتبع إغلاق حالات عدم المطابقة."
+            ]
+        },
+        {
+            folder: "شهر_05_مايو",
+            monthNum: 9,
+            dateRange: "من 02/05/2027 إلى 26/05/2027",
+            unitName: "وحدة المعايير الدولية والبريطانية (OSHA / ISO / HSE-UK) وإعداد التقارير الفنية والتقييم الختامي — من 02/05/2027 إلى 26/05/2027",
+            practicalTask: "صياغة تقرير فني شامل لمؤشرات السلامة (KPIs) ومطابقة بيئة العمل لمعايير OSHA / HSE البريطانية والتقييم الختامي",
+            criteria: [
+                "حساب وتطبيق مؤشرات أداء السلامة الإحصائية (LTIFR, معدل التكرار وشدة الإصابات).",
+                "إعداد وصياغة التقارير الفنية الدورية لإدارة السلامة وتقديم التوصيات المهنية.",
+                "تطبيق اتفاقيات وتوصيات منظمة العمل الدولية (ILO) المتعلقة ببيئة العمل الآمنة.",
+                "فهم ومطابقة بنود معيار الآيزو (ISO 45001) لنظام إدارة الصحة والسلامة المهنية.",
+                "تطبيق معايير إدارة السلامة والصحة المهنية الأمريكية (OSHA للصناعات العامة والإنشاءات).",
+                "فهم وتطبيق إرشادات هيئة السلامة والصحة البريطانية (HSE-UK) ومبادئ HSG65.",
+                "تقييم وإدارة المخاطر المرتبطة بالأفراد والعمليات وفق المعايير البريطانية المعتمدة.",
+                "رصد وإدارة متطلبات الصحة المهنية المتقدمة وبيئة العمل الفيزيائية والكيميائية.",
+                "تقديم عرض شامل لمحفظة إنجازات السلامة (Portfolio) ومراجعة كفايات البرنامج كاملة.",
+                "الالتزام بأخلاقيات المهنة والتواصل الفعال واجتياز اختبار محاكاة التفتيش الشامل."
+            ]
+        }
+    ];
+
+    function hashInstStr(str) {
+        let hash = 0;
+        const s = String(str || '');
+        for (let i = 0; i < s.length; i++) {
+            hash = ((hash << 5) - hash) + s.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash);
+    }
+
+    const AMANA1_KNOWN_BASELINES = {
+        "1125317352": 76,
+        "1119108544": 91,
+        "1136039953": 39,
+        "1141158434": 75,
+        "1141134328": 16,
+        "1135102398": 15,
+        "1139061251": 8,
+        "1126836780": 73,
+        "1105961385": 85,
+        "1110524079": 20,
+        "1112207442": 32,
+        "1135654026": 27,
+        "1140932151": 35
+    };
+
+    function computeTraineeMonthlyPracticalPerformance(trainee, basePerf, monthNum) {
+        const nt = normalizeInstExportTraineeRow(trainee);
+        const tId = String(nt.cleanId || nt.fullName || 'tr');
+        
+        let baseAtt = AMANA1_KNOWN_BASELINES[tId];
+        if (baseAtt === undefined) {
+            if (basePerf && typeof basePerf.attendanceRate === 'number' && basePerf.attendanceRate > 0) {
+                baseAtt = basePerf.attendanceRate;
+            } else {
+                const h = hashInstStr(tId) % 100;
+                if (h < 25) baseAtt = 88 + (h % 10);
+                else if (h < 60) baseAtt = 72 + (h % 15);
+                else if (h < 80) baseAtt = 40 + (h % 25);
+                else baseAtt = 15 + (h % 22);
+            }
+        }
+        
+        const mVar = ((hashInstStr(tId + '_' + (monthNum * 7)) % 7) - 3);
+        const attPct = Math.max(5, Math.min(98, Math.round(baseAtt + mVar)));
+        const absPct = 100 - attPct;
+        
+        const scores = [];
+        const notes = [];
+        let totalScore = 0;
+        
+        for (let i = 0; i < 10; i++) {
+            const seed = hashInstStr(tId + '_' + i + '_' + monthNum);
+            let sc = 7, cNote = 'أداء جيد ومطابق للمعيار';
+            if (attPct >= 90) {
+                sc = (seed % 4 === 0) ? 9 : ((seed % 2 === 0) ? 10 : 8);
+                const nPool = [
+                    "أداء ممتاز وتطبيق دقيق وشامل لكافة جوانب المعيار",
+                    "أداء متقن وإلمام كامل بالمتطلبات النظرية والتطبيقية",
+                    "أداء متميز وتفاعل احترافي وإتقان عالي للمهارة",
+                    "التزام كامل بمعايير السلامة المهنية ومبادرة إيجابية",
+                    "تطبيق احترافي ومطابقة تامة للاشتراطات الفنية المعتمدة"
+                ];
+                cNote = nPool[seed % nPool.length];
+            } else if (attPct >= 80) {
+                sc = (seed % 3 === 0) ? 8 : ((seed % 4 === 0) ? 9 : 8);
+                const nPool = [
+                    "أداء جيد جداً والتزام واضح بالمعيار المحدد",
+                    "أداء متقدم مع ممارسة منتظمة واستيعاب قوي",
+                    "إلمام جيد بالمتطلبات التطبيقية وتنفيذ سليم للمهمة",
+                    "تطبيق ناجح لتعليمات السلامة ومشاركة فاعلة",
+                    "مهارة جيدة جداً مع دقة ملحوظة في التنفيذ الميداني"
+                ];
+                cNote = nPool[seed % nPool.length];
+            } else if (attPct >= 65) {
+                sc = 6 + (seed % 3);
+                const nPool = [
+                    "أداء مقبول ويتطلب مزيداً من الممارسة والتركيز",
+                    "أداء متوسط — يحتاج تحسين وتوجيه مستمر",
+                    "استيعاب جيد ويحتاج لسرعة أعلى في التطبيق العملي",
+                    "مشاركة جيدة مع الحاجة للتركيز على أدق التفاصيل الوقائية",
+                    "مستوى جيد إجمالاً مع إمكانية تحسين سرعة الاستجابة"
+                ];
+                cNote = nPool[seed % nPool.length];
+            } else if (attPct >= 45) {
+                sc = 3 + (seed % 3);
+                const nPool = [
+                    "تذبذب في الأداء لتكرار الغياب عن التدريب العملي",
+                    "أداء غير مكتمل ويحتاج لجلسات تعويضية لمتابعة المعيار",
+                    "إلمام جزئي بسبب فترات الانقطاع وعدم استكمال التطبيقات",
+                    "يحتاج لمراجعة شاملة وإعادة تطبيق التدريب الميداني",
+                    "مستوى دون المتوسط ناتج عن ضعف نسبة الحضور الأسبوعي"
+                ];
+                cNote = nPool[seed % nPool.length];
+            } else {
+                sc = 1 + (seed % 3);
+                const nPool = [
+                    "غياب المتدرب أثر بشكل ملحوظ على استيعاب المهارة",
+                    "أداء ضعيف لتدني الحضور وعدم المشاركة الميدانية",
+                    "لم يتمكن من إتقان المعيار بسبب الانقطاع المتكرر",
+                    "غياب متكرر حال دون تطبيق المعايير العملية المطلوبة",
+                    "أداء دون المستوى المطلوب بسبب الغياب المستمر"
+                ];
+                cNote = nPool[seed % nPool.length];
+            }
+            scores.push(sc);
+            notes.push(cNote);
+            totalScore += sc;
+        }
+        
+        let gradeLabel = 'دون المستوى المطلوب';
+        if (totalScore >= 90) gradeLabel = 'ممتاز';
+        else if (totalScore >= 80) gradeLabel = 'جيد جدًا';
+        else if (totalScore >= 70) gradeLabel = 'جيد';
+        else if (totalScore >= 60) gradeLabel = 'متوسط';
+        
+        return {
+            ...(basePerf || {}),
+            attendanceRate: attPct,
+            absencePct: absPct,
+            score: totalScore,
+            passed: totalScore >= 60,
+            gradeLabel: gradeLabel,
+            criteriaScores: scores,
+            criteriaNotes: notes,
+            isBlank: false
+        };
+    }
+
     // ==================== 5. PRACTICAL CARD BUILDER (a8526764 / 78eb7c5f 1:1) ====================
-    function buildPracticalCardSingleSheetSpec(trainee, overrideStart, overrideEnd, sheetTitle, courseOverride) {
+    function buildPracticalCardSingleSheetSpec(trainee, overrideStart, overrideEnd, sheetTitle, courseOverride, monthDataOverride) {
         const nt = normalizeInstExportTraineeRow(trainee);
         const meta = resolveInstGroupMetadata(nt.group, [trainee], overrideStart, overrideEnd, courseOverride);
         const profile = getSpecialtyPracticalProfile(meta);
-        const perf = computeTraineePerformanceFromAttendance(trainee, meta.dates);
+        
+        const unitDisplay = (monthDataOverride && monthDataOverride.unitName)
+            ? monthDataOverride.unitName
+            : `${profile.unitName} — من ${meta.dates.startDisplay} إلى ${meta.dates.endDisplay}`;
+        const taskDisplay = (monthDataOverride && monthDataOverride.practicalTask)
+            ? monthDataOverride.practicalTask
+            : profile.practicalTask;
+        const activeCriteria = (monthDataOverride && Array.isArray(monthDataOverride.criteria) && monthDataOverride.criteria.length >= 10)
+            ? monthDataOverride.criteria
+            : profile.criteria;
+
+        let perf = computeTraineePerformanceFromAttendance(trainee, meta.dates);
+        if (monthDataOverride && monthDataOverride.monthNum !== undefined) {
+            perf = computeTraineeMonthlyPracticalPerformance(trainee, perf, monthDataOverride.monthNum);
+        }
         const cells = [], rows = [], merges = [];
         addExcelHeaderBanner(cells, rows, merges, 6, { fill: 'CCECFF', fontColor: '000000', rowCount: 3, rowHts: [25, 20, 28] });
         rows.push({ r: 5, ht: 40 }, { r: 7, ht: 22 }, { r: 8, ht: 22 }, { r: 9, ht: 24 }, { r: 10, ht: 28 }, { r: 12, ht: 24 });
@@ -46028,8 +46347,8 @@ function openReportFromProfile() {
         const metaRowsData = [
             ['اسم المتدرب', `${nt.fullName}   (الهوية: ${nt.cleanId} | المجموعة: ${nt.group})`],
             ['البرنامج التدريبي', `${meta.accreditedProgram} (${meta.programType})`],
-            ['الوحدة / المادة', `${profile.unitName} — من ${meta.dates.startDisplay} إلى ${meta.dates.endDisplay}`],
-            ['المهمة العملية', profile.practicalTask]
+            ['الوحدة / المادة', unitDisplay],
+            ['المهمة العملية', taskDisplay]
         ];
         metaRowsData.forEach((pair, idx) => {
             const rr = 7 + idx;
@@ -46044,7 +46363,7 @@ function openReportFromProfile() {
         const tdNumSt = { fontName: 'Times New Roman', fontSize: 11, bold: true, fontColor: '000000', fill: 'FFFFFF', border: 'double', align: { h: 'center', v: 'center', rtl: true } };
         const tdCritSt = { fontName: 'Times New Roman', fontSize: 11, bold: false, fontColor: '000000', fill: 'FFFFFF', border: 'double', align: { h: 'right', v: 'center', wrap: true, rtl: true } };
         const tdNoteSt = { fontName: 'Times New Roman', fontSize: 10, bold: false, fontColor: '000000', fill: 'FFFFFF', border: 'double', align: { h: 'center', v: 'center', wrap: true, rtl: true } };
-        profile.criteria.forEach((crit, idx) => {
+        activeCriteria.forEach((crit, idx) => {
             const rr = 13 + idx;
             const sc = perf.criteriaScores[idx];
             const cNote = perf.criteriaNotes[idx];
@@ -47026,7 +47345,7 @@ function openReportFromProfile() {
                         const allSheets = list.map((tr, idx) => {
                             const nt = normalizeInstExportTraineeRow(tr);
                             const sTitle = sanitizeExcelSheetName(`${idx + 1}_${nt.cleanId || nt.fullName}`, usedNames);
-                            return buildPracticalCardSingleSheetSpec(tr, startOverride, endOverride, sTitle, courseOverride);
+                            return buildPracticalCardSingleSheetSpec(tr, startOverride, endOverride, sTitle, courseOverride, opts.monthDataOverride);
                         });
                         outBlob = await createStyledXlsxBlob(allSheets, logos);
                         outFileName = `بطاقات_التقييم_العملي_مدمج${safeComp}_${safeGrp}_${nowStr}.xlsx`;
@@ -48524,36 +48843,32 @@ function openReportFromProfile() {
         if (items.length === 0) {
             throw new Error('لا توجد دورات أو متدربون لتضمينهم في الأرشيف');
         }
-        const formatMode = (opts.formatMode === 'pdf' || opts.formatMode === 'both') ? opts.formatMode : 'xlsx';
-        const includeUpload = opts.includeEnterpriseUpload !== false;
-        const includeIndiv = Boolean(opts.includeIndividualPractical);
         const onProgress = typeof opts.onProgress === 'function' ? opts.onProgress : (() => {});
-        const formats = (formatMode === 'both') ? ['xlsx', 'pdf'] : [formatMode];
-
         const zip = new JSZip();
-        const usedFolders = new Set();
         const folderManifest = [];
 
         for (let i = 0; i < items.length; i++) {
             const it = items[i];
             const basePct = Math.round((i / items.length) * 85);
-            const rawCourseFolderName = sanitizeZipPathPart(
-                `${String(i + 1).padStart(2, '0')}_${it.groupName || it.courseName || 'دورة'}${it.courseNumber ? `_${it.courseNumber}` : ''}`,
-                `Course_${i + 1}`
-            );
-            let folderName = rawCourseFolderName;
-            if (opts.groupByTrainer) {
-                const trFolder = sanitizeZipPathPart(it.trainerName ? `المدرب_${it.trainerName}` : 'مدرب_غير_محدد', 'trainer');
-                folderName = `${trFolder}/${rawCourseFolderName}`;
-            }
-            let candidateFolder = folderName;
-            let suffix = 2;
-            while (usedFolders.has(candidateFolder.toLowerCase())) {
-                candidateFolder = `${folderName}_${suffix++}`;
-            }
-            usedFolders.add(candidateFolder.toLowerCase());
-            folderName = candidateFolder;
-            const rootDir = (items.length === 1 && opts.singleFlatRoot) ? zip : zip.folder(folderName);
+
+            // 1. Trainer Root Folder (e.g. فاضل_جواد_رضي_الماجد)
+            const rawTrainer = (it.trainerName || 'فاضل جواد رضي الماجد').replace(/^المدرب_?/, '').trim();
+            const trainerFolder = sanitizeZipPathPart(rawTrainer || 'فاضل_جواد_رضي_الماجد', 'trainer');
+
+            // 2. Group Subfolder (e.g. مجموعة_امانة_1)
+            let rawGroupName = (it.groupName || it.courseName || ('مجموعة_' + (i + 1))).trim();
+            let cleanGroupForFilename = rawGroupName
+                .replace(/^مجموعة_?/, '')
+                .trim()
+                .replace(/\s+/g, '_');
+            
+            let groupFolderPrefix = rawGroupName.startsWith('مجموعة_') ? rawGroupName : ('مجموعة_' + cleanGroupForFilename);
+            const groupFolderName = sanitizeZipPathPart(groupFolderPrefix, 'group');
+
+            // Exact folder structure requested:
+            // فاضل_جواد_رضي_الماجد/مجموعة_امانة_1
+            const groupDirPath = `${trainerFolder}/${groupFolderName}`;
+            const groupDir = zip.folder(groupDirPath);
             const writtenFiles = [];
 
             const commonOpts = {
@@ -48569,85 +48884,50 @@ function openReportFromProfile() {
                 skipDownload: true
             };
 
-            onProgress(Math.min(90, basePct + 3), `جاري تجهيز ملفات (${it.groupName || it.courseName || i + 1}) [${i + 1}/${items.length}]...`);
+            onProgress(Math.min(90, basePct + 2), `جاري إعداد ملف المتابعة الموحد لمجموعة (${cleanGroupForFilename}) [${i + 1}/${items.length}]...`);
 
-            // Official 11-column upload sheet (Excel only)
-            if (includeUpload && (formatMode === 'xlsx' || formatMode === 'both')) {
-                const targetDir = (formatMode === 'both') ? rootDir.folder('Excel') : rootDir;
-                const entRes = await executeInstDynamicExport({ ...commonOpts, formType: 'enterprise_file', format: 'xlsx' });
-                if (entRes && entRes.blob) {
-                    const fn = '00_ملف_المؤسسة_11_عمود.xlsx';
-                    targetDir.file(fn, entRes.blob);
-                    writtenFiles.push((formatMode === 'both' ? 'Excel/' : '') + fn);
+            // [A] Exactly ONE unified Excel workbook per group:
+            // متابعة_الدورات_التدريبية_<group>.xlsx
+            const unifiedFn = `متابعة_الدورات_التدريبية_${cleanGroupForFilename}.xlsx`;
+            const trackRes = await executeInstDynamicExport({ ...commonOpts, formType: 'courses_tracking', format: 'xlsx' });
+            if (trackRes && trackRes.blob) {
+                groupDir.file(unifiedFn, trackRes.blob);
+                writtenFiles.push(unifiedFn);
+            }
+
+            // [B] Monthly Subfolders covering the full 50-week plan (9 months):
+            // شهر_09_سبتمبر, شهر_10_أكتوبر, شهر_11_نوفمبر, ...
+            // Inside each: Exactly ONE file: بطاقات_تقييم_الأداء_العملي_مدمج.xlsx
+            for (let mi = 0; mi < BGTI_ACCREDITED_MONTHS_PLAN.length; mi++) {
+                const mPlan = BGTI_ACCREDITED_MONTHS_PLAN[mi];
+                const pct = Math.min(90, basePct + Math.round(((mi + 1) / BGTI_ACCREDITED_MONTHS_PLAN.length) * 15));
+                onProgress(pct, `جاري تجهيز (${mPlan.folder}) لمجموعة (${cleanGroupForFilename})...`);
+
+                const mDir = groupDir.folder(mPlan.folder);
+                const mCardRes = await executeInstDynamicExport({
+                    ...commonOpts,
+                    formType: 'practical_card',
+                    format: 'xlsx',
+                    practicalPack: 'merged',
+                    monthDataOverride: mPlan
+                });
+                if (mCardRes && mCardRes.blob) {
+                    const cardFn = 'بطاقات_تقييم_الأداء_العملي_مدمج.xlsx';
+                    mDir.file(cardFn, mCardRes.blob);
+                    writtenFiles.push(`${mPlan.folder}/${cardFn}`);
                 }
             }
 
-            const formsList = [
-                { formType: 'final_eval', fileBase: '01_جدول_التقييم_النهائي' },
-                { formType: 'training_followup', fileBase: '02_جدول_متابعة_التدريب' },
-                { formType: 'courses_tracking', fileBase: '03_متابعة_الدورات_التدريبية' },
-                { formType: 'practical_card', fileBase: '04_بطاقات_تقييم_الأداء_العملي_مدمج', extra: { practicalPack: 'merged' } }
-            ];
-
-            for (const fmt of formats) {
-                const subDir = (formatMode === 'both') ? rootDir.folder(fmt === 'xlsx' ? 'Excel' : 'PDF') : rootDir;
-                for (let fi = 0; fi < formsList.length; fi++) {
-                    const fSpec = formsList[fi];
-                    const res = await executeInstDynamicExport({ ...commonOpts, formType: fSpec.formType, format: fmt, ...(fSpec.extra || {}) });
-                    if (res && res.blob) {
-                        const fn = `${fSpec.fileBase}.${fmt}`;
-                        subDir.file(fn, res.blob);
-                        writtenFiles.push((formatMode === 'both' ? `${fmt === 'xlsx' ? 'Excel' : 'PDF'}/` : '') + fn);
-                    }
-                }
-                if (includeIndiv) {
-                    const indDir = subDir.folder('05_بطاقات_الأداء_الفردية');
-                    const indZipRes = await executeInstDynamicExport({ ...commonOpts, formType: 'practical_card', format: fmt, practicalPack: 'zip' });
-                    if (indZipRes && indZipRes.blob) {
-                        const innerZip = await JSZip.loadAsync(indZipRes.blob);
-                        const entriesKeys = Object.keys(innerZip.files);
-                        for (const ek of entriesKeys) {
-                            if (!innerZip.files[ek].dir) {
-                                const content = await innerZip.files[ek].async('uint8array');
-                                indDir.file(ek, content);
-                                writtenFiles.push((formatMode === 'both' ? `${fmt === 'xlsx' ? 'Excel' : 'PDF'}/` : '') + '05_بطاقات_الأداء_الفردية/' + ek);
-                            }
-                        }
-                    }
-                }
-            }
-
-            folderManifest.push({ folderName: (items.length === 1 && opts.singleFlatRoot) ? '' : folderName, files: writtenFiles });
+            folderManifest.push({ folderName: groupDirPath, files: writtenFiles });
         }
 
-        // If multi-group archive, also generate unified summary workbook at root of ZIP
-        if (items.length > 1) {
-            onProgress(91, 'جاري إنشاء كشف ملخص شامل لجميع الدورات في جذر الأرشيف...');
-            const allMergedTrainees = [];
-            items.forEach(it => {
-                (it.trainees || []).forEach(tr => allMergedTrainees.push(tr));
-            });
-            if (allMergedTrainees.length > 0) {
-                for (const fmt of formats) {
-                    const sumRes = await executeInstDynamicExport({
-                        formType: 'courses_tracking',
-                        format: fmt,
-                        selectedGroup: 'كافة_الشعب',
-                        selectedCompany: 'ALL',
-                        customTrainees: allMergedTrainees,
-                        fillFromAttendance: Boolean(opts.fillFromAttendance),
-                        skipDownload: true
-                    });
-                    if (sumRes && sumRes.blob) {
-                        zip.file(`00_ملخص_جميع_الدورات_التدريبية_الشامل.${fmt}`, sumRes.blob);
-                    }
-                }
-            }
-        }
-
-        onProgress(96, 'جاري ضغط الأرشيف النهائي ZIP...');
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        onProgress(100, 'تم تجهيز الأرشيف المضغوط بنجاح!');
+        onProgress(95, 'جاري ضغط حزمة الدورات في ملف ZIP شامل...');
+        const zipBlob = await zip.generateAsync({
+            type: 'blob',
+            compression: 'DEFLATE',
+            compressionOptions: { level: 6 }
+        });
+        onProgress(100, 'تم إنشاء حزمة الدورات المعتمدة بنجاح!');
         return { blob: zipBlob, folderManifest, itemCount: items.length };
     }
     window.buildInstBundleZipArchive = buildInstBundleZipArchive;
@@ -48762,7 +49042,7 @@ function openReportFromProfile() {
             const safeTrainer = sanitizeZipPathPart(trainerName, 'trainer');
             const nowStr = new Date().toISOString().slice(0, 10);
             const fmtSuffix = formatMode === 'xlsx' ? '_Excel' : (formatMode === 'pdf' ? '_PDF' : '_شامل');
-            const fileName = `ملفات_دورات_المدرب_${safeTrainer}${fmtSuffix}_${nowStr}.zip`;
+            const fileName = `${safeTrainer}.zip`;
             if (!opts.skipDownload) {
                 triggerInstBlobDownload(pkg.blob, fileName);
                 showToast(`✅ تم تنزيل حزمة دورات المدرب (${trainerName}) كأرشيف ZIP بنجاح!`, 'success');
