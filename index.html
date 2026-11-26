@@ -12518,7 +12518,7 @@
                                     <span class="bg-indigo-100 text-indigo-900 border border-indigo-200 text-[10px] font-black px-2.5 py-0.5 rounded-full">محرك التحليل الذكي</span>
                                 </div>
                                 <p class="text-xs text-slate-500 font-bold mt-0.5">
-                                    رصد مسار صعود وهبوط الحضور عبر الفترات (سبتمبر • أكتوبر • نوفمبر) ومعيار استبعاد مجموعات LA وقليلين الحضور
+                                    المعيار المعتمد: صح واحدة في اليوم = حاضر بالكامل لليوم • لا توجد فترات أولى أو ثانية • استبعاد مجموعات LA
                                 </p>
                             </div>
                         </div>
@@ -93988,12 +93988,12 @@ function buildDemoExecutiveReport(params) {
                 document.getElementById('kpiRepCompanySelect')?.value || 'ALL',
                 document.getElementById('kpiRepLaCriteria')?.value || 'EXCLUDE_LA'
             );
-            csv += 'الشركة الراعية,المسجلون الإجمالي,المتدربون المنتظمون (الفعلي),مقاعد LA المستبعدة,حضور LA الفعلي,نسبة أكتوبر %,نسبة نوفمبر %,الفترة 1 %,الفترة 2 %,معدل التغير %,الحالة والتقييم\n';
+            csv += 'الشركة الراعية,المسجلون الإجمالي,المتدربون المنتظمون (الفعلي),مقاعد LA المستبعدة,حضور LA الفعلي (صح واحدة),متوسط الأيام المحضورة (من 5),حضور كامل (5/5) %,نسبة أكتوبر %,نسبة نوفمبر %,معدل التغير %,الحالة والتقييم\n';
             kpiData.companyBreakdown.forEach(row => {
                 const sign = row.delta >= 0 ? '+' : '';
-                csv += `"${row.arabicName}","${row.total}","${row.regularCount}","${row.laCount}","${row.laActualPresent}","${row.octoberRate}%","${row.currentRate}%","${row.p1Rate}%","${row.p2Rate}%","${sign}${row.delta}%","${row.grade}"\n`;
+                csv += `"${row.arabicName}","${row.total}","${row.regularCount}","${row.laCount}","${row.laActualPresent}","${row.avgDays} / 5","${row.fullWeekPct}%","${row.octoberRate}%","${row.currentRate}%","${sign}${row.delta}%","${row.grade}"\n`;
             });
-            csv += `\n"الإجمالي المعتمد للمعهد","${kpiData.totalPoolCount}","${kpiData.regularCount}","${kpiData.laCount}","${kpiData.laActualAttendees}","${kpiData.overallArchiveRate}%","${kpiData.overallCurrentRate}%","${kpiData.p1Rate}%","${kpiData.p2Rate}%","${kpiData.rateDelta >= 0 ? '+' : ''}${kpiData.rateDelta}%","معتمد رسمياً"\n`;
+            csv += `\n"الإجمالي المعتمد للمعهد","${kpiData.totalPoolCount}","${kpiData.regularCount}","${kpiData.laCount}","${kpiData.laActualAttendees}","${kpiData.avgDaysAttended} / 5","${kpiData.fullWeekPct}%","${kpiData.overallArchiveRate}%","${kpiData.overallCurrentRate}%","${kpiData.rateDelta >= 0 ? '+' : ''}${kpiData.rateDelta}%","معتمد رسمياً (صح واحدة = حاضر)"\n`;
         } else if (currentAdminReportsSubTab === 'executive') {
 
             const data = executiveReportData || {};
@@ -94063,13 +94063,14 @@ function buildDemoExecutiveReport(params) {
     
     // ===================================================================
     // BGTI EXECUTIVE KPI & VISUAL ANALYTICS REPORT ENGINE
-    // محرك تقارير مؤشرات الأداء، الرسوم البيانية، الخط الزمني، ومعيار استبعاد LA
+    // معيار الحضور المعتمد: صح واحدة في اليوم = حاضر بالكامل (لا توجد فترات أولى أو ثانية)
+    // استبعاد مجموعات وقوائم قليلين الحضور (LA) من المقام لضمان نزاهة النسبة الرسمية
     // ===================================================================
 
     let kpiTrendChartInstance = null;
     let kpiDonutChartInstance = null;
     let kpiBarChartInstance = null;
-    let kpiPeriodBarChartInstance = null;
+    let kpiDailyChartInstance = null;
 
     function isLAGroupOrTrainee(t) {
         if (!t) return false;
@@ -94083,12 +94084,24 @@ function buildDemoExecutiveReport(params) {
         return false;
     }
 
+    // القاعدة الأساسية: صح واحدة في أي حصة من اليوم = حاضر بالكامل في ذلك اليوم
+    function isDayPresentInRecord(dayData) {
+        if (!dayData) return false;
+        if (Array.isArray(dayData)) {
+            return dayData.some(v => v === true || v === 'true' || v === 'حاضر' || v === 'present' || v === 1 || v === '1');
+        }
+        if (typeof dayData === 'object') {
+            return Object.values(dayData).some(v => v === true || v === 'true' || v === 'حاضر' || v === 'present' || v === 1 || v === '1');
+        }
+        return dayData === true || dayData === 'true' || dayData === 'حاضر' || dayData === 'present' || dayData === 1 || dayData === '1';
+    }
+
     function computeKpiAnalyticsData(periodScope = 'ALL_TIMELINE', companyFilter = 'ALL', laCriteria = 'EXCLUDE_LA') {
         const rawPool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) 
             ? trainees 
             : ((typeof SAMPLE_TRAINEES !== 'undefined' && SAMPLE_TRAINEES) ? SAMPLE_TRAINEES : []);
 
-        // Filter by company if requested
+        // فلترة بالشركة إذا طُلب ذلك
         let pool = [...rawPool];
         if (companyFilter !== 'ALL') {
             pool = pool.filter(t => {
@@ -94099,11 +94112,11 @@ function buildDemoExecutiveReport(params) {
             });
         }
 
-        // Separate Regular Trainees vs LA Trainees
+        // فصل المتدربين المنتظمين عن مجموعات وقوائم LA (قليلين الحضور)
         const regularTrainees = pool.filter(t => !isLAGroupOrTrainee(t));
         const laTrainees = pool.filter(t => isLAGroupOrTrainee(t));
 
-        // Evaluate target group based on criteria
+        // تحديد الفئة النشطة بناءً على المعيار المختار
         let activePool = regularTrainees;
         if (laCriteria === 'INCLUDE_ALL') {
             activePool = pool;
@@ -94113,83 +94126,98 @@ function buildDemoExecutiveReport(params) {
 
         const count = activePool.length || 1;
 
-        // Calculate live P1, P2 and Overall Rate for activePool
-        let p1Att = 0, p1Tot = 0, p2Att = 0, p2Tot = 0;
+        // حساب الحضور الأسبوعي واليومي بمعيار: صح واحدة = حاضر لليوم
+        let totalStudentDaysAttended = 0;
+        let totalRequiredStudentDays = count * 5;
+        let fullWeekCount = 0;      // 5/5 أيام (100%)
+        let highCommitmentCount = 0; // 4-5 أيام (>= 80%)
+        let moderateCount = 0;      // 3 أيام (60%)
+        let atRiskCount = 0;        // <= 2 يوم (<= 40%)
+
+        let dailyPresentCounts = [0, 0, 0, 0, 0]; // الأحد، الاثنين، الثلاثاء، الأربعاء، الخميس
         let sumCurrentRate = 0;
         let sumArchiveRate = 0;
-        let committedCount = 0; // >= 90%
-        let moderateCount = 0;  // 75 - 89%
-        let atRiskCount = 0;    // < 75%
 
         activePool.forEach(t => {
             const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
-            let cRate = (t.rate !== undefined) ? Number(t.rate) : ((t.weeklyRate !== undefined) ? Number(t.weeklyRate) : 92);
-            let aRate = (t.archiveRate !== undefined) ? Number(t.archiveRate) : ((t.combinedRate !== undefined) ? Number(t.combinedRate) : 82);
 
-            // Check archiveData if available
+            let daysAttended = 0;
+            const weekDaysPresence = [false, false, false, false, false];
+
+            if (Array.isArray(t.weeklyAttendance)) {
+                for (let d = 0; d < Math.min(5, t.weeklyAttendance.length); d++) {
+                    if (isDayPresentInRecord(t.weeklyAttendance[d])) {
+                        daysAttended++;
+                        weekDaysPresence[d] = true;
+                    }
+                }
+            } else if (t.weeklyAttendance && typeof t.weeklyAttendance === 'object') {
+                const dayKeys = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+                dayKeys.forEach((k, idx) => {
+                    if (isDayPresentInRecord(t.weeklyAttendance[k])) {
+                        daysAttended++;
+                        weekDaysPresence[idx] = true;
+                    }
+                });
+            } else {
+                // إذا لم توجد مصفوفة تفصيلية، الاعتماد على النسبة المسجلة للمتدرب
+                const baseRate = (t.rate !== undefined) ? Number(t.rate) : ((t.weeklyRate !== undefined) ? Number(t.weeklyRate) : 92);
+                daysAttended = Math.min(5, Math.round((baseRate / 100) * 5));
+                for (let i = 0; i < daysAttended; i++) weekDaysPresence[i] = true;
+            }
+
+            // تحديث عدادات الأيام
+            for (let d = 0; d < 5; d++) {
+                if (weekDaysPresence[d]) dailyPresentCounts[d]++;
+            }
+
+            totalStudentDaysAttended += daysAttended;
+
+            // نسبة المتدرب الحالية بناءً على عدد الأيام (صح واحدة = حاضر)
+            const traineeWeeklyRate = Math.round((daysAttended / 5) * 100);
+            sumCurrentRate += traineeWeeklyRate;
+
+            let aRate = (t.archiveRate !== undefined) ? Number(t.archiveRate) : ((t.combinedRate !== undefined) ? Number(t.combinedRate) : 82);
             if (typeof archiveData !== 'undefined' && archiveData && archiveData[cleanId]) {
                 const arch = archiveData[cleanId];
                 if (arch.attendanceRate !== undefined && Number(arch.attendanceRate) > 0) {
                     aRate = Number(arch.attendanceRate);
                 }
             }
-
-            sumCurrentRate += cRate;
             sumArchiveRate += aRate;
 
-            if (cRate >= 90) committedCount++;
-            else if (cRate >= 75) moderateCount++;
+            if (daysAttended === 5) fullWeekCount++;
+            if (daysAttended >= 4) highCommitmentCount++;
+            else if (daysAttended === 3) moderateCount++;
             else atRiskCount++;
-
-            // Weekly sessions for P1 & P2
-            if (Array.isArray(t.weeklyAttendance)) {
-                t.weeklyAttendance.forEach(daySlots => {
-                    if (Array.isArray(daySlots) && daySlots.length >= 2) {
-                        p1Tot++; p2Tot++;
-                        const p1Pres = (daySlots[0] === true || daySlots[0] === 'present' || daySlots[0] === 'حاضر' || (daySlots.length >= 2 && (daySlots[1] === true || daySlots[1] === 'present' || daySlots[1] === 'حاضر')));
-                        const p2Pres = (daySlots.length >= 4) ? (daySlots[2] === true || daySlots[2] === 'present' || daySlots[2] === 'حاضر' || daySlots[3] === true || daySlots[3] === 'present' || daySlots[3] === 'حاضر') : (daySlots.length >= 2 && (daySlots[1] === true || daySlots[1] === 'present' || daySlots[1] === 'حاضر'));
-                        if (p1Pres) p1Att++;
-                        if (p2Pres) p2Att++;
-                    }
-                });
-            } else if (t.weeklyAttendance && typeof t.weeklyAttendance === 'object') {
-                ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'].forEach(d => {
-                    const rec = t.weeklyAttendance[d];
-                    if (rec) {
-                        p1Tot++; p2Tot++;
-                        if (rec.p1 === 'حاضر' || rec.p1 === 'present' || rec.p1 === true) p1Att++;
-                        if (rec.p2 === 'حاضر' || rec.p2 === 'present' || rec.p2 === true) p2Att++;
-                    }
-                });
-            }
         });
-
-        if (p1Tot === 0) { p1Tot = count * 5; p1Att = Math.round(p1Tot * 0.93); }
-        if (p2Tot === 0) { p2Tot = count * 5; p2Att = Math.round(p2Tot * 0.89); }
 
         const overallCurrentRate = Math.min(100, Math.round(sumCurrentRate / count) || 91);
         const overallArchiveRate = Math.min(100, Math.round(sumArchiveRate / count) || 82);
-        const p1Rate = Math.min(100, Math.round((p1Att / p1Tot) * 100) || 93);
-        const p2Rate = Math.min(100, Math.round((p2Att / p2Tot) * 100) || 89);
-
-        // Delta calculation: Current (November / Live) vs Archive (October)
         const rateDelta = Math.round((overallCurrentRate - overallArchiveRate) * 10) / 10;
 
-        // LA group stats (Actual Attendees in LA)
+        const avgDaysAttended = Math.round((totalStudentDaysAttended / count) * 10) / 10;
+        const fullWeekPct = Math.round((fullWeekCount / count) * 100) || 82;
+        const highCommitmentPct = Math.round((highCommitmentCount / count) * 100) || 91;
+
+        // نسب الحضور اليومية عبر أيام الأسبوع (الأحد، الاثنين، الثلاثاء، الأربعاء، الخميس)
+        const dailyRateList = dailyPresentCounts.map(cnt => Math.min(100, Math.round((cnt / count) * 100) || 92));
+
+        // إحصائيات قوائم قليلين الحضور LA (الحضور الفعلي بصح واحدة)
         let laActualAttendees = 0;
         laTrainees.forEach(t => {
-            let attended = 0;
+            let attendedAnyDay = false;
             if (Array.isArray(t.weeklyAttendance)) {
-                t.weeklyAttendance.forEach(d => {
-                    if (Array.isArray(d) && d.some(Boolean)) attended++;
-                });
+                attendedAnyDay = t.weeklyAttendance.some(d => isDayPresentInRecord(d));
+            } else if (t.weeklyAttendance && typeof t.weeklyAttendance === 'object') {
+                attendedAnyDay = Object.values(t.weeklyAttendance).some(d => isDayPresentInRecord(d));
+            } else {
+                attendedAnyDay = (t.rate && t.rate > 0) || (t.weeklyRate && t.weeklyRate > 0);
             }
-            if (attended > 0 || (t.rate && t.rate > 0) || (t.weeklyRate && t.weeklyRate > 0)) {
-                laActualAttendees++;
-            }
+            if (attendedAnyDay) laActualAttendees++;
         });
 
-        // Timeline Months Data (September, October, November, Live Week)
+        // بيانات الخط الزمني التراكمي (سبتمبر، أكتوبر، نوفمبر، الأسبوع الحالي)
         const septRate = Math.max(68, Math.round(overallArchiveRate - 4.5));
         const octRate = Math.max(72, Math.round(overallArchiveRate));
         const novRate = Math.min(100, overallCurrentRate);
@@ -94209,7 +94237,7 @@ function buildDemoExecutiveReport(params) {
             {
                 key: 'MONTH_10',
                 label: 'شهر أكتوبر',
-                desc: 'المتابعة وتثبيت الجداول',
+                desc: 'فترة التثبيت والمتابعة الميدانية',
                 rate: octRate,
                 delta: Math.round((octRate - septRate) * 10) / 10,
                 trend: (octRate >= septRate) ? 'up' : 'down',
@@ -94238,7 +94266,6 @@ function buildDemoExecutiveReport(params) {
             }
         ];
 
-        // Specific Scope Adjustment if filtered by a single month
         let displayRate = overallCurrentRate;
         let displayDelta = rateDelta;
         let displayPeriodTitle = 'كافة الفترات (سجل زمني تراكمي ومقارن)';
@@ -94250,7 +94277,7 @@ function buildDemoExecutiveReport(params) {
         } else if (periodScope === 'MONTH_10') {
             displayRate = octRate;
             displayDelta = Math.round((octRate - septRate) * 10) / 10;
-            displayPeriodTitle = 'شهر أكتوبر 2026 (الفترة السابقة)';
+            displayPeriodTitle = 'شهر أكتوبر 2026 (الفترة المرجعية السابقة)';
         } else if (periodScope === 'MONTH_11') {
             displayRate = novRate;
             displayDelta = Math.round((novRate - octRate) * 10) / 10;
@@ -94261,7 +94288,7 @@ function buildDemoExecutiveReport(params) {
             displayPeriodTitle = 'الأسبوع التدريبي الجاري (التحضير المباشر اللحظي)';
         }
 
-        // Breakdown by Major Companies
+        // مقارنة الشركات بمعيار: صح واحدة = حاضر (لا توجد فترات أولى وثانية)
         const companiesList = ['Samsung', 'Shinbo', 'Sinopec', 'Hyundai', 'Amana'];
         const companyBreakdown = companiesList.map(comp => {
             const compTrainees = rawPool.filter(t => {
@@ -94273,23 +94300,39 @@ function buildDemoExecutiveReport(params) {
             const cRegular = compTrainees.filter(t => !isLAGroupOrTrainee(t));
             const cLA = compTrainees.filter(t => isLAGroupOrTrainee(t));
 
-            let cSumRate = 0;
+            let cSumDays = 0;
             let cArchSum = 0;
+            let cFullWeek = 0;
             const targetTrainees = (laCriteria === 'INCLUDE_ALL') ? compTrainees : (laCriteria === 'ONLY_LA' ? cLA : cRegular);
             const tCount = targetTrainees.length || 1;
 
             targetTrainees.forEach(t => {
-                cSumRate += (t.rate !== undefined ? Number(t.rate) : ((t.weeklyRate !== undefined) ? Number(t.weeklyRate) : 90));
+                let dAtt = 0;
+                if (Array.isArray(t.weeklyAttendance)) {
+                    for (let d = 0; d < Math.min(5, t.weeklyAttendance.length); d++) {
+                        if (isDayPresentInRecord(t.weeklyAttendance[d])) dAtt++;
+                    }
+                } else {
+                    const r = (t.rate !== undefined) ? Number(t.rate) : ((t.weeklyRate !== undefined) ? Number(t.weeklyRate) : 90);
+                    dAtt = Math.round((r / 100) * 5);
+                }
+                cSumDays += dAtt;
+                if (dAtt === 5) cFullWeek++;
                 cArchSum += (t.archiveRate !== undefined ? Number(t.archiveRate) : 80);
             });
 
-            const cRate = targetTrainees.length > 0 ? Math.min(100, Math.round(cSumRate / tCount)) : (comp === 'Samsung' ? 91 : (comp === 'Sinopec' ? 93 : 89));
+            const cRate = targetTrainees.length > 0 ? Math.min(100, Math.round((cSumDays / (tCount * 5)) * 100)) : (comp === 'Samsung' ? 91 : (comp === 'Sinopec' ? 93 : 89));
             const cArchRate = targetTrainees.length > 0 ? Math.min(100, Math.round(cArchSum / tCount)) : (comp === 'Samsung' ? 82 : (comp === 'Sinopec' ? 84 : 81));
             const cDelta = Math.round((cRate - cArchRate) * 10) / 10;
+            const cAvgDays = Math.round((cSumDays / tCount) * 10) / 10;
+            const cFullWeekPct = Math.round((cFullWeek / tCount) * 100) || 80;
 
             let cLaPresent = 0;
             cLA.forEach(t => {
-                if ((t.rate && t.rate > 0) || (t.weeklyRate && t.weeklyRate > 0)) cLaPresent++;
+                let anyDay = false;
+                if (Array.isArray(t.weeklyAttendance)) anyDay = t.weeklyAttendance.some(d => isDayPresentInRecord(d));
+                else anyDay = (t.rate && t.rate > 0) || (t.weeklyRate && t.weeklyRate > 0);
+                if (anyDay) cLaPresent++;
             });
 
             return {
@@ -94302,8 +94345,8 @@ function buildDemoExecutiveReport(params) {
                 currentRate: cRate,
                 octoberRate: cArchRate,
                 delta: cDelta,
-                p1Rate: Math.min(100, cRate + 2),
-                p2Rate: Math.max(60, cRate - 3),
+                avgDays: cAvgDays,
+                fullWeekPct: cFullWeekPct,
                 grade: cRate >= 90 ? 'ممتاز معتمد' : (cRate >= 80 ? 'منضبط جيد' : 'متابعة ميدانية')
             };
         });
@@ -94321,14 +94364,14 @@ function buildDemoExecutiveReport(params) {
             overallArchiveRate: octRate,
             rateDelta: displayDelta,
             displayPeriodTitle,
-            p1Rate,
-            p2Rate,
-            committedCount,
+            avgDaysAttended,
+            fullWeekCount,
+            fullWeekPct,
+            highCommitmentCount,
+            highCommitmentPct,
             moderateCount,
             atRiskCount,
-            committedPct: Math.round((committedCount / count) * 100) || 85,
-            moderatePct: Math.round((moderateCount / count) * 100) || 12,
-            atRiskPct: Math.round((atRiskCount / count) * 100) || 3,
+            dailyRateList,
             timelineData,
             companyBreakdown
         };
@@ -94363,7 +94406,6 @@ function buildDemoExecutiveReport(params) {
 
         printArea.innerHTML = html;
 
-        // Initialize Canvas Charts (with auto-fallback to SVG if Chart.js is loading)
         if (optCharts) {
             setTimeout(() => {
                 renderKpiCharts(data);
@@ -94374,7 +94416,7 @@ function buildDemoExecutiveReport(params) {
     function generateKpiLetterheadHtml(d) {
         const todayStr = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
         const laBadgeText = d.laCriteria === 'EXCLUDE_LA' 
-            ? '🟢 المعيار المعتمد: استبعاد مجموعات وقوائم LA (حساب الحضور الفعلي فقط)' 
+            ? '🟢 المعيار المعتمد: صح واحدة = حاضر بالكامل • استبعاد مجموعات وقوائم LA' 
             : (d.laCriteria === 'INCLUDE_ALL' ? '⚪ النسبة الإجمالية لكافة القوائم (شاملة LA)' : '🔍 تحليل خاص بمجموعات LA وقليلين الحضور');
 
         return `
@@ -94390,7 +94432,7 @@ function buildDemoExecutiveReport(params) {
                     <div class="text-center">
                         <img src="logo.png" alt="Black Gold Training Institute" class="h-16 w-auto object-contain mx-auto" onerror="this.style.display='none'">
                         <div class="text-[11px] font-black tracking-wider text-[#0F2942] mt-1">BLACK GOLD TRAINING INSTITUTE</div>
-                        <div class="text-[9px] font-bold text-slate-500">نظام المؤشرات والتحليل الإحصائي الرقمي المتقدم</div>
+                        <div class="text-[9px] font-bold text-slate-500">نظام المؤشرات والتحليل الإحصائي الرقمي المتقدم (فرع عنك)</div>
                     </div>
 
                     <div class="text-left space-y-1 text-xs">
@@ -94440,59 +94482,55 @@ function buildDemoExecutiveReport(params) {
                     <div class="mt-2 text-[10px] text-slate-500 font-bold leading-tight">
                         ${isUp ? 'ارتفاع ملحوظ مقارنة بشهر أكتوبر (82.5%)' : 'نزول طفيف يتطلب متابعة الإشراف'}
                     </div>
-                    <div class="text-[9px] text-emerald-800 font-black mt-1">✓ استبعاد LA لحماية النسبة</div>
+                    <div class="text-[9px] text-emerald-800 font-black mt-1">✓ معيار: صح واحدة = حاضر لليوم</div>
                 </div>
 
-                <!-- Card 2: Period 1 Rate -->
+                <!-- Card 2: Average Attended Days (No P1/P2) -->
                 <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm relative overflow-hidden hover:border-blue-300 transition">
                     <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-black text-slate-500 uppercase">الفترة الأولى (الصباحية P1)</span>
-                        <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-black">☀️</span>
+                        <span class="text-[10px] font-black text-slate-500 uppercase">معدل الحضور اليومي</span>
+                        <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-black">🗓️</span>
                     </div>
                     <div class="mt-2 flex items-baseline gap-2">
-                        <span class="text-3xl font-black text-blue-900">${d.p1Rate}%</span>
-                        <span class="text-xs font-black px-2 py-0.5 rounded-full border text-blue-800 bg-blue-50 border-blue-200">
-                            ▲ +3.8%
-                        </span>
+                        <span class="text-3xl font-black text-blue-900">${d.avgDaysAttended}</span>
+                        <span class="text-xs font-black text-slate-500">من 5 أيام</span>
                     </div>
                     <div class="mt-2 text-[10px] text-slate-500 font-bold leading-tight">
-                        الحصص 1 و 2 (الحضور المبكر الملتزم)
+                        متوسط الأيام المحضورة للمتدرب في الأسبوع
                     </div>
-                    <div class="text-[9px] text-blue-700 font-black mt-1">أعلى فترات الانضباط الميداني</div>
+                    <div class="text-[9px] text-blue-700 font-black mt-1">صح واحدة تعادل حضور اليوم كاملاً</div>
                 </div>
 
-                <!-- Card 3: Period 2 Rate -->
-                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm relative overflow-hidden hover:border-indigo-300 transition">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-black text-slate-500 uppercase">الفترة الثانية (المسائية P2)</span>
-                        <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">🌤️</span>
-                    </div>
-                    <div class="mt-2 flex items-baseline gap-2">
-                        <span class="text-3xl font-black text-indigo-900">${d.p2Rate}%</span>
-                        <span class="text-xs font-black px-2 py-0.5 rounded-full border text-indigo-800 bg-indigo-50 border-indigo-200">
-                            ▲ +4.5%
-                        </span>
-                    </div>
-                    <div class="mt-2 text-[10px] text-slate-500 font-bold leading-tight">
-                        الحصص 3 و 4 (استمرار الالتزام التدريبي)
-                    </div>
-                    <div class="text-[9px] text-indigo-700 font-black mt-1">تحسن ملحوظ بعد المتابعة</div>
-                </div>
-
-                <!-- Card 4: High Commitment -->
+                <!-- Card 3: Full 5-Day Attendance (100%) -->
                 <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm relative overflow-hidden hover:border-emerald-300 transition">
                     <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-black text-slate-500 uppercase">نطاق الامتياز (≥ 90%)</span>
+                        <span class="text-[10px] font-black text-slate-500 uppercase">حضور كامل (5 أيام / 100%)</span>
                         <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-black">⭐</span>
                     </div>
                     <div class="mt-2 flex items-baseline gap-2">
-                        <span class="text-3xl font-black text-emerald-800">${d.committedPct}%</span>
-                        <span class="text-[11px] font-bold text-slate-500">(${d.committedCount} متدرباً)</span>
+                        <span class="text-3xl font-black text-emerald-800">${d.fullWeekPct}%</span>
+                        <span class="text-[11px] font-bold text-slate-500">(${d.fullWeekCount} متدرباً)</span>
                     </div>
                     <div class="mt-2 text-[10px] text-slate-500 font-bold leading-tight">
-                        المتدربون الحاصلون على تقييم ملتزم ممتاز
+                        متدربون حضروا كامل أيام الأسبوع بدون أي غياب
                     </div>
-                    <div class="text-[9px] text-emerald-700 font-black mt-1">مؤهلون لمكافأة الانضباط</div>
+                    <div class="text-[9px] text-emerald-700 font-black mt-1">انضباط والتزام أسبوعي تام</div>
+                </div>
+
+                <!-- Card 4: High Commitment (4-5 Days >= 80%) -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm relative overflow-hidden hover:border-indigo-300 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black text-slate-500 uppercase">نطاق الانضباط العالي (≥ 80%)</span>
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">🎯</span>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-3xl font-black text-indigo-900">${d.highCommitmentPct}%</span>
+                        <span class="text-[11px] font-bold text-slate-500">(${d.highCommitmentCount} متدرباً)</span>
+                    </div>
+                    <div class="mt-2 text-[10px] text-slate-500 font-bold leading-tight">
+                        متدربون حضروا 4 أيام أو أكثر في الأسبوع
+                    </div>
+                    <div class="text-[9px] text-indigo-700 font-black mt-1">مؤهلون لمكافأة الانضباط الميداني</div>
                 </div>
 
                 <!-- Card 5: LA Groups Actual Attendees -->
@@ -94508,7 +94546,7 @@ function buildDemoExecutiveReport(params) {
                         </span>
                     </div>
                     <div class="mt-2 text-[10px] text-amber-900/80 font-bold leading-tight">
-                        حضور فعلي مرصود دون احتساب غيابهم في النسبة العامة
+                        حضور فعلي مرصود (صح واحدة) دون احتساب غيابهم في النسبة
                     </div>
                     <div class="text-[9px] text-amber-900 font-black mt-1">حماية عدالة النسبة المؤسسية</div>
                 </div>
@@ -94523,8 +94561,8 @@ function buildDemoExecutiveReport(params) {
                     <div class="flex items-center gap-2">
                         <span class="text-xl">⏱️</span>
                         <div>
-                            <h4 class="font-black text-white text-sm md:text-base">الخط الزمني التفاعلي لتطور نسب الحضور عبر الفترات</h4>
-                            <p class="text-[11px] text-amber-300 font-bold">تتبع مسار الصعود والهبوط: سبتمبر (التأسيس) ➔ أكتوبر (80%) ➔ نوفمبر (90% قفزة) ➔ الأسبوع المباشر</p>
+                            <h4 class="font-black text-white text-sm md:text-base">الخط الزمني لتطور نسب الحضور عبر الشهور (معيار: صح = حاضر)</h4>
+                            <p class="text-[11px] text-amber-300 font-bold">تتبع مسار الصعود والهبوط: سبتمبر ➔ أكتوبر (80%) ➔ نوفمبر (90% قفزة) ➔ الأسبوع المباشر</p>
                         </div>
                     </div>
                     <div class="text-xs text-slate-300 font-bold bg-white/10 px-3 py-1 rounded-xl border border-white/10">
@@ -94579,7 +94617,7 @@ function buildDemoExecutiveReport(params) {
                         <span class="text-xl">📊</span>
                         <h4 class="font-black text-slate-900 text-base">الرسوم البيانية التحليلية (جراف وباي تشارت)</h4>
                     </div>
-                    <span class="text-xs font-bold text-slate-500">رسوم تفاعلية وفيكتور بدقة طباعة عالية</span>
+                    <span class="text-xs font-bold text-slate-500">معيار الحساب: صح واحدة في اليوم = حاضر كامل</span>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -94590,7 +94628,7 @@ function buildDemoExecutiveReport(params) {
                                 <h5 class="font-black text-slate-900 text-sm">📈 منحنى صعود وهبوط نسبة الحضور عبر الشهور</h5>
                                 <p class="text-[11px] text-slate-500 font-bold">مسار التغير من سبتمبر حتى نوفمبر والأسبوع الحالي</p>
                             </div>
-                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">تصاعدي +8.9%</span>
+                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">تصاعدي +${d.rateDelta}%</span>
                         </div>
                         <div class="relative h-64 w-full flex items-center justify-center">
                             <canvas id="kpiTrendCanvas" class="w-full h-full"></canvas>
@@ -94604,8 +94642,8 @@ function buildDemoExecutiveReport(params) {
                     <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h5 class="font-black text-slate-900 text-sm">🍩 التوزيع النسبي لمستويات الانضباط (باي تشارت)</h5>
-                                <p class="text-[11px] text-slate-500 font-bold">توزيع متدربي المعهد حسب فئات الالتزام</p>
+                                <h5 class="font-black text-slate-900 text-sm">🍩 التوزيع النسبي لأيام الحضور والانضباط (باي تشارت)</h5>
+                                <p class="text-[11px] text-slate-500 font-bold">توزيع متدربي المعهد حسب أيام الحضور في الأسبوع</p>
                             </div>
                             <span class="bg-blue-100 text-blue-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">إجمالي ${d.activeCount} متدرباً</span>
                         </div>
@@ -94622,9 +94660,9 @@ function buildDemoExecutiveReport(params) {
                         <div class="flex items-center justify-between">
                             <div>
                                 <h5 class="font-black text-slate-900 text-sm">📊 مقارنة نسب الحضور الفعلي بين الشركات الراعية</h5>
-                                <p class="text-[11px] text-slate-500 font-bold">سامسونج • شينبو • سينوبك • هونداي • أمانة (المعيار المعتمد)</p>
+                                <p class="text-[11px] text-slate-500 font-bold">سامسونج • شينبو • سينوبك • هونداي • أمانة (استبعاد LA)</p>
                             </div>
-                            <span class="bg-indigo-100 text-indigo-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">استبعاد LA</span>
+                            <span class="bg-indigo-100 text-indigo-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">حضور فعلي معتمد</span>
                         </div>
                         <div class="relative h-64 w-full flex items-center justify-center">
                             <canvas id="kpiBarCanvas" class="w-full h-full"></canvas>
@@ -94634,19 +94672,19 @@ function buildDemoExecutiveReport(params) {
                         </div>
                     </div>
 
-                    <!-- Chart 4: Period 1 vs Period 2 Comparative Bar Chart -->
+                    <!-- Chart 4: Daily Attendance Rates Across Days of Week (الأحد -> الخميس) (No P1/P2) -->
                     <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h5 class="font-black text-slate-900 text-sm">⚖️ مقارنة حضور الفترة 1 (الصباحية) مقابل الفترة 2 (المسائية)</h5>
-                                <p class="text-[11px] text-slate-500 font-bold">تأثير أوقات التدريب على معدل الالتزام لكل جهة</p>
+                                <h5 class="font-black text-slate-900 text-sm">📅 معدل الحضور اليومي عبر أيام الأسبوع (الأحد ➔ الخميس)</h5>
+                                <p class="text-[11px] text-slate-500 font-bold">نسبة الحضور الفعلي في كل يوم تدريبي (صح واحدة = حاضر)</p>
                             </div>
-                            <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">P1: ${d.p1Rate}% | P2: ${d.p2Rate}%</span>
+                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">الأسبوع التدريبي</span>
                         </div>
                         <div class="relative h-64 w-full flex items-center justify-center">
-                            <canvas id="kpiPeriodBarCanvas" class="w-full h-full"></canvas>
-                            <div id="kpiPeriodBarSvgFallback" class="absolute inset-0 pointer-events-none hidden">
-                                ${generateKpiPeriodBarSvg(d)}
+                            <canvas id="kpiDailyCanvas" class="w-full h-full"></canvas>
+                            <div id="kpiDailySvgFallback" class="absolute inset-0 pointer-events-none hidden">
+                                ${generateKpiDailySvg(d)}
                             </div>
                         </div>
                     </div>
@@ -94663,7 +94701,7 @@ function buildDemoExecutiveReport(params) {
                         <span class="text-xl">📑</span>
                         <div>
                             <h4 class="font-black text-slate-900 text-sm md:text-base">جدول المقارنة التحليلي التفصيلي للشركات والمؤشرات</h4>
-                            <p class="text-[11px] text-slate-500 font-bold">بيان الحضور الفعلي واستبعاد شواغر ومجموعات LA مع نسب التغير (صعوداً ونزولاً)</p>
+                            <p class="text-[11px] text-slate-500 font-bold">المعيار المعتمد: صح واحدة = حاضر بالكامل لليوم • استبعاد مقاعد LA من المقام</p>
                         </div>
                     </div>
                     <span class="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-xl">
@@ -94680,10 +94718,10 @@ function buildDemoExecutiveReport(params) {
                                 <th class="p-3 font-black text-center">المنتظمون (الفعلي)</th>
                                 <th class="p-3 font-black text-center">مقاعد LA (مستبعدة)</th>
                                 <th class="p-3 font-black text-center">حضور LA الفعلي</th>
+                                <th class="p-3 font-black text-center">متوسط الأيام (من 5)</th>
+                                <th class="p-3 font-black text-center">حضور كامل (5/5)</th>
                                 <th class="p-3 font-black text-center">أكتوبر %</th>
                                 <th class="p-3 font-black text-center">نوفمبر %</th>
-                                <th class="p-3 font-black text-center">الفترة 1 %</th>
-                                <th class="p-3 font-black text-center">الفترة 2 %</th>
                                 <th class="p-3 font-black text-center">معدل التغير (الأسهم)</th>
                                 <th class="p-3 rounded-tl-xl font-black text-center">الحالة الرسمية</th>
                             </tr>
@@ -94706,10 +94744,10 @@ function buildDemoExecutiveReport(params) {
                                         <td class="p-3 text-center font-black text-indigo-900">${row.regularCount}</td>
                                         <td class="p-3 text-center font-bold text-amber-900 bg-amber-50/50">${row.laCount}</td>
                                         <td class="p-3 text-center font-bold text-emerald-800">${row.laActualPresent}</td>
+                                        <td class="p-3 text-center font-black text-blue-900 font-mono">${row.avgDays} / 5</td>
+                                        <td class="p-3 text-center font-bold text-emerald-700 font-mono">${row.fullWeekPct}%</td>
                                         <td class="p-3 text-center font-bold text-slate-500 font-mono">${row.octoberRate}%</td>
                                         <td class="p-3 text-center font-black text-[#0F2942] font-mono text-sm">${row.currentRate}%</td>
-                                        <td class="p-3 text-center font-bold text-blue-800 font-mono">${row.p1Rate}%</td>
-                                        <td class="p-3 text-center font-bold text-indigo-800 font-mono">${row.p2Rate}%</td>
                                         <td class="p-3 text-center">${deltaBadge}</td>
                                         <td class="p-3 text-center font-black text-[11px] ${row.currentRate >= 90 ? 'text-emerald-700' : 'text-blue-700'}">${row.grade}</td>
                                     </tr>
@@ -94722,8 +94760,8 @@ function buildDemoExecutiveReport(params) {
                 <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-900 flex items-start gap-2.5">
                     <span class="text-base shrink-0">💡</span>
                     <div class="leading-relaxed">
-                        <span class="font-black">معيار الحساب المعتمد لمعهد الذهب الأسود:</span>
-                        وفقاً للتوجيهات الإدارية، أي شخص في قوائم قليلين الحضور (LA) أو شواغر مجموعات LA مثل سامسونج أو شينبو أو سينوبك، لا يتم احتساب نسبته كغياب سلبي يخفض المؤشر التراكمي للمعهد والشركات، وإنما يتم فقط رصد الحضور الفعلي للمتدربين المنتظمين مع إظهار الحضور الفعلي لمتدربي LA في عمود مستقل لضمان أقصى درجات الشفافية والعدالة.
+                        <span class="font-black">المعيار الإداري المعتمد لمعهد الذهب الأسود:</span>
+                        لا يوجد تقسيم لفترات أولى وثانية، بل أي علامة صح واحدة في أي حصة من حصص اليوم تعتبر حضوراً كاملاً لليوم (حاضر). كما أن أي متدرب في قوائم قليلين الحضور (LA) أو شواغر مجموعات LA لا يتم احتسابه كغياب يخفض نسبة المعهد التراكمية، بل يُحسب فقط الحضور الفعلي للمتدربين المنتظمين.
                     </div>
                 </div>
             </div>
@@ -94748,7 +94786,7 @@ function buildDemoExecutiveReport(params) {
                             <span>مسار التحسن الفصلي</span>
                         </div>
                         <p class="text-slate-600 font-bold">
-                            سجل شهر نوفمبر قفزة نوعية في نسبة الحضور العام بلغت <span class="text-emerald-700 font-black">${d.overallCurrentRate}%</span> مقارنة بشهر أكتوبر (<span class="font-black">${d.overallArchiveRate}%</span>) بنمو قدره <span class="text-emerald-700 font-black">+${d.rateDelta}%</span>.
+                            سجل شهر نوفمبر قفزة نوعية في نسبة الحضور العام بلغت <span class="text-emerald-700 font-black">${d.overallCurrentRate}%</span> مقارنة بشهر أكتوبر (<span class="font-black">${d.overallArchiveRate}%</span>) بنمو قدره <span class="text-emerald-700 font-black">+${d.rateDelta}%</span>، بمتوسط حضور بلغ <span class="text-indigo-900 font-black">${d.avgDaysAttended} أيام</span> أسبوعياً.
                         </p>
                     </div>
 
@@ -94758,7 +94796,7 @@ function buildDemoExecutiveReport(params) {
                             <span>أثر معيار استبعاد LA</span>
                         </div>
                         <p class="text-slate-600 font-bold">
-                            أثبت استبعاد مقاعد وشواغر قليلين الحضور (LA) فاعليته في عكس الانضباط الفعلي لقاعات التدريب مع رصد <span class="font-black text-amber-900">${d.laActualAttendees} متدرباً حاضرين فعلياً</span>.
+                            أثبت استبعاد مقاعد وشواغر قليلين الحضور (LA) فاعليته في حماية النسبة الرسمية المعتمدة للمعهد، مع رصد <span class="font-black text-amber-900">${d.laActualAttendees} متدرباً حاضرين فعلياً</span>.
                         </p>
                     </div>
 
@@ -94768,7 +94806,7 @@ function buildDemoExecutiveReport(params) {
                             <span>التوصيات الميدانية</span>
                         </div>
                         <p class="text-slate-600 font-bold">
-                            يوصى بمواصلة التكريم الأسبوعي للمجموعات الملتزمة (≥ 92%) وتكثيف المتابعة الصباحية للفترة 2 لضمان استقرار الانضباط.
+                            يوصى بمواصلة التكريم الأسبوعي للمجموعات الملتزمة كاملاً (5 أيام بدون غياب) وتكثيف المتابعة لمنتصف الأسبوع.
                         </p>
                     </div>
                 </div>
@@ -94778,7 +94816,7 @@ function buildDemoExecutiveReport(params) {
                     <div class="space-y-1">
                         <div class="text-[11px] font-bold text-slate-500">إعداد / وحدة الرصد والمؤشرات</div>
                         <div class="text-xs font-black text-slate-800">أ. مشعل القحطاني</div>
-                        <div class="text-[10px] text-emerald-700 font-bold">✓ تم التدقيق الحسابي</div>
+                        <div class="text-[10px] text-emerald-700 font-bold">✓ تم التدقيق الحسابي بمعيار صح = حاضر</div>
                     </div>
 
                     <div class="space-y-1 flex flex-col items-center justify-center">
@@ -94837,7 +94875,7 @@ function buildDemoExecutiveReport(params) {
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: (ctx) => ` نسبة الحضور: ${ctx.parsed.y}%`
+                                label: (ctx) => ` نسبة الحضور: ${ctx.parsed.y}% (صح = حاضر)`
                             }
                         }
                     },
@@ -94848,25 +94886,23 @@ function buildDemoExecutiveReport(params) {
                             ticks: { callback: v => v + '%' },
                             grid: { color: 'rgba(226, 232, 240, 0.6)' }
                         },
-                        x: {
-                            grid: { display: false }
-                        }
+                        x: { grid: { display: false } }
                     }
                 }
             });
         }
 
-        // 2. Donut / Pie Chart
+        // 2. Donut / Pie Chart for Commitment Levels
         const donutEl = document.getElementById('kpiDonutCanvas');
         if (donutEl) {
             if (kpiDonutChartInstance) kpiDonutChartInstance.destroy();
             kpiDonutChartInstance = new Chart(donutEl, {
                 type: 'doughnut',
                 data: {
-                    labels: ['ملتزم ممتاز (≥90%)', 'متوسط (75-89%)', 'منذر / بحاجة لمتابعة (<75%)'],
+                    labels: ['حضور كامل 5 أيام (100%)', 'حضور 4 أيام (80%)', 'حضور 3 أيام (60%)', 'غياب حرج (≤ يومين)'],
                     datasets: [{
-                        data: [d.committedCount, d.moderateCount, d.atRiskCount],
-                        backgroundColor: ['#059669', '#2563EB', '#F43F5E'],
+                        data: [d.fullWeekCount, Math.max(0, d.highCommitmentCount - d.fullWeekCount), d.moderateCount, d.atRiskCount],
+                        backgroundColor: ['#059669', '#2563EB', '#D97706', '#F43F5E'],
                         borderColor: '#ffffff',
                         borderWidth: 2
                     }]
@@ -94920,31 +94956,37 @@ function buildDemoExecutiveReport(params) {
             });
         }
 
-        // 4. Period Bar Chart (P1 vs P2)
-        const pBarEl = document.getElementById('kpiPeriodBarCanvas');
-        if (pBarEl) {
-            if (kpiPeriodBarChartInstance) kpiPeriodBarChartInstance.destroy();
-            const cLabels = d.companyBreakdown.map(c => c.company);
-            const p1Rates = d.companyBreakdown.map(c => c.p1Rate);
-            const p2Rates = d.companyBreakdown.map(c => c.p2Rate);
+        // 4. Daily Attendance Bar Chart Across Days of Week (الأحد -> الخميس)
+        const dailyEl = document.getElementById('kpiDailyCanvas');
+        if (dailyEl) {
+            if (kpiDailyChartInstance) kpiDailyChartInstance.destroy();
+            const dayLabels = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+            const dayRates = d.dailyRateList;
 
-            kpiPeriodBarChartInstance = new Chart(pBarEl, {
+            kpiDailyChartInstance = new Chart(dailyEl, {
                 type: 'bar',
                 data: {
-                    labels: cLabels,
-                    datasets: [
-                        { label: 'الفترة 1 (الصباحية)', data: p1Rates, backgroundColor: '#2563EB', borderRadius: 6 },
-                        { label: 'الفترة 2 (المسائية)', data: p2Rates, backgroundColor: '#4F46E5', borderRadius: 6 }
-                    ]
+                    labels: dayLabels,
+                    datasets: [{
+                        label: 'نسبة حضور اليوم %',
+                        data: dayRates,
+                        backgroundColor: ['#2563EB', '#3B82F6', '#059669', '#10B981', '#6366F1'],
+                        borderRadius: 8
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { font: { size: 10, weight: 'bold' } } }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` الحضور: ${ctx.parsed.y}% (صح واحدة = حاضر)`
+                            }
+                        }
                     },
                     scales: {
-                        y: { min: 50, max: 100, ticks: { callback: v => v + '%' } },
+                        y: { min: 60, max: 100, ticks: { callback: v => v + '%' } },
                         x: { grid: { display: false } }
                     }
                 }
@@ -94953,7 +94995,7 @@ function buildDemoExecutiveReport(params) {
     }
 
     function showKpiSvgFallbacks() {
-        ['kpiTrendSvgFallback', 'kpiDonutSvgFallback', 'kpiBarSvgFallback', 'kpiPeriodBarSvgFallback'].forEach(id => {
+        ['kpiTrendSvgFallback', 'kpiDonutSvgFallback', 'kpiBarSvgFallback', 'kpiDailySvgFallback'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.classList.remove('hidden');
         });
@@ -94987,10 +95029,10 @@ function buildDemoExecutiveReport(params) {
         return `
             <svg viewBox="0 0 200 200" class="w-full h-full max-h-48 mx-auto">
                 <circle cx="100" cy="100" r="70" fill="none" stroke="#F43F5E" stroke-width="24" stroke-dasharray="440" stroke-dashoffset="0" />
-                <circle cx="100" cy="100" r="70" fill="none" stroke="#2563EB" stroke-width="24" stroke-dasharray="440" stroke-dashoffset="${440 * (1 - (d.committedPct + d.moderatePct)/100)}" />
-                <circle cx="100" cy="100" r="70" fill="none" stroke="#059669" stroke-width="24" stroke-dasharray="440" stroke-dashoffset="${440 * (1 - d.committedPct/100)}" />
+                <circle cx="100" cy="100" r="70" fill="none" stroke="#2563EB" stroke-width="24" stroke-dasharray="440" stroke-dashoffset="${440 * (1 - (d.highCommitmentPct)/100)}" />
+                <circle cx="100" cy="100" r="70" fill="none" stroke="#059669" stroke-width="24" stroke-dasharray="440" stroke-dashoffset="${440 * (1 - d.fullWeekPct/100)}" />
                 <text x="100" y="98" font-size="20" font-weight="900" fill="#0F2942" text-anchor="middle">${d.overallCurrentRate}%</text>
-                <text x="100" y="116" font-size="9" font-weight="bold" fill="#64748B" text-anchor="middle">حضور فعلي معتمد</text>
+                <text x="100" y="116" font-size="9" font-weight="bold" fill="#64748B" text-anchor="middle">صح واحدة = حاضر</text>
             </svg>
         `;
     }
@@ -95012,17 +95054,18 @@ function buildDemoExecutiveReport(params) {
         `;
     }
 
-    function generateKpiPeriodBarSvg(d) {
+    function generateKpiDailySvg(d) {
+        const dayLabels = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
         return `
             <svg viewBox="0 0 450 180" class="w-full h-full">
-                ${d.companyBreakdown.map((c, i) => {
+                ${d.dailyRateList.map((r, i) => {
                     const x = 30 + (i * 85);
-                    const h1 = c.p1Rate * 1.3;
-                    const h2 = c.p2Rate * 1.3;
+                    const h = r * 1.35;
+                    const y = 160 - h;
                     return `
-                        <rect x="${x}" y="${160 - h1}" width="22" height="${h1}" rx="4" fill="#2563EB" />
-                        <rect x="${x + 24}" y="${160 - h2}" width="22" height="${h2}" rx="4" fill="#4F46E5" />
-                        <text x="${x + 23}" y="175" font-size="10" font-weight="bold" fill="#64748B" text-anchor="middle">${c.company}</text>
+                        <rect x="${x}" y="${y}" width="48" height="${h}" rx="6" fill="#2563EB" opacity="0.85" />
+                        <text x="${x + 24}" y="${y - 8}" font-size="11" font-weight="bold" fill="#2563EB" text-anchor="middle">${r}%</text>
+                        <text x="${x + 24}" y="175" font-size="10" font-weight="bold" fill="#64748B" text-anchor="middle">${dayLabels[i]}</text>
                     `;
                 }).join('')}
             </svg>
