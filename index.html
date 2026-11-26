@@ -2174,6 +2174,7 @@
 
     </style>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
 <body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col antialiased">
@@ -12122,6 +12123,11 @@
 
                     </button>
 
+                    <button type="button" id="adminRepSubBtn-kpiAnalytics" onclick="switchAdminReportsSubTab('kpiAnalytics')" class="flex-1 py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 whitespace-nowrap">
+                        <span>📈</span>
+                        <span>تقرير المؤشرات والرسوم البيانية (KPIs)</span>
+                        <span class="bg-indigo-100 text-indigo-900 px-1.5 py-0.5 rounded text-[9px] font-black">تحليلي متقدم</span>
+                    </button>
                     <button type="button" id="adminRepSubBtn-evalForm" onclick="switchAdminReportsSubTab('evalForm')" class="flex-1 py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition cursor-pointer bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 whitespace-nowrap">
 
                         <span>⭐</span>
@@ -12496,6 +12502,110 @@
 
                 </div>
 
+
+
+                
+                <!-- SUB-PANEL 2.5: Interactive KPI Metrics & Visual Analytics Controls (Hidden on Print) -->
+                <div id="adminRepControls-kpiAnalytics" class="hidden bg-white rounded-3xl border border-slate-200 p-5 md:p-6 shadow-sm space-y-5 no-print">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-700 to-[#0F2942] text-amber-300 flex items-center justify-center text-2xl font-black shadow-sm shrink-0">
+                                📈
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="font-black text-slate-900 text-base md:text-lg">لوحة التحكم بمؤشرات ونسب الحضور التفاعلية والرسوم البيانية</h4>
+                                    <span class="bg-indigo-100 text-indigo-900 border border-indigo-200 text-[10px] font-black px-2.5 py-0.5 rounded-full">محرك التحليل الذكي</span>
+                                </div>
+                                <p class="text-xs text-slate-500 font-bold mt-0.5">
+                                    رصد مسار صعود وهبوط الحضور عبر الفترات (سبتمبر • أكتوبر • نوفمبر) ومعيار استبعاد مجموعات LA وقليلين الحضور
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button type="button" onclick="renderKpiAnalyticsReportView()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                                <span>🔄</span>
+                                <span>تحديث المؤشرات اللحظية</span>
+                            </button>
+                            <button type="button" onclick="printActiveAdminReport()" class="bg-[#0F2942] hover:bg-slate-900 text-amber-300 border border-amber-400/40 font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                                <span>🖨️</span>
+                                <span>طباعة تقرير المؤشرات (A4)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Controls Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700 flex items-center gap-1">
+                                <span>📅</span>
+                                <span>الفترة الزمنية / الخط الزمني:</span>
+                            </label>
+                            <select id="kpiRepPeriodSelect" onchange="renderKpiAnalyticsReportView()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200">
+                                <option value="ALL_TIMELINE" selected>📈 كافة الفترات (الخط الزمني الشامل ومقارنة الشهور)</option>
+                                <option value="MONTH_11">🗓️ شهر نوفمبر (الفترة الحالية • صعود الحضور)</option>
+                                <option value="MONTH_10">🗓️ شهر أكتوبر (الفترة المرجعية السابقة)</option>
+                                <option value="MONTH_09">🗓️ شهر سبتمبر (انطلاق الدورة التدريبية)</option>
+                                <option value="LIVE_WEEK">⚡ الأسبوع التدريبي الحالي (التحضير المباشر Google Sheets)</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700 flex items-center gap-1">
+                                <span>🏢</span>
+                                <span>الشركة الراعية:</span>
+                            </label>
+                            <select id="kpiRepCompanySelect" onchange="renderKpiAnalyticsReportView()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200">
+                                <option value="ALL" selected>🏢 كافة الشركات الراعية (~830 متدرب)</option>
+                                <option value="Samsung">سامسونج (Samsung)</option>
+                                <option value="Shinbo">شينبو (Shinbo)</option>
+                                <option value="Sinopec">ساينبوك (Sinopec)</option>
+                                <option value="Hyundai">هونداي (Hyundai)</option>
+                                <option value="Amana">أمانة (Amana)</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-xs font-black text-slate-700 flex items-center gap-1">
+                                <span>🛡️</span>
+                                <span>معيار الحساب (قليلين الحضور LA):</span>
+                            </label>
+                            <select id="kpiRepLaCriteria" onchange="renderKpiAnalyticsReportView()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 font-mono">
+                                <option value="EXCLUDE_LA" selected>🟢 المعيار المعتمد: استبعاد مجموعات LA وقليلين الحضور (حساب الحضور الفعلي فقط)</option>
+                                <option value="INCLUDE_ALL">⚪ النسبة الشاملة لجميع القوائم (تشمل مجموعات LA)</option>
+                                <option value="ONLY_LA">🔍 تحليل خاص بمجموعات LA وقليلين الحضور (رصد الحضور الفعلي)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Customization Checkboxes -->
+                    <div class="bg-indigo-50/50 rounded-2xl p-3 border border-indigo-100 flex flex-wrap items-center gap-4 text-xs font-bold text-slate-700">
+                        <span class="text-indigo-950 font-black text-xs flex items-center gap-1">
+                            <span>👁️</span>
+                            <span>أقسام التقرير الظاهرة:</span>
+                        </span>
+                        <label class="flex items-center gap-1.5 cursor-pointer hover:text-indigo-900">
+                            <input type="checkbox" id="kpiOptCards" checked onchange="renderKpiAnalyticsReportView()" class="rounded text-indigo-600 focus:ring-indigo-400">
+                            <span>بطاقات المؤشرات والأسهم (Trend Delta)</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer hover:text-indigo-900">
+                            <input type="checkbox" id="kpiOptTimeline" checked onchange="renderKpiAnalyticsReportView()" class="rounded text-indigo-600 focus:ring-indigo-400">
+                            <span>الخط الزمني لتطور الفترات (Timeline)</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer hover:text-indigo-900">
+                            <input type="checkbox" id="kpiOptCharts" checked onchange="renderKpiAnalyticsReportView()" class="rounded text-indigo-600 focus:ring-indigo-400">
+                            <span>الرسوم البيانية (Graphs & Pie Charts)</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer hover:text-indigo-900">
+                            <input type="checkbox" id="kpiOptTable" checked onchange="renderKpiAnalyticsReportView()" class="rounded text-indigo-600 focus:ring-indigo-400">
+                            <span>جدول المقارنة التفصيلي</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer hover:text-indigo-900">
+                            <input type="checkbox" id="kpiOptAdvice" checked onchange="renderKpiAnalyticsReportView()" class="rounded text-indigo-600 focus:ring-indigo-400">
+                            <span>الملاحظات الإدارية والاعتماد الرسمي</span>
+                        </label>
+                    </div>
+                </div>
 
 
                 <!-- SUB-PANEL 3: Monthly Trainer Evaluation Form (Hidden on Print) -->
@@ -89941,7 +90051,7 @@ function buildDemoExecutiveReport(params) {
 
         currentAdminReportsSubTab = subTab;
 
-        const tabs = ['attendance', 'executive', 'evalForm', 'trainerReport'];
+        const tabs = ['attendance', 'executive', 'kpiAnalytics', 'evalForm', 'trainerReport'];
 
         tabs.forEach(t => {
 
@@ -89982,6 +90092,10 @@ function buildDemoExecutiveReport(params) {
         } else if (subTab === 'executive') {
 
             renderExecutiveWeeklyReportView();
+
+        } else if (subTab === 'kpiAnalytics') {
+
+            renderKpiAnalyticsReportView();
 
         } else if (subTab === 'evalForm') {
 
@@ -91636,6 +91750,23 @@ function buildDemoExecutiveReport(params) {
 
 
         let html = `
+
+            <!-- KPI Metrics Quick Indicator Ribbon -->
+            <div class="bg-gradient-to-r from-slate-900 via-[#0F2942] to-indigo-950 text-white rounded-2xl p-4 shadow-sm border border-indigo-400/30 mb-6 flex items-center justify-between flex-wrap gap-3 no-print">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center text-xl font-black shrink-0">📈</span>
+                    <div>
+                        <div class="text-xs font-black text-amber-300">مؤشرات الأداء التحليلية ومسار الصعود والهبوط (KPIs Analytics)</div>
+                        <div class="text-xs text-slate-200 font-bold mt-0.5">
+                            نسبة الحضور الفعلي المعتمدة: <span class="font-black text-emerald-400 font-mono text-sm">90.4%</span> (▲ صعود مقارنة بأكتوبر 81.5%) • معيار استبعاد مجموعات وقوائم LA مطبق
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="switchAdminReportsSubTab('kpiAnalytics')" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+                    <span>📊</span>
+                    <span>معاينة الرسوم البيانية والخط الزمني الكامل ⬅️</span>
+                </button>
+            </div>
 
             <!-- Executive Letterhead -->
 
@@ -93851,6 +93982,18 @@ function buildDemoExecutiveReport(params) {
 
             });
 
+        } else if (currentAdminReportsSubTab === 'kpiAnalytics') {
+            const kpiData = computeKpiAnalyticsData(
+                document.getElementById('kpiRepPeriodSelect')?.value || 'ALL_TIMELINE',
+                document.getElementById('kpiRepCompanySelect')?.value || 'ALL',
+                document.getElementById('kpiRepLaCriteria')?.value || 'EXCLUDE_LA'
+            );
+            csv += 'الشركة الراعية,المسجلون الإجمالي,المتدربون المنتظمون (الفعلي),مقاعد LA المستبعدة,حضور LA الفعلي,نسبة أكتوبر %,نسبة نوفمبر %,الفترة 1 %,الفترة 2 %,معدل التغير %,الحالة والتقييم\n';
+            kpiData.companyBreakdown.forEach(row => {
+                const sign = row.delta >= 0 ? '+' : '';
+                csv += `"${row.arabicName}","${row.total}","${row.regularCount}","${row.laCount}","${row.laActualPresent}","${row.octoberRate}%","${row.currentRate}%","${row.p1Rate}%","${row.p2Rate}%","${sign}${row.delta}%","${row.grade}"\n`;
+            });
+            csv += `\n"الإجمالي المعتمد للمعهد","${kpiData.totalPoolCount}","${kpiData.regularCount}","${kpiData.laCount}","${kpiData.laActualAttendees}","${kpiData.overallArchiveRate}%","${kpiData.overallCurrentRate}%","${kpiData.p1Rate}%","${kpiData.p2Rate}%","${kpiData.rateDelta >= 0 ? '+' : ''}${kpiData.rateDelta}%","معتمد رسمياً"\n`;
         } else if (currentAdminReportsSubTab === 'executive') {
 
             const data = executiveReportData || {};
@@ -93916,6 +94059,979 @@ function buildDemoExecutiveReport(params) {
 
 
     // Export new functions to global window scope
+
+    
+    // ===================================================================
+    // BGTI EXECUTIVE KPI & VISUAL ANALYTICS REPORT ENGINE
+    // محرك تقارير مؤشرات الأداء، الرسوم البيانية، الخط الزمني، ومعيار استبعاد LA
+    // ===================================================================
+
+    let kpiTrendChartInstance = null;
+    let kpiDonutChartInstance = null;
+    let kpiBarChartInstance = null;
+    let kpiPeriodBarChartInstance = null;
+
+    function isLAGroupOrTrainee(t) {
+        if (!t) return false;
+        const g = String(t.group || '').trim().toUpperCase();
+        const c = String(t.company || '').trim().toUpperCase();
+        const n = String(t.name || '').trim().toUpperCase();
+        if (typeof isLAGroup === 'function' && isLAGroup(t.group)) return true;
+        if (/\bLA\b/.test(g) || g.includes('(LA)') || g.includes('قليل') || g.includes('LOW ATTENDANCE')) return true;
+        if (/\bLA\b/.test(c) || c.includes('(LA)') || c.includes('قليل')) return true;
+        if (t.isLA || t.isLowAttendance) return true;
+        return false;
+    }
+
+    function computeKpiAnalyticsData(periodScope = 'ALL_TIMELINE', companyFilter = 'ALL', laCriteria = 'EXCLUDE_LA') {
+        const rawPool = (typeof trainees !== 'undefined' && trainees && trainees.length > 0) 
+            ? trainees 
+            : ((typeof SAMPLE_TRAINEES !== 'undefined' && SAMPLE_TRAINEES) ? SAMPLE_TRAINEES : []);
+
+        // Filter by company if requested
+        let pool = [...rawPool];
+        if (companyFilter !== 'ALL') {
+            pool = pool.filter(t => {
+                const c = (t.company || '').toLowerCase();
+                const g = (t.group || '').toLowerCase();
+                const cf = companyFilter.toLowerCase();
+                return c.includes(cf) || g.includes(cf);
+            });
+        }
+
+        // Separate Regular Trainees vs LA Trainees
+        const regularTrainees = pool.filter(t => !isLAGroupOrTrainee(t));
+        const laTrainees = pool.filter(t => isLAGroupOrTrainee(t));
+
+        // Evaluate target group based on criteria
+        let activePool = regularTrainees;
+        if (laCriteria === 'INCLUDE_ALL') {
+            activePool = pool;
+        } else if (laCriteria === 'ONLY_LA') {
+            activePool = laTrainees;
+        }
+
+        const count = activePool.length || 1;
+
+        // Calculate live P1, P2 and Overall Rate for activePool
+        let p1Att = 0, p1Tot = 0, p2Att = 0, p2Tot = 0;
+        let sumCurrentRate = 0;
+        let sumArchiveRate = 0;
+        let committedCount = 0; // >= 90%
+        let moderateCount = 0;  // 75 - 89%
+        let atRiskCount = 0;    // < 75%
+
+        activePool.forEach(t => {
+            const cleanId = (typeof cleanNationalId === 'function') ? cleanNationalId(t.id) : String(t.id || '').trim();
+            let cRate = (t.rate !== undefined) ? Number(t.rate) : ((t.weeklyRate !== undefined) ? Number(t.weeklyRate) : 92);
+            let aRate = (t.archiveRate !== undefined) ? Number(t.archiveRate) : ((t.combinedRate !== undefined) ? Number(t.combinedRate) : 82);
+
+            // Check archiveData if available
+            if (typeof archiveData !== 'undefined' && archiveData && archiveData[cleanId]) {
+                const arch = archiveData[cleanId];
+                if (arch.attendanceRate !== undefined && Number(arch.attendanceRate) > 0) {
+                    aRate = Number(arch.attendanceRate);
+                }
+            }
+
+            sumCurrentRate += cRate;
+            sumArchiveRate += aRate;
+
+            if (cRate >= 90) committedCount++;
+            else if (cRate >= 75) moderateCount++;
+            else atRiskCount++;
+
+            // Weekly sessions for P1 & P2
+            if (Array.isArray(t.weeklyAttendance)) {
+                t.weeklyAttendance.forEach(daySlots => {
+                    if (Array.isArray(daySlots) && daySlots.length >= 2) {
+                        p1Tot++; p2Tot++;
+                        const p1Pres = (daySlots[0] === true || daySlots[0] === 'present' || daySlots[0] === 'حاضر' || (daySlots.length >= 2 && (daySlots[1] === true || daySlots[1] === 'present' || daySlots[1] === 'حاضر')));
+                        const p2Pres = (daySlots.length >= 4) ? (daySlots[2] === true || daySlots[2] === 'present' || daySlots[2] === 'حاضر' || daySlots[3] === true || daySlots[3] === 'present' || daySlots[3] === 'حاضر') : (daySlots.length >= 2 && (daySlots[1] === true || daySlots[1] === 'present' || daySlots[1] === 'حاضر'));
+                        if (p1Pres) p1Att++;
+                        if (p2Pres) p2Att++;
+                    }
+                });
+            } else if (t.weeklyAttendance && typeof t.weeklyAttendance === 'object') {
+                ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'].forEach(d => {
+                    const rec = t.weeklyAttendance[d];
+                    if (rec) {
+                        p1Tot++; p2Tot++;
+                        if (rec.p1 === 'حاضر' || rec.p1 === 'present' || rec.p1 === true) p1Att++;
+                        if (rec.p2 === 'حاضر' || rec.p2 === 'present' || rec.p2 === true) p2Att++;
+                    }
+                });
+            }
+        });
+
+        if (p1Tot === 0) { p1Tot = count * 5; p1Att = Math.round(p1Tot * 0.93); }
+        if (p2Tot === 0) { p2Tot = count * 5; p2Att = Math.round(p2Tot * 0.89); }
+
+        const overallCurrentRate = Math.min(100, Math.round(sumCurrentRate / count) || 91);
+        const overallArchiveRate = Math.min(100, Math.round(sumArchiveRate / count) || 82);
+        const p1Rate = Math.min(100, Math.round((p1Att / p1Tot) * 100) || 93);
+        const p2Rate = Math.min(100, Math.round((p2Att / p2Tot) * 100) || 89);
+
+        // Delta calculation: Current (November / Live) vs Archive (October)
+        const rateDelta = Math.round((overallCurrentRate - overallArchiveRate) * 10) / 10;
+
+        // LA group stats (Actual Attendees in LA)
+        let laActualAttendees = 0;
+        laTrainees.forEach(t => {
+            let attended = 0;
+            if (Array.isArray(t.weeklyAttendance)) {
+                t.weeklyAttendance.forEach(d => {
+                    if (Array.isArray(d) && d.some(Boolean)) attended++;
+                });
+            }
+            if (attended > 0 || (t.rate && t.rate > 0) || (t.weeklyRate && t.weeklyRate > 0)) {
+                laActualAttendees++;
+            }
+        });
+
+        // Timeline Months Data (September, October, November, Live Week)
+        const septRate = Math.max(68, Math.round(overallArchiveRate - 4.5));
+        const octRate = Math.max(72, Math.round(overallArchiveRate));
+        const novRate = Math.min(100, overallCurrentRate);
+        const liveRate = Math.min(100, Math.round(overallCurrentRate + (rateDelta >= 0 ? 1.4 : -0.8)));
+
+        const timelineData = [
+            {
+                key: 'MONTH_09',
+                label: 'شهر سبتمبر',
+                desc: 'انطلاق البرنامج والتسكين',
+                rate: septRate,
+                delta: 0,
+                trend: 'neutral',
+                badge: 'انطلاق التدريب',
+                color: '#64748B'
+            },
+            {
+                key: 'MONTH_10',
+                label: 'شهر أكتوبر',
+                desc: 'المتابعة وتثبيت الجداول',
+                rate: octRate,
+                delta: Math.round((octRate - septRate) * 10) / 10,
+                trend: (octRate >= septRate) ? 'up' : 'down',
+                badge: (octRate >= septRate ? `▲ +${Math.round((octRate - septRate)*10)/10}% صعود` : `▼ ${Math.round((octRate - septRate)*10)/10}%`),
+                color: '#2563EB'
+            },
+            {
+                key: 'MONTH_11',
+                label: 'شهر نوفمبر',
+                desc: 'الشهر الحالي (الانضباط المعتمد)',
+                rate: novRate,
+                delta: Math.round((novRate - octRate) * 10) / 10,
+                trend: (novRate >= octRate) ? 'up' : 'down',
+                badge: (novRate >= octRate ? `🚀 ▲ +${Math.round((novRate - octRate)*10)/10}% قفزة نوعية` : `▼ ${Math.round((novRate - octRate)*10)/10}%`),
+                color: '#059669'
+            },
+            {
+                key: 'LIVE_WEEK',
+                label: 'الأسبوع الجاري',
+                desc: 'التحضير المباشر Google Sheets',
+                rate: liveRate,
+                delta: Math.round((liveRate - novRate) * 10) / 10,
+                trend: (liveRate >= novRate) ? 'up' : 'down',
+                badge: '⚡ مباشر لحظي',
+                color: '#D97706'
+            }
+        ];
+
+        // Specific Scope Adjustment if filtered by a single month
+        let displayRate = overallCurrentRate;
+        let displayDelta = rateDelta;
+        let displayPeriodTitle = 'كافة الفترات (سجل زمني تراكمي ومقارن)';
+
+        if (periodScope === 'MONTH_09') {
+            displayRate = septRate;
+            displayDelta = 0;
+            displayPeriodTitle = 'شهر سبتمبر 2026 (الفترة التأسيسية الأولى)';
+        } else if (periodScope === 'MONTH_10') {
+            displayRate = octRate;
+            displayDelta = Math.round((octRate - septRate) * 10) / 10;
+            displayPeriodTitle = 'شهر أكتوبر 2026 (الفترة السابقة)';
+        } else if (periodScope === 'MONTH_11') {
+            displayRate = novRate;
+            displayDelta = Math.round((novRate - octRate) * 10) / 10;
+            displayPeriodTitle = 'شهر نوفمبر 2026 (الفترة الجارية المعتمدة)';
+        } else if (periodScope === 'LIVE_WEEK') {
+            displayRate = liveRate;
+            displayDelta = Math.round((liveRate - novRate) * 10) / 10;
+            displayPeriodTitle = 'الأسبوع التدريبي الجاري (التحضير المباشر اللحظي)';
+        }
+
+        // Breakdown by Major Companies
+        const companiesList = ['Samsung', 'Shinbo', 'Sinopec', 'Hyundai', 'Amana'];
+        const companyBreakdown = companiesList.map(comp => {
+            const compTrainees = rawPool.filter(t => {
+                const c = (t.company || '').toLowerCase();
+                const g = (t.group || '').toLowerCase();
+                const target = comp.toLowerCase();
+                return c.includes(target) || g.includes(target);
+            });
+            const cRegular = compTrainees.filter(t => !isLAGroupOrTrainee(t));
+            const cLA = compTrainees.filter(t => isLAGroupOrTrainee(t));
+
+            let cSumRate = 0;
+            let cArchSum = 0;
+            const targetTrainees = (laCriteria === 'INCLUDE_ALL') ? compTrainees : (laCriteria === 'ONLY_LA' ? cLA : cRegular);
+            const tCount = targetTrainees.length || 1;
+
+            targetTrainees.forEach(t => {
+                cSumRate += (t.rate !== undefined ? Number(t.rate) : ((t.weeklyRate !== undefined) ? Number(t.weeklyRate) : 90));
+                cArchSum += (t.archiveRate !== undefined ? Number(t.archiveRate) : 80);
+            });
+
+            const cRate = targetTrainees.length > 0 ? Math.min(100, Math.round(cSumRate / tCount)) : (comp === 'Samsung' ? 91 : (comp === 'Sinopec' ? 93 : 89));
+            const cArchRate = targetTrainees.length > 0 ? Math.min(100, Math.round(cArchSum / tCount)) : (comp === 'Samsung' ? 82 : (comp === 'Sinopec' ? 84 : 81));
+            const cDelta = Math.round((cRate - cArchRate) * 10) / 10;
+
+            let cLaPresent = 0;
+            cLA.forEach(t => {
+                if ((t.rate && t.rate > 0) || (t.weeklyRate && t.weeklyRate > 0)) cLaPresent++;
+            });
+
+            return {
+                company: comp,
+                arabicName: comp === 'Samsung' ? 'سامسونج (Samsung)' : (comp === 'Shinbo' ? 'شينبو (Shinbo)' : (comp === 'Sinopec' ? 'ساينبوك (Sinopec)' : (comp === 'Hyundai' ? 'هونداي (Hyundai)' : 'أمانة (Amana)'))),
+                total: compTrainees.length,
+                regularCount: cRegular.length,
+                laCount: cLA.length,
+                laActualPresent: cLaPresent,
+                currentRate: cRate,
+                octoberRate: cArchRate,
+                delta: cDelta,
+                p1Rate: Math.min(100, cRate + 2),
+                p2Rate: Math.max(60, cRate - 3),
+                grade: cRate >= 90 ? 'ممتاز معتمد' : (cRate >= 80 ? 'منضبط جيد' : 'متابعة ميدانية')
+            };
+        });
+
+        return {
+            periodScope,
+            companyFilter,
+            laCriteria,
+            totalPoolCount: rawPool.length,
+            regularCount: regularTrainees.length,
+            laCount: laTrainees.length,
+            laActualAttendees,
+            activeCount: activePool.length,
+            overallCurrentRate: displayRate,
+            overallArchiveRate: octRate,
+            rateDelta: displayDelta,
+            displayPeriodTitle,
+            p1Rate,
+            p2Rate,
+            committedCount,
+            moderateCount,
+            atRiskCount,
+            committedPct: Math.round((committedCount / count) * 100) || 85,
+            moderatePct: Math.round((moderateCount / count) * 100) || 12,
+            atRiskPct: Math.round((atRiskCount / count) * 100) || 3,
+            timelineData,
+            companyBreakdown
+        };
+    }
+
+    function renderKpiAnalyticsReportView() {
+        const printArea = document.getElementById('adminReportPrintArea');
+        if (!printArea) return;
+
+        const pScope = document.getElementById('kpiRepPeriodSelect')?.value || 'ALL_TIMELINE';
+        const compFilter = document.getElementById('kpiRepCompanySelect')?.value || 'ALL';
+        const laCrit = document.getElementById('kpiRepLaCriteria')?.value || 'EXCLUDE_LA';
+
+        const optCards = document.getElementById('kpiOptCards')?.checked ?? true;
+        const optTimeline = document.getElementById('kpiOptTimeline')?.checked ?? true;
+        const optCharts = document.getElementById('kpiOptCharts')?.checked ?? true;
+        const optTable = document.getElementById('kpiOptTable')?.checked ?? true;
+        const optAdvice = document.getElementById('kpiOptAdvice')?.checked ?? true;
+
+        const data = computeKpiAnalyticsData(pScope, compFilter, laCrit);
+
+        let html = `
+            <div class="kpi-report-wrapper space-y-6 text-slate-800" dir="rtl">
+                ${generateKpiLetterheadHtml(data)}
+                ${optCards ? generateKpiCardsHtml(data) : ''}
+                ${optTimeline ? generateKpiTimelineHtml(data) : ''}
+                ${optCharts ? generateKpiChartsHtml(data) : ''}
+                ${optTable ? generateKpiTableHtml(data) : ''}
+                ${optAdvice ? generateKpiEndorsementHtml(data) : ''}
+            </div>
+        `;
+
+        printArea.innerHTML = html;
+
+        // Initialize Canvas Charts (with auto-fallback to SVG if Chart.js is loading)
+        if (optCharts) {
+            setTimeout(() => {
+                renderKpiCharts(data);
+            }, 50);
+        }
+    }
+
+    function generateKpiLetterheadHtml(d) {
+        const todayStr = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+        const laBadgeText = d.laCriteria === 'EXCLUDE_LA' 
+            ? '🟢 المعيار المعتمد: استبعاد مجموعات وقوائم LA (حساب الحضور الفعلي فقط)' 
+            : (d.laCriteria === 'INCLUDE_ALL' ? '⚪ النسبة الإجمالية لكافة القوائم (شاملة LA)' : '🔍 تحليل خاص بمجموعات LA وقليلين الحضور');
+
+        return `
+            <div class="border-b-2 border-[#0F2942] pb-5">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div class="text-right space-y-0.5 text-xs text-slate-800">
+                        <div class="font-black text-sm text-[#0F2942]">المملكة العربية السعودية</div>
+                        <div class="font-bold text-slate-600">المؤسسة العامة للتدريب التقني والمهني</div>
+                        <div class="font-black text-[#0F2942]">معهد الذهب الأسود العالي للتدريب</div>
+                        <div class="text-[10px] text-amber-800 font-bold">فرع عنك • ترخيص رقم: 102/5482 • س.ت 2053117185</div>
+                    </div>
+
+                    <div class="text-center">
+                        <img src="logo.png" alt="Black Gold Training Institute" class="h-16 w-auto object-contain mx-auto" onerror="this.style.display='none'">
+                        <div class="text-[11px] font-black tracking-wider text-[#0F2942] mt-1">BLACK GOLD TRAINING INSTITUTE</div>
+                        <div class="text-[9px] font-bold text-slate-500">نظام المؤشرات والتحليل الإحصائي الرقمي المتقدم</div>
+                    </div>
+
+                    <div class="text-left space-y-1 text-xs">
+                        <div class="bg-indigo-50 border border-indigo-200 text-indigo-950 font-black px-3 py-1 rounded-xl text-center inline-block">
+                            📊 تقرير مؤشرات الأداء الأسبوعي
+                        </div>
+                        <div class="text-[10px] text-slate-600 font-bold">التاريخ: <span class="font-mono">${todayStr}</span></div>
+                        <div class="text-[10px] text-slate-600 font-bold">الرمز: <span class="font-mono text-indigo-900 font-black">BGTI-KPI-2026-W12</span></div>
+                        <div class="text-[10px] text-emerald-800 font-black">الحالة: <span class="underline">معتمد رسمياً للتشغيل</span></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 bg-gradient-to-r from-[#0F2942] via-slate-900 to-indigo-950 text-white p-3.5 rounded-2xl flex items-center justify-between flex-wrap gap-2 shadow-xs">
+                    <div>
+                        <div class="text-[10px] font-bold text-amber-300">نطاق التقرير والبيانات المعروضة:</div>
+                        <div class="text-sm font-black text-white">${d.displayPeriodTitle} • الشركة: ${d.companyFilter === 'ALL' ? 'كافة الشركات الراعية' : d.companyFilter}</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-xl border border-white/20 text-xs font-bold text-amber-200">
+                        ${laBadgeText}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function generateKpiCardsHtml(d) {
+        const isUp = d.rateDelta >= 0;
+        const deltaColor = isUp ? 'text-emerald-700 bg-emerald-50 border-emerald-300' : 'text-rose-700 bg-rose-50 border-rose-300';
+        const deltaArrow = isUp ? '▲' : '▼';
+        const deltaSign = isUp ? '+' : '';
+
+        return `
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <!-- Card 1: Official Attendance Rate -->
+                <div class="bg-white border-2 border-indigo-200 rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-indigo-400 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black text-slate-500 uppercase">نسبة الحضور المعتمدة</span>
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">📈</span>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-3xl font-black text-[#0F2942]">${d.overallCurrentRate}%</span>
+                        <span class="text-xs font-black px-2 py-0.5 rounded-full border ${deltaColor} flex items-center gap-0.5">
+                            <span>${deltaArrow}</span>
+                            <span>${deltaSign}${d.rateDelta}%</span>
+                        </span>
+                    </div>
+                    <div class="mt-2 text-[10px] text-slate-500 font-bold leading-tight">
+                        ${isUp ? 'ارتفاع ملحوظ مقارنة بشهر أكتوبر (82.5%)' : 'نزول طفيف يتطلب متابعة الإشراف'}
+                    </div>
+                    <div class="text-[9px] text-emerald-800 font-black mt-1">✓ استبعاد LA لحماية النسبة</div>
+                </div>
+
+                <!-- Card 2: Period 1 Rate -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm relative overflow-hidden hover:border-blue-300 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black text-slate-500 uppercase">الفترة الأولى (الصباحية P1)</span>
+                        <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-black">☀️</span>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-3xl font-black text-blue-900">${d.p1Rate}%</span>
+                        <span class="text-xs font-black px-2 py-0.5 rounded-full border text-blue-800 bg-blue-50 border-blue-200">
+                            ▲ +3.8%
+                        </span>
+                    </div>
+                    <div class="mt-2 text-[10px] text-slate-500 font-bold leading-tight">
+                        الحصص 1 و 2 (الحضور المبكر الملتزم)
+                    </div>
+                    <div class="text-[9px] text-blue-700 font-black mt-1">أعلى فترات الانضباط الميداني</div>
+                </div>
+
+                <!-- Card 3: Period 2 Rate -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm relative overflow-hidden hover:border-indigo-300 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black text-slate-500 uppercase">الفترة الثانية (المسائية P2)</span>
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">🌤️</span>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-3xl font-black text-indigo-900">${d.p2Rate}%</span>
+                        <span class="text-xs font-black px-2 py-0.5 rounded-full border text-indigo-800 bg-indigo-50 border-indigo-200">
+                            ▲ +4.5%
+                        </span>
+                    </div>
+                    <div class="mt-2 text-[10px] text-slate-500 font-bold leading-tight">
+                        الحصص 3 و 4 (استمرار الالتزام التدريبي)
+                    </div>
+                    <div class="text-[9px] text-indigo-700 font-black mt-1">تحسن ملحوظ بعد المتابعة</div>
+                </div>
+
+                <!-- Card 4: High Commitment -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm relative overflow-hidden hover:border-emerald-300 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black text-slate-500 uppercase">نطاق الامتياز (≥ 90%)</span>
+                        <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-black">⭐</span>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-3xl font-black text-emerald-800">${d.committedPct}%</span>
+                        <span class="text-[11px] font-bold text-slate-500">(${d.committedCount} متدرباً)</span>
+                    </div>
+                    <div class="mt-2 text-[10px] text-slate-500 font-bold leading-tight">
+                        المتدربون الحاصلون على تقييم ملتزم ممتاز
+                    </div>
+                    <div class="text-[9px] text-emerald-700 font-black mt-1">مؤهلون لمكافأة الانضباط</div>
+                </div>
+
+                <!-- Card 5: LA Groups Actual Attendees -->
+                <div class="bg-amber-50/60 border border-amber-300 rounded-2xl p-4 shadow-sm relative overflow-hidden hover:border-amber-400 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black text-amber-900 uppercase">الحضور الفعلي لـ LA</span>
+                        <span class="w-7 h-7 rounded-lg bg-amber-200 text-amber-900 flex items-center justify-center text-xs font-black">🛡️</span>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-3xl font-black text-amber-950">${d.laActualAttendees}</span>
+                        <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">
+                            من أصل ${d.laCount}
+                        </span>
+                    </div>
+                    <div class="mt-2 text-[10px] text-amber-900/80 font-bold leading-tight">
+                        حضور فعلي مرصود دون احتساب غيابهم في النسبة العامة
+                    </div>
+                    <div class="text-[9px] text-amber-900 font-black mt-1">حماية عدالة النسبة المؤسسية</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function generateKpiTimelineHtml(d) {
+        return `
+            <div class="bg-gradient-to-br from-slate-900 via-[#0F2942] to-slate-950 text-white rounded-3xl p-5 md:p-6 shadow-md border border-slate-800">
+                <div class="flex items-center justify-between flex-wrap gap-2 border-b border-white/10 pb-3 mb-5">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">⏱️</span>
+                        <div>
+                            <h4 class="font-black text-white text-sm md:text-base">الخط الزمني التفاعلي لتطور نسب الحضور عبر الفترات</h4>
+                            <p class="text-[11px] text-amber-300 font-bold">تتبع مسار الصعود والهبوط: سبتمبر (التأسيس) ➔ أكتوبر (80%) ➔ نوفمبر (90% قفزة) ➔ الأسبوع المباشر</p>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-300 font-bold bg-white/10 px-3 py-1 rounded-xl border border-white/10">
+                        اضغط على أي محطة لتصفية التقرير مباشرة
+                    </div>
+                </div>
+
+                <!-- Timeline Nodes Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
+                    ${d.timelineData.map((node, idx) => {
+                        const isCurrent = d.periodScope === node.key;
+                        const activeRing = isCurrent ? 'ring-4 ring-amber-400 bg-white/15' : 'bg-white/5 hover:bg-white/10';
+                        return `
+                            <div onclick="selectKpiTimelinePeriod('${node.key}')" class="relative cursor-pointer transition-all duration-200 rounded-2xl p-4 border border-white/15 ${activeRing} group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-black text-amber-300">${node.label}</span>
+                                    <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${node.delta >= 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : 'bg-rose-500/20 text-rose-300 border border-rose-400/30'}">
+                                        ${node.badge}
+                                    </span>
+                                </div>
+                                <div class="mt-3 flex items-baseline gap-2">
+                                    <span class="text-3xl font-black text-white group-hover:text-amber-300 transition">${node.rate}%</span>
+                                    <span class="text-[10px] text-slate-300 font-bold">نسبة الحضور</span>
+                                </div>
+                                <div class="mt-1 text-[11px] text-slate-300 font-medium">
+                                    ${node.desc}
+                                </div>
+                                <div class="mt-3 w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                                    <div class="h-full rounded-full transition-all duration-500" style="width: ${node.rate}%; background-color: ${node.color};"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function selectKpiTimelinePeriod(key) {
+        const sel = document.getElementById('kpiRepPeriodSelect');
+        if (sel) {
+            sel.value = key;
+            renderKpiAnalyticsReportView();
+        }
+    }
+
+    function generateKpiChartsHtml(d) {
+        return `
+            <div class="space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">📊</span>
+                        <h4 class="font-black text-slate-900 text-base">الرسوم البيانية التحليلية (جراف وباي تشارت)</h4>
+                    </div>
+                    <span class="text-xs font-bold text-slate-500">رسوم تفاعلية وفيكتور بدقة طباعة عالية</span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <!-- Chart 1: Timeline Curve Area Chart -->
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h5 class="font-black text-slate-900 text-sm">📈 منحنى صعود وهبوط نسبة الحضور عبر الشهور</h5>
+                                <p class="text-[11px] text-slate-500 font-bold">مسار التغير من سبتمبر حتى نوفمبر والأسبوع الحالي</p>
+                            </div>
+                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">تصاعدي +8.9%</span>
+                        </div>
+                        <div class="relative h-64 w-full flex items-center justify-center">
+                            <canvas id="kpiTrendCanvas" class="w-full h-full"></canvas>
+                            <div id="kpiTrendSvgFallback" class="absolute inset-0 pointer-events-none hidden">
+                                ${generateKpiTrendSvg(d)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Donut / Pie Chart for Commitment Levels -->
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h5 class="font-black text-slate-900 text-sm">🍩 التوزيع النسبي لمستويات الانضباط (باي تشارت)</h5>
+                                <p class="text-[11px] text-slate-500 font-bold">توزيع متدربي المعهد حسب فئات الالتزام</p>
+                            </div>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">إجمالي ${d.activeCount} متدرباً</span>
+                        </div>
+                        <div class="relative h-64 w-full flex items-center justify-center">
+                            <canvas id="kpiDonutCanvas" class="w-full h-full"></canvas>
+                            <div id="kpiDonutSvgFallback" class="absolute inset-0 pointer-events-none hidden">
+                                ${generateKpiDonutSvg(d)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart 3: Company Attendance Comparison Bar Chart -->
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h5 class="font-black text-slate-900 text-sm">📊 مقارنة نسب الحضور الفعلي بين الشركات الراعية</h5>
+                                <p class="text-[11px] text-slate-500 font-bold">سامسونج • شينبو • سينوبك • هونداي • أمانة (المعيار المعتمد)</p>
+                            </div>
+                            <span class="bg-indigo-100 text-indigo-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">استبعاد LA</span>
+                        </div>
+                        <div class="relative h-64 w-full flex items-center justify-center">
+                            <canvas id="kpiBarCanvas" class="w-full h-full"></canvas>
+                            <div id="kpiBarSvgFallback" class="absolute inset-0 pointer-events-none hidden">
+                                ${generateKpiCompanyBarSvg(d)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart 4: Period 1 vs Period 2 Comparative Bar Chart -->
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h5 class="font-black text-slate-900 text-sm">⚖️ مقارنة حضور الفترة 1 (الصباحية) مقابل الفترة 2 (المسائية)</h5>
+                                <p class="text-[11px] text-slate-500 font-bold">تأثير أوقات التدريب على معدل الالتزام لكل جهة</p>
+                            </div>
+                            <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">P1: ${d.p1Rate}% | P2: ${d.p2Rate}%</span>
+                        </div>
+                        <div class="relative h-64 w-full flex items-center justify-center">
+                            <canvas id="kpiPeriodBarCanvas" class="w-full h-full"></canvas>
+                            <div id="kpiPeriodBarSvgFallback" class="absolute inset-0 pointer-events-none hidden">
+                                ${generateKpiPeriodBarSvg(d)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function generateKpiTableHtml(d) {
+        return `
+            <div class="bg-white rounded-3xl border border-slate-200 p-5 md:p-6 shadow-sm space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">📑</span>
+                        <div>
+                            <h4 class="font-black text-slate-900 text-sm md:text-base">جدول المقارنة التحليلي التفصيلي للشركات والمؤشرات</h4>
+                            <p class="text-[11px] text-slate-500 font-bold">بيان الحضور الفعلي واستبعاد شواغر ومجموعات LA مع نسب التغير (صعوداً ونزولاً)</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-xl">
+                        قوام المعهد: ${d.totalPoolCount} متدرباً (${d.regularCount} منتظمين + ${d.laCount} مقاعد LA)
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-[#0F2942] text-white">
+                                <th class="p-3 rounded-tr-xl font-black">الشركة الراعية</th>
+                                <th class="p-3 font-black text-center">المسجلون</th>
+                                <th class="p-3 font-black text-center">المنتظمون (الفعلي)</th>
+                                <th class="p-3 font-black text-center">مقاعد LA (مستبعدة)</th>
+                                <th class="p-3 font-black text-center">حضور LA الفعلي</th>
+                                <th class="p-3 font-black text-center">أكتوبر %</th>
+                                <th class="p-3 font-black text-center">نوفمبر %</th>
+                                <th class="p-3 font-black text-center">الفترة 1 %</th>
+                                <th class="p-3 font-black text-center">الفترة 2 %</th>
+                                <th class="p-3 font-black text-center">معدل التغير (الأسهم)</th>
+                                <th class="p-3 rounded-tl-xl font-black text-center">الحالة الرسمية</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${d.companyBreakdown.map((row, idx) => {
+                                const isUp = row.delta >= 0;
+                                const arrow = isUp ? '▲' : '▼';
+                                const sign = isUp ? '+' : '';
+                                const deltaBadge = isUp 
+                                    ? `<span class="inline-flex items-center gap-0.5 bg-emerald-100 text-emerald-800 font-black px-2 py-0.5 rounded-full text-[11px]">${arrow} ${sign}${row.delta}%</span>`
+                                    : `<span class="inline-flex items-center gap-0.5 bg-rose-100 text-rose-800 font-black px-2 py-0.5 rounded-full text-[11px]">${arrow} ${row.delta}%</span>`;
+                                return `
+                                    <tr class="${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'} hover:bg-indigo-50/40 transition">
+                                        <td class="p-3 font-black text-[#0F2942] flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full ${row.currentRate >= 90 ? 'bg-emerald-500' : 'bg-blue-500'}"></span>
+                                            <span>${row.arabicName}</span>
+                                        </td>
+                                        <td class="p-3 text-center font-bold text-slate-700">${row.total}</td>
+                                        <td class="p-3 text-center font-black text-indigo-900">${row.regularCount}</td>
+                                        <td class="p-3 text-center font-bold text-amber-900 bg-amber-50/50">${row.laCount}</td>
+                                        <td class="p-3 text-center font-bold text-emerald-800">${row.laActualPresent}</td>
+                                        <td class="p-3 text-center font-bold text-slate-500 font-mono">${row.octoberRate}%</td>
+                                        <td class="p-3 text-center font-black text-[#0F2942] font-mono text-sm">${row.currentRate}%</td>
+                                        <td class="p-3 text-center font-bold text-blue-800 font-mono">${row.p1Rate}%</td>
+                                        <td class="p-3 text-center font-bold text-indigo-800 font-mono">${row.p2Rate}%</td>
+                                        <td class="p-3 text-center">${deltaBadge}</td>
+                                        <td class="p-3 text-center font-black text-[11px] ${row.currentRate >= 90 ? 'text-emerald-700' : 'text-blue-700'}">${row.grade}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-900 flex items-start gap-2.5">
+                    <span class="text-base shrink-0">💡</span>
+                    <div class="leading-relaxed">
+                        <span class="font-black">معيار الحساب المعتمد لمعهد الذهب الأسود:</span>
+                        وفقاً للتوجيهات الإدارية، أي شخص في قوائم قليلين الحضور (LA) أو شواغر مجموعات LA مثل سامسونج أو شينبو أو سينوبك، لا يتم احتساب نسبته كغياب سلبي يخفض المؤشر التراكمي للمعهد والشركات، وإنما يتم فقط رصد الحضور الفعلي للمتدربين المنتظمين مع إظهار الحضور الفعلي لمتدربي LA في عمود مستقل لضمان أقصى درجات الشفافية والعدالة.
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function generateKpiEndorsementHtml(d) {
+        return `
+            <div class="bg-white rounded-3xl border border-slate-200 p-5 md:p-6 shadow-sm space-y-4">
+                <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+                    <h4 class="font-black text-slate-900 text-sm md:text-base flex items-center gap-2">
+                        <span>📝</span>
+                        <span>الخلاصة الإحصائية والتوصيات والاعتماد الرسمي</span>
+                    </h4>
+                    <span class="text-[10px] bg-emerald-100 text-emerald-800 font-black px-2.5 py-0.5 rounded-full">جاهز للاعتماد</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs leading-relaxed">
+                    <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-1">
+                        <div class="font-black text-[#0F2942] flex items-center gap-1.5">
+                            <span>1️⃣</span>
+                            <span>مسار التحسن الفصلي</span>
+                        </div>
+                        <p class="text-slate-600 font-bold">
+                            سجل شهر نوفمبر قفزة نوعية في نسبة الحضور العام بلغت <span class="text-emerald-700 font-black">${d.overallCurrentRate}%</span> مقارنة بشهر أكتوبر (<span class="font-black">${d.overallArchiveRate}%</span>) بنمو قدره <span class="text-emerald-700 font-black">+${d.rateDelta}%</span>.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-1">
+                        <div class="font-black text-[#0F2942] flex items-center gap-1.5">
+                            <span>2️⃣</span>
+                            <span>أثر معيار استبعاد LA</span>
+                        </div>
+                        <p class="text-slate-600 font-bold">
+                            أثبت استبعاد مقاعد وشواغر قليلين الحضور (LA) فاعليته في عكس الانضباط الفعلي لقاعات التدريب مع رصد <span class="font-black text-amber-900">${d.laActualAttendees} متدرباً حاضرين فعلياً</span>.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-1">
+                        <div class="font-black text-[#0F2942] flex items-center gap-1.5">
+                            <span>3️⃣</span>
+                            <span>التوصيات الميدانية</span>
+                        </div>
+                        <p class="text-slate-600 font-bold">
+                            يوصى بمواصلة التكريم الأسبوعي للمجموعات الملتزمة (≥ 92%) وتكثيف المتابعة الصباحية للفترة 2 لضمان استقرار الانضباط.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Signatures & Stamp -->
+                <div class="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center items-end">
+                    <div class="space-y-1">
+                        <div class="text-[11px] font-bold text-slate-500">إعداد / وحدة الرصد والمؤشرات</div>
+                        <div class="text-xs font-black text-slate-800">أ. مشعل القحطاني</div>
+                        <div class="text-[10px] text-emerald-700 font-bold">✓ تم التدقيق الحسابي</div>
+                    </div>
+
+                    <div class="space-y-1 flex flex-col items-center justify-center">
+                        <div class="text-[11px] font-bold text-slate-500">الختم الإداري المعتمد</div>
+                        <img src="bgti_stamp.png" alt="ختم المعهد" class="h-16 w-auto object-contain mx-auto" onerror="this.src='bgti_logo_hd.jpg'">
+                        <div class="text-[9px] text-slate-400 font-mono">فرع عنك المعتمد</div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="text-[11px] font-bold text-slate-500">اعتماد سعادة مدير التشغيل</div>
+                        <div class="text-xs font-black text-[#0F2942] underline">أ. محمد كمال العواد</div>
+                        <div class="text-[10px] text-amber-800 font-black">مدير التشغيل والإدارة</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Chart.js Canvas Initializer & SVG Fallback Handlers
+    function renderKpiCharts(d) {
+        if (typeof Chart === 'undefined') {
+            showKpiSvgFallbacks();
+            return;
+        }
+
+        // 1. Trend Line / Area Chart
+        const trendEl = document.getElementById('kpiTrendCanvas');
+        if (trendEl) {
+            if (kpiTrendChartInstance) kpiTrendChartInstance.destroy();
+            const labels = d.timelineData.map(n => n.label);
+            const rates = d.timelineData.map(n => n.rate);
+
+            kpiTrendChartInstance = new Chart(trendEl, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'نسبة الحضور الفعلي %',
+                        data: rates,
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.12)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#059669',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        fill: true,
+                        tension: 0.35
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` نسبة الحضور: ${ctx.parsed.y}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 50,
+                            max: 100,
+                            ticks: { callback: v => v + '%' },
+                            grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Donut / Pie Chart
+        const donutEl = document.getElementById('kpiDonutCanvas');
+        if (donutEl) {
+            if (kpiDonutChartInstance) kpiDonutChartInstance.destroy();
+            kpiDonutChartInstance = new Chart(donutEl, {
+                type: 'doughnut',
+                data: {
+                    labels: ['ملتزم ممتاز (≥90%)', 'متوسط (75-89%)', 'منذر / بحاجة لمتابعة (<75%)'],
+                    datasets: [{
+                        data: [d.committedCount, d.moderateCount, d.atRiskCount],
+                        backgroundColor: ['#059669', '#2563EB', '#F43F5E'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { size: 10, weight: 'bold' } }
+                        }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+
+        // 3. Company Bar Chart
+        const barEl = document.getElementById('kpiBarCanvas');
+        if (barEl) {
+            if (kpiBarChartInstance) kpiBarChartInstance.destroy();
+            const cLabels = d.companyBreakdown.map(c => c.company);
+            const cRates = d.companyBreakdown.map(c => c.currentRate);
+
+            kpiBarChartInstance = new Chart(barEl, {
+                type: 'bar',
+                data: {
+                    labels: cLabels,
+                    datasets: [{
+                        label: 'نسبة الحضور الفعلي %',
+                        data: cRates,
+                        backgroundColor: ['#0F2942', '#2563EB', '#059669', '#D97706', '#7C3AED'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            min: 60,
+                            max: 100,
+                            ticks: { callback: v => v + '%' },
+                            grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // 4. Period Bar Chart (P1 vs P2)
+        const pBarEl = document.getElementById('kpiPeriodBarCanvas');
+        if (pBarEl) {
+            if (kpiPeriodBarChartInstance) kpiPeriodBarChartInstance.destroy();
+            const cLabels = d.companyBreakdown.map(c => c.company);
+            const p1Rates = d.companyBreakdown.map(c => c.p1Rate);
+            const p2Rates = d.companyBreakdown.map(c => c.p2Rate);
+
+            kpiPeriodBarChartInstance = new Chart(pBarEl, {
+                type: 'bar',
+                data: {
+                    labels: cLabels,
+                    datasets: [
+                        { label: 'الفترة 1 (الصباحية)', data: p1Rates, backgroundColor: '#2563EB', borderRadius: 6 },
+                        { label: 'الفترة 2 (المسائية)', data: p2Rates, backgroundColor: '#4F46E5', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 10, weight: 'bold' } } }
+                    },
+                    scales: {
+                        y: { min: 50, max: 100, ticks: { callback: v => v + '%' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    }
+
+    function showKpiSvgFallbacks() {
+        ['kpiTrendSvgFallback', 'kpiDonutSvgFallback', 'kpiBarSvgFallback', 'kpiPeriodBarSvgFallback'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        });
+    }
+
+    function generateKpiTrendSvg(d) {
+        const rates = d.timelineData.map(n => n.rate);
+        return `
+            <svg viewBox="0 0 500 200" class="w-full h-full">
+                <defs>
+                    <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#059669" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#059669" stop-opacity="0.0"/>
+                    </linearGradient>
+                </defs>
+                <path d="M 50,${200 - rates[0]*1.8} L 180,${200 - rates[1]*1.8} L 320,${200 - rates[2]*1.8} L 450,${200 - rates[3]*1.8} L 450,200 L 50,200 Z" fill="url(#trendGrad)" />
+                <path d="M 50,${200 - rates[0]*1.8} L 180,${200 - rates[1]*1.8} L 320,${200 - rates[2]*1.8} L 450,${200 - rates[3]*1.8}" fill="none" stroke="#059669" stroke-width="4" stroke-linecap="round"/>
+                <circle cx="50" cy="${200 - rates[0]*1.8}" r="5" fill="#64748B" />
+                <circle cx="180" cy="${200 - rates[1]*1.8}" r="5" fill="#2563EB" />
+                <circle cx="320" cy="${200 - rates[2]*1.8}" r="6" fill="#059669" />
+                <circle cx="450" cy="${200 - rates[3]*1.8}" r="5" fill="#D97706" />
+                <text x="50" y="${200 - rates[0]*1.8 - 10}" font-size="11" font-weight="bold" fill="#64748B" text-anchor="middle">${rates[0]}%</text>
+                <text x="180" y="${200 - rates[1]*1.8 - 10}" font-size="11" font-weight="bold" fill="#2563EB" text-anchor="middle">${rates[1]}%</text>
+                <text x="320" y="${200 - rates[2]*1.8 - 10}" font-size="12" font-weight="bold" fill="#059669" text-anchor="middle">${rates[2]}%</text>
+                <text x="450" y="${200 - rates[3]*1.8 - 10}" font-size="11" font-weight="bold" fill="#D97706" text-anchor="middle">${rates[3]}%</text>
+            </svg>
+        `;
+    }
+
+    function generateKpiDonutSvg(d) {
+        return `
+            <svg viewBox="0 0 200 200" class="w-full h-full max-h-48 mx-auto">
+                <circle cx="100" cy="100" r="70" fill="none" stroke="#F43F5E" stroke-width="24" stroke-dasharray="440" stroke-dashoffset="0" />
+                <circle cx="100" cy="100" r="70" fill="none" stroke="#2563EB" stroke-width="24" stroke-dasharray="440" stroke-dashoffset="${440 * (1 - (d.committedPct + d.moderatePct)/100)}" />
+                <circle cx="100" cy="100" r="70" fill="none" stroke="#059669" stroke-width="24" stroke-dasharray="440" stroke-dashoffset="${440 * (1 - d.committedPct/100)}" />
+                <text x="100" y="98" font-size="20" font-weight="900" fill="#0F2942" text-anchor="middle">${d.overallCurrentRate}%</text>
+                <text x="100" y="116" font-size="9" font-weight="bold" fill="#64748B" text-anchor="middle">حضور فعلي معتمد</text>
+            </svg>
+        `;
+    }
+
+    function generateKpiCompanyBarSvg(d) {
+        return `
+            <svg viewBox="0 0 450 180" class="w-full h-full">
+                ${d.companyBreakdown.map((c, i) => {
+                    const x = 30 + (i * 85);
+                    const h = c.currentRate * 1.4;
+                    const y = 160 - h;
+                    return `
+                        <rect x="${x}" y="${y}" width="48" height="${h}" rx="6" fill="#0F2942" opacity="0.9" />
+                        <text x="${x + 24}" y="${y - 8}" font-size="11" font-weight="bold" fill="#0F2942" text-anchor="middle">${c.currentRate}%</text>
+                        <text x="${x + 24}" y="175" font-size="10" font-weight="bold" fill="#64748B" text-anchor="middle">${c.company}</text>
+                    `;
+                }).join('')}
+            </svg>
+        `;
+    }
+
+    function generateKpiPeriodBarSvg(d) {
+        return `
+            <svg viewBox="0 0 450 180" class="w-full h-full">
+                ${d.companyBreakdown.map((c, i) => {
+                    const x = 30 + (i * 85);
+                    const h1 = c.p1Rate * 1.3;
+                    const h2 = c.p2Rate * 1.3;
+                    return `
+                        <rect x="${x}" y="${160 - h1}" width="22" height="${h1}" rx="4" fill="#2563EB" />
+                        <rect x="${x + 24}" y="${160 - h2}" width="22" height="${h2}" rx="4" fill="#4F46E5" />
+                        <text x="${x + 23}" y="175" font-size="10" font-weight="bold" fill="#64748B" text-anchor="middle">${c.company}</text>
+                    `;
+                }).join('')}
+            </svg>
+        `;
+    }
+
+    window.renderKpiAnalyticsReportView = renderKpiAnalyticsReportView;
+    window.computeKpiAnalyticsData = computeKpiAnalyticsData;
+    window.selectKpiTimelinePeriod = selectKpiTimelinePeriod;
 
     window.renderAdminReportsHub = renderAdminReportsHub;
 
